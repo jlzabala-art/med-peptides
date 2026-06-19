@@ -8,15 +8,27 @@ const db = admin.firestore();
 
 async function run() {
   try {
-    const mappings = await db.collection('sku_mappings').limit(5).get();
-    console.log(`Number of sku_mappings: ${mappings.size}`);
-    mappings.forEach(d => console.log(d.id, d.data()));
+    const usersSnap = await db.collection('users').get();
+    console.log(`TOTAL USERS: ${usersSnap.size}`);
+    
+    const ordersSnap = await db.collection('orders').get();
+    console.log(`TOTAL ORDERS: ${ordersSnap.size}`);
+    
+    const rfqsSnap = await db.collection('purchase_rfqs').get();
+    console.log(`TOTAL PURCHASE RFQS: ${rfqsSnap.size}`);
+    
+    const posSnap = await db.collection('purchaseOrders').get();
+    console.log(`TOTAL PURCHASE ORDERS: ${posSnap.size}`);
 
-    const products = await db.collection('products').limit(5).get();
-    console.log(`Number of products: ${products.size}`);
-    products.forEach(d => console.log({ id: d.id, name: d.data().name, displayName: d.data().displayName, sku: d.data().sku }));
+    const catalogsSnap = await db.collection('catalogs').get();
+    console.log(`TOTAL CATALOGS: ${catalogsSnap.size}`);
+
+    // Print details of the first order if exists
+    if (ordersSnap.size > 0) {
+      console.log("Sample order:", JSON.stringify(ordersSnap.docs[0].data(), null, 2));
+    }
   } catch (err) {
-    console.error('Error querying firestore:', err);
+    console.error("Error executing query:", err);
   }
 }
 

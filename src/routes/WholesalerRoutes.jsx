@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -7,7 +7,7 @@ import WholesalerHome, {
   WholesalerOverviewTab,
   WholesalerRxInboxTab,
   WholesalerBulkTab,
-  PlaceholderTab
+  PlaceholderTab,
 } from '../templates/WholesalerHome';
 import DashboardEngine from '../engine/DashboardEngine';
 const UserSettings = lazy(() => import('../templates/UserSettings'));
@@ -40,94 +40,148 @@ export default function WholesalerRoutes() {
 
   return (
     <Suspense fallback={<TabSkeleton />}>
-    <Routes>
-      <Route element={<WholesalerHome />}>
-        <Route index element={
-          <AdminTabErrorBoundary tabId="overview" tabLabel="Overview">
-            <DashboardEngine role="wholesaler" dataContext={{ uid }} />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="rx-inbox" element={
-          <AdminTabErrorBoundary tabId="rx-inbox" tabLabel="Rx Inbox">
-            <WholesalerRxInboxTab uid={uid} />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="bulk-orders" element={
-          <AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders">
-            <WholesalerBulkTab />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="messages" element={
-          <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
-            <MessagingWidget />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="clinical-ai" element={
-          <AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Atlas Health">
-            <ClinicalAIWidget />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="geography" element={
-          <AdminTabErrorBoundary tabId="geography" tabLabel="Geography">
-            <GeographyAreasTab />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="branding" element={
-          <AdminTabErrorBoundary tabId="branding" tabLabel="Branding">
-            <BrandingTab />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="domains" element={
-          <AdminTabErrorBoundary tabId="domains" tabLabel="Domains">
-            <DomainsTab />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="clients" element={
-          <AdminTabErrorBoundary tabId="clients" tabLabel="Clients">
-            <ClientsTab />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="catalogs" element={
-          <AdminTabErrorBoundary tabId="catalogs" tabLabel="Catalogs">
-            <CatalogList 
-              ownerId={uid} 
-              ownerType="wholesaler" 
-              onOpenBuilder={() => { setCatalogToEdit(null); navigate('/wholesaler/catalog-builder'); }} 
-              onSelectCatalogToEdit={(cat) => { setCatalogToEdit(cat); navigate('/wholesaler/catalog-builder'); }} 
-            />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="catalog-builder" element={
-          <AdminTabErrorBoundary tabId="catalog-builder" tabLabel="Catalog Builder">
-            <CatalogCreatorFlow 
-              ownerId={uid} 
-              ownerType="wholesaler" 
-              editingCatalog={catalogToEdit} 
-              onBack={() => { setCatalogToEdit(null); navigate('/wholesaler/catalogs'); }} 
-            />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="email-campaigns" element={
-          <AdminTabErrorBoundary tabId="email-campaigns" tabLabel="Email Campaigns">
-            <EmailCampaignBuilder 
-              ownerId={uid} 
-              ownerType="wholesaler" 
-              onBack={() => navigate('/wholesaler/catalogs')} 
-            />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="inventory" element={
-          <AdminTabErrorBoundary tabId="inventory" tabLabel="Inventory">
-            <PlaceholderTab title="Inventory Manager" description="Real-time stock view, batch expiry tracking, and restock alerts — coming soon." />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="settings" element={
-          <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
-            <UserSettings onBack={() => navigate('/wholesaler')} />
-          </AdminTabErrorBoundary>
-        } />
-      </Route>
-    </Routes>
+      <Routes>
+        <Route element={<WholesalerHome />}>
+          <Route
+            index
+            element={
+              <AdminTabErrorBoundary tabId="overview" tabLabel="Overview">
+                <DashboardEngine role="wholesaler" dataContext={{ uid }} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="rx-inbox"
+            element={
+              <AdminTabErrorBoundary tabId="rx-inbox" tabLabel="Rx Inbox">
+                <WholesalerRxInboxTab uid={uid} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="bulk-orders"
+            element={
+              <AdminTabErrorBoundary tabId="bulk-orders" tabLabel="Bulk Orders">
+                <WholesalerBulkTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="messages"
+            element={
+              <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
+                <MessagingWidget />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="clinical-ai"
+            element={
+              <AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Atlas Health">
+                <ClinicalAIWidget />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="geography"
+            element={
+              <AdminTabErrorBoundary tabId="geography" tabLabel="Geography">
+                <GeographyAreasTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="branding"
+            element={
+              <AdminTabErrorBoundary tabId="branding" tabLabel="Branding">
+                <BrandingTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="domains"
+            element={
+              <AdminTabErrorBoundary tabId="domains" tabLabel="Domains">
+                <DomainsTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="clients"
+            element={
+              <AdminTabErrorBoundary tabId="clients" tabLabel="Clients">
+                <ClientsTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="catalogs"
+            element={
+              <AdminTabErrorBoundary tabId="catalogs" tabLabel="Catalogs">
+                <CatalogList
+                  ownerId={uid}
+                  ownerType="wholesaler"
+                  onOpenBuilder={() => {
+                    setCatalogToEdit(null);
+                    navigate('/wholesaler/catalog-builder');
+                  }}
+                  onSelectCatalogToEdit={(cat) => {
+                    setCatalogToEdit(cat);
+                    navigate('/wholesaler/catalog-builder');
+                  }}
+                />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="catalog-builder"
+            element={
+              <AdminTabErrorBoundary tabId="catalog-builder" tabLabel="Catalog Builder">
+                <CatalogCreatorFlow
+                  ownerId={uid}
+                  ownerType="wholesaler"
+                  editingCatalog={catalogToEdit}
+                  onBack={() => {
+                    setCatalogToEdit(null);
+                    navigate('/wholesaler/catalogs');
+                  }}
+                />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="email-campaigns"
+            element={
+              <AdminTabErrorBoundary tabId="email-campaigns" tabLabel="Email Campaigns">
+                <EmailCampaignBuilder
+                  ownerId={uid}
+                  ownerType="wholesaler"
+                  onBack={() => navigate('/wholesaler/catalogs')}
+                />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="inventory"
+            element={
+              <AdminTabErrorBoundary tabId="inventory" tabLabel="Inventory">
+                <PlaceholderTab
+                  title="Inventory Manager"
+                  description="Real-time stock view, batch expiry tracking, and restock alerts — coming soon."
+                />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
+                <UserSettings onBack={() => navigate('/wholesaler')} />
+              </AdminTabErrorBoundary>
+            }
+          />
+        </Route>
+      </Routes>
     </Suspense>
   );
 }

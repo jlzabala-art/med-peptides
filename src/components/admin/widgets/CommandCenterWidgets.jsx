@@ -43,25 +43,31 @@ export function WidgetStyles() {
         border-color: rgba(203, 213, 225, 0.9);
       }
       .cc-kpis-container {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
         margin-bottom: 1.5rem;
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      @media (min-width: 640px) {
+        .cc-kpis-container {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (min-width: 768px) {
+        .cc-kpis-container {
+          grid-template-columns: repeat(4, 1fr);
+        }
       }
       @media (min-width: 1024px) {
         .cc-kpis-container {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          overflow-x: visible;
-          padding-bottom: 0;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         }
       }
       .cc-kpi-card {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
+        width: 100%;
+        box-sizing: border-box;
         padding: 1rem 1.25rem;
         cursor: pointer;
         display: flex;
@@ -71,16 +77,6 @@ export function WidgetStyles() {
         border-left: 4px solid transparent;
         position: relative;
         max-height: 220px;
-      }
-      @media (min-width: 768px) {
-        .cc-kpi-card {
-          flex: 0 0 240px;
-        }
-      }
-      @media (min-width: 1024px) {
-        .cc-kpi-card {
-          flex: 1;
-        }
       }
       .cc-kpi-card:hover {
         background: #ffffff;

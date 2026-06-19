@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -12,7 +12,9 @@ import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
 const MessagingWidget = lazy(() => import('../components/messaging/MessagingWidget'));
 const ClinicalAIWidget = lazy(() => import('../components/admin/ClinicalAIWidget'));
 const AdminClientsTab = lazy(() => import('../components/admin/AdminClientsTab'));
-const CatalogIntelligenceHub = lazy(() => import('../components/admin/catalog/CatalogIntelligenceHub'));
+const CatalogIntelligenceHub = lazy(
+  () => import('../components/admin/catalog/CatalogIntelligenceHub')
+);
 const AdminAccountManagersTab = lazy(() => import('../components/admin/AdminAccountManagersTab'));
 const ShippingTrackerTab = lazy(() => import('../components/supplier/ShippingTrackerTab'));
 
@@ -33,52 +35,76 @@ export default function SupplierRoutes() {
 
   return (
     <Suspense fallback={<TabSkeleton />}>
-    <Routes>
-      <Route element={<SupplierHome />}> 
-        <Route index element={<SupplierDashboardTab />} />
-        <Route path="orders" element={
-          <AdminTabErrorBoundary tabId="orders" tabLabel="Orders">
-            <OrdersTab buyerId={uid} />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="clients" element={
-          <AdminTabErrorBoundary tabId="clients" tabLabel="B2B Clients">
-            <AdminClientsTab ownerId={uid} ownerType="supplier" />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="catalog" element={
-          <AdminTabErrorBoundary tabId="catalog" tabLabel="Mass Catalog / APIs">
-            <CatalogIntelligenceHub readOnly={false} ownerId={uid} ownerType="supplier" />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="shipments" element={
-          <AdminTabErrorBoundary tabId="shipments" tabLabel="Shipping Tracker">
-            <ShippingTrackerTab supplierId={uid} />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="account-managers" element={
-          <AdminTabErrorBoundary tabId="account-managers" tabLabel="Account Managers">
-            <AdminAccountManagersTab supplierId={uid} />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="messages" element={
-          <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
-            <MessagingWidget role="supplier" />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="atlas-ai" element={
-          <AdminTabErrorBoundary tabId="atlas-ai" tabLabel="Atlas Health">
-            <ClinicalAIWidget role="supplier" />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="settings" element={
-          <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
-            <UserSettings onBack={() => navigate('/supplier-dashboard')} />
-          </AdminTabErrorBoundary>
-        } />
-        <Route path="*" element={<PlaceholderTab />} />
-      </Route>
-    </Routes>
+      <Routes>
+        <Route element={<SupplierHome />}>
+          <Route index element={<SupplierDashboardTab />} />
+          <Route
+            path="orders"
+            element={
+              <AdminTabErrorBoundary tabId="orders" tabLabel="Orders">
+                <OrdersTab buyerId={uid} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="clients"
+            element={
+              <AdminTabErrorBoundary tabId="clients" tabLabel="B2B Clients">
+                <AdminClientsTab ownerId={uid} ownerType="supplier" />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="catalog"
+            element={
+              <AdminTabErrorBoundary tabId="catalog" tabLabel="Mass Catalog / APIs">
+                <CatalogIntelligenceHub readOnly={false} ownerId={uid} ownerType="supplier" />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="shipments"
+            element={
+              <AdminTabErrorBoundary tabId="shipments" tabLabel="Shipping Tracker">
+                <ShippingTrackerTab supplierId={uid} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="account-managers"
+            element={
+              <AdminTabErrorBoundary tabId="account-managers" tabLabel="Account Managers">
+                <AdminAccountManagersTab supplierId={uid} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="messages"
+            element={
+              <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
+                <MessagingWidget role="supplier" />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="atlas-ai"
+            element={
+              <AdminTabErrorBoundary tabId="atlas-ai" tabLabel="Atlas Health">
+                <ClinicalAIWidget role="supplier" />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
+                <UserSettings onBack={() => navigate('/supplier-dashboard')} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route path="*" element={<PlaceholderTab />} />
+        </Route>
+      </Routes>
     </Suspense>
   );
 }

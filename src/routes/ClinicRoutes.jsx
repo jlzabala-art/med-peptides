@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
@@ -28,36 +28,54 @@ export default function ClinicRoutes() {
       <Routes>
         <Route element={<ClinicHome />}>
           <Route index element={<ClinicDashboardTab />} />
-          <Route path="messages" element={
-            <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
-              <MessagingWidget role="clinic" />
-            </AdminTabErrorBoundary>
-          } />
-          <Route path="clinical-ai" element={
-            <AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Atlas Health">
-              <ClinicalAIWidget />
-            </AdminTabErrorBoundary>
-          } />
-          <Route path="new-order" element={
-            <AdminTabErrorBoundary tabId="new-order" tabLabel="New Order">
-              <PlaceholderTab />
-            </AdminTabErrorBoundary>
-          } />
-          <Route path="order-history" element={
-            <AdminTabErrorBoundary tabId="order-history" tabLabel="Order History">
-              <OrdersTab buyerId={uid} readOnly={true} />
-            </AdminTabErrorBoundary>
-          } />
-          <Route path="inventory" element={
-            <AdminTabErrorBoundary tabId="inventory" tabLabel="Inventory">
-              <PlaceholderTab />
-            </AdminTabErrorBoundary>
-          } />
-          <Route path="settings" element={
-            <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
-              <UserSettings onBack={() => navigate('/clinic-dashboard')} />
-            </AdminTabErrorBoundary>
-          } />
+          <Route
+            path="messages"
+            element={
+              <AdminTabErrorBoundary tabId="messages" tabLabel="Messages">
+                <MessagingWidget role="clinic" />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="clinical-ai"
+            element={
+              <AdminTabErrorBoundary tabId="clinical-ai" tabLabel="Atlas Health">
+                <ClinicalAIWidget />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="new-order"
+            element={
+              <AdminTabErrorBoundary tabId="new-order" tabLabel="New Order">
+                <PlaceholderTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="order-history"
+            element={
+              <AdminTabErrorBoundary tabId="order-history" tabLabel="Order History">
+                <OrdersTab buyerId={uid} readOnly={true} />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="inventory"
+            element={
+              <AdminTabErrorBoundary tabId="inventory" tabLabel="Inventory">
+                <PlaceholderTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <AdminTabErrorBoundary tabId="settings" tabLabel="Settings">
+                <UserSettings onBack={() => navigate('/clinic-dashboard')} />
+              </AdminTabErrorBoundary>
+            }
+          />
           <Route path="*" element={<PlaceholderTab />} />
         </Route>
       </Routes>

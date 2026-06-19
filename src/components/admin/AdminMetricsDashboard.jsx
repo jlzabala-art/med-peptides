@@ -70,55 +70,32 @@ import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
 import notifier from '../../services/NotificationService';
 import styles from './AdminMetricsDashboard.module.css';
 
-// Roles-based dashboard configurations preset layout
+// Roles-based dashboard configurations preset layout (Real Data Only)
 const ROLE_PRESETS = {
   CEO: {
-    visibleKPIs: [
-      'revenue',
-      'grossProfit',
-      'openOrders',
-      'pendingApprovals',
-      'openRFQs',
-      'aiAlerts',
-      'cashPosition',
-    ],
-    visibleWidgets: [
-      'todayPriorities',
-      'businessHealth',
-      'cashFlow',
-      'crmPipeline',
-      'wholesalersRanking',
-      'aiWorkspace',
-    ],
-    kpiOrder: [
-      'revenue',
-      'grossProfit',
-      'cashPosition',
-      'openOrders',
-      'pendingApprovals',
-      'openRFQs',
-      'aiAlerts',
-    ],
+    visibleKPIs: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
+    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
+    kpiOrder: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
   },
   Finance: {
-    visibleKPIs: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
-    visibleWidgets: ['todayPriorities', 'financeTasks', 'cashFlow', 'businessHealth'],
-    kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'pendingApprovals'],
+    visibleKPIs: ['revenue', 'openOrders', 'pendingApprovals'],
+    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
+    kpiOrder: ['revenue', 'openOrders', 'pendingApprovals'],
   },
   Purchasing: {
-    visibleKPIs: ['openOrders', 'openRFQs', 'pendingApprovals'],
-    visibleWidgets: ['todayPriorities', 'wholesalersRanking', 'businessHealth'],
-    kpiOrder: ['openOrders', 'openRFQs', 'pendingApprovals'],
+    visibleKPIs: ['openOrders', 'openRFQs'],
+    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
+    kpiOrder: ['openOrders', 'openRFQs'],
   },
   Sales: {
     visibleKPIs: ['revenue', 'openOrders', 'openRFQs'],
-    visibleWidgets: ['todayPriorities', 'crmPipeline', 'wholesalersRanking', 'businessHealth'],
+    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
     kpiOrder: ['revenue', 'openOrders', 'openRFQs'],
   },
   Operations: {
-    visibleKPIs: ['openOrders', 'pendingApprovals', 'aiAlerts'],
-    visibleWidgets: ['todayPriorities', 'businessHealth', 'wholesalersRanking', 'systemStatus'],
-    kpiOrder: ['openOrders', 'pendingApprovals', 'aiAlerts'],
+    visibleKPIs: ['openOrders', 'pendingApprovals'],
+    visibleWidgets: ['todayPriorities', 'aiWorkspace'],
+    kpiOrder: ['openOrders', 'pendingApprovals'],
   },
 };
 
@@ -126,7 +103,8 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin' || userProfile?.roles?.includes('admin');
-  // Customizer State
+
+  // Customizer State initialized to CEO presets
   const [currentRolePreset, setCurrentRolePreset] = useState('CEO');
   const [visibleKPIs, setVisibleKPIs] = useState(ROLE_PRESETS.CEO.visibleKPIs);
   const [visibleWidgets, setVisibleWidgets] = useState(ROLE_PRESETS.CEO.visibleWidgets);
@@ -140,55 +118,20 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
   const [aiConsumption, setAiConsumption] = useState(1.42);
   const [activeUsersCount, setActiveUsersCount] = useState(4);
   const [recentRegistrations, setRecentRegistrations] = useState([]);
-  // Metrics values (live simulation and DB mappings)
+
+  // Metrics values initialized to 0 (real data source)
   const [metrics, setMetrics] = useState({
-    revenue: 456000,
-    grossProfit: 136800,
-    openOrders: 127,
-    pendingApprovals: 18,
-    openRFQs: 24,
-    aiAlerts: 5,
-    cashPosition: 890400,
+    revenue: 0,
+    openOrders: 0,
+    pendingApprovals: 0,
+    openRFQs: 0,
+    grossProfit: 0,
+    cashPosition: 0,
+    aiAlerts: 0,
   });
 
-  // Today Priorities list
-  const [priorities, setPriorities] = useState([
-    {
-      id: 1,
-      text: '5 RFQs require immediate approval',
-      type: 'rfq',
-      priority: 'high',
-      link: '/admin/rfq',
-    },
-    {
-      id: 2,
-      text: '3 supplier bills due today',
-      type: 'bill',
-      priority: 'critical',
-      link: '/admin/bills',
-    },
-    {
-      id: 3,
-      text: '2 leads require follow-up',
-      type: 'lead',
-      priority: 'medium',
-      link: '/admin/leads',
-    },
-    {
-      id: 4,
-      text: '1 inventory alert: low stock on Peptide A1',
-      type: 'stock',
-      priority: 'high',
-      link: '/admin/products',
-    },
-    {
-      id: 5,
-      text: 'AI detected pricing anomaly in Wholesale B',
-      type: 'anomaly',
-      priority: 'low',
-      link: '/admin/analytics',
-    },
-  ]);
+  // Priorities list built dynamically from real counts
+  const [priorities, setPriorities] = useState([]);
 
   // AI Command Console simulation helper
   const handleAiAsk = async (queryText) => {
@@ -199,13 +142,12 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       queryLower.includes('today')
     ) {
       return {
-        answer:
-          'Here are the top issues that require your immediate attention today: Overdue bills (AED 34,200) and 3 pending RFQs.',
+        answer: `Here are the top issues that require your immediate attention today: We have ${metrics.openOrders} pending orders, ${metrics.openRFQs} open RFQs, and ${metrics.pendingApprovals} user accounts awaiting approval.`,
         actions: [],
       };
     }
     return {
-      answer: `AI processing finished for "${queryText}": Current cash reserves are stable.`,
+      answer: `AI processing finished for "${queryText}": Total active revenue is AED ${metrics.revenue.toLocaleString()}. All databases are synchronized.`,
       actions: [],
     };
   };
@@ -223,15 +165,94 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch metrics dynamically
+  // Fetch metrics dynamically from real Firestore collections
   useEffect(() => {
     const startDbTime = performance.now();
     async function loadData() {
       try {
         const usersSnap = await getDocs(collection(db, 'users'));
         const ordersSnap = await getDocs(collection(db, 'orders'));
+
+        let rfqsSize = 0;
+        try {
+          const rfqsSnap = await getDocs(collection(db, 'purchase_rfqs'));
+          rfqsSize = rfqsSnap.size;
+        } catch (e) {
+          console.warn('Failed to fetch purchase_rfqs:', e);
+        }
+
         const latency = Math.round(performance.now() - startDbTime);
         setDbLatency(`${latency}ms`);
+
+        // Compute real statistics
+        let totalRevenue = 0;
+        let openOrdersCount = 0;
+        ordersSnap.forEach((doc) => {
+          const data = doc.data();
+          if (data.status !== 'cancelled') {
+            totalRevenue += Number(data.total || data.subtotal || 0);
+          }
+          if (['pending', 'processing', 'shipped'].includes(data.status)) {
+            openOrdersCount++;
+          }
+        });
+
+        let pendingApprovalsCount = 0;
+        usersSnap.forEach((doc) => {
+          const data = doc.data();
+          if (data.approved !== true && data.role !== 'admin') {
+            pendingApprovalsCount++;
+          }
+        });
+
+        // Set state metrics
+        setMetrics({
+          revenue: totalRevenue,
+          openOrders: openOrdersCount,
+          pendingApprovals: pendingApprovalsCount,
+          openRFQs: rfqsSize,
+          grossProfit: 0,
+          cashPosition: 0,
+          aiAlerts: 0,
+        });
+
+        // Load active users count
+        setActiveUsersCount(usersSnap.size);
+
+        // Dynamically build the priorities queue based on real data
+        const realPriorities = [];
+        let pId = 1;
+        if (pendingApprovalsCount > 0) {
+          realPriorities.push({
+            id: pId++,
+            text: `${pendingApprovalsCount} users pending approval`,
+            type: 'approval',
+            priority: 'high',
+            link: '/admin/users',
+            detail: `${pendingApprovalsCount} user profiles are registered but not approved to access clinical catalogs.`,
+          });
+        }
+        if (rfqsSize > 0) {
+          realPriorities.push({
+            id: pId++,
+            text: `${rfqsSize} RFQs require attention`,
+            type: 'rfq',
+            priority: 'critical',
+            link: '/admin/rfq',
+            detail: `${rfqsSize} purchasing requests for quotation are open and require manufacturer coordination.`,
+          });
+        }
+        if (openOrdersCount > 0) {
+          realPriorities.push({
+            id: pId++,
+            text: `${openOrdersCount} pending orders require processing`,
+            type: 'order',
+            priority: 'high',
+            link: '/admin/orders',
+            detail: `${openOrdersCount} customer orders are currently in pending or processing status.`,
+          });
+        }
+        setPriorities(realPriorities);
 
         const recentRegs = usersSnap.docs
           .map((d) => ({ id: d.id, ...d.data() }))

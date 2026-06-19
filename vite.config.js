@@ -24,7 +24,7 @@ export default defineConfig({
     sourcemap: false,
     minify: 'esbuild',
     emptyOutDir: true,
-    copyPublicDir: false,
+    copyPublicDir: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
