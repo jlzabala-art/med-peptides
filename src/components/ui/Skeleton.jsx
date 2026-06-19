@@ -15,6 +15,7 @@ export default function Skeleton({
   count = 1,
   animate = true,
   className = '',
+  borderRadius,
   ...rest
 }) {
   const classes = [
@@ -29,6 +30,7 @@ export default function Skeleton({
   const style = {};
   if (width != null) style.width = typeof width === 'number' ? `${width}px` : width;
   if (height != null) style.height = typeof height === 'number' ? `${height}px` : height;
+  if (borderRadius != null) style.borderRadius = typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius;
 
   // Default heights per variant when not specified
   if (height == null) {

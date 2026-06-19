@@ -22,7 +22,8 @@ import {
   ArrowLeft, Search, Plus, Check, Trash2, SlidersHorizontal, 
   BarChart2, ShieldCheck, Activity, Brain, Target, Shield, Box, X,
   Layers, LayoutTemplate, Calendar, Percent, Sparkles as SparklesIcon, Download,
-  ChevronDown, ChevronUp, BookOpen, Mail, MessageSquare, ExternalLink, Building2
+  ChevronDown, ChevronUp, BookOpen, Mail, MessageSquare, ExternalLink, Building2,
+  FileText
 } from 'lucide-react';
 
 
@@ -903,26 +904,62 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <button 
               onClick={() => onBack ? onBack() : navigate(-1)} 
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 500 }}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                padding: '8px 16px', 
+                borderRadius: '8px', 
+                background: '#f8fafc', 
+                color: '#64748b', 
+                border: '1px solid #e2e8f0', 
+                fontWeight: 600, 
+                fontSize: '0.85rem',
+                cursor: 'pointer', 
+                transition: 'all 0.2s' 
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.color = '#475569';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.color = '#64748b';
+              }}
             >
-              <ArrowLeft size={18} /> Back to Hub
+              <ArrowLeft size={16} /> Back to Hub
             </button>
             <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 24px' }}></div>
             <h2 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600, color: '#0f172a' }}>
               {catalogMeta.title || 'Untitled Catalog'} <span style={{ marginLeft: '12px', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '12px', color: '#64748b' }}>Draft</span> <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#64748b' }}>{cartProducts.length} Products</span>
             </h2>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>
-              {catalogCart.length > 0 && catalogMeta.title ? 'Ready to Publish' : 'Needs Configuration'}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button 
               onClick={() => setShowAIDrawer(true)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '8px 16px', borderRadius: '8px', 
-                background: '#f8fafc', color: '#6366f1', border: '1px solid #e0e7ff', fontWeight: 600, cursor: 'pointer',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '6px',
+                padding: '8px 16px', 
+                borderRadius: '8px', 
+                background: '#f8fafc', 
+                color: '#6366f1', 
+                border: '1px solid #e0e7ff', 
+                fontWeight: 600, 
+                fontSize: '0.85rem',
+                cursor: 'pointer',
                 transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#eef2ff';
+                e.currentTarget.style.borderColor = '#c7d2fe';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#e0e7ff';
               }}
             >
               <SparklesIcon size={16} /> AI Assistant
@@ -931,10 +968,28 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
               onClick={() => setShowPublishOptions(true)}
               disabled={catalogCart.length === 0 || !catalogMeta.title}
               style={{ 
-                padding: '8px 24px', borderRadius: '8px', 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px', 
+                borderRadius: '8px', 
                 background: (catalogCart.length === 0 || !catalogMeta.title) ? '#cbd5e1' : '#1e293b', 
-                color: '#fff', border: 'none', fontWeight: 600, cursor: (catalogCart.length === 0 || !catalogMeta.title) ? 'not-allowed' : 'pointer',
+                color: '#fff', 
+                border: 'none', 
+                fontWeight: 600, 
+                fontSize: '0.85rem',
+                cursor: (catalogCart.length === 0 || !catalogMeta.title) ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                if (catalogCart.length > 0 && catalogMeta.title) {
+                  e.currentTarget.style.backgroundColor = '#0f172a';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (catalogCart.length > 0 && catalogMeta.title) {
+                  e.currentTarget.style.backgroundColor = '#1e293b';
+                }
               }}
             >
               Publish Catalog
