@@ -138,7 +138,7 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
                 backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
                 borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
               }}
-              onClick={() => onAction && onAction('view_variant', parentProduct, v)}
+              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'analytics')}
             >
               {onSelectionChange && (
                 <td style={{ ...tdStyle, textAlign: 'center' }}>
@@ -168,17 +168,9 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
                     maxVisible={3}
                     actions={[
                       {
-                        type: 'view',
-                        onClick: () => onAction && onAction('view_variant', parentProduct, v),
-                      },
-                      {
                         type: 'edit',
                         onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'analytics'),
-                      },
-                      {
-                        type: 'delete',
-                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
-                      },
+                      }
                     ]}
                   />
                 </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { searchClient } from '../../../algolia';
+import { GOALS } from '../../../constants/catalogFilters';
 import {
   collection,
   query,
@@ -20,12 +21,19 @@ import {
 import { db } from '../../../firebase';
 import { useToast } from '../../../hooks/useToast';
 
+const DEFAULT_ADVANCED_FILTERS = {};
+const DEFAULT_ACTIVE_KPIS = [];
+
 export function useCatalogData(options = {}) {
   const {
     pageSize = 20,
     searchQuery = '',
-    categoryFilter = null,
+    categoryFilter = 'All Categories',
+    supplierFilter = null,
+    advancedFilters = DEFAULT_ADVANCED_FILTERS,
+    activeKpis = DEFAULT_ACTIVE_KPIS,
     activeWorkspace = 'products',
+    skipFetch = false,
   } = options;
 
   const [products, setProducts] = useState([]);
@@ -52,14 +60,184 @@ export function useCatalogData(options = {}) {
     try {
       setLoading(true);
 
-      if (searchQuery && searchClient) {
+      if (supplierFilter) {
+        // Query variants for this supplier
+        const vQ = query(collectionGroup(db, 'variants'), where('supplier', '==', supplierFilter));
+        const vSnap = await getDocs(vQ);
+        const variantsOfSupplier = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        const productIds = [...new Set(variantsOfSupplier.map(v => v.productId).filter(Boolean))];
+        
+        // Also query products directly just in case
+        const pQ = query(collection(db, 'products'), where('supplier', '==', supplierFilter));
+        const pSnap = await getDocs(pQ);
+        pSnap.docs.forEach(d => {
+            if (!productIds.includes(d.id)) {
+                productIds.push(d.id);
+            }
+        });
+
+        if (productIds.length === 0) {
+          setProducts([]);
+          setVariants([]);
+          setHasMore(false);
+          setLoading(false);
+          return;
+        }
+
+        const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+        const idChunks = chunkArray(productIds, 10);
+        let rawProducts = [];
+        
+        for (const chunk of idChunks) {
+           const chunkQ = query(collection(db, 'products'), where('__name__', 'in', chunk));
+           const chunkSnap = await getDocs(chunkQ);
+           rawProducts = rawProducts.concat(chunkSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+
+        let allVariants = [];
+        for (const chunk of idChunks) {
+            const vQ2 = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
+            const vSnap2 = await getDocs(vQ2);
+            allVariants = allVariants.concat(vSnap2.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+
+        const variantsByProduct = {};
+        allVariants.forEach(v => {
+           if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
+           variantsByProduct[v.productId].push(v);
+        });
+
+        const finalProducts = rawProducts.map(p => {
+           p.variants = variantsByProduct[p.id] || [];
+           return p;
+        });
+
+        setProducts(finalProducts);
+        
+        // Build flatVars
+        const flatVars = [];
+        finalProducts.forEach((p) => {
+          if (p.variants && p.variants.length > 0) {
+            p.variants.forEach((v, idx) => {
+              const details = [
+                v.format || p.format || '',
+                v.dosage || p.dosage || '',
+                v.size || p.size || '',
+              ].filter(Boolean).join(' ');
+              const computedPrice = Number(v.pricing?.retail?.perUnit || v.price) || 0;
+              const computedCost = Number(v.cost_per_gram || v.pricing?.master?.perUnit || v.cost) || 0;
+  
+              flatVars.push({
+                ...v,
+                id: v.id || `${p.id}-var-${idx}`,
+                productId: p.id,
+                productName: p.name || 'Unknown Product',
+                name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
+                supplier: v.supplier || p.supplier || 'Unassigned',
+                stock: Number(v.stock?.available || v.stock) || 0,
+                reorderPoint: Number(v.reorderPoint) || 20,
+                price: computedPrice,
+                cost: computedCost,
+                coa: v.hasCoa ? 'Valid' : 'Missing',
+                gmp: v.hasGmp ? 'Valid' : 'Missing',
+                registration: 'Active',
+                isMissingSupplier: !(v.supplier || p.supplier),
+                isMissingPricing: !(computedPrice || computedCost),
+                rawVariant: v,
+                rawProduct: p,
+              });
+            });
+          } else {
+            const computedPrice = Number(p.pricing?.retail?.perUnit || p.price) || 0;
+            const computedCost = Number(p.cost_per_gram || p.pricing?.master?.perUnit || p.cost) || 0;
+  
+            flatVars.push({
+              ...p,
+              id: p.id,
+              productId: p.id,
+              productName: p.name || 'Unknown Product',
+              name: p.name || 'Unknown Product',
+              supplier: p.supplier || 'Unassigned',
+              stock: Number(p.stock?.available || p.stock) || 0,
+              reorderPoint: Number(p.reorderPoint) || 20,
+              price: computedPrice,
+              cost: computedCost,
+              coa: p.hasCoa ? 'Valid' : 'Missing',
+              gmp: p.hasGmp ? 'Valid' : 'Missing',
+              registration: 'Active',
+              isMissingSupplier: !p.supplier,
+              isMissingPricing: !(computedPrice || computedCost),
+              rawVariant: null,
+              rawProduct: p,
+            });
+          }
+        });
+        setVariants(flatVars);
+        setHasMore(false);
+        setLoading(false);
+        return;
+      }
+
+      const hasAlgoliaFilters = 
+        (advancedFilters.goals && advancedFilters.goals.length > 0) ||
+        (advancedFilters.productTypes && advancedFilters.productTypes.length > 0) ||
+        (advancedFilters.commercialStatus && advancedFilters.commercialStatus.length > 0) ||
+        (advancedFilters.regulatoryStatus && advancedFilters.regulatoryStatus.length > 0) ||
+        (activeKpis && activeKpis.length > 0) ||
+        (categoryFilter && categoryFilter !== 'All Categories');
+
+      if ((searchQuery || hasAlgoliaFilters) && searchClient) {
         // --- ALGOLIA SEARCH PATH ---
         try {
+          const facetFilters = [];
+          const numericFilters = [];
+
+          if (advancedFilters.goals && advancedFilters.goals.length > 0) {
+            const mappedGoals = advancedFilters.goals.flatMap(goalId => {
+              const goalObj = GOALS.find(g => g.id === goalId);
+              return goalObj && goalObj.dbKeys ? goalObj.dbKeys : [goalId];
+            });
+            const normalizedGoals = mappedGoals.map(g => `searchableGoals:${g.replace(/_/g, '-')}`);
+            if (normalizedGoals.length > 0) facetFilters.push(normalizedGoals);
+          }
+
+          if (advancedFilters.productTypes && advancedFilters.productTypes.length > 0) {
+            facetFilters.push(advancedFilters.productTypes.map(pt => `productType:${pt}`));
+          }
+          
+          if (advancedFilters.regulatoryStatus && advancedFilters.regulatoryStatus.length > 0) {
+            const regFilters = [];
+            if (advancedFilters.regulatoryStatus.includes('Missing COA')) regFilters.push('hasCoa:false');
+            if (advancedFilters.regulatoryStatus.includes('Missing GMP')) regFilters.push('hasGmp:false');
+            if (regFilters.length > 0) facetFilters.push(regFilters);
+          }
+
+          if (activeKpis && activeKpis.length > 0) {
+            const kpiFilters = [];
+            if (activeKpis.includes('missingCOA')) kpiFilters.push('hasCoa:false');
+            if (activeKpis.includes('missingGMP')) kpiFilters.push('hasGmp:false');
+            if (activeKpis.includes('missingSupplier')) kpiFilters.push('supplier:');
+            if (kpiFilters.length > 0) facetFilters.push(kpiFilters);
+          }
+
+          if (categoryFilter && categoryFilter !== 'All Categories') {
+            const goalObj = GOALS.find(g => g.id === categoryFilter);
+            if (goalObj) {
+               const catKeys = (goalObj.dbKeys || []).map(g => `searchableGoals:${g.replace(/_/g, '-')}`);
+               if (catKeys.length > 0) facetFilters.push(catKeys);
+            } else {
+               facetFilters.push(`category:${categoryFilter}`);
+            }
+          }
+
           const { results } = await searchClient.search({
             requests: [
               {
                 indexName: 'products',
                 query: searchQuery,
+                facetFilters: facetFilters,
+                numericFilters: numericFilters,
                 hitsPerPage: pageSize,
                 page: currentPage - 1,
               },
@@ -157,19 +335,48 @@ export function useCatalogData(options = {}) {
       let q = query(collection(db, 'products'), orderBy('name', 'asc'));
 
       if (searchQuery) {
-        // Prefix search trick for Firestore
-        q = query(
-          collection(db, 'products'),
-          where('name', '>=', searchQuery),
-          where('name', '<=', searchQuery + '\uf8ff'),
-          orderBy('name', 'asc')
+        const lowerQ = searchQuery.toLowerCase();
+        const matchedGoal = GOALS.find(g => 
+          g.label.toLowerCase().includes(lowerQ) || 
+          g.id.toLowerCase().includes(lowerQ) || 
+          (g.dbKeys && g.dbKeys.some(k => k.toLowerCase().includes(lowerQ)))
         );
+
+        if (matchedGoal) {
+          const searchValues = [matchedGoal.label, ...(matchedGoal.dbKeys || [])].slice(0, 10);
+          q = query(
+            collection(db, 'products'),
+            where('category', 'in', searchValues),
+            orderBy('name', 'asc')
+          );
+        } else {
+          // Prefix search trick for Firestore
+          // Capitalize first letter to help with Title Case names
+          const capSearch = searchQuery.charAt(0).toUpperCase() + searchQuery.slice(1).toLowerCase();
+          q = query(
+            collection(db, 'products'),
+            where('name', '>=', capSearch),
+            where('name', '<=', capSearch + '\uf8ff'),
+            orderBy('name', 'asc')
+          );
+        }
       } else if (categoryFilter && categoryFilter !== 'All Categories') {
-        q = query(
-          collection(db, 'products'),
-          where('category', '==', categoryFilter),
-          orderBy('name', 'asc')
-        );
+        const goalObj = GOALS.find(g => g.id === categoryFilter);
+        
+        if (goalObj) {
+          const searchValues = [goalObj.label, ...(goalObj.dbKeys || [])].slice(0, 10);
+          q = query(
+            collection(db, 'products'),
+            where('category', 'in', searchValues),
+            orderBy('name', 'asc')
+          );
+        } else {
+          q = query(
+            collection(db, 'products'),
+            where('category', '==', categoryFilter),
+            orderBy('name', 'asc')
+          );
+        }
       }
 
       q = query(q, limit(pageSize));
@@ -349,9 +556,13 @@ export function useCatalogData(options = {}) {
   };
 
   useEffect(() => {
+    if (skipFetch) {
+      setLoading(false);
+      return;
+    }
     fetchProducts('next', true); // passing true overrides query and starts from page 1
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, categoryFilter, activeWorkspace]);
+  }, [searchQuery, categoryFilter, activeWorkspace, supplierFilter, advancedFilters, activeKpis, skipFetch]);
 
   const updateProduct = async (id, updates) => {
     try {

@@ -180,14 +180,24 @@ export default function CatalogSmartSearch({
       {/* Quick Dropdown Filters removed as requested */}
 
       {/* Selected Categories, Supplier & Active Filter Chips */}
-      {(activeCategories.length > 0 || (activeFilters && activeFilters.length > 0) || (activeWorkspace === 'products' && advancedFilters?.products?.supplier && advancedFilters.products.supplier !== 'All Suppliers')) && (
-        <div style={{
-          display: 'flex',
-          gap: '0.6rem',
-          marginTop: '1rem',
-          flexWrap: 'wrap',
-          alignItems: 'center'
-        }}>
+      {(() => {
+        const hasActiveFilters = activeCategories.length > 0 || (activeFilters && activeFilters.length > 0) || (activeWorkspace === 'products' && advancedFilters?.products?.supplier && advancedFilters.products.supplier !== 'All Suppliers');
+        
+        return (
+          <div style={{
+            display: 'flex',
+            gap: '0.6rem',
+            marginTop: '1rem',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            minHeight: '32px'
+          }}>
+            {!hasActiveFilters ? (
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                Showing all items. No filters applied.
+              </span>
+            ) : (
+              <>
           {activeWorkspace === 'products' && activeCategories.map(cat => (
             <div key={cat} style={{
               display: 'flex',
@@ -274,21 +284,30 @@ export default function CatalogSmartSearch({
               }
             }}
             style={{
-              background: 'none',
-              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
               cursor: 'pointer',
               fontSize: '0.8rem',
-              color: 'var(--text-muted, #64748b)',
-              fontWeight: 500,
-              marginLeft: '4px',
-              padding: '4px 8px',
-              borderRadius: '12px'
+              color: '#ef4444',
+              fontWeight: 600,
+              marginLeft: 'auto',
+              padding: '6px 12px',
+              borderRadius: '16px',
+              transition: 'all 0.2s ease'
             }}
+            onMouseOver={(e) => e.currentTarget.style.background = '#fee2e2'}
+            onMouseOut={(e) => e.currentTarget.style.background = '#fef2f2'}
           >
-            Clear all
+            <X size={14} /> Clear all filters
           </button>
+          </>
+        )}
         </div>
-      )}
+        );
+      })()}
 
     </div>
   );

@@ -207,7 +207,6 @@ const NAV_GROUPS = [
     icon: Box,
     items: [
       { id: 'products', label: 'Items', icon: Box },
-      { id: 'variants', label: 'Variants', icon: Layers },
       { id: 'pricing-visibility', label: 'Pricing Visibility', icon: EyeOff },
       { id: 'protocols', label: 'Protocols', icon: ClipboardList },
       { id: 'competitors', label: 'Competitor Analysis', icon: Activity },

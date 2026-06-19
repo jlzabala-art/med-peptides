@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 
 const thStyle = {
   padding: '12px',
@@ -26,6 +28,12 @@ const trStyle = { backgroundColor: 'transparent', cursor: 'pointer' };
 
 export default function VariantInventoryTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [expandedRows, setExpandedRows] = useState({});
+
+  const toggleRow = (id, e) => {
+    e.stopPropagation();
+    setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -50,10 +58,29 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
         return ['SKU', safeName, format, size].filter(Boolean).join('-');
       };
 
-      const inventory = typeof v.stock === 'object' ? v.stock?.available || 0 : v.stock || 0;
+      let inventoryRaw = typeof v.stock === 'object' && v.stock !== null ? v.stock.available : v.stock;
+      let inventory = Number(inventoryRaw);
+      if (isNaN(inventory) || inventoryRaw === '' || inventoryRaw === null || inventoryRaw === undefined) {
+        inventory = 0;
+      }
+
+      const typeStr = v.formatLabel || v.format || v.productType || '';
+      const dosageStr = v.dosage || v.size || '';
+      const unitStr = v.kit?.unit || v.dosage_unit || '';
+      
+      let displayDosageFormat = '-';
+      if (typeStr.toLowerCase().includes('api')) {
+        displayDosageFormat = `API (Bulk)`;
+      } else if (dosageStr) {
+        const presentation = unitStr ? unitStr : (typeStr.toLowerCase().includes('lyophilized') ? 'Vial' : typeStr);
+        displayDosageFormat = `${dosageStr} / ${presentation.charAt(0).toUpperCase() + presentation.slice(1)}`;
+      } else {
+        displayDosageFormat = typeStr || '-';
+      }
 
       return {
         ...v,
+        displayDosageFormat,
         displaySku: v.sku || generateFallbackSku(),
         inventory,
         reorderPoint: v.reorderPoint || 20,
@@ -124,12 +151,9 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
               />
             </th>
           )}
-          <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
+          <th style={thStyle} onClick={() => handleSort('displayDosageFormat')}>Dosage / Format{getSortIcon('displayDosageFormat')}</th>
           <th style={thStyle} onClick={() => handleSort('inventory')}>Stock{getSortIcon('inventory')}</th>
-          <th style={thStyle} onClick={() => handleSort('reorderPoint')}>Reorder Point{getSortIcon('reorderPoint')}</th>
-          <th style={thStyle} onClick={() => handleSort('moq')}>MOQ{getSortIcon('moq')}</th>
-          <th style={thStyle} onClick={() => handleSort('leadTime')}>Lead Time{getSortIcon('leadTime')}</th>
-          <th style={thStyle} onClick={() => handleSort('velocity')}>Velocity{getSortIcon('velocity')}</th>
+
           <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
         </tr>
       </thead>
@@ -144,7 +168,7 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
                 backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
                 borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
               }}
-              onClick={() => onAction && onAction('view_variant', parentProduct, v)}
+              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'inventory')}
             >
               {onSelectionChange && (
                 <td style={{ ...tdStyle, textAlign: 'center' }}>
@@ -157,16 +181,22 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
                   />
                 </td>
               )}
-              <td style={tdStyleMain}>{v.displaySku}</td>
+              <td style={tdStyleMain}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {v.warehouses && v.warehouses.length > 0 && (
+                    <div onClick={(e) => toggleRow(v.id, e)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                      {expandedRows[v.id] ? <ChevronDown size={16} color="#64748b" /> : <ChevronRight size={16} color="#64748b" />}
+                    </div>
+                  )}
+                  {v.displayDosageFormat}
+                </div>
+              </td>
               <td style={tdStyle}>
-                <span style={{ color: v.inventory < v.reorderPoint ? '#ef4444' : 'inherit' }}>
-                  {v.inventory} units
+                <span style={{ color: v.inventory < v.reorderPoint ? '#ef4444' : 'inherit', fontWeight: v.warehouses?.length > 0 ? 600 : 400 }}>
+                  {v.inventory} units {v.warehouses?.length > 0 && <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '4px' }}>({v.warehouses.length} locations)</span>}
                 </span>
               </td>
-              <td style={tdStyle}>{v.reorderPoint}</td>
-              <td style={tdStyle}>{v.moq}</td>
-              <td style={tdStyle}>{v.leadTime ? `${v.leadTime} days` : '-'}</td>
-              <td style={tdStyle}>{v.velocity}</td>
+
               <td style={{ ...tdStyle, textAlign: 'right' }}>
                 <div
                   style={{
@@ -180,23 +210,30 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
                     maxVisible={3}
                     actions={[
                       {
-                        type: 'view',
-                        onClick: () => onAction && onAction('view_variant', parentProduct, v),
-                      },
-                      {
                         type: 'edit',
                         onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'inventory'),
-                      },
-                      {
-                        type: 'delete',
-                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
-                      },
+                      }
                     ]}
                   />
                 </div>
               </td>
             </tr>
           );
+        })}
+        {sortedVariants.map((v, i) => {
+          if (!expandedRows[v.id] || !v.warehouses || v.warehouses.length === 0) return null;
+          return v.warehouses.map((wh, wIdx) => (
+            <tr key={`${v.id}-wh-${wIdx}`} style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              {onSelectionChange && <td style={tdStyle}></td>}
+              <td style={{ ...tdStyleMain, paddingLeft: '48px', fontSize: '0.75rem', color: '#475569' }}>
+                ↳ {wh.location || 'Unknown Location'}
+              </td>
+              <td style={{ ...tdStyle, fontSize: '0.75rem', color: wh.stock === 0 ? '#ef4444' : '#475569' }}>
+                {wh.stock || 0} units
+              </td>
+              <td style={tdStyle}></td>
+            </tr>
+          ));
         })}
       </tbody>
     </table>

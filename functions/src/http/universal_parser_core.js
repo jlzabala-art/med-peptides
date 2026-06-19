@@ -46,8 +46,25 @@ Rules:
 7. Extract 'line_items' as an array of objects: { "description": "str", "quantity": number, "rate": number, "amount": number }.
 8. Provide a 'confidence_score' (integer 0-100).
 Output a JSON array containing a SINGLE object representing the invoice: { "type": "str", "entity_name": "str", "invoice_number": "str", "date": "YYYY-MM-DD", "due_date": "YYYY-MM-DD", "total_amount": number, "currency": "str", "line_items": [...], "confidence_score": number }. Return ONLY a valid JSON array.`;
+  } else if (context === "Auto") {
+    systemInstruction = `You are a highly advanced Medical & B2B Supply Chain AI expert. Your task is to FIRST classify the provided document into one of the following types: 'PriceList', 'COA' (Certificate of Analysis), 'Invoice', 'RFQ' (Request for Quote), or 'ProductLabel'.
+If you are unsure, classify it as 'Unknown'.
+
+Once classified, extract the data according to these rules:
+
+1. For 'PriceList': Identify products, dosages, and prices. Return an array of objects: { "peptide_name": "str", "dosage": "str|null", "unit_cost": number, "moq": number }
+2. For 'COA': Identify batch validation details. Return an array of objects: { "batch_number": "str", "peptide_name": "str", "purity_percentage": number, "test_results": "str" }
+3. For 'Invoice': Identify the invoice details. Return an array containing ONE object: { "type": "str", "entity_name": "str", "total_amount": number, "line_items": [{description, quantity, rate, amount}] }
+4. For 'RFQ': Identify requested items. Return an array of objects: { "peptide_name": "str", "dosage": "str|null", "quantity": number, "units": "str" }
+
+You MUST output ONLY a valid JSON object matching this exact schema:
+{
+  "detectedType": "PriceList" | "COA" | "Invoice" | "RFQ" | "ProductLabel" | "Unknown",
+  "confidence": number,
+  "data": [ ... extracted data objects based on the rules above ... ]
+}`;
   } else {
-    throw new Error("Invalid context. Allowed: RFQ, PriceList, COA, Invoice");
+    throw new Error("Invalid context. Allowed: RFQ, PriceList, COA, Invoice, Auto");
   }
 
   if (aiInstructions && aiInstructions.trim() !== '') {

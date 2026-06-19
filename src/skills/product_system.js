@@ -44,11 +44,12 @@ export function normalizeAttributes(product) {
   return normalized;
 }
 
-/** Generate deterministic SKUs for each variant */
+/** Generate unique SKUs for each variant */
 export function generateVariantSKUs(product) {
-  const base = product.id;
-  return product.variants.map((variant, idx) => {
-    const sku = `${base}-${idx + 1}`;
+  const prefix = (product.name || 'UNK').replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
+  return product.variants.map((variant) => {
+    const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const sku = `SKU-${prefix}-${randomCode}`;
     return { ...variant, sku };
   });
 }

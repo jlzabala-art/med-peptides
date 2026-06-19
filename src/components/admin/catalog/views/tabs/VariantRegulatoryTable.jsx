@@ -35,8 +35,26 @@ const badgeStyle = (isValid) => ({
   color: isValid === true || isValid === 'Valid' || isValid === 'Active' ? '#10b981' : '#64748b',
 });
 
+const PdfModal = ({ url, onClose }) => {
+  if (!url) return null;
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }}>
+      <div style={{ background: 'white', width: '90%', maxWidth: '900px', height: '85vh', borderRadius: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>COA Viewer</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}>&times;</button>
+        </div>
+        <div style={{ flex: 1, backgroundColor: '#f1f5f9' }}>
+          <iframe src={url} style={{ width: '100%', height: '100%', border: 'none' }} title="COA PDF Viewer" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function VariantRegulatoryTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [pdfUrl, setPdfUrl] = useState(null);
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -63,15 +81,27 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
 
       const regStatus = v.registrationStatus || v.registration || 'Unregistered';
 
+      const typeStr = v.formatLabel || v.format || v.productType || '';
+      const dosageStr = v.dosage || v.size || '';
+      const unitStr = v.kit?.unit || v.dosage_unit || '';
+      
+      let displayDosageFormat = '-';
+      if (typeStr.toLowerCase().includes('api')) {
+        displayDosageFormat = `API (Bulk)`;
+      } else if (dosageStr) {
+        const presentation = unitStr ? unitStr : (typeStr.toLowerCase().includes('lyophilized') ? 'Vial' : typeStr);
+        displayDosageFormat = `${dosageStr} / ${presentation.charAt(0).toUpperCase() + presentation.slice(1)}`;
+      } else {
+        displayDosageFormat = typeStr || '-';
+      }
+
       return {
         ...v,
+        displayDosageFormat,
         displaySku: v.sku || generateFallbackSku(),
         supplierName: v.supplier || parentProduct?.supplier || 'Unassigned',
-        regStatus,
-        coa: v.coa === 'Valid' ? 'Valid' : 'Missing',
-        gmp: v.gmp === 'Valid' ? 'Valid' : 'Missing',
-        stability: v.stability === 'Valid' ? 'Valid' : 'Missing',
-        permit: v.permit === 'Active' ? 'Active' : 'Missing',
+        coa: v.coaAvailable || !!v.coaFileUrl ? 'Valid' : 'Missing',
+        coaFileUrl: v.coaFileUrl || null
       };
     });
   }, [variants, parentProduct]);
@@ -112,6 +142,7 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
   };
 
   return (
+    <>
     <table
       style={{
         width: '100%',
@@ -136,13 +167,9 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
               />
             </th>
           )}
-          <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
+          <th style={thStyle} onClick={() => handleSort('displayDosageFormat')}>Dosage / Format{getSortIcon('displayDosageFormat')}</th>
           <th style={thStyle} onClick={() => handleSort('supplierName')}>Supplier{getSortIcon('supplierName')}</th>
-          <th style={thStyle} onClick={() => handleSort('regStatus')}>Registration{getSortIcon('regStatus')}</th>
           <th style={thStyle} onClick={() => handleSort('coa')}>COA{getSortIcon('coa')}</th>
-          <th style={thStyle} onClick={() => handleSort('gmp')}>GMP{getSortIcon('gmp')}</th>
-          <th style={thStyle} onClick={() => handleSort('stability')}>Stability{getSortIcon('stability')}</th>
-          <th style={thStyle} onClick={() => handleSort('permit')}>Import Permit{getSortIcon('permit')}</th>
           <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
         </tr>
       </thead>
@@ -157,7 +184,7 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
                 backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
                 borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
               }}
-              onClick={() => onAction && onAction('view_variant', parentProduct, v)}
+              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'regulatory')}
             >
               {onSelectionChange && (
                 <td style={{ ...tdStyle, textAlign: 'center' }}>
@@ -170,24 +197,19 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
                   />
                 </td>
               )}
-              <td style={tdStyleMain}>{v.displaySku}</td>
+              <td style={tdStyleMain}>{v.displayDosageFormat}</td>
               <td style={tdStyle}>{v.supplierName}</td>
               <td style={tdStyle}>
-                <span style={badgeStyle(v.regStatus === 'Registered' || v.regStatus === 'Active')}>
-                  {v.regStatus}
-                </span>
-              </td>
-              <td style={tdStyle}>
-                <span style={badgeStyle(v.coa)}>{v.coa}</span>
-              </td>
-              <td style={tdStyle}>
-                <span style={badgeStyle(v.gmp)}>{v.gmp}</span>
-              </td>
-              <td style={tdStyle}>
-                <span style={badgeStyle(v.stability)}>{v.stability}</span>
-              </td>
-              <td style={tdStyle}>
-                <span style={badgeStyle(v.permit)}>{v.permit}</span>
+                {v.coaFileUrl ? (
+                  <span 
+                    onClick={(e) => { e.stopPropagation(); setPdfUrl(v.coaFileUrl); }} 
+                    style={{ ...badgeStyle('Valid'), cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    View COA
+                  </span>
+                ) : (
+                  <span style={badgeStyle('Missing')}>Missing</span>
+                )}
               </td>
               <td style={{ ...tdStyle, textAlign: 'right' }}>
                 <div
@@ -202,17 +224,9 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
                     maxVisible={3}
                     actions={[
                       {
-                        type: 'view',
-                        onClick: () => onAction && onAction('view_variant', parentProduct, v),
-                      },
-                      {
                         type: 'edit',
                         onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'regulatory'),
-                      },
-                      {
-                        type: 'delete',
-                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
-                      },
+                      }
                     ]}
                   />
                 </div>
@@ -222,5 +236,7 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
         })}
       </tbody>
     </table>
+    <PdfModal url={pdfUrl} onClose={() => setPdfUrl(null)} />
+    </>
   );
 }

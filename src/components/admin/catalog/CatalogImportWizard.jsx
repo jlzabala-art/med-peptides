@@ -12,8 +12,8 @@ import { collection, doc, setDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 export default function CatalogImportWizard({ isOpen, onClose }) {
-  const [step, setStep] = useState(1);
-  const [source, setSource] = useState(null);
+  const [step, setStep] = useState(2);
+  const [source, setSource] = useState('ai');
   const [importedCount, setImportedCount] = useState(0);
 
   if (!isOpen) return null;
@@ -25,6 +25,13 @@ export default function CatalogImportWizard({ isOpen, onClose }) {
         // Clean up the confidence_score and _sourceFile before saving
         const { confidence_score, _sourceFile, ...cleanItem } = item;
         
+        // Ensure SKU is unique if not provided
+        if (!cleanItem.sku || cleanItem.sku.trim() === '') {
+          const prefix = (cleanItem.name || 'UNK').replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
+          const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+          cleanItem.sku = `SKU-${prefix}-${randomCode}`;
+        }
+
         await setDoc(docRef, {
           ...cleanItem,
           status: 'Active',
@@ -41,8 +48,8 @@ export default function CatalogImportWizard({ isOpen, onClose }) {
   };
 
   const handleClose = () => {
-    setStep(1);
-    setSource(null);
+    setStep(2);
+    setSource('ai');
     setImportedCount(0);
     onClose();
   };
@@ -90,52 +97,6 @@ export default function CatalogImportWizard({ isOpen, onClose }) {
 
           {/* Content */}
           <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
-            {step === 1 && (
-              <>
-                <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem' }}>Select Import Source</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                  
-                  {/* New AI Option */}
-                  <div 
-                    onClick={() => setSource('ai')}
-                    style={{ border: `2px solid ${source === 'ai' ? 'var(--color-primary, #6366f1)' : 'var(--color-border, #e2e8f0)'}`, padding: '1.5rem', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: source === 'ai' ? 'rgba(99, 102, 241, 0.05)' : 'white' }}
-                  >
-                    <Sparkles size={32} color={source === 'ai' ? 'var(--color-primary, #6366f1)' : 'var(--text-muted, #64748b)'} style={{ marginBottom: '1rem' }} />
-                    <h4 style={{ margin: '0 0 0.5rem 0' }}>Smart File Import (AI)</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted, #64748b)' }}>Extract data automatically from PDFs, images, and Excel using Atlas AI.</p>
-                  </div>
-
-                  <div 
-                    onClick={() => setSource('csv')}
-                    style={{ border: `2px solid ${source === 'csv' ? 'var(--color-primary, #6366f1)' : 'var(--color-border, #e2e8f0)'}`, padding: '1.5rem', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: source === 'csv' ? 'rgba(99, 102, 241, 0.05)' : 'white' }}
-                  >
-                    <FileText size={32} color={source === 'csv' ? 'var(--color-primary, #6366f1)' : 'var(--text-muted, #64748b)'} style={{ marginBottom: '1rem' }} />
-                    <h4 style={{ margin: '0 0 0.5rem 0' }}>Standard CSV</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted, #64748b)' }}>Upload pre-formatted spreadsheet templates.</p>
-                  </div>
-
-                  <div 
-                    onClick={() => setSource('erp')}
-                    style={{ border: `2px solid ${source === 'erp' ? 'var(--color-primary, #6366f1)' : 'var(--color-border, #e2e8f0)'}`, padding: '1.5rem', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: source === 'erp' ? 'rgba(99, 102, 241, 0.05)' : 'white' }}
-                  >
-                    <Database size={32} color={source === 'erp' ? 'var(--color-primary, #6366f1)' : 'var(--text-muted, #64748b)'} style={{ marginBottom: '1rem' }} />
-                    <h4 style={{ margin: '0 0 0.5rem 0' }}>ERP Connect</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted, #64748b)' }}>Sync directly from Zoho or SAP.</p>
-                  </div>
-
-                  <div 
-                    onClick={() => setSource('api')}
-                    style={{ border: `2px solid ${source === 'api' ? 'var(--color-primary, #6366f1)' : 'var(--color-border, #e2e8f0)'}`, padding: '1.5rem', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: source === 'api' ? 'rgba(99, 102, 241, 0.05)' : 'white' }}
-                  >
-                    <Link size={32} color={source === 'api' ? 'var(--color-primary, #6366f1)' : 'var(--text-muted, #64748b)'} style={{ marginBottom: '1rem' }} />
-                    <h4 style={{ margin: '0 0 0.5rem 0' }}>Supplier API</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted, #64748b)' }}>Live feed from registered suppliers.</p>
-                  </div>
-
-                </div>
-              </>
-            )}
-
             {step === 2 && source === 'ai' && (
               <div style={{ margin: '-1rem' }}>
                 <GadgetImportTab 

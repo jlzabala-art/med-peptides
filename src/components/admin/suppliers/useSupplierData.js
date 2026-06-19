@@ -1,12 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { collection, getDocs, updateDoc, doc, setDoc, query, limit, getCountFromServer, where } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 
 export function useSupplierData() {
+  const [searchParams] = useSearchParams();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   
   // Advanced Filters
   const [activeKpiFilter, setActiveKpiFilter] = useState('all'); // all, active, strategic, pending, low_response
@@ -42,10 +44,10 @@ export function useSupplierData() {
         setServerKpis({
           total,
           active: activeSnap.data().count,
-          strategic: strategicSnap.data().count,
-          pendingDocs: Math.floor(total * 0.12),
-          lowResponse: Math.max(0, Math.floor(total * 0.05)),
-          coveredCountriesCount: 6
+          singleSourceRisks: Math.max(1, Math.floor(total * 0.08)), // Mocked for now
+          expiringGMP: Math.floor(total * 0.15), // Mocked
+          pendingCOAs: Math.floor(total * 0.2), // Mocked
+          coveredCountriesCount: 14 // Mocked expanded coverage
         });
       } catch (err) {
         console.error("Error fetching supplier KPIs:", err);
@@ -134,9 +136,9 @@ export function useSupplierData() {
 
     // 2. KPI Pre-Filters
     if (activeKpiFilter === 'active') result = result.filter(s => s.status === 'active');
-    else if (activeKpiFilter === 'strategic') result = result.filter(s => s.rating === 5);
-    else if (activeKpiFilter === 'low_response') result = result.filter(s => (s.healthScore || 100) < 85);
-    else if (activeKpiFilter === 'pending') result = result.filter(s => s.pendingDocsCount > 0);
+    else if (activeKpiFilter === 'single_source') result = result.filter(s => s.singleSourceItems > 0);
+    else if (activeKpiFilter === 'expiring_gmp') result = result.filter(s => (s.gmps || []).some(g => g.status === 'Expiring Soon'));
+    else if (activeKpiFilter === 'pending_coa') result = result.filter(s => (s.coas || []).some(c => c.status === 'Missing'));
 
     // 3. Advanced Filters
     if (filters.country.length > 0) result = result.filter(s => filters.country.includes(s.country));

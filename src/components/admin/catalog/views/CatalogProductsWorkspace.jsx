@@ -12,7 +12,9 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
 import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useCatalogBuilderStore } from '../../../../stores/useCatalogBuilderStore';
 
 import CatalogTableView from './CatalogTableView';
 import CatalogCardsView from './CatalogCardsView';
@@ -36,9 +38,37 @@ const CatalogProductsWorkspace = ({
   prevPage,
   onAction,
 }) => {
+  const location = useLocation();
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [matrixViewType, setMatrixViewType] = useState('grouped'); // 'grouped' | 'flat'
-  const [selectedIds, setSelectedIds] = useState([]);
+  const activeCatalogSelectedIds = useCatalogBuilderStore((state) => state.selectedProducts);
+  const activeCatalogCartData = useCatalogBuilderStore((state) => state.cartProductsData);
+  const isDraftActive = useCatalogBuilderStore((state) => state.isDraftActive);
+
+  const [selectedIds, setSelectedIds] = useState(() => {
+    if (location.state?.catalogCart) return location.state.catalogCart;
+    if (isDraftActive) return activeCatalogSelectedIds;
+    return [];
+  });
+
+  const [selectedItems, setSelectedItems] = useState(() => {
+    if (location.state?.catalogCartData) return location.state.catalogCartData;
+    if (isDraftActive) return activeCatalogCartData;
+    return [];
+  });
+
+  const handleSelectionChange = (newIds) => {
+    setSelectedIds(newIds);
+    setSelectedItems(prev => {
+      const keeping = prev.filter(p => newIds.includes(p.id));
+      const toAddIds = newIds.filter(id => !keeping.some(p => p.id === id));
+      const newItems = variants.filter(v => toAddIds.includes(v.id));
+      // If we are in 'grouped' mode, some selections might be parent products, so check products array too
+      const missingIds = toAddIds.filter(id => !newItems.some(n => n.id === id));
+      const newParentItems = products.filter(p => missingIds.includes(p.id));
+      return [...keeping, ...newItems, ...newParentItems];
+    });
+  };
 
   // Filter states (quick filters from CatalogCommandBar)
   const [quickFilters, setQuickFilters] = useState([]);
@@ -73,15 +103,59 @@ const CatalogProductsWorkspace = ({
           borderBottom: '1px solid #e2e8f0',
         }}
       >
-        <div className="toolbar-left">
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: '600' }}>
-            Item Command Center
-          </h2>
-        </div>
-        <div
-          className="toolbar-right"
-          style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
-        >
+        <div className="toolbar-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Display Mode Segmented Control */}
+          <div
+            className="display-mode-control"
+            style={{
+              display: 'flex',
+              backgroundColor: '#f1f5f9',
+              borderRadius: '6px',
+              padding: '4px',
+            }}
+          >
+            <button
+              onClick={() => onDisplayModeChange('table')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 12px',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: activeDisplayMode === 'table' ? '#ffffff' : 'transparent',
+                boxShadow: activeDisplayMode === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                color: activeDisplayMode === 'table' ? '#0f172a' : '#64748b',
+                transition: 'all 0.2s ease-in-out',
+              }}
+              title="Table View"
+            >
+              <List size={18} />
+            </button>
+            <button
+              onClick={() => onDisplayModeChange('cards')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 12px',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: activeDisplayMode === 'cards' ? '#ffffff' : 'transparent',
+                boxShadow: activeDisplayMode === 'cards' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                color: activeDisplayMode === 'cards' ? '#0f172a' : '#64748b',
+                transition: 'all 0.2s ease-in-out',
+              }}
+              title="Cards View"
+            >
+              <LayoutGrid size={18} />
+            </button>
+          </div>
+
+          <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0' }}></div>
+
           {/* Hierarchy Toggle (Grouped vs Flat) */}
           <div
             className="hierarchy-toggle"
@@ -135,68 +209,26 @@ const CatalogProductsWorkspace = ({
               <LayoutTemplate size={16} /> Flat Variants
             </button>
           </div>
-
-          <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0' }}></div>
-
-          {/* Display Mode Segmented Control */}
-          <div
-            className="display-mode-control"
-            style={{
-              display: 'flex',
-              backgroundColor: '#f1f5f9',
-              borderRadius: '6px',
-              padding: '4px',
-            }}
-          >
-            <button
-              onClick={() => onDisplayModeChange('table')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px 12px',
-                borderRadius: '4px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: activeDisplayMode === 'table' ? '#ffffff' : 'transparent',
-                boxShadow: activeDisplayMode === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                color: activeDisplayMode === 'table' ? '#0f172a' : '#64748b',
-                transition: 'all 0.2s ease-in-out',
-              }}
-              title="Table View"
-            >
-              <List size={18} />
-            </button>
-            <button
-              onClick={() => onDisplayModeChange('cards')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px 12px',
-                borderRadius: '4px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: activeDisplayMode === 'cards' ? '#ffffff' : 'transparent',
-                boxShadow: activeDisplayMode === 'cards' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                color: activeDisplayMode === 'cards' ? '#0f172a' : '#64748b',
-                transition: 'all 0.2s ease-in-out',
-              }}
-              title="Cards View"
-            >
-              <LayoutGrid size={18} />
-            </button>
-          </div>
+        </div>
+        <div
+          className="toolbar-right"
+          style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
+        >
         </div>
       </div>
+
 
       {/* Bulk Actions Bar (Sticky above the grid) */}
       <CatalogBulkActionsBar
         selectedIds={selectedIds}
         variants={variants}
-        onClearSelection={() => setSelectedIds([])}
+        filteredIds={variants.map(v => v.id)}
+        onClearSelection={() => {
+          setSelectedIds([]);
+          setSelectedItems([]);
+        }}
         onAction={(action) => {
-          if (onAction) onAction(action, selectedIds);
+          if (onAction) onAction(action, selectedIds, variants.map(v => v.id), selectedItems);
         }}
       />
 
@@ -249,21 +281,10 @@ const CatalogProductsWorkspace = ({
                 boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.1)',
               }}
             >
-              <Sparkles size={24} color="#3b82f6" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <Box size={24} color="#3b82f6" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <p
-                  style={{
-                    margin: '0 0 8px 0',
-                    color: '#1e3a8a',
-                    fontWeight: '600',
-                    fontSize: '0.95rem',
-                  }}
-                >
-                  Atlas AI Insights
-                </p>
                 <p style={{ margin: 0, color: '#2563eb', lineHeight: '1.5' }}>
-                  Inventory healthy. Atlas AI predicts no stock-outs in the next 30 days. Get
-                  started by importing products or running a bulk update to populate your catalog.
+                  No products found with the selected filters. Try changing your filters or importing new products.
                 </p>
               </div>
             </div>
@@ -287,7 +308,7 @@ const CatalogProductsWorkspace = ({
                   onAction={onAction}
                   matrixViewType={matrixViewType}
                   selectedIds={selectedIds}
-                  onSelectionChange={setSelectedIds}
+                  onSelectionChange={handleSelectionChange}
                 />
               ) : (
                 <CatalogCardsView
@@ -295,7 +316,7 @@ const CatalogProductsWorkspace = ({
                   loading={loading}
                   onAction={onAction}
                   selectedIds={selectedIds}
-                  onSelectionChange={setSelectedIds}
+                  onSelectionChange={handleSelectionChange}
                 />
               )}
             </div>

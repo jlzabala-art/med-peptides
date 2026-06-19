@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { collection, query, getDocs } from 'firebase/firestore';
-import { db } from '../../../../firebase';
+import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase';
+import { useCatalogSelectionStore } from '../../../stores/useCatalogSelectionStore';
 import TransactionItemTable from './TransactionItemTable';
-import { ChevronLeft, Save, Send } from 'lucide-react';
+import { ChevronLeft, Save, Send, Box, Filter } from 'lucide-react';
+import { CatalogService } from '../catalog/api/catalog.service';
 
 export default function TransactionEditor() {
   const { type } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const selectedIds = useCatalogSelectionStore(state => state.selectedIds);
   
   const [items, setItems] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [customer, setCustomer] = useState('');
+  const [customerTypeFilter, setCustomerTypeFilter] = useState('all');
+  const [loadingItems, setLoadingItems] = useState(false);
   
   const [headerData, setHeaderData] = useState({
     location: 'Organization Address',
@@ -35,32 +40,69 @@ export default function TransactionEditor() {
   const title = typeTitles[type] || 'New Transaction';
 
   useEffect(() => {
-    // 1. Preload items from location state if provided
-    if (location.state?.prefilledItems) {
-      const prefilled = location.state.prefilledItems.map(item => ({
-        ...item,
-        quantity: 1,
-        rate: item.msrp || item.price || item.cost || 0,
-        amount: item.msrp || item.price || item.cost || 0
-      }));
-      setItems(prefilled);
-    }
+    // 1. Fetch items using selectedIds from Zustand store
+    const fetchSelectedItems = async () => {
+      if (!selectedIds || selectedIds.length === 0) return;
+      setLoadingItems(true);
+        try {
+          const allProducts = await CatalogService.getProducts();
+          
+          const fetched = [];
+          for (const id of selectedIds) {
+            let foundItem = null;
+            
+            // Search in products
+            const prod = allProducts.find(p => p.id === id);
+            if (prod) {
+              foundItem = prod;
+            } else {
+              // Search in variants
+              for (const p of allProducts) {
+                const variant = p.variants?.find(v => v.id === id);
+                if (variant) {
+                  foundItem = { ...variant, name: variant.name || p.name };
+                  break;
+                }
+              }
+            }
+
+            if (foundItem) {
+              fetched.push({
+                id,
+                ...foundItem,
+                quantity: 1,
+                rate: foundItem.msrp || foundItem.price || foundItem.cost || 0,
+                amount: foundItem.msrp || foundItem.price || foundItem.cost || 0
+              });
+            }
+          }
+          setItems(fetched);
+        } catch (err) {
+          console.error("Failed to fetch prefilled items", err);
+        } finally {
+          setLoadingItems(false);
+        }
+    };
+    
+    fetchSelectedItems();
 
     // 2. Load real customers/vendors from db 
-    // In a real scenario you might differentiate customers vs vendors based on type
     const fetchEntities = async () => {
       try {
-        // Querying 'clinics' or 'users' as a mockup of real db call for customers
-        const q = query(collection(db, 'clinics'));
+        // Querying 'customers' if it exists, otherwise fallbacks
+        const q = query(collection(db, 'customers'));
         const snap = await getDocs(q);
-        const fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let fetched = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if (fetched.length > 0) {
           setCustomers(fetched);
         } else {
-          // Fallback mockup if clinics collection is empty
+          // Fallback mockup
           setCustomers([
-            { id: '1', name: 'Mediluxe Health' },
-            { id: '2', name: 'Apex Longevity Clinic' }
+            { id: '1', name: 'Mediluxe Health', type: 'clinic' },
+            { id: '2', name: 'Apex Longevity Clinic', type: 'clinic' },
+            { id: '3', name: 'Dr. Jane Smith', type: 'doctor' },
+            { id: '4', name: 'John Doe', type: 'patient' },
+            { id: '5', name: 'PharmaWholesale Inc.', type: 'wholesaler' }
           ]);
         }
       } catch(e) {
@@ -97,17 +139,32 @@ export default function TransactionEditor() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <label style={{ width: '120px', color: '#ef4444', fontWeight: 500, fontSize: '0.9rem' }}>Customer Name*</label>
-            <select 
-              value={customer} 
-              onChange={(e) => setCustomer(e.target.value)}
-              style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', backgroundColor: '#fff' }}
-            >
-              <option value="">Select or add a customer</option>
-              {customers.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <label style={{ width: '120px', color: '#ef4444', fontWeight: 500, fontSize: '0.9rem' }}>Customer Filter</label>
+            <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
+              <select 
+                value={customerTypeFilter} 
+                onChange={(e) => setCustomerTypeFilter(e.target.value)}
+                style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', backgroundColor: '#fff', maxWidth: '150px' }}
+              >
+                <option value="all">All Types</option>
+                <option value="doctor">Doctors</option>
+                <option value="patient">Patients</option>
+                <option value="clinic">Clinics</option>
+                <option value="wholesaler">Wholesalers</option>
+              </select>
+              <select 
+                value={customer} 
+                onChange={(e) => setCustomer(e.target.value)}
+                style={{ flex: 2, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.9rem', backgroundColor: '#fff' }}
+              >
+                <option value="">Select a customer</option>
+                {customers
+                  .filter(c => customerTypeFilter === 'all' || c.type === customerTypeFilter)
+                  .map(c => (
+                  <option key={c.id} value={c.id}>{c.name} ({c.type || 'unknown'})</option>
+                ))}
+              </select>
+            </div>
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

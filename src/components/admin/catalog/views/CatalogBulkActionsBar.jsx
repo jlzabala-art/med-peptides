@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Tag, Building, Trash2, X, FileText, PackageOpen, ChevronDown, CheckCircle2, MoreHorizontal, Check, PowerOff } from 'lucide-react';
+import { Tag, Building, Trash2, X, FileText, PackageOpen, ChevronDown, CheckCircle2, MoreHorizontal, Check, PowerOff, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useCatalogBuilderStore } from '../../../../stores/useCatalogBuilderStore';
 
 export default function CatalogBulkActionsBar({ selectedIds, variants = [], onClearSelection, onAction }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [showMobileSheet, setShowMobileSheet] = useState(false);
   const [confirmingAction, setConfirmingAction] = useState(null);
   const [showTransactionMenu, setShowTransactionMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const menuRef = useRef(null);
+  const isDraftActive = useCatalogBuilderStore(state => state.isDraftActive);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -60,10 +63,18 @@ export default function CatalogBulkActionsBar({ selectedIds, variants = [], onCl
     executeAction(actionId);
   };
 
-  const executeAction = (actionId) => {
+  const executeAction = async (actionId) => {
     if (showMobileSheet) setShowMobileSheet(false);
     setConfirmingAction(null);
-    onAction(actionId);
+    
+    if (actionId === 'bulk_add_to_catalog') {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 50));
+      await onAction(actionId);
+      setIsLoading(false);
+    } else {
+      onAction(actionId);
+    }
   };
 
   // Shared button styles
@@ -113,23 +124,38 @@ export default function CatalogBulkActionsBar({ selectedIds, variants = [], onCl
           alignItems: 'center',
           justifyContent: 'space-between',
           boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-          flexWrap: 'wrap'
+          gap: '12px'
         }}
       >
         {/* Left Side: Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button onClick={() => handleAction('bulk_update')} style={btnStyle}>
+        <div className="no-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', flex: 1, paddingBottom: '2px' }}>
+          <button onClick={() => handleAction('bulk_manage_visibility')} style={{ ...btnStyle, flexShrink: 0 }}>
+            Manage Visibility
+          </button>
+          
+          <button 
+            onClick={() => handleAction('bulk_add_to_catalog')} 
+            style={{ ...btnStyle, flexShrink: 0, opacity: isLoading ? 0.7 : 1, cursor: isLoading ? 'wait' : 'pointer', border: isDraftActive ? '1px solid #bfdbfe' : '1px solid #e2e8f0', backgroundColor: isDraftActive ? '#eff6ff' : '#fff', color: isDraftActive ? '#2563eb' : '#334155' }}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite', border: '2px solid transparent', borderTopColor: 'currentColor', borderRadius: '50%', width: '14px', height: '14px' }} />
+            ) : null}
+            {isLoading ? 'Loading...' : (isDraftActive ? 'Add to Catalog' : 'Create Catalog')}
+          </button>
+
+          <button onClick={() => handleAction('bulk_update')} style={{ ...btnStyle, flexShrink: 0 }}>
             Bulk Update
           </button>
 
-          <button onClick={() => handleAction('bulk_supplier')} style={btnStyle}>
+          <button onClick={() => handleAction('bulk_supplier')} style={{ ...btnStyle, flexShrink: 0 }}>
             {assignSupplierLabel}
           </button>
 
-          <div style={{ position: 'relative' }} ref={menuRef}>
+          <div style={{ position: 'relative', flexShrink: 0 }} ref={menuRef}>
             <button 
               onClick={() => setShowTransactionMenu(!showTransactionMenu)} 
-              style={{ ...btnStyle, backgroundColor: showTransactionMenu ? '#f1f5f9' : '#fff' }}
+              style={{ ...btnStyle, backgroundColor: showTransactionMenu ? '#f1f5f9' : '#fff', flexShrink: 0 }}
             >
               New Transaction <ChevronDown size={14} />
             </button>
@@ -192,21 +218,21 @@ export default function CatalogBulkActionsBar({ selectedIds, variants = [], onCl
             )}
           </div>
 
-          <button onClick={() => handleAction('bulk_mark_active')} style={btnStyle}>
+          <button onClick={() => handleAction('bulk_mark_active')} style={{ ...btnStyle, flexShrink: 0 }}>
             Mark as Active
           </button>
           
-          <button onClick={() => handleAction('bulk_mark_inactive')} style={btnStyle}>
+          <button onClick={() => handleAction('bulk_mark_inactive')} style={{ ...btnStyle, flexShrink: 0 }}>
             Mark as Inactive
           </button>
           
-          <button onClick={() => handleAction('bulk_delete')} style={btnStyle}>
+          <button onClick={() => handleAction('bulk_delete')} style={{ ...btnStyle, flexShrink: 0 }}>
             Delete
           </button>
 
-          <div style={{ width: '1px', height: '16px', backgroundColor: '#cbd5e1', margin: '0 8px' }}></div>
+          <div style={{ width: '1px', height: '16px', backgroundColor: '#cbd5e1', margin: '0 8px', flexShrink: 0 }}></div>
           
-          <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <div style={{ 
               backgroundColor: '#e0e7ff', 
               color: '#4f46e5', 
@@ -226,7 +252,7 @@ export default function CatalogBulkActionsBar({ selectedIds, variants = [], onCl
         </div>
 
         {/* Right Side: Close */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <button 
             onClick={onClearSelection} 
             style={{ 
@@ -274,6 +300,8 @@ export default function CatalogBulkActionsBar({ selectedIds, variants = [], onCl
               <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 'normal' }}>{selectedIds.length} items</span>
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button onClick={() => handleAction('bulk_manage_visibility')} style={{ ...btnStyle, width: '100%', justifyContent: 'flex-start', padding: '12px' }}><CheckCircle2 size={16} /> Manage Visibility</button>
+              <button onClick={() => handleAction('bulk_add_to_catalog')} style={{ ...btnStyle, width: '100%', justifyContent: 'flex-start', padding: '12px' }}><BookOpen size={16} /> {isDraftActive ? 'Add to Catalog' : 'Create Catalog'}</button>
               <button onClick={() => handleAction('bulk_tag')} style={{ ...btnStyle, width: '100%', justifyContent: 'flex-start', padding: '12px' }}><Tag size={16} /> Edit Tags</button>
               <button onClick={() => handleAction('bulk_supplier')} style={{ ...btnStyle, width: '100%', justifyContent: 'flex-start', padding: '12px' }}><Building size={16} /> {assignSupplierLabel}</button>
               <button onClick={() => handleAction('bulk_po')} style={{ ...primaryBtnStyle, width: '100%', justifyContent: 'flex-start', padding: '12px' }}><FileText size={16} /> Create PO</button>

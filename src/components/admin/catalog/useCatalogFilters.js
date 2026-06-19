@@ -136,7 +136,7 @@ export function useCatalogFilters(items = []) {
     // Search
     if (deferredSearchQuery) {
       const fuse = new Fuse(result, {
-        keys: ['name', 'displayName', 'sku', 'supplier', 'category', 'format'],
+        keys: ['name', 'displayName', 'sku', 'supplier', 'category', 'format', 'clinicalGoals', 'tags', 'objective', 'description', 'clinical_summary', 'beginnerExplanation'],
         threshold: 0.3,
         ignoreLocation: true,
       });
@@ -178,6 +178,21 @@ export function useCatalogFilters(items = []) {
           }
           if (f.id === 'supplier') {
             return item.supplier === f.value;
+          }
+          if (f.id === 'category') {
+            return item.category === f.value;
+          }
+          if (f.id === 'tag' || f.id === 'clinicalGoal') {
+            const term = f.value.toLowerCase();
+            const tags = (item.tags || []).map(t => t.toLowerCase());
+            const goals = (item.clinicalGoals || []).map(g => g.toLowerCase());
+            return tags.includes(term) || goals.includes(term) || (item.category && item.category.toLowerCase() === term);
+          }
+          if (f.id === 'category_or_tag') {
+             const term = f.value.toLowerCase();
+             const tags = (item.tags || []).map(t => t.toLowerCase());
+             const goals = (item.clinicalGoals || []).map(g => g.toLowerCase());
+             return tags.includes(term) || goals.includes(term) || (item.category && item.category.toLowerCase() === term);
           }
           // Add other specific filter rules as needed
           return true;

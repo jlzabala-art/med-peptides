@@ -65,6 +65,8 @@ export const CANONICAL_CATALOG_FIELDS = Object.freeze([
   'pricingMargin',
   'contactEmail',
   'contactPhone',
+  'pdfTemplate',
+  'formats',
 ]);
 
 /**
@@ -169,6 +171,8 @@ export function emptyCatalog(overrides = {}) {
     pricingMargin: 0,
     contactEmail: '',
     contactPhone: '',
+    pdfTemplate: 'standard',
+    formats: [],
     ...overrides,
   };
 }

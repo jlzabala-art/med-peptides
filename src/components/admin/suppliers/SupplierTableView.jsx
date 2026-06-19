@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Clock, AlertTriangle, FileText, Activity } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronRight, Clock, AlertTriangle, FileText, Activity } from 'lucide-react';
 import { StatusChip } from '../../ui';
 
 export default function SupplierTableView({ 
@@ -9,20 +9,15 @@ export default function SupplierTableView({
   selectedIds, 
   onToggleSelect, 
   onToggleSelectAll,
-  onRowExpand // Will render the subcomponent
+  onRowClick,
+  selectedSupplierId
 }) {
-  const [expandedRows, setExpandedRows] = useState({});
-
   const handleSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
-  };
-
-  const toggleRow = (id) => {
-    setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const allSelected = paginatedData.length > 0 && paginatedData.every(s => selectedIds.includes(s.id));
@@ -69,26 +64,26 @@ export default function SupplierTableView({
               <th style={thStyle} onClick={() => handleSort('companyName')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Supplier <SortIcon column="companyName" /></div>
               </th>
-              <th style={thStyle} onClick={() => handleSort('id')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Supplier SKU <SortIcon column="id" /></div>
-              </th>
               <th style={thStyle} onClick={() => handleSort('country')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Country <SortIcon column="country" /></div>
               </th>
               <th style={thStyle} onClick={() => handleSort('type')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Type <SortIcon column="type" /></div>
               </th>
-              <th style={thStyle} onClick={() => handleSort('status')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Status <SortIcon column="status" /></div>
+              <th style={thStyle} onClick={() => handleSort('productsSupplied')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Items Linked <SortIcon column="productsSupplied" /></div>
               </th>
-              <th style={thStyle} onClick={() => handleSort('healthScore')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Health <SortIcon column="healthScore" /></div>
-              </th>
-              <th style={thStyle} onClick={() => handleSort('reliability')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Reliability <SortIcon column="reliability" /></div>
+              <th style={thStyle} onClick={() => handleSort('singleSourceItems')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Single Source Items <SortIcon column="singleSourceItems" /></div>
               </th>
               <th style={thStyle} onClick={() => handleSort('pendingDocsCount')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Docs <SortIcon column="pendingDocsCount" /></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Compliance <SortIcon column="pendingDocsCount" /></div>
+              </th>
+              <th style={thStyle} onClick={() => handleSort('healthScore')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Health Score <SortIcon column="healthScore" /></div>
+              </th>
+              <th style={thStyle} onClick={() => handleSort('lastActivity')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Last Activity <SortIcon column="lastActivity" /></div>
               </th>
               <th style={{ ...thStyle, cursor: 'default', textAlign: 'right' }}>Actions</th>
             </tr>
@@ -103,15 +98,13 @@ export default function SupplierTableView({
             ) : (
               paginatedData.map(s => {
                 const isSelected = selectedIds.includes(s.id);
-                const isExpanded = expandedRows[s.id];
-                const health = s.healthScore || 90;
-                const reliability = s.reliability || 95;
-                const pendingDocs = s.pendingDocsCount || 0;
-
                 return (
                   <React.Fragment key={s.id}>
-                    <tr style={{ backgroundColor: isSelected ? 'var(--primary-light)' : 'transparent', transition: 'background-color 0.2s' }}>
-                      <td style={tdStyle}>
+                    <tr 
+                      style={{ backgroundColor: s.id === selectedSupplierId ? 'var(--primary-light)' : isSelected ? 'var(--color-bg-selected)' : 'transparent', transition: 'background-color 0.2s', cursor: 'pointer' }}
+                      onClick={() => onRowClick(s)}
+                    >
+                      <td style={tdStyle} onClick={(e) => e.stopPropagation()}>
                         <input 
                           type="checkbox" 
                           checked={isSelected}
@@ -121,12 +114,6 @@ export default function SupplierTableView({
                       </td>
                       <td style={{ ...tdStyle, fontWeight: 700 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <button 
-                            onClick={() => toggleRow(s.id)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
-                          >
-                            {isExpanded ? <ChevronUp size={14} color="var(--primary)" /> : <ChevronDown size={14} color="var(--text-muted)" />}
-                          </button>
                           {s.companyName || s.name || 'Unknown'}
                           {s.supplierVariants && s.supplierVariants.length > 1 && (
                             <span style={{ fontSize: '0.65rem', backgroundColor: 'var(--primary-light)', color: 'var(--primary)', padding: '2px 6px', borderRadius: '4px', fontWeight: 700, marginLeft: '4px' }}>
@@ -135,11 +122,6 @@ export default function SupplierTableView({
                           )}
                         </div>
                       </td>
-                      <td style={tdStyle}>
-                        <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)', backgroundColor: 'var(--surface-raised)', padding: '2px 6px', borderRadius: '4px' }}>
-                          {s.sku || s.zohoVendorNumber_EUR || s.zohoVendorNumber_USD || ('SUP-' + s.id.slice(-6).toUpperCase())}
-                        </span>
-                      </td>
                       <td style={tdStyle}>{s.country || 'N/A'}</td>
                       <td style={tdStyle}>
                         <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', backgroundColor: 'var(--surface-raised)', padding: '2px 6px', borderRadius: '4px' }}>
@@ -147,7 +129,25 @@ export default function SupplierTableView({
                         </span>
                       </td>
                       <td style={tdStyle}>
-                        <StatusChip status={s.status} />
+                        <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{s.productsSupplied || 0}</span>
+                      </td>
+                      <td style={tdStyle}>
+                        {s.singleSourceItems > 0 ? (
+                          <span style={{ fontWeight: 600, color: '#ef4444' }}>{s.singleSourceItems}</span>
+                        ) : (
+                          <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>0</span>
+                        )}
+                      </td>
+                      <td style={tdStyle}>
+                        {pendingDocs > 0 ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontWeight: 600, fontSize: '0.75rem' }}>
+                            <AlertTriangle size={14} /> Pending ({pendingDocs})
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>
+                            <FileText size={14} /> Complete
+                          </div>
+                        )}
                       </td>
                       <td style={tdStyle}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -158,34 +158,14 @@ export default function SupplierTableView({
                         </div>
                       </td>
                       <td style={tdStyle}>
-                        <span style={{ fontWeight: 600, color: reliability < 90 ? '#ef4444' : 'var(--text-main)' }}>{reliability}%</span>
-                      </td>
-                      <td style={tdStyle}>
-                        {pendingDocs > 0 ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontWeight: 600 }}>
-                            <AlertTriangle size={14} /> {pendingDocs}
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981' }}>
-                            <FileText size={14} /> Complete
-                          </div>
-                        )}
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          {s.lastActivity || 'Today'}
+                        </span>
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'right' }}>
-                        <button onClick={() => toggleRow(s.id)} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '4px 8px' }}>
-                          {isExpanded ? 'Close' : 'Expand'}
-                        </button>
+                        <ChevronRight size={16} color="var(--text-muted)" />
                       </td>
                     </tr>
-                    {isExpanded && (
-                      <tr>
-                        <td colSpan="10" style={{ padding: 0, borderBottom: '1px solid var(--border)' }}>
-                          <div style={{ backgroundColor: 'var(--surface-raised)', borderLeft: '4px solid var(--primary)' }}>
-                            {onRowExpand(s)}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </React.Fragment>
                 );
               })

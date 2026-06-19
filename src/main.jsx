@@ -26,6 +26,22 @@ onLCP(reportVital);
 onFCP(reportVital);
 onTTFB(reportVital);
 
+// ── Service Worker Clean Up ──────────────────────────────────────────────────
+// Unregister any stale service workers (e.g. from previous vite-plugin-pwa config)
+// to prevent old index.html/assets from being served from the browser cache.
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister().then((success) => {
+        if (success) {
+          console.log('Stale service worker unregistered successfully. Reloading page...');
+          window.location.reload();
+        }
+      });
+    }
+  });
+}
+
 // ── Stale chunk recovery ─────────────────────────────────────────────────────
 // After a new deployment, old hashed chunk URLs no longer exist on the server.
 // The SPA fallback returns index.html → browser rejects it as text/html MIME.
@@ -40,6 +56,7 @@ window.addEventListener('vite:preloadError', (event) => {
     window.location.reload();
   }
 });
+
 
 // ── Error Boundary ───────────────────────────────────────────────────────────
 class ErrorBoundary extends React.Component {

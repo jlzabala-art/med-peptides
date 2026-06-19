@@ -50,7 +50,7 @@ export default function SmartProductIntakeWizard({
           name: first.peptideName || prev.name,
           pricePerGram: first.pricePerGram || prev.pricePerGram,
           sku: first.peptideName
-            ? `AUTO-${first.peptideName.substring(0, 3).toUpperCase()}-001`
+            ? `SKU-${first.peptideName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
             : prev.sku,
         }));
 
@@ -89,8 +89,18 @@ export default function SmartProductIntakeWizard({
       return;
     }
 
+    let finalData = { ...formData, _mode: mode };
+    
+    // Ensure unique SKU if missing
+    if (!finalData.sku || finalData.sku.trim() === '') {
+       const baseName = mode === 'variant' ? (finalData.format || 'VAR') : (finalData.name || 'UNK');
+       const prefix = baseName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
+       const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+       finalData.sku = `SKU-${prefix}-${randomCode}`;
+    }
+
     if (onAddProduct) {
-      const success = await onAddProduct({ ...formData, _mode: mode });
+      const success = await onAddProduct(finalData);
       if (success) onClose();
     } else {
       toast.success(`${mode === 'variant' ? 'Variant' : 'Product'} added successfully!`);
@@ -201,8 +211,8 @@ export default function SmartProductIntakeWizard({
               }}
             >
               <p style={{ color: '#4b5563', margin: 0, fontSize: '0.95rem', lineHeight: '1.5' }}>
-                Drop a COA, Supplier Invoice, or Product Label here.<br/> 
-                <span style={{ fontWeight: 600, color: '#8b5cf6' }}>Atlas AI</span> will magically extract the {mode === 'variant' ? 'variant specs' : 'peptide name'}, purity, and pricing.
+                Drop a Price List, Supplier Document, or Invoice here.<br/> 
+                <span style={{ fontWeight: 600, color: '#8b5cf6' }}>Atlas AI</span> will magically extract product details like {mode === 'variant' ? 'variant names' : 'product names'} and pricing.
               </p>
 
               <label

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSupplierData } from './suppliers/useSupplierData';
 import SupplierKPIs from './suppliers/SupplierKPIs';
 import SupplierCommandBar from './suppliers/SupplierCommandBar';
@@ -35,6 +36,28 @@ export default function AdminWholesellersTab({ isMobile }) {
 
   const [activeView, setActiveView] = useState('table'); // table, directory, comparison, map
   const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search');
+  const openVariantId = searchParams.get('openVariant');
+
+  useEffect(() => {
+    if (urlSearch && !searchTerm) {
+      setSearchTerm(urlSearch);
+    }
+  }, [urlSearch, searchTerm, setSearchTerm]);
+
+  useEffect(() => {
+    if (urlSearch && paginatedData.length > 0 && !selectedSupplier) {
+      const match = paginatedData.find(s => s.companyName === urlSearch || s.name === urlSearch);
+      if (match) {
+        setSelectedSupplier(match);
+      } else if (paginatedData.length === 1) {
+        setSelectedSupplier(paginatedData[0]);
+      }
+    }
+  }, [urlSearch, paginatedData, selectedSupplier]);
 
   if (loading && !suppliers.length) {
     return (
@@ -63,15 +86,9 @@ export default function AdminWholesellersTab({ isMobile }) {
     setSelectedIds([]);
   };
 
-  const renderRowExpand = (supplier) => (
-    <div style={{ padding: '16px 24px', backgroundColor: 'var(--surface-alt)' }}>
-      <SupplierDetail 
-        w={supplier} 
-        onClose={() => {}} 
-        onUpdate={handleUpdate} 
-      />
-    </div>
-  );
+  const handleRowClick = (supplier) => {
+    setSelectedSupplier(supplier);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1.25rem', backgroundColor: 'var(--background)' }}>
@@ -98,15 +115,30 @@ export default function AdminWholesellersTab({ isMobile }) {
       {/* 3. Main Data Layer */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {activeView === 'table' && (
-          <SupplierTableView 
-            paginatedData={paginatedData}
-            sortConfig={sortConfig}
-            setSortConfig={setSortConfig}
-            selectedIds={selectedIds}
-            onToggleSelect={handleToggleSelect}
-            onToggleSelectAll={handleToggleSelectAll}
-            onRowExpand={renderRowExpand}
-          />
+          <div style={{ display: 'flex', gap: '1rem', height: '100%', alignItems: 'flex-start' }}>
+            <div style={{ flex: selectedSupplier ? '0 0 50%' : '1 1 100%', transition: 'all 0.3s ease' }}>
+              <SupplierTableView 
+                paginatedData={paginatedData}
+                sortConfig={sortConfig}
+                setSortConfig={setSortConfig}
+                selectedIds={selectedIds}
+                onToggleSelect={handleToggleSelect}
+                onToggleSelectAll={handleToggleSelectAll}
+                onRowClick={handleRowClick}
+                selectedSupplierId={selectedSupplier?.id}
+              />
+            </div>
+            {selectedSupplier && (
+              <div style={{ flex: '0 0 50%', position: 'sticky', top: 0, height: '100%', overflowY: 'auto' }}>
+                <SupplierDetail 
+                  w={selectedSupplier} 
+                  onClose={() => setSelectedSupplier(null)} 
+                  onUpdate={handleUpdate} 
+                  initialVariantId={openVariantId}
+                />
+              </div>
+            )}
+          </div>
         )}
         {activeView === 'directory' && (
           <SupplierDirectoryView 

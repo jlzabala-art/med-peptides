@@ -14,6 +14,7 @@ import styles from '../../components/admin/catalog/CatalogIntelligenceHub.module
 
 export default function CatalogHeaderGadget({
   activeWorkspace,
+  title,
   searchQuery,
   setSearchQuery,
   setIsAdvancedFiltersOpen,
@@ -23,7 +24,10 @@ export default function CatalogHeaderGadget({
   setIsAddMenuOpen,
   setIntakeMode,
   setIsCreateModalOpen,
-  setIsImportModalOpen
+  setIsImportModalOpen,
+  onAction,
+  activeFilterCount = 0,
+  totalItems = 0
 }) {
   return (
     <div
@@ -48,9 +52,14 @@ export default function CatalogHeaderGadget({
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1 }}>
         <h1
           className={styles.title}
-          style={{ margin: 0, fontSize: '1.5rem', whiteSpace: 'nowrap' }}
+          style={{ margin: 0, fontSize: '1.5rem', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '12px' }}
         >
-          {activeWorkspace.charAt(0).toUpperCase() + activeWorkspace.slice(1)}
+          {title || (activeWorkspace.charAt(0).toUpperCase() + activeWorkspace.slice(1))}
+          {(totalItems > 0 || filteredCatalog) && (
+            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '500', background: '#f1f5f9', padding: '4px 10px', borderRadius: '16px', letterSpacing: '0.5px' }}>
+              {activeFilterCount > 0 ? `${filteredCatalog.length} Filtered` : `${totalItems > 0 ? totalItems : filteredCatalog?.length} Items`}
+            </span>
+          )}
         </h1>
 
         {/* Search Input Integrated into Header */}
@@ -72,7 +81,11 @@ export default function CatalogHeaderGadget({
           <Search size={16} color="var(--text-muted, #64748b)" style={{ marginRight: '8px' }} />
           <input
             type="text"
-            placeholder="Ask Atlas or Search..."
+            placeholder={
+              activeFilterCount > 0
+                ? `Searching within ${activeFilterCount} active filter(s)...`
+                : "Search..."
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -106,87 +119,15 @@ export default function CatalogHeaderGadget({
         className={styles.actionButtons}
         style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}
       >
-        <button
-          onClick={() => {
-            toast.promise(
-              new Promise(resolve => setTimeout(resolve, 2500)),
-              {
-                loading: 'Atlas AI is auditing the catalog...',
-                success: () => {
-                  return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ fontWeight: 600 }}>Atlas AI Catalog Audit</span>
-                      <span style={{ fontSize: '0.85rem' }}>• 2 products missing Retail Prices</span>
-                      <span style={{ fontSize: '0.85rem' }}>• 1 product with Low Margin (&lt;20%)</span>
-                      <span style={{ fontSize: '0.85rem' }}>• 3 products missing COA</span>
-                    </div>
-                  );
-                },
-                error: 'Audit failed.'
-              },
-              { duration: 5000 }
-            );
-          }}
-          style={{
-            padding: '0.4rem 0.8rem',
-            borderRadius: '16px',
-            fontSize: '0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: '#f1f5f9',
-            border: '1px solid #cbd5e1',
-            cursor: 'pointer',
-            color: '#475569',
-            fontWeight: 600
-          }}
-        >
-          <Activity size={14} color="#8b5cf6" /> AI Audit Catalog
-        </button>
-        <button
-          onClick={() => {
-            const dataToExport = filteredCatalog.map(item => ({
-              ID: item.id || '',
-              SKU: item.sku || '',
-              Name: item.name || '',
-              Supplier: item.supplier || '',
-              Category: item.category || '',
-              Format: item.format || '',
-              Size: item.size || '',
-              Stock: item.stock || 0,
-              Cost: item.cost || 0,
-              MSRP: item.msrp || item.price || 0,
-              Status: item.status || 'Active'
-            }));
-            const csv = Papa.unparse(dataToExport);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `catalog_export_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            toast.success('Catalog exported successfully!');
-          }}
-          style={{
-            padding: '0.4rem 0.8rem',
-            borderRadius: '16px',
-            fontSize: '0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: 'white',
-            border: '1px solid #e2e8f0',
-            cursor: 'pointer'
-          }}
-        >
-          <Download size={14} /> Export CSV
-        </button>
+
         {activeWorkspace === 'products' && (
           <div style={{ position: 'relative' }}>
             <button
-              onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+              onClick={() => {
+                if (window.dispatchEvent) {
+                  window.dispatchEvent(new CustomEvent('open-universal-wizard'));
+                }
+              }}
               className={styles.btnAdd}
               style={{
                 padding: '0.4rem 0.8rem',
@@ -197,103 +138,8 @@ export default function CatalogHeaderGadget({
                 gap: '0.5rem',
               }}
             >
-              <Plus size={16} /> Add Product <ChevronDown size={14} />
+              <Plus size={16} /> Add Info
             </button>
-            <AnimatePresence>
-              {isAddMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 0.5rem)',
-                    right: 0,
-                    background: 'white',
-                    borderRadius: '12px',
-                    boxShadow:
-                      '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
-                    border: '1px solid #e2e8f0',
-                    overflow: 'hidden',
-                    minWidth: '200px',
-                    zIndex: 100,
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setIntakeMode('product');
-                      setIsCreateModalOpen(true);
-                      setIsAddMenuOpen(false);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #f1f5f9',
-                    }}
-                  >
-                    <Package size={16} color="#0f172a" />
-                    <span style={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>
-                      Add New Product
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIntakeMode('variant');
-                      setIsCreateModalOpen(true);
-                      setIsAddMenuOpen(false);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #f1f5f9',
-                    }}
-                  >
-                    <Tag size={16} color="#0f172a" />
-                    <span style={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>
-                      Add Variant
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsImportModalOpen(true);
-                      setIsAddMenuOpen(false);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #f1f5f9',
-                    }}
-                  >
-                    <Download size={16} color="#0f172a" />
-                    <span style={{ fontSize: '0.875rem', color: '#0f172a', fontWeight: 500 }}>
-                      Import Products
-                    </span>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         )}
       </div>

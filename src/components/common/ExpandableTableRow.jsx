@@ -5,15 +5,17 @@ import React, { useState } from 'react';
 
 
 /**
- * ExpandableTableRow - A reusable 3-column table row component with an expandable detail panel.
+ * ExpandableTableRow - A reusable table row component with an optional extra column and expandable detail panel.
  * 
- * @param {React.ReactNode} mainContent - Content for the first column (e.g. Title, Slugs)
- * @param {React.ReactNode} subContent - Content for the second column (e.g. Status, Badge)
- * @param {React.ReactNode} actions - Content for the third column (e.g. Action buttons)
- * @param {React.ReactNode} expandedContent - Content to show when the row is expanded
+ * @param {React.ReactNode} mainContent     - First column (Title, Slugs)
+ * @param {React.ReactNode} subContent      - Second column (Status, Badge)
+ * @param {React.ReactNode} [extraContent]  - Optional third column (Formats & Date)
+ * @param {React.ReactNode} actions         - Last column (Action buttons)
+ * @param {React.ReactNode} expandedContent - Content shown when row is expanded
  */
-export default function ExpandableTableRow({ mainContent, subContent, actions, expandedContent }) {
+export default function ExpandableTableRow({ mainContent, subContent, extraContent, actions, expandedContent }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const colSpan = extraContent ? 4 : 3;
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -26,6 +28,11 @@ export default function ExpandableTableRow({ mainContent, subContent, actions, e
         <td style={subTdStyle}>
           {subContent}
         </td>
+        {extraContent && (
+          <td style={extraTdStyle}>
+            {extraContent}
+          </td>
+        )}
         <td style={actionsTdStyle}>
           <div style={actionsContainerStyle}>
             {actions}
@@ -41,7 +48,7 @@ export default function ExpandableTableRow({ mainContent, subContent, actions, e
       </tr>
       {isExpanded && (
         <tr style={expandedRowStyle}>
-          <td colSpan={3} style={expandedTdStyle}>
+          <td colSpan={colSpan} style={expandedTdStyle}>
             {expandedContent}
           </td>
         </tr>
@@ -49,6 +56,7 @@ export default function ExpandableTableRow({ mainContent, subContent, actions, e
     </>
   );
 }
+
 
 // ── Styles ──────────────────────────────────────────
 
@@ -79,7 +87,12 @@ const mainTdStyle = {
 
 const subTdStyle = {
   ...tdStyle,
-  width: '30%',
+  width: '20%',
+};
+
+const extraTdStyle = {
+  ...tdStyle,
+  width: '20%',
 };
 
 const actionsTdStyle = {

@@ -12,6 +12,8 @@ import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { db } from '../firebase.js';
+import { doc, getDoc } from 'firebase/firestore';
 import { catalogRepository } from '../repositories/catalogRepository';
 import { productRepository } from '../repositories/productRepository';
 import { protocolRepository } from '../repositories/protocolRepository';
@@ -67,6 +69,7 @@ export default function PublicCatalogView() {
 
   // FAQ accordion state
   const [activeFaq, setActiveFaq] = useState(null);
+  const [enrichments, setEnrichments] = useState({});
 
   useEffect(() => {
     async function loadCatalogData() {
@@ -90,6 +93,42 @@ export default function PublicCatalogView() {
         setCatalog(cat);
         setProducts(prodList);
         setProtocols(protoList);
+
+        // Fetch AI clinical enrichments if clinical template is selected
+        const template = cat.pdfTemplate || cat.publishOptions?.pdfTemplate || 'standard';
+        if (template === 'clinical') {
+          const enrichMap = {};
+          const uniqueProductIds = new Set();
+          (cat.sections || []).forEach((sec) => {
+            (sec.products || []).forEach((id) => uniqueProductIds.add(id));
+          });
+
+          await Promise.all(
+            Array.from(uniqueProductIds).map(async (id) => {
+              const p = prodList.find((item) => item.id === id || item.slug === id);
+              if (!p) return;
+              const name = p.name || p.productTitle || p.displayName || '';
+              if (!name) return;
+
+              const cacheKey = name
+                .toLowerCase()
+                .replace(/[\s\-_().]/g, '')
+                .replace(/[^a-z0-9]/g, '')
+                .substring(0, 60);
+
+              try {
+                const docRef = doc(db, 'productEnrichments', cacheKey);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                  enrichMap[name] = docSnap.data().enrichment;
+                }
+              } catch (err) {
+                console.warn('[PublicCatalogView] Failed to fetch enrichment:', err);
+              }
+            })
+          );
+          setEnrichments(enrichMap);
+        }
 
         // Resolve Inquiry routing
         const fallbackContact = await resolveCatalogContact(cat);
@@ -330,34 +369,238 @@ export default function PublicCatalogView() {
               )}
 
               {/* Products in this Section */}
-              <div style={productsGridStyle}>
+              <div style={{
+                ...productsGridStyle,
+                gridTemplateColumns: (catalog.pdfTemplate || catalog.publishOptions?.pdfTemplate || 'standard') === 'clinical' 
+                  ? '1fr' 
+                  : ((catalog.pdfTemplate || catalog.publishOptions?.pdfTemplate || 'standard') === 'minimal' ? 'repeat(auto-fill, minmax(220px, 1fr))' : 'repeat(auto-fill, minmax(340px, 1fr))'),
+                gap: (catalog.pdfTemplate || catalog.publishOptions?.pdfTemplate || 'standard') === 'clinical' ? '2rem' : '1.25rem'
+              }}>
                 {section.products?.map(prodId => {
                   const prod = getProductInfo(prodId);
                   if (!prod) return null;
-                  return (
-                    <div key={prodId} style={productCardStyle}>
-                      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                        <div style={{ width: '40px', height: '40px', backgroundColor: '#e8f0fe', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryColor }}>
-                          <FileText size={20} />
-                        </div>
+                  
+                  const activeTemplate = catalog.pdfTemplate || catalog.publishOptions?.pdfTemplate || 'standard';
+                  const pName = prod.displayName || prod.name || '—';
+                  const showPrices = catalog.pricingVisible ?? true;
+                  const priceVal = prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD;
+                  const formattedPrice = priceVal
+                    ? `$${(priceVal * (1 + (catalog.pricingMargin || 0) / 100)).toFixed(2)}`
+                    : 'Request Pricing';
+
+                  if (activeTemplate === 'minimal') {
+                    return (
+                      <div key={prodId} style={{
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid #dadce0',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        textAlign: 'center',
+                        boxShadow: '0 1px 2px 0 rgba(60,64,67,0.05)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        minHeight: '200px'
+                      }}>
+                        {prod.imageUrl || prod.image || prod.thumbnail ? (
+                          <img 
+                            src={prod.imageUrl || prod.image || prod.thumbnail} 
+                            alt={pName} 
+                            style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '0.75rem', borderRadius: '4px' }}
+                          />
+                        ) : (
+                          <div style={{ width: '80px', height: '80px', backgroundColor: '#f8fafc', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.7rem', marginBottom: '0.75rem' }}>
+                            No Image
+                          </div>
+                        )}
                         <div>
-                          <h4 style={productTitleStyle}>{prod.displayName || prod.name}</h4>
-                          <span style={productBadgeStyle}>{prod.productType || 'peptide'}</span>
+                          <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.88rem', fontWeight: 700, color: '#202124' }}>{pName}</h4>
+                          {(prod.sku || prod.variantSku) && (
+                            <span style={{ fontSize: '0.7rem', color: '#5f6368', display: 'block', marginBottom: '0.5rem' }}>
+                              SKU: {prod.sku || prod.variantSku}
+                            </span>
+                          )}
+                        </div>
+                        {showPrices && (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto' }}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#137333' }}>{formattedPrice}</span>
+                            <span style={{ fontSize: '0.6rem', color: '#5f6368' }}>ex-works — shipping not included</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (activeTemplate === 'standard') {
+                    return (
+                      <div key={prodId} style={{
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid #dadce0',
+                        borderRadius: '8px',
+                        padding: '1.25rem',
+                        boxShadow: '0 1px 2px 0 rgba(60,64,67,0.05)',
+                        display: 'flex',
+                        gap: '1rem',
+                        alignItems: 'start'
+                      }}>
+                        <div style={{ flexShrink: 0 }}>
+                          {prod.imageUrl || prod.image || prod.thumbnail ? (
+                            <img 
+                              src={prod.imageUrl || prod.image || prod.thumbnail} 
+                              alt={pName} 
+                              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                            />
+                          ) : (
+                            <div style={{ width: '80px', height: '80px', backgroundColor: '#e8f0fe', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryColor }}>
+                              <FileText size={28} />
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                              <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#202124' }}>{pName}</h4>
+                              <span style={productBadgeStyle}>{prod.productType || 'peptide'}</span>
+                            </div>
+                            {(prod.sku || prod.variantSku) && (
+                              <span style={{ fontSize: '0.72rem', color: '#5f6368', display: 'block', marginBottom: '0.5rem' }}>
+                                SKU: {prod.sku || prod.variantSku}
+                              </span>
+                            )}
+                            <p style={{ ...productDescStyle, margin: '0.25rem 0 0.75rem 0', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                              {prod.desc || prod.science?.desc || 'Details currently under review.'}
+                            </p>
+                            
+                            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#5f6368', marginBottom: '0.75rem' }}>
+                              <span><strong>Route:</strong> {prod.defaultVariant?.route?.replace('_', ' ') || prod.route || 'Injectable'}</span>
+                              {prod.dosage && <span><strong>Dosage:</strong> {prod.dosage}</span>}
+                            </div>
+                          </div>
+
+                          {showPrices && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f3f4', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#137333' }}>{formattedPrice}</span>
+                                <span style={{ fontSize: '0.6rem', color: '#5f6368' }}>ex-works — shipping not included</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <p style={productDescStyle}>
-                        {prod.desc || prod.science?.desc || 'Details currently under review.'}
-                      </p>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f3f4', paddingTop: '0.75rem' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#137333' }}>
-                          {catalog.pricingVisible && prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD
-                            ? `$${(prod.defaultVariant.pricing.retailPrice.base.kitUSD * (1 + (catalog.pricingMargin || 0) / 100)).toFixed(2)}`
-                            : 'Request Pricing'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: '#5f6368' }}>
-                          {prod.defaultVariant?.route?.replace('_', ' ') || 'Injectable vial'}
-                        </span>
+                    );
+                  }
+
+                  // Clinical Template (1-per-row full clinical dossier)
+                  const enrichment = enrichments[pName] || null;
+
+                  return (
+                    <div key={prodId} style={{
+                      backgroundColor: 'var(--color-bg-surface)',
+                      border: '1px solid #dadce0',
+                      borderTop: `4px solid ${primaryColor}`,
+                      borderRadius: '8px',
+                      padding: '1.75rem',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.06)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '1.5rem'
+                    }}>
+                      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                          {prod.imageUrl || prod.image || prod.thumbnail ? (
+                            <img 
+                              src={prod.imageUrl || prod.image || prod.thumbnail} 
+                              alt={pName} 
+                              style={{ width: '120px', height: '120px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #e2e8f0', padding: '4px', background: '#fff' }}
+                            />
+                          ) : (
+                            <div style={{ width: '120px', height: '120px', backgroundColor: '#e8f0fe', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryColor }}>
+                              <FileText size={48} />
+                            </div>
+                          )}
+                          
+                          {showPrices && (
+                            <div style={{ textAlign: 'center', marginTop: '0.25rem' }}>
+                              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#137333', display: 'block' }}>{formattedPrice}</span>
+                              <span style={{ fontSize: '0.62rem', color: '#5f6368' }}>ex-works — shipping not included</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div style={{ flex: 1, minWidth: '260px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: '#0f172a' }}>{pName}</h3>
+                            <span style={{ ...productBadgeStyle, fontSize: '0.75rem', padding: '4px 10px' }}>{prod.productType || 'peptide'}</span>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '0.5rem 1rem', fontSize: '0.85rem', color: '#334155', marginTop: '0.75rem' }}>
+                            {prod.sku && <><strong>SKU:</strong> <span>{prod.sku}</span></>}
+                            {(prod.strength || prod.vialStrength) && <><strong>Strength / Vial:</strong> <span>{prod.strength || prod.vialStrength}</span></>}
+                            {prod.defaultVariant?.route && <><strong>Administration Route:</strong> <span style={{ textTransform: 'capitalize' }}>{prod.defaultVariant.route.replace(/_/g, ' ')}</span></>}
+                            {prod.dosage && <><strong>Dosage Reference:</strong> <span>{prod.dosage}</span></>}
+                            {prod.storage && <><strong>Storage Conditions:</strong> <span>{prod.storage}</span></>}
+                          </div>
+                        </div>
                       </div>
+
+                      {enrichment ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                          {enrichment.summary && (
+                            <div style={{ padding: '1rem', backgroundColor: `${primaryColor}08`, borderLeft: `4px solid ${primaryColor}`, borderRadius: '4px' }}>
+                              <h5 style={{ margin: '0 0 0.35rem 0', fontSize: '0.88rem', fontWeight: 700, color: primaryColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>📋 Clinical Summary</h5>
+                              <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155', lineHeight: 1.6 }}>{enrichment.summary}</p>
+                            </div>
+                          )}
+
+                          {enrichment.mechanism && (
+                            <div>
+                              <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>⚙️ Mechanism of Action</h5>
+                              <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.6 }}>{enrichment.mechanism}</p>
+                            </div>
+                          )}
+
+                          {(enrichment.indications?.length > 0 || enrichment.contraindications?.length > 0) && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginTop: '0.25rem' }}>
+                              {enrichment.indications?.length > 0 && (
+                                <div>
+                                  <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.82rem', fontWeight: 700, color: '#137333', textTransform: 'uppercase' }}>✅ Therapeutic Indications</h5>
+                                  <ul style={{ paddingLeft: '1.1rem', margin: 0, fontSize: '0.8rem', color: '#334155', lineHeight: 1.5 }}>
+                                    {enrichment.indications.map((ind, idx) => <li key={idx} style={{ marginBottom: '0.25rem' }}>{ind}</li>)}
+                                  </ul>
+                                </div>
+                              )}
+                              {enrichment.contraindications?.length > 0 && (
+                                <div>
+                                  <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.82rem', fontWeight: 700, color: '#b45309', textTransform: 'uppercase' }}>⚠️ Key Contraindications</h5>
+                                  <ul style={{ paddingLeft: '1.1rem', margin: 0, fontSize: '0.8rem', color: '#b45309', lineHeight: 1.5 }}>
+                                    {enrichment.contraindications.map((ci, idx) => <li key={idx} style={{ marginBottom: '0.25rem' }}>{ci}</li>)}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {enrichment.references?.length > 0 && (
+                            <div style={{ marginTop: '0.5rem' }}>
+                              <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>📚 Scientific Literature</h5>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                {enrichment.references.slice(0, 4).map((ref, idx) => (
+                                  <div key={idx} style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
+                                    <span style={{ color: primaryColor, fontWeight: 700, flexShrink: 0 }}>[{idx + 1}]</span>
+                                    <span>{ref}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem', marginTop: '0.5rem' }}>
+                          <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>Description</h5>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.6 }}>{prod.desc || prod.science?.desc || 'Details currently under review.'}</p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

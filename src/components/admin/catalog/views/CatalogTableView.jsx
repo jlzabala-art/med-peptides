@@ -136,34 +136,7 @@ export default function CatalogTableView({
 
   const [visibleColumns, setVisibleColumns] = useState(null);
 
-  const [activeSavedView, setActiveSavedView] = useState('Default View');
-
-  const renderSavedViews = () => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-        View:
-      </span>
-      <select
-        value={activeSavedView}
-        onChange={(e) => setActiveSavedView(e.target.value)}
-        style={{
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '0.25rem 0.5rem',
-          fontSize: '0.75rem',
-          fontWeight: 600,
-          color: 'var(--color-primary)',
-          backgroundColor: 'rgba(99,102,241,0.05)',
-          cursor: 'pointer',
-          outline: 'none',
-        }}
-      >
-        <option value="Default View">Default View</option>
-        <option value="Compact List">Compact List</option>
-        <option value="Expanded Details">Expanded Details</option>
-      </select>
-    </div>
-  );
+  // Removed saved views dropdown as requested
 
   // Generate columns dynamically based on contextualTab
   const columns = useMemo(() => {
@@ -233,7 +206,7 @@ export default function CatalogTableView({
       },
       {
         key: 'type',
-        header: 'TYPE / FORMAT',
+        header: 'CATEGORY / GOAL',
         render: (row) => (
           <span style={{ fontSize: '0.85rem', color: '#475569' }}>
             {row.format || row.category || 'Goods'}
@@ -311,50 +284,7 @@ export default function CatalogTableView({
           );
         },
       },
-      {
-        key: 'statusMatrix',
-        header: 'Status Matrix',
-        render: (row) => {
-          if (row.isVariantRow) return null;
 
-          // Compute Inventory Status
-          const totalStock = (row.variants || []).reduce((sum, v) => sum + (v.stock || 0), 0);
-          const inventoryStatus = totalStock === 0 ? { label: 'Out of Stock', color: '#ef4444', bg: '#fef2f2' } 
-            : totalStock < 50 ? { label: 'Low Stock', color: '#f59e0b', bg: '#fffbeb' }
-            : { label: 'In Stock', color: '#10b981', bg: '#ecfdf5' };
-
-          // Compute Supplier Status
-          const uniqueSuppliers = new Set((row.variants || []).map((v) => v.supplier).filter(Boolean));
-          const supplierStatus = uniqueSuppliers.size === 0 ? { label: 'Missing Supplier', color: '#ef4444', bg: '#fef2f2' }
-            : uniqueSuppliers.size === 1 ? { label: 'Single Source Risk', color: '#f59e0b', bg: '#fffbeb' }
-            : { label: 'Assigned', color: '#10b981', bg: '#ecfdf5' };
-
-          // Compute Regulatory Status (Mock logic based on variants)
-          const missingDocs = (row.variants || []).some(v => v.missingDocs);
-          const regStatus = missingDocs ? { label: 'Missing Docs', color: '#ef4444', bg: '#fef2f2' }
-            : { label: 'Registered', color: '#10b981', bg: '#ecfdf5' };
-
-          // Compute Commercial Status
-          const hasMissingPrice = (row.variants || []).some(v => !(v.price || v.msrp || v.pricing?.retail?.perUnit));
-          const commStatus = hasMissingPrice ? { label: 'Price Missing', color: '#ef4444', bg: '#fef2f2' }
-            : { label: 'Active', color: '#10b981', bg: '#ecfdf5' };
-
-          const Badge = ({ status }) => (
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', background: status.bg, color: status.color, whiteSpace: 'nowrap' }}>
-              {status.label}
-            </span>
-          );
-
-          return (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-              <Badge status={inventoryStatus} />
-              <Badge status={supplierStatus} />
-              <Badge status={regStatus} />
-              <Badge status={commStatus} />
-            </div>
-          );
-        },
-      },
     ];
 
     if (matrixViewType === 'flat') {
@@ -508,11 +438,11 @@ export default function CatalogTableView({
             </button>
             <AppActionGroup
               maxVisible={3}
-              actions={[
-                { type: 'clone', onClick: () => onAction(row.isVariantRow ? 'clone_variant' : 'clone_product', row) },
-                { type: 'edit', onClick: () => onAction('edit', productRef) },
-                { type: 'delete', onClick: () => onAction('delete', productRef) },
-              ]}
+              actions={row.isVariantRow ? [
+                { type: 'clone', onClick: () => onAction('clone_variant', row) },
+                { type: 'edit', onClick: () => onAction('edit', row) },
+                { type: 'delete', onClick: () => onAction('delete', row) },
+              ] : []}
             />
           </div>
         );
@@ -631,7 +561,6 @@ export default function CatalogTableView({
         hideSearch={true}
         hidePagination={false}
         enableColumnSelection={true}
-        renderCustomFilters={renderSavedViews}
         enableExport={true}
         onExport={handleExport}
         visibleColumns={visibleColumns}

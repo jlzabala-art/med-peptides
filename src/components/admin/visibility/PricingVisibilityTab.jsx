@@ -1,13 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useCatalogSelectionStore } from '../../../stores/useCatalogSelectionStore';
 import VisibilityOverviewTab from './VisibilityOverviewTab';
 import RegionalAccessTab from './RegionalAccessTab';
 import CustomerAccessTab from './CustomerAccessTab';
 import RegulatoryAccessTab from './RegulatoryAccessTab';
 import ZohoPublishingTab from './ZohoPublishingTab';
+import SelectedItemsVisibilityWorkflow from './SelectedItemsVisibilityWorkflow';
 import ContextTooltip from '../../shared/widgets/ContextTooltip';
 
 export default function PricingVisibilityTab() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const selectedItemIds = useCatalogSelectionStore(state => state.selectedIds);
+  const clearSelection = useCatalogSelectionStore(state => state.clearSelection);
+
+  const handleClearSelection = () => {
+    clearSelection();
+    navigate('/admin/pricing-visibility', { replace: true, state: {} });
+  };
+
+  if (selectedItemIds.length > 0) {
+    return (
+      <SelectedItemsVisibilityWorkflow 
+        selectedItemIds={selectedItemIds} 
+        onClearSelection={handleClearSelection}
+      />
+    );
+  }
 
   const tabs = [
     { id: 'overview', label: 'Control Tower' },

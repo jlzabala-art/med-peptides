@@ -160,7 +160,11 @@ export default function CatalogCommandBar({ filterState }) {
           />
           <input
             type="text"
-            placeholder="Search products, SKUs, suppliers..."
+            placeholder={
+              filters.length > 0
+                ? `Searching within ${filters.length} active filter(s)...`
+                : "Search products, SKUs, suppliers..."
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{

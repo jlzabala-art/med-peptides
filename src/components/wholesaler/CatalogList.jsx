@@ -245,6 +245,7 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
               <tr style={theadRowStyle}>
                 <th style={thStyle}>Catalog / Route</th>
                 <th style={thStyle}>Status / Visibility</th>
+                <th style={thStyle}>Formats & Date</th>
                 <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
@@ -373,11 +374,46 @@ function ExpandableCatalogRow({
     </>
   );
 
+
+  // Format label config
+  const FORMAT_CONFIG = {
+    pdf:          { label: 'PDF',  bg: '#e0e7ff', color: '#4f46e5' },
+    excel:        { label: 'Excel', bg: '#fef3c7', color: '#d97706' },
+    landing_page: { label: 'Web',  bg: '#dcfce7', color: '#16a34a' },
+  };
+
+  const formats = catalog.formats || [];
+
+  const formatsContent = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+        {formats.length === 0 ? (
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>—</span>
+        ) : (
+          formats.map((f, i) => {
+            const cfg = FORMAT_CONFIG[f.type] || { label: f.type, bg: '#f1f5f9', color: '#475569' };
+            return (
+              <span key={i} title={`Generated: ${new Date(f.generatedAt).toLocaleString()}`} style={{
+                fontSize: '0.72rem', background: cfg.bg, color: cfg.color,
+                padding: '2px 7px', borderRadius: '4px', fontWeight: 700, cursor: 'default'
+              }}>{cfg.label}</span>
+            );
+          })
+        )}
+      </div>
+      {catalog.createdAt && (
+        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+          Created: {new Date(catalog.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+        </span>
+      )}
+    </div>
+  );
+
   const expandedContent = (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
       <div>
         <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Audience</div>
-        <span style={badgeStyle}>{catalog.audience}</span>
+        <span style={badgeStyle}>{catalog.audience || catalog.targetAudience || '—'}</span>
       </div>
       <div>
         <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Views</div>
@@ -397,7 +433,9 @@ function ExpandableCatalogRow({
       </div>
       <div>
         <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Last Updated</div>
-        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>{new Date(catalog.updatedAt).toLocaleDateString()}</div>
+        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>
+          {catalog.updatedAt ? new Date(catalog.updatedAt).toLocaleDateString() : '—'}
+        </div>
       </div>
     </div>
   );
@@ -406,11 +444,13 @@ function ExpandableCatalogRow({
     <ExpandableTableRow 
       mainContent={mainContent}
       subContent={subContent}
+      extraContent={formatsContent}
       actions={actions}
       expandedContent={expandedContent}
     />
   );
 }
+
 
 // ── Styles (Google Cloud inspired) ──────────────────────────────────────────
 const containerStyle = {

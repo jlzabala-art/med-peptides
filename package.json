@@ -22,6 +22,7 @@
     "build:deploy:dev": "NODE_OPTIONS=--max-old-space-size=4096 vite build && XDG_CONFIG_HOME=./.firebase-config firebase hosting:channel:deploy dev --expires 30d",
     "sync:rules": "node scripts/sync-clinicalai-rules.mjs",
     "sync:rules:live": "node scripts/sync-clinicalai-live-catalog.mjs",
+    "sync:algolia": "node scripts/sync-algolia.mjs",
     "qa:pricing": "node src/scripts/qa-pricing-validation.mjs",
     "migrate:pricing": "node src/scripts/migrate-firestore-pricing.mjs",
     "migrate:pricing:write": "node src/scripts/migrate-firestore-pricing.mjs --write",

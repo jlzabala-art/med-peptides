@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from "../../../firebase";
+import { db } from "../../../firebase.js";
 import MarketKPIHeader from './MarketKPIHeader';
 import MarketAlertCenter from './MarketAlertCenter';
-import CompetitorThreatMatrix from './CompetitorThreatMatrix';
 import MarketOpportunitiesScanner from './MarketOpportunitiesScanner';
 import BenchmarkingWorkspace from './BenchmarkingWorkspace';
-import AtlasMarketAI from './AtlasMarketAI';
 import ProductAnalysisDrawer from './ProductAnalysisDrawer';
 
 export default function MarketIntelligenceHub() {
@@ -81,13 +79,9 @@ export default function MarketIntelligenceHub() {
 
       {/* Layer 5 (AI Prominent) & Layer 2/3 Flex */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0rem' }}>
-        <AtlasMarketAI />
         <MarketAlertCenter />
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
-          <CompetitorThreatMatrix matches={cacheData.matches} />
-          <MarketOpportunitiesScanner matches={cacheData.matches} />
-        </div>
+        {/* User requested removal of Threat Matrix and AI mention */}
       </div>
 
       {/* Layer 4 */}

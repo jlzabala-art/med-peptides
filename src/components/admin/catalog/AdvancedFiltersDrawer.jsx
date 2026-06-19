@@ -1,260 +1,150 @@
 import X from "lucide-react/dist/esm/icons/x";
-import Save from "lucide-react/dist/esm/icons/save";
-import Share2 from "lucide-react/dist/esm/icons/share-2";
-import Users from "lucide-react/dist/esm/icons/users";
 import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from "../../../firebase";
-
+import React from 'react';
 import RightWorkspacePanel from './RightWorkspacePanel';
-import toast from 'react-hot-toast';
 
-const subcategories = [
-  { id: 'weight_loss', label: 'Weight Loss / GLP-1' },
-  { id: 'recovery', label: 'Recovery & Healing' },
-  { id: 'anti_aging', label: 'Anti-Aging & Longevity' },
-  { id: 'nootropics', label: 'Cognitive & Nootropics' },
-  { id: 'growth', label: 'Growth & Muscle' },
-  { id: 'hormones', label: 'Hormones & Fertility' },
-  { id: 'skin', label: 'Cosmetics / Skin' },
-  { id: 'research', label: 'Research Peptides' }
+const GOALS = [
+  { id: 'weight_loss_glp1', label: 'Weight Loss / GLP-1' },
+  { id: 'metabolic_health', label: 'Metabolic Health' },
+  { id: 'anti_aging_longevity', label: 'Anti-Aging & Longevity' },
+  { id: 'recovery_healing', label: 'Recovery & Healing' },
+  { id: 'cognitive_mood', label: 'Cognitive & Mood' },
+  { id: 'hormonal_optimization', label: 'Hormonal Optimization' },
+  { id: 'fertility', label: 'Fertility' },
+  { id: 'immune_support', label: 'Immune Support' },
+  { id: 'skin_hair_aesthetics', label: 'Skin / Hair / Aesthetics' },
+  { id: 'performance_muscle', label: 'Performance / Muscle' },
+  { id: 'biomarkers', label: 'Biomarkers' },
+  { id: 'genomics', label: 'Genomics' },
+  { id: 'general_wellness', label: 'General Wellness' }
 ];
 
-const CATEGORY_TREE = [
-  {
-    id: 'lyophilized_peptides',
-    label: 'Lyophilized Peptides',
-    children: subcategories.map(s => ({ ...s, id: `lyo_${s.id}` }))
-  },
-  {
-    id: 'api_peptides',
-    label: 'API Peptides',
-    children: subcategories.map(s => ({ ...s, id: `api_${s.id}` }))
-  },
-  {
-    id: 'longevity',
-    label: 'Longevity',
-    children: [
-      { id: 'anti_aging', label: 'Anti-Aging' },
-      { id: 'biomarkers', label: 'Biomarkers' },
-      { id: 'genomics', label: 'Genomics' }
-    ]
-  },
-  { id: 'hormonal_optimization', label: 'Hormonal Optimization', children: [] },
-  { id: 'metabolic_weight', label: 'Metabolic & Weight', children: [] },
-  { id: 'cognitive_mood', label: 'Cognitive & Mood', children: [] },
-  { id: 'immune_support', label: 'Immune Support', children: [] },
-  { id: 'testing', label: 'Testing', children: [] },
-  { id: 'raw_materials', label: 'Raw Materials', children: [] },
-  { id: 'medical_devices', label: 'Medical Devices', children: [] },
-  { id: 'services', label: 'Services', children: [] }
+const PRODUCT_TYPES = [
+  { id: 'lyophilized_peptide', label: 'Lyophilized Peptides' },
+  { id: 'api_peptide', label: 'API Peptides' },
+  { id: 'api_supplement', label: 'API Supplements' },
+  { id: 'dna_testing_kit', label: 'DNA Testing Kits' },
+  { id: 'biomarker_testing_kit', label: 'Biomarker Testing Kits' },
+  { id: 'pellet', label: 'Pellets' },
+  { id: 'injectable', label: 'Injectables' },
+  { id: 'capsule_tablet', label: 'Capsules / Tablets' },
+  { id: 'medical_device', label: 'Medical Devices' },
+  { id: 'consumable', label: 'Consumables' },
+  { id: 'service', label: 'Services' }
 ];
 
-export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace = 'products', advancedFilters, setAdvancedFilters, activeCategories = [], onCategoryChange }) {
-  const [suppliers, setSuppliers] = useState([]);
-  const [recentSearches, setRecentSearches] = useState([]);
-  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(false);
+const COMMERCIAL_STATUSES = [
+  { id: 'inStock', label: 'In Stock' },
+  { id: 'outOfStock', label: 'Out of Stock' },
+  { id: 'priceMissing', label: 'Price Missing' },
+  { id: 'supplierMissing', label: 'Supplier Missing' },
+  { id: 'singleSourceRisk', label: 'Single Source Risk' }
+];
 
-  useEffect(() => {
-    // Load recent searches from localStorage
-    const saved = localStorage.getItem('recentSupplierSearches');
-    if (saved) {
-      try {
-        setRecentSearches(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse recent searches', e);
-      }
-    }
+const REGULATORY_STATUSES = [
+  { id: 'registered', label: 'Registered' },
+  { id: 'coaAvailable', label: 'COA Available' },
+  { id: 'missingCOA', label: 'Missing COA' },
+  { id: 'regulatoryRisk', label: 'Regulatory Risk' },
+  { id: 'researchUseOnly', label: 'Research Use Only' }
+];
 
-    // Fetch suppliers from Firestore
-    const fetchSuppliers = async () => {
-      setIsLoadingSuppliers(true);
-      try {
-        const querySnapshot = await getDocs(collection(db, 'wholesellers'));
-        const supplierList = querySnapshot.docs.map(doc => ({
-          value: doc.data().companyName || doc.id,
-          label: doc.data().companyName || doc.id
-        })).filter(s => s.label);
-        
-        // Sort alphabetically
-        supplierList.sort((a, b) => a.label.localeCompare(b.label));
-        setSuppliers(supplierList);
-      } catch (error) {
-        console.error('Error fetching suppliers:', error);
-      } finally {
-        setIsLoadingSuppliers(false);
-      }
-    };
-
-    fetchSuppliers();
-  }, []);
-
+export default function AdvancedFiltersDrawer({ isOpen, onClose, advancedFilters, setAdvancedFilters, suppliers = [], filteredCount = 0, totalCount = 0 }) {
   if (!isOpen) return null;
 
-  const handleAction = (actionName) => {
-    toast.success(`${actionName} action triggered`, { icon: '✨' });
+  const countActiveFilters = () => {
+    let count = 0;
+    count += (advancedFilters?.goals || []).length;
+    count += (advancedFilters?.productTypes || []).length;
+    count += (advancedFilters?.suppliers || []).length;
+    count += Object.values(advancedFilters?.commercialStatus || {}).filter(Boolean).length;
+    count += Object.values(advancedFilters?.regulatoryStatus || {}).filter(Boolean).length;
+    return count;
   };
 
-  const toggleCategory = (label) => {
-    if (activeCategories.includes(label)) {
-      onCategoryChange(activeCategories.filter(c => c !== label));
-    } else {
-      onCategoryChange([...activeCategories, label]);
-    }
-  };
+  const activeCount = countActiveFilters();
 
-  const updateFilter = (workspace, key, value, subKey = null) => {
-    setAdvancedFilters(prev => {
-      const newState = { ...prev };
-      if (subKey) {
-        newState[workspace] = {
-          ...newState[workspace],
-          [key]: {
-            ...newState[workspace][key],
-            [subKey]: value
-          }
-        };
-      } else {
-        newState[workspace] = {
-          ...newState[workspace],
-          [key]: value
-        };
+  const handleClearAll = () => {
+    setAdvancedFilters({
+      goals: [],
+      productTypes: [],
+      suppliers: [],
+      commercialStatus: {
+        inStock: false,
+        outOfStock: false,
+        priceMissing: false,
+        supplierMissing: false,
+        singleSourceRisk: false
+      },
+      regulatoryStatus: {
+        registered: false,
+        coaAvailable: false,
+        missingCOA: false,
+        regulatoryRisk: false,
+        researchUseOnly: false
       }
-      return newState;
     });
   };
+
+  const toggleArrayFilter = (category, id) => {
+    setAdvancedFilters(prev => {
+      const arr = prev[category] || [];
+      const newArr = arr.includes(id) ? arr.filter(i => i !== id) : [...arr, id];
+      return { ...prev, [category]: newArr };
+    });
+  };
+
+  const toggleObjectFilter = (category, id) => {
+    setAdvancedFilters(prev => {
+      const obj = prev[category] || {};
+      return {
+        ...prev,
+        [category]: { ...obj, [id]: !obj[id] }
+      };
+    });
+  };
+
+  // Safe defaults if advancedFilters is not yet initialized with new schema
+  const safeGoals = advancedFilters?.goals || [];
+  const safeTypes = advancedFilters?.productTypes || [];
+  const safeSuppliers = advancedFilters?.suppliers || [];
+  const safeComm = advancedFilters?.commercialStatus || {};
+  const safeReg = advancedFilters?.regulatoryStatus || {};
 
   return (
     <RightWorkspacePanel
       isOpen={isOpen}
       onClose={onClose}
       title="Filters"
-      badge="4"
+      badge={activeCount > 0 ? activeCount.toString() : null}
       icon={<SlidersHorizontal size={22} color="var(--text-main, #1e293b)" />}
-      headerActions={null}
-      footer={
-        <>
+      headerActions={
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={handleClearAll} style={{ 
+            padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', 
+            background: 'rgba(255,255,255,0.5)', color: '#111', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem'
+          }}>Clear All</button>
           <button onClick={onClose} style={{ 
-            flex: 1, 
-            padding: '0.875rem', 
-            borderRadius: '12px', 
-            border: '1px solid rgba(0,0,0,0.1)', 
-            background: 'rgba(255,255,255,0.5)',
-            color: '#111',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={e => e.currentTarget.style.background = 'rgba(0,0,0,0.03)'}
-          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.5)'}
-          >Clear All</button>
-          <button onClick={onClose} style={{ 
-            flex: 2, 
-            padding: '0.875rem', 
-            borderRadius: '12px', 
-            border: 'none', 
-            background: '#111',
-            color: '#fff',
-            fontWeight: 600,
-            cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.25)' }}
-          onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.2)' }}
-          >Show Results</button>
-        </>
+            padding: '0.4rem 0.8rem', borderRadius: '8px', border: 'none', 
+            background: 'var(--color-primary, #2563eb)', color: '#fff', fontWeight: 600, cursor: 'pointer', fontSize: '0.85rem',
+            boxShadow: '0 2px 8px rgba(37,99,235,0.2)'
+          }}>
+            Show {filteredCount} Results
+          </button>
+        </div>
       }
+      footer={null}
     >
       <style>{`
-        .glass-btn {
-          background: rgba(255,255,255,0.7);
-          border: 1px solid rgba(0,0,0,0.06);
-          color: #333;
-          border-radius: 10px;
-          padding: 8px 12px;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          cursor: pointer;
-        }
-        .glass-btn:hover {
-          background: rgba(255,255,255,0.95);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-          transform: translateY(-1px);
-        }
-
         .glass-checkbox {
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border: 1.5px solid rgba(0,0,0,0.2);
-          border-radius: 6px;
-          background: rgba(255,255,255,0.6);
-          cursor: pointer;
-          position: relative;
-          transition: all 0.2s ease;
+          appearance: none; width: 20px; height: 20px; border: 1.5px solid rgba(0,0,0,0.2); border-radius: 6px;
+          background: rgba(255,255,255,0.6); cursor: pointer; position: relative; transition: all 0.2s ease;
         }
-        .glass-checkbox:checked {
-          background: #111;
-          border-color: #111;
-        }
+        .glass-checkbox:checked { background: #111; border-color: #111; }
         .glass-checkbox:checked::after {
-          content: '';
-          position: absolute;
-          left: 6px;
-          top: 2px;
-          width: 5px;
-          height: 10px;
-          border: solid white;
-          border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
-        }
-        .glass-range {
-          -webkit-appearance: none;
-          width: 100%;
-          height: 6px;
-          background: rgba(0,0,0,0.08);
-          border-radius: 6px;
-          outline: none;
-        }
-        .glass-range::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #111;
-          cursor: pointer;
-          border: 2px solid #fff;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-          transition: transform 0.1s;
-        }
-        .glass-range::-webkit-slider-thumb:hover {
-          transform: scale(1.15);
-        }
-        .glass-select {
-          width: 100%;
-          padding: 0.875rem 1rem;
-          border-radius: 12px;
-          border: 1px solid rgba(0,0,0,0.1);
-          outline: none;
-          background: rgba(255,255,255,0.7);
-          box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-          font-size: 0.95rem;
-          color: #333;
-          cursor: pointer;
-          appearance: none;
-          background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
-          background-repeat: no-repeat;
-          background-position: right 1rem top 50%;
-          background-size: 0.65rem auto;
+          content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px;
+          border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
         }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
@@ -262,218 +152,110 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, activeWorkspace
         .accordion-icon { transition: transform 0.3s ease; }
       `}</style>
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-
-        {/* Product Section */}
+        
+        {/* Goal / Use Case */}
         <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
           <details style={{ width: '100%' }}>
-            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              Product Criteria
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Goal / Use Case
+                {safeGoals.length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{safeGoals.length}</span>}
+              </div>
               <ChevronDown size={20} className="accordion-icon" />
             </summary>
-            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Categories</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto', paddingRight: '0.5rem', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '12px', padding: '0.85rem', background: 'rgba(255,255,255,0.7)' }}>
-                  {CATEGORY_TREE.map(node => (
-                    <div key={node.id}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333', marginBottom: '0.5rem' }}>
-                        <input type="checkbox" className="glass-checkbox" checked={activeCategories.includes(node.label)} onChange={() => toggleCategory(node.label)} /> 
-                        {node.label}
-                      </label>
-                      {node.children && node.children.length > 0 && (
-                        <div style={{ paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                          {node.children.map(child => (
-                            <label key={child.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', cursor: 'pointer', color: '#555' }}>
-                              <input type="checkbox" className="glass-checkbox" checked={activeCategories.includes(child.label)} onChange={() => toggleCategory(child.label)} /> 
-                              {child.label}
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Stock Status</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.inStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'inStock')} /> In Stock
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.lowStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'lowStock')} /> Low Stock
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.inventory.stockStatus.outOfStock} onChange={(e) => updateFilter('inventory', 'stockStatus', e.target.checked, 'outOfStock')} /> Out of Stock
-                  </label>
-                </div>
-              </div>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {GOALS.map(goal => (
+                <label key={goal.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                  <input type="checkbox" className="glass-checkbox" checked={safeGoals.includes(goal.id)} onChange={() => toggleArrayFilter('goals', goal.id)} /> 
+                  {goal.label}
+                </label>
+              ))}
             </div>
           </details>
         </div>
 
-        {/* Supplier Section */}
+        {/* Product Type */}
         <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
           <details style={{ width: '100%' }}>
-            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              Supplier Network
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Product Type
+                {safeTypes.length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{safeTypes.length}</span>}
+              </div>
               <ChevronDown size={20} className="accordion-icon" />
             </summary>
-            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Supplier</label>
-                <Select
-                  isLoading={isLoadingSuppliers}
-                  isClearable
-                  placeholder="Search suppliers..."
-                  value={
-                    advancedFilters.suppliers.supplier && advancedFilters.suppliers.supplier !== 'All Suppliers'
-                      ? { value: advancedFilters.suppliers.supplier, label: advancedFilters.suppliers.supplier }
-                      : null
-                  }
-                  onChange={(selected) => {
-                    const val = selected ? selected.value : 'All Suppliers';
-                    updateFilter('suppliers', 'supplier', val);
-                    updateFilter('products', 'supplier', val);
-                    
-                    if (selected) {
-                      // Save to recent searches
-                      setRecentSearches(prev => {
-                        const newRecent = [selected, ...prev.filter(s => s.value !== selected.value)].slice(0, 3);
-                        localStorage.setItem('recentSupplierSearches', JSON.stringify(newRecent));
-                        return newRecent;
-                      });
-                    }
-                  }}
-                  options={[
-                    ...(recentSearches.length > 0 ? [{
-                      label: 'Recent Searches',
-                      options: recentSearches
-                    }] : []),
-                    {
-                      label: 'All Suppliers',
-                      options: suppliers
-                    }
-                  ]}
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      background: 'rgba(255,255,255,0.7)',
-                      borderColor: 'rgba(0,0,0,0.1)',
-                      borderRadius: '12px',
-                      padding: '2px',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        borderColor: 'rgba(0,0,0,0.2)'
-                      }
-                    }),
-                    menu: (base) => ({
-                      ...base,
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      zIndex: 50
-                    }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected ? '#111' : state.isFocused ? 'rgba(0,0,0,0.05)' : 'white',
-                      color: state.isSelected ? 'white' : '#333',
-                      cursor: 'pointer'
-                    })
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country</label>
-                <select className="glass-select" value={advancedFilters.suppliers.country} onChange={(e) => updateFilter('suppliers', 'country', e.target.value)}>
-                  <option>All Countries</option>
-                  <option>USA</option>
-                  <option>China</option>
-                  <option>India</option>
-                  <option>Europe</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Performance Score (Min)</label>
-                <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.suppliers.minPerformance} onChange={(e) => updateFilter('suppliers', 'minPerformance', parseInt(e.target.value))} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                  <span>0</span>
-                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.suppliers.minPerformance}</span>
-                  <span>100</span>
-                </div>
-              </div>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {PRODUCT_TYPES.map(type => (
+                <label key={type.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                  <input type="checkbox" className="glass-checkbox" checked={safeTypes.includes(type.id)} onChange={() => toggleArrayFilter('productTypes', type.id)} /> 
+                  {type.label}
+                </label>
+              ))}
             </div>
           </details>
         </div>
 
-        {/* Quality Section */}
+        {/* Suppliers */}
+        {suppliers.length > 0 && (
+          <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+            <details style={{ width: '100%' }}>
+              <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Suppliers
+                  {safeSuppliers.length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{safeSuppliers.length}</span>}
+                </div>
+                <ChevronDown size={20} className="accordion-icon" />
+              </summary>
+              <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {suppliers.map(supplier => (
+                  <label key={supplier} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                    <input type="checkbox" className="glass-checkbox" checked={safeSuppliers.includes(supplier)} onChange={() => toggleArrayFilter('suppliers', supplier)} /> 
+                    {supplier}
+                  </label>
+                ))}
+              </div>
+            </details>
+          </div>
+        )}
+
+        {/* Commercial Status */}
         <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
           <details style={{ width: '100%' }}>
-            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              Quality & Assurance
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Commercial Status
+                {Object.values(safeComm).filter(Boolean).length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{Object.values(safeComm).filter(Boolean).length}</span>}
+              </div>
               <ChevronDown size={20} className="accordion-icon" />
             </summary>
-            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Health Score (Min)</label>
-                <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.products.minHealth} onChange={(e) => updateFilter('products', 'minHealth', parseInt(e.target.value))} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                  <span>0</span>
-                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.products.minHealth}</span>
-                  <span>100</span>
-                </div>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Missing Documents</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingCOA} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingCOA')} /> Missing COA
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.documents.missingSDS} onChange={(e) => updateFilter('regulatory', 'documents', e.target.checked, 'missingSDS')} /> Missing SDS
-                  </label>
-                </div>
-              </div>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {COMMERCIAL_STATUSES.map(status => (
+                <label key={status.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                  <input type="checkbox" className="glass-checkbox" checked={!!safeComm[status.id]} onChange={() => toggleObjectFilter('commercialStatus', status.id)} /> 
+                  {status.label}
+                </label>
+              ))}
             </div>
           </details>
         </div>
 
-        {/* Regulatory Section */}
+        {/* Regulatory Status */}
         <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
           <details style={{ width: '100%' }}>
-            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              Regulatory Compliance
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Regulatory Status
+                {Object.values(safeReg).filter(Boolean).length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{Object.values(safeReg).filter(Boolean).length}</span>}
+              </div>
               <ChevronDown size={20} className="accordion-icon" />
             </summary>
-            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Registration Status</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.status.registered} onChange={(e) => updateFilter('regulatory', 'status', e.target.checked, 'registered')} /> Registered
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={advancedFilters.regulatory.status.pending} onChange={(e) => updateFilter('regulatory', 'status', e.target.checked, 'pending')} /> Pending
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Country</label>
-                <select className="glass-select" value={advancedFilters.regulatory.country} onChange={(e) => updateFilter('regulatory', 'country', e.target.value)}>
-                  <option>All Countries</option>
-                  <option>USA (FDA)</option>
-                  <option>Europe (EMA)</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.85rem', fontSize: '0.95rem', color: '#1a1a1a' }}>Compliance Risk (Max)</label>
-                <input type="range" className="glass-range" min="0" max="100" value={advancedFilters.regulatory.maxRisk} onChange={(e) => updateFilter('regulatory', 'maxRisk', parseInt(e.target.value))} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#666', marginTop: '0.75rem', fontWeight: 500 }}>
-                  <span>0</span>
-                  <span style={{ fontWeight: 800, color: 'var(--color-primary)' }}>{advancedFilters.regulatory.maxRisk}</span>
-                  <span>100</span>
-                </div>
-              </div>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {REGULATORY_STATUSES.map(status => (
+                <label key={status.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                  <input type="checkbox" className="glass-checkbox" checked={!!safeReg[status.id]} onChange={() => toggleObjectFilter('regulatoryStatus', status.id)} /> 
+                  {status.label}
+                </label>
+              ))}
             </div>
           </details>
         </div>

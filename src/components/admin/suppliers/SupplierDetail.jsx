@@ -3,10 +3,80 @@ import { Lock, Check, Copy, X, Star, Building, User } from 'lucide-react';
 import { Tabs, StatusChip } from '../../ui';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useCatalogData } from '../catalog/useCatalogData';
+import CatalogTableView from '../catalog/views/CatalogTableView';
+import VariantDetailsModal from '../products/VariantDetailsModal';
 
-function WholesellerDetail({ w, onClose, onUpdate }) {
+function SupplierProductsTab({ supplierName, initialVariantId }) {
+  const { products, variants, loading, refresh } = useCatalogData({ supplierFilter: supplierName });
+  const [selectedVariantForEdit, setSelectedVariantForEdit] = useState(null);
+  const [hasOpenedInitial, setHasOpenedInitial] = useState(false);
+
+  useEffect(() => {
+    if (initialVariantId && variants?.length > 0 && !hasOpenedInitial) {
+      const match = variants.find(v => v.id === initialVariantId);
+      if (match) {
+        setSelectedVariantForEdit(match);
+        setHasOpenedInitial(true);
+      }
+    }
+  }, [initialVariantId, variants, hasOpenedInitial]);
+
+  const handleCatalogAction = (action, item) => {
+    if (action === 'edit' || action === 'ai') {
+      setSelectedVariantForEdit(item);
+    }
+  };
+
+  return (
+    <div style={{ height: '100%', paddingBottom: '2rem' }}>
+      {loading ? (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>Loading products...</div>
+      ) : (
+        <CatalogTableView 
+          products={products}
+          variants={variants}
+          loading={loading}
+          currentPage={1}
+          rowsPerPage={100}
+          onPageChange={() => {}}
+          onRowsPerPageChange={() => {}}
+          onAction={handleCatalogAction}
+          selectedIds={[]}
+          onSelectionChange={() => {}}
+          matrixViewType="grouped"
+        />
+      )}
+      {selectedVariantForEdit && (
+        <VariantDetailsModal 
+           isOpen={true} 
+           onClose={() => {
+             setSelectedVariantForEdit(null);
+             refresh();
+           }} 
+           variant={selectedVariantForEdit.rawVariant || selectedVariantForEdit} 
+           product={selectedVariantForEdit.rawProduct || selectedVariantForEdit.parentProduct || selectedVariantForEdit} 
+           onSave={() => {
+             setSelectedVariantForEdit(null);
+             refresh();
+           }}
+        />
+      )}
+    </div>
+  );
+}
+
+export default function SupplierDetail({ w, onClose, onUpdate, initialVariantId }) {
   const [detailTab, setDetailTab] = useState('overview');
   const [copiedField, setCopiedField] = useState(null);
+
+  useEffect(() => {
+    if (initialVariantId && detailTab !== 'products') {
+      setDetailTab('products');
+    }
+  }, [initialVariantId, detailTab]);
+
+  if (!w) return null;
 
   // Fallbacks for SRM fields
   const type = w.type || (w.isZohoMaster ? 'Manufacturer' : 'Distributor');
@@ -227,6 +297,50 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
                       {renderCopyableField('Logistics Lead', w.logisticsManager || logManager, 'logisticsManager', false, true)}
                     </div>
                   </div>
+
+                  {/* Fulfillment Configuration */}
+                  <div style={{ backgroundColor: 'var(--surface-raised)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem' }}>
+                    <h3 style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Building size={14} color="#10b981" /> Fulfillment Configuration
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.5rem' }}>
+                      <div style={{ 
+                        position: 'relative', 
+                        marginBottom: '0.75rem',
+                        backgroundColor: 'var(--surface-raised)',
+                        padding: '0.6rem 0.85rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border)',
+                      }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '0.15rem', textTransform: 'uppercase' }}>
+                          Configured Warehouses
+                        </label>
+                        <input 
+                          type="text"
+                          defaultValue={Array.isArray(w.warehouses) ? w.warehouses.join(', ') : ''}
+                          placeholder="e.g. Polonia, USA, HK"
+                          onBlur={e => {
+                            const val = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                            onUpdate(w.id, { warehouses: val });
+                          }}
+                          style={{ 
+                            width: '100%', 
+                            padding: '0.1rem 0',
+                            border: 'none',
+                            borderBottom: '1px solid var(--border)',
+                            background: 'transparent',
+                            fontSize: '0.8rem', 
+                            fontWeight: 600,
+                            color: 'var(--text-main)',
+                            outline: 'none' 
+                          }}
+                        />
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                          Comma-separated list of warehouses for this supplier's product inventory. (Local field, not synced to Zoho).
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )
             },
@@ -355,23 +469,7 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
             {
               id: 'products',
               label: 'Products Supplied',
-              content: (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {[
-                    { name: 'BPC-157 5mg', sku: 'PEP-BPC5', stock: 120, MOQ: 10, price: '180 AED' },
-                    { name: 'TB-500 2mg', sku: 'PEP-TB52', stock: 45, MOQ: 10, price: '210 AED' },
-                    { name: 'Semaglutide 5mg Pure', sku: 'GLP-SEMA5', stock: 18, MOQ: 5, price: '450 AED' }
-                  ].map((prod, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--surface-raised)', fontSize: '0.75rem' }}>
-                      <div>
-                        <strong style={{ color: 'var(--text-main)' }}>{prod.name}</strong>
-                        <span style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)' }}>SKU: {prod.sku} | MOQ: {prod.MOQ} | Price: {prod.price}</span>
-                      </div>
-                      <span style={{ fontWeight: 700, color: prod.stock < 20 ? '#ef4444' : 'var(--text-main)' }}>{prod.stock} in stock</span>
-                    </div>
-                  ))}
-                </div>
-              )
+              content: <SupplierProductsTab supplierName={w.companyName || w.name} initialVariantId={initialVariantId} />
             },
             ...(w.supplierVariants && w.supplierVariants.length > 1 ? [{
               id: 'variants',
@@ -437,4 +535,4 @@ function WholesellerDetail({ w, onClose, onUpdate }) {
   );
 }
 
-export default WholesellerDetail;
+

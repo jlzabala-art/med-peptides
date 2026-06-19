@@ -35,21 +35,23 @@ export default function SidebarGadget(props) {
     const hydratedGroups = savedGroups
       .filter(savedGroup => savedGroup.id !== 'favorites' && savedGroup.id !== 'admin_favorites')
       .map(savedGroup => {
-      const origGroup = originalGroups.find(g => g.id === savedGroup.id) || savedGroup;
-      const hydratedItems = (savedGroup.items || [])
-        .map(savedItem => {
-          const item = allItems.get(savedItem.id) || null;
-          if (item && savedGroup.id !== 'favorites') usedItemIds.add(item.id);
-          return item;
-        })
-        .filter(Boolean);
+        const origGroup = originalGroups.find(g => g.id === savedGroup.id);
+        if (!origGroup) return null; // Discard obsolete groups that don't exist in originalGroups
+        const hydratedItems = (savedGroup.items || [])
+          .map(savedItem => {
+            const item = allItems.get(savedItem.id) || null;
+            if (item && savedGroup.id !== 'favorites') usedItemIds.add(item.id);
+            return item;
+          })
+          .filter(Boolean);
 
-      return {
-        ...origGroup,
-        id: savedGroup.id,
-        items: hydratedItems
-      };
-    });
+        return {
+          ...origGroup,
+          id: savedGroup.id,
+          items: hydratedItems
+        };
+      })
+      .filter(Boolean);
 
     // Add any missing groups
     originalGroups.forEach(origGroup => {

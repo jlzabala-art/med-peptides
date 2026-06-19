@@ -101,7 +101,7 @@ export default function RoleDashboard({ onBack }) {
   // Map of ALL possible tabs and their components/icons
   const TAB_REGISTRY = {
     users: { component: AdminUsersTab, label: 'Users', icon: Users },
-    products: { component: CatalogIntelligenceHub, label: 'Products', icon: PackageSearch },
+    products: { component: CatalogIntelligenceHub, label: 'Catalog Intelligence', icon: PackageSearch },
     costs: { component: AdminCostsTab, label: 'Costs', icon: Database },
     prices: { component: AdminPricesTab, label: 'Prices', icon: Globe },
     relationships: { component: AdminRelationshipsTab, label: 'Relations', icon: Layers },

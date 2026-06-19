@@ -59,17 +59,29 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
         return ['SKU', safeName, format, size].filter(Boolean).join('-');
       };
 
+      const typeStr = v.formatLabel || v.format || v.productType || '';
+      const dosageStr = v.dosage || v.size || '';
+      const unitStr = v.kit?.unit || v.dosage_unit || '';
+      
+      let displayDosageFormat = '-';
+      if (typeStr.toLowerCase().includes('api')) {
+        displayDosageFormat = `API (Bulk)`;
+      } else if (dosageStr) {
+        const presentation = unitStr ? unitStr : (typeStr.toLowerCase().includes('lyophilized') ? 'Vial' : typeStr);
+        displayDosageFormat = `${dosageStr} / ${presentation.charAt(0).toUpperCase() + presentation.slice(1)}`;
+      } else {
+        displayDosageFormat = typeStr || '-';
+      }
+
       return {
         ...v,
+        displayDosageFormat,
         displaySku: v.sku || generateFallbackSku(),
         supplierName: v.supplier || parentProduct?.supplier || 'Unassigned',
         rawCost: Number(rawCost),
-        rawShipping: Number(rawShipping),
         rawWholesale: Number(rawWholesale),
         rawClinic: Number(rawClinic),
         rawMsrp: Number(rawMsrp),
-        landedCost: landedCost ? Number(landedCost) : 0,
-        margin: margin ? Number(margin) : 0
       };
     });
   }, [variants, parentProduct]);
@@ -134,15 +146,12 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
               />
             </th>
           )}
-          <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
+          <th style={thStyle} onClick={() => handleSort('displayDosageFormat')}>Dosage / Format{getSortIcon('displayDosageFormat')}</th>
           <th style={thStyle} onClick={() => handleSort('supplierName')}>Supplier{getSortIcon('supplierName')}</th>
           <th style={thStyle} onClick={() => handleSort('rawCost')}>Base Cost{getSortIcon('rawCost')}</th>
-          <th style={thStyle} onClick={() => handleSort('rawShipping')}>Shipping{getSortIcon('rawShipping')}</th>
-          <th style={thStyle} onClick={() => handleSort('landedCost')}>Landed Cost{getSortIcon('landedCost')}</th>
           <th style={thStyle} onClick={() => handleSort('rawWholesale')}>Wholesale{getSortIcon('rawWholesale')}</th>
           <th style={thStyle} onClick={() => handleSort('rawClinic')}>Clinic{getSortIcon('rawClinic')}</th>
           <th style={thStyle} onClick={() => handleSort('rawMsrp')}>MSRP{getSortIcon('rawMsrp')}</th>
-          <th style={thStyle} onClick={() => handleSort('margin')}>Margin %{getSortIcon('margin')}</th>
           <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
         </tr>
       </thead>
@@ -157,7 +166,7 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
                 backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
                 borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
               }}
-              onClick={() => onAction && onAction('view_variant', parentProduct, v)}
+              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'commercial')}
             >
               {onSelectionChange && (
                 <td style={{ ...tdStyle, textAlign: 'center' }}>
@@ -170,22 +179,20 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
                   />
                 </td>
               )}
-              <td style={tdStyleMain}>{v.displaySku}</td>
+              <td style={tdStyleMain}>{v.displayDosageFormat}</td>
               <td style={tdStyle}>{v.supplierName}</td>
               <td style={tdStyle}>{v.rawCost ? `$${v.rawCost}` : '-'}</td>
-              <td style={tdStyle}>{v.rawShipping ? `$${v.rawShipping}` : '-'}</td>
               <td style={tdStyle}>
-                <b>{v.landedCost ? `$${v.landedCost.toFixed(2)}` : '-'}</b>
+                {v.rawWholesale ? `$${v.rawWholesale}` : '-'}
+                {v.rawWholesale && v.rawCost ? <span style={{fontSize:'0.75rem', color:'#64748b', marginLeft:'6px'}}>{Math.round(((v.rawWholesale - v.rawCost)/v.rawWholesale)*100)}%</span> : null}
               </td>
-              <td style={tdStyle}>{v.rawWholesale ? `$${v.rawWholesale}` : '-'}</td>
-              <td style={tdStyle}>{v.rawClinic ? `$${v.rawClinic}` : '-'}</td>
+              <td style={tdStyle}>
+                {v.rawClinic ? `$${v.rawClinic}` : '-'}
+                {v.rawClinic && v.rawWholesale ? <span style={{fontSize:'0.75rem', color:'#64748b', marginLeft:'6px'}}>{Math.round(((v.rawClinic - v.rawWholesale)/v.rawClinic)*100)}%</span> : null}
+              </td>
               <td style={tdStyle}>
                 <b>{v.rawMsrp ? `$${v.rawMsrp}` : '-'}</b>
-              </td>
-              <td style={tdStyle}>
-                <span style={{ color: v.margin > 50 ? '#10b981' : v.margin ? '#f59e0b' : 'inherit' }}>
-                  {v.margin ? `${v.margin}%` : '-'}
-                </span>
+                {v.rawMsrp && v.rawClinic ? <span style={{fontSize:'0.75rem', color:'#f59e0b', marginLeft:'6px'}}>{Math.round(((v.rawMsrp - v.rawClinic)/v.rawMsrp)*100)}%</span> : null}
               </td>
               <td style={{ ...tdStyle, textAlign: 'right' }}>
                 <div
@@ -200,17 +207,9 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
                     maxVisible={3}
                     actions={[
                       {
-                        type: 'view',
-                        onClick: () => onAction && onAction('view_variant', parentProduct, v),
-                      },
-                      {
                         type: 'edit',
                         onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'commercial'),
-                      },
-                      {
-                        type: 'delete',
-                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
-                      },
+                      }
                     ]}
                   />
                 </div>

@@ -14,6 +14,7 @@ import Download from "lucide-react/dist/esm/icons/download";
 import Package from "lucide-react/dist/esm/icons/package";
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Bot from "lucide-react/dist/esm/icons/bot";
+import Copy from "lucide-react/dist/esm/icons/copy";
 import React, { useState, useRef, useEffect } from 'react';
 
 
@@ -34,6 +35,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 const ACTION_CONFIG = {
   view: { icon: Eye, label: 'View', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
+  clone: { icon: Copy, label: 'Clone', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
   edit: { icon: Edit, label: 'Edit', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
   assign: { icon: Link, label: 'Assign / Link', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-primary)' },
   pricing: { icon: DollarSign, label: 'Pricing', color: 'var(--color-text-secondary)', hoverColor: 'var(--color-success)' },
@@ -65,7 +67,7 @@ export default function AppActionGroup({ actions, maxVisible = 2 }) {
     if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
-  const order = ['view', 'edit', 'assign', 'pricing', 'send', 'approve', 'revoke', 'archive', 'hide', 'show', 'download', 'delete'];
+  const order = ['view', 'clone', 'edit', 'assign', 'pricing', 'send', 'approve', 'revoke', 'archive', 'hide', 'show', 'download', 'delete'];
   const sortedActions = [...actions].sort((a, b) => {
     return order.indexOf(a.type) - order.indexOf(b.type);
   });

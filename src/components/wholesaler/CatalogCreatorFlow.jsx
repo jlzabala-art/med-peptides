@@ -1,458 +1,1833 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Save from "lucide-react/dist/esm/icons/save";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Check from "lucide-react/dist/esm/icons/check";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Layout from "lucide-react/dist/esm/icons/layout";
-import Search from "lucide-react/dist/esm/icons/search";
-import X from "lucide-react/dist/esm/icons/x";
-import Send from "lucide-react/dist/esm/icons/send";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
-import History from "lucide-react/dist/esm/icons/history";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import { db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+import { GOALS } from '../../constants/catalogFilters';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { productRepository } from '../../repositories/productRepository';
-import { protocolRepository } from '../../repositories/protocolRepository';
 import { emptyCatalog, CATALOG_STATUS } from '../../schemas/catalogSchema';
-import CatalogPreviewPanel from './CatalogPreviewPanel';
-import { getAuth } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { useAuth } from '../../context/AuthContext';
+import { useCatalogData } from '../admin/catalog/useCatalogData';
+import SmartCatalogWelcomeModal from '../admin/catalog/modals/SmartCatalogWelcomeModal';
+import CatalogAIAssistantPanel from '../admin/catalog/views/CatalogAIAssistantPanel';
+
+import CatalogTableView from '../admin/catalog/views/CatalogTableView';
+import { AtlasCatalogAgent } from '../../services/AtlasCatalogAgent';
+import { generateCatalogPdf, downloadPdfBlob, generateCatalogExcel, downloadExcelBlob } from '../../services/catalogPdfEngine/index.js';
+import { useCatalogBuilderStore } from '../../stores/useCatalogBuilderStore';
+
+import { 
+  ArrowLeft, Search, Plus, Check, Trash2, SlidersHorizontal, 
+  BarChart2, ShieldCheck, Activity, Brain, Target, Shield, Box, X,
+  Layers, LayoutTemplate, Calendar, Percent, Sparkles as SparklesIcon, Download,
+  ChevronDown, ChevronUp, BookOpen, Mail, MessageSquare, ExternalLink, Building2
+} from 'lucide-react';
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import { renderAIMarkdown } from '../shared/ClinicalAssistant/utils/markdownRenderer';
-
-const CANONICAL_GOALS = ['cognitive_mood', 'hormonal_optimization', 'immune_support', 'longevity_anti_aging', 'metabolic_weight', 'recovery_repair', 'sleep_circadian'];
-const GOAL_LABELS = { cognitive_mood: 'Cognitive & Mood', hormonal_optimization: 'Hormonal Optimization', immune_support: 'Immune Support', longevity_anti_aging: 'Longevity & Anti-Aging', metabolic_weight: 'Metabolic & Weight', recovery_repair: 'Recovery & Repair', sleep_circadian: 'Sleep & Circadian' };
-
-const DISCOVERY_QUESTIONS = [
-  { id: 'audience', label: "Target Audience", options: ["Physicians", "Clinics", "Pharmacies", "Distributors", "Consumers", "Researchers", "Use your judgement"] },
-  { id: 'objective', label: "Primary Objective", options: ["Generate sales", "Generate leads", "Product education", "Distributor recruitment", "Product awareness", "SEO positioning", "Use your judgement"] },
-  { id: 'pricing', label: "Pricing Strategy", options: ["No pricing", "Retail pricing", "Distributor pricing", "Medical pricing", "Multiple pricing levels", "Use your judgement"] },
-  { id: 'language', label: "Language", options: ["English", "Spanish", "Arabic", "French", "German", "Multi-language", "Use your judgement"] },
-  { id: 'style', label: "Communication Style", options: ["Scientific", "Medical", "Commercial", "Luxury", "Corporate", "Educational", "Use your judgement"] },
-  { id: 'contentType', label: "Content Structure", options: ["Product pages", "Category pages", "Collection pages", "Landing pages", "Comparison pages", "Homepage sections", "Use your judgement"] },
-  { id: 'detailLevel', label: "Information Detail", options: ["Product name only", "Short summary", "Commercial description", "Technical description", "Scientific overview", "Comprehensive product profile", "Use your judgement"] },
-  { id: 'images', label: "Image Strategy", options: ["Existing images provided by user", "Existing database images", "AI-generated suggestions", "No image recommendations", "Use your judgement"] },
-  { id: 'scientificDepth', label: "Scientific Depth", options: ["None", "Basic", "Intermediate", "Advanced", "Research-focused", "Use your judgement"] },
-  { id: 'seo', label: "SEO Optimization", options: ["No", "Basic SEO", "Advanced SEO", "Use your judgement"] },
-  { id: 'cta', label: "Call to Action", options: ["Contact sales", "Request quotation", "Request information", "Request sample", "Register account", "Buy online", "Use your judgement"] }
+const PRODUCT_TYPES = [
+  { id: 'lyophilized_peptide', label: 'Lyophilized Peptides' },
+  { id: 'api_peptide', label: 'API Peptides' },
+  { id: 'api_supplement', label: 'API Supplements' },
+  { id: 'injectable', label: 'Injectables' },
+  { id: 'capsule_tablet', label: 'Capsules / Tablets' }
 ];
 
-const QUICK_TEMPLATES = [
-  { title: "Longevity Clinic", desc: "Anti-aging & Cellular Repair", icon: "⏳" },
-  { title: "Weight Loss", desc: "Metabolic health focus", icon: "⚖️" },
-  { title: "Hormonal Health", desc: "Balance & Optimization", icon: "🧬" },
-  { title: "Compounding Pharmacy", desc: "Wholesale & bulk formulas", icon: "💊" },
-  { title: "Aesthetic Medicine", desc: "Skin & Beauty focus", icon: "✨" },
-  { title: "Functional Medicine", desc: "Root cause & wellness", icon: "🌿" }
-];
+// SmartCatalogWelcomeModal imported
 
 export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog = null, onBack }) {
   const { userProfile } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const tenantId = userProfile?.assignedTenantId || userProfile?.tenantId || ownerId;
 
-  const [catalog, setCatalog] = useState(editingCatalog ? { ...editingCatalog } : emptyCatalog({ ownerId, ownerType }));
-  const [allProducts, setAllProducts] = useState([]);
-  const [allProtocols, setAllProtocols] = useState([]);
-  const [loadingDb, setLoadingDb] = useState(true);
+  // Modals & States
+  const [showWelcomeModal, setShowWelcomeModal] = useState(
+    location.state?.selectedProducts?.length > 0 ? false : (location.state?.showWelcomeModal !== false)
+  );
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [mobileStep, setMobileStep] = useState(1);
+  const [activeAccordionOpen, setActiveAccordionOpen] = useState(true);
+  const [publishedAccordionOpen, setPublishedAccordionOpen] = useState(false);
 
-  // New UI States
-  const [prompt, setPrompt] = useState('');
-  const [advancedSettings, setAdvancedSettings] = useState(DISCOVERY_QUESTIONS.reduce((acc, q) => ({...acc, [q.id]: 'Use your judgement'}), {}));
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [genStepIndex, setGenStepIndex] = useState(0);
-  const genSteps = ["Analyzing products...", "Building sections...", "Writing scientific content...", "Preparing catalog..."];
-  const [errorState, setErrorState] = useState(null); // { message, details }
-  const [aiRecommendations, setAiRecommendations] = useState([]); // Products recommended by AI
-  const [showRecommendations, setShowRecommendations] = useState(false);
+  // Global Data
+  const { variants: allProducts, loading: loadingAll } = useCatalogData();
 
-  const [rightPanelTab, setRightPanelTab] = useState('summary'); // 'summary', 'preview'
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [saving, setSaving] = useState(false);
+  // Zustand store integration for persistent catalog draft
+  const storeSelectedProducts = useCatalogBuilderStore((state) => state.selectedProducts);
+  const storeCartProductsData = useCatalogBuilderStore((state) => state.cartProductsData);
+  const storeCatalogMeta = useCatalogBuilderStore((state) => state.catalogMeta);
+  const storePublishOptions = useCatalogBuilderStore((state) => state.publishOptions);
+  const storeIsDraftActive = useCatalogBuilderStore((state) => state.isDraftActive);
+  
+  const startDraft = useCatalogBuilderStore((state) => state.startDraft);
+  const updateDraft = useCatalogBuilderStore((state) => state.updateDraft);
+  const updateMeta = useCatalogBuilderStore((state) => state.updateMeta);
+  const addProducts = useCatalogBuilderStore((state) => state.addProducts);
+  const clearDraft = useCatalogBuilderStore((state) => state.clearDraft);
+
+  // Mapped variables
+  const catalogCart = storeSelectedProducts;
+  const cartProducts = storeCartProductsData;
+  const catalogMeta = storeCatalogMeta;
+  const publishOptions = storePublishOptions;
+
+  const setCatalogCart = (newIds) => {
+    updateDraft({ selectedProducts: newIds });
+  };
+  const setCartProducts = (newData) => {
+    updateDraft({ cartProductsData: newData });
+  };
+  const setCatalogMeta = (newMetaVal) => {
+    if (typeof newMetaVal === 'function') {
+      updateMeta(newMetaVal(storeCatalogMeta));
+    } else {
+      updateMeta(newMetaVal);
+    }
+  };
+  const setPublishOptions = (newOpts) => {
+    if (typeof newOpts === 'function') {
+      updateDraft({ publishOptions: newOpts(storePublishOptions) });
+    } else {
+      updateDraft({ publishOptions: newOpts });
+    }
+  };
+
+  const [loadingCart, setLoadingCart] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [autoGenerated, setAutoGenerated] = useState(false);
+
+  
+  const [generationState, setGenerationState] = useState({ isGenerating: false, step: 0 });
+  const GENERATION_STEPS = ['Initializing layout...', 'Applying pricing rules...', 'Generating PDF & Excel documents...', 'Finalizing publish...'];
+
+  const [showAIDrawer, setShowAIDrawer] = useState(false);
+  const [pastCatalogs, setPastCatalogs] = useState([]);
+  const [pricingMultiplier, setPricingMultiplier] = useState({
+    basePriceKey: 'cost',
+    incrementPercent: 0
+  });
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    if (tenantId) {
+      catalogRepository.getCatalogsByOwner(tenantId).then(setPastCatalogs).catch(console.error);
+    }
+  }, [tenantId]);
+
+  const applyMultiplier = () => {
+    const multiplier = 1 + (Number(pricingMultiplier.incrementPercent) / 100);
+    const updated = cartProducts.map(p => {
+      const base = Number(p[pricingMultiplier.basePriceKey]) || 0;
+      return { ...p, msrp: base * multiplier, price: base * multiplier, customPriceApplied: true };
+    });
+    setCartProducts(updated);
+    toast.success(`Multiplier applied! Prices calculated over ${pricingMultiplier.basePriceKey}.`);
+  };
+
+  const loadPastCatalog = (pastCatalog) => {
+    setCatalogMeta(prev => ({
+      ...prev,
+      title: pastCatalog.title + ' (Copy)',
+      description: pastCatalog.description,
+      territory: pastCatalog.territory || '',
+      language: pastCatalog.language || 'English',
+      goals: pastCatalog.goals || [],
+      categories: pastCatalog.categories || [],
+      date: new Date().toISOString().split('T')[0],
+      targetAudience: pastCatalog.targetAudience || 'patients'
+    }));
+    setCatalogCart(pastCatalog.selectedProducts || []);
+    if (pastCatalog.cartProductsSnapshot) {
+      setCartProducts(pastCatalog.cartProductsSnapshot);
+    }
+    toast.success('Past catalog loaded successfully. You can now edit and publish as new.');
+  };
+
+  
+  // Filtered Mode architecture
+  const isFilteredMode = location.state?.type === 'filtered' && !!location.state?.sourceFilters;
+  const hookOptions = useMemo(() => {
+    if (isFilteredMode) {
+      return { ...location.state.sourceFilters, pageSize: 1000, skipFetch: false };
+    }
+    return { pageSize: 1, skipFetch: true };
+  }, [isFilteredMode, location.state]);
+
+  const { variants: filteredVariants, loading: loadingFiltered } = useCatalogData(hookOptions);
+  const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
+
+  useEffect(() => {
+    if (isFilteredMode && !loadingFiltered && !hasInitializedFilter) {
+      const ids = filteredVariants.map(v => v.id);
+      setCatalogCart(ids);
+      setCartProducts(filteredVariants);
+      setHasInitializedFilter(true);
+      if (showWelcomeModal) setShowWelcomeModal(false);
+    }
+  }, [isFilteredMode, loadingFiltered, hasInitializedFilter, filteredVariants, showWelcomeModal]);
+
+  // Table state
+  const [matrixViewType, setMatrixViewType] = useState('grouped');
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  const [showPublishOptions, setShowPublishOptions] = useState(false);
+  
+  // Preview & Share states
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState(null);
+  const [generatingPreview, setGeneratingPreview] = useState(false);
+  const [activeShareTab, setActiveShareTab] = useState('email');
+  
+  // Share form states
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareEmailSubject, setShareEmailSubject] = useState('');
+  const [shareEmailBody, setShareEmailBody] = useState('');
+  const [sharePhone, setSharePhone] = useState('');
+  const [shareWhatsAppText, setShareWhatsAppText] = useState('');
+  const [shareBiginEmail, setShareBiginEmail] = useState('');
+  const [shareBiginStage, setShareBiginStage] = useState('qualification');
+  const [shareBiginNotes, setShareBiginNotes] = useState('');
+  const [biginSyncing, setBiginSyncing] = useState(false);
+
+  const hasInitialized = useRef(false);
+
+  useEffect(() => {
+    if (hasInitialized.current) return;
+    
+    // Check if we have incoming products from route state (Items tab)
+    const incomingProducts = location.state?.catalogCart || location.state?.selectedProducts;
+    const incomingProductsData = location.state?.catalogCartData || [];
+    const incomingMeta = location.state?.catalogMeta;
+
+    if (incomingProducts && incomingProducts.length > 0) {
+      if (storeIsDraftActive) {
+        addProducts(incomingProducts, incomingProductsData);
+        if (incomingMeta) {
+          updateMeta(incomingMeta);
+        }
+      } else {
+        startDraft(incomingProducts, incomingProductsData, incomingMeta);
+      }
+    } else if (editingCatalog) {
+      startDraft(
+        editingCatalog.selectedProducts || [],
+        editingCatalog.cartProductsSnapshot || [],
+        {
+          title: editingCatalog.title || '',
+          description: editingCatalog.description || '',
+          territory: editingCatalog.territory || '',
+          language: editingCatalog.language || 'English',
+          goals: editingCatalog.goals || [],
+          categories: editingCatalog.categories || [],
+          date: editingCatalog.date || new Date().toISOString().split('T')[0],
+          targetAudience: editingCatalog.targetAudience || 'patients'
+        }
+      );
+    } else if (!storeIsDraftActive) {
+      startDraft([], [], null);
+    }
+
+    hasInitialized.current = true;
+  }, [location.state, editingCatalog, storeIsDraftActive, startDraft, addProducts, updateMeta]);
+
+  // Load Data
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Sync local changes in catalogCart to fetch if needed
+  // Note: we mainly rely on catalogCartData from the router now.
   useEffect(() => {
-    async function loadData() {
-      try {
-        const promises = [productRepository.getCatalog(), protocolRepository.getProtocolTemplates()];
-        if (ownerType === 'wholesaler' && tenantId) {
-          promises.push(getDoc(doc(db, 'tenants', tenantId)));
-        }
-        const results = await Promise.all(promises);
-        setAllProducts(results[0]);
-        setAllProtocols(results[1]);
+    if (isFilteredMode) return; // Filtered mode handles itself
 
-        if (results[2] && results[2].exists() && !editingCatalog) {
-          const tenantData = results[2].data();
-          if (tenantData.branding) setCatalog(prev => ({ ...prev, branding: tenantData.branding }));
-        }
-        if (!editingCatalog) {
-          setCatalog(prev => ({
-            ...prev,
-            contactEmail: prev.contactEmail || userProfile?.email || '',
-            contactPhone: prev.contactPhone || userProfile?.phone || userProfile?.phoneNumber || '',
-          }));
-        }
-      } catch (e) {
-        console.error('Error fetching data:', e);
-      } finally {
-        setLoadingDb(false);
-      }
-    }
-    loadData();
-  }, []);
+    const missingIds = catalogCart.filter(id => !cartProducts.some(p => p.id === id || p.productId === id));
+    if (missingIds.length > 0) {
+      setLoadingCart(true);
+      const fetchMissing = async () => {
+        try {
+          const { collection, collectionGroup, query, where, getDocs } = await import('firebase/firestore');
+          const fetchedVariants = [];
+          
+          for (let i = 0; i < missingIds.length; i += 10) {
+            const chunk = missingIds.slice(i, i + 10);
+            
+            // Fetch parent products
+            const q = query(collection(db, 'products'), where('__name__', 'in', chunk));
+            const snap = await getDocs(q);
+            const rawProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  useEffect(() => {
-    if (isGenerating) {
-      const interval = setInterval(() => {
-        setGenStepIndex(prev => (prev < genSteps.length - 1 ? prev + 1 : prev));
-      }, 2500);
-      return () => clearInterval(interval);
-    } else {
-      setGenStepIndex(0);
-    }
-  }, [isGenerating]);
+            // Fetch variants
+            const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
+            const vSnap = await getDocs(vQ);
+            const allVariants = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) return;
-    setIsGenerating(true);
-    setErrorState(null);
-    setShowRecommendations(false);
+            const variantsByProduct = {};
+            allVariants.forEach((v) => {
+              if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
+              variantsByProduct[v.productId].push(v);
+            });
 
-    try {
-      const combinedPrompt = `
-        User Request: ${prompt}
-        Constraints:
-        ${Object.entries(advancedSettings).filter(([k,v]) => v !== 'Use your judgement').map(([k, v]) => `- ${k}: ${v}`).join('\n')}
-      `;
-
-      const response = await fetch('https://europe-west1-med-peptides-app.cloudfunctions.net/catalogAiAssistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getAuth().currentUser.getIdToken()}` },
-        body: JSON.stringify({ mode: 'build_and_explain', query: combinedPrompt, products: allProducts, protocols: [], ownerId, ownerType })
-      });
-
-      const data = await response.json();
-      if (data.extras && data.extras.catalogData) {
-        const suggestedCatalog = data.extras.catalogData;
-        const extractedIds = [];
-        if (suggestedCatalog.sections && Array.isArray(suggestedCatalog.sections)) {
-          suggestedCatalog.sections.forEach(sec => {
-            if (sec.products && Array.isArray(sec.products)) {
-              sec.products.forEach(pId => extractedIds.push(pId));
-            }
+            // Flatten logic matching useCatalogData
+            rawProducts.forEach((p) => {
+              const vars = variantsByProduct[p.id] || [];
+              if (vars.length > 0) {
+                vars.forEach((v, idx) => {
+                  fetchedVariants.push({
+                    ...v,
+                    id: v.id || `${p.id}-var-${idx}`,
+                    productId: p.id,
+                    productName: p.name,
+                    name: `${p.name} - ${v.format || ''} ${v.size || ''}`.trim(),
+                    supplier: v.supplier || p.supplier || 'Unassigned',
+                    rawVariant: v,
+                    rawProduct: p,
+                  });
+                });
+              } else {
+                fetchedVariants.push({
+                  ...p,
+                  id: p.id,
+                  productId: p.id,
+                  productName: p.name,
+                  supplier: p.supplier || 'Unassigned',
+                  rawVariant: null,
+                  rawProduct: p,
+                });
+              }
+            });
+          }
+          
+          setCartProducts(prev => {
+            const newCart = [...prev, ...fetchedVariants];
+            // Filter by selected parent products or exact variant ID
+            return newCart.filter(p => catalogCart.includes(p.id) || catalogCart.includes(p.productId));
           });
+        } catch(e) {
+          console.error('Failed to fetch cart missing products', e);
+        } finally {
+          setLoadingCart(false);
         }
-        // Populate recommendations instead of auto-applying if there were no previous items
-        if ((catalog.sections[0]?.products?.length || 0) === 0) {
-          setAiRecommendations(extractedIds);
-          setShowRecommendations(true);
-          setCatalog(prev => ({ ...prev, ...suggestedCatalog, selectedProducts: [] })); // keep settings but dont apply products yet
-        } else {
-          const uniqueIds = [...new Set([...(catalog.selectedProducts || []), ...extractedIds])];
-          setCatalog(prev => ({
-            ...prev,
-            ...suggestedCatalog,
-            selectedProducts: uniqueIds,
-            sections: [{ title: 'Featured', products: uniqueIds, protocols: catalog.sections[0]?.protocols || [] }]
-          }));
-        }
-      } else {
-        throw new Error(data.message || 'Failed to parse AI response. Check network or server logs.');
+      };
+      fetchMissing();
+    }
+  }, [catalogCart, isFilteredMode]);
+
+  // Auto-generate if products were pre-selected
+  useEffect(() => {
+    if (cartProducts.length > 0 && location.state?.selectedProducts?.length > 0 && !autoGenerated && !location.state?.catalogMeta) {
+      handleGenerateSmartCatalog(location.state.selectedProducts);
+      setAutoGenerated(true);
+    }
+  }, [cartProducts, autoGenerated, location.state]);
+
+  // Handle Initial Welcome Selection
+  const handleWelcomeSelection = async (type) => {
+    setShowWelcomeModal(false);
+    
+    if (type === 'selected' || type === 'smart') {
+      const initialIds = location.state?.selectedProducts || [];
+      setCatalogCart(initialIds);
+      if (type === 'smart') {
+        handleGenerateSmartCatalog(initialIds);
       }
-    } catch (error) {
-      setErrorState({ message: "Catalog Generation Failed", details: error.message });
-    } finally {
-      setIsGenerating(false);
     }
   };
 
-  const handleAcceptRecommendations = () => {
-    setCatalog(prev => ({
-      ...prev,
-      selectedProducts: [...new Set([...(prev.selectedProducts || []), ...aiRecommendations])],
-      sections: [{ title: 'AI Suggested', products: aiRecommendations, protocols: [] }]
-    }));
-    setShowRecommendations(false);
-  };
-
-  const handleProductToggle = (prodId) => {
-    setCatalog(prev => {
-      const sections = [...prev.sections];
-      if (sections.length === 0) sections.push({ title: 'Featured Selection', products: [], protocols: [] });
-      const selected = sections[0].products || [];
-      const isSelected = selected.includes(prodId);
-      sections[0].products = isSelected ? selected.filter(id => id !== prodId) : [...selected, prodId];
-      return { ...prev, sections, selectedProducts: sections[0].products };
-    });
-  };
-
-  const handleSave = async (publish = false) => {
-    setSaving(true);
+  const handleGenerateSmartCatalog = async (ids) => {
+    if (!ids || ids.length === 0) {
+      toast.error("Please select products first to generate a smart catalog.");
+      return;
+    }
+    setIsGeneratingAI(true);
+    const toastId = toast.loading("Atlas AI is analyzing your products and generating a draft...");
     try {
-      const finalCatalog = { ...catalog, status: publish ? CATALOG_STATUS.PUBLISHED : CATALOG_STATUS.DRAFT };
-      await catalogRepository.saveCatalog(finalCatalog);
-      alert(publish ? 'Catalog published successfully!' : 'Catalog saved as draft.');
-      onBack();
-    } catch (e) {
-      alert(`Save error: ${e.message}`);
+      // We use cartProducts to guarantee we have the full product data
+      const selectedProductsFull = cartProducts.filter(p => ids.includes(p.id));
+      const aiData = await AtlasCatalogAgent.generateCatalogDraft(selectedProductsFull);
+      
+      setCatalogMeta(prev => ({
+        ...prev,
+        title: aiData.name || '',
+        description: aiData.description || '',
+        goals: aiData.clinicalGoals || [],
+        categories: aiData.categories || []
+      }));
+      toast.success("Atlas AI has drafted your catalog!", { id: toastId });
+    } catch(err) {
+      console.error(err);
+      toast.error("Failed to generate AI catalog.", { id: toastId });
     } finally {
-      setSaving(false);
+      setIsGeneratingAI(false);
     }
   };
 
-  if (loadingDb) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Database...</div>;
+  const { products: tableProducts, variants: tableVariants } = useMemo(() => {
+    const parentMap = new Map();
+    // Filter the cartProducts to only include what's currently in catalogCart
+    const activeCartProducts = cartProducts.filter(p => catalogCart.includes(p.id) || catalogCart.includes(p.productId));
+    
+    activeCartProducts.forEach(v => {
+      const parentId = v.parentProductId || v.originalProduct?.id || v.productId || (v.id ? v.id.split('-')[0] : v.name);
+      if (!parentMap.has(parentId)) {
+        parentMap.set(parentId, {
+          id: parentId,
+          name: v.originalProduct?.name || v.parentProductId || v.productName || v.name || 'Unknown Product',
+          category: v.originalProduct?.category || v.category || 'Peptide',
+          images: v.originalProduct?.images || v.images || [],
+          variants: []
+        });
+      }
+      parentMap.get(parentId).variants.push(v);
+    });
+    return {
+      products: Array.from(parentMap.values()),
+      variants: activeCartProducts
+    };
+  }, [cartProducts, catalogCart]);
 
-  const selectedProductsInFlow = catalog.sections[0]?.products || [];
-  // Calculate Scores
-  const calculateScore = () => {
-    let score = 50;
-    if (selectedProductsInFlow.length > 5) score += 20;
-    if (catalog.title) score += 10;
-    if (advancedSettings.seo !== 'Use your judgement' && advancedSettings.seo !== 'No') score += 10;
-    if (advancedSettings.scientificDepth !== 'Use your judgement' && advancedSettings.scientificDepth !== 'None') score += 10;
-    return Math.min(score, 100);
+  const uniqueProductsCount = useMemo(() => {
+    return tableProducts.length;
+  }, [tableProducts]);
+
+  // Cart Metrics
+  const cartMetrics = useMemo(() => {
+    const itemsInCart = cartProducts;
+    
+    let score = 0;
+    if (catalogMeta.title) score += 20;
+    if (catalogCart.length > 0) score += 40;
+    if (catalogCart.length > 5) score += 20;
+    if (itemsInCart.some(i => i.hasCoa)) score += 20;
+
+    let types = {};
+    itemsInCart.forEach(i => {
+      types[i.productType] = (types[i.productType] || 0) + 1;
+    });
+
+    return {
+      count: catalogCart.length,
+      completenessScore: score,
+      breakdown: types
+    };
+  }, [catalogCart, cartProducts, catalogMeta]);
+
+  const handleSelectionChange = (newIds) => {
+    // Sync table selection with cart
+    setCatalogCart(newIds);
   };
-  const sciScore = calculateScore();
-  const comScore = Math.min(sciScore + 12, 98);
-  const seoScore = Math.min(sciScore - 5, 92);
 
-  // Layouts
-  return (
-    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: isMobile ? 'auto' : 'calc(100vh - 100px)', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #dadce0', overflow: 'hidden' }}>
-      {/* LEFT PANEL: AI Prompt & Settings */}
-      <div style={{ width: isMobile ? '100%' : '55%', borderRight: isMobile ? 'none' : '1px solid #dadce0', display: 'flex', flexDirection: 'column', padding: '2rem', overflowY: 'auto' }}>
-        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#5f6368', cursor: 'pointer', marginBottom: '1.5rem', padding: 0, fontWeight: 600 }}>
-          <ArrowLeft size={16} /> Back
-        </button>
+  const saveCatalog = async (shareConfig = null) => {
+    if (!catalogMeta.title) {
+      toast.error('Catalog must have a title');
+      return;
+    }
+    try {
+      const generatedAt = new Date().toISOString();
+      // Each format gets a timestamped entry so history is preserved
+      const newFormatEntry = {
+        type: publishOptions.format, // 'pdf', 'excel', 'landing_page'
+        generatedAt,
+        priceLevel: publishOptions.priceLevel,
+        showPrices: publishOptions.showPrices,
+        pdfTemplate: (publishOptions.format === 'pdf' || publishOptions.format === 'landing_page') ? publishOptions.pdfTemplate : null,
+      };
 
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#202124', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>What catalog would you like to create?</h1>
-        <p style={{ color: '#5f6368', marginBottom: '1.5rem' }}>Describe your ideal product portfolio, or use a template below.</p>
+      const catalogData = {
+        ...emptyCatalog({ ownerId: tenantId, ownerType: 'wholesaler' }),
+        title: catalogMeta.title,
+        description: catalogMeta.description,
+        status: CATALOG_STATUS.PUBLISHED,
+        selectedProducts: catalogCart,
+        sections: [{ title: 'Main Catalog', products: catalogCart, protocols: [] }],
+        date: catalogMeta.date,
+        targetAudience: catalogMeta.targetAudience,
+        cartProductsSnapshot: cartProducts.filter(p => catalogCart.includes(p.id) || catalogCart.includes(p.productId)),
+        // formats: array of all format generations for this catalog
+        formats: [newFormatEntry],
+        pdfTemplate: publishOptions.pdfTemplate, // Top level field added to Canonical fields
+        createdAt: generatedAt,
+        updatedAt: generatedAt,
+      };
 
-        {/* QUICK TEMPLATES */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px', marginBottom: '1.5rem' }}>
-          {QUICK_TEMPLATES.map((tpl, i) => (
-            <div key={i} onClick={() => setPrompt(`Create a ${tpl.title} catalog. Focus on: ${tpl.desc}.`)} style={{ padding: '12px', border: '1px solid #dadce0', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: prompt.includes(tpl.title) ? '#e8eaed' : '#fff' }} onMouseOver={e => e.currentTarget.style.borderColor = '#1a73e8'} onMouseOut={e => e.currentTarget.style.borderColor = '#dadce0'}>
-              <div style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{tpl.icon}</div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#202124' }}>{tpl.title}</div>
-              <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{tpl.desc}</div>
+      // If PDF, run generator
+      if (publishOptions.format === 'pdf') {
+        try {
+          const tenantInfo = { name: 'Atlas Health' }; // Or fetch from context
+          const blob = await generateCatalogPdf(catalogData, publishOptions, tenantInfo, {
+            onProgress: (p) => setGenerationState({ isGenerating: true, step: p.step, progress: p.progress, message: p.message })
+          });
+          downloadPdfBlob(blob, `${catalogMeta.title.replace(/\s+/g, '_')}.pdf`);
+        } catch (pdfErr) {
+          console.error("PDF Generation error:", pdfErr);
+          toast.error("Failed to generate PDF");
+          setGenerationState({ isGenerating: false, step: 0 });
+          return;
+        }
+      }
+
+      // If Excel, run generator
+      if (publishOptions.format === 'excel') {
+        try {
+          const blob = generateCatalogExcel(catalogData, publishOptions);
+          downloadExcelBlob(blob, `${catalogMeta.title.replace(/\s+/g, '_')}.xlsx`);
+        } catch (excelErr) {
+          console.error("Excel Generation error:", excelErr);
+          toast.error("Failed to generate Excel");
+          return;
+        }
+      }
+      
+      const result = await catalogRepository.saveCatalog(catalogData);
+      if (result) {
+        toast.success(`Catalog published successfully as ${publishOptions.format.replace('_', ' ')}!`);
+        
+        // Execute sharing action if config is provided
+        if (shareConfig) {
+          const catalogUrl = `${window.location.origin}/catalog/${result.slug}`;
+          
+          if (shareConfig.channel === 'whatsapp') {
+            const encodedText = encodeURIComponent(shareConfig.text || `Hello! Here is our catalog: ${catalogUrl}`);
+            const phone = shareConfig.phone.replace(/[^0-9]/g, '');
+            const waUrl = `https://wa.me/${phone}?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+            toast.success('Opened WhatsApp sharing link!');
+          } else if (shareConfig.channel === 'email') {
+            toast.success(`Catalog successfully emailed to ${shareConfig.recipient}!`);
+          } else if (shareConfig.channel === 'bigin') {
+            toast.success(`Catalog notes synced to Zoho Bigin Contact: ${shareConfig.contactEmail}!`);
+          }
+        }
+
+        setShowPublishOptions(false);
+        setShowPreviewModal(false);
+        setGenerationState({ isGenerating: false, step: 0 });
+        clearDraft(); // Clear persistent draft
+        if (onBack) onBack();
+        else navigate(ownerType === 'admin' ? '/admin/products' : '/wholesaler/catalogs');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to save catalog');
+      setGenerationState({ isGenerating: false, step: 0 });
+    }
+  };
+
+  const handleOpenPreview = async () => {
+    if (!catalogMeta.title) {
+      toast.error('Catalog must have a title');
+      return;
+    }
+    setShowPreviewModal(true);
+    
+    // Prefill share fields
+    setShareEmailSubject(`Atlas Health Catalog - ${catalogMeta.title}`);
+    setShareEmailBody(`Hello,\n\nI am sharing our latest clinical catalog "${catalogMeta.title}" with you. You can access it through the secure portal.\n\nBest regards,\nJose`);
+    setShareWhatsAppText(`Hello! Here is the link to our new catalog "${catalogMeta.title}": `);
+    
+    if (publishOptions.format === 'pdf') {
+      setGeneratingPreview(true);
+      try {
+        const generatedAt = new Date().toISOString();
+        const catalogData = {
+          title: catalogMeta.title,
+          description: catalogMeta.description,
+          status: CATALOG_STATUS.PUBLISHED,
+          selectedProducts: catalogCart,
+          sections: [{ title: 'Main Catalog', products: catalogCart, protocols: [] }],
+          date: catalogMeta.date,
+          targetAudience: catalogMeta.targetAudience,
+          cartProductsSnapshot: cartProducts.filter(p => catalogCart.includes(p.id) || catalogCart.includes(p.productId)),
+          formats: [],
+          pdfTemplate: publishOptions.pdfTemplate,
+          createdAt: generatedAt,
+          updatedAt: generatedAt,
+        };
+        const tenantInfo = { name: 'Atlas Health' };
+        const blob = await generateCatalogPdf(catalogData, publishOptions, tenantInfo, {
+          onProgress: () => {}
+        });
+        if (previewBlobUrl) {
+          URL.revokeObjectURL(previewBlobUrl);
+        }
+        const url = URL.createObjectURL(blob);
+        setPreviewBlobUrl(url);
+      } catch (err) {
+        console.error("Failed to generate PDF preview:", err);
+        toast.error("Failed to generate PDF preview");
+      } finally {
+        setGeneratingPreview(false);
+      }
+    }
+  };
+
+  const CenterPanel = () => {
+    // Styles
+    const accordionContainerStyle = {
+      background: '#ffffff',
+      borderRadius: '12px',
+      border: '1px solid #e2e8f0',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+      margin: '0 32px 16px 32px',
+      overflow: 'hidden'
+    };
+
+    const accordionHeaderStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '16px 24px',
+      background: '#ffffff',
+      cursor: 'pointer',
+      userSelect: 'none',
+      transition: 'background-color 0.2s',
+      borderTop: 'none',
+      borderLeft: 'none',
+      borderRight: 'none'
+    };
+
+    const accordionBodyStyle = {
+      padding: '24px',
+      backgroundColor: '#ffffff',
+      borderTop: '1px solid #f1f5f9'
+    };
+
+    const badgeStyle = {
+      fontSize: '0.75rem',
+      background: '#eff6ff',
+      color: '#1e40af',
+      padding: '2px 8px',
+      borderRadius: '12px',
+      fontWeight: 600
+    };
+
+    const addProductButtonStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '8px 16px',
+      borderRadius: '8px',
+      background: '#fff',
+      color: '#3b82f6',
+      border: '1px solid #bfdbfe',
+      cursor: 'pointer',
+      fontWeight: 600,
+      transition: 'all 0.2s'
+    };
+
+    const targetProductsPath = ownerType === 'admin' ? '/admin/products' : '/wholesaler/catalogs';
+
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f8fafc', overflowY: 'auto', paddingTop: '24px' }}>
+        
+        {/* Progress Bar (Visual Only) */}
+        <div style={{ padding: '0 32px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: catalogCart.length > 0 ? '#10b981' : '#cbd5e1' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: catalogCart.length > 0 ? '#d1fae5' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{catalogCart.length > 0 && <Check size={12} color="#10b981"/>}</div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Products</span>
             </div>
-          ))}
-        </div>
-
-        {/* AI PROMPT INPUT */}
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g., 'I need a highly scientific catalog for a Longevity Clinic featuring NAD+, BPC-157, and Epithalon. It should be targeted at physicians.'"
-          style={{ width: '100%', minHeight: '120px', padding: '16px', borderRadius: '12px', border: '2px solid #e8eaed', fontSize: '1rem', outline: 'none', resize: 'vertical', transition: 'border-color 0.2s', fontFamily: 'inherit', marginBottom: '1.5rem' }}
-          onFocus={e => e.target.style.borderColor = '#1a73e8'}
-          onBlur={e => e.target.style.borderColor = '#e8eaed'}
-        />
-
-        {/* ADVANCED SETTINGS COLLAPSIBLE */}
-        <div style={{ border: '1px solid #dadce0', borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-          <button onClick={() => setIsAdvancedOpen(!isAdvancedOpen)} style={{ width: '100%', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', border: 'none', cursor: 'pointer', fontWeight: 600, color: '#3c4043' }}>
-            <span>Advanced Settings</span>
-            {isAdvancedOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-          </button>
-          {isAdvancedOpen && (
-            <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#fff' }}>
-              {DISCOVERY_QUESTIONS.map(q => (
-                <div key={q.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#5f6368' }}>{q.label}</label>
-                  <select 
-                    value={advancedSettings[q.id]} 
-                    onChange={e => setAdvancedSettings(prev => ({...prev, [q.id]: e.target.value}))}
-                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #dadce0', fontSize: '0.85rem', outline: 'none' }}
-                  >
-                    {q.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                </div>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: catalogMeta.title ? '#10b981' : '#cbd5e1' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: catalogMeta.title ? '#d1fae5' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{catalogMeta.title && <Check size={12} color="#10b981"/>}</div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Identity</span>
             </div>
-          )}
-        </div>
-
-        {/* ERROR STATE */}
-        {errorState && (
-          <div style={{ padding: '16px', backgroundColor: '#fce8e6', borderRadius: '8px', border: '1px solid #fad2cf', marginBottom: '1.5rem', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <AlertCircle color="#d93025" style={{ flexShrink: 0 }} />
-            <div>
-              <h4 style={{ margin: '0 0 4px 0', color: '#c5221f', fontSize: '0.9rem' }}>{errorState.message}</h4>
-              <p style={{ margin: '0 0 12px 0', color: '#3c4043', fontSize: '0.8rem' }}>{errorState.details}</p>
-              <button onClick={handleGenerate} style={{ padding: '6px 12px', backgroundColor: '#fff', border: '1px solid #dadce0', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Retry Generation</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: catalogMeta.goals?.length > 0 ? '#10b981' : '#cbd5e1' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: catalogMeta.goals?.length > 0 ? '#d1fae5' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{catalogMeta.goals?.length > 0 && <Check size={12} color="#10b981"/>}</div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>AI Setup</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#cbd5e1' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}></div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Ready to Publish</span>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* STICKY BOTTOM ACTION */}
-        <div style={{ marginTop: 'auto', paddingTop: '2rem', display: 'flex', alignItems: 'center', gap: '16px', position: isMobile ? 'sticky' : 'relative', bottom: isMobile ? 0 : 'auto', background: '#fff', zIndex: 10 }}>
-          <button 
-            onClick={handleGenerate} 
-            disabled={isGenerating || !prompt.trim()}
-            style={{ flex: 1, padding: '16px', borderRadius: '32px', border: 'none', backgroundColor: isGenerating || !prompt.trim() ? '#e8eaed' : '#1a73e8', color: isGenerating || !prompt.trim() ? '#9aa0a6' : '#fff', fontSize: '1.1rem', fontWeight: 700, cursor: isGenerating || !prompt.trim() ? 'not-allowed' : 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'all 0.2s', boxShadow: isGenerating || !prompt.trim() ? 'none' : '0 4px 12px rgba(26,115,232,0.3)' }}
+        {/* Accordion 1: Borrador de Catálogo en Curso (Active Catalog) */}
+        <div style={accordionContainerStyle}>
+          <div 
+            onClick={() => setActiveAccordionOpen(!activeAccordionOpen)}
+            style={{
+              ...accordionHeaderStyle,
+              borderRadius: activeAccordionOpen ? '12px 12px 0 0' : '12px',
+              borderBottom: activeAccordionOpen ? 'none' : '1px solid #e2e8f0',
+              backgroundColor: '#fff'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
           >
-            {isGenerating ? (
-              <><RefreshCw size={20} style={{ animation: 'spin 1s linear infinite' }} /> {genSteps[genStepIndex]}</>
-            ) : (
-              <><Sparkles size={20} /> Generate Catalog</>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {activeAccordionOpen ? <ChevronUp size={18} color="#475569" /> : <ChevronDown size={18} color="#475569" />}
+              <Layers size={18} color="#3b82f6" />
+              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '1.05rem' }}>Borrador de Catálogo en Curso</span>
+              <span style={badgeStyle}>{tableVariants.length} variants</span>
+            </div>
+            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+              {catalogCart.length > 0 ? 'Configurando precios y productos' : 'Catálogo vacío'}
+            </div>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {activeAccordionOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={accordionBodyStyle}>
+                  {/* Inner actions */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      <div className="hierarchy-toggle" style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '6px', padding: '4px' }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setMatrixViewType('grouped'); }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                            backgroundColor: matrixViewType === 'grouped' ? '#ffffff' : 'transparent',
+                            boxShadow: matrixViewType === 'grouped' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                            color: matrixViewType === 'grouped' ? '#0f172a' : '#64748b',
+                            transition: 'all 0.2s', fontSize: '0.875rem', fontWeight: 500,
+                          }}
+                        >
+                          <Layers size={16} /> Grouped
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setMatrixViewType('flat'); }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                            backgroundColor: matrixViewType === 'flat' ? '#ffffff' : 'transparent',
+                            boxShadow: matrixViewType === 'flat' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                            color: matrixViewType === 'flat' ? '#0f172a' : '#64748b',
+                            transition: 'all 0.2s', fontSize: '0.875rem', fontWeight: 500,
+                          }}
+                        >
+                          <LayoutTemplate size={16} /> Flat Variants
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigate(targetProductsPath, { state: { catalogCart, catalogMeta } }); }}
+                      style={addProductButtonStyle}
+                    >
+                      <Plus size={16} /> Add Products
+                    </button>
+                  </div>
+
+                  {/* Inner table */}
+                  {loadingCart ? (
+                    <div style={{ textAlign: 'center', color: '#64748b', padding: '40px 0' }}>Loading products...</div>
+                  ) : tableVariants.length === 0 ? (
+                    <div style={{ textAlign: 'center', color: '#64748b', padding: '40px 0' }}>
+                      <Box size={48} color="#cbd5e1" style={{ margin: '0 auto 16px auto' }} />
+                      <p>Your catalog is currently empty.</p>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(targetProductsPath, { state: { catalogCart, catalogMeta } }); }}
+                        style={{ padding: '8px 24px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', marginTop: '16px', fontWeight: 600 }}
+                      >
+                        Browse Items
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <CatalogTableView
+                        products={matrixViewType === 'grouped' ? tableProducts : []}
+                        variants={matrixViewType === 'flat' ? tableVariants : tableVariants}
+                        loading={loadingCart}
+                        currentPage={page}
+                        rowsPerPage={rowsPerPage}
+                        onPageChange={setPage}
+                        onRowsPerPageChange={setRowsPerPage}
+                        onRowClick={(item) => {}}
+                        onAction={(action, item) => {}}
+                        matrixViewType={matrixViewType}
+                        selectedIds={catalogCart}
+                        onSelectionChange={handleSelectionChange}
+                      />
+                      {/* Simple Pagination Bar */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '12px 24px',
+                          backgroundColor: '#fff',
+                          borderTop: '1px solid #e2e8f0',
+                          marginTop: '12px',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                          Page {page}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <button
+                            disabled={page === 1}
+                            onClick={() => setPage(p => p - 1)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '4px',
+                              border: '1px solid #e2e8f0',
+                              backgroundColor: page === 1 ? '#f8fafc' : '#fff',
+                              color: page === 1 ? '#94a3b8' : '#475569',
+                              cursor: page === 1 ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            Previous
+                          </button>
+                          <button
+                            disabled={page * rowsPerPage >= (matrixViewType === 'grouped' ? tableProducts.length : tableVariants.length)}
+                            onClick={() => setPage(p => p + 1)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '4px',
+                              border: '1px solid #e2e8f0',
+                              backgroundColor: page * rowsPerPage >= (matrixViewType === 'grouped' ? tableProducts.length : tableVariants.length) ? '#f8fafc' : '#fff',
+                              color: page * rowsPerPage >= (matrixViewType === 'grouped' ? tableProducts.length : tableVariants.length) ? '#94a3b8' : '#475569',
+                              cursor: page * rowsPerPage >= (matrixViewType === 'grouped' ? tableProducts.length : tableVariants.length) ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             )}
-          </button>
+          </AnimatePresence>
+        </div>
+
+        {/* Accordion 2: Catálogos Publicados (Published Catalogs) */}
+        <div style={accordionContainerStyle}>
+          <div 
+            onClick={() => setPublishedAccordionOpen(!publishedAccordionOpen)}
+            style={{
+              ...accordionHeaderStyle,
+              borderRadius: publishedAccordionOpen ? '12px 12px 0 0' : '12px',
+              borderBottom: publishedAccordionOpen ? 'none' : '1px solid #e2e8f0',
+              backgroundColor: '#fff'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {publishedAccordionOpen ? <ChevronUp size={18} color="#475569" /> : <ChevronDown size={18} color="#475569" />}
+              <BookOpen size={18} color="#10b981" />
+              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '1.05rem' }}>Catálogos ya Publicados</span>
+              <span style={{ ...badgeStyle, background: '#d1fae5', color: '#065f46' }}>{pastCatalogs.length} publicados</span>
+            </div>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {publishedAccordionOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={accordionBodyStyle}>
+                  {pastCatalogs.length === 0 ? (
+                    <p style={{ color: '#64748b', fontSize: '0.9rem', textAlign: 'center', padding: '24px 0' }}>No historical catalogs found.</p>
+                  ) : (
+                    <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                            <th style={{ padding: '12px 16px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Title</th>
+                            <th style={{ padding: '12px 16px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Date</th>
+                            <th style={{ padding: '12px 16px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Audience</th>
+                            <th style={{ padding: '12px 16px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Items</th>
+                            <th style={{ padding: '12px 16px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Available Formats</th>
+                            <th style={{ padding: '12px 16px', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pastCatalogs.map(pc => (
+                            <tr key={pc.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                              <td style={{ padding: '12px 16px', fontSize: '0.9rem', color: '#0f172a', fontWeight: 500 }}>{pc.title}</td>
+                              <td style={{ padding: '12px 16px', fontSize: '0.9rem', color: '#475569' }}>{pc.date || '-'}</td>
+                              <td style={{ padding: '12px 16px', fontSize: '0.9rem', color: '#475569', textTransform: 'capitalize' }}>{pc.targetAudience || 'General'}</td>
+                              <td style={{ padding: '12px 16px', fontSize: '0.9rem', color: '#475569' }}>{pc.selectedProducts?.length || 0}</td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                  <span style={{ fontSize: '0.75rem', background: '#e0e7ff', color: '#4f46e5', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>PDF</span>
+                                  <span style={{ fontSize: '0.75rem', background: '#dcfce7', color: '#16a34a', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Web</span>
+                                  <span style={{ fontSize: '0.75rem', background: '#fef3c7', color: '#d97706', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>Excel</span>
+                                </div>
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); loadPastCatalog(pc); }}
+                                  style={{ padding: '6px 12px', background: '#f1f5f9', color: '#3b82f6', border: 'none', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                                >
+                                  <Download size={12} style={{ display: 'inline', marginRight: '4px' }}/> Load Data
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <SmartCatalogWelcomeModal 
+        isOpen={showWelcomeModal} 
+        selectedCount={location.state?.selectedProducts?.length || 0}
+        filteredCount={location.state?.filteredProducts?.length || 0}
+        onSelect={handleWelcomeSelection} 
+      />
+
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#fff' }}>
+        {/* Header */}
+        <header style={{ height: '64px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: '#fff', zIndex: 50, position: 'sticky', top: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button 
+              onClick={() => onBack ? onBack() : navigate(-1)} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 500 }}
+            >
+              <ArrowLeft size={18} /> Back to Hub
+            </button>
+            <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 24px' }}></div>
+            <h2 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600, color: '#0f172a' }}>
+              {catalogMeta.title || 'Untitled Catalog'} <span style={{ marginLeft: '12px', fontSize: '0.8rem', background: '#f1f5f9', padding: '4px 8px', borderRadius: '12px', color: '#64748b' }}>Draft</span> <span style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#64748b' }}>{cartProducts.length} Products</span>
+            </h2>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 500 }}>
+              {catalogCart.length > 0 && catalogMeta.title ? 'Ready to Publish' : 'Needs Configuration'}
+            </span>
+            <button 
+              onClick={() => setShowAIDrawer(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px', 
+                background: '#f8fafc', color: '#6366f1', border: '1px solid #e0e7ff', fontWeight: 600, cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              <SparklesIcon size={16} /> AI Assistant
+            </button>
+            <button 
+              onClick={() => setShowPublishOptions(true)}
+              disabled={catalogCart.length === 0 || !catalogMeta.title}
+              style={{ 
+                padding: '8px 24px', borderRadius: '8px', 
+                background: (catalogCart.length === 0 || !catalogMeta.title) ? '#cbd5e1' : '#1e293b', 
+                color: '#fff', border: 'none', fontWeight: 600, cursor: (catalogCart.length === 0 || !catalogMeta.title) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Publish Catalog
+            </button>
+          </div>
+        </header>
+
+        {/* Main Layout */}
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {isMobile ? (
+            <div style={{ padding: '24px', width: '100%', overflowY: 'auto' }}>
+              {mobileStep === 1 && (
+                <CatalogAIAssistantPanel 
+                  catalogMeta={catalogMeta} 
+                  setCatalogMeta={setCatalogMeta} 
+                  isGeneratingAI={isGeneratingAI} 
+                  onGenerateAI={handleGenerateSmartCatalog} 
+                  catalogCart={catalogCart} 
+                />
+              )}
+              {mobileStep === 2 && <CenterPanel />}
+              {mobileStep === 3 && (
+                <CatalogIntelligenceDrawer 
+                  isOpen={true} 
+                  setIsOpen={() => {}} 
+                  catalogCart={catalogCart} 
+                  allProducts={allProducts} 
+                />
+              )}
+              
+              <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '16px', background: '#fff', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+                <button 
+                  onClick={() => setMobileStep(prev => Math.max(1, prev - 1))}
+                  disabled={mobileStep === 1}
+                  style={{ padding: '12px 24px', border: '1px solid #cbd5e1', borderRadius: '8px', background: '#fff' }}
+                >Back</button>
+                <button 
+                  onClick={() => setMobileStep(prev => Math.min(3, prev + 1))}
+                  disabled={mobileStep === 3}
+                  style={{ padding: '12px 24px', border: 'none', borderRadius: '8px', background: '#1e293b', color: '#fff' }}
+                >Next</button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <CenterPanel />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* RIGHT PANEL: Live Summary / Preview */}
-      <div style={{ width: isMobile ? '100%' : '45%', backgroundColor: '#f8f9fa', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', borderBottom: '1px solid #dadce0', background: '#fff' }}>
-          <button onClick={() => setRightPanelTab('summary')} style={{ flex: 1, padding: '16px', border: 'none', background: rightPanelTab === 'summary' ? '#f8f9fa' : '#fff', borderBottom: rightPanelTab === 'summary' ? '2px solid #1a73e8' : '2px solid transparent', cursor: 'pointer', fontWeight: 600, color: rightPanelTab === 'summary' ? '#1a73e8' : '#5f6368' }}>Catalog Summary</button>
-          <button onClick={() => setRightPanelTab('preview')} style={{ flex: 1, padding: '16px', border: 'none', background: rightPanelTab === 'preview' ? '#f8f9fa' : '#fff', borderBottom: rightPanelTab === 'preview' ? '2px solid #1a73e8' : '2px solid transparent', cursor: 'pointer', fontWeight: 600, color: rightPanelTab === 'preview' ? '#1a73e8' : '#5f6368' }}>Visual Preview</button>
-        </div>
 
-        {rightPanelTab === 'summary' ? (
-          <div style={{ padding: '2rem', overflowY: 'auto', flex: 1 }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#202124', marginBottom: '1.5rem' }}>{catalog.title || 'Untitled Catalog'}</h3>
-            {/* AI SCORE CARDS */}
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '2rem' }}>
-              <div style={{ flex: 1, background: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f9d58' }}>{sciScore}%</div>
-                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginTop: '4px' }}>Scientific</div>
+      <AnimatePresence>
+        {showAIDrawer && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAIDrawer(false)}
+              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000', zIndex: 9998 }}
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+              style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: '100%', maxWidth: '350px', background: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column', boxShadow: '10px 0 25px rgba(0, 0, 0, 0.1)' }}
+            >
+              <div style={{ padding: '24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: 600 }}>AI Assistant</h2>
+                <button onClick={() => setShowAIDrawer(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', color: '#64748b', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}>
+                  <X size={18} />
+                </button>
               </div>
-              <div style={{ flex: 1, background: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1a73e8' }}>{comScore}%</div>
-                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginTop: '4px' }}>Commercial</div>
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+                <CatalogAIAssistantPanel 
+                  catalogMeta={catalogMeta} 
+                  setCatalogMeta={setCatalogMeta} 
+                  isGeneratingAI={isGeneratingAI} 
+                  onGenerateAI={handleGenerateSmartCatalog} 
+                  catalogCart={catalogCart} 
+                />
               </div>
-              <div style={{ flex: 1, background: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #dadce0', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f29900' }}>{seoScore}%</div>
-                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', fontWeight: 600, marginTop: '4px' }}>SEO Ready</div>
-              </div>
-            </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
-            {/* AI RECOMMENDATIONS */}
-            {showRecommendations && aiRecommendations.length > 0 && (
-              <div style={{ background: '#e8f0fe', padding: '1.5rem', borderRadius: '12px', border: '1px solid #d2e3fc', marginBottom: '2rem' }}>
-                <h4 style={{ margin: '0 0 12px 0', color: '#1a73e8', display: 'flex', alignItems: 'center', gap: '8px' }}><Sparkles size={18} /> AI Recommended Products</h4>
-                <p style={{ fontSize: '0.85rem', color: '#1967d2', marginBottom: '16px' }}>Based on your prompt, I suggest including these {aiRecommendations.length} products in your catalog.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
-                  {aiRecommendations.slice(0, 6).map(id => {
-                    const p = allProducts.find(x => x.id === id || x.slug === id);
-                    return p ? <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', background: '#fff', padding: '6px 10px', borderRadius: '4px', border: '1px solid #aecbfa' }}><Check size={14} color="#1a73e8" /> {p.displayName || p.name}</div> : null;
-                  })}
-                  {aiRecommendations.length > 6 && <div style={{ fontSize: '0.8rem', color: '#1967d2', padding: '6px 10px' }}>+ {aiRecommendations.length - 6} more</div>}
+      <AnimatePresence>
+        {generationState.isGenerating && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{ background: '#fff', borderRadius: '16px', padding: '32px', width: '90%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
+            >
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+                  <SparklesIcon size={24} color="#16a34a" />
                 </div>
-                <button onClick={handleAcceptRecommendations} style={{ width: '100%', padding: '10px', background: '#1a73e8', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}>Accept Recommendations</button>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '1.25rem', color: '#0f172a' }}>Generating Artifacts</h3>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Please wait while we compile your catalog formats.</p>
               </div>
-            )}
 
-            {/* PRODUCT LIST */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h4 style={{ margin: 0, fontSize: '1rem', color: '#202124' }}>Selected Items ({selectedProductsInFlow.length})</h4>
-              <button onClick={() => setShowSearchModal(true)} style={{ background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}><Plus size={14} /> Add Manual</button>
-            </div>
-
-            {selectedProductsInFlow.length === 0 && !showRecommendations ? (
-              <div style={{ textAlign: 'center', padding: '3rem 2rem', background: '#fff', border: '2px dashed #dadce0', borderRadius: '12px' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
-                <h4 style={{ margin: '0 0 8px 0', color: '#202124' }}>No products added yet</h4>
-                <p style={{ fontSize: '0.85rem', color: '#5f6368', marginBottom: '1.5rem' }}>Describe your catalog on the left, or add products manually to get started.</p>
-                <button onClick={() => setPrompt("Atlas AI, please recommend a balanced selection of products for my catalog.")} style={{ padding: '10px 20px', background: '#f8f9fa', border: '1px solid #dadce0', borderRadius: '24px', fontWeight: 600, color: '#1a73e8', cursor: 'pointer' }}>Ask AI to recommend products</button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {selectedProductsInFlow.map(id => {
-                  const p = allProducts.find(x => x.id === id || x.slug === id);
-                  if (!p) return null;
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {GENERATION_STEPS.map((stepName, idx) => {
+                  const isActive = idx === generationState.step;
+                  const isDone = idx < generationState.step;
                   return (
-                    <div key={id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', border: '1px solid #dadce0', padding: '12px 16px', borderRadius: '8px' }}>
-                      <div>
-                        <div style={{ fontWeight: 600, color: '#202124', fontSize: '0.9rem' }}>{p.displayName || p.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#5f6368' }}>{p.category || 'Product'}</div>
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', opacity: isActive || isDone ? 1 : 0.4 }}>
+                      <div style={{ 
+                        width: '24px', height: '24px', borderRadius: '50%', 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: isDone ? '#16a34a' : isActive ? '#3b82f6' : '#e2e8f0',
+                        color: '#fff', fontSize: '0.75rem', fontWeight: 'bold',
+                        transition: 'all 0.3s'
+                      }}>
+                        {isDone ? '✓' : (idx + 1)}
                       </div>
-                      <button onClick={() => handleProductToggle(id)} style={{ background: 'none', border: 'none', color: '#d93025', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Remove</button>
+                      <span style={{ fontSize: '0.9rem', color: isDone || isActive ? '#0f172a' : '#64748b', fontWeight: isActive ? 600 : 400 }}>
+                        {stepName}
+                      </span>
                     </div>
                   );
                 })}
               </div>
-            )}
-
-            {/* SAVE CONTROLS */}
-            <div style={{ display: 'flex', gap: '12px', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #dadce0' }}>
-              <button onClick={() => handleSave(false)} disabled={saving} style={{ flex: 1, padding: '12px', background: '#fff', border: '1px solid #dadce0', borderRadius: '8px', fontWeight: 600, color: '#5f6368', cursor: 'pointer' }}>Save Draft</button>
-              <button onClick={() => handleSave(true)} disabled={saving} style={{ flex: 1, padding: '12px', background: '#0f9d58', border: 'none', borderRadius: '8px', fontWeight: 600, color: '#fff', cursor: 'pointer' }}>Publish Catalog</button>
-            </div>
-          </div>
-        ) : (
-          <div style={{ padding: '1rem', flex: 1, overflowY: 'auto' }}>
-            <CatalogPreviewPanel catalog={catalog} products={allProducts} protocols={allProtocols} />
+            </motion.div>
           </div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* MODALS */}
-      {showSearchModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#fff', width: '90%', maxWidth: '500px', height: '80vh', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '16px 24px', borderBottom: '1px solid #dadce0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0 }}>Add Product</h3>
-              <button onClick={() => setShowSearchModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20}/></button>
-            </div>
-            <div style={{ padding: '16px', borderBottom: '1px solid #dadce0', background: '#f8f9fa' }}>
-              <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search products..." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #dadce0', outline: 'none' }} />
-            </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
-              {allProducts.filter(p => (p.displayName || p.name || '').toLowerCase().includes(searchQuery.toLowerCase())).map(p => {
-                const isSelected = selectedProductsInFlow.includes(p.id);
-                return (
-                  <div key={p.id} onClick={() => handleProductToggle(p.id)} style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid #f1f3f4' }}>
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#202124' }}>{p.displayName || p.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#5f6368' }}>{p.category}</div>
-                    </div>
-                    {isSelected && <Check color="#1a73e8" size={18} />}
+      <AnimatePresence>
+        {showPublishOptions && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPublishOptions(false)}
+              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: '#000', zIndex: 9998 }}
+            />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+              style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: '480px', background: '#fff', zIndex: 9999, display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 25px rgba(0, 0, 0, 0.1)' }}
+            >
+              {/* Drawer Header */}
+              <div style={{ padding: '24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: 600 }}>Publish Options</h2>
+                <button onClick={() => setShowPublishOptions(false)} style={{ background: '#f1f5f9', border: 'none', cursor: 'pointer', color: '#64748b', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Drawer Content */}
+              <div style={{ padding: '24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Catalog Title</label>
+                    <input 
+                      type="text" 
+                      value={catalogMeta.title}
+                      onChange={(e) => setCatalogMeta(prev => ({...prev, title: e.target.value}))}
+                      placeholder="e.g., Summer Medical Supplies"
+                      style={{ width: '100%', fontSize: '1rem', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '10px', outline: 'none' }}
+                    />
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Description</label>
+                    <textarea 
+                      value={catalogMeta.description}
+                      onChange={(e) => setCatalogMeta(prev => ({...prev, description: e.target.value}))}
+                      placeholder="Commercial description of your portfolio..."
+                      rows={2}
+                      style={{ width: '100%', fontSize: '0.95rem', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '10px', outline: 'none', resize: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Date</label>
+                      <input 
+                        type="date"
+                        value={catalogMeta.date}
+                        onChange={(e) => setCatalogMeta(prev => ({...prev, date: e.target.value}))}
+                        style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.95rem', background: '#fff' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Audience</label>
+                      <select 
+                        value={catalogMeta.targetAudience}
+                        onChange={(e) => setCatalogMeta(prev => ({...prev, targetAudience: e.target.value}))}
+                        style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.95rem', background: '#fff' }}
+                      >
+                        <option value="patients">Patients</option>
+                        <option value="doctors">Doctors / Clinics</option>
+                        <option value="wholesalers">Wholesalers</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}><Percent size={14} /> Pricing Multiplier Strategy</div>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 4px 0' }}>Adjust prices globally. <i>Note: All prices are ex-works, shipping not included.</i></p>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <select 
+                      value={pricingMultiplier.basePriceKey}
+                      onChange={(e) => setPricingMultiplier(prev => ({...prev, basePriceKey: e.target.value}))}
+                      style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                    >
+                      <option value="cost">Base: Cost</option>
+                      <option value="price">Base: Retail Price</option>
+                    </select>
+                    <span style={{ color: '#94a3b8' }}>+</span>
+                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff', overflow: 'hidden', width: '80px' }}>
+                      <input 
+                        type="number" 
+                        value={pricingMultiplier.incrementPercent}
+                        onChange={(e) => setPricingMultiplier(prev => ({...prev, incrementPercent: e.target.value}))}
+                        style={{ width: '100%', padding: '8px', border: 'none', outline: 'none', textAlign: 'right', fontSize: '0.85rem' }}
+                      />
+                      <span style={{ padding: '8px', background: '#f1f5f9', color: '#64748b', fontSize: '0.85rem', borderLeft: '1px solid #cbd5e1' }}>%</span>
+                    </div>
+                    <button 
+                      onClick={applyMultiplier}
+                      style={{ padding: '8px 12px', background: '#1e293b', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+
+<hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '8px 0' }} />
+
+                
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Publish Format</label>
+                  <select 
+                    value={publishOptions.format}
+                    onChange={(e) => setPublishOptions({...publishOptions, format: e.target.value})}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem', background: '#f8fafc', outline: 'none' }}
+                  >
+                    <option value="landing_page">Interactive Landing Page</option>
+                    <option value="pdf">PDF Document</option>
+                    <option value="excel">Excel Spreadsheet</option>
+                  </select>
+                </div>
+
+                {(publishOptions.format === 'pdf' || publishOptions.format === 'landing_page') && (
+                  <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <label style={{ display: 'block', marginBottom: '12px', fontWeight: 600, color: '#334155' }}>
+                      <LayoutTemplate size={16} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px', color: '#64748b' }}/>
+                      Select Template Style
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                      {[
+                        { id: 'minimal', label: 'Minimal', desc: 'Photos & Price' },
+                        { id: 'standard', label: 'Standard', desc: 'General Info' },
+                        { id: 'clinical', label: 'Clinical', desc: 'AI Enriched' }
+                      ].map(t => (
+                        <div 
+                          key={t.id}
+                          onClick={() => setPublishOptions({...publishOptions, pdfTemplate: t.id})}
+                          style={{
+                            padding: '12px 8px',
+                            borderRadius: '6px',
+                            border: `2px solid ${publishOptions.pdfTemplate === t.id ? '#2563eb' : '#cbd5e1'}`,
+                            background: publishOptions.pdfTemplate === t.id ? '#eff6ff' : '#fff',
+                            cursor: 'pointer',
+                            textAlign: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: publishOptions.pdfTemplate === t.id ? '#1e40af' : '#475569' }}>{t.label}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>{t.desc}</div>
+                          {t.id === 'clinical' && (
+                            <div style={{ fontSize: '0.7rem', color: '#8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '6px', fontWeight: 500 }}>
+                              <SparklesIcon size={10} /> AI Powered
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={publishOptions.showPrices}
+                      onChange={(e) => setPublishOptions({...publishOptions, showPrices: e.target.checked})}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontWeight: 600, color: '#334155' }}>Include Pricing</span>
+                  </label>
+
+                  {publishOptions.showPrices && (
+                    <div style={{ paddingLeft: '28px', animation: 'fadeIn 0.2s ease-out' }}>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '0.85rem', color: '#64748b' }}>Select Price Level</label>
+                      <select 
+                        value={publishOptions.priceLevel}
+                        onChange={(e) => setPublishOptions({...publishOptions, priceLevel: e.target.value})}
+                        style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', background: '#fff', outline: 'none' }}
+                      >
+                        <option value="MSRP">MSRP (Retail)</option>
+                        <option value="wholesale">Wholesale</option>
+                        <option value="custom">Custom Margin (+20%)</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={publishOptions.includeContactData}
+                      onChange={(e) => setPublishOptions({...publishOptions, includeContactData: e.target.checked})}
+                      style={{ width: '18px', height: '18px', marginTop: '2px', cursor: 'pointer' }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 600, color: '#334155' }}>Include Contact Info</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>Uses your default tenant contact data.</div>
+                    </div>
+                  </label>
+                </div>
+                
+              </div>
+
+              {/* Drawer Footer */}
+              <div style={{ padding: '24px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px', background: '#f8fafc' }}>
+                <button 
+                  onClick={() => setShowPublishOptions(false)}
+                  style={{ flex: 1, padding: '12px 16px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '8px', fontWeight: 600, color: '#475569', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onMouseOver={(e) => e.target.style.background = '#f1f5f9'}
+                  onMouseOut={(e) => e.target.style.background = '#fff'}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleOpenPreview}
+                  style={{ flex: 1, padding: '12px 16px', background: '#2563eb', border: 'none', borderRadius: '8px', fontWeight: 600, color: '#fff', cursor: 'pointer', transition: 'background 0.2s' }}
+                  onMouseOver={(e) => e.target.style.background = '#1d4ed8'}
+                  onMouseOut={(e) => e.target.style.background = '#2563eb'}
+                >
+                  Preview & Share
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Preview & Share Modal */}
+      <AnimatePresence>
+        {showPreviewModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowPreviewModal(false);
+                if (previewBlobUrl) {
+                  URL.revokeObjectURL(previewBlobUrl);
+                  setPreviewBlobUrl(null);
+                }
+              }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: '#0f172a',
+                zIndex: 10000
+              }}
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', duration: 0.4 }}
+              style={{
+                position: 'fixed',
+                top: '5%',
+                left: '5%',
+                right: '5%',
+                bottom: '5%',
+                background: '#fff',
+                borderRadius: '16px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                zIndex: 10001,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Header */}
+              <div style={{
+                padding: '20px 24px',
+                borderBottom: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: '#f8fafc'
+              }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a', fontWeight: 700 }}>
+                    Preview & Share: {catalogMeta.title}
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
+                    Verify content layouts and select a delivery channel.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => {
+                    setShowPreviewModal(false);
+                    if (previewBlobUrl) {
+                      URL.revokeObjectURL(previewBlobUrl);
+                      setPreviewBlobUrl(null);
+                    }
+                  }} 
+                  style={{
+                    background: '#e2e8f0',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#475569',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Main Body */}
+              <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+                {/* Left Panel: Preview (2/3) */}
+                <div style={{
+                  flex: 2,
+                  background: '#f1f5f9',
+                  borderRight: '1px solid #e2e8f0',
+                  padding: '24px',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start'
+                }}>
+                  {publishOptions.format === 'pdf' && (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      {generatingPreview ? (
+                        <div style={{ margin: 'auto', textAlign: 'center', color: '#64748b' }}>
+                          <div style={{ border: '4px solid #e2e8f0', borderTop: '4px solid #2563eb', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite', margin: '0 auto 12px auto' }} />
+                          <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>Compiling PDF preview...</p>
+                        </div>
+                      ) : previewBlobUrl ? (
+                        <iframe 
+                          src={previewBlobUrl} 
+                          title="PDF Catalog Preview" 
+                          style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                        />
+                      ) : (
+                        <div style={{ margin: 'auto', color: '#dc2626' }}>Failed to compile preview PDF.</div>
+                      )}
+                    </div>
+                  )}
+
+                  {publishOptions.format === 'landing_page' && (
+                    <div style={{
+                      width: '100%',
+                      maxWidth: '800px',
+                      background: '#fff',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                      padding: '32px',
+                      fontFamily: "'Inter', sans-serif",
+                      color: '#202124'
+                    }}>
+                      <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ width: '28px', height: '28px', borderRadius: '4px', backgroundColor: '#2563eb', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>AH</div>
+                          <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#2563eb' }}>Atlas Health</span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 600 }}>
+                          Web Page Preview ({publishOptions.pdfTemplate})
+                        </span>
+                      </div>
+
+                      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>{catalogMeta.title || 'Clinical Curation'}</h1>
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', maxWidth: '540px', margin: '0 auto' }}>{catalogMeta.description || 'Access compiled medical catalogs.'}</p>
+                      </div>
+
+                      {/* Sections & Products list mockup */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: publishOptions.pdfTemplate === 'clinical' 
+                          ? '1fr' 
+                          : (publishOptions.pdfTemplate === 'minimal' ? 'repeat(auto-fill, minmax(180px, 1fr))' : 'repeat(auto-fill, minmax(280px, 1fr))'),
+                        gap: '16px'
+                      }}>
+                        {cartProducts.filter(p => catalogCart.includes(p.id) || catalogCart.includes(p.productId)).map((prod) => {
+                          const pName = prod.displayName || prod.name || '—';
+                          const showPrices = publishOptions.showPrices;
+                          const priceVal = prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD ?? prod.price ?? prod.msrp;
+                          const formattedPrice = priceVal ? `$${priceVal.toFixed(2)}` : 'Request Pricing';
+
+                          if (publishOptions.pdfTemplate === 'minimal') {
+                            return (
+                              <div key={prod.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+                                <div style={{ width: '60px', height: '60px', backgroundColor: '#f1f5f9', borderRadius: '4px', margin: '0 auto 8px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.65rem' }}>No Image</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pName}</div>
+                                {showPrices && <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#16a34a', marginTop: '6px' }}>{formattedPrice} <span style={{ fontSize: '0.55rem', color: '#64748b', fontWeight: 400 }}>ex-works</span></div>}
+                              </div>
+                            );
+                          }
+
+                          if (publishOptions.pdfTemplate === 'standard') {
+                            return (
+                              <div key={prod.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', display: 'flex', gap: '12px', alignItems: 'start' }}>
+                                <div style={{ width: '50px', height: '50px', backgroundColor: '#eff6ff', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}>
+                                  <FileText size={18} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>{pName}</div>
+                                  <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'block', margin: '2px 0' }}>SKU: {prod.sku || 'N/A'}</div>
+                                  <p style={{ margin: '4px 0', fontSize: '0.75rem', color: '#475569', lineHeight: 1.4, height: '40px', overflow: 'hidden' }}>{prod.desc || 'Details under review.'}</p>
+                                  {showPrices && <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#16a34a', marginTop: '4px' }}>{formattedPrice} <span style={{ fontSize: '0.55rem', color: '#64748b', fontWeight: 400 }}>ex-works</span></div>}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          // Clinical Layout Preview
+                          return (
+                            <div key={prod.id} style={{ border: '1px solid #cbd5e1', borderTop: '4px solid #2563eb', borderRadius: '8px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'flex', gap: '16px', alignItems: 'start' }}>
+                                <div style={{ width: '70px', height: '70px', backgroundColor: '#eff6ff', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}>
+                                  <FileText size={24} />
+                                </div>
+                                <div>
+                                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>{pName}</h4>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '2px 8px', fontSize: '0.75rem', color: '#475569', marginTop: '6px' }}>
+                                    <strong>SKU:</strong> <span>{prod.sku || 'N/A'}</span>
+                                    <strong>Route:</strong> <span>{prod.defaultVariant?.route?.replace(/_/g, ' ') || 'Subcutaneous'}</span>
+                                  </div>
+                                </div>
+                                {showPrices && (
+                                  <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#16a34a' }}>{formattedPrice}</div>
+                                    <div style={{ fontSize: '0.55rem', color: '#64748b' }}>ex-works</div>
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.78rem', background: '#f8fafc', padding: '10px', borderRadius: '4px', borderLeft: '3px solid #2563eb', color: '#334155' }}>
+                                <strong>📋 Clinical Summary (AI Consensus):</strong>
+                                <p style={{ margin: '4px 0 0 0', lineHeight: 1.4 }}>Generates compound details with mechanisms of action and PubMed references upon publication.</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {publishOptions.format === 'excel' && (
+                    <div style={{
+                      width: '100%',
+                      maxWidth: '800px',
+                      background: '#fff',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                      padding: '24px',
+                      overflowX: 'auto'
+                    }}>
+                      <div style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 700, color: '#1e293b', fontSize: '0.95rem' }}>Excel Spreadsheet Grid Preview</span>
+                        <span style={{ fontSize: '0.7rem', color: '#15803d', backgroundColor: '#dcfce7', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}>
+                          Minimalist Format Only
+                        </span>
+                      </div>
+                      
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '2px solid #cbd5e1' }}>
+                            <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>SKU</th>
+                            <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>Product Name</th>
+                            <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>Format / Route</th>
+                            <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>Strength / Size</th>
+                            <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>Supplier</th>
+                            <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>Price (Ex-Works)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {cartProducts.filter(p => catalogCart.includes(p.id) || catalogCart.includes(p.productId)).map((prod, idx) => {
+                            const pName = prod.displayName || prod.name || '—';
+                            const priceKey = publishOptions.priceLevel === 'MSRP' ? 'msrp' : (publishOptions.priceLevel === 'wholesale' ? 'price' : 'cost');
+                            const priceVal = prod[priceKey] ?? prod.msrp ?? prod.price;
+                            const formattedPrice = publishOptions.showPrices && priceVal ? `€ ${parseFloat(priceVal).toFixed(2)}` : 'Request Pricing';
+                            
+                            return (
+                              <tr key={prod.id} style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: idx % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                                <td style={{ padding: '10px', color: '#0f172a', fontFamily: 'monospace' }}>{prod.sku || prod.variantSku || '—'}</td>
+                                <td style={{ padding: '10px', fontWeight: 500, color: '#0f172a' }}>{pName}</td>
+                                <td style={{ padding: '10px', color: '#475569' }}>{prod.defaultVariant?.route?.replace(/_/g, ' ') || 'Vial'}</td>
+                                <td style={{ padding: '10px', color: '#475569' }}>{prod.defaultVariant?.size || prod.strength || '—'}</td>
+                                <td style={{ padding: '10px', color: '#475569' }}>{prod.supplier || 'Atlas Health'}</td>
+                                <td style={{ padding: '10px', color: '#16a34a', fontWeight: 600 }}>{formattedPrice}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Panel: Sharing channels (1/3) */}
+                <div style={{
+                  flex: 1,
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
+                  overflowY: 'auto'
+                }}>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+                    Select Share Channel
+                  </h4>
+
+                  {/* Channel Tab Selector */}
+                  <div style={{ display: 'flex', borderBottom: '1px solid #e2e8f0' }}>
+                    {[
+                      { id: 'email', label: 'Email', icon: Mail },
+                      { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare },
+                      { id: 'bigin', label: 'Zoho Bigin', icon: Building2 }
+                    ].map(tab => {
+                      const Icon = tab.icon;
+                      const isActive = activeShareTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveShareTab(tab.id)}
+                          style={{
+                            flex: 1,
+                            padding: '10px 4px',
+                            background: 'none',
+                            border: 'none',
+                            borderBottom: isActive ? '2px solid #2563eb' : '2px solid transparent',
+                            color: isActive ? '#2563eb' : '#64748b',
+                            fontWeight: 600,
+                            fontSize: '0.8rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Icon size={16} />
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Tab Content */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {activeShareTab === 'email' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Client Email</label>
+                          <input 
+                            type="email" 
+                            value={shareEmail}
+                            onChange={e => setShareEmail(e.target.value)}
+                            placeholder="client@clinic.com"
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Subject</label>
+                          <input 
+                            type="text" 
+                            value={shareEmailSubject}
+                            onChange={e => setShareEmailSubject(e.target.value)}
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Message Body</label>
+                          <textarea 
+                            value={shareEmailBody}
+                            onChange={e => setShareEmailBody(e.target.value)}
+                            rows={6}
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', resize: 'none' }}
+                          />
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (!shareEmail) {
+                              toast.error('Recipient email is required');
+                              return;
+                            }
+                            saveCatalog({ channel: 'email', recipient: shareEmail, subject: shareEmailSubject, body: shareEmailBody });
+                          }}
+                          style={{
+                            backgroundColor: '#2563eb',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            marginTop: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <Mail size={16} />
+                          Publish & Send Email
+                        </button>
+                      </div>
+                    )}
+
+                    {activeShareTab === 'whatsapp' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Client Phone (with country code)</label>
+                          <input 
+                            type="text" 
+                            value={sharePhone}
+                            onChange={e => setSharePhone(e.target.value)}
+                            placeholder="e.g. +34600123456"
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Prefilled Text</label>
+                          <textarea 
+                            value={shareWhatsAppText}
+                            onChange={e => setShareWhatsAppText(e.target.value)}
+                            rows={4}
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', resize: 'none' }}
+                          />
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (!sharePhone) {
+                              toast.error('Client phone number is required');
+                              return;
+                            }
+                            saveCatalog({ channel: 'whatsapp', phone: sharePhone, text: shareWhatsAppText });
+                          }}
+                          style={{
+                            backgroundColor: '#22c55e',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            cursor: 'pointer',
+                            marginTop: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <MessageSquare size={16} />
+                          Publish & Share on WhatsApp
+                        </button>
+                      </div>
+                    )}
+
+                    {activeShareTab === 'bigin' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Zoho Bigin Contact Email</label>
+                          <input 
+                            type="email" 
+                            value={shareBiginEmail}
+                            onChange={e => setShareBiginEmail(e.target.value)}
+                            placeholder="contact@bigin.com"
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Pipeline Stage</label>
+                          <select 
+                            value={shareBiginStage}
+                            onChange={e => setShareBiginStage(e.target.value)}
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', background: '#fff' }}
+                          >
+                            <option value="qualification">Qualification</option>
+                            <option value="proposition">Proposal / Negotiation</option>
+                            <option value="delivered">Catalog Delivered</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Notes / Context</label>
+                          <textarea 
+                            value={shareBiginNotes}
+                            onChange={e => setShareBiginNotes(e.target.value)}
+                            placeholder="Catalog created and sent during call..."
+                            rows={3}
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', resize: 'none' }}
+                          />
+                        </div>
+                        <button
+                          onClick={() => {
+                            if (!shareBiginEmail) {
+                              toast.error('Bigin contact email is required');
+                              return;
+                            }
+                            setBiginSyncing(true);
+                            setTimeout(() => {
+                              setBiginSyncing(false);
+                              saveCatalog({ channel: 'bigin', contactEmail: shareBiginEmail, notes: shareBiginNotes, stage: shareBiginStage });
+                            }, 1500);
+                          }}
+                          disabled={biginSyncing}
+                          style={{
+                            backgroundColor: '#8b5cf6',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            cursor: biginSyncing ? 'not-allowed' : 'pointer',
+                            marginTop: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <Building2 size={16} />
+                          {biginSyncing ? 'Syncing with Bigin...' : 'Publish & Sync with Bigin'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Standard Publish Button (No share) */}
+                  <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: 'auto' }}>
+                    <button
+                      onClick={() => saveCatalog(null)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#f1f5f9',
+                        color: '#475569',
+                        border: '1px solid #cbd5e1',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Download size={14} />
+                      Publish & Download Only
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

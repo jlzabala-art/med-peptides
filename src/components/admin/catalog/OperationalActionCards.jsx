@@ -57,11 +57,11 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         {
           id: 'missing_coa',
           title: 'Missing COA',
-          count: globalKpis?.missing_coa ?? missingCoa.length,
+          count: Math.max(globalKpis?.missing_coa || 0, missingCoa.length),
           total: totalProducts || products.length,
           severity: 'warning',
           icon: FileWarning,
-          trend: `↓ ${Math.max(1, Math.floor((globalKpis?.missing_coa ?? missingCoa.length) * 0.15))} this week`,
+          trend: `↓ ${Math.max(1, Math.floor(Math.max(globalKpis?.missing_coa || 0, missingCoa.length) * 0.15))} this week`,
           trendDir: 'down',
           impact: `${globalKpis?.missing_coa ?? missingCoa.length} Products cannot be sold until certified`,
           actionLabel: 'Request Documents',
@@ -70,11 +70,11 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         {
           id: 'regulatory_risk',
           title: 'Regulatory Risk',
-          count: globalKpis?.regulatory_risk ?? regulatoryRisk.length,
+          count: Math.max(globalKpis?.regulatory_risk || 0, regulatoryRisk.length),
           total: totalProducts || products.length,
           severity: 'critical',
           icon: ShieldAlert,
-          trend: `↑ ${Math.max(1, Math.floor((globalKpis?.regulatory_risk ?? regulatoryRisk.length) * 0.2))} this month`,
+          trend: `↑ ${Math.max(1, Math.floor(Math.max(globalKpis?.regulatory_risk || 0, regulatoryRisk.length) * 0.2))} this month`,
           trendDir: 'up',
           impact: `$${((globalKpis?.regulatory_risk ?? regulatoryRisk.length) * 15000).toLocaleString()} Revenue Exposure`,
           actionLabel: 'Review Issues',
@@ -85,11 +85,11 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         {
           id: 'missing_supplier',
           title: 'Missing Supplier',
-          count: globalKpis?.missing_supplier ?? missingSupplier.length,
+          count: Math.max(globalKpis?.missing_supplier || 0, missingSupplier.length),
           total: totalProducts || products.length,
           severity: 'warning',
           icon: AlertCircle,
-          trend: `↓ ${Math.max(1, Math.floor((globalKpis?.missing_supplier ?? missingSupplier.length) * 0.1))} this week`,
+          trend: `↓ ${Math.max(1, Math.floor(Math.max(globalKpis?.missing_supplier || 0, missingSupplier.length) * 0.1))} this week`,
           trendDir: 'down',
           impact: `Cannot be reordered without assignment`,
           actionLabel: 'Assign Suppliers',
@@ -98,7 +98,7 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         {
           id: 'single_source',
           title: 'Single Source Risk',
-          count: globalKpis?.single_source ?? singleSource.length,
+          count: Math.max(globalKpis?.single_source || 0, singleSource.length),
           total: totalProducts || products.length,
           severity: 'medium',
           icon: LinkIcon,
@@ -113,11 +113,11 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         {
           id: 'out_of_stock',
           title: 'Out of Stock',
-          count: globalKpis?.out_of_stock ?? outOfStock.length,
+          count: Math.max(globalKpis?.out_of_stock || 0, outOfStock.length),
           total: totalProducts || products.length,
           severity: 'critical',
           icon: PackageX,
-          trend: `↑ ${Math.max(1, Math.floor((globalKpis?.out_of_stock ?? outOfStock.length) * 0.3))} this week`,
+          trend: `↑ ${Math.max(1, Math.floor(Math.max(globalKpis?.out_of_stock || 0, outOfStock.length) * 0.3))} this week`,
           trendDir: 'up',
           impact: `Immediate lost sales risk`,
           actionLabel: 'Reorder Now',
@@ -126,11 +126,11 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         {
           id: 'low_health',
           title: 'Low Health Score',
-          count: globalKpis?.low_health ?? lowHealth.length,
+          count: Math.max(globalKpis?.low_health || 0, lowHealth.length),
           total: totalProducts || products.length,
           severity: 'medium',
           icon: Activity,
-          trend: `↓ ${Math.max(1, Math.floor((globalKpis?.low_health ?? lowHealth.length) * 0.05))} this month`,
+          trend: `↓ ${Math.max(1, Math.floor(Math.max(globalKpis?.low_health || 0, lowHealth.length) * 0.05))} this month`,
           trendDir: 'down',
           impact: `Products require data enrichment`,
           actionLabel: 'View Recommendations',
@@ -353,47 +353,7 @@ export default function OperationalActionCards({ products, activeFilters = [], o
         </div>
       )}
 
-      {/* AI Contextual Insights Strip - Thin version */}
-      {!isAiDismissed && (
-        <div 
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            gap: '0.75rem', 
-            backgroundColor: '#f0fdfa', 
-            border: '1px solid #ccfbf1', 
-            borderRadius: '4px', 
-            padding: '4px 8px',
-            color: '#0f766e',
-            fontSize: '0.75rem'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Sparkles size={12} color="#0d9488" />
-            <div>
-              <strong style={{ fontWeight: 600 }}>Atlas AI:</strong>{' '}
-              {kpis.compliance[0].count > 0 
-                ? `Requesting missing documents now can prevent ${kpis.compliance[0].count} shipping delays.`
-                : `Assigning alternative suppliers could reduce single-source risks.`}
-            </div>
-          </div>
-          <button 
-            onClick={() => setIsAiDismissed(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: '#0d9488',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '2px'
-            }}
-          >
-            <X size={12} />
-          </button>
-        </div>
-      )}
+
 
       {/* Scrollable Container */}
       <div 

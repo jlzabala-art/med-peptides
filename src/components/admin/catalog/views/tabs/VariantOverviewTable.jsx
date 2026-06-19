@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { calculateVariantHealthScore } from '../../useVariantHealthScore';
 import AppActionGroup from '../../../../ui/AppActionGroup';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
@@ -38,6 +39,7 @@ const badgeStyle = (isValid) => ({
 });
 
 export default function VariantOverviewTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
+  const navigate = useNavigate();
   const [touchTimer, setTouchTimer] = React.useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
@@ -68,7 +70,19 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
 
       const displaySku = v.sku || generateFallbackSku();
       const supplierName = v.supplier || parentProduct?.supplier || 'Unassigned';
-      const formatSize = [v.format || '', v.dosage || '', v.size || ''].filter(Boolean).join(' ') || '-';
+      const typeStr = v.formatLabel || v.format || v.productType || '';
+      const dosageStr = v.dosage || v.size || '';
+      const unitStr = v.kit?.unit || v.dosage_unit || '';
+      
+      let formatSize = '-';
+      if (typeStr.toLowerCase().includes('api')) {
+        formatSize = `API (Bulk)`;
+      } else if (dosageStr) {
+        const presentation = unitStr ? unitStr : (typeStr.toLowerCase().includes('lyophilized') ? 'Vial' : typeStr);
+        formatSize = `${dosageStr} / ${presentation.charAt(0).toUpperCase() + presentation.slice(1)}`;
+      } else {
+        formatSize = typeStr || '-';
+      }
       const inventory = typeof v.stock === 'object' ? v.stock?.available || 0 : v.stock || 0;
       const regStatus = v.registrationStatus || v.registration || 'Unregistered';
 
@@ -99,6 +113,18 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
+      });
+    } else {
+      // Default Sort: API first, then Lyophilized, sorted by dosage lowest to highest
+      sortableItems.sort((a, b) => {
+        const isApiA = (a.productType || a.formatLabel || '').toLowerCase().includes('api');
+        const isApiB = (b.productType || b.formatLabel || '').toLowerCase().includes('api');
+        
+        if (isApiA && !isApiB) return -1;
+        if (!isApiA && isApiB) return 1;
+
+        const getDosageNum = (v) => parseFloat((v.dosage || v.size || '0').toString().replace(/[^0-9.]/g, '')) || 0;
+        return getDosageNum(a) - getDosageNum(b);
       });
     }
     return sortableItems;
@@ -170,11 +196,8 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
           )}
           <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
           <th style={thStyle} onClick={() => handleSort('supplierName')}>Supplier{getSortIcon('supplierName')}</th>
-          <th style={thStyle} onClick={() => handleSort('formatSize')}>Format / Size{getSortIcon('formatSize')}</th>
-          <th style={thStyle} onClick={() => handleSort('health')}>Health Score{getSortIcon('health')}</th>
-          <th style={thStyle} onClick={() => handleSort('inventory')}>Inventory{getSortIcon('inventory')}</th>
-          <th style={thStyle} onClick={() => handleSort('regStatus')}>Reg. Status{getSortIcon('regStatus')}</th>
-          <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
+          <th style={thStyle} onClick={() => handleSort('formatSize')}>Dosage / Format{getSortIcon('formatSize')}</th>
+          <th style={{ ...thStyle, textAlign: 'center', cursor: 'default' }}>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -213,40 +236,29 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
                   <span>{v.displaySku}</span>
                 </div>
               </td>
-              <td style={tdStyle}>{v.supplierName}</td>
-              <td style={tdStyle}>{v.formatSize}</td>
               <td style={tdStyle}>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                  title={v.health.flags.map((f) => f.label).join(', ') || 'Fully Compliant'}
+                <span 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/admin/wholesellers?search=${encodeURIComponent(v.supplierName)}&openVariant=${v.id}`);
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    color: 'var(--color-primary, #3b82f6)',
+                    fontWeight: 500,
+                  }}
+                  title="View Supplier Profile"
                 >
-                  <div
-                    style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: v.health.color,
-                    }}
-                  />
-                  <span style={{ fontWeight: 600, color: v.health.color }}>{v.health.score}</span>
-                </div>
-              </td>
-              <td style={tdStyle}>
-                <span style={{ color: v.inventory < (v.reorderPoint || 20) ? '#ef4444' : 'inherit' }}>
-                  {v.inventory} units
+                  {v.supplierName}
                 </span>
               </td>
-              <td style={tdStyle}>
-                <span style={badgeStyle(v.regStatus === 'Registered' || v.regStatus === 'Active')}>
-                  {v.regStatus}
-                </span>
-              </td>
-              <td style={{ ...tdStyle, textAlign: 'right' }}>
+              <td style={tdStyle}>{v.formatSize}</td>
+              <td style={{ ...tdStyle, textAlign: 'center' }}>
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'center',
                     gap: '0.5rem',
                   }}
                 >

@@ -12,53 +12,53 @@ export default function SupplierKPIs({ kpiStats, activeKpiFilter, setActiveKpiFi
   const kpis = [
     { 
       id: 'all', 
-      label: 'Total Directory', 
+      label: 'Total Sources', 
       val: kpiStats.total, 
       color: 'var(--primary)', 
       bg: 'rgba(59, 130, 246, 0.08)',
       icon: Users,
-      actionLabel: 'Add New',
-      actionStr: 'Opening New Supplier form...'
+      actionLabel: 'Add Source',
+      actionStr: 'Opening New Source form...'
     },
     { 
       id: 'active', 
-      label: 'Active Partners', 
+      label: 'Active Sources', 
       val: kpiStats.active, 
       color: '#10b981', 
       bg: 'rgba(16, 185, 129, 0.08)',
       icon: Building2,
       actionLabel: 'Review',
-      actionStr: 'Filtering by Active Partners...'
+      actionStr: 'Filtering by Active Sources...'
     },
     { 
-      id: 'strategic', 
-      label: 'Strategic Tier', 
-      val: kpiStats.strategic, 
-      color: '#f59e0b', 
-      bg: 'rgba(245, 158, 11, 0.08)',
-      icon: ShieldCheck,
-      actionLabel: 'Mark Strategic',
-      actionStr: 'Select suppliers to mark as strategic.'
-    },
-    { 
-      id: 'pending', 
-      label: 'Pending Documents', 
-      val: kpiStats.pendingDocs, 
+      id: 'single_source', 
+      label: 'Single Source Risks', 
+      val: kpiStats.singleSourceRisks, 
       color: '#ef4444', 
       bg: 'rgba(239, 68, 68, 0.08)',
-      icon: FileText,
-      actionLabel: 'Request Docs',
-      actionStr: 'Bulk document request initiated.'
+      icon: ShieldCheck,
+      actionLabel: 'View Risks',
+      actionStr: 'Filtering items with single source risk...'
     },
     { 
-      id: 'low_response', 
-      label: 'Low Response', 
-      val: kpiStats.lowResponse, 
+      id: 'expiring_gmp', 
+      label: 'Expiring GMP', 
+      val: kpiStats.expiringGMP, 
+      color: '#f59e0b', 
+      bg: 'rgba(245, 158, 11, 0.08)',
+      icon: FileText,
+      actionLabel: 'Request GMP',
+      actionStr: 'Bulk document request initiated for expiring GMPs.'
+    },
+    { 
+      id: 'pending_coa', 
+      label: 'Pending COAs', 
+      val: kpiStats.pendingCOAs, 
       color: '#a855f7', 
       bg: 'rgba(168, 85, 247, 0.08)',
       icon: TrendingDown,
-      actionLabel: 'Send Reminder',
-      actionStr: 'Reminders sent to unresponsive partners.'
+      actionLabel: 'Chase COAs',
+      actionStr: 'Reminders sent for pending COAs.'
     },
     { 
       id: 'countries', 

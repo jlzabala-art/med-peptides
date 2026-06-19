@@ -81,6 +81,8 @@ const SalesOrdersHub = lazy(() => import('../features/sales-orders/SalesOrdersHu
 const InvoiceIntelligenceHub = lazy(() => import('../features/invoices/InvoiceIntelligenceHub'));
 const AdminPrescriptionsTab = lazy(() => import('../components/admin/prescriptions/AdminPrescriptionsTab'));
 const TransactionEditor = lazy(() => import('../components/admin/transactions/TransactionEditor'));
+const DatabaseMigrationUtility = lazy(() => import('../components/admin/market/DatabaseMigrationUtility'));
+
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
   <div style={{ padding: '2rem' }}>
