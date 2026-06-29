@@ -155,6 +155,8 @@ const DEFAULT_ROLE_PERMISSIONS = {
 
 const usersToCreate = [
   { role: 'admin', email: 'admin@regenpept.test', name: 'Test Admin' },
+  { role: 'medical_director', email: 'medical_director@regenpept.test', name: 'Test Medical Director' },
+  { role: 'fagron_doctor', email: 'fagron_doctor@regenpept.test', name: 'Test Fagron Doctor' },
   { role: 'clinic', email: 'clinic@regenpept.test', name: 'Test Clinic' },
   { role: 'doctor', email: 'doctor@regenpept.test', name: 'Test Doctor' },
   { role: 'wholesaler', email: 'wholesaler@regenpept.test', name: 'Test Wholesaler' },

@@ -3,7 +3,15 @@ import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import AtlasHealthLogo from './components/brand/AtlasHealthLogo';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import { resolveProductPrice } from './utils/resolveProductPrice';
-import { Routes, Route, useNavigate, useLocation, Navigate, useParams, Outlet } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+  useParams,
+  Outlet,
+} from 'react-router-dom';
 import AppRouter from './routes/AppRouter';
 import PageTransition from './components/PageTransition';
 import Header from './layout/Header';
@@ -19,6 +27,7 @@ import ClinicalAssistant from './components/shared/ClinicalAssistant';
 import { trackPageView } from './hooks/useAnalytics';
 import { Toaster } from 'react-hot-toast';
 import InstallPrompt from './components/pwa/InstallPrompt';
+import DevAutoLogin from './components/dev/DevAutoLogin';
 
 // --- Contexts ---
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -108,16 +117,21 @@ const ProtocolFinderRedirect = () => {
 const ObjectiveDetailRouteWrapper = ({ isProfessional, visibleProducts, onSelectProduct }) => {
   const { objectiveId } = useParams();
   const navigate = useNavigate();
-  
+
   const idMap = {
     'healing-repair': 'Healing & Repair',
     'metabolic-optimization': 'Metabolic Optimization',
     'neuro-cognitive': 'Neuro-Cognitive',
     'longevity-vitality': 'Longevity & Vitality',
     'somatic-research': 'Somatic Research',
-    'hormonal-pathways': 'Hormonal Pathways'
+    'hormonal-pathways': 'Hormonal Pathways',
   };
-  const resolvedId = idMap[objectiveId] || objectiveId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const resolvedId =
+    idMap[objectiveId] ||
+    objectiveId
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
 
   return (
     <ObjectiveDetailView
@@ -126,7 +140,6 @@ const ObjectiveDetailRouteWrapper = ({ isProfessional, visibleProducts, onSelect
       onSelectProduct={onSelectProduct}
       isProfessional={isProfessional}
       products={visibleProducts}
-      
     />
   );
 };
@@ -138,16 +151,37 @@ const APIDashboard = lazy(() => import('./templates/APIDashboard'));
 
 // Branded Atlas Health loading screen (used as Suspense fallback)
 const ClinicalLoader = () => (
-  <div style={{
-    height: '80vh', display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center', gap: '1rem'
-  }}>
+  <div
+    style={{
+      height: '80vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '1rem',
+    }}
+  >
     <div style={{ animation: 'atlas-pulse 1.8s ease-in-out infinite' }}>
       <AtlasHealthLogo size={52} />
     </div>
     <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500, margin: 0 }}>Loading…</p>
-    <div style={{ width: 100, height: 3, borderRadius: 99, background: 'rgba(0,54,102,0.08)', overflow: 'hidden' }}>
-      <div style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg,#003666,#00BCD4)', animation: 'atlas-shimmer 1.4s ease-in-out infinite' }} />
+    <div
+      style={{
+        width: 100,
+        height: 3,
+        borderRadius: 99,
+        background: 'rgba(0,54,102,0.08)',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          height: '100%',
+          borderRadius: 99,
+          background: 'linear-gradient(90deg,#003666,#00BCD4)',
+          animation: 'atlas-shimmer 1.4s ease-in-out infinite',
+        }}
+      />
     </div>
     <style>{`
       @keyframes atlas-pulse { 0%,100%{opacity:.8;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
@@ -174,18 +208,25 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const { tenantSlug } = useTenant();
-  const setScrolled = useUIStore(state => state.setScrolled);
+  const setScrolled = useUIStore((state) => state.setScrolled);
   const { showCheckout, setShowCheckout } = useUIStore();
   const { manualRegionChange, setManualRegionChange } = useUIStore();
-  const setSearchQuery = useUIStore(state => state.setSearchQuery);
-  const searchQuery = useUIStore(state => state.searchQuery);
-  const searchInitialTab = useUIStore(state => state.searchInitialTab);
-  const setSearchInitialTab = useUIStore(state => state.setSearchInitialTab);
-  const activeModal = useUIStore(state => state.activeModal);
-  const setActiveModal = useUIStore(state => state.setActiveModal);
+  const setSearchQuery = useUIStore((state) => state.setSearchQuery);
+  const searchQuery = useUIStore((state) => state.searchQuery);
+  const searchInitialTab = useUIStore((state) => state.searchInitialTab);
+  const setSearchInitialTab = useUIStore((state) => state.setSearchInitialTab);
+  const activeModal = useUIStore((state) => state.activeModal);
+  const setActiveModal = useUIStore((state) => state.setActiveModal);
 
   const tenantNavigate = (path, options) => {
-    if (typeof path === 'string' && tenantSlug && path.startsWith('/') && !path.startsWith('/admin') && !path.startsWith('/login') && !path.startsWith('/session-ended')) {
+    if (
+      typeof path === 'string' &&
+      tenantSlug &&
+      path.startsWith('/') &&
+      !path.startsWith('/admin') &&
+      !path.startsWith('/login') &&
+      !path.startsWith('/session-ended')
+    ) {
       navigate(`/partner/${tenantSlug}${path}`, options);
     } else {
       navigate(path, options);
@@ -198,12 +239,33 @@ function App() {
     setScrolled(false);
     trackPageView(location.pathname + location.search, document.title || 'Regenpept');
   }, [location.pathname, location.search]);
-  
+
   // Lifted global state with safety catch for Private modes
-  const { region, setRegion, settings, setSettings, products, compareList, setCompareList } = useShop();
-  const { cart, setCart, cartMetadata, setCartMetadata, cartOwnership, setCartOwnership, updateCart, removeProtocolBundle, cartBreakdown, cartCount } = useCart();
-  
-  const { isProfessional, isAdmin, isPhysician, isPatient, user, userProfile, loading: authLoading, activeRole } = useAuth();
+  const { region, setRegion, settings, setSettings, products, compareList, setCompareList } =
+    useShop();
+  const {
+    cart,
+    setCart,
+    cartMetadata,
+    setCartMetadata,
+    cartOwnership,
+    setCartOwnership,
+    updateCart,
+    removeProtocolBundle,
+    cartBreakdown,
+    cartCount,
+  } = useCart();
+
+  const {
+    isProfessional,
+    isAdmin,
+    isPhysician,
+    isPatient,
+    user,
+    userProfile,
+    loading: authLoading,
+    activeRole,
+  } = useAuth();
   useGlobalSettings();
   useCartOwnershipSync();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
@@ -219,7 +281,7 @@ function App() {
 
   const visibleProducts = useMemo(() => {
     if (isAdmin) return products;
-    return products.filter(p => {
+    return products.filter((p) => {
       if (p.isActive === false) return false;
       if (!isProfessional && (p.isProfessional === true || p.supplier === 'NPLAB')) return false;
       return true;
@@ -228,14 +290,14 @@ function App() {
 
   const [selectedShipping, setSelectedShipping] = useState('standard');
   const [pendingQuote, setPendingQuote] = useState(null);
-  
+
   // Dynamic Settings are now from useShop
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -245,37 +307,29 @@ function App() {
     try {
       if (region) localStorage.setItem('mp_region', region);
     } catch (e) {
-      console.warn("Storage restricted:", e);
+      console.warn('Storage restricted:', e);
     }
   }, [region]);
 
   // Listen for API Dashboard navigation event (dispatched by UserDashboard card)
   useEffect(() => {
-    const handler = () => { navigate('/api-dashboard'); };
+    const handler = () => {
+      navigate('/api-dashboard');
+    };
     window.addEventListener('nav:apiDashboard', handler);
     return () => window.removeEventListener('nav:apiDashboard', handler);
   }, []);
 
-
-
-
-
-  
-  
-
   // ── Product catalog is now fetched by ShopProvider ────────────────────────
 
-
-  
-  
   const toggleCompare = (product) => {
-    setCompareList(prev => {
-      const exists = prev.find(p => p.id === product.id || p.name === product.name);
+    setCompareList((prev) => {
+      const exists = prev.find((p) => p.id === product.id || p.name === product.name);
       if (exists) {
-        return prev.filter(p => p.id !== product.id && p.name !== product.name);
+        return prev.filter((p) => p.id !== product.id && p.name !== product.name);
       }
       if (prev.length >= 3) {
-        alert("You can only compare up to 3 products at a time.");
+        alert('You can only compare up to 3 products at a time.');
         return prev;
       }
       return [...prev, product];
@@ -283,32 +337,31 @@ function App() {
     setActiveModal('compare'); // Automatically open compare drawer when adding
   };
 
-
-
-  
-  
   const handleProtocolSupply = (bundle) => {
-    setCartMetadata(prev => ({
+    setCartMetadata((prev) => ({
       ...prev,
-      protocolBundles: [...(prev.protocolBundles || []), bundle]
+      protocolBundles: [...(prev.protocolBundles || []), bundle],
     }));
     setActiveModal('cart');
   };
 
-
-
-  
-  const isHome = location.pathname === '/' || ['/clinic', '/doctor', '/wholesaler', '/sales_agent', '/staff', '/patient'].includes(location.pathname);
-  const isPortalRoute = /^\/(admin|doctor|patient|wholesaler|pharmacy-dashboard|staff|clinic)/.test(location.pathname);
+  const isHome =
+    location.pathname === '/' ||
+    ['/clinic', '/doctor', '/wholesaler', '/sales_agent', '/staff', '/patient'].includes(
+      location.pathname
+    );
+  const isPortalRoute = /^\/(admin|doctor|patient|wholesaler|pharmacy-dashboard|staff|clinic)/.test(
+    location.pathname
+  );
 
   const handleCategorySelect = (cat) => {
     console.log('[App] Category Select:', cat);
-    
-    if (cat === 'Home') { 
+
+    if (cat === 'Home') {
       navigate(activeRole === 'admin' ? '/admin' : '/');
-      return; 
+      return;
     }
-    
+
     if (cat === 'Peptides' || cat === 'Products') {
       navigate('/collection/peptides');
       return;
@@ -342,7 +395,7 @@ function App() {
       'Cognitive & Mood': '/collection/protocols?goal=Cognitive & Mood',
       'Sleep & Circadian': '/collection/protocols?goal=Sleep & Circadian',
       'Hormonal Optimization': '/collection/protocols?goal=Hormonal Optimization',
-      'Immune Support': '/collection/protocols?goal=Immune Support'
+      'Immune Support': '/collection/protocols?goal=Immune Support',
     };
 
     if (focusAreaMap[cat]) {
@@ -375,12 +428,13 @@ function App() {
     } else if (cat === 'Legal') {
       navigate('/legal');
     } else {
-      const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const slug = cat
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
       navigate(`/collection/${slug}`);
     }
   };
-
-
 
   const handleProductSelect = (productOrName) => {
     // ── Product-type aware routing ──────────────────────────────────────────
@@ -393,18 +447,21 @@ function App() {
 
     const ROUTE_MAP = {
       supplement: (slug) => `/supplements/${slug}`,
-      peptide:    (slug) => `/product/${slug}`,
-      testing:    (slug) => `/testing/${slug}`,
+      peptide: (slug) => `/product/${slug}`,
+      testing: (slug) => `/testing/${slug}`,
       diagnostic: (slug) => `/testing/${slug}`,
     };
 
     if (typeof productOrName === 'object' && productOrName !== null) {
-      const obj  = productOrName;
+      const obj = productOrName;
       const slug = obj.slug || obj.id || (obj.name && obj.name.toLowerCase().replace(/\s+/g, '-'));
       if (!slug) return;
 
       // Primary: productType field or category-based check
-      const type = obj.productType || obj.type || (obj.category === 'Longevity Diagnostics' ? 'testing' : undefined);
+      const type =
+        obj.productType ||
+        obj.type ||
+        (obj.category === 'Longevity Diagnostics' ? 'testing' : undefined);
       const routeFn = ROUTE_MAP[type];
       if (routeFn) {
         navigate(routeFn(slug));
@@ -417,13 +474,19 @@ function App() {
         (p) => p.id === obj.id || p.slug === slug || p.name === obj.name
       );
       const isTestingCategory = obj.category === 'Longevity Diagnostics';
-      navigate(isKnownPeptide ? `/product/${slug}` : isTestingCategory ? `/testing/${slug}` : `/supplements/${slug}`);
+      navigate(
+        isKnownPeptide
+          ? `/product/${slug}`
+          : isTestingCategory
+            ? `/testing/${slug}`
+            : `/supplements/${slug}`
+      );
       window.scrollTo(0, 0);
       return;
     }
 
     // String path: look up in peptide products first
-    const product = products.find(p => p.name === productOrName || p.id === productOrName);
+    const product = products.find((p) => p.name === productOrName || p.id === productOrName);
     if (product) {
       const slug = product.slug || product.name.toLowerCase().replace(/\s+/g, '-');
       navigate(`/product/${slug}`);
@@ -438,12 +501,11 @@ function App() {
   // Global Title Management (SEO)
   useEffect(() => {
     if (location.pathname === '/') {
-      document.title = "Atlas Health | Premium Cellular Health & Longevity";
+      document.title = 'Atlas Health | Premium Cellular Health & Longevity';
     } else if (location.pathname === '/privacy') {
-      document.title = "Privacy Policy | Atlas Health";
+      document.title = 'Privacy Policy | Atlas Health';
     }
   }, [location.pathname]);
-
 
   // Global Modal Scroll Management
   useEffect(() => {
@@ -452,16 +514,21 @@ function App() {
     } else {
       document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [activeModal]);
 
-
-
   const routerProps = {
-    location, navigate, tenantNavigate,
-    handleCategorySelect, handleProductSelect, visibleProducts,
+    location,
+    navigate,
+    tenantNavigate,
+    handleCategorySelect,
+    handleProductSelect,
+    visibleProducts,
     setPendingQuote,
-    isHome, pendingQuote,
+    isHome,
+    pendingQuote,
   };
 
   // Public auth routes (/login, /login?tab=register) must NEVER be blocked by the loading gate.
@@ -470,16 +537,30 @@ function App() {
 
   if (authLoading && !loadingTimeout && !isPublicAuthRoute) {
     return (
-      <div style={{ 
-        height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#020e1c', color: 'white', fontFamily: 'var(--font-heading)'
-      }}>
+      <div
+        style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#020e1c',
+          color: 'white',
+          fontFamily: 'var(--font-heading)',
+        }}
+      >
         <div style={{ textAlign: 'center' }}>
           <div className="spinner" style={{ margin: '0 auto 1.5rem auto' }}></div>
-          <div style={{ fontSize: '1.2rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              fontSize: '1.2rem',
+              fontWeight: 600,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
             Atlas Health
           </div>
-          <button 
+          <button
             onClick={() => setLoadingTimeout(true)}
             style={{
               marginTop: '2rem',
@@ -489,7 +570,7 @@ function App() {
               color: 'rgba(255,255,255,0.4)',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '0.8rem'
+              fontSize: '0.8rem',
             }}
           >
             Bypass Loading
@@ -500,16 +581,18 @@ function App() {
   }
 
   return (
-      <div className="app">
-        <SEO />
-        <Toaster position="bottom-right" />
-        <InstallPrompt />
-        <AppRouter {...routerProps} />
-        <ClinicalAssistant 
-          isOpen={activeModal === 'ai'} 
-          setIsOpen={(val) => setActiveModal(val ? 'ai' : null)} 
-          contextMode={activeRole === 'admin' ? 'admin' : activeRole === 'doctor' ? 'doctor' : 'patient'}
-        />
+    <div className="app">
+      <SEO />
+      <Toaster position="bottom-right" />
+      <InstallPrompt />
+      <AppRouter {...routerProps} />
+      <ClinicalAssistant
+        isOpen={activeModal === 'ai'}
+        setIsOpen={(val) => setActiveModal(val ? 'ai' : null)}
+        contextMode={
+          activeRole === 'admin' ? 'admin' : activeRole === 'doctor' ? 'doctor' : 'patient'
+        }
+      />
       {/* Global Profile & Destination Bar — controlled by SHOW_REGION_BAR flag */}
       {SHOW_REGION_BAR && !showCheckout && (
         <RegionBar
@@ -521,17 +604,15 @@ function App() {
             setRegion(null);
             setManualRegionChange(true);
             // eslint-disable-next-line no-empty
-            try { localStorage.removeItem('mp_region'); } catch (e) {}
+            try {
+              localStorage.removeItem('mp_region');
+            } catch (e) {}
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       )}
 
-
-
-
-
-      <Cart 
+      <Cart
         isOpen={activeModal === 'cart'}
         onClose={() => setActiveModal(null)}
         cart={cart}
@@ -556,13 +637,16 @@ function App() {
 
       {/* ── Global Checkout Overlay (outside Routes so it works from any URL) ── */}
       {showCheckout && (
-        <div style={{
-          position: 'fixed', inset: 0,
-          zIndex: 3000,
-          backgroundColor: 'var(--background, #fff)',
-          overflowY: 'auto',
-        }}>
-          <Checkout 
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 3000,
+            backgroundColor: 'var(--background, #fff)',
+            overflowY: 'auto',
+          }}
+        >
+          <Checkout
             cart={cart}
             cartMetadata={cartMetadata}
             region={region}
@@ -578,7 +662,7 @@ function App() {
               setCart({});
               setCartMetadata({});
               // Reset ownership back to logged-in patient defaults after order placed
-              setCartOwnership(prev => ({
+              setCartOwnership((prev) => ({
                 ...prev,
                 source: 'patient_selected',
                 recommendationId: null,
@@ -593,36 +677,46 @@ function App() {
       <BackToTop />
 
       {activeModal === 'compare' && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 3000, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'flex-end' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 3000,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
           <Suspense fallback={null}>
-            <ProductComparator 
-              compareList={compareList} 
-              setCompareList={setCompareList} 
-              onClose={() => setActiveModal(null)} 
+            <ProductComparator
+              compareList={compareList}
+              setCompareList={setCompareList}
+              onClose={() => setActiveModal(null)}
             />
           </Suspense>
         </div>
       )}
 
       <Suspense fallback={null}>
-        <SearchModal 
-          isOpen={activeModal === 'search'} 
-          onClose={() => { setActiveModal(null); setSearchQuery(''); setSearchInitialTab('peptides'); }} 
+        <SearchModal
+          isOpen={activeModal === 'search'}
+          onClose={() => {
+            setActiveModal(null);
+            setSearchQuery('');
+            setSearchInitialTab('peptides');
+          }}
           onSelectProduct={handleProductSelect}
           products={visibleProducts}
-          
-          
-          
           initialTab={searchInitialTab}
           isProfessional={isProfessional}
-          
         />
       </Suspense>
 
       {!isPublicAuthRoute && (
         <Suspense fallback={null}>
-          <AccessCatalogOverlay 
-            region={region} 
+          <AccessCatalogOverlay
+            region={region}
             setRegion={(r) => {
               setRegion(r);
               setManualRegionChange(false);
@@ -636,7 +730,8 @@ function App() {
 
       {/* ── Mobile Navigation ── */}
       {!isPortalRoute && <BottomTabBar />}
-      </div>
+      <DevAutoLogin />
+    </div>
   );
 }
 
