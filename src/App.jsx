@@ -18,6 +18,7 @@ import ExitProfessionalMode from './components/auth/ExitProfessionalMode';
 import ClinicalAssistant from './components/shared/ClinicalAssistant';
 import { trackPageView } from './hooks/useAnalytics';
 import { Toaster } from 'react-hot-toast';
+import InstallPrompt from './components/pwa/InstallPrompt';
 
 // --- Contexts ---
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -502,6 +503,7 @@ function App() {
       <div className="app">
         <SEO />
         <Toaster position="bottom-right" />
+        <InstallPrompt />
         <AppRouter {...routerProps} />
         <ClinicalAssistant 
           isOpen={activeModal === 'ai'} 

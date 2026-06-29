@@ -18,6 +18,9 @@ import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Beaker from "lucide-react/dist/esm/icons/beaker";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { triggerHaptic } from '../utils/haptics';
+import PullToRefreshWrapper from '../components/ui/PullToRefreshWrapper';
+import Skeleton from '../components/ui/Skeleton';
 
 
 
@@ -187,8 +190,14 @@ export default function DoctorDashboard() {
 
   const currentTab = ALL_TABS.find(t => t.id === activeTab);
 
+  const handleRefresh = async () => {
+    // Simulate network delay for refresh
+    return new Promise(resolve => setTimeout(resolve, 800));
+  };
+
   return (
-    <AppPortalLayout allowedRoles={['doctor', 'admin', 'staff']}>
+    <PullToRefreshWrapper onRefresh={handleRefresh}>
+      <AppPortalLayout allowedRoles={['doctor', 'admin', 'staff']}>
       {isAdmin && (
         <div style={{
           background: '#fff7e6',
@@ -248,5 +257,6 @@ export default function DoctorDashboard() {
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>
+    </PullToRefreshWrapper>
   );
 }
