@@ -1,21 +1,3 @@
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Save from "lucide-react/dist/esm/icons/save";
-import Check from "lucide-react/dist/esm/icons/check";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import X from "lucide-react/dist/esm/icons/x";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Package from "lucide-react/dist/esm/icons/package";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import User from "lucide-react/dist/esm/icons/user";
-import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
-import Edit3 from "lucide-react/dist/esm/icons/edit-3";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Pause from "lucide-react/dist/esm/icons/pause";
-import Play from "lucide-react/dist/esm/icons/play";
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 /**
@@ -28,26 +10,29 @@ import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/fi
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase';
 import { getPaginatedProtocols, updateProtocolFull } from '../../services/protocolStorage';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import {
+  RefreshCw,
+  ChevronDown,
+  ChevronRight,
+  Trash2,
+  Save,
+  Check,
+  Plus,
+  X,
+  AlertTriangle,
+  FlaskConical,
+  Package,
+  Clock,
+  User,
+  GripVertical,
+  Edit3,
+  ExternalLink,
+  Pause,
+  Play,
+  Archive,
+  Activity,
+} from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
-import notifier from '../../services/NotificationService';
 import CustomProtocolBuilder from './CustomProtocolBuilder';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -634,6 +619,7 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
               <p style={{ color: '#64748b', fontSize: '0.95rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
                 You can manually assemble the phases, or let Atlas AI generate a draft clinical pathway based on your parameters.
               </p>
+              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                 <button 
                   onClick={buildTemplate}
@@ -659,6 +645,7 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </button>
+          
           {step < 3 && (
             <button 
               onClick={handleNext}
@@ -670,6 +657,7 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           )}
         </div>
       </motion.div>
+      
       <AnimatePresence>
         {showPathwayWizard && (
           <PathwayBuilder 
@@ -696,6 +684,176 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
   );
 }
 
+// ── Responsive CSS ────────────────────────────────────────────────────────────
+const responsiveStyles = `
+  .responsive-table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .flexible-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+  .flexible-table th {
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    background: #f8fafc;
+  }
+  .flexible-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+  .flexible-row {
+    transition: all 0.2s ease;
+    background: white;
+  }
+  .flexible-row:hover {
+    background: #f8fafc;
+  }
+  
+  @media (max-width: 768px) {
+    .flexible-table thead {
+      display: none;
+    }
+    .flexible-table, .flexible-table tbody, .flexible-table tr, .flexible-table td {
+      display: block;
+      width: 100%;
+    }
+    .flexible-row {
+      margin-bottom: 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .flexible-table td {
+      border-bottom: none;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .flexible-table td::before {
+      content: attr(data-label);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-right: 1rem;
+    }
+    .flexible-table td:first-child {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+  }
+  
+  .smart-chip {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+  }
+  .smart-chip.active {
+    background: #0f172a;
+    color: white;
+    border: 1px solid #0f172a;
+  }
+  .smart-chip.inactive {
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  .smart-chip.inactive:hover {
+    border-color: #94a3b8;
+    color: #334155;
+  }
+`;
+
+// ── Status Configuration ──────────────────────────────────────────────────────
+const STATUS_CONFIG = {
+  active:   { label: 'Active',   emoji: '🟢', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
+  draft:    { label: 'Draft',    emoji: '📝', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
+  archived: { label: 'Archived', emoji: '📦', color: '#f59e0b', bg: '#fffbeb', border: '#fde68a' },
+};
+
+function getStatusMeta(status) {
+  return STATUS_CONFIG[status] || { label: status || 'Unknown', emoji: '⚪', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' };
+}
+
+// ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
+function UniformKPIs({ data }) {
+  const total = data.length;
+  const active = data.filter(d => d.status === 'active').length;
+  const drafts = data.filter(d => d.status === 'draft').length;
+  const archived = data.filter(d => d.status === 'archived').length;
+
+  const stats = [
+    { label: 'Total Protocols', value: total, color: '#3b82f6', icon: <FlaskConical size={16} /> },
+    { label: 'Active', value: active, color: '#10b981', icon: <Activity size={16} /> },
+    { label: 'Drafts', value: drafts, color: '#6b7280', icon: <Edit3 size={16} /> },
+    { label: 'Archived', value: archived, color: '#f59e0b', icon: <Archive size={16} /> },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      {stats.map((s, i) => (
+        <div key={i} style={{
+          flex: '1 1 200px', minWidth: 180, background: 'white',
+          padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0',
+          display: 'flex', flexDirection: 'column', gap: '0.75rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
+            <div style={{ color: s.color, background: s.color + '15', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
+              {s.icon}
+            </div>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
+          </div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{s.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Smart Chips ───────────────────────────────────────────────────────────────
+function SmartChips({ activeChip, setActiveChip }) {
+  const chips = [
+    { id: 'all', label: 'All Protocols', icon: <Package size={14} /> },
+    { id: 'active', label: 'Active', icon: <Activity size={14} /> },
+    { id: 'drafts', label: 'Drafts', icon: <Edit3 size={14} /> },
+    { id: 'archived', label: 'Archived', icon: <Archive size={14} /> },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      {chips.map(chip => (
+        <button
+          key={chip.id}
+          className={`smart-chip ${activeChip === chip.id ? 'active' : 'inactive'}`}
+          onClick={() => setActiveChip(chip.id)}
+        >
+          {chip.icon} {chip.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function AdminProtocolsTab() {
   const { toast } = useToast();
@@ -713,6 +871,7 @@ export default function AdminProtocolsTab() {
   const [catalogProducts, setCatalog] = useState([]);
   const [showPathwayWizard, setShowPathwayWizard] = useState(false);
   const [showCustomBuilder, setShowCustomBuilder] = useState(false);
+  const [activeChip, setActiveChip] = useState('all');
 
   // Fetch initial protocols
   const fetchProtocols = useCallback(async () => {
@@ -723,7 +882,7 @@ export default function AdminProtocolsTab() {
         protocols: data,
         lastDoc: last,
         hasMore: more,
-      } = await getPaginatedProtocols(null, 20, { visibility: 'public' });
+      } = await getPaginatedProtocols(null, 100, {});
       setProtocols(data);
       // Inject data context for Atlas AI
       const activeProtocols = data.filter(p => p.status === 'active');
@@ -754,7 +913,7 @@ export default function AdminProtocolsTab() {
         protocols: data,
         lastDoc: last,
         hasMore: more,
-      } = await getPaginatedProtocols(lastDoc, 20, { visibility: 'public' });
+      } = await getPaginatedProtocols(lastDoc, 100, {});
       setProtocols((prev) => [...prev, ...data]);
       setLastDoc(last);
       setHasMore(more);
@@ -852,17 +1011,16 @@ export default function AdminProtocolsTab() {
 
   // Delete
   async function handleDelete(id) {
-    notifier.confirmCritical('Permanently delete this protocol? This cannot be undone.', async () => {
-      setDeleting(id);
-      try {
-        await deleteDoc(doc(db, 'protocols', id));
-        setProtocols((prev) => prev.filter((p) => p.id !== id));
-      } catch (err) {
-        toast.error('Delete failed: ' + err.message);
-      } finally {
-        setDeleting(null);
-      }
-    });
+    if (!window.confirm('Permanently delete this protocol? This cannot be undone.')) return;
+    setDeleting(id);
+    try {
+      await deleteDoc(doc(db, 'protocols', id));
+      setProtocols((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      toast.error('Delete failed: ' + err.message);
+    } finally {
+      setDeleting(null);
+    }
   };
 
   // Create new pathway from wizard
@@ -906,6 +1064,14 @@ export default function AdminProtocolsTab() {
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  // Filtered Protocols
+  const filteredProtocols = protocols.filter(p => {
+    if (activeChip === 'active') return p.status === 'active';
+    if (activeChip === 'drafts') return p.status === 'draft';
+    if (activeChip === 'archived') return p.status === 'archived';
+    return true;
+  });
 
   // Styles
   const inputStyle = {
@@ -963,7 +1129,9 @@ export default function AdminProtocolsTab() {
     );
 
   return (
-    <div>
+    <>
+      <style>{responsiveStyles}</style>
+
       {/* Header */}
       <div
         style={{
@@ -974,13 +1142,62 @@ export default function AdminProtocolsTab() {
         }}
       >
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)' }}>
-            All Protocols
+          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>
+            Protocols & Pathways
           </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            {protocols.length} total across all users
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem', color: '#64748b' }}>
+            Manage clinical pathways, kits, and treatment templates
           </p>
         </div>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            onClick={fetchProtocols}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+              padding: '0.5rem 1rem', background: 'white', border: '1px solid #e2e8f0',
+              borderRadius: '8px', color: '#475569', transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+            onMouseLeave={e => e.currentTarget.style.background = 'white'}
+          >
+            <RefreshCw size={16} /> Refresh
+          </button>
+          <button
+            onClick={() => setShowPathwayWizard(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+              padding: '0.5rem 1rem', background: '#0f172a', border: 'none',
+              borderRadius: '8px', color: 'white', transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
+            onMouseLeave={e => e.currentTarget.style.background = '#0f172a'}
+          >
+            <Plus size={16} /> Create Pathway
+          </button>
+          <button
+            onClick={() => navigate('/admin/protocols/new/edit')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+              padding: '0.5rem 1rem', background: '#3b82f6', border: 'none',
+              borderRadius: '8px', color: 'white', transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}
+            onMouseLeave={e => e.currentTarget.style.background = '#3b82f6'}
+          >
+            <Package size={16} /> Build Custom Kit
+          </button>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <UniformKPIs data={protocols} />
+      </div>
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <SmartChips activeChip={activeChip} setActiveChip={setActiveChip} />
       </div>
 
       {protocols.length === 0 && (
@@ -999,114 +1216,21 @@ export default function AdminProtocolsTab() {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingBottom: '0.25rem' }}>
-          <button
-            onClick={fetchProtocols}
-            className="btn btn-outline"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              padding: '0.4rem 1rem',
-            }}
-          >
-            <RefreshCw size={15} /> Refresh
-          </button>
-          <button
-            onClick={() => setShowPathwayWizard(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              padding: '0.4rem 1rem',
-              backgroundColor: '#0f172a',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px'
-            }}
-          >
-            <Plus size={15} /> Create Pathway
-          </button>
-          <button
-            onClick={() => navigate('/admin/protocols/new/edit')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              padding: '0.4rem 1rem',
-              backgroundColor: 'var(--primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px'
-            }}
-          >
-            <Package size={15} /> Build Custom Kit
-          </button>
-        </div>
-
         {/* Protocol Table */}
-        <div
-          style={{
-            background: 'var(--color-bg-surface)',
-            borderRadius: '4px',
-            border: '1px solid var(--border)',
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                textAlign: 'left',
-                fontSize: '0.85rem',
-              }}
-            >
-              <thead>
-                <tr style={{ background: '#f8f9fa', borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '0.75rem 1rem', width: '32px' }}></th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    Protocol Name
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Category
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Status
-                  </th>
-                  <th style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#5f6368' }}>
-                    Phases
-                  </th>
-                  <th
-                    style={{
-                      padding: '0.75rem 1rem',
-                      fontWeight: 600,
-                      color: '#5f6368',
-                      textAlign: 'right',
-                    }}
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {protocols.map((p, i) => {
+        <div className="responsive-table-container">
+          <table className="flexible-table">
+            <thead>
+              <tr>
+                <th style={{ width: '40px' }}></th>
+                <th>Protocol Name</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Phases</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProtocols.map((p, i) => {
                   const isOpen = !!expanded[p.id];
                   const e = getEdit(p);
                   const isDirty = !!edits[p.id];
@@ -1125,16 +1249,12 @@ export default function AdminProtocolsTab() {
                     handleSave(p.id);
                   };
 
+                  const meta = getStatusMeta(e.status);
+
                   return (
                     <React.Fragment key={p.id}>
-                      <tr
-                        style={{
-                          borderBottom: isLast && !isOpen ? 'none' : '1px solid var(--border)',
-                          background: isOpen ? '#f8f9fa' : 'transparent',
-                          transition: 'background 0.2s',
-                        }}
-                      >
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                      <tr className="flexible-row">
+                        <td data-label="Details" style={{ width: '40px' }}>
                           <button
                             onClick={() => setExpanded((prev) => ({ ...prev, [p.id]: !isOpen }))}
                             aria-label="Toggle details"
@@ -1156,7 +1276,7 @@ export default function AdminProtocolsTab() {
                             </motion.div>
                           </button>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
+                        <td data-label="Protocol Name">
                           {isDirty ? (
                             <input
                               value={e.protocol_name}
@@ -1188,7 +1308,7 @@ export default function AdminProtocolsTab() {
                             </div>
                           )}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>
+                        <td data-label="Category">
                           {isDirty ? (
                             <input
                               value={e.therapeutic_category}
@@ -1207,42 +1327,24 @@ export default function AdminProtocolsTab() {
                             e.therapeutic_category || '—'
                           )}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <div
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              textTransform: 'uppercase',
-                              background:
-                                e.status === 'active'
-                                  ? '#e6f4ea'
-                                  : e.status === 'archived'
-                                    ? '#f1f3f4'
-                                    : '#fef7e0',
-                              color:
-                                e.status === 'active'
-                                  ? '#137333'
-                                  : e.status === 'archived'
-                                    ? '#5f6368'
-                                    : '#b06000',
-                            }}
-                          >
-                            {e.status}
-                          </div>
+                        <td data-label="Status">
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                            padding: '0.25rem 0.6rem', borderRadius: '20px',
+                            background: meta.bg, color: meta.color, border: `1px solid ${meta.border}`,
+                            fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap'
+                          }}>
+                            {meta.emoji} {meta.label}
+                          </span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#5f6368' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <td data-label="Phases">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: '#334155' }}>
                             <FlaskConical size={14} /> {(e.phases ?? []).length}
                           </div>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                        <td data-label="Actions" style={{ textAlign: 'right' }}>
                           <div
-                            style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center' }}
+                            style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}
                           >
                             {isDirty ? (
                               <button
@@ -1335,6 +1437,7 @@ export default function AdminProtocolsTab() {
                                           {phase.items?.length || 0} Products
                                         </span>
                                       </div>
+                                      
                                       {phase.items && phase.items.length > 0 ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                           {phase.items.map((item, j) => (
@@ -1427,9 +1530,10 @@ export default function AdminProtocolsTab() {
           </div>
         )}
       </div>
+    
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminProtocolsTab | Props: none
       </div>
-</div>
+    </>
   );
 }

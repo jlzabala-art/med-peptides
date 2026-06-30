@@ -269,6 +269,7 @@ const NAV_GROUPS = [
     badge: 'LIVE',
     badgeColor: 'var(--color-success)',
     items: [
+      { id: 'simulations', label: 'Role Simulations', icon: Users },
       { id: 'ai-agents', label: 'AI Agents Hub', icon: Network },
       { id: 'prescription-agent', label: 'Prescription Agent', icon: Zap },
       { id: 'clinical-ai', label: 'Atlas AI', icon: Bot },

@@ -513,18 +513,7 @@ service cloud.firestore {
     match /catalog_metadata/{docId} {
       allow read, write: if true;
     }
-    match /products/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    match /supplements/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-    match /protocols/{docId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
+
 
     // ── catalogs & catalogLeadRequests ──────────────────────────────────────
     // B2B context: tenantId (ownerId) is an org ID, not user UID.

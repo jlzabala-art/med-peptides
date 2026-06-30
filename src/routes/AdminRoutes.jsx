@@ -99,6 +99,7 @@ const TransactionEditor = lazy(() => import('../components/admin/transactions/Tr
 const DatabaseMigrationUtility = lazy(
   () => import('../components/admin/market/DatabaseMigrationUtility')
 );
+const SimulationHub = lazy(() => import('../pages/admin/SimulationHub'));
 
 // ── Premium loading skeleton for lazy-loaded admin tabs ────────────────────────
 const AdminTabSkeleton = () => (
@@ -665,6 +666,14 @@ export default function AdminRoutes() {
             element={
               <AdminTabErrorBoundary tabId="ai-agents" tabLabel="AI Agents">
                 <AdminAIAgentsTab />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="simulations"
+            element={
+              <AdminTabErrorBoundary tabId="simulations" tabLabel="Role Simulations">
+                <SimulationHub />
               </AdminTabErrorBoundary>
             }
           />

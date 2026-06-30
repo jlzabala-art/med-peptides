@@ -41,6 +41,7 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
   const today   = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 
   // Derived metadata
+  const category         = protocol?.category || meta.category || '—';
   const primaryGoal      = meta.primary_goal || protocol?.primary_goal || '—';
   const totalWeeks       = protocol?.protocol_duration_weeks || '—';
   const numPhases        = protocol?.number_of_phases || phases.length || '—';
@@ -55,6 +56,18 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
   const longDescription  = meta.longDescription || '';
   const lastReviewed     = protocol?.protocol_last_reviewed_at || '—';
   const washoutWeeks     = protocol?.washout_recommended_weeks || protocol?.safety_profile?.washout_recommended_weeks || null;
+
+  const numCompounds     = useMemo(() => {
+    const compoundMap = new Map();
+    phases.forEach(ph => {
+      const drugs = ph.drugs || ph.drugs_used || ph.compounds || [];
+      drugs.forEach(d => {
+        const key = d.product_slug || d.name || d.product_title || 'unknown';
+        if (!compoundMap.has(key)) compoundMap.set(key, d);
+      });
+    });
+    return compoundMap.size || '—';
+  }, [phases]);
 
   // ── Procurement Payload Calculation for Cart ────────────────────────────
   const procurementPayload = useMemo(() => {
@@ -288,13 +301,12 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
           {/* Metadata row — flat table style matching PDF */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0', borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: '0.75rem' }}>
             {[
-              primaryGoal !== '—' && { label: 'PRIMARY GOAL', value: primaryGoal },
+              category !== '—' && { label: 'CATEGORY', value: category },
+              complexity !== '—' && { label: 'COMPLEXITY', value: complexity.charAt(0).toUpperCase() + complexity.slice(1) },
               { label: 'DURATION', value: `${totalWeeks} weeks` },
               { label: 'PHASES', value: numPhases },
+              { label: 'COMPOUNDS', value: numCompounds },
               evidenceGrade !== '—' && { label: 'EVIDENCE', value: `Grade ${evidenceGrade}` },
-              complexity !== '—' && { label: 'COMPLEXITY', value: complexity.charAt(0).toUpperCase() + complexity.slice(1) },
-              { label: 'VERSION', value: version },
-              { label: 'AUTHOR', value: author },
             ].filter(Boolean).map((item, i, arr) => (
               <div key={i} style={{
                 paddingRight: '1.25rem', marginRight: '1.25rem',

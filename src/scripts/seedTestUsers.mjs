@@ -150,6 +150,62 @@ const DEFAULT_ROLE_PERMISSIONS = {
     canAccessAcademy: true,
     canAccessClinicalAI: false,
     canAccessCustomSynthesis: false
+  },
+  medical_director: {
+    canRecommend: true,
+    canBulkOrder: true,
+    customSynthesis: true,
+    clinicalLogs: true,
+    manageStaff: true,
+    trackCommission: false,
+    canAccessAdminDashboard: false,
+    canAccessDoctorDashboard: true,
+    canAccessCalculator: true,
+    canAccessAcademy: true,
+    canAccessClinicalAI: true,
+    canAccessCustomSynthesis: true
+  },
+  fagron_doctor: {
+    canRecommend: true,
+    canBulkOrder: true,
+    customSynthesis: true,
+    clinicalLogs: true,
+    manageStaff: true,
+    trackCommission: false,
+    canAccessAdminDashboard: false,
+    canAccessDoctorDashboard: true,
+    canAccessCalculator: true,
+    canAccessAcademy: true,
+    canAccessClinicalAI: true,
+    canAccessCustomSynthesis: true
+  },
+  supplier: {
+    canRecommend: false,
+    canBulkOrder: true,
+    customSynthesis: true,
+    clinicalLogs: false,
+    manageStaff: false,
+    trackCommission: false,
+    canAccessAdminDashboard: false,
+    canAccessDoctorDashboard: false,
+    canAccessCalculator: false,
+    canAccessAcademy: false,
+    canAccessClinicalAI: false,
+    canAccessCustomSynthesis: false
+  },
+  account_manager: {
+    canRecommend: false,
+    canBulkOrder: false,
+    customSynthesis: false,
+    clinicalLogs: false,
+    manageStaff: false,
+    trackCommission: true,
+    canAccessAdminDashboard: true,
+    canAccessDoctorDashboard: false,
+    canAccessCalculator: false,
+    canAccessAcademy: true,
+    canAccessClinicalAI: false,
+    canAccessCustomSynthesis: false
   }
 };
 
@@ -160,6 +216,8 @@ const usersToCreate = [
   { role: 'clinic', email: 'clinic@regenpept.test', name: 'Test Clinic' },
   { role: 'doctor', email: 'doctor@regenpept.test', name: 'Test Doctor' },
   { role: 'wholesaler', email: 'wholesaler@regenpept.test', name: 'Test Wholesaler' },
+  { role: 'supplier', email: 'supplier@regenpept.test', name: 'Test Supplier' },
+  { role: 'account_manager', email: 'account_manager@regenpept.test', name: 'Test Account Manager' },
   { role: 'sales_agent', email: 'sales_agent@regenpept.test', name: 'Test Sales Agent' },
   { role: 'staff', email: 'staff@regenpept.test', name: 'Test Staff' },
   { role: 'patient', email: 'patient@regenpept.test', name: 'Test Patient' },
@@ -177,7 +235,7 @@ async function seed() {
   // 2. Create users
   for (const item of usersToCreate) {
     const { role, email, name } = item;
-    const password = 'password123';
+    const password = 'Regenpept2026!';
     console.log(`👤 Processing user: ${email} (Role: ${role})...`);
 
     let uid;

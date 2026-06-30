@@ -1,0 +1,324 @@
+Atlas AI – Fagron Physician Prescription Module
+
+Objective
+
+Create a simplified physician-facing prescription workflow inside Atlas AI for doctors referred by Fagron Genomics.
+
+The primary goal is to allow physicians to upload a PDF prescription or treatment recommendation generated from Fagron Genomics, automatically extract all relevant data using OCR and AI, and convert it into a structured Atlas AI Prescription with minimal user interaction.
+
+The design must maximize reuse of the existing Prescription Module and existing Patient infrastructure, avoiding duplicate logic whenever possible.
+
+⸻
+
+User Access Logic
+
+When a user logs in:
+
+IF:
+
+* User Role = Physician
+* Referral Source = Fagron Genomics
+
+THEN:
+
+Display the “Fagron Physician Workspace” instead of the standard Atlas Prescription Workflow.
+
+This workspace should be intentionally simplified and optimized for speed.
+
+⸻
+
+Main Workflow
+
+Step 1 – Upload Prescription PDF
+
+Primary CTA:
+
+“Upload Fagron Recommendation”
+
+Accepted formats:
+
+* PDF
+* Image (JPG, PNG)
+* Multi-page PDF
+
+Drag & Drop supported.
+
+⸻
+
+Step 2 – OCR + AI Extraction
+
+After upload:
+
+Use OCR to extract all visible text.
+
+Then use AI to identify:
+
+Patient Information
+
+* Patient Name
+* Patient ID
+* Date of Birth
+* Gender
+* Contact Information (if available)
+
+Prescription Information
+
+* Product Name
+* Active Ingredients
+* Strength
+* Dosage
+* Quantity
+* Administration Route
+* Frequency
+* Duration
+* Refills (if specified)
+
+Clinical Information
+
+* Biomarkers referenced
+* Genetic markers referenced
+* Clinical notes
+* Physician comments
+
+⸻
+
+Step 3 – Prescription Conversion
+
+Automatically convert extracted data into the existing Atlas Prescription structure.
+
+Important:
+
+DO NOT create a new prescription engine.
+
+Reuse:
+
+* Existing Prescription Entity
+* Existing Prescription Statuses
+* Existing Prescription Database
+* Existing Prescription Validation Logic
+* Existing Pricing Engine
+* Existing Refill Logic
+
+The uploaded PDF becomes simply another Prescription Creation Method.
+
+Existing methods:
+
+* Manual Prescription
+* Biomarker-driven Prescription
+* Protocol-driven Prescription
+
+Add:
+
+* PDF OCR Prescription
+
+⸻
+
+Review Screen
+
+Show a simple review page:
+
+Left Side
+
+Original PDF Preview
+
+Right Side
+
+Extracted Structured Data
+
+Editable fields:
+
+* Product
+* Strength
+* Quantity
+* Directions
+* Notes
+
+Allow physician corrections before saving.
+
+⸻
+
+Patient Record Integration
+
+When saved:
+
+Automatically create or update the Patient Profile.
+
+Inside Patient Profile create:
+
+New Section
+
+“Fagron Prescriptions”
+
+Store:
+
+* Original PDF
+* OCR Text
+* Structured Prescription
+* Date Created
+* Prescribing Physician
+
+Chronological timeline.
+
+⸻
+
+Calendar Integration
+
+Automatically create calendar events.
+
+Event 1
+
+Prescription Created
+
+Date = Prescription Date
+
+⸻
+
+Event 2
+
+Recommended Follow-Up
+
+Date calculated from:
+
+Prescription Duration
+
+Examples:
+
+30-day treatment → follow-up at Day 30
+
+60-day treatment → follow-up at Day 60
+
+90-day treatment → follow-up at Day 90
+
+⸻
+
+Event 3
+
+Refill Reminder
+
+Automatically calculated.
+
+Configurable by admin.
+
+Default:
+
+7 days before expected completion.
+
+⸻
+
+Physician Dashboard
+
+Keep extremely simple.
+
+Widgets:
+
+Active Patients
+
+Patients with active prescriptions.
+
+⸻
+
+Upcoming Refills
+
+Patients requiring action soon.
+
+⸻
+
+Follow-Up Appointments
+
+Patients approaching review dates.
+
+⸻
+
+Recent Uploads
+
+Last uploaded Fagron recommendations.
+
+⸻
+
+UX Requirements
+
+The physician should be able to:
+
+1. Login
+2. Upload PDF
+3. Review extracted data
+4. Save
+
+In under 60 seconds.
+
+No complex prescription builder.
+
+No protocol configuration.
+
+No catalog management.
+
+No inventory management.
+
+Hide all non-essential functionality.
+
+⸻
+
+Permissions
+
+Physician can:
+
+* Upload prescriptions
+* View own patients
+* View prescription history
+* View refill reminders
+* Request quotation
+
+Physician cannot:
+
+* Edit product catalog
+* Edit protocols
+* Edit pricing rules
+* Manage suppliers
+* Manage inventory
+
+⸻
+
+Quotation Integration
+
+Each prescription should include a simple:
+
+“Request Quote”
+
+button.
+
+When pressed:
+
+Reuse the existing Atlas quotation engine.
+
+No duplicate quotation workflow should be created.
+
+⸻
+
+Technical Architecture
+
+Principle:
+
+Reuse before building.
+
+Reuse:
+
+* Patient Module
+* Prescription Module
+* Calendar Module
+* Notifications Module
+* Quotation Module
+* User Management Module
+
+Create only:
+
+* Fagron Physician Workspace
+* PDF OCR Service
+* Prescription Mapping Layer
+
+Everything else must leverage existing Atlas AI infrastructure.
+
+⸻
+
+Success Metric
+
+A Fagron physician should be able to convert a PDF recommendation into a complete Atlas prescription, stored in the patient record and scheduled for refill follow-up, in less than one minute with fewer than three clicks.

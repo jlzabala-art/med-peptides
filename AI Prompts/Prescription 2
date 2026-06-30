@@ -1,0 +1,515 @@
+You are a Senior Product Designer, Healthcare UX Specialist, and SaaS Platform Architect.
+
+Your task is to redesign the entire Prescription Management experience inside Atlas Health without changing any existing business logic, workflows, permissions, database structures, or functionality.
+
+The goal is to transform the current experience from an administrative system into a premium clinical workspace optimized for physicians, medical directors, longevity clinics, peptide prescribers, BHRT specialists, and precision medicine teams.
+
+The final design should feel comparable to:
+
+• Epic MyChart
+• AthenaHealth
+• HubSpot CRM
+• Linear
+• Notion
+• Stripe Dashboard
+
+while preserving every existing feature.
+
+───────────────────────────────
+PRIMARY OBJECTIVES
+───────────────────────────────
+
+Improve:
+
+• Visual hierarchy
+• Information architecture
+• Clinical readability
+• Mobile responsiveness
+• Speed of understanding
+• Physician workflow efficiency
+• White-space utilization
+• Action discoverability
+
+Do NOT:
+
+• Add new functionality
+• Remove functionality
+• Change business rules
+• Change workflows
+• Change permissions
+• Add database fields
+• Add backend requirements
+
+Only redesign the presentation and UX.
+
+───────────────────────────────
+GENERAL UX PRINCIPLES
+───────────────────────────────
+
+A physician should immediately understand:
+
+1. Who is the patient?
+2. What protocol is active?
+3. What is the diagnosis?
+4. What is the current prescription status?
+5. What action is required?
+
+without scanning the entire page.
+
+Current screens feel administrative.
+
+The redesign should feel clinical.
+
+Replace dense interfaces with structured clinical layouts.
+
+Use:
+
+• Better typography hierarchy
+• Stronger spacing
+• Cleaner cards
+• Better grouping
+• Clinical visual language
+• Reduced cognitive load
+
+Avoid:
+
+• Spreadsheet feeling
+• Excessive empty space
+• Overly dense tables
+• Small action icons
+• Weak visual hierarchy
+
+───────────────────────────────
+PRESCRIPTION HUB (LIST VIEW)
+───────────────────────────────
+
+Current problems:
+
+• KPIs consume excessive vertical space
+• Too many visible columns
+• Difficult to identify priority prescriptions
+• Actions lack prominence
+• Table feels operational instead of clinical
+
+Redesign the page into a modern clinical queue.
+
+Keep all current filters and actions.
+
+Convert each prescription row into a richer clinical record card.
+
+Each card should emphasize:
+
+PATIENT
+Protocol
+Diagnosis
+Source
+API Count
+Follow-Up
+Status
+
+Status badges should become much more prominent.
+
+Examples:
+
+🟡 Awaiting Review
+🟢 Active
+🟣 Quotation Requested
+🔴 Expired
+🔵 Fulfilled
+
+Actions should be grouped visually and aligned consistently.
+
+───────────────────────────────
+KPI AREA
+───────────────────────────────
+
+Current KPI cards waste vertical space.
+
+Replace with compact summary bar.
+
+Example:
+
+20 Total
+2 Awaiting Review
+17 Active
+0 Fulfilled
+0 Expired
+
+Desktop:
+Single-row layout.
+
+Mobile:
+Horizontal scroll container.
+
+Reduce dashboard height significantly.
+
+───────────────────────────────
+FILTER AREA
+───────────────────────────────
+
+Keep:
+
+• Search
+• Status
+• Source
+• Columns
+
+Improve:
+
+• Alignment
+• Density
+• Spacing
+
+Desktop:
+
+Search | Status | Source | Columns
+
+Mobile:
+
+Collapsible filter drawer.
+
+Filters remain sticky while scrolling.
+
+───────────────────────────────
+PRESCRIPTION DETAIL PAGE
+───────────────────────────────
+
+Current detail page feels like a form.
+
+Transform it into a clinical workspace.
+
+───────────────────────────────
+HEADER REDESIGN
+───────────────────────────────
+
+Current:
+
+AUTO-20260622-001
+Patient
+Type
+
+Not ideal.
+
+Redesign:
+
+Patient Name
+
+Protocol Name
+
+Status Badge
+
+Secondary information:
+
+Doctor
+Account Manager
+Created Date
+
+Move prescription ID into secondary metadata.
+
+The patient must be the visual focal point.
+
+───────────────────────────────
+ACTION BAR
+───────────────────────────────
+
+Current:
+
+Single Edit button.
+
+Create professional action toolbar.
+
+Examples:
+
+Edit
+Approve
+Export PDF
+Generate Quote
+More Actions
+
+Desktop:
+
+Top-right action bar.
+
+Mobile:
+
+Floating action menu.
+
+───────────────────────────────
+OVERVIEW TAB
+───────────────────────────────
+
+Current page contains large unused areas.
+
+Create a responsive two-column layout.
+
+Desktop:
+
+LEFT COLUMN
+
+Patient
+Doctor
+Account Manager
+
+RIGHT COLUMN
+
+Diagnosis
+Protocol
+Clinical Notes
+
+Each section should use clean cards.
+
+───────────────────────────────
+CLINICAL SUMMARY STRIP
+───────────────────────────────
+
+Add a summary banner directly below the header.
+
+Use existing data only.
+
+Display:
+
+Number of APIs
+Duration
+Follow-Up Interval
+Required Tests
+
+Example:
+
+2 APIs | 10 Weeks | Review in 2 Months | 1 Required Test
+
+No new functionality.
+
+Only presentation.
+
+───────────────────────────────
+ITEMS & CALCULATIONS TAB
+───────────────────────────────
+
+This is the most important tab.
+
+Current version feels like Excel.
+
+Keep all information.
+
+Improve readability.
+
+Desktop:
+
+Create enriched clinical table.
+
+Emphasize:
+
+Product
+Dose
+Frequency
+Duration
+Units Needed
+
+Use improved spacing.
+
+Reduce visual density.
+
+Highlight product names.
+
+Support long peptide names elegantly.
+
+Example:
+
+MOTS-C
+5 mg
+Twice Weekly
+10 Weeks
+10 Units
+
+Retatrutide
+2.5 mg
+Weekly
+10 Weeks
+1 Unit
+
+───────────────────────────────
+MOBILE ITEMS EXPERIENCE
+───────────────────────────────
+
+Never use horizontal scrolling.
+
+Convert rows into cards.
+
+Example:
+
+MOTS-C
+
+Dose: 5 mg
+Frequency: Twice Weekly
+Duration: 10 Weeks
+Units Needed: 10
+
+───────────────────────────────
+FOLLOW-UP TAB
+───────────────────────────────
+
+Current screen feels unfinished.
+
+Transform into a monitoring workspace.
+
+Keep same data.
+
+Display:
+
+Review Interval
+
+Required Tests
+
+Use a visual timeline-style component.
+
+Example:
+
+Review in 2 Months
+
+Required Tests:
+• Testosterone
+
+Make the next clinical milestone obvious.
+
+───────────────────────────────
+DOCUMENTS TAB
+───────────────────────────────
+
+Current empty state looks incomplete.
+
+Create premium document management experience.
+
+Empty state:
+
+Illustration
+Explanation
+Upload Button
+
+When documents exist:
+
+Show cards with:
+
+File Name
+Type
+Upload Date
+Preview Icon
+
+No new functionality.
+
+Only improved presentation.
+
+───────────────────────────────
+TIMELINE TAB
+───────────────────────────────
+
+This area should feel like a CRM audit log.
+
+Use a professional vertical timeline.
+
+Each event displayed as a timeline card.
+
+Examples:
+
+Prescription Uploaded
+
+Jun 24
+Document processed and added
+
+────────────────
+
+Assigned to Account Manager
+
+Jun 24
+Assigned to Kasia Manager
+
+────────────────
+
+Prescription Updated
+
+Jun 24
+Updated by Administrator
+
+Use:
+
+• Event icons
+• Status colors
+• Better spacing
+• Strong hierarchy
+
+───────────────────────────────
+RESPONSIVE DESIGN
+───────────────────────────────
+
+Design mobile first.
+
+Must work perfectly on:
+
+• Laptop
+• Desktop
+• Tablet
+• Mobile
+
+───────────────────────────────
+MOBILE HEADER
+───────────────────────────────
+
+Keep visible:
+
+Patient Name
+Status Badge
+Protocol Name
+
+Sticky while scrolling.
+
+───────────────────────────────
+MOBILE TAB NAVIGATION
+───────────────────────────────
+
+Replace traditional tabs with:
+
+Scrollable segmented control
+
+Overview | Items | Follow-Up | Documents | Timeline
+
+Sticky beneath header.
+
+───────────────────────────────
+MOBILE ACTIONS
+───────────────────────────────
+
+Move actions into:
+
+Floating Action Button
+
+or
+
+Bottom Action Sheet
+
+to reduce clutter.
+
+───────────────────────────────
+VISUAL STYLE
+───────────────────────────────
+
+Use:
+
+• Premium healthcare SaaS aesthetics
+• Soft neutral backgrounds
+• White cards
+• Subtle shadows
+• Modern iconography
+• Clean typography
+• Excellent spacing
+• Clear status colors
+
+The final result should look like a world-class precision medicine platform used for:
+
+• Peptides
+• BHRT
+• Functional Medicine
+• Longevity Programs
+• Biomarker Monitoring
+• Genomics
+• Personalized Clinical Protocols
+
+while preserving 100% of the existing functionality.

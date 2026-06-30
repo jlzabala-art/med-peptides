@@ -1,0 +1,250 @@
+You are a Senior Clinical UX Architect and Healthcare Information Designer.
+
+Review the Atlas Health Medical Protocol Detail page and perform a complete Information Architecture audit.
+
+Do NOT change any functionality, calculations, workflows, permissions, APIs, database structures, backend logic, or business rules.
+
+Your objective is to eliminate redundant information and enforce a strict Single Source of Truth model throughout the interface.
+
+--------------------------------------------------
+
+PROBLEM TO SOLVE
+--------------------------------------------------
+
+The Protocol Header already displays core protocol metadata:
+
+• Status
+• Duration
+• Number of Phases
+• Number of Compounds
+• Evidence Level
+• Category
+• Complexity
+
+However, the same information is repeated inside tabs and side panels.
+
+This creates:
+
+• Visual clutter
+• Cognitive overload
+• Wasted screen space
+• Reduced physician confidence
+• Risk of inconsistent values
+• Poor information hierarchy
+
+A physician should never see the same protocol metadata twice on the same screen.
+
+--------------------------------------------------
+
+SINGLE SOURCE OF TRUTH RULE
+--------------------------------------------------
+
+Protocol metadata must be displayed only once.
+
+The Protocol Header becomes the authoritative source for:
+
+• Protocol Name
+• Status
+• Category
+• Complexity
+• Duration
+• Number of Phases
+• Number of Compounds
+• Evidence Level
+
+No other section may repeat these values.
+
+All sections must read from the same protocol object.
+
+Example:
+
+protocol.durationWeeks
+protocol.phaseCount
+protocol.compoundCount
+protocol.category
+protocol.complexity
+protocol.evidenceLevel
+
+Never duplicate state.
+
+Never hardcode values.
+
+Never create local copies.
+
+--------------------------------------------------
+
+HEADER
+--------------------------------------------------
+
+Keep only protocol identity information.
+
+Display:
+
+• Protocol Name
+• Status
+• Category
+• Complexity
+• Duration
+• Phases
+• Compounds
+• Evidence Level
+
+This becomes the master protocol summary.
+
+--------------------------------------------------
+
+TREATMENT PLAN TAB
+--------------------------------------------------
+
+Remove all duplicated KPI cards.
+
+Delete any repeated display of:
+
+• Duration
+• Number of Phases
+• Number of Compounds
+• Category
+• Complexity
+• Evidence Level
+
+The Treatment Plan tab should focus exclusively on treatment execution.
+
+Display only:
+
+• Phase structure
+• Dose
+• Frequency
+• Route
+• Compound sequence
+• Escalation schedule
+• Timeline visualization
+
+No protocol metadata.
+
+No summary cards.
+
+No repeated protocol statistics.
+
+--------------------------------------------------
+
+CLINICAL SIDEBAR
+--------------------------------------------------
+
+Audit every field.
+
+Remove anything already displayed in the header.
+
+Do not repeat:
+
+• Category
+• Complexity
+• Duration
+• Evidence Level
+• Phases
+• Compounds
+
+Sidebar should only contain unique operational information such as:
+
+• Patients Treated
+• Average Adherence
+• Active Prescriptions
+• Last Clinical Review
+• Real World Outcomes
+• Adoption Metrics
+
+If operational data is unavailable, hide the card entirely.
+
+Do not display placeholder values.
+
+Do not display empty metrics.
+
+--------------------------------------------------
+
+EXPECTED OUTCOMES TAB
+--------------------------------------------------
+
+Show only:
+
+• Expected therapeutic outcomes
+• Milestones
+• Clinical benefits
+• Evidence references
+
+Do not repeat protocol metadata.
+
+--------------------------------------------------
+
+SUPPLY REQUIREMENTS TAB
+--------------------------------------------------
+
+Show only:
+
+• Vials required
+• Consumption calculations
+• Inventory planning
+• Refill requirements
+
+Do not repeat protocol metadata.
+
+--------------------------------------------------
+
+UX VALIDATION RULE
+--------------------------------------------------
+
+Before rendering any information block:
+
+Ask:
+
+"Is this information already visible elsewhere on this page?"
+
+If YES:
+
+Do not render it again.
+
+Unless clinically essential.
+
+--------------------------------------------------
+
+DATA CONSISTENCY AUDIT
+--------------------------------------------------
+
+Verify that every displayed value originates from the same protocol source object.
+
+Compare:
+
+Header
+Sidebar
+Treatment Plan
+Expected Outcomes
+Supply Requirements
+
+Detect any mismatches.
+
+If values differ:
+
+• Identify the conflicting fields
+• Trace the source of each value
+• Refactor to use the canonical protocol object
+
+--------------------------------------------------
+
+DESIGN GOAL
+--------------------------------------------------
+
+The final experience should feel like:
+
+• Epic Hyperdrive
+• Athenahealth
+• Function Health
+• Lifeforce
+• Levels Health
+
+The physician should immediately understand:
+
+1. What protocol this is.
+2. How the treatment is structured.
+3. What outcomes are expected.
+
+Without seeing the same information twice.
+
+The result must be cleaner, faster to scan, clinically focused, and based on a true Single Source of Truth architecture.
