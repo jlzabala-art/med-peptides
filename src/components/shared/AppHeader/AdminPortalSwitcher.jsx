@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { useAdminRoleSimulation } from '../../../hooks/admin/useAdminRoleSimulation';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,20 +24,42 @@ const PORTALS = [
   {
     id: 'admin',
     label: 'Admin Console',
-    description: 'Operations, configuration & master data',
+    description: 'Full master access',
     icon: Shield,
     route: '/admin',
     color: '#3b82f6', // blue-500
     group: 'Operations',
+    isSimulatedRole: true,
   },
   {
-    id: 'wholesaler',
-    label: 'Logistics Portal',
-    description: 'Shipments, warehouse & B2B orders',
+    id: 'medical_director',
+    label: 'Medical Director',
+    description: 'Clinical oversight & patients',
+    icon: Stethoscope,
+    route: '/admin',
+    color: '#10b981', // emerald-500
+    group: 'Clinical',
+    isSimulatedRole: true,
+  },
+  {
+    id: 'account_manager',
+    label: 'Account Manager',
+    description: 'Sales & clinic relationships',
+    icon: Briefcase,
+    route: '/admin',
+    color: '#8b5cf6', // violet-500
+    group: 'Commercial',
+    isSimulatedRole: true,
+  },
+  {
+    id: 'supplier',
+    label: 'Supplier / Wholesaler',
+    description: 'Supply chain & RFQs',
     icon: Building2,
-    route: '/wholesaler',
+    route: '/admin',
     color: '#f59e0b', // amber-500
     group: 'Operations',
+    isSimulatedRole: true,
   },
   {
     id: 'b2c',
@@ -45,15 +68,6 @@ const PORTALS = [
     icon: ShoppingCart,
     route: '/',
     color: '#ec4899', // pink-500
-    group: 'Commercial',
-  },
-  {
-    id: 'account_manager',
-    label: 'Account Manager Portal',
-    description: 'Manage clinical accounts & sales',
-    icon: Briefcase,
-    route: '/account-manager',
-    color: '#8b5cf6', // violet-500
     group: 'Commercial',
   },
   {
@@ -107,6 +121,7 @@ function addRecentPortal(id) {
 
 export default function AdminPortalSwitcher() {
   const { isAdmin, activeRole, switchActiveRole } = useAuth();
+  const { simulatedRole, setSimulatedRole } = useAdminRoleSimulation();
   const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -148,6 +163,11 @@ export default function AdminPortalSwitcher() {
   }, [isOpen, isMobile]);
 
   const currentPortal = useMemo(() => {
+    // Check if we are simulating a role first
+    if (simulatedRole !== 'admin') {
+      const sim = PORTALS.find((p) => p.id === simulatedRole);
+      if (sim) return sim;
+    }
     return (
       PORTALS.find((p) => p.id === activeRole) || {
         id: activeRole,
@@ -158,7 +178,7 @@ export default function AdminPortalSwitcher() {
         color: '#64748b',
       }
     );
-  }, [activeRole]);
+  }, [activeRole, simulatedRole]);
 
   const recentPortals = useMemo(() => {
     const recentIds = getRecentPortalIds().filter((id) => id !== currentPortal.id);
@@ -167,8 +187,16 @@ export default function AdminPortalSwitcher() {
 
   const handleSwitch = (portal) => {
     addRecentPortal(currentPortal.id);
-    switchActiveRole(portal.id);
-    navigate(portal.route);
+    if (portal.isSimulatedRole) {
+      setSimulatedRole(portal.id);
+      if (window.location.pathname !== '/admin') {
+        navigate('/admin');
+      }
+    } else {
+      setSimulatedRole('admin');
+      switchActiveRole(portal.id);
+      navigate(portal.route);
+    }
     setIsOpen(false);
   };
 

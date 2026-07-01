@@ -728,3 +728,155 @@
     color: var(--color-text-secondary, #5f6368);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   13. MOBILE UX — TOUCH TARGETS & LAYOUT IMPROVEMENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* KPI Cards: 2-column grid on mobile, single column on very small screens */
+.kpi-scroll-row {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.kpi-scroll-row > * {
+  scroll-snap-align: start;
+  flex: 0 0 calc(50% - 0.5rem);
+  min-width: 160px;
+}
+@media (min-width: 768px) {
+  .kpi-scroll-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+  .kpi-scroll-row > * {
+    flex: unset;
+    min-width: unset;
+  }
+}
+
+/* SmartChips: horizontal scroll on mobile with momentum */
+.smart-chips-bar {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  padding: 0.25rem 0 0.75rem;
+  /* Hide scrollbar visually but keep functionality */
+  scrollbar-width: none;
+}
+.smart-chips-bar::-webkit-scrollbar { display: none; }
+.smart-chips-bar > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* Minimum touch target: 44×44px (WCAG 2.5.5) */
+@media (max-width: 768px) {
+  .smart-chip,
+  button.smart-chip {
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Action buttons in table rows — larger tap area */
+  .row-action-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Batch action bar stacks vertically */
+  .batch-actions-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+  .batch-actions-bar button {
+    flex: 1 1 auto;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* DataTable toolbar stacks on mobile */
+  .ui-table-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .ui-table-toolbar input[type="text"],
+  .ui-table-toolbar input[type="date"] {
+    width: 100%;
+    font-size: 1rem; /* prevents iOS zoom on focus */
+  }
+
+  /* Pagination footer: shrink for small screens */
+  .ui-pagination-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center !important;
+    padding: 0.75rem !important;
+  }
+
+  /* Modal: full-screen on mobile */
+  .modal-container {
+    position: fixed;
+    inset: 0;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prescription detail modal tabs: scroll horizontally */
+  .modal-tabs-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap !important;
+  }
+  .modal-tabs-row::-webkit-scrollbar { display: none; }
+  .modal-tabs-row button {
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 44px;
+  }
+
+  /* Forms: full-width inputs */
+  .form-row {
+    flex-direction: column !important;
+  }
+  .form-row > * {
+    width: 100% !important;
+  }
+
+  /* Sidebar / header adjustments */
+  .portal-sidebar {
+    display: none;
+  }
+  .portal-sidebar.open {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+  }
+}
+
+/* Smooth scroll for chip containers & KPI rows */
+@supports (scroll-behavior: smooth) {
+  .smart-chips-bar,
+  .kpi-scroll-row {
+    scroll-behavior: smooth;
+  }
+}

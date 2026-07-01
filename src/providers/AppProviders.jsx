@@ -17,8 +17,8 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { PreferencesProvider } from '../context/PreferencesContext';
 import { HeaderProvider } from '../context/HeaderContext';
 import { CopilotProvider } from '../context/CopilotContext';
-
 import { ClinicalCartProvider } from '../contexts/ClinicalCartContext';
+import { ModalProvider } from '../hooks/ui/useModalStack.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -55,7 +55,7 @@ export default function AppProviders({ children }) {
                           <PreferencesProvider>
                             <CopilotProvider>
                               <HeaderProvider>
-                                {children}
+                                <ModalProvider>{children}</ModalProvider>
                               </HeaderProvider>
                             </CopilotProvider>
                           </PreferencesProvider>

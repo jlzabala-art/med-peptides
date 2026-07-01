@@ -3,10 +3,11 @@
 /**
  * AdminProtocolsTab.jsx
  * Full admin view: list all protocols, edit metadata + phases.
+ * v2: Drawer detail view, bulk selection, Algolia search.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase';
 import { getPaginatedProtocols, updateProtocolFull } from '../../services/protocolStorage';
@@ -31,9 +32,19 @@ import {
   Play,
   Archive,
   Activity,
+  Search,
+  CheckSquare,
+  Square,
+  ArchiveRestore,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import CustomProtocolBuilder from './CustomProtocolBuilder';
+import StandardDrawer from '../ui/StandardDrawer';
+import BulkActionsBar from '../ui/BulkActionsBar';
+import { useDataTable } from '../../hooks/ui/useDataTable';
+import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
+import { useProducts } from '../../hooks/admin/useProducts';
+import ProtocolDrawerContent from './protocols/ProtocolDrawerContent';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
@@ -188,10 +199,10 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
                         textAlign: 'left',
                         wordBreak: 'break-word',
                         transition: 'color 0.2s',
-                        textDecoration: 'none'
+                        textDecoration: 'none',
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
-                      onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                      onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                      onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
                       title="Ver Ficha Clínica (Materia Medica)"
                     >
                       {item.productName ?? item.productId}
@@ -415,7 +426,11 @@ function SupplementsEditor({ supplements, onChange }) {
           >
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem' }}>
               <div style={{ flex: 2 }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Name</label>
+                <label
+                  style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+                >
+                  Name
+                </label>
                 <input
                   value={sup.name ?? ''}
                   onChange={(e) => updateSupplement(i, { name: e.target.value })}
@@ -425,7 +440,11 @@ function SupplementsEditor({ supplements, onChange }) {
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Dosage</label>
+                <label
+                  style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+                >
+                  Dosage
+                </label>
                 <input
                   value={sup.dosage ?? ''}
                   onChange={(e) => updateSupplement(i, { dosage: e.target.value })}
@@ -435,7 +454,11 @@ function SupplementsEditor({ supplements, onChange }) {
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Timing</label>
+                <label
+                  style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+                >
+                  Timing
+                </label>
                 <input
                   value={sup.timing ?? ''}
                   onChange={(e) => updateSupplement(i, { timing: e.target.value })}
@@ -447,20 +470,34 @@ function SupplementsEditor({ supplements, onChange }) {
               <button
                 onClick={() => removeSupplement(i)}
                 style={{
-                  background: 'none', border: 'none', cursor: 'pointer', color: 'var(--error)',
-                  padding: '0.25rem', marginTop: '1.5rem', height: 'fit-content'
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--error)',
+                  padding: '0.25rem',
+                  marginTop: '1.5rem',
+                  height: 'fit-content',
                 }}
               >
                 <Trash2 size={18} />
               </button>
             </div>
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Rationale</label>
+              <label
+                style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}
+              >
+                Rationale
+              </label>
               <textarea
                 value={sup.rationale ?? ''}
                 onChange={(e) => updateSupplement(i, { rationale: e.target.value })}
                 className="admin-premium-input"
-                style={{ width: '100%', marginTop: '0.25rem', resize: 'vertical', minHeight: '60px' }}
+                style={{
+                  width: '100%',
+                  marginTop: '0.25rem',
+                  resize: 'vertical',
+                  minHeight: '60px',
+                }}
                 placeholder="Rationale for this supplement..."
               />
             </div>
@@ -471,10 +508,19 @@ function SupplementsEditor({ supplements, onChange }) {
       <button
         onClick={addSupplement}
         style={{
-          display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem',
-          border: '1px dashed var(--primary)', borderRadius: 'var(--radius-sm)',
-          background: 'var(--accent-soft)', color: 'var(--primary)', cursor: 'pointer',
-          fontWeight: 700, fontSize: '0.83rem', width: '100%', justifyContent: 'center',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.65rem 1rem',
+          border: '1px dashed var(--primary)',
+          borderRadius: 'var(--radius-sm)',
+          background: 'var(--accent-soft)',
+          color: 'var(--primary)',
+          cursor: 'pointer',
+          fontWeight: 700,
+          fontSize: '0.83rem',
+          width: '100%',
+          justifyContent: 'center',
           transition: 'all 0.2s ease',
         }}
       >
@@ -522,48 +568,114 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)'
-    }}>
-      <motion.div 
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="admin-modal"
         style={{
-          backgroundColor: 'white', borderRadius: '16px', width: '90%', maxWidth: '600px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', overflow: 'hidden',
-          display: 'flex', flexDirection: 'column'
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          width: '90%',
+          maxWidth: '600px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div
+          style={{
+            padding: '1.5rem',
+            borderBottom: '1px solid #e2e8f0',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <h3
+            style={{
+              margin: 0,
+              fontSize: '1.25rem',
+              color: '#0f172a',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
             <FlaskConical size={20} color="#3b82f6" /> Clinical Pathway Builder
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
+          <button
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Pathway Title</label>
-                <input 
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  Pathway Title
+                </label>
+                <input
                   autoFocus
-                  type="text" 
-                  value={formData.title} 
-                  onChange={(e) => setFormData(p => ({ ...p, title: e.target.value }))}
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
                   placeholder="e.g. Advanced Metabolic Reset"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '1rem',
+                  }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Therapeutic Category</label>
-                <select 
-                  value={formData.category} 
-                  onChange={(e) => setFormData(p => ({ ...p, category: e.target.value }))}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  Therapeutic Category
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '1rem',
+                  }}
                 >
                   <option value="">Select Category...</option>
                   <option value="Longevity">Longevity</option>
@@ -579,18 +691,32 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Complexity Level</label>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  Complexity Level
+                </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                  {['simple', 'moderate', 'advanced'].map(lvl => (
+                  {['simple', 'moderate', 'advanced'].map((lvl) => (
                     <button
                       key={lvl}
-                      onClick={() => setFormData(p => ({ ...p, complexity: lvl }))}
+                      onClick={() => setFormData((p) => ({ ...p, complexity: lvl }))}
                       style={{
-                        padding: '1rem', borderRadius: '8px', cursor: 'pointer',
-                        border: formData.complexity === lvl ? '2px solid #3b82f6' : '1px solid #e2e8f0',
+                        padding: '1rem',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        border:
+                          formData.complexity === lvl ? '2px solid #3b82f6' : '1px solid #e2e8f0',
                         backgroundColor: formData.complexity === lvl ? '#eff6ff' : 'white',
                         color: formData.complexity === lvl ? '#1e40af' : '#64748b',
-                        fontWeight: 600, textTransform: 'capitalize'
+                        fontWeight: 600,
+                        textTransform: 'capitalize',
                       }}
                     >
                       {lvl}
@@ -599,12 +725,30 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Clinical Overview (Optional)</label>
-                <textarea 
-                  value={formData.description} 
-                  onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: '#475569',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  Clinical Overview (Optional)
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
                   placeholder="Brief description of the intended outcome..."
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem', minHeight: '100px', resize: 'vertical' }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '1rem',
+                    minHeight: '100px',
+                    resize: 'vertical',
+                  }}
                 />
               </div>
             </div>
@@ -612,24 +756,79 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
 
           {step === 3 && (
             <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#eff6ff', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: '#eff6ff',
+                  color: '#3b82f6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1.5rem',
+                }}
+              >
                 <Package size={32} />
               </div>
-              <h4 style={{ fontSize: '1.25rem', color: '#0f172a', margin: '0 0 0.5rem' }}>Ready to Build Pathway</h4>
-              <p style={{ color: '#64748b', fontSize: '0.95rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
-                You can manually assemble the phases, or let Atlas AI generate a draft clinical pathway based on your parameters.
+              <h4 style={{ fontSize: '1.25rem', color: '#0f172a', margin: '0 0 0.5rem' }}>
+                Ready to Build Pathway
+              </h4>
+              <p
+                style={{
+                  color: '#64748b',
+                  fontSize: '0.95rem',
+                  maxWidth: '400px',
+                  margin: '0 auto 2rem',
+                }}
+              >
+                You can manually assemble the phases, or let Atlas AI generate a draft clinical
+                pathway based on your parameters.
               </p>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-                <button 
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  alignItems: 'center',
+                }}
+              >
+                <button
                   onClick={buildTemplate}
-                  style={{ width: '100%', maxWidth: '300px', padding: '0.85rem', borderRadius: '8px', border: 'none', backgroundColor: '#0f172a', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}
+                  style={{
+                    width: '100%',
+                    maxWidth: '300px',
+                    padding: '0.85rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: '#0f172a',
+                    color: 'white',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                  }}
                 >
                   Create Manual Pathway
                 </button>
-                <button 
+                <button
                   onClick={() => onGenerateAI(formData)}
-                  style={{ width: '100%', maxWidth: '300px', padding: '0.85rem', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: 'white', color: '#0f172a', fontWeight: 600, cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  style={{
+                    width: '100%',
+                    maxWidth: '300px',
+                    padding: '0.85rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: 'white',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                  }}
                 >
                   <FlaskConical size={18} /> Generate with Atlas AI
                 </button>
@@ -638,45 +837,70 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
           )}
         </div>
 
-        <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between' }}>
-          <button 
+        <div
+          style={{
+            padding: '1.25rem 1.5rem',
+            borderTop: '1px solid #e2e8f0',
+            backgroundColor: '#f8fafc',
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <button
             onClick={step === 1 ? onClose : handlePrev}
-            style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: 'white', color: '#475569', fontWeight: 600, cursor: 'pointer' }}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: 'white',
+              color: '#475569',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </button>
-          
+
           {step < 3 && (
-            <button 
+            <button
               onClick={handleNext}
               disabled={step === 1 && (!formData.title || !formData.category)}
-              style={{ padding: '0.5rem 1.5rem', borderRadius: '6px', border: 'none', backgroundColor: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer', opacity: (step === 1 && (!formData.title || !formData.category)) ? 0.5 : 1 }}
+              style={{
+                padding: '0.5rem 1.5rem',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                fontWeight: 600,
+                cursor: 'pointer',
+                opacity: step === 1 && (!formData.title || !formData.category) ? 0.5 : 1,
+              }}
             >
               Next Step
             </button>
           )}
         </div>
       </motion.div>
-      
+
       <AnimatePresence>
         {showPathwayWizard && (
-          <PathwayBuilder 
-            onClose={() => setShowPathwayWizard(false)} 
-            onSave={handleCreatePathway} 
-            onGenerateAI={handleGenerateAIPathway} 
+          <PathwayBuilder
+            onClose={() => setShowPathwayWizard(false)}
+            onSave={handleCreatePathway}
+            onGenerateAI={handleGenerateAIPathway}
           />
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {showCustomBuilder && (
-          <CustomProtocolBuilder 
-            onClose={() => setShowCustomBuilder(false)} 
+          <CustomProtocolBuilder
+            onClose={() => setShowCustomBuilder(false)}
             onSaved={() => {
               setShowCustomBuilder(false);
               fetchProtocols();
               toast.success('Custom Protocol Kit saved successfully!');
-            }} 
+            }}
           />
         )}
       </AnimatePresence>
@@ -785,21 +1009,29 @@ const responsiveStyles = `
 
 // ── Status Configuration ──────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  active:   { label: 'Active',   emoji: '🟢', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
-  draft:    { label: 'Draft',    emoji: '📝', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
+  active: { label: 'Active', emoji: '🟢', color: '#10b981', bg: '#ecfdf5', border: '#a7f3d0' },
+  draft: { label: 'Draft', emoji: '📝', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' },
   archived: { label: 'Archived', emoji: '📦', color: '#f59e0b', bg: '#fffbeb', border: '#fde68a' },
 };
 
 function getStatusMeta(status) {
-  return STATUS_CONFIG[status] || { label: status || 'Unknown', emoji: '⚪', color: '#6b7280', bg: '#f9fafb', border: '#e5e7eb' };
+  return (
+    STATUS_CONFIG[status] || {
+      label: status || 'Unknown',
+      emoji: '⚪',
+      color: '#6b7280',
+      bg: '#f9fafb',
+      border: '#e5e7eb',
+    }
+  );
 }
 
 // ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
 function UniformKPIs({ data }) {
   const total = data.length;
-  const active = data.filter(d => d.status === 'active').length;
-  const drafts = data.filter(d => d.status === 'draft').length;
-  const archived = data.filter(d => d.status === 'archived').length;
+  const active = data.filter((d) => d.status === 'active').length;
+  const drafts = data.filter((d) => d.status === 'draft').length;
+  const archived = data.filter((d) => d.status === 'archived').length;
 
   const stats = [
     { label: 'Total Protocols', value: total, color: '#3b82f6', icon: <FlaskConical size={16} /> },
@@ -809,21 +1041,52 @@ function UniformKPIs({ data }) {
   ];
 
   return (
-    <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+    <div
+      className="kpi-scroll-row"
+      style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}
+    >
       {stats.map((s, i) => (
-        <div key={i} style={{
-          flex: '1 1 200px', minWidth: 180, background: 'white',
-          padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0',
-          display: 'flex', flexDirection: 'column', gap: '0.75rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-        }}>
+        <div
+          key={i}
+          style={{
+            flex: '1 1 200px',
+            minWidth: 180,
+            background: 'white',
+            padding: '1.25rem',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
-            <div style={{ color: s.color, background: s.color + '15', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
+            <div
+              style={{
+                color: s.color,
+                background: s.color + '15',
+                padding: '0.4rem',
+                borderRadius: '8px',
+                display: 'flex',
+              }}
+            >
               {s.icon}
             </div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
+            <span
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {s.label}
+            </span>
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{s.value}</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
+            {s.value}
+          </div>
         </div>
       ))}
     </div>
@@ -840,8 +1103,11 @@ function SmartChips({ activeChip, setActiveChip }) {
   ];
 
   return (
-    <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-      {chips.map(chip => (
+    <div
+      className="smart-chips-bar"
+      style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}
+    >
+      {chips.map((chip) => (
         <button
           key={chip.id}
           className={`smart-chip ${activeChip === chip.id ? 'active' : 'inactive'}`}
@@ -863,15 +1129,54 @@ export default function AdminProtocolsTab() {
   const [hasMore, setHasMore] = useState(false);
   const [lastDoc, setLastDoc] = useState(null);
   const [error, setError] = useState(null);
-  const [expanded, setExpanded] = useState({});
   const [edits, setEdits] = useState({}); // id → { protocol_name, status, therapeutic_category, phases }
   const [saving, setSaving] = useState({});
-  const [saved, setSaved] = useState({});
-  const [deleting, setDeleting] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [drawerProtocol, setDrawerProtocol] = useState(null);
+  const { products } = useProducts();
   const [catalogProducts, setCatalog] = useState([]);
   const [showPathwayWizard, setShowPathwayWizard] = useState(false);
   const [showCustomBuilder, setShowCustomBuilder] = useState(false);
   const [activeChip, setActiveChip] = useState('all');
+
+  // ── Algolia Search ───────────────────────────────────────────────────────────
+  const { hits: algoliaHits, isAlgoliaActive } = useAlgoliaSearch(
+    'protocols',
+    searchQuery,
+    {},
+    300
+  );
+
+  // Merge: when Algolia returns hits, map them; otherwise use local data
+  const chipFilteredProtocols = protocols.filter((p) => {
+    if (activeChip === 'active') return p.status === 'active';
+    if (activeChip === 'drafts') return p.status === 'draft';
+    if (activeChip === 'archived') return p.status === 'archived';
+    return true;
+  });
+
+  const displayedProtocols =
+    isAlgoliaActive && searchQuery.trim()
+      ? algoliaHits
+          .map((h) => protocols.find((p) => p.id === h.objectID) || { ...h, id: h.objectID })
+          .filter(Boolean)
+      : chipFilteredProtocols;
+
+  // ── Bulk selection via useDataTable ─────────────────────────────────────────
+  const {
+    selectedIds,
+    selectedCount,
+    isSelected,
+    toggleRowSelection,
+    selectAll,
+    clearSelection,
+    isAllCurrentPageSelected,
+    isIndeterminate,
+    toggleSelectAllCurrentPage,
+    selectedItems,
+    paginatedData: paginatedProtocols,
+    totalCount,
+  } = useDataTable(displayedProtocols, { idField: 'id' });
 
   // Fetch initial protocols
   const fetchProtocols = useCallback(async () => {
@@ -885,17 +1190,25 @@ export default function AdminProtocolsTab() {
       } = await getPaginatedProtocols(null, 100, {});
       setProtocols(data);
       // Inject data context for Atlas AI
-      const activeProtocols = data.filter(p => p.status === 'active');
-      window.dispatchEvent(new CustomEvent('admin-context-update', {
-        detail: {
-          page: 'protocols',
-          totalProtocols: data.length,
-          activeCount: activeProtocols.length,
-          categories: [...new Set(data.map(p => p.therapeutic_category).filter(Boolean))],
-          recentActive: activeProtocols.slice(0, 5).map(p => ({ title: p.protocol_name || p.title, category: p.therapeutic_category, phases: p.phases?.length || 0 })),
-          summary: `Clinical Protocols: ${data.length} total protocols. ${activeProtocols.length} active.`
-        }
-      }));
+      const activeProtocols = data.filter((p) => p.status === 'active');
+      window.dispatchEvent(
+        new CustomEvent('admin-context-update', {
+          detail: {
+            page: 'protocols',
+            totalProtocols: data.length,
+            activeCount: activeProtocols.length,
+            categories: [...new Set(data.map((p) => p.therapeutic_category).filter(Boolean))],
+            recentActive: activeProtocols
+              .slice(0, 5)
+              .map((p) => ({
+                title: p.protocol_name,
+                category: p.therapeutic_category,
+                phases: p.phases?.length || 0,
+              })),
+            summary: `Clinical Protocols: ${data.length} total protocols. ${activeProtocols.length} active.`,
+          },
+        })
+      );
       setLastDoc(last);
       setHasMore(more);
     } catch (err) {
@@ -922,7 +1235,7 @@ export default function AdminProtocolsTab() {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }
 
   // Fetch all protocols
   useEffect(() => {
@@ -1007,7 +1320,7 @@ export default function AdminProtocolsTab() {
     } finally {
       setSaving((prev) => ({ ...prev, [id]: false }));
     }
-  };
+  }
 
   // Delete
   async function handleDelete(id) {
@@ -1021,7 +1334,7 @@ export default function AdminProtocolsTab() {
     } finally {
       setDeleting(null);
     }
-  };
+  }
 
   // Create new pathway from wizard
   const handleCreatePathway = async (protocolData) => {
@@ -1055,7 +1368,7 @@ export default function AdminProtocolsTab() {
       complexity_level: formData.complexity,
       status: 'draft',
       overview_summary: 'Draft generated by Atlas AI based on: ' + formData.description,
-      phases: [{ label: 'Phase 1: Atlas AI Pending', durationWeeks: 4, items: [] }]
+      phases: [{ label: 'Phase 1: Atlas AI Pending', durationWeeks: 4, items: [] }],
     });
   };
 
@@ -1066,12 +1379,7 @@ export default function AdminProtocolsTab() {
   };
 
   // Filtered Protocols
-  const filteredProtocols = protocols.filter(p => {
-    if (activeChip === 'active') return p.status === 'active';
-    if (activeChip === 'drafts') return p.status === 'draft';
-    if (activeChip === 'archived') return p.status === 'archived';
-    return true;
-  });
+  // (now handled by useDataTable + displayedProtocols above)
 
   // Styles
   const inputStyle = {
@@ -1129,7 +1437,7 @@ export default function AdminProtocolsTab() {
     );
 
   return (
-    <>
+    <div style={{ minHeight: '100%' }}>
       <style>{responsiveStyles}</style>
 
       {/* Header */}
@@ -1153,43 +1461,100 @@ export default function AdminProtocolsTab() {
           <button
             onClick={fetchProtocols}
             style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
-              padding: '0.5rem 1rem', background: 'white', border: '1px solid #e2e8f0',
-              borderRadius: '8px', color: '#475569', transition: 'all 0.2s ease'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              padding: '0.5rem 1rem',
+              background: 'white',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              color: '#475569',
+              transition: 'all 0.2s ease',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-            onMouseLeave={e => e.currentTarget.style.background = 'white'}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'white')}
           >
             <RefreshCw size={16} /> Refresh
           </button>
           <button
             onClick={() => setShowPathwayWizard(true)}
             style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
-              padding: '0.5rem 1rem', background: '#0f172a', border: 'none',
-              borderRadius: '8px', color: 'white', transition: 'all 0.2s ease'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              padding: '0.5rem 1rem',
+              background: '#0f172a',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              transition: 'all 0.2s ease',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#1e293b'}
-            onMouseLeave={e => e.currentTarget.style.background = '#0f172a'}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#1e293b')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#0f172a')}
           >
             <Plus size={16} /> Create Pathway
           </button>
           <button
             onClick={() => navigate('/admin/protocols/new/edit')}
             style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
-              padding: '0.5rem 1rem', background: '#3b82f6', border: 'none',
-              borderRadius: '8px', color: 'white', transition: 'all 0.2s ease'
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              padding: '0.5rem 1rem',
+              background: '#3b82f6',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              transition: 'all 0.2s ease',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}
-            onMouseLeave={e => e.currentTarget.style.background = '#3b82f6'}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#2563eb')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#3b82f6')}
           >
             <Package size={16} /> Build Custom Kit
           </button>
         </div>
+      </div>
+
+      {/* ── Algolia Search Bar ─────────────────────────────────────────────── */}
+      <div style={{ marginBottom: '1rem', position: 'relative', maxWidth: '420px' }}>
+        <Search
+          size={16}
+          style={{
+            position: 'absolute',
+            left: '0.85rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#94a3b8',
+            pointerEvents: 'none',
+          }}
+        />
+        <input
+          type="search"
+          placeholder="Search protocols (Algolia)…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '0.6rem 1rem 0.6rem 2.5rem',
+            borderRadius: '10px',
+            border: '1.5px solid #e2e8f0',
+            fontSize: '0.875rem',
+            outline: 'none',
+            background: '#f8fafc',
+            transition: 'border-color 0.2s',
+          }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = '#6366f1')}
+          onBlur={(e) => (e.currentTarget.style.borderColor = '#e2e8f0')}
+        />
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
@@ -1200,7 +1565,7 @@ export default function AdminProtocolsTab() {
         <SmartChips activeChip={activeChip} setActiveChip={setActiveChip} />
       </div>
 
-      {protocols.length === 0 && (
+      {paginatedProtocols.length === 0 && (
         <div
           style={{
             textAlign: 'center',
@@ -1211,7 +1576,7 @@ export default function AdminProtocolsTab() {
             border: '1px solid var(--border)',
           }}
         >
-          No protocols saved yet.
+          {searchQuery ? `No protocols matching "${searchQuery}"` : 'No protocols saved yet.'}
         </div>
       )}
 
@@ -1221,7 +1586,18 @@ export default function AdminProtocolsTab() {
           <table className="flexible-table">
             <thead>
               <tr>
-                <th style={{ width: '40px' }}></th>
+                {/* Bulk checkbox */}
+                <th style={{ width: '40px', textAlign: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={isAllCurrentPageSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = isIndeterminate;
+                    }}
+                    onChange={toggleSelectAllCurrentPage}
+                    aria-label="Select all visible protocols"
+                  />
+                </th>
                 <th>Protocol Name</th>
                 <th>Category</th>
                 <th>Status</th>
@@ -1230,267 +1606,222 @@ export default function AdminProtocolsTab() {
               </tr>
             </thead>
             <tbody>
-              {filteredProtocols.map((p, i) => {
-                  const isOpen = !!expanded[p.id];
-                  const e = getEdit(p);
-                  const isDirty = !!edits[p.id];
-                  const isSaving = !!saving[p.id];
-                  const isSaved = !!saved[p.id];
-                  const isLast = i === protocols.length - 1;
+              {paginatedProtocols.map((p, i) => {
+                const e = getEdit(p);
+                const isDirty = !!edits[p.id];
+                const isSaving = !!saving[p.id];
+                const isSaved = !!saved[p.id];
+                const isLast = i === paginatedProtocols.length - 1;
+                const rowSelected = isSelected(p.id);
 
-                  const toggleActive = () => {
-                    const newStatus = e.status === 'active' ? 'draft' : 'active';
-                    setEditField(p.id, 'status', newStatus);
-                    handleSave(p.id); // auto-save status toggle
-                  };
+                const toggleActive = () => {
+                  const newStatus = e.status === 'active' ? 'draft' : 'active';
+                  setEditField(p.id, 'status', newStatus);
+                  handleSave(p.id);
+                };
 
-                  const archiveProtocol = () => {
-                    setEditField(p.id, 'status', 'archived');
-                    handleSave(p.id);
-                  };
+                const archiveProtocol = () => {
+                  setEditField(p.id, 'status', 'archived');
+                  handleSave(p.id);
+                };
 
-                  const meta = getStatusMeta(e.status);
+                const meta = getStatusMeta(e.status);
 
-                  return (
-                    <React.Fragment key={p.id}>
-                      <tr className="flexible-row">
-                        <td data-label="Details" style={{ width: '40px' }}>
-                          <button
-                            onClick={() => setExpanded((prev) => ({ ...prev, [p.id]: !isOpen }))}
-                            aria-label="Toggle details"
-                            className="admin-tooltip-target"
-                            data-tooltip={isOpen ? "Collapse" : "Expand"}
+                return (
+                  <tr
+                    key={p.id}
+                    className="flexible-row"
+                    style={{
+                      background: rowSelected ? 'rgba(99,102,241,0.06)' : undefined,
+                      transition: 'background 0.15s',
+                    }}
+                  >
+                    {/* Bulk checkbox */}
+                    <td style={{ width: '40px', textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={rowSelected}
+                        onChange={() => toggleRowSelection(p.id)}
+                        aria-label={`Select protocol ${e.protocol_name}`}
+                      />
+                    </td>
+                    {/* Name — click opens Drawer */}
+                    <td
+                      data-label="Protocol Name"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setDrawerProtocol(p)}
+                    >
+                      {isDirty ? (
+                        <input
+                          value={e.protocol_name}
+                          onChange={(ev) => setEditField(p.id, 'protocol_name', ev.target.value)}
+                          style={{
+                            padding: '4px 8px',
+                            border: '1px solid #1a73e8',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            width: '100%',
+                            minWidth: '180px',
+                          }}
+                        />
+                      ) : (
+                        <div style={{ fontWeight: 600, color: '#202124' }}>
+                          {e.protocol_name || 'Unnamed Protocol'}
+                          <div
                             style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              padding: '0.25rem',
+                              fontSize: '0.7rem',
                               color: '#5f6368',
+                              marginTop: '2px',
+                              fontWeight: 400,
                             }}
                           >
-                            <motion.div
-                              animate={{ rotate: isOpen ? 90 : 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <ChevronRight size={16} />
-                            </motion.div>
-                          </button>
-                        </td>
-                        <td data-label="Protocol Name">
-                          {isDirty ? (
-                            <input
-                              value={e.protocol_name}
-                              onChange={(ev) =>
-                                setEditField(p.id, 'protocol_name', ev.target.value)
-                              }
-                              style={{
-                                padding: '4px 8px',
-                                border: '1px solid #1a73e8',
-                                borderRadius: '4px',
-                                fontSize: '0.85rem',
-                                width: '100%',
-                                minWidth: '180px',
-                              }}
-                            />
-                          ) : (
-                            <div style={{ fontWeight: 600, color: '#202124' }}>
-                              {e.protocol_name || 'Unnamed Protocol'}
-                              <div
-                                style={{
-                                  fontSize: '0.7rem',
-                                  color: '#5f6368',
-                                  marginTop: '2px',
-                                  fontWeight: 400,
-                                }}
-                              >
-                                v{p.version_number ?? 1} • {formatDate(p.created_at)}
-                              </div>
-                            </div>
-                          )}
-                        </td>
-                        <td data-label="Category">
-                          {isDirty ? (
-                            <input
-                              value={e.therapeutic_category}
-                              onChange={(ev) =>
-                                setEditField(p.id, 'therapeutic_category', ev.target.value)
-                              }
-                              style={{
-                                padding: '4px 8px',
-                                border: '1px solid #1a73e8',
-                                borderRadius: '4px',
-                                fontSize: '0.85rem',
-                                width: '100%',
-                              }}
-                            />
-                          ) : (
-                            e.therapeutic_category || '—'
-                          )}
-                        </td>
-                        <td data-label="Status">
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
-                            padding: '0.25rem 0.6rem', borderRadius: '20px',
-                            background: meta.bg, color: meta.color, border: `1px solid ${meta.border}`,
-                            fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap'
-                          }}>
-                            {meta.emoji} {meta.label}
-                          </span>
-                        </td>
-                        <td data-label="Phases">
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: '#334155' }}>
-                            <FlaskConical size={14} /> {(e.phases ?? []).length}
+                            v{p.version_number ?? 1} • {formatDate(p.created_at)}
                           </div>
-                        </td>
-                        <td data-label="Actions" style={{ textAlign: 'right' }}>
-                          <div
-                            style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}
-                          >
-                            {isDirty ? (
-                              <button
-                                onClick={() => handleSave(p.id)}
-                                disabled={isSaving}
-                                className="admin-tooltip-target"
-                                data-tooltip="Save changes"
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  background: '#1a73e8',
-                                  color: 'white',
-                                  border: 'none',
-                                  padding: '4px 12px',
-                                  borderRadius: '4px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  opacity: isSaving ? 0.6 : 1,
-                                }}
-                              >
-                                <Save size={12} /> {isSaving ? 'Saving' : 'Save'}
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => navigate(`/admin/protocols/${p.id}/edit`)}
-                                className="admin-tooltip-target"
-                                data-tooltip="Edit Protocol"
-                                style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: '#1a73e8',
-                                  cursor: 'pointer',
-                                  padding: '4px',
-                                }}
-                              >
-                                <Edit3 size={16} />
-                              </button>
-                            )}
-
-                            <button
-                              onClick={toggleActive}
-                              className="admin-tooltip-target"
-                              data-tooltip={e.status === 'active' ? 'Deactivate' : 'Activate'}
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: e.status === 'active' ? '#b06000' : '#137333',
-                                cursor: 'pointer',
-                                padding: '4px',
-                              }}
-                            >
-                              {e.status === 'active' ? (
-                                <Pause size={16} />
-                              ) : (
-                                <Check size={16} />
-                              )}
-                            </button>
-
-                            <button
-                              onClick={archiveProtocol}
-                              className="admin-tooltip-target"
-                              data-tooltip="Archive Protocol"
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#5f6368',
-                                cursor: 'pointer',
-                                padding: '4px',
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                      {isOpen && (
-                        <tr>
-                          <td colSpan={6} style={{ padding: 0, borderBottom: '1px solid var(--border)' }}>
-                            <div style={{ padding: '1.5rem 2.5rem', background: '#f8f9fa', borderLeft: '4px solid #1a73e8' }}>
-                              <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#1a73e8', fontWeight: 600 }}>Protocol Phases & Dosages</h4>
-                              {p.phases && p.phases.length > 0 ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                  {p.phases.map((phase, idx) => (
-                                    <div key={idx} style={{ padding: '1rem', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-                                      <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span>{phase.label || `Phase ${idx+1}`} {phase.durationWeeks ? `(${phase.durationWeeks} weeks)` : ''}</span>
-                                        <span style={{ fontSize: '0.75rem', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '12px' }}>
-                                          {phase.items?.length || 0} Products
-                                        </span>
-                                      </div>
-                                      
-                                      {phase.items && phase.items.length > 0 ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                          {phase.items.map((item, j) => (
-                                            <div key={j} style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                              <div style={{ flex: 1 }}>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#334155', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                  {item.productName || item.product_name || 'Unknown Product'}
-                                                  <button
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      const queryParams = item.productId ? `sku=${encodeURIComponent(item.productId)}` : `search=${encodeURIComponent(item.productName || item.product_name)}`;
-                                                      navigate(`/admin/products?${queryParams}`);
-                                                    }}
-                                                    title="View Product in Catalog"
-                                                    style={{ 
-                                                      background: 'transparent', border: 'none', cursor: 'pointer', color: '#3b82f6', 
-                                                      display: 'inline-flex', alignItems: 'center', padding: '2px', borderRadius: '4px' 
-                                                    }}
-                                                    onMouseOver={(e) => e.currentTarget.style.background = '#e0e7ff'}
-                                                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                                                  >
-                                                    <ExternalLink size={14} />
-                                                  </button>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.75rem', color: '#64748b' }}>
-                                                  <div><strong>Dose:</strong> {item.dosage || '-'}</div>
-                                                  <div><strong>Freq:</strong> {item.frequency || '-'}</div>
-                                                  <div><strong>Vials:</strong> {item.vialsNeeded || 1}</div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      ) : (
-                                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic' }}>No products in this phase.</div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div style={{ fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic' }}>No phases defined for this protocol.</div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
+                        </div>
                       )}
-                    </React.Fragment>
-                  );
-                })}
+                    </td>
+                    <td data-label="Category">
+                      {isDirty ? (
+                        <input
+                          value={e.therapeutic_category}
+                          onChange={(ev) =>
+                            setEditField(p.id, 'therapeutic_category', ev.target.value)
+                          }
+                          style={{
+                            padding: '4px 8px',
+                            border: '1px solid #1a73e8',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            width: '100%',
+                          }}
+                        />
+                      ) : (
+                        e.therapeutic_category || '—'
+                      )}
+                    </td>
+                    <td data-label="Status">
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          padding: '0.25rem 0.6rem',
+                          borderRadius: '20px',
+                          background: meta.bg,
+                          color: meta.color,
+                          border: `1px solid ${meta.border}`,
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {meta.emoji} {meta.label}
+                      </span>
+                    </td>
+                    <td data-label="Phases">
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontWeight: 600,
+                          color: '#334155',
+                        }}
+                      >
+                        <FlaskConical size={14} /> {(e.phases ?? []).length}
+                      </div>
+                    </td>
+                    <td data-label="Actions" style={{ textAlign: 'right' }}>
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          gap: '0.5rem',
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
+                          width: '100%',
+                        }}
+                      >
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            navigate(`/admin/protocols/${p.id}/edit`);
+                          }}
+                          className="admin-tooltip-target"
+                          data-tooltip="Edit Protocol"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#1a73e8',
+                            cursor: 'pointer',
+                            padding: '4px',
+                          }}
+                        >
+                          <Edit3 size={16} />
+                        </button>
+
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            toggleActive();
+                          }}
+                          className="admin-tooltip-target"
+                          data-tooltip={e.status === 'active' ? 'Deactivate' : 'Activate'}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: e.status === 'active' ? '#b06000' : '#137333',
+                            cursor: 'pointer',
+                            padding: '4px',
+                          }}
+                        >
+                          {e.status === 'active' ? <Pause size={16} /> : <Play size={16} />}
+                        </button>
+
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            archiveProtocol();
+                          }}
+                          className="admin-tooltip-target"
+                          data-tooltip="Archive"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#6b7280',
+                            cursor: 'pointer',
+                            padding: '4px',
+                          }}
+                        >
+                          <Archive size={16} />
+                        </button>
+
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            handleDelete(p.id);
+                          }}
+                          className="admin-tooltip-target"
+                          data-tooltip="Delete"
+                          disabled={!!deleting}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#dc2626',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            opacity: deleting === p.id ? 0.5 : 1,
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-      </div>
 
         {/* Pagination Load More */}
         {hasMore && (
@@ -1530,10 +1861,77 @@ export default function AdminProtocolsTab() {
           </div>
         )}
       </div>
-    
-      <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
+
+      {/* ── Protocol Detail Drawer ───────────────────────────────────────────── */}
+      <StandardDrawer
+        isOpen={!!drawerProtocol}
+        onClose={() => setDrawerProtocol(null)}
+        title={drawerProtocol?.protocol_name || 'Protocol Detail'}
+        subtitle={`${drawerProtocol?.therapeutic_category || '—'} · v${drawerProtocol?.version_number ?? 1}`}
+        fullWorkspace={true}
+        actions={
+          <button
+            onClick={() => {
+              setDrawerProtocol(null);
+              navigate(`/admin/protocols/${drawerProtocol?.id}/edit`);
+            }}
+            style={{
+              padding: '0.45rem 1rem',
+              borderRadius: '6px',
+              background: '#eef2ff',
+              color: '#4f46e5',
+              border: '1px solid #c7d2fe',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Edit3 size={14} style={{ marginRight: '0.4rem' }} />
+            Edit Protocol
+          </button>
+        }
+        footer={
+          <button
+            onClick={() => setDrawerProtocol(null)}
+            style={{
+              padding: '0.55rem 1.25rem',
+              borderRadius: '8px',
+              background: 'transparent',
+              color: '#475569',
+              border: '1px solid #e2e8f0',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        }
+      >
+        {drawerProtocol && <ProtocolDrawerContent protocol={drawerProtocol} products={products} />}
+      </StandardDrawer>
+
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          fontSize: '0.7rem',
+          color: 'var(--text-muted)',
+          opacity: 0.8,
+          background: 'var(--surface)',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          border: '1px solid var(--border)',
+          pointerEvents: 'none',
+          zIndex: 1000,
+          boxShadow: 'var(--shadow-sm)',
+        }}
+      >
         Widget: AdminProtocolsTab | Props: none
       </div>
-    </>
+    </div>
   );
 }

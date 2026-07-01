@@ -1,30 +1,21 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Inbox from "lucide-react/dist/esm/icons/inbox";
-import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
-import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
-import Search from "lucide-react/dist/esm/icons/search";
-import X from "lucide-react/dist/esm/icons/x";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import React, { useState, useMemo } from 'react';
-
-
-
-
-
-
-
-
-
-
+import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
+import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
+import Inbox from 'lucide-react/dist/esm/icons/inbox';
+import ArrowUp from 'lucide-react/dist/esm/icons/arrow-up';
+import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
+import Search from 'lucide-react/dist/esm/icons/search';
+import X from 'lucide-react/dist/esm/icons/x';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import React, { useState, useMemo, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import Skeleton from './Skeleton';
 
-export default function DataTable({ 
-  columns, 
-  data = [], 
+export default function DataTable({
+  columns,
+  data = [],
   keyField = 'id',
   isLoading = false,
   // Selection
@@ -52,8 +43,8 @@ export default function DataTable({
   onRowClick,
   renderHoverActions,
   // Empty State
-  emptyTitle = "No data found",
-  emptyDescription = "There are no records to display.",
+  emptyTitle = 'No data found',
+  emptyDescription = 'There are no records to display.',
   emptyMessage, // for backwards compatibility
   emptyActionLabel,
   onEmptyAction,
@@ -72,22 +63,24 @@ export default function DataTable({
   enableColumnSelection = false,
   enableExport = false,
   onExport,
+  virtualize = false,
   visibleColumns, // array of keys
   onColumnToggle, // (columnKey, isVisible) => void
-  tableId
+  tableId,
 }) {
   const [expandedId, setExpandedId] = useState(null);
   const [hoveredRowId, setHoveredRowId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [showColMenu, setShowColMenu] = useState(false);
-  
+
   // Long-press state
   const [touchTimer, setTouchTimer] = useState(null);
+  const parentRef = useRef(null);
 
   // Use visibleColumns prop if provided, otherwise assume all visible
   const activeColumns = useMemo(() => {
     if (!visibleColumns) return columns;
-    return columns.filter(c => visibleColumns.includes(c.key || c.header));
+    return columns.filter((c) => visibleColumns.includes(c.key || c.header));
   }, [columns, visibleColumns]);
 
   const sortedData = useMemo(() => {
@@ -95,7 +88,7 @@ export default function DataTable({
     if (!sortConfig.key) return safeData;
     let sortableItems = [...safeData];
     sortableItems.sort((a, b) => {
-      const col = columns.find(c => c.key === sortConfig.key);
+      const col = columns.find((c) => c.key === sortConfig.key);
       let aVal = col && col.sortValue ? col.sortValue(a) : a[sortConfig.key];
       let bVal = col && col.sortValue ? col.sortValue(b) : b[sortConfig.key];
 
@@ -109,6 +102,13 @@ export default function DataTable({
     return sortableItems;
   }, [data, sortConfig, columns]);
 
+  const rowVirtualizer = useVirtualizer({
+    count: sortedData.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 64, // Default row height in CSS
+    overscan: 5,
+  });
+
   const requestSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -120,7 +120,7 @@ export default function DataTable({
   const handleSelectAll = (e) => {
     if (!onSelectionChange) return;
     if (e.target.checked) {
-      onSelectionChange(data.map(item => item[keyField]));
+      onSelectionChange(data.map((item) => item[keyField]));
     } else {
       onSelectionChange([]);
     }
@@ -131,7 +131,7 @@ export default function DataTable({
     if (checked) {
       onSelectionChange([...selectedIds, id]);
     } else {
-      onSelectionChange(selectedIds.filter(sid => sid !== id));
+      onSelectionChange(selectedIds.filter((sid) => sid !== id));
     }
   };
 
@@ -153,38 +153,53 @@ export default function DataTable({
   };
 
   const allSelected = sortedData.length > 0 && selectedIds.length === sortedData.length;
-  const someSelected = (selectedIds.length > 0 && selectedIds.length < sortedData.length) || indeterminateIds.length > 0;
+  const someSelected =
+    (selectedIds.length > 0 && selectedIds.length < sortedData.length) ||
+    indeterminateIds.length > 0;
 
   return (
-    <div style={{ 
-      backgroundColor: 'transparent',
-      overflow: 'visible',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
+    <div
+      style={{
+        backgroundColor: 'transparent',
+        overflow: 'visible',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       {/* TOOLBAR */}
-      {(onSearchChange || onDateRangeChange || renderCustomFilters || (filters && filters.length > 0) || enableColumnSelection || enableExport) && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          padding: '1rem',
-          backgroundColor: 'var(--color-bg-surface)',
-          borderBottom: '1px solid var(--color-border)',
-          borderTopLeftRadius: 'var(--radius-md)',
-          borderTopRightRadius: 'var(--radius-md)'
-        }}>
+      {(onSearchChange ||
+        onDateRangeChange ||
+        renderCustomFilters ||
+        (filters && filters.length > 0) ||
+        enableColumnSelection ||
+        enableExport) && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            padding: '1rem',
+            backgroundColor: 'var(--color-bg-surface)',
+            borderBottom: '1px solid var(--color-border)',
+            borderTopLeftRadius: 'var(--radius-md)',
+            borderTopRightRadius: 'var(--radius-md)',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             {onSearchChange && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.35rem 0.75rem',
-                backgroundColor: 'var(--color-bg-app)',
-                flex: '1 1 200px',
-                maxWidth: '350px'
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.35rem 0.75rem',
+                  backgroundColor: 'var(--color-bg-app)',
+                  flex: '1 1 200px',
+                  maxWidth: '350px',
+                }}
+              >
                 <Search size={16} color="var(--text-muted)" />
                 <input
                   type="text"
@@ -192,8 +207,12 @@ export default function DataTable({
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   style={{
-                    border: 'none', background: 'transparent', outline: 'none',
-                    fontSize: '0.8rem', color: 'var(--text-main)', width: '100%'
+                    border: 'none',
+                    background: 'transparent',
+                    outline: 'none',
+                    fontSize: '0.8rem',
+                    color: 'var(--text-main)',
+                    width: '100%',
                   }}
                 />
               </div>
@@ -206,9 +225,13 @@ export default function DataTable({
                   value={dateRange.start || ''}
                   onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
                   style={{
-                    border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)',
-                    padding: '0.25rem 0.5rem', fontSize: '0.75rem', outline: 'none',
-                    color: 'var(--text-main)', backgroundColor: 'var(--color-bg-app)'
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    outline: 'none',
+                    color: 'var(--text-main)',
+                    backgroundColor: 'var(--color-bg-app)',
                   }}
                 />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>to</span>
@@ -217,16 +240,22 @@ export default function DataTable({
                   value={dateRange.end || ''}
                   onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
                   style={{
-                    border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)',
-                    padding: '0.25rem 0.5rem', fontSize: '0.75rem', outline: 'none',
-                    color: 'var(--text-main)', backgroundColor: 'var(--color-bg-app)'
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.75rem',
+                    outline: 'none',
+                    color: 'var(--text-main)',
+                    backgroundColor: 'var(--color-bg-app)',
                   }}
                 />
               </div>
             )}
 
             {renderCustomFilters && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}
+              >
                 {renderCustomFilters()}
               </div>
             )}
@@ -234,18 +263,25 @@ export default function DataTable({
             <div style={{ flex: 1 }} />
 
             {(enableColumnSelection || enableExport) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', position: 'relative' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  position: 'relative',
+                }}
+              >
                 {enableExport && (
-                  <button 
+                  <button
                     onClick={onExport}
-                    style={{ 
-                      padding: '0.35rem 0.75rem', 
-                      backgroundColor: 'var(--color-bg-subtle)', 
-                      border: '1px solid var(--color-border)', 
-                      borderRadius: 'var(--radius-sm)', 
-                      fontSize: '0.75rem', 
-                      fontWeight: 600, 
-                      cursor: 'pointer' 
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      backgroundColor: 'var(--color-bg-subtle)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
                     }}
                   >
                     Export CSV
@@ -253,40 +289,62 @@ export default function DataTable({
                 )}
                 {enableColumnSelection && (
                   <div style={{ position: 'relative' }}>
-                    <button 
+                    <button
                       onClick={() => setShowColMenu(!showColMenu)}
-                      style={{ 
-                        padding: '0.35rem 0.75rem', 
-                        backgroundColor: 'var(--color-bg-subtle)', 
-                        border: '1px solid var(--color-border)', 
-                        borderRadius: 'var(--radius-sm)', 
-                        fontSize: '0.75rem', 
-                        fontWeight: 600, 
+                      style={{
+                        padding: '0.35rem 0.75rem',
+                        backgroundColor: 'var(--color-bg-subtle)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.25rem'
+                        gap: '0.25rem',
                       }}
                     >
-                      Columns <ChevronDown size={14}/>
+                      Columns <ChevronDown size={14} />
                     </button>
                     {showColMenu && (
-                      <div style={{ 
-                        position: 'absolute', top: '100%', right: 0, marginTop: '4px',
-                        backgroundColor: 'var(--color-bg-app)', border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-md)', padding: '0.5rem', minWidth: '150px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', zIndex: 50,
-                        display: 'flex', flexDirection: 'column', gap: '0.25rem'
-                      }}>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          marginTop: '4px',
+                          backgroundColor: 'var(--color-bg-app)',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-md)',
+                          padding: '0.5rem',
+                          minWidth: '150px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                          zIndex: 50,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.25rem',
+                        }}
+                      >
                         {columns.map((c, i) => {
                           const colKey = c.key || c.header;
                           const isVisible = visibleColumns ? visibleColumns.includes(colKey) : true;
                           return (
-                            <label key={`col-sel-${i}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', cursor: 'pointer' }}>
-                              <input 
-                                type="checkbox" 
-                                checked={isVisible} 
-                                onChange={(e) => onColumnToggle && onColumnToggle(colKey, e.target.checked)} 
+                            <label
+                              key={`col-sel-${i}`}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.75rem',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isVisible}
+                                onChange={(e) =>
+                                  onColumnToggle && onColumnToggle(colKey, e.target.checked)
+                                }
                               />
                               {c.header || colKey}
                             </label>
@@ -303,23 +361,37 @@ export default function DataTable({
           {/* Filter Chips */}
           {filters && filters.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Active filters:</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                Active filters:
+              </span>
               {filters.map((filter, index) => (
-                <div key={index} style={{
-                  display: 'flex', alignItems: 'center', gap: '0.35rem',
-                  padding: '0.2rem 0.5rem', borderRadius: '1rem',
-                  backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)',
-                  color: 'var(--color-primary)',
-                  fontSize: '0.7rem', fontWeight: 600
-                }}>
+                <div
+                  key={index}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '1rem',
+                    backgroundColor: 'rgba(var(--color-primary-rgb), 0.1)',
+                    color: 'var(--color-primary)',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                  }}
+                >
                   {filter.label}: {filter.value}
                   {onFilterRemove && (
                     <button
                       onClick={() => onFilterRemove(filter)}
                       style={{
-                        background: 'none', border: 'none', padding: 0,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center',
-                        color: 'inherit', opacity: 0.7
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: 'inherit',
+                        opacity: 0.7,
                       }}
                     >
                       <X size={12} />
@@ -331,23 +403,59 @@ export default function DataTable({
           )}
         </div>
       )}
-      <div className="ui-table-container responsive-stack" style={{ overflowX: 'auto', overflowY: 'auto', width: '100%', minHeight: '350px', maxHeight: 'calc(100vh - 200px)' }}>
-        <table className="ui-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead style={{ 
-            backgroundColor: 'var(--color-bg-app)', 
-            borderBottom: '1px solid var(--color-border)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 10
-          }}>
-            <tr style={{ backgroundColor: someSelected || allSelected ? 'rgba(var(--color-primary-rgb), 0.05)' : 'transparent' }}>
+      <div
+        ref={virtualize ? parentRef : null}
+        className={`ui-table-container${virtualize ? '' : ' responsive-stack'}`}
+        style={{
+          overflowX: 'auto',
+          overflowY: 'auto',
+          width: '100%',
+          minHeight: '350px',
+          maxHeight: virtualize ? '600px' : 'calc(100vh - 200px)',
+          backgroundColor: 'var(--color-bg-app)',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <table
+          className="ui-table"
+          style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}
+        >
+          <thead
+            style={{
+              backgroundColor: 'var(--color-bg-surface)',
+              borderBottom: '2px solid var(--color-border)',
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+            }}
+          >
+            <tr
+              style={{
+                backgroundColor:
+                  someSelected || allSelected
+                    ? 'rgba(var(--color-primary-rgb), 0.05)'
+                    : 'transparent',
+              }}
+            >
               {onSelectionChange && (
-                <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={allSelected} 
-                    ref={input => { if (input) input.indeterminate = someSelected; }}
-                    onChange={handleSelectAll} 
+                <th
+                  style={{
+                    width: '48px',
+                    minWidth: '48px',
+                    whiteSpace: 'nowrap',
+                    padding: '0',
+                    borderBottom: '1px solid var(--color-border)',
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(input) => {
+                      if (input) input.indeterminate = someSelected;
+                    }}
+                    onChange={handleSelectAll}
                     style={{ cursor: 'pointer' }}
                   />
                 </th>
@@ -355,37 +463,84 @@ export default function DataTable({
               {/* We no longer render batch actions in the table header. It's a floating bar now. */}
               {!(someSelected || allSelected) || !renderBatchActions ? (
                 <React.Fragment>
-                  {expandableRender && <th style={{ width: '48px', minWidth: '48px', whiteSpace: 'nowrap', padding: '0', borderBottom: '1px solid var(--color-border)', textAlign: 'center' }}></th>}
+                  {expandableRender && (
+                    <th
+                      style={{
+                        width: '48px',
+                        minWidth: '48px',
+                        whiteSpace: 'nowrap',
+                        padding: '0',
+                        borderBottom: '1px solid var(--color-border)',
+                        textAlign: 'center',
+                      }}
+                    ></th>
+                  )}
                   {activeColumns.map((col, idx) => {
                     const isSortable = col.key && col.sortable !== false;
                     return (
-                      <th 
-                        key={col.key || idx} 
+                      <th
+                        key={col.key || idx}
                         className={col.hideOnMobile ? 'hide-on-mobile' : ''}
                         onClick={() => isSortable && requestSort(col.key)}
-                        style={{ 
+                        style={{
                           height: '36px',
-                          padding: '0 16px', 
-                          fontSize: '0.75rem', 
+                          padding: '0 16px',
+                          fontSize: '0.75rem',
                           fontWeight: 600,
-                          color: sortConfig.key === col.key ? 'var(--color-primary)' : 'var(--text-muted)',
+                          color:
+                            sortConfig.key === col.key
+                              ? 'var(--color-primary)'
+                              : 'var(--text-muted)',
                           textAlign: col.align || 'left',
                           width: col.width || 'auto',
                           borderBottom: '1px solid var(--color-border)',
                           cursor: isSortable ? 'pointer' : 'default',
                           userSelect: 'none',
                           whiteSpace: 'nowrap',
-                          position: (col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name') ? 'sticky' : 'static',
-                          left: (col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name') ? (onSelectionChange ? '48px' : '0') : 'auto',
+                          position:
+                            col.key === 'name' ||
+                            col.header === 'Product Name' ||
+                            col.label === 'Product Name'
+                              ? 'sticky'
+                              : 'static',
+                          left:
+                            col.key === 'name' ||
+                            col.header === 'Product Name' ||
+                            col.label === 'Product Name'
+                              ? onSelectionChange
+                                ? '48px'
+                                : '0'
+                              : 'auto',
                           backgroundColor: 'var(--color-bg-subtle)',
-                          zIndex: (col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name') ? 2 : 0,
+                          zIndex:
+                            col.key === 'name' ||
+                            col.header === 'Product Name' ||
+                            col.label === 'Product Name'
+                              ? 2
+                              : 0,
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: col.align === 'right' ? 'flex-end' : (col.align === 'center' ? 'center' : 'flex-start'), gap: '4px' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent:
+                              col.align === 'right'
+                                ? 'flex-end'
+                                : col.align === 'center'
+                                  ? 'center'
+                                  : 'flex-start',
+                            gap: '4px',
+                          }}
+                        >
                           {col.header}
                           {isSortable && sortConfig.key === col.key && (
                             <span style={{ display: 'flex', color: 'var(--color-primary)' }}>
-                              {sortConfig.direction === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
+                              {sortConfig.direction === 'asc' ? (
+                                <ArrowUp size={14} />
+                              ) : (
+                                <ArrowDown size={14} />
+                              )}
                             </span>
                           )}
                         </div>
@@ -396,10 +551,22 @@ export default function DataTable({
               ) : null}
             </tr>
           </thead>
-          <tbody>
+          <tbody
+            style={
+              virtualize
+                ? { height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }
+                : {}
+            }
+          >
             {isLoading ? (
               Array.from({ length: 5 }).map((_, rowIndex) => (
-                <tr key={`skeleton-${rowIndex}`} style={{ borderBottom: '1px solid var(--color-border)', minHeight: 'var(--row-min-height)' }}>
+                <tr
+                  key={`skeleton-${rowIndex}`}
+                  style={{
+                    borderBottom: '1px solid var(--color-border)',
+                    minHeight: 'var(--row-min-height)',
+                  }}
+                >
                   {onSelectionChange && (
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       <Skeleton width="16px" height="16px" borderRadius="4px" />
@@ -412,33 +579,74 @@ export default function DataTable({
                   )}
                   {columns.map((col, colIndex) => (
                     <td key={`skel-col-${colIndex}`} style={{ padding: '12px 16px' }}>
-                      <Skeleton width={colIndex === 0 ? "80%" : "60%"} height="16px" />
+                      <Skeleton width={colIndex === 0 ? '80%' : '60%'} height="16px" />
                     </td>
                   ))}
                 </tr>
               ))
-            ) : (!data || data.length === 0) ? (
+            ) : !data || data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)}>
-                  <div style={{ 
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    padding: '64px 24px', textAlign: 'center'
-                  }}>
-                    <div style={{ 
-                      width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)',
-                      marginBottom: '16px'
-                    }}>
+                <td
+                  colSpan={
+                    columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)
+                  }
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '64px 24px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--color-bg-hover)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--color-text-tertiary)',
+                        marginBottom: '16px',
+                      }}
+                    >
                       <Inbox size={32} />
                     </div>
-                    <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--color-text-primary)' }}>{emptyMessage || emptyTitle}</h3>
-                    {!emptyMessage && <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: 'var(--color-text-secondary)' }}>{emptyDescription}</p>}
+                    <h3
+                      style={{
+                        margin: '0 0 8px 0',
+                        fontSize: '16px',
+                        color: 'var(--color-text-primary)',
+                      }}
+                    >
+                      {emptyMessage || emptyTitle}
+                    </h3>
+                    {!emptyMessage && (
+                      <p
+                        style={{
+                          margin: '0 0 24px 0',
+                          fontSize: '14px',
+                          color: 'var(--color-text-secondary)',
+                        }}
+                      >
+                        {emptyDescription}
+                      </p>
+                    )}
                     {emptyActionLabel && onEmptyAction && (
-                      <button 
+                      <button
                         onClick={onEmptyAction}
                         style={{
-                          padding: '8px 16px', backgroundColor: 'var(--color-primary)', color: 'white',
-                          border: 'none', borderRadius: 'var(--radius-sm)', fontWeight: 600, cursor: 'pointer'
+                          padding: '8px 16px',
+                          backgroundColor: 'var(--color-primary)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 'var(--radius-sm)',
+                          fontWeight: 600,
+                          cursor: 'pointer',
                         }}
                       >
                         {emptyActionLabel}
@@ -447,135 +655,205 @@ export default function DataTable({
                   </div>
                 </td>
               </tr>
-            ) : sortedData.map((row, rowIndex) => {
-              const rowKey = (row && row[keyField] !== undefined && row[keyField] !== null) ? row[keyField] : `fallback-key-${rowIndex}`;
-              const isExpanded = expandedId === rowKey;
-              const isSelected = selectedIds.includes(rowKey);
-              const isIndeterminate = indeterminateIds.includes(rowKey);
-              const isActive = isSelected || isIndeterminate;
+            ) : (
+              (virtualize ? rowVirtualizer.getVirtualItems() : sortedData).map(
+                (virtualRowOrRow, rowIndex) => {
+                  const row = virtualize ? sortedData[virtualRowOrRow.index] : virtualRowOrRow;
+                  const rowKey =
+                    row && row[keyField] !== undefined && row[keyField] !== null
+                      ? row[keyField]
+                      : `fallback-key-${virtualize ? virtualRowOrRow.index : rowIndex}`;
+                  const isExpanded = expandedId === rowKey;
+                  const isSelected = selectedIds.includes(rowKey);
+                  const isIndeterminate = indeterminateIds.includes(rowKey);
+                  const isActive = isSelected || isIndeterminate;
 
-              return (
-                <React.Fragment key={rowKey}>
-                  <tr 
-                    style={{ 
-                      borderBottom: '1px solid var(--color-border)', 
-                      borderLeft: isActive ? '4px solid #3b82f6' : '4px solid transparent',
-                      backgroundColor: isActive ? 'var(--color-bg-selected)' : (isExpanded ? 'var(--color-bg-hover)' : 'transparent'),
-                      transition: 'all 0.2s ease',
-                      height: '64px',
-                      cursor: (expandableRender || onRowClick) ? 'pointer' : 'default',
-                      position: 'relative',
-                    }}
-                    onClick={() => {
-                      if (onRowClick) {
-                        onRowClick(row);
-                      } else if (expandableRender) {
-                        setExpandedId(isExpanded ? null : rowKey);
-                      }
-                    }}
-                    onMouseEnter={(e) => {
-                      setHoveredRowId(rowKey);
-                      if (!isActive && !isExpanded) e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
-                    }}
-                    onMouseLeave={(e) => {
-                      setHoveredRowId(null);
-                      if (!isActive && !isExpanded) e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                    onTouchStart={() => handleTouchStart(rowKey)}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchCancel={handleTouchEnd}
-                  >
-                    {onSelectionChange && (
-                      <td style={{ 
-                        padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', verticalAlign: 'middle', textAlign: 'center',
-                        position: 'sticky', left: 0, backgroundColor: 'inherit', zIndex: 1
-                      }}>
-                        <input 
-                          type="checkbox" 
-                          checked={isSelected || isIndeterminate}
-                          ref={input => { if (input) input.indeterminate = isIndeterminate; }}
-                          onChange={(e) => handleSelectRow(rowKey, e.target.checked)}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </td>
-                    )}
-                    {expandableRender && (
-                      <td 
-                        style={{ padding: '0', width: '48px', minWidth: '48px', whiteSpace: 'nowrap', cursor: 'pointer', color: 'var(--text-muted)', verticalAlign: 'middle', textAlign: 'center' }}
-                        onClick={(e) => { e.stopPropagation(); setExpandedId(isExpanded ? null : rowKey); }}
+                  return (
+                    <React.Fragment key={rowKey}>
+                      <tr
+                        style={{
+                          borderBottom: '1px solid var(--color-border)',
+                          borderLeft: isActive ? '4px solid #3b82f6' : '4px solid transparent',
+                          backgroundColor: isActive
+                            ? 'var(--color-bg-selected)'
+                            : isExpanded
+                              ? 'var(--color-bg-hover)'
+                              : 'transparent',
+                          transition: 'all 0.2s ease',
+                          height: '64px',
+                          cursor: expandableRender || onRowClick ? 'pointer' : 'default',
+                          position: virtualize ? 'absolute' : 'relative',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: virtualize ? `translateY(${virtualRowOrRow.start}px)` : 'none',
+                        }}
+                        onClick={() => {
+                          if (onRowClick) {
+                            onRowClick(row);
+                          } else if (expandableRender) {
+                            setExpandedId(isExpanded ? null : rowKey);
+                          }
+                        }}
+                        onMouseEnter={(e) => {
+                          setHoveredRowId(rowKey);
+                          if (!isActive && !isExpanded)
+                            e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          setHoveredRowId(null);
+                          if (!isActive && !isExpanded)
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                        onTouchStart={() => handleTouchStart(rowKey)}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchCancel={handleTouchEnd}
                       >
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </td>
-                    )}
-                    {activeColumns.map((col, idx) => {
-                      let cellValue = col.render ? col.render(row) : row[col.key];
-                      const isProductColumn = col.key === 'name' || col.header === 'Product Name' || col.label === 'Product Name';
-                      const cellStyle = {
-                        padding: '12px 16px', 
-                        fontSize: '13px', 
-                        color: 'var(--text-main)',
-                        textAlign: col.align || 'left',
-                        verticalAlign: 'middle',
-                        position: isProductColumn ? 'sticky' : 'static',
-                        left: isProductColumn ? (onSelectionChange ? '48px' : '0') : 'auto',
-                        backgroundColor: 'inherit',
-                        zIndex: isProductColumn ? 1 : 0,
-                      };
+                        {onSelectionChange && (
+                          <td
+                            style={{
+                              padding: '0',
+                              width: '48px',
+                              minWidth: '48px',
+                              whiteSpace: 'nowrap',
+                              verticalAlign: 'middle',
+                              textAlign: 'center',
+                              position: 'sticky',
+                              left: 0,
+                              backgroundColor: 'inherit',
+                              zIndex: 1,
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected || isIndeterminate}
+                              ref={(input) => {
+                                if (input) input.indeterminate = isIndeterminate;
+                              }}
+                              onChange={(e) => handleSelectRow(rowKey, e.target.checked)}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ cursor: 'pointer' }}
+                            />
+                          </td>
+                        )}
+                        {expandableRender && (
+                          <td
+                            style={{
+                              padding: '0',
+                              width: '48px',
+                              minWidth: '48px',
+                              whiteSpace: 'nowrap',
+                              cursor: 'pointer',
+                              color: 'var(--text-muted)',
+                              verticalAlign: 'middle',
+                              textAlign: 'center',
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedId(isExpanded ? null : rowKey);
+                            }}
+                          >
+                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </td>
+                        )}
+                        {activeColumns.map((col, idx) => {
+                          let cellValue = col.render ? col.render(row) : row[col.key];
+                          const isProductColumn =
+                            col.key === 'name' ||
+                            col.header === 'Product Name' ||
+                            col.label === 'Product Name';
+                          const cellStyle = {
+                            padding: '12px 16px',
+                            fontSize: '13px',
+                            color: 'var(--text-main)',
+                            textAlign: col.align || 'left',
+                            verticalAlign: 'middle',
+                            position: isProductColumn ? 'sticky' : 'static',
+                            left: isProductColumn ? (onSelectionChange ? '48px' : '0') : 'auto',
+                            backgroundColor: 'inherit',
+                            zIndex: isProductColumn ? 1 : 0,
+                          };
 
-                      return (
-                        <td 
-                          key={col.key || idx} 
-                          className={col.hideOnMobile ? 'hide-on-mobile' : ''}
-                          data-label={typeof col.header === 'string' ? col.header : col.key}
-                          style={cellStyle}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ flex: 1, overflow: 'hidden' }}>
-                              {cellValue}
-                            </div>
-                            {idx === activeColumns.length - 1 && renderHoverActions && hoveredRowId === rowKey && (
-                              <div style={{ position: 'absolute', right: '16px', display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(90deg, transparent, inherit 20%)', paddingLeft: '24px' }}>
-                                {renderHoverActions(row)}
+                          return (
+                            <td
+                              key={col.key || idx}
+                              className={col.hideOnMobile ? 'hide-on-mobile' : ''}
+                              data-label={typeof col.header === 'string' ? col.header : col.key}
+                              style={cellStyle}
+                            >
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                }}
+                              >
+                                <div style={{ flex: 1, overflow: 'hidden' }}>{cellValue}</div>
+                                {idx === activeColumns.length - 1 &&
+                                  renderHoverActions &&
+                                  hoveredRowId === rowKey && (
+                                    <div
+                                      style={{
+                                        position: 'absolute',
+                                        right: '16px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        background:
+                                          'linear-gradient(90deg, transparent, inherit 20%)',
+                                        paddingLeft: '24px',
+                                      }}
+                                    >
+                                      {renderHoverActions(row)}
+                                    </div>
+                                  )}
                               </div>
-                            )}
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {isExpanded && expandableRender && (
-                    <tr style={{ backgroundColor: 'var(--color-bg-hover)' }}>
-                      <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + 1} style={{ padding: '24px', borderBottom: '1px solid var(--color-border)' }}>
-                        {expandableRender(row)}
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      {isExpanded && expandableRender && !virtualize && (
+                        <tr style={{ backgroundColor: 'var(--color-bg-hover)' }}>
+                          <td
+                            colSpan={columns.length + (onSelectionChange ? 1 : 0) + 1}
+                            style={{
+                              padding: '24px',
+                              borderBottom: '1px solid var(--color-border)',
+                            }}
+                          >
+                            {expandableRender(row)}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+              )
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Pagination Footer (Google Cloud Style) */}
       {(onPageChange || onNextPage || onPrevPage) && (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'flex-end', 
-          alignItems: 'center', 
-          padding: '8px 24px',
-          borderTop: '1px solid var(--color-border)',
-          backgroundColor: 'var(--color-bg-app)',
-          gap: '24px',
-          minHeight: '48px'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            padding: '8px 24px',
+            borderTop: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-bg-app)',
+            gap: '24px',
+            minHeight: '48px',
+          }}
+        >
           {/* Rows per page selector */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rows per page:</span>
             {onRowsPerPageChange ? (
-              <select 
-                value={rowsPerPage} 
+              <select
+                value={rowsPerPage}
                 onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
                 style={{
                   border: 'none',
@@ -584,15 +862,19 @@ export default function DataTable({
                   color: 'var(--color-text-primary)',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  outline: 'none'
+                  outline: 'none',
                 }}
               >
-                {[20, 50, 100, 250].map(val => (
-                  <option key={`rpp-${val}`} value={val}>{val}</option>
+                {[20, 50, 100, 250].map((val) => (
+                  <option key={`rpp-${val}`} value={val}>
+                    {val}
+                  </option>
                 ))}
               </select>
             ) : (
-              <span style={{ fontSize: '12px', color: 'var(--color-text-primary)', fontWeight: 600 }}>
+              <span
+                style={{ fontSize: '12px', color: 'var(--color-text-primary)', fontWeight: 600 }}
+              >
                 {rowsPerPage || 20}
               </span>
             )}
@@ -600,37 +882,72 @@ export default function DataTable({
 
           {/* Item count (e.g. 1-20 of 152) */}
           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            {paginationText || (
-              totalItems > 0 
-                ? `${((currentPage - 1) * (rowsPerPage || 20)) + 1}-${Math.min(currentPage * (rowsPerPage || 20), totalItems)} of ${totalItems}`
-                : '0-0 of 0'
-            )}
+            {paginationText ||
+              (totalItems > 0
+                ? `${(currentPage - 1) * (rowsPerPage || 20) + 1}-${Math.min(currentPage * (rowsPerPage || 20), totalItems)} of ${totalItems}`
+                : '0-0 of 0')}
           </span>
 
           {/* Pagination controls */}
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              onClick={() => onPrevPage ? onPrevPage() : onPageChange(currentPage - 1)}
+            <button
+              onClick={() => (onPrevPage ? onPrevPage() : onPageChange(currentPage - 1))}
               disabled={hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: '32px', height: '32px', borderRadius: '4px',
-                border: 'none', background: 'transparent',
-                color: (hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1) ? 'var(--color-border)' : 'var(--color-text-primary)',
-                cursor: (hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1) ? 'not-allowed' : 'pointer'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '4px',
+                border: 'none',
+                background: 'transparent',
+                color: (hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1)
+                  ? 'var(--color-border)'
+                  : 'var(--color-text-primary)',
+                cursor: (hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1)
+                  ? 'not-allowed'
+                  : 'pointer',
               }}
             >
               <ChevronLeft size={20} />
             </button>
-            <button 
-              onClick={() => onNextPage ? onNextPage() : onPageChange(currentPage + 1)}
-              disabled={hasNextPage !== undefined ? !hasNextPage : (totalPages ? currentPage >= totalPages : true)}
+            <button
+              onClick={() => (onNextPage ? onNextPage() : onPageChange(currentPage + 1))}
+              disabled={
+                hasNextPage !== undefined
+                  ? !hasNextPage
+                  : totalPages
+                    ? currentPage >= totalPages
+                    : true
+              }
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: '32px', height: '32px', borderRadius: '4px',
-                border: 'none', background: 'transparent',
-                color: (hasNextPage !== undefined ? !hasNextPage : (totalPages ? currentPage >= totalPages : true)) ? 'var(--color-border)' : 'var(--color-text-primary)',
-                cursor: (hasNextPage !== undefined ? !hasNextPage : (totalPages ? currentPage >= totalPages : true)) ? 'not-allowed' : 'pointer'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '4px',
+                border: 'none',
+                background: 'transparent',
+                color: (
+                  hasNextPage !== undefined
+                    ? !hasNextPage
+                    : totalPages
+                      ? currentPage >= totalPages
+                      : true
+                )
+                  ? 'var(--color-border)'
+                  : 'var(--color-text-primary)',
+                cursor: (
+                  hasNextPage !== undefined
+                    ? !hasNextPage
+                    : totalPages
+                      ? currentPage >= totalPages
+                      : true
+                )
+                  ? 'not-allowed'
+                  : 'pointer',
               }}
             >
               <ChevronRight size={20} />
@@ -639,25 +956,40 @@ export default function DataTable({
         </div>
       )}
       {/* Floating Batch Actions */}
-      {(selectedIds.length > 0) && renderBatchActions && (
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#1e293b', // Dark modern color
-          borderRadius: '12px',
-          padding: '12px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '24px',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
-          zIndex: 1000,
-          color: 'white',
-          animation: 'slideUp 0.3s ease-out forwards',
-        }}>
+      {selectedIds.length > 0 && renderBatchActions && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#1e293b', // Dark modern color
+            borderRadius: '12px',
+            padding: '12px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '24px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
+            zIndex: 1000,
+            color: 'white',
+            animation: 'slideUp 0.3s ease-out forwards',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ backgroundColor: '#334155', color: '#e2e8f0', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 600 }}>
+            <div
+              style={{
+                backgroundColor: '#334155',
+                color: '#e2e8f0',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+              }}
+            >
               {selectedIds.length}
             </div>
             <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#e2e8f0' }}>Selected</span>
@@ -666,9 +998,19 @@ export default function DataTable({
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {renderBatchActions(selectedIds)}
           </div>
-          <button 
-            onClick={() => onSelectionChange?.([])} 
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', marginLeft: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          <button
+            onClick={() => onSelectionChange?.([])}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              padding: '4px',
+              marginLeft: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             title="Clear Selection"
           >
             <X size={16} />

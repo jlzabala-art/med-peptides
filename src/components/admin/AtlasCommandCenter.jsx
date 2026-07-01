@@ -34,28 +34,34 @@ import TasksEngine from '../shared/TasksEngine';
 const MetricCard = ({ label, value }) => (
   <div
     style={{
-      backgroundColor: 'white',
-      border: '1px solid var(--border)',
-      borderRadius: '12px',
+      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(226, 232, 240, 0.8)',
+      borderRadius: '16px',
       padding: '1.5rem',
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
       justifyContent: 'center',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     }}
   >
     <div
       style={{
-        fontSize: '0.85rem',
-        color: 'var(--text-muted)',
-        fontWeight: 600,
+        fontSize: '0.75rem',
+        color: 'var(--text-muted, #64748b)',
+        fontWeight: 700,
         textTransform: 'uppercase',
+        letterSpacing: '0.05em',
         marginBottom: '0.5rem',
       }}
     >
       {label}
     </div>
-    <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)' }}>{value}</div>
+    <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main, #0f172a)' }}>
+      {value}
+    </div>
   </div>
 );
 
@@ -69,8 +75,16 @@ function SortableWidget({ id, widget }) {
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 10 : 1,
-    gridColumn: widget.size === 'large' ? 'span 2' : widget.size === 'full' ? 'span 3' : 'span 1',
-    minHeight: widget.type === 'kpi' ? '140px' : '400px',
+    // 12 column grid system
+    gridColumn:
+      widget.size === 'full'
+        ? 'span 12'
+        : widget.size === 'large'
+          ? 'span 8'
+          : widget.type === 'kpi'
+            ? 'span 3'
+            : 'span 4',
+    minHeight: widget.type === 'kpi' ? '120px' : '400px',
     cursor: 'grab',
   };
 
@@ -158,7 +172,7 @@ function WorkspaceGrid() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(12, 1fr)',
             gap: '1.5rem',
             marginTop: '1.5rem',
           }}

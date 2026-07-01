@@ -74,6 +74,7 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import PortalLayout from '../components/ui/PortalLayout';
 import PageTransition from '../components/PageTransition';
 import Omnibar from '../components/admin/Omnibar';
+import { useAdminRoleSimulation } from '../hooks/admin/useAdminRoleSimulation';
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
@@ -131,7 +132,11 @@ function useInboxPendingCount() {
       collection(db, 'operations_queue'),
       where('status', 'in', ['New', 'AI Processing', 'Awaiting Review', 'Awaiting Approval'])
     );
-    const unsub = onSnapshot(q, (snap) => setCount(snap.size), () => {});
+    const unsub = onSnapshot(
+      q,
+      (snap) => setCount(snap.size),
+      () => {}
+    );
     return unsub;
   }, []);
   return count;
@@ -149,21 +154,25 @@ function useUpcomingCalendarCount() {
       orderBy('start', 'asc')
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      let pending = 0;
-      const startOfToday = new Date();
-      startOfToday.setHours(0,0,0,0);
-      const todayIso = startOfToday.toISOString();
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        let pending = 0;
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const todayIso = startOfToday.toISOString();
 
-      snap.forEach(doc => {
-        const data = doc.data();
-        const startStr = data.start?.toDate ? data.start.toDate().toISOString() : data.start;
-        if (startStr && startStr >= todayIso) {
-          pending++;
-        }
-      });
-      setCount(pending);
-    }, () => {});
+        snap.forEach((doc) => {
+          const data = doc.data();
+          const startStr = data.start?.toDate ? data.start.toDate().toISOString() : data.start;
+          if (startStr && startStr >= todayIso) {
+            pending++;
+          }
+        });
+        setCount(pending);
+      },
+      () => {}
+    );
 
     return unsub;
   }, [user]);
@@ -342,6 +351,7 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const { isAdmin, loading: authLoading, logout, userProfile } = useAuth();
+  const { simulatedRole, allowedAdminTabs, isSimulating } = useAdminRoleSimulation();
   const navigate = useNavigate();
   const location = useLocation();
   const unreadMessages = useUnreadMessagesCount();
@@ -388,6 +398,16 @@ export default function AdminDashboard() {
   }, [unreadMessages, pendingInboxItems, upcomingCalendarCount]);
 
   const filteredNavGroups = React.useMemo(() => {
+    // 1. Role simulation logic
+    if (isSimulating) {
+      if (allowedAdminTabs.includes('*')) return NAV_GROUPS;
+      return NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items.filter((item) => allowedAdminTabs.includes(item.id)),
+      })).filter((group) => group.items.length > 0);
+    }
+
+    // 2. Normal Auth logic
     if (isAdmin || userProfile?.role === 'admin') {
       return NAV_GROUPS;
     }
@@ -398,7 +418,7 @@ export default function AdminDashboard() {
       ...group,
       items: group.items.filter((item) => userProfile.allowedAdminTabs.includes(item.id)),
     })).filter((group) => group.items.length > 0);
-  }, [userProfile, isAdmin]);
+  }, [userProfile, isAdmin, isSimulating, allowedAdminTabs]);
 
   // Derive active tab from the URL path instead of query params.
   // E.g., /admin/users -> 'users', /admin -> 'dashboard'
@@ -406,6 +426,21 @@ export default function AdminDashboard() {
   const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   React.useEffect(() => {
+    // If simulating, do not forcibly redirect the admin (or redirect them if you strictly want to enforce it).
+    // Let's enforce it to make the simulation authentic.
+    if (isSimulating && !allowedAdminTabs.includes('*')) {
+      if (
+        !allowedAdminTabs.includes(activeTab) &&
+        activeTab !== 'dashboard' &&
+        activeTab !== 'my-profile'
+      ) {
+        navigate(`/admin/${allowedAdminTabs[0]}`);
+      } else if (activeTab === 'dashboard' && !allowedAdminTabs.includes('dashboard')) {
+        navigate(`/admin/${allowedAdminTabs[0]}`);
+      }
+      return;
+    }
+
     if (isAdmin || userProfile?.role === 'admin') return; // Admins bypass restrictions
     if (userProfile?.allowedAdminTabs && userProfile.allowedAdminTabs.length > 0) {
       if (
@@ -420,7 +455,15 @@ export default function AdminDashboard() {
         navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
       }
     }
-  }, [userProfile?.allowedAdminTabs, activeTab, navigate, isAdmin, userProfile?.role]);
+  }, [
+    userProfile?.allowedAdminTabs,
+    activeTab,
+    navigate,
+    isAdmin,
+    userProfile?.role,
+    isSimulating,
+    allowedAdminTabs,
+  ]);
 
   const navToTab = useCallback(
     (tabId) => {

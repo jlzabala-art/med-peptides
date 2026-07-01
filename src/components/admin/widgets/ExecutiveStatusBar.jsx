@@ -23,6 +23,7 @@ export default function ExecutiveStatusBar({
         display: 'flex',
         alignItems: 'center',
         overflowX: 'auto',
+        padding: '0 0.5rem',
         WebkitOverflowScrolling: 'touch',
         msOverflowStyle: 'none', // IE and Edge
         scrollbarWidth: 'none', // Firefox
@@ -35,7 +36,7 @@ export default function ExecutiveStatusBar({
         }
         .exec-status-item {
           display: flex;
-          alignItems: center;
+          align-items: center;
           white-space: nowrap;
           padding: 0 1rem;
           height: 48px;
@@ -51,8 +52,12 @@ export default function ExecutiveStatusBar({
             padding: 0 1.5rem;
           }
         }
+        .exec-status-item:first-child {
+          padding-left: 0.5rem;
+        }
         .exec-status-item:last-child {
           border-right: none;
+          padding-right: 1.5rem;
         }
         .exec-live-indicator {
           width: 8px;
