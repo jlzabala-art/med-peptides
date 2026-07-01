@@ -1132,6 +1132,7 @@ export default function AdminProtocolsTab() {
   const [edits, setEdits] = useState({}); // id → { protocol_name, status, therapeutic_category, phases }
   const [saving, setSaving] = useState({});
   const [saved, setSaved] = useState({});
+  const [deleting, setDeleting] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [drawerProtocol, setDrawerProtocol] = useState(null);
   const [linkedProduct, setLinkedProduct] = useState(null); // secondary: product detail drawer
