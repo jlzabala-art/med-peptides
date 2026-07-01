@@ -49,6 +49,31 @@ export const ADMIN_ROLES = {
       'import-catalogs',
     ],
   },
+  patient_coordinator: {
+    id: 'patient_coordinator',
+    label: 'Patient Coordinator',
+    allowedTabs: [
+      'dashboard',
+      'patients',
+      'prescriptions',
+      'protocols',
+      'orders',
+      'communications',
+    ],
+  },
+  fagron_clinic: {
+    id: 'fagron_clinic',
+    label: 'Fagron Clinic',
+    allowedTabs: [
+      'dashboard',
+      'clinics',
+      'prescriptions',
+      'prescription-agent',
+      'protocols',
+      'orders',
+      'lab-tests',
+    ],
+  },
 };
 
 let globalSimulatedRole = 'admin';

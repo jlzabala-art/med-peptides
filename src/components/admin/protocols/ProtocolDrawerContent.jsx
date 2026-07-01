@@ -297,91 +297,106 @@ export default function ProtocolDrawerContent({ protocol, products = [], onProdu
                       {phase.label || `Phase ${idx + 1}`}
                     </div>
                     {(phase.items ?? []).length > 0 ? (
-                      <table
-                        style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}
+                      <div
+                        style={{
+                          overflowX: 'auto',
+                          WebkitOverflowScrolling: 'touch',
+                          margin: '0 -0.5rem',
+                          padding: '0 0.5rem',
+                        }}
                       >
-                        <thead>
-                          <tr
-                            style={{
-                              borderBottom: '1px solid #e2e8f0',
-                              color: '#64748b',
-                              textAlign: 'left',
-                            }}
-                          >
-                            <th style={{ padding: '0.5rem 0', fontWeight: 600 }}>Product</th>
-                            <th style={{ padding: '0.5rem 0', fontWeight: 600 }}>Dosage</th>
-                            <th style={{ padding: '0.5rem 0', fontWeight: 600 }}>Frequency</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(phase.items ?? []).map((item, j) => {
-                            const product = getProductDetails(
-                              item.productId,
-                              item.productName || item.product_name
-                            );
-                            return (
-                              <tr
-                                key={j}
-                                style={{
-                                  borderBottom: '1px solid #f1f5f9',
-                                  cursor: onProductClick && item.productId ? 'pointer' : 'default',
-                                }}
-                                onClick={() =>
-                                  onProductClick && item.productId && onProductClick(product)
-                                }
-                                onMouseEnter={(e) => {
-                                  if (onProductClick && item.productId)
-                                    e.currentTarget.style.background = '#f8fafc';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.background = '';
-                                }}
-                              >
-                                <td
+                        <table
+                          style={{
+                            minWidth: '400px',
+                            width: '100%',
+                            borderCollapse: 'collapse',
+                            fontSize: '0.85rem',
+                          }}
+                        >
+                          <thead>
+                            <tr
+                              style={{
+                                borderBottom: '1px solid #e2e8f0',
+                                color: '#64748b',
+                                textAlign: 'left',
+                              }}
+                            >
+                              <th style={{ padding: '0.5rem 0', fontWeight: 600 }}>Product</th>
+                              <th style={{ padding: '0.5rem 0', fontWeight: 600 }}>Dosage</th>
+                              <th style={{ padding: '0.5rem 0', fontWeight: 600 }}>Frequency</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(phase.items ?? []).map((item, j) => {
+                              const product = getProductDetails(
+                                item.productId,
+                                item.productName || item.product_name
+                              );
+                              return (
+                                <tr
+                                  key={j}
                                   style={{
-                                    padding: '0.75rem 0',
-                                    color: '#0f172a',
-                                    fontWeight: 500,
+                                    borderBottom: '1px solid #f1f5f9',
+                                    cursor:
+                                      onProductClick && item.productId ? 'pointer' : 'default',
+                                  }}
+                                  onClick={() =>
+                                    onProductClick && item.productId && onProductClick(product)
+                                  }
+                                  onMouseEnter={(e) => {
+                                    if (onProductClick && item.productId)
+                                      e.currentTarget.style.background = '#f8fafc';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = '';
                                   }}
                                 >
-                                  {product.name}
-                                  {!item.productId && (
-                                    <span
-                                      style={{
-                                        marginLeft: '6px',
-                                        fontSize: '0.65rem',
-                                        padding: '2px 4px',
-                                        background: '#fef08a',
-                                        color: '#854d0e',
-                                        borderRadius: '4px',
-                                      }}
-                                    >
-                                      Legacy Name
-                                    </span>
-                                  )}
-                                  {onProductClick && item.productId && (
-                                    <span
-                                      style={{
-                                        marginLeft: '4px',
-                                        fontSize: '0.65rem',
-                                        color: '#94a3b8',
-                                      }}
-                                    >
-                                      ↗
-                                    </span>
-                                  )}
-                                </td>
-                                <td style={{ padding: '0.75rem 0', color: '#475569' }}>
-                                  {item.dosage || '—'}
-                                </td>
-                                <td style={{ padding: '0.75rem 0', color: '#475569' }}>
-                                  {item.frequency || '—'}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                  <td
+                                    style={{
+                                      padding: '0.75rem 0',
+                                      color: '#0f172a',
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    {product.name}
+                                    {!item.productId && (
+                                      <span
+                                        style={{
+                                          marginLeft: '6px',
+                                          fontSize: '0.65rem',
+                                          padding: '2px 4px',
+                                          background: '#fef08a',
+                                          color: '#854d0e',
+                                          borderRadius: '4px',
+                                        }}
+                                      >
+                                        Legacy Name
+                                      </span>
+                                    )}
+                                    {onProductClick && item.productId && (
+                                      <span
+                                        style={{
+                                          marginLeft: '4px',
+                                          fontSize: '0.65rem',
+                                          color: '#94a3b8',
+                                        }}
+                                      >
+                                        ↗
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: '0.75rem 0', color: '#475569' }}>
+                                    {item.dosage || '—'}
+                                  </td>
+                                  <td style={{ padding: '0.75rem 0', color: '#475569' }}>
+                                    {item.frequency || '—'}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     ) : (
                       <p
                         style={{

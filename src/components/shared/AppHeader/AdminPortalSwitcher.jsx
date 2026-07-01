@@ -62,6 +62,26 @@ const PORTALS = [
     isSimulatedRole: true,
   },
   {
+    id: 'patient_coordinator',
+    label: 'Patient Coordinator',
+    description: 'Patient care & records',
+    icon: User,
+    route: '/admin',
+    color: '#0ea5e9', // sky-500
+    group: 'Clinical',
+    isSimulatedRole: true,
+  },
+  {
+    id: 'fagron_clinic',
+    label: 'Fagron Clinic',
+    description: 'Clinic & prescriptions',
+    icon: FlaskConical,
+    route: '/admin',
+    color: '#06b6d4', // cyan-500
+    group: 'Clinical',
+    isSimulatedRole: true,
+  },
+  {
     id: 'b2c',
     label: 'Patient Shop',
     description: 'Patient storefront',
