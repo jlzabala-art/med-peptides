@@ -3,8 +3,8 @@ const { GoogleGenAI } = require('@google/genai');
 async function executeUniversalParse(filePath, mimeType, context, aiInstructions, apiKey) {
   const ai = new GoogleGenAI({ apiKey });
 
-  let systemInstruction = "";
-  if (context === "RFQ") {
+  let systemInstruction = '';
+  if (context === 'RFQ') {
     systemInstruction = `You are a highly advanced Clinical Supply Chain AI expert. Your task is to rigorously extract requested items, dosages, quantities, and units from the provided Request for Quote (RFQ) or purchase order document.
 Rules:
 1. Identify all peptides, medical supplies, and biological products.
@@ -14,7 +14,7 @@ Rules:
 5. 'original_text' MUST contain the exact raw string line from the document where you found this item, to allow for human auditing.
 6. Provide a 'confidence_score' (integer 0-100) reflecting how certain you are of the extracted values based on the original document's clarity and formatting.
 Output a JSON array of objects: { "original_text": "str", "peptide_name": "str", "dosage": "str|null", "quantity": number, "units": "str", "confidence_score": number }. Return ONLY a valid JSON array.`;
-  } else if (context === "PriceList") {
+  } else if (context === 'PriceList') {
     systemInstruction = `You are a B2B Catalog and Pricing AI expert. Your task is to meticulously extract the price list catalog from the provided document (PDF, Image, or Excel).
 Rules:
 1. Identify every unique product/peptide being sold.
@@ -24,7 +24,7 @@ Rules:
 5. 'original_text' MUST contain the exact raw text line to allow humans to audit the extraction.
 6. Provide a 'confidence_score' (integer 0-100) reflecting how certain you are of the extracted values based on the original document's clarity and formatting.
 Output a JSON array of objects: { "original_text": "str", "peptide_name": "str", "dosage": "str|null", "unit_cost": number, "moq": number, "confidence_score": number }. Return ONLY a valid JSON array.`;
-  } else if (context === "COA") {
+  } else if (context === 'COA') {
     systemInstruction = `You are an elite Quality Assurance AI. Your task is to rigorously extract batch validation details from the provided Certificate of Analysis (COA).
 Rules:
 1. Locate the precise 'batch_number' or 'lot_number'. This is critical for compliance.
@@ -34,7 +34,7 @@ Rules:
 5. Summarize 'test_results' briefly (e.g., "Pass - HPLC > 99%, MS conforms").
 6. Provide a 'confidence_score' (integer 0-100) reflecting how certain you are of the extracted values based on the original document's clarity and formatting.
 Output a JSON array of objects: { "batch_number": "str", "peptide_name": "str", "purity_percentage": number, "manufacture_date": "YYYY-MM-DD|null", "expiration_date": "YYYY-MM-DD|null", "test_results": "str", "confidence_score": number }. Return ONLY a valid JSON array.`;
-  } else if (context === "Invoice") {
+  } else if (context === 'Invoice') {
     systemInstruction = `You are a specialized Financial Data Extraction AI. Your task is to extract invoice or bill details from the provided document to integrate with Zoho Books.
 Rules:
 1. Identify if it is a Supplier Bill (money you owe) or Customer Invoice (money owed to you). Return 'type' as "Bill" or "Invoice".
@@ -46,7 +46,7 @@ Rules:
 7. Extract 'line_items' as an array of objects: { "description": "str", "quantity": number, "rate": number, "amount": number }.
 8. Provide a 'confidence_score' (integer 0-100).
 Output a JSON array containing a SINGLE object representing the invoice: { "type": "str", "entity_name": "str", "invoice_number": "str", "date": "YYYY-MM-DD", "due_date": "YYYY-MM-DD", "total_amount": number, "currency": "str", "line_items": [...], "confidence_score": number }. Return ONLY a valid JSON array.`;
-  } else if (context === "Auto") {
+  } else if (context === 'Auto') {
     systemInstruction = `You are a highly advanced Medical & B2B Supply Chain AI expert. Your task is to FIRST classify the provided document into one of the following types: 'PriceList', 'COA' (Certificate of Analysis), 'Invoice', 'RFQ' (Request for Quote), or 'ProductLabel'.
 If you are unsure, classify it as 'Unknown'.
 
@@ -63,8 +63,84 @@ You MUST output ONLY a valid JSON object matching this exact schema:
   "confidence": number,
   "data": [ ... extracted data objects based on the rules above ... ]
 }`;
+  } else if (context === 'BloodTest') {
+    systemInstruction = `You are an elite Clinical Biomarker Extraction AI specialized in medical laboratory reports. Your task is to extract all biomarkers and clinical findings from the provided blood test or laboratory report.
+
+Rules:
+1. Extract every measured biomarker: name, value, unit, reference range, and status (normal/high/low/critical).
+2. Flag any out-of-range values as 'abnormal: true'.
+3. Provide a brief 'clinical_interpretation' (one sentence) for each abnormal biomarker.
+4. Calculate an overall 'risk_score' (0-100, where 0 is optimal health).
+5. Generate 'clinical_recommendations' — a list of general clinical areas to address, based strictly on the findings (NO treatment names or drug recommendations).
+6. Never include any pricing or product suggestions.
+
+Output a JSON object matching EXACTLY this schema:
+{
+  "reportDate": "YYYY-MM-DD or null",
+  "patientAge": number or null,
+  "patientGender": "male|female|other|null",
+  "biomarkers": [
+    {
+      "name": "str",
+      "value": "str",
+      "unit": "str",
+      "referenceRange": "str",
+      "status": "normal|high|low|critical",
+      "abnormal": boolean,
+      "clinicalInterpretation": "str or null"
+    }
+  ],
+  "overallRiskScore": number,
+  "clinicalSummary": "str",
+  "clinicalRecommendations": ["str"]
+}`;
+  } else if (context === 'GeneticReport') {
+    systemInstruction = `You are an elite Genomics and Precision Medicine AI. Your task is to extract clinically actionable insights from a genetic or nutrigenomics report (e.g., 24Genetics, Bloodo, or similar).
+
+Rules:
+1. Extract gene variants and SNPs with their clinical significance.
+2. Identify predispositions: metabolic, cardiovascular, hormonal, micronutrient deficiencies, inflammatory tendencies.
+3. Rate each predisposition: 'low_risk', 'moderate_risk', 'high_risk'.
+4. Provide a brief 'clinicalNote' per predisposition, grounded strictly in the report findings.
+5. Do NOT invent data. Only extract what is present in the document.
+6. Never include pricing or product names.
+
+Output a JSON object matching EXACTLY this schema:
+{
+  "reportDate": "YYYY-MM-DD or null",
+  "geneticPlatform": "str",
+  "predispositions": [
+    {
+      "category": "str (e.g., Metabolic, Hormonal, Cardiovascular)",
+      "name": "str",
+      "riskLevel": "low_risk|moderate_risk|high_risk",
+      "genes": ["str"],
+      "clinicalNote": "str"
+    }
+  ],
+  "keyFindings": ["str"],
+  "clinicalSummary": "str"
+}`;
+  } else if (context === 'ClinicalDocument') {
+    systemInstruction = `You are an expert Clinical Document Classification and Extraction AI. First classify the document type, then extract accordingly.
+
+Supported types: 'BloodTest', 'GeneticReport', 'Prescription', 'ClinicalNote', 'Unknown'.
+
+For 'Prescription': extract { patientName, doctorName, medications: [{name, dosage, frequency, duration}], date }.
+For 'ClinicalNote': extract { patientName, date, chiefComplaint, assessment, plan }.
+For 'BloodTest': follow the BloodTest extraction schema (biomarkers with status and risk score).
+For 'GeneticReport': follow the GeneticReport extraction schema (predispositions and key findings).
+
+Output a JSON object:
+{
+  "detectedType": "BloodTest|GeneticReport|Prescription|ClinicalNote|Unknown",
+  "confidence": number,
+  "data": { ... type-specific extracted object ... }
+}`;
   } else {
-    throw new Error("Invalid context. Allowed: RFQ, PriceList, COA, Invoice, Auto");
+    throw new Error(
+      'Invalid context. Allowed: RFQ, PriceList, COA, Invoice, Auto, BloodTest, GeneticReport, ClinicalDocument'
+    );
   }
 
   if (aiInstructions && aiInstructions.trim() !== '') {
@@ -75,7 +151,7 @@ You MUST output ONLY a valid JSON object matching this exact schema:
   try {
     uploadedFile = await ai.files.upload({
       file: filePath,
-      config: { mimeType }
+      config: { mimeType },
     });
 
     const response = await ai.models.generateContent({
@@ -84,32 +160,37 @@ You MUST output ONLY a valid JSON object matching this exact schema:
         {
           fileData: {
             fileUri: uploadedFile.uri,
-            mimeType: uploadedFile.mimeType
-          }
+            mimeType: uploadedFile.mimeType,
+          },
         },
-        { text: "Extract the data according to the system instructions." }
+        { text: 'Extract the data according to the system instructions.' },
       ],
       config: {
         systemInstruction: systemInstruction,
         temperature: 0.1,
-        responseMimeType: "application/json"
-      }
+        responseMimeType: 'application/json',
+      },
     });
 
-    const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-    
+    const text = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+
     let parsed = [];
     try {
       parsed = JSON.parse(text);
     } catch (e) {
-      const cleanText = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+      const cleanText = text
+        .replace(/```json/gi, '')
+        .replace(/```/g, '')
+        .trim();
       parsed = JSON.parse(cleanText);
     }
 
     return parsed;
   } finally {
     if (uploadedFile && uploadedFile.name) {
-      await ai.files.delete({ name: uploadedFile.name }).catch(err => console.error("Failed to delete file:", err));
+      await ai.files
+        .delete({ name: uploadedFile.name })
+        .catch((err) => console.error('Failed to delete file:', err));
     }
   }
 }
