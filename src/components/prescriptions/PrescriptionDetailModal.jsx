@@ -390,13 +390,13 @@ function OverviewTab({ rx }) {
   );
 }
 
-function ItemsTab({ rx, products = [] }) {
+function ItemsTab({ rx, products = [], onProductClick }) {
   const items = rx.items || rx.products || [];
 
   const getProductDetails = (productId, fallbackName) => {
     if (!productId) return { name: fallbackName || 'Unknown Product' };
     const found = products.find((p) => p.id === productId);
-    return found || { name: fallbackName || 'Unknown Product' };
+    return found || { name: fallbackName || 'Unknown Product', id: productId };
   };
 
   if (items.length === 0) {
@@ -470,6 +470,11 @@ function ItemsTab({ rx, products = [] }) {
               alignItems: 'center',
               gap: '0',
               transition: 'background 0.1s',
+              cursor: onProductClick && item.productId ? 'pointer' : 'default',
+            }}
+            onClick={() => {
+              const product = getProductDetails(item.productId, item.name || item.productName);
+              if (onProductClick && item.productId) onProductClick(product);
             }}
             onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
             onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -927,7 +932,13 @@ function TimelineTab({ rx }) {
 // ── Main Modal Component ──────────────────────────────────────────────────────
 const TABS = ['Overview', 'Items', 'Follow-Up', 'Documents', 'Timeline'];
 
-export default function PrescriptionDetailModal({ rx, products = [], onClose }) {
+export default function PrescriptionDetailModal({
+  rx,
+  products = [],
+  onClose,
+  onProtocolClick,
+  onProductClick,
+}) {
   const [activeTab, setActiveTab] = useState('Overview');
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -1040,14 +1051,37 @@ export default function PrescriptionDetailModal({ rx, products = [], onClose }) 
             <div style={{ minWidth: 0 }}>
               {protocol && (
                 <div
+                  onClick={() =>
+                    onProtocolClick &&
+                    rx.protocolId &&
+                    onProtocolClick({ id: rx.protocolId, name: protocol })
+                  }
                   style={{
                     fontSize: '0.9rem',
                     color: '#6366f1',
                     fontWeight: 600,
                     marginTop: '0.2rem',
+                    cursor: onProtocolClick && rx.protocolId ? 'pointer' : 'default',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: onProtocolClick && rx.protocolId ? '0.1rem 0.3rem' : '0',
+                    borderRadius: '4px',
+                    transition: 'background 0.1s',
                   }}
+                  onMouseEnter={(e) => {
+                    if (onProtocolClick && rx.protocolId)
+                      e.currentTarget.style.background = '#eef2ff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '';
+                  }}
+                  title={onProtocolClick && rx.protocolId ? 'View protocol details' : ''}
                 >
                   {protocol}
+                  {onProtocolClick && rx.protocolId && (
+                    <span style={{ fontSize: '0.7rem', color: '#a5b4fc' }}>↗</span>
+                  )}
                 </div>
               )}
               <div
@@ -1130,7 +1164,9 @@ export default function PrescriptionDetailModal({ rx, products = [], onClose }) 
         {/* ── Tab Content ────────────────────────────────────────────── */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {activeTab === 'Overview' && <OverviewTab rx={rx} />}
-          {activeTab === 'Items' && <ItemsTab rx={rx} products={products} />}
+          {activeTab === 'Items' && (
+            <ItemsTab rx={rx} products={products} onProductClick={onProductClick} />
+          )}
           {activeTab === 'Follow-Up' && <FollowUpTab rx={rx} />}
           {activeTab === 'Documents' && <DocumentsTab rx={rx} />}
           {activeTab === 'Timeline' && <TimelineTab rx={rx} />}

@@ -17,6 +17,8 @@ import {
   Package,
 } from 'lucide-react';
 import PrescriptionDetailModal from '../../prescriptions/PrescriptionDetailModal';
+import ProtocolDrawerContent from '../protocols/ProtocolDrawerContent';
+import StandardDrawer from '../../ui/StandardDrawer';
 
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
 import { useDataTable } from '../../../hooks/ui/useDataTable';
@@ -472,6 +474,8 @@ function FlexibleTable({ data, onRowClick }) {
 export default function AdminPrescriptionsTab() {
   const [activeChip, setActiveChip] = useState('all');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [linkedProtocol, setLinkedProtocol] = useState(null); // secondary: protocol drawer
+  const [linkedProduct, setLinkedProduct] = useState(null); // secondary: product drawer
 
   // 1. Data Fetching
   const { data: prescriptions, isLoading: loading } = useFirestoreCollection('prescriptions', {
@@ -662,13 +666,94 @@ export default function AdminPrescriptionsTab() {
           )}
         </div>
 
-        {/* Detail Modal */}
+        {/* Prescription Detail Drawer */}
         {selectedItem && (
           <PrescriptionDetailModal
             rx={selectedItem}
             products={products}
             onClose={() => setSelectedItem(null)}
+            onProtocolClick={(proto) => setLinkedProtocol(proto)}
+            onProductClick={(prod) => setLinkedProduct(prod)}
           />
+        )}
+
+        {/* Linked Protocol Secondary Drawer */}
+        {linkedProtocol && (
+          <StandardDrawer
+            isOpen={true}
+            onClose={() => setLinkedProtocol(null)}
+            title={linkedProtocol.name || 'Protocol Details'}
+            subtitle="Linked protocol"
+            fullWorkspace={true}
+          >
+            <ProtocolDrawerContent
+              protocol={linkedProtocol}
+              products={products}
+              onProductClick={(prod) => setLinkedProduct(prod)}
+            />
+          </StandardDrawer>
+        )}
+
+        {/* Linked Product Secondary Drawer */}
+        {linkedProduct && (
+          <StandardDrawer
+            isOpen={true}
+            onClose={() => setLinkedProduct(null)}
+            title={linkedProduct.name || linkedProduct.displayName || 'Product Details'}
+            subtitle={linkedProduct.category || ''}
+            fullWorkspace={true}
+          >
+            <div
+              style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
+            >
+              {linkedProduct.description && (
+                <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                  {linkedProduct.description}
+                </p>
+              )}
+              {[
+                { label: 'SKU / Ref', value: linkedProduct.sku || linkedProduct.ref || '—' },
+                { label: 'Category', value: linkedProduct.category || '—' },
+                { label: 'Default Dosage', value: linkedProduct.defaultDosage || '—' },
+                { label: 'Unit', value: linkedProduct.unit || '—' },
+                {
+                  label: 'Active',
+                  value:
+                    linkedProduct.isActive !== undefined
+                      ? linkedProduct.isActive
+                        ? 'Yes'
+                        : 'No'
+                      : '—',
+                },
+              ].map(({ label, value }) => (
+                <div
+                  key={label}
+                  style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    padding: '0.6rem 0',
+                    borderBottom: '1px solid #f1f5f9',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.8rem',
+                      color: '#94a3b8',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      width: 110,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {label}
+                  </span>
+                  <span style={{ fontSize: '0.9rem', color: '#0f172a', fontWeight: 600 }}>
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </StandardDrawer>
         )}
       </div>
     </>

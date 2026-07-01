@@ -1133,6 +1133,7 @@ export default function AdminProtocolsTab() {
   const [saving, setSaving] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [drawerProtocol, setDrawerProtocol] = useState(null);
+  const [linkedProduct, setLinkedProduct] = useState(null); // secondary: product detail drawer
   const { products } = useProducts();
   const [catalogProducts, setCatalog] = useState([]);
   const [showPathwayWizard, setShowPathwayWizard] = useState(false);
@@ -1198,13 +1199,11 @@ export default function AdminProtocolsTab() {
             totalProtocols: data.length,
             activeCount: activeProtocols.length,
             categories: [...new Set(data.map((p) => p.therapeutic_category).filter(Boolean))],
-            recentActive: activeProtocols
-              .slice(0, 5)
-              .map((p) => ({
-                title: p.protocol_name,
-                category: p.therapeutic_category,
-                phases: p.phases?.length || 0,
-              })),
+            recentActive: activeProtocols.slice(0, 5).map((p) => ({
+              title: p.protocol_name,
+              category: p.therapeutic_category,
+              phases: p.phases?.length || 0,
+            })),
             summary: `Clinical Protocols: ${data.length} total protocols. ${activeProtocols.length} active.`,
           },
         })
@@ -1910,8 +1909,76 @@ export default function AdminProtocolsTab() {
           </button>
         }
       >
-        {drawerProtocol && <ProtocolDrawerContent protocol={drawerProtocol} products={products} />}
+        {drawerProtocol && (
+          <ProtocolDrawerContent
+            protocol={drawerProtocol}
+            products={products}
+            onProductClick={(prod) => setLinkedProduct(prod)}
+          />
+        )}
       </StandardDrawer>
+
+      {/* ── Linked Product Secondary Drawer ─────────────────────────────────── */}
+      {linkedProduct && (
+        <StandardDrawer
+          isOpen={true}
+          onClose={() => setLinkedProduct(null)}
+          title={linkedProduct.name || linkedProduct.displayName || 'Product Details'}
+          subtitle={linkedProduct.category || ''}
+          fullWorkspace={true}
+        >
+          <div
+            style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
+          >
+            {linkedProduct.description && (
+              <p style={{ margin: 0, color: '#475569', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                {linkedProduct.description}
+              </p>
+            )}
+            {[
+              { label: 'SKU / Ref', value: linkedProduct.sku || linkedProduct.ref || '—' },
+              { label: 'Category', value: linkedProduct.category || '—' },
+              { label: 'Default Dosage', value: linkedProduct.defaultDosage || '—' },
+              { label: 'Unit', value: linkedProduct.unit || '—' },
+              {
+                label: 'Active',
+                value:
+                  linkedProduct.isActive !== undefined
+                    ? linkedProduct.isActive
+                      ? 'Yes'
+                      : 'No'
+                    : '—',
+              },
+            ].map(({ label, value }) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  padding: '0.6rem 0',
+                  borderBottom: '1px solid #f1f5f9',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.8rem',
+                    color: '#94a3b8',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    width: 110,
+                    flexShrink: 0,
+                  }}
+                >
+                  {label}
+                </span>
+                <span style={{ fontSize: '0.9rem', color: '#0f172a', fontWeight: 600 }}>
+                  {value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </StandardDrawer>
+      )}
 
       <div
         style={{

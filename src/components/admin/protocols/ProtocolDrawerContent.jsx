@@ -12,7 +12,7 @@ function formatDate(ts) {
   }
 }
 
-export default function ProtocolDrawerContent({ protocol, products = [] }) {
+export default function ProtocolDrawerContent({ protocol, products = [], onProductClick }) {
   const [activeTab, setActiveTab] = useState('overview');
 
   const meta = {
@@ -216,15 +216,34 @@ export default function ProtocolDrawerContent({ protocol, products = [] }) {
                         return (
                           <div
                             key={j}
+                            onClick={() =>
+                              onProductClick && item.productId && onProductClick(product)
+                            }
                             style={{
                               padding: '0.3rem 0.6rem',
                               background: '#f1f5f9',
                               borderRadius: '4px',
                               fontSize: '0.75rem',
                               color: '#334155',
+                              cursor: onProductClick && item.productId ? 'pointer' : 'default',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              transition: 'background 0.1s',
                             }}
+                            onMouseEnter={(e) => {
+                              if (onProductClick && item.productId)
+                                e.currentTarget.style.background = '#e2e8f0';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#f1f5f9';
+                            }}
+                            title={onProductClick && item.productId ? 'View product details' : ''}
                           >
                             {product.name}
+                            {onProductClick && item.productId && (
+                              <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>↗</span>
+                            )}
                           </div>
                         );
                       })}
@@ -301,7 +320,23 @@ export default function ProtocolDrawerContent({ protocol, products = [] }) {
                               item.productName || item.product_name
                             );
                             return (
-                              <tr key={j} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                              <tr
+                                key={j}
+                                style={{
+                                  borderBottom: '1px solid #f1f5f9',
+                                  cursor: onProductClick && item.productId ? 'pointer' : 'default',
+                                }}
+                                onClick={() =>
+                                  onProductClick && item.productId && onProductClick(product)
+                                }
+                                onMouseEnter={(e) => {
+                                  if (onProductClick && item.productId)
+                                    e.currentTarget.style.background = '#f8fafc';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '';
+                                }}
+                              >
                                 <td
                                   style={{
                                     padding: '0.75rem 0',
@@ -322,6 +357,17 @@ export default function ProtocolDrawerContent({ protocol, products = [] }) {
                                       }}
                                     >
                                       Legacy Name
+                                    </span>
+                                  )}
+                                  {onProductClick && item.productId && (
+                                    <span
+                                      style={{
+                                        marginLeft: '4px',
+                                        fontSize: '0.65rem',
+                                        color: '#94a3b8',
+                                      }}
+                                    >
+                                      ↗
                                     </span>
                                   )}
                                 </td>
