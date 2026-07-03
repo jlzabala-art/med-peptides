@@ -144,6 +144,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('All');
+  const [filterSource, setFilterSource] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -359,6 +360,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
   const filtered = orders.filter((o) => {
     const matchesStatus =
       filterStatus === 'All' || o.status?.toLowerCase() === filterStatus.toLowerCase();
+    const matchesSource = filterSource === 'All' || (o.source && o.source.toLowerCase() === filterSource.toLowerCase());
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       !searchLower ||
@@ -385,7 +387,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       }
     }
 
-    return matchesStatus && matchesSearch && matchesDate;
+    return matchesStatus && matchesSearch && matchesDate && matchesSource;
   });
 
   useEffect(() => {
@@ -759,6 +761,9 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
   const getActiveFilters = () => {
     const active = [];
+    if (filterSource && filterSource !== 'All') {
+      active.push({ label: 'Source', value: filterSource === 'b2c_home' ? 'B2C (Home)' : 'B2B (Portal)', type: 'sourceFilter' });
+    }
     if (filterStatus && filterStatus !== 'All') {
       active.push({ label: 'Status', value: filterStatus, type: 'statusFilter' });
     }
@@ -767,6 +772,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
 
   const handleFilterRemove = (f) => {
     if (f.type === 'statusFilter') setFilterStatus('All');
+    if (f.type === 'sourceFilter') setFilterSource('All');
   };
 
 
