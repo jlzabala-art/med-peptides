@@ -1,8 +1,4 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import { Bot, Sparkles, ArrowRight, TrendingUp, BookOpen } from "lucide-react";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 

@@ -1,15 +1,4 @@
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Dna from "lucide-react/dist/esm/icons/dna";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import ScrollText from "lucide-react/dist/esm/icons/scroll-text";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Search from "lucide-react/dist/esm/icons/search";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import History from "lucide-react/dist/esm/icons/history";
+import { Pill, Bot, Sparkles, History, ScrollText, ExternalLink, Search, Dna, Clock, FlaskConical, ChevronRight, Trash2 } from "lucide-react";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * RecentlyExplored.jsx — Phase 4-D (v3 — Premium Redesign)

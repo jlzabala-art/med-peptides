@@ -276,11 +276,9 @@ export default function ContextualFAB() {
     setIsOpen(false);
   }, [location.pathname, scrollDirection]);
 
-  // Do not render anything on Desktop
-  if (!isMobile) return null;
-
   const config = getContextConfig(location.pathname);
-  const showLabel = isAtTop || scrollDirection === 'up';
+  // Show label if scrolling up, at top, or on desktop (always show on desktop)
+  const showLabel = !isMobile || isAtTop || scrollDirection === 'up';
 
   const handleActionClick = (actionId) => {
     setIsOpen(false);

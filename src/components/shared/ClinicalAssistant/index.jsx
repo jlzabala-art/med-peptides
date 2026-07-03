@@ -194,7 +194,6 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
       setSupportContext(ctx);
     },
     externalPageContext: pageContext,
-    contextMode,
     agentType
   });
 

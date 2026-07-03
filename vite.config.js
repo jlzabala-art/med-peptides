@@ -11,10 +11,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  plugins: [react(), lucidePreprocess()],
+  plugins: [react()],
   server: {
     port: 3000,
     open: true,
+    hmr: {
+      overlay: false
+    }
   },
   optimizeDeps: {
     exclude: ['node_modules_bad'],

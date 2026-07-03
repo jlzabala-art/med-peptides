@@ -9,24 +9,17 @@ import Receipt from "lucide-react/dist/esm/icons/receipt";
 import Download from "lucide-react/dist/esm/icons/download";
 import { useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc, limit } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, functions, storage, auth } from '../../firebase';
-
-
-
-
-
-
-
-
-
 import { Card } from '../ui';
 import notifier from '../../services/NotificationService';
 import SupplierPriceListUpdater from './gadgets/SupplierPriceListUpdater';
 import DataTable from '../ui/DataTable';
 import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 export default function AdminRFQTab() {
   const [rfqs, setRfqs] = useState([]);
@@ -65,7 +58,8 @@ export default function AdminRFQTab() {
   const loadRfqs = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, 'agency_rfqs'), orderBy('createdAt', 'desc'));
+      // Golden Rule: limit(100) — never pull unbounded collections
+      const q = query(collection(db, 'agency_rfqs'), orderBy('createdAt', 'desc'), limit(100));
       const snap = await getDocs(q);
       setRfqs(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (err) {
@@ -498,9 +492,21 @@ export default function AdminRFQTab() {
         }
       />
 
+      {/* GlobalSearchBar — prominent, above card */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by client, supplier, or status..."
+          resultCount={loading ? undefined : filteredRfqs.length}
+          namespace="admin-rfq"
+          size="lg"
+        />
+      </div>
+
       <Card style={{ overflow: 'visible', padding: 0 }}>
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center' }}><Loader2 className="spin" /></div>
+          <DataTableSkeleton rows={8} columns={5} />
         ) : (
           <DataTable
             data={filteredRfqs}

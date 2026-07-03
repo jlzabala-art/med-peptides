@@ -159,17 +159,12 @@ function ProtocolCard({ protocol, onClick }) {
             <Icon size={20} color="white" strokeWidth={1.8} />
           </div>
           <span style={{
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.07em',
-            color: theme.accent.replace('fa', '60').replace('d4', '60'),
-            background: theme.glow,
-            padding: '0.25rem 0.6rem',
+            padding: '6px 14px',
+            fontSize: '0.85rem',
             borderRadius: '20px',
             border: `1px solid ${theme.glow}`,
-            color: 'var(--text-muted)',
             whiteSpace: 'nowrap',
+            color: 'var(--text-muted)',
           }}>
             {protocol.category?.split('/')[0]?.trim() || 'Protocol'}
           </span>

@@ -1,13 +1,4 @@
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Check from "lucide-react/dist/esm/icons/check";
-import Bot from "lucide-react/dist/esm/icons/bot";
+import { Zap, Sparkles, Bot, Beaker, Activity, HelpCircle, Check, ChevronRight, ShoppingCart, BookOpen } from "lucide-react";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 

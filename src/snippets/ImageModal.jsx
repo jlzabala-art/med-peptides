@@ -1,5 +1,4 @@
-import X from "lucide-react/dist/esm/icons/x";
-import ZoomIn from "lucide-react/dist/esm/icons/zoom-in";
+import { ZoomIn, X } from "lucide-react";
 import React, { useEffect } from 'react';
 
 

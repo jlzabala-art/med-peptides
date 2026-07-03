@@ -205,7 +205,7 @@ export default function CreateProductModal({ isOpen, onClose, onCreated }) {
             <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '4px 0' }} />
 
             {/* Prices */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-grid">
               <div>
                 <label style={labelStyle}>Retail Price ($/unit)</label>
                 <div style={{ position: 'relative' }}>
@@ -225,7 +225,7 @@ export default function CreateProductModal({ isOpen, onClose, onCreated }) {
             </div>
 
             {/* Stock & Supplier */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div className="form-grid">
               <div>
                 <label style={labelStyle}>Initial Stock (units)</label>
                 <div style={{ position: 'relative' }}>

@@ -31,6 +31,8 @@ import AdminAIAssistant from './AdminAIAssistant';
 import GlobalSearchModal from './GlobalSearchModal';
 import AdminPortalSwitcher from './AdminPortalSwitcher';
 import GlobalPreferencesDropdown from './GlobalPreferencesDropdown';
+import RoleSimulationDropdown from './RoleSimulationDropdown';
+import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
 
 export default function AppHeader({ 
   title, subtitle, onSearchClick, cartCount = 0, onOpenCart, onToggleSidebar,
@@ -40,11 +42,13 @@ export default function AppHeader({
   const { headerContent } = useHeaderContext();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { unreadCount } = useNotifications();
   const { t, i18n } = useTranslation();
+  const { simulatedRole, exitSimulation } = useSimulationStore();
+  const isAdmin = activeRole === 'admin' || userProfile?.role === 'admin' || userProfile?.roles?.includes('admin');
+  const simulatedRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'es' : 'en';
@@ -81,7 +85,48 @@ export default function AppHeader({
     : userProfile?.name || user?.email || 'User';
 
   return (
-    <header className="app-header glass-header">
+    <>
+      {/* ── Simulation Banner ────────────────────────────────────────────────── */}
+      {simulatedRole && simulatedRoleData && (
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 9999,
+            background: `linear-gradient(90deg, ${simulatedRoleData.color}22, ${simulatedRoleData.color}11)`,
+            borderBottom: `2px solid ${simulatedRoleData.color}`,
+            padding: '6px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: simulatedRoleData.color }}>
+            <span style={{ fontSize: '1rem' }}>{simulatedRoleData.emoji}</span>
+            Viewing Atlas Health as <strong>{simulatedRoleData.label}</strong>
+            — Sidebar and navigation filtered to this role.
+          </span>
+          <button
+            onClick={exitSimulation}
+            style={{
+              padding: '3px 12px',
+              borderRadius: '6px',
+              border: `1.5px solid ${simulatedRoleData.color}`,
+              background: 'white',
+              color: simulatedRoleData.color,
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+            }}
+          >
+            Exit Simulation
+          </button>
+        </div>
+      )}
+
+      <header className="app-header glass-header">
       {/* Left: Hamburger (Mobile) + Breadcrumbs / Context Title + Portal Switcher */}
       <div className="app-header-left">
         {onToggleSidebar && (
@@ -99,8 +144,11 @@ export default function AppHeader({
             </div>
           )}
         </div>
+        <div className="app-header-divider"></div>
         {/* Portal switcher sits in left — it's a context indicator, not a utility action */}
         <AdminPortalSwitcher />
+        {/* Role Simulation Dropdown — admin only */}
+        {isAdmin && <RoleSimulationDropdown />}
       </div>
 
       {/* Center: Dynamic Utility Content OR Global Search */}
@@ -221,5 +269,6 @@ export default function AppHeader({
       {/* Global Search Command Palette */}
       <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
+    </>
   );
 }

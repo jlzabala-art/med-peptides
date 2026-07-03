@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { db } from '../../../firebase';
 
 import TopKPIBar from './TopKPIBar';
@@ -34,7 +34,7 @@ export default function CatalogIntelligenceHub() {
   const runAudit = async () => {
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, 'products'));
+      const snap = await getDocs(query(collection(db, 'products'), limit(100)));
       const dbProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
       const results = TARGET_ITEMS.map((item, index) => {

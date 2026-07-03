@@ -21,10 +21,8 @@ import {
   Check,
   ArrowUpRight,
 } from 'lucide-react';
-import StatusBadge from '../common/StatusBadge';
 import StandardDrawer from '../ui/StandardDrawer';
 import StandardDrawerTabs from '../common/StandardDrawerTabs';
-import OverviewTab from './tabs/OverviewTab';
 
 // ── Status Configuration ──────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -968,6 +966,30 @@ export default function PrescriptionDetailModal({
       fullWorkspace={true}
       actions={
         <>
+          <button
+            onClick={() => {
+              // We dispatch a custom event or you could use the Zustand store directly if imported.
+              // For simplicity, we can just fire a custom event that QuotationsHub listens to,
+              // or navigate to quotations.
+              window.dispatchEvent(new CustomEvent('open-quotation-wizard', { detail: { source: 'prescription', id: rx.id } }));
+            }}
+            style={{
+              padding: '0.45rem 0.8rem',
+              borderRadius: '6px',
+              border: 'none',
+              background: 'var(--primary)',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              marginRight: '0.5rem'
+            }}
+          >
+            Create Quotation
+          </button>
           <button
             style={{
               padding: '0.45rem 0.8rem',

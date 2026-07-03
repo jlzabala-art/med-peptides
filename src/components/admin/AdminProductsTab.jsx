@@ -1,70 +1,54 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  collection,
-  query,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc,
-  limit,
-  startAfter,
-  orderBy,
-} from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '../../firebase';
-import {
-  Search,
-  Copy,
-  Download,
-  UploadCloud,
-  Percent,
-  ArrowUpRight,
-  XCircle,
-  EyeOff,
-  Eye,
-  Trash2,
-  BookOpen,
-  Plus,
-  ChevronDown,
-  ChevronUp,
-  Package,
-  ClipboardList,
-  Bot,
-  ShoppingCart,
-  MessageSquare,
-  DollarSign,
-  Activity,
-  FileText,
-  LineChart,
-  Stethoscope,
+  Search, Copy, Download, UploadCloud, Percent, ArrowUpRight,
+  XCircle, EyeOff, Eye, Trash2, BookOpen, Plus,
+  ChevronDown, ChevronUp, Package, ClipboardList, Bot,
+  ShoppingCart, MessageSquare, DollarSign, Activity,
+  FileText, LineChart, Stethoscope, LayoutGrid, List,
 } from 'lucide-react';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate as useNav, useSearchParams as useSP } from 'react-router-dom';
+
+// UI Components
 import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
 import AppStatusToggle from '../ui/AppStatusToggle';
 import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
-import { useToast } from '../../hooks/useToast';
-import { catalogRepository } from '../../repositories/catalogRepository';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import GridSkeleton from '../ui/skeletons/GridSkeleton';
+
+// Admin Components
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
 import PredictiveInventoryAlerts from './gadgets/PredictiveInventoryAlerts';
 import ProductContextSwitcher from './ProductContextSwitcher';
 import InlineEditField from '../ui/InlineEditField';
-import BulkOrderSelectionModal from './BulkOrders/BulkOrderSelectionModal';
-import TooltipWrapper from '../ui/TooltipWrapper';
-import { UniformKPIs, SmartChips } from './AdminProductsKPIs';
 import AdminPageHeader from './AdminPageHeader';
-import ProductMicrosite from './products/ProductMicrosite';
-import CreateProductModal from './CreateProductModal';
+import { useAdminProductsUIStore } from '../../stores/adminProductsUIStore';
+import { getAdminProductsColumns } from './AdminProductsColumns';
+import AdminProductsBatchActions from './AdminProductsBatchActions';
+import VariantRow from './VariantRow';
+import ProductGridCard from './ProductGridCard';
 
+// Hooks
+import { useToast } from '../../hooks/useToast';
+import { catalogRepository } from '../../repositories/catalogRepository';
+import { useDataFilters } from '../../hooks/ui/useDataFilters';
 import { useProducts } from '../../hooks/admin/useProducts';
-import { useProductFilters } from '../../hooks/admin/useProductFilters';
 import { useBulkSelection } from '../../hooks/admin/useBulkSelection';
-import { useProductMutations } from '../../hooks/admin/useProductMutations';
+import { useUpdateProduct, useDeleteProduct, useBulkUpdateProduct } from '../../hooks/admin/useProductMutations';
+import { useCsvImport } from '../../hooks/data/useCsvImport';
+
+// Lazy-loaded heavy modals
+const ProductMicrosite = React.lazy(() => import('./products/ProductMicrosite'));
+const CreateProductModal = React.lazy(() => import('./CreateProductModal'));
+const BulkOrderSelectionModal = React.lazy(() => import('./BulkOrders/BulkOrderSelectionModal'));
+
+
 
 export default function AdminProductsTab({
   readOnly = false,
@@ -80,59 +64,144 @@ export default function AdminProductsTab({
   const initialSearch = searchParams.get('search') || '';
   const initialNew = searchParams.get('new') === 'true';
 
-  const [isCreateProductModalOpen, setIsCreateProductModalOpen] = useState(initialNew);
-  const [catalogSelectMode, setCatalogSelectMode] = useState(false);
-  const [myCatalogs, setMyCatalogs] = useState([]);
-  const [loadingCatalogs, setLoadingCatalogs] = useState(false);
-  const [bulkMode, setBulkMode] = useState(null);
-  const [bulkValue, setBulkValue] = useState('');
-  const [bulkCategory, setBulkCategory] = useState('All');
-  const [importing, setImporting] = useState(false);
-  const [migrating, setMigrating] = useState(false);
-  const [isBulkOrderModalOpen, setIsBulkOrderModalOpen] = useState(false);
-  const [productsToBulkOrder, setProductsToBulkOrder] = useState([]);
+  const {
+    isCreateProductModalOpen, setIsCreateProductModalOpen,
+    catalogSelectMode, setCatalogSelectMode,
+    myCatalogs, setMyCatalogs,
+    loadingCatalogs, setLoadingCatalogs,
+    bulkMode, setBulkMode,
+    bulkValue, setBulkValue,
+    bulkCategory, setBulkCategory,
+    migrating, setMigrating,
+    isBulkOrderModalOpen, setIsBulkOrderModalOpen,
+    productsToBulkOrder, setProductsToBulkOrder
+  } = useAdminProductsUIStore();
 
-  // Use Custom Hooks
-  const { products, setProducts, loading, fetchProducts, hasMore, lastVisible } =
+  const [viewMode, setViewMode] = useState(window.innerWidth < 1024 ? 'grid' : 'list');
+
+  useEffect(() => {
+    if (initialNew) setIsCreateProductModalOpen(true);
+  }, [initialNew, setIsCreateProductModalOpen]);
+
+  // Firestore paginated data (never loads all docs at once)
+  const { products, loading, loadingMore, fetchProducts, loadMore, hasMore, totalCount } =
     useProducts(allowedCategories);
 
-  const { savingProduct, updateProduct, deleteProduct, performBulkUpdate } = useProductMutations(
-    products,
-    setProducts
-  );
-
+  // Fuzzy search + filters (client-side, on already-loaded page)
   const {
     searchTerm,
     setSearchTerm,
-    activeChip,
-    setActiveChip,
-    currentPage,
-    setCurrentPage,
-    rowsPerPage,
-    setRowsPerPage,
-    filterCategory,
-    setFilterCategory,
-    filterSupplier,
-    setFilterSupplier,
-    filterProductType,
-    setFilterProductType,
-    filterStatus,
-    setFilterStatus,
-    filterStock,
-    setFilterStock,
-    filterWarehouse,
-    setFilterWarehouse,
-    filterZoho,
-    setFilterZoho,
-    filterSource,
-    setFilterSource,
-    dateRange,
-    setDateRange,
-    paginatedProducts,
-    filteredGroups,
+    filters,
+    setFilter,
+    clearFilters,
+    activeFilterCount,
+    paginatedData: paginatedProducts,
+    filteredData: filteredProducts,
     totalItems,
     totalPages,
-  } = useProductFilters(products, initialSearch);
+    currentPage,
+    setCurrentPage,
+    pageSize: rowsPerPage,
+    setPageSize: setRowsPerPage,
+  } = useDataFilters(products, {
+    searchConfig: [
+      { field: 'name', weight: 4 },
+      { field: 'sku', weight: 3 },
+      { field: 'category', weight: 2 },
+      { field: 'dosage', weight: 2 },
+      { field: 'objective', weight: 1 },
+      { field: 'supplier', weight: 1 },
+    ],
+    initialFilters: {
+      category: 'All',
+      supplier: 'All',
+      isActive: 'All',
+      warehouse: 'All',
+    },
+    pageSize: 20,
+    initialSearch: initialSearch,
+  });
+
+  // Group flat product list by name for table display
+  const filteredGroups = React.useMemo(() => {
+    const groupMap = filteredProducts.reduce((acc, p) => {
+      const gName = p.name || 'Unnamed';
+      if (!acc[gName]) {
+        acc[gName] = {
+          name: gName, category: p.category || '', supplier: p.supplier || '',
+          warehouse: p.warehouse || '', totalStock: 0, isActive: false,
+          variants: [], zoho_item_id: null, sku: null,
+        };
+      }
+      acc[gName].variants.push(p);
+      acc[gName].totalStock += p.stock || 0;
+      if (p.isActive !== false) acc[gName].isActive = true;
+      if (!acc[gName].sku && p.sku) acc[gName].sku = p.sku.substring(0, 8);
+      if (!acc[gName].zoho_item_id && p.zoho_item_id) acc[gName].zoho_item_id = p.zoho_item_id;
+      return acc;
+    }, {});
+    return Object.values(groupMap);
+  }, [filteredProducts]);
+
+  // Compat with old filter field names
+  const filterCategory = filters.category;
+  const setFilterCategory = (v) => setFilter('category', v);
+  const filterSupplier = filters.supplier;
+  const setFilterSupplier = (v) => setFilter('supplier', v);
+  const filterStatus = filters.isActive;
+  const setFilterStatus = (v) => setFilter('isActive', v);
+  const filterWarehouse = filters.warehouse;
+  const setFilterWarehouse = (v) => setFilter('warehouse', v);
+  // Keeping these for existing filter UI
+  const [filterProductType, setFilterProductType] = useState('All');
+  const [filterStock, setFilterStock] = useState('All');
+  const [filterZoho, setFilterZoho] = useState('All');
+  const [filterSource, setFilterSource] = useState('All');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
+  const activeFilters = [];
+  if (filterCategory !== 'All') activeFilters.push({ label: 'Category', value: filterCategory, type: 'category' });
+  if (filterSupplier !== 'All') activeFilters.push({ label: 'Supplier', value: filterSupplier, type: 'supplier' });
+  if (filterProductType !== 'All') activeFilters.push({ label: 'Product Type', value: filterProductType, type: 'productType' });
+  if (filterStatus !== 'All') activeFilters.push({ label: 'Status', value: filterStatus, type: 'status' });
+  if (filterWarehouse !== 'All') activeFilters.push({ label: 'Warehouse', value: filterWarehouse, type: 'warehouse' });
+  if (filterStock !== 'All') activeFilters.push({ label: 'Stock', value: filterStock, type: 'stock' });
+  if (filterZoho !== 'All') activeFilters.push({ label: 'Zoho', value: filterZoho, type: 'zoho' });
+  if (filterSource !== 'All') activeFilters.push({ label: 'Source', value: filterSource, type: 'source' });
+  const transformProductRow = (row) => ({
+    id: row['ID'] || '',
+    sku: row['SKU'] || '',
+    productName: row['Name'] || '',
+    category: row['Category'] || '',
+    dosage: row['Dosage'] || '',
+    guestVialPrice: parseFloat(row['Guest Vial Price']) || 0,
+    guestKitPrice: parseFloat(row['Guest Kit Price']) || 0,
+    proVialPrice: parseFloat(row['Pro Vial Price']) || 0,
+    proKitPrice: parseFloat(row['Pro Kit Price']) || 0,
+    stock: parseInt(row['Stock'], 10) || 0,
+    warehouse: row['Warehouse'] || 'Poland',
+    costPrice: parseFloat(row['Cost Price']) || 0,
+    supplier: row['Supplier'] || '',
+    isActive: String(row['Active']).toLowerCase() !== 'inactive',
+    updatedAt: new Date().toISOString(),
+    lastImportedAt: new Date().toISOString(),
+  });
+
+  const {
+    importData,
+    isImporting: importing,
+    progress: importProgress,
+    downloadTemplate
+  } = useCsvImport({
+    collectionName: 'products',
+    transformRow: transformProductRow,
+    onSuccess: () => fetchProducts()
+  });
+
+  const { mutateAsync: updateProduct, isPending: isUpdating, variables: updateVars } = useUpdateProduct();
+  const { mutateAsync: deleteProduct, isPending: isDeleting, variables: deleteVars } = useDeleteProduct();
+  const { mutateAsync: performBulkUpdate, isPending: isBulkUpdating } = useBulkUpdateProduct();
+  const savingProduct = (isUpdating ? updateVars?.id : null) || (isDeleting ? deleteVars : null);
 
   const {
     selectedIds: selectedProductIds,
@@ -140,7 +209,7 @@ export default function AdminProductsTab({
     handleSelectRow,
     clearSelection,
     isAllSelected,
-  } = useBulkSelection(filteredGroups.flatMap((g) => g.variants)); // Or use filtered flat list
+  } = useBulkSelection(filteredGroups.flatMap((g) => g.variants));
 
   useEffect(() => {
     const searchVal = searchParams.get('search');
@@ -148,6 +217,7 @@ export default function AdminProductsTab({
       setSearchTerm(searchVal);
     }
   }, [searchParams]);
+
 
   async function handleMigrate() {
     if (readOnly) return;
@@ -225,83 +295,16 @@ export default function AdminProductsTab({
       'Supplier',
       'Active',
     ];
-    const sampleRow = [
-      'sample_id',
-      'BPC157-5',
-      'BPC-157',
-      'Healing & Recovery',
-      '5mg/vial',
-      '28.75',
-      '172.50',
-      '24.44',
-      '146.63',
-      '100',
-      'Poland',
-      '15.00',
-      'Regpept',
-      'active',
-    ];
-    const csvContent = [headers.join(','), sampleRow.join(',')].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'med_peptides_import_template.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadTemplate(headers, 'med_peptides_import_template.csv');
   };
 
   async function handleImportCSV(event) {
     if (readOnly) return;
     const file = event.target.files[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      setImporting(true);
-      try {
-        const text = e.target.result;
-        const rows = text.split('\n');
-        const headers = rows[0].split(',');
-
-        for (let i = 1; i < rows.length; i++) {
-          if (!rows[i].trim()) continue;
-
-          const cols = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-          if (cols.length < 9) continue;
-
-          const id = cols[0].replace(/"/g, '');
-          const updates = {
-            sku: cols[1]?.replace(/"/g, '') || '',
-            guestVialPrice: parseFloat(cols[5]),
-            guestKitPrice: parseFloat(cols[6]),
-            proVialPrice: parseFloat(cols[7]),
-            proKitPrice: parseFloat(cols[8]),
-            stock: parseInt(cols[9]),
-            warehouse: cols[10]?.replace(/"/g, '') || 'Poland',
-            costPrice: parseFloat(cols[11]) || 0,
-            supplier: cols[12]?.replace(/"/g, '') || '',
-            isActive: cols[13]?.toLowerCase().includes('inactive') ? false : true,
-            updatedAt: new Date().toISOString(),
-            lastImportedAt: new Date().toISOString(),
-          };
-
-          const productRef = doc(db, 'products', id);
-          await updateDoc(productRef, updates);
-        }
-        toast.success('Import complete! Refreshing catalog...');
-        fetchProducts();
-      } catch (err) {
-        console.error('Import error:', err);
-        toast.error('Error importing CSV. Ensure the format is correct.');
-      } finally {
-        setImporting(false);
-      }
-    };
-    reader.readAsText(file);
+    importData(file);
+    // Reset file input so same file can be uploaded again if needed
+    event.target.value = null;
   }
 
   async function handleBulkAdjust() {
@@ -416,152 +419,18 @@ export default function AdminProductsTab({
 
   const suppliersToShow = [...new Set(products.map((p) => p.supplier).filter(Boolean))];
 
-  const columns = [
-    {
-      key: 'product',
-      header: 'Product / Category',
-      sortKey: 'product',
-      sortValue: (p) => p.name.toLowerCase(),
-      render: (p) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {p.zoho_item_id ? (
-            <TooltipWrapper text="Synced to Zoho Inventory">
-              <UploadCloud size={16} color="#1a73e8" />
-            </TooltipWrapper>
-          ) : (
-            <div style={{ width: 16 }}></div>
-          )}
-          <AppEntityCell
-            title={p.name}
-            subtitle={
-              <>
-                <span style={{ opacity: 0.5 }}>↳</span> {p.category} |{' '}
-                {p.isGroup ? `${p.variants.length} Variants` : p.dosage}
-              </>
-            }
-          />
-        </div>
-      ),
-    },
-    {
-      key: 'product_type',
-      header: 'Type',
-      width: '120px',
-      render: (p) => {
-        return (
-          <InlineEditField
-            type="select"
-            value={p.product_type || 'Other'}
-            options={['Peptides', 'API Peptides', 'API Supplements', 'Other']}
-            onSave={(val) => {
-              handleUpdateProduct(p.id, { product_type: val });
-            }}
-          />
-        );
-      },
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      width: '80px',
-      sortKey: 'status',
-      render: (p) => {
-        let isLocked = false;
-        let isLocallyActive = p.isActive !== false;
+  const columns = getAdminProductsColumns({
+    isAdmin,
+    user,
+    readOnly,
+    savingProduct,
+    navigate,
+    updateProduct,
+    handleDeleteProduct: deleteProduct,
+    handleScrapeCompetitor
+  });
 
-        if (!isAdmin && user) {
-          if (p.isActive === false) {
-            isLocked = true;
-            isLocallyActive = false;
-          } else {
-            const localOverrides = p.localOverrides || {};
-            if (localOverrides[user.uid] === false) {
-              isLocallyActive = false;
-            }
-          }
-        }
-
-        const handleToggle = (willBeActive) => {
-          if (isAdmin) {
-            handleUpdateProduct(p.id, { isActive: willBeActive });
-          } else {
-            if (!user) return;
-            handleUpdateProduct(p.id, { [`localOverrides.${user.uid}`]: willBeActive });
-          }
-        };
-
-        return (
-          <AppStatusToggle isActive={isLocallyActive} isLocked={isLocked} onToggle={handleToggle} />
-        );
-      },
-    },
-  ];
-
-  if (!readOnly) {
-    columns.push({
-      key: 'actions',
-      header: 'Actions',
-      align: 'right',
-      width: '180px',
-      render: (p) => {
-        const targetP = p.isGroup ? (p.variants && p.variants[0] ? p.variants[0] : p) : p;
-        const actions = [
-          {
-            type: 'inventory',
-            onClick: () => {
-              navigate(
-                `/admin/sku-sync?sku=${encodeURIComponent(targetP.sku || '')}&productId=${encodeURIComponent(targetP.id || '')}`
-              );
-            },
-          },
-          {
-            type: 'pricing',
-            onClick: () => {
-              navigate(
-                `/admin/prices?sku=${encodeURIComponent(targetP.sku || '')}&productId=${encodeURIComponent(targetP.id || '')}`
-              );
-            },
-          },
-          {
-            type: 'protocols',
-            onClick: () => {
-              navigate(`/admin/protocols`);
-            },
-          },
-          {
-            type: 'ai',
-            onClick: () => {
-              window.dispatchEvent(
-                new CustomEvent('OPEN_ATLAS_CLINICAL_MODE', {
-                  detail: { product: targetP.name, sku: targetP.sku },
-                })
-              );
-            },
-          },
-          {
-            type: 'search',
-            label: 'Search Competitors',
-            onClick: () => handleScrapeCompetitor(targetP),
-          },
-        ];
-
-        if (!p.isGroup) {
-          actions.push({ type: 'delete', onClick: () => handleDeleteProduct(p.id) });
-        }
-
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {savingProduct === p.id && (
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
-            )}
-            <AppActionGroup actions={actions} />
-          </div>
-        );
-      },
-    });
-  }
-
-  const handleScrapeCompetitor = async (p) => {
+  async function handleScrapeCompetitor(p) {
     toast.info(`Buscando precios para ${p.name}...`);
     try {
       // Using fetch directly since forceScrapeCompetitors is an onRequest (HTTP) function
@@ -592,327 +461,20 @@ export default function AdminProductsTab({
     setIsBulkOrderModalOpen(true);
   };
 
+  const handleCreatePrescription = (selectedIds) => {
+    // You could pass IDs to the state or query params
+    navigate(`/prescriptions/new?source=Selected Items&items=${selectedIds.join(',')}`);
+  };
+
   const handleDeactivateSelected = async (selectedIds) => {
     try {
-      const promises = selectedIds.map((id) => {
-        const ref = doc(db, 'products', id);
-        return updateDoc(ref, { isActive: false });
-      });
-      await Promise.all(promises);
-      addToast(`${selectedIds.length} products have been deactivated.`, 'success');
+      await performBulkUpdate({ ids: selectedIds, updates: { isActive: false }, actionName: 'Deactivate' });
       clearSelection();
-      fetchProducts();
     } catch (error) {
-      addToast('Error deactivating products: ' + error.message, 'error');
+      // Error handled by mutation
     }
   };
 
-  const VariantRow = ({ variant, navigate }) => {
-    const [expandedSection, setExpandedSection] = React.useState(null);
-
-    const toggleSection = (section) => {
-      setExpandedSection((prev) => (prev === section ? null : section));
-    };
-
-    return (
-      <div
-        style={{
-          padding: '0.75rem 1rem',
-          backgroundColor: 'white',
-          borderRadius: '6px',
-          border: '1px solid var(--color-border)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span
-              style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-primary)' }}
-            >
-              {variant.name}
-            </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-              SKU: {variant.sku || 'N/A'}
-              {(variant.dosage || variant.route || variant.form) && (
-                <span
-                  style={{
-                    marginLeft: '8px',
-                    paddingLeft: '8px',
-                    borderLeft: '1px solid var(--color-border)',
-                  }}
-                >
-                  {variant.dosage && (
-                    <span style={{ marginRight: '6px', fontWeight: 500 }}>{variant.dosage}</span>
-                  )}
-                  {variant.form && <span style={{ marginRight: '6px' }}>• {variant.form}</span>}
-                  {variant.route && <span>• {variant.route}</span>}
-                </span>
-              )}
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleSection('pricing');
-              }}
-              style={{
-                padding: '0.4rem 0.8rem',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                backgroundColor:
-                  expandedSection === 'pricing' ? '#0f172a' : 'var(--color-bg-hover)',
-                color: expandedSection === 'pricing' ? 'white' : 'var(--color-text-secondary)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              Pricing {expandedSection === 'pricing' ? '▼' : '▶'}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleSection('inventory');
-              }}
-              style={{
-                padding: '0.4rem 0.8rem',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                backgroundColor:
-                  expandedSection === 'inventory' ? '#0f172a' : 'var(--color-bg-hover)',
-                color: expandedSection === 'inventory' ? 'white' : 'var(--color-text-secondary)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-            >
-              Inventory {expandedSection === 'inventory' ? '▼' : '▶'}
-            </button>
-          </div>
-        </div>
-
-        {expandedSection === 'pricing' &&
-          (() => {
-            const retailUnit = variant.pricing?.retail?.perUnit || variant.guestVialPrice || 0;
-            const clinicUnit = variant.pricing?.clinic?.perUnit || variant.proVialPrice || 0;
-            const wholesaleUnit = variant.pricing?.wholesale?.perUnit || 0;
-            const masterUnit = variant.pricing?.master?.perUnit || 0;
-
-            const retailKit = variant.pricing?.retail?.kit || variant.guestKitPrice || 0;
-            const clinicKit = variant.pricing?.clinic?.kit || variant.proKitPrice || 0;
-            const wholesaleKit = variant.pricing?.wholesale?.kit || 0;
-            const masterKit = variant.pricing?.master?.kit || 0;
-
-            const hasKit =
-              parseFloat(retailKit) > 0 ||
-              parseFloat(clinicKit) > 0 ||
-              parseFloat(wholesaleKit) > 0 ||
-              parseFloat(masterKit) > 0;
-
-            return (
-              <div
-                style={{
-                  marginTop: '0.5rem',
-                  padding: '1rem',
-                  backgroundColor: '#f8fafc',
-                  borderRadius: '4px',
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  <h5 style={{ margin: 0, fontSize: '0.8rem', color: '#334155' }}>
-                    Pricing Tiers Overview
-                  </h5>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 600,
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '12px',
-                      backgroundColor: hasKit ? '#dcfce7' : '#f1f5f9',
-                      color: hasKit ? '#166534' : '#64748b',
-                    }}
-                  >
-                    {hasKit ? '✓ Set of 10 Available' : '✗ No Set of 10'}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.5fr 1fr 1fr',
-                    gap: '0.5rem',
-                    fontSize: '0.8rem',
-                    marginBottom: '1rem',
-                    borderBottom: '1px solid #e2e8f0',
-                    paddingBottom: '0.5rem',
-                  }}
-                >
-                  <strong style={{ color: '#64748b' }}>Tier</strong>
-                  <strong style={{ textAlign: 'right', color: '#64748b' }}>1 Unit</strong>
-                  <strong style={{ textAlign: 'right', color: '#64748b' }}>Set of 10</strong>
-
-                  <span style={{ color: '#0f172a', fontWeight: 500 }}>Retail</span>
-                  <span style={{ textAlign: 'right' }}>${parseFloat(retailUnit).toFixed(2)}</span>
-                  <span style={{ textAlign: 'right' }}>
-                    {parseFloat(retailKit) > 0 ? `$${parseFloat(retailKit).toFixed(2)}` : '-'}
-                  </span>
-
-                  <span style={{ color: '#0f172a', fontWeight: 500 }}>Doctor / Clinic</span>
-                  <span style={{ textAlign: 'right' }}>${parseFloat(clinicUnit).toFixed(2)}</span>
-                  <span style={{ textAlign: 'right' }}>
-                    {parseFloat(clinicKit) > 0 ? `$${parseFloat(clinicKit).toFixed(2)}` : '-'}
-                  </span>
-
-                  <span style={{ color: '#0f172a', fontWeight: 500 }}>Wholesaler</span>
-                  <span style={{ textAlign: 'right' }}>
-                    ${parseFloat(wholesaleUnit).toFixed(2)}
-                  </span>
-                  <span style={{ textAlign: 'right' }}>
-                    {parseFloat(wholesaleKit) > 0 ? `$${parseFloat(wholesaleKit).toFixed(2)}` : '-'}
-                  </span>
-
-                  <span style={{ color: '#0f172a', fontWeight: 500 }}>Master</span>
-                  <span style={{ textAlign: 'right' }}>${parseFloat(masterUnit).toFixed(2)}</span>
-                  <span style={{ textAlign: 'right' }}>
-                    {parseFloat(masterKit) > 0 ? `$${parseFloat(masterKit).toFixed(2)}` : '-'}
-                  </span>
-                </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(
-                      `/admin/prices?sku=${encodeURIComponent(variant.sku || '')}&productId=${encodeURIComponent(variant.id || '')}`
-                    );
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '0.6rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    backgroundColor: 'white',
-                    color: '#0f172a',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <span>Manage Pricing in Detail</span>
-                  <span>→</span>
-                </button>
-              </div>
-            );
-          })()}
-
-        {expandedSection === 'inventory' && (
-          <div
-            style={{
-              marginTop: '0.5rem',
-              padding: '1rem',
-              backgroundColor: '#f8fafc',
-              borderRadius: '4px',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#334155' }}>
-              Inventory Status
-            </h5>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr',
-                gap: '0.5rem',
-                fontSize: '0.8rem',
-                marginBottom: '1rem',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  paddingBottom: '0.25rem',
-                  borderBottom: '1px solid #e2e8f0',
-                }}
-              >
-                <span style={{ color: '#64748b' }}>Warehouse:</span>
-                <strong style={{ color: '#0f172a' }}>
-                  {variant.warehouse || variant.stock?.warehouse || 'Primary Warehouse'}
-                </strong>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  paddingBottom: '0.25rem',
-                  borderBottom: '1px solid #e2e8f0',
-                }}
-              >
-                <span style={{ color: '#64748b' }}>Total Stock Qty:</span>
-                <strong>{variant.stock?.qty ?? variant.stock ?? 0} units</strong>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  paddingBottom: '0.25rem',
-                  borderBottom: '1px solid #e2e8f0',
-                }}
-              >
-                <span style={{ color: '#64748b' }}>Availability:</span>
-                <strong
-                  style={{ color: (variant.stock?.available ?? true) ? '#10b981' : '#ef4444' }}
-                >
-                  {(variant.stock?.available ?? true) ? 'In Stock' : 'Out of Stock'}
-                </strong>
-              </div>
-            </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(
-                  `/admin/sku-sync?sku=${encodeURIComponent(variant.sku || '')}&productId=${encodeURIComponent(variant.id || '')}`
-                );
-              }}
-              style={{
-                width: '100%',
-                padding: '0.6rem',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                backgroundColor: 'white',
-                color: '#0f172a',
-                border: '1px solid #cbd5e1',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <span>Manage Inventory in Detail</span>
-              <span>→</span>
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   const renderExpandedRow = (groupItem) => {
     const targetProduct = groupItem.isGroup
@@ -968,22 +530,7 @@ export default function AdminProductsTab({
     );
   };
 
-  const activeFilters = [];
-  if (filterCategory !== 'All')
-    activeFilters.push({ label: 'Category', value: filterCategory, type: 'category' });
-  if (filterSupplier !== 'All')
-    activeFilters.push({ label: 'Supplier', value: filterSupplier, type: 'supplier' });
-  if (filterProductType !== 'All')
-    activeFilters.push({ label: 'Product Type', value: filterProductType, type: 'productType' });
-  if (filterStatus !== 'All')
-    activeFilters.push({ label: 'Status', value: filterStatus, type: 'status' });
-  if (filterWarehouse !== 'All')
-    activeFilters.push({ label: 'Warehouse', value: filterWarehouse, type: 'warehouse' });
-  if (filterStock !== 'All')
-    activeFilters.push({ label: 'Stock', value: filterStock, type: 'stock' });
-  if (filterZoho !== 'All') activeFilters.push({ label: 'Zoho', value: filterZoho, type: 'zoho' });
-  if (filterSource !== 'All')
-    activeFilters.push({ label: 'Source', value: filterSource, type: 'source' });
+
 
   const handleFilterRemove = (filter) => {
     if (filter.type === 'category') setFilterCategory('All');
@@ -1190,6 +737,19 @@ export default function AdminProductsTab({
         icon={Package}
       />
 
+      {/* Global Search Bar — prominent position, fuzzy search with scoring */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by name, SKU, category, dosage, supplier..."
+          resultCount={loading ? undefined : totalItems}
+          isLoading={loadingMore}
+          namespace="admin-products"
+          size="lg"
+        />
+      </div>
+
       <ProductContextSwitcher
         searchTerm={searchTerm}
         currentTab="products"
@@ -1210,8 +770,8 @@ export default function AdminProductsTab({
         </div>
       )}
 
-      <UniformKPIs products={products} />
-      <SmartChips activeChip={activeChip} setActiveChip={setActiveChip} />
+      {/* <UniformKPIs products={products} /> */}
+      {/* <SmartChips activeChip={activeChip} setActiveChip={setActiveChip} /> */}
 
       {/* Table Action Toolbar */}
       {!readOnly && (
@@ -1225,13 +785,45 @@ export default function AdminProductsTab({
             border: '1px solid var(--border)',
             borderBottom: 'none',
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+            flexWrap: 'wrap',
+            gap: '1rem'
           }}
         >
           <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-main)' }}>
             Items ({filteredGroups.reduce((acc, g) => acc + g.variants.length, 0)} items in{' '}
             {filteredGroups.length} families)
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', background: 'var(--color-bg-subtle)', borderRadius: '8px', padding: '0.2rem', marginRight: '0.5rem' }}>
+              <button
+                onClick={() => setViewMode('grid')}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0.4rem', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                  background: viewMode === 'grid' ? 'white' : 'transparent',
+                  color: viewMode === 'grid' ? 'var(--primary)' : 'var(--text-muted)',
+                  boxShadow: viewMode === 'grid' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s'
+                }}
+                title="Grid View"
+              >
+                <LayoutGrid size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0.4rem', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                  background: viewMode === 'list' ? 'white' : 'transparent',
+                  color: viewMode === 'list' ? 'var(--primary)' : 'var(--text-muted)',
+                  boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.2s'
+                }}
+                title="List View"
+              >
+                <List size={18} />
+              </button>
+            </div>
             <button
               onClick={handleDownloadTemplate}
               style={{
@@ -1283,7 +875,7 @@ export default function AdminProductsTab({
                   '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)';
               }}
             >
-              <UploadCloud size={16} /> {importing ? 'IMPORTING...' : 'IMPORT'}
+              <UploadCloud size={16} /> {importing ? `IMPORTING... ${importProgress}%` : 'IMPORT'}
               <input
                 type="file"
                 accept=".csv"
@@ -1569,130 +1161,97 @@ export default function AdminProductsTab({
 
       <div style={{ marginBottom: '2rem' }}>
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            Loading catalog...
-          </div>
+          viewMode === 'grid' ? (
+            <GridSkeleton cards={8} cardHeight="220px" minCardWidth={300} />
+          ) : (
+            <DataTableSkeleton rows={10} columns={6} hasSelect={true} hasExpand={true} />
+          )
         ) : products.length === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             Catalog is empty.
           </div>
         ) : (
           <>
-            <DataTable
-              virtualize={true}
-              data={paginatedProducts}
-              columns={columns}
-              keyField="id"
-              expandableRender={renderExpandedRow}
-              selectedIds={selectedProductIds}
-              onSelectionChange={handleSelectRow}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              onPageChange={setCurrentPage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(val) => {
-                setRowsPerPage(val);
-                setCurrentPage(1);
-              }}
-              searchQuery={searchTerm}
-              onSearchChange={setSearchTerm}
-              searchPlaceholder="Search items by name, category, dosage..."
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              filters={activeFilters}
-              onFilterRemove={handleFilterRemove}
-              renderCustomFilters={renderCustomFilters}
-              renderBatchActions={(selected) => (
-                <>
-                  <button
-                    onClick={() => handleAddToBulkOrder(selected)}
-                    className="btn btn-primary"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      fontSize: '0.8rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: '#10b981',
-                      borderColor: '#10b981',
-                    }}
-                  >
-                    <ShoppingCart size={14} /> Add to Bulk Order
-                  </button>
-                  <button
-                    onClick={() => handleDeactivateSelected(selected)}
-                    className="btn btn-outline"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      fontSize: '0.8rem',
-                      padding: '0.4rem 0.8rem',
-                      color: '#ef4444',
-                      borderColor: '#ef4444',
-                      background: '#fef2f2',
-                    }}
-                  >
-                    <XCircle size={14} /> Deactivate
-                  </button>
-                  <button
-                    onClick={handleExportCSV}
-                    className="btn btn-outline"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      fontSize: '0.8rem',
-                      padding: '0.4rem 0.8rem',
-                      background: 'white',
-                    }}
-                  >
-                    <Download size={14} /> Export Selected
-                  </button>
-                  {!readOnly && (
-                    <button
-                      onClick={() => setBulkMode(bulkMode ? null : 'percent')}
-                      className="btn btn-outline"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.8rem',
-                        padding: '0.4rem 0.8rem',
-                        background: 'white',
-                      }}
-                    >
-                      <Percent size={14} /> Bulk Price Update
-                    </button>
-                  )}
-                  {!readOnly && (
-                    <button
-                      onClick={handleOpenCatalogSelect}
-                      className="btn btn-outline"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.8rem',
-                        padding: '0.4rem 0.8rem',
-                        background: 'white',
-                      }}
-                    >
-                      <BookOpen size={14} /> Include in Catalog
-                    </button>
-                  )}
-                </>
-              )}
-            />
+            {viewMode === 'grid' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {/* Custom Filters and Search for Grid Mode */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', padding: '1rem', background: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                  <div style={{ flex: '1 1 300px', position: 'relative' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input 
+                      type="text" 
+                      value={searchTerm} 
+                      onChange={(e) => setSearchTerm(e.target.value)} 
+                      placeholder="Search items by name, category, dosage..." 
+                      style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} 
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {renderCustomFilters()}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                  {paginatedProducts.map(product => (
+                    <ProductGridCard 
+                      key={product.id} 
+                      product={product} 
+                      isSelected={selectedProductIds.includes(product.id)}
+                      onToggleSelect={(id) => handleSelectRow(id, !selectedProductIds.includes(id))}
+                      onClick={() => navigate(`/admin/catalog/${product.id}`)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <DataTable
+                virtualize={true}
+                data={paginatedProducts}
+                columns={columns}
+                keyField="id"
+                expandableRender={renderExpandedRow}
+                selectedIds={selectedProductIds}
+                onSelectionChange={handleSelectRow}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                onPageChange={setCurrentPage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(val) => {
+                  setRowsPerPage(val);
+                  setCurrentPage(1);
+                }}
+                searchQuery={searchTerm}
+                onSearchChange={setSearchTerm}
+                searchPlaceholder="Search items by name, category, dosage..."
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                filters={activeFilters}
+                onFilterRemove={handleFilterRemove}
+                renderCustomFilters={renderCustomFilters}
+                renderBatchActions={(selected) => (
+                  <AdminProductsBatchActions
+                    selectedIds={selected}
+                    readOnly={readOnly}
+                    bulkMode={bulkMode}
+                    onAddToBulkOrder={handleAddToBulkOrder}
+                    onCreatePrescription={handleCreatePrescription}
+                    onDeactivateSelected={handleDeactivateSelected}
+                    onExportCSV={handleExportCSV}
+                    onToggleBulkMode={() => setBulkMode(bulkMode ? null : 'percent')}
+                    onOpenCatalogSelect={handleOpenCatalogSelect}
+                  />
+                )}
+              />
+            )}
             {hasMore && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
                 <button
                   className="btn btn-outline"
-                  onClick={() => fetchProducts(true)}
-                  disabled={loading}
+                  onClick={() => loadMore()}
+                  disabled={loadingMore}
                 >
-                  {loading ? 'Loading...' : 'Load more items'}
+                  {loadingMore ? 'Loading...' : 'Load more items'}
                 </button>
               </div>
             )}

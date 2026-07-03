@@ -1,13 +1,4 @@
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
-import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
-import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-import Inbox from 'lucide-react/dist/esm/icons/inbox';
-import ArrowUp from 'lucide-react/dist/esm/icons/arrow-up';
-import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
-import Search from 'lucide-react/dist/esm/icons/search';
-import X from 'lucide-react/dist/esm/icons/x';
-import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from 'lucide-react';
 import React, { useState, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -405,7 +396,7 @@ export default function DataTable({
       )}
       <div
         ref={virtualize ? parentRef : null}
-        className={`ui-table-container${virtualize ? '' : ' responsive-stack'}`}
+        className={`ui-table-container rsp-table-wrap${virtualize ? '' : ' responsive-stack'}`}
         style={{
           overflowX: 'auto',
           overflowY: 'auto',

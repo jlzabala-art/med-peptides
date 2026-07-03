@@ -1,18 +1,7 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import User from "lucide-react/dist/esm/icons/user";
-import Send from "lucide-react/dist/esm/icons/send";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Users from "lucide-react/dist/esm/icons/users";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import CloudUpload from "lucide-react/dist/esm/icons/cloud-upload";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import {
+  Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe,
+  FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck
+} from 'lucide-react';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';

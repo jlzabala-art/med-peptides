@@ -1,31 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
-
-// ── Module-level shared cache ─────────────────────────────────────────────────
-// A single Firestore read is shared across all components that call useProducts().
-// Subsequent calls within the same session reuse the cached data immediately.
-let _cache = null; // { products: [], lastVisible: snap|null }
-let _fetchPromise = null; // Ongoing fetch promise (deduplication)
-const _listeners = new Set(); // React setState callbacks to notify
-
-function notifyListeners(products) {
-  _listeners.forEach((fn) => fn(products));
-}
-
-async function fetchAllProducts() {
-  const q = query(collection(db, 'products'), orderBy('name'));
-  const snapshot = await getDocs(q);
-  const products = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-  const lastVisible = snapshot.docs[snapshot.docs.length - 1] || null;
-  _cache = { products, lastVisible };
-  dispatchContextEvent(products);
-  notifyListeners(products);
-  _fetchPromise = null;
-  return products;
-}
+/**
+ * useProducts
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Fetches products from Firestore with proper cursor-based pagination.
+ * Built on useFirestorePaginatedCollection — never loads all documents.
+ *
+ * After loading, dispatches a custom DOM event so the AI context panel
+ * knows what's on screen (inventory alerts, categories, etc.)
+ *
+ * @param {string[]} allowedCategories — Filter to specific categories. ['All'] = no filter.
+ */
+import { useEffect } from 'react';
+import { useFirestorePaginatedCollection } from '../data/useFirestorePaginatedCollection';
 
 function dispatchContextEvent(productsList) {
+  if (!productsList || productsList.length === 0) return;
   const lowStock = productsList.filter((p) => (p.stock || 0) < 20);
   const outOfStock = productsList.filter((p) => (p.stock || 0) === 0);
   window.dispatchEvent(
@@ -45,60 +33,58 @@ function dispatchContextEvent(productsList) {
   );
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
 export function useProducts(allowedCategories = ['All']) {
-  const [products, setProducts] = useState(_cache?.products ?? []);
-  const [loading, setLoading] = useState(!_cache);
+  // Build where conditions only when categories are restricted
+  const whereConditions =
+    allowedCategories.includes('All') || allowedCategories.length === 0
+      ? []
+      : allowedCategories.length === 1
+      ? [['category', '==', allowedCategories[0]]]
+      : []; // Multiple categories: filter client-side (Firestore doesn't support OR across != field)
 
-  // Subscribe to cache updates
+  const {
+    data: rawProducts,
+    isLoading: loading,
+    isFetchingMore: loadingMore,
+    hasMore,
+    error,
+    totalCount,
+    loadMore,
+    refresh: fetchProducts,
+  } = useFirestorePaginatedCollection('products', {
+    whereConditions,
+    orderByFields: [['name', 'asc']],
+    pageSize: 50,
+    onDataLoaded: (newDocs) => {
+      // Dispatch context event when new data arrives
+      dispatchContextEvent(newDocs);
+    },
+  });
+
+  // Client-side filter for multiple allowed categories (can't use Firestore OR efficiently)
+  const products =
+    !allowedCategories.includes('All') && allowedCategories.length > 1
+      ? rawProducts.filter((p) => allowedCategories.includes(p.category))
+      : rawProducts;
+
+  // Dispatch on full data load
   useEffect(() => {
-    _listeners.add(setProducts);
-    return () => _listeners.delete(setProducts);
-  }, []);
-
-  // Trigger fetch if not already cached or in-flight
-  useEffect(() => {
-    if (_cache) {
-      setProducts(_cache.products);
-      setLoading(false);
-      return;
+    if (!loading && products.length > 0) {
+      dispatchContextEvent(products);
     }
-    if (!_fetchPromise) {
-      setLoading(true);
-      _fetchPromise = fetchAllProducts().finally(() => setLoading(false));
-    }
-  }, []); // Only run on mount
-
-  // Allow callers to force-refresh (e.g. after creating a product)
-  const fetchProducts = useCallback(async () => {
-    _cache = null;
-    _fetchPromise = null;
-    setLoading(true);
-    _fetchPromise = fetchAllProducts().finally(() => setLoading(false));
-    return _fetchPromise;
-  }, []);
-
-  // Apply category filter if requested (client-side, from the shared cache)
-  const filtered = !allowedCategories.includes('All')
-    ? products.filter((p) => allowedCategories.includes(p.category))
-    : products;
-
-  // setProducts also updates the module cache for full-write operations
-  const setProductsAndCache = useCallback((updaterOrProducts) => {
-    const next =
-      typeof updaterOrProducts === 'function'
-        ? updaterOrProducts(_cache?.products ?? [])
-        : updaterOrProducts;
-    _cache = { ...(_cache || {}), products: next };
-    notifyListeners(next);
-  }, []);
+  }, [loading, products.length]);
 
   return {
-    products: filtered,
-    setProducts: setProductsAndCache,
+    products,
     loading,
+    loadingMore,
+    hasMore,
+    error,
+    totalCount,
+    loadMore,
     fetchProducts,
-    hasMore: false,
-    lastVisible: _cache?.lastVisible ?? null,
+    // Legacy compat: some components expect setProducts
+    setProducts: () => {},
+    lastVisible: null, // Managed internally by hook
   };
 }

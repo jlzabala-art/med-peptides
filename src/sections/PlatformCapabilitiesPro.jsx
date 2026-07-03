@@ -103,11 +103,11 @@ export default function PlatformCapabilitiesPro() {
 
         {/* Footer note */}
         <div style={{
-          maxWidth: '860px', margin: '2.5rem auto 0', padding: '0 1rem',
-          display: 'flex', alignItems: 'center', gap: '0.75rem',
-          padding: '1.25rem 1.75rem',
-          backgroundColor: 'var(--color-bg-app)',
-          border: '1px solid #e2e8f0',
+            maxWidth: '860px', margin: '2.5rem auto 0',
+            display: 'flex', alignItems: 'center', gap: '0.75rem',
+            padding: '1.25rem 1.75rem',
+            backgroundColor: 'var(--color-bg-app)',
+            border: '1px solid #e2e8f0',
           borderRadius: '14px',
         }}>
           <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0 }} />

@@ -1,17 +1,4 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import X from "lucide-react/dist/esm/icons/x";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import Leaf from "lucide-react/dist/esm/icons/leaf";
-import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
+import { Bot, Sparkles, Beaker, Search, ArrowRight, MessageCircle, Activity, HelpCircle, SlidersHorizontal, X, ClipboardList, Clock, FlaskConical, Leaf } from "lucide-react";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 
 

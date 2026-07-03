@@ -1,12 +1,4 @@
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import Zap from "lucide-react/dist/esm/icons/zap";
-
-
-
-
-
+import { Truck, Zap, Shield, CheckCircle } from "lucide-react";
 export default function TrustSection() {
   const stats = [
     { label: 'Purity Standard', value: '99%+', icon: <CheckCircle className="icon-blue" /> },

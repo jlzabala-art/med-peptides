@@ -1,28 +1,17 @@
 import React, { useState } from 'react';
 import {
-  FileText,
-  Search,
-  Activity,
-  Stethoscope,
-  AlertTriangle,
-  CheckCircle2,
-  ChevronRight,
-  FilePlus,
-  FlaskConical,
-  Clock,
-  Calendar,
-  User,
-  Eye,
-  Archive,
-  Package,
+  FileText, Search, Activity, Stethoscope, AlertTriangle, CheckCircle2,
+  ChevronRight, FilePlus, FlaskConical, Clock, Calendar, User, Eye, Archive, Package,
 } from 'lucide-react';
 import PrescriptionDetailModal from '../../prescriptions/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../protocols/ProtocolDrawerContent';
 import StandardDrawer from '../../ui/StandardDrawer';
-
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
 import { useDataTable } from '../../../hooks/ui/useDataTable';
 import { useProducts } from '../../../hooks/admin/useProducts';
+import GlobalSearchBar from '../../ui/GlobalSearchBar';
+import DataTableSkeleton from '../../ui/skeletons/DataTableSkeleton';
+import AdminPageHeader from '../AdminPageHeader';
 
 // ── Responsive CSS ────────────────────────────────────────────────────────────
 const responsiveStyles = `
@@ -530,98 +519,42 @@ export default function AdminPrescriptionsTab() {
           backgroundColor: '#f8fafc',
         }}
       >
-        {/* Page Header */}
-        <div>
-          <h1
-            style={{
-              fontSize: '1.8rem',
-              fontWeight: 800,
-              color: '#0f172a',
-              margin: '0 0 0.2rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-            }}
-          >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <FileText size={20} color="white" />
-            </div>
-            Prescriptions
-          </h1>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#64748b' }}>
-            System of record for all patient prescriptions and recommendations.
-          </p>
-        </div>
+        {/* Page Header — normalised */}
+        <AdminPageHeader
+          title="Prescriptions"
+          subtitle="System of record for all patient prescriptions and recommendations."
+          icon={FileText}
+        />
+
+        {/* GlobalSearchBar — prominent position */}
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by patient, doctor, protocol or ID..."
+          resultCount={loading ? undefined : filtered.length}
+          namespace="admin-prescriptions"
+          size="lg"
+        />
 
         {/* Uniform KPI Summary Bar */}
         {!loading && <UniformKPIs data={prescriptions} />}
 
-        {/* Filters and Smart Chips */}
+        {/* Smart Chip Filters */}
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: '1rem',
+            gap: '0.75rem',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'white',
-            padding: '1rem',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
           }}
         >
           <SmartChips activeChip={activeChip} setActiveChip={setActiveChip} />
-
-          <div style={{ position: 'relative', flex: '1 1 250px', maxWidth: '400px' }}>
-            <Search
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94a3b8',
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search by patient, doctor, or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.6rem 1rem 0.6rem 2.5rem',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '0.9rem',
-                outline: 'none',
-                background: '#f8fafc',
-                color: '#0f172a',
-                boxSizing: 'border-box',
-                transition: 'all 0.2s',
-              }}
-              onFocus={(e) => (e.target.style.borderColor = '#6366f1')}
-              onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
-            />
-          </div>
         </div>
 
-        {/* Flexible Table */}
+        {/* Table */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
-              Loading prescriptions...
-            </div>
+            <DataTableSkeleton rows={8} columns={5} />
           ) : filtered.length === 0 ? (
             <div
               style={{

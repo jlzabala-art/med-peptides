@@ -1,0 +1,89 @@
+/* ================================================================
+   Responsive Table — rows → cards on mobile (< 768px)
+   ================================================================
+   Usage:
+     1. Wrap your <table> in <div className="rsp-table-wrap">
+     2. Add data-label="Column Name" to each <td>
+
+   Works with DataTable.jsx out of the box via the wrapper div.
+   Columns with `hideOnMobile` prop use .hide-on-mobile CSS class.
+================================================================ */
+
+.rsp-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Desktop: normal overflow-x scroll on medium screens */
+@media (max-width: 1023px) {
+  .rsp-table-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile: full card transform */
+@media (max-width: 767px) {
+  .rsp-table-wrap table,
+  .rsp-table-wrap thead,
+  .rsp-table-wrap tbody,
+  .rsp-table-wrap th,
+  .rsp-table-wrap td,
+  .rsp-table-wrap tr {
+    display: block;
+  }
+
+  /* Hide header row visually but keep for accessibility */
+  .rsp-table-wrap thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  /* Each row becomes a card */
+  .rsp-table-wrap tr {
+    background: var(--color-bg-surface, #fff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--radius-lg, 12px);
+    margin-bottom: var(--space-12, 12px);
+    padding: var(--space-12, 12px) var(--space-16, 16px);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+  }
+
+  /* Each cell: label left, value right */
+  .rsp-table-wrap td {
+    position: relative;
+    padding: 7px 8px 7px 45%;
+    border: none;
+    border-bottom: 1px solid var(--color-bg-hover, #f1f5f9);
+    min-height: 34px;
+    font-size: 0.875rem;
+    word-break: break-word;
+  }
+
+  .rsp-table-wrap td:last-child {
+    border-bottom: none;
+    padding-bottom: 2px;
+  }
+
+  /* Auto label from data-label attribute */
+  .rsp-table-wrap td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 8px;
+    top: 7px;
+    width: 40%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-secondary, #5f6368);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Hide utility */
+  .hide-on-mobile {
+    display: none !important;
+  }
+}

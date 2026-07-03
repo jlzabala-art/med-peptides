@@ -1,0 +1,226 @@
+/* ============================================================
+   Atlas Health — Global Component Structures
+   Provides standardized classes for layouts, cards, and panels
+   ============================================================ */
+
+/* ── App Layout ───────────────────────────────────────────── */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-app);
+}
+
+.app-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: white;
+  border-right: 1px solid var(--border);
+  transition: width 0.3s ease;
+  z-index: 40;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents overflow */
+}
+
+.content-container {
+  max-width: var(--max-content-width, 1320px);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--space-32);
+}
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .app-sidebar {
+    width: 80px; /* Collapsed state */
+  }
+  .content-container {
+    padding: var(--space-24);
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .app-sidebar {
+    display: none; /* Hidden on mobile, slide-out handled via JS/state */
+  }
+  .content-container {
+    padding: var(--space-16);
+  }
+}
+
+/* ── Responsive Grids ─────────────────────────────────────── */
+.responsive-grid {
+  display: grid;
+  gap: var(--space-24);
+}
+
+.responsive-grid--metrics {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.responsive-grid--widgets {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Tablet Grids */
+@media (max-width: 1023px) {
+  .responsive-grid--metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile Grids */
+@media (max-width: 767px) {
+  .responsive-grid {
+    gap: var(--space-16);
+  }
+  .responsive-grid--metrics,
+  .responsive-grid--widgets {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Stack Layouts ────────────────────────────────────────── */
+.stack-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+.stack-layout--sm { gap: var(--space-16); }
+.stack-layout--lg { gap: var(--space-32); }
+
+@media (max-width: 767px) {
+  .stack-layout { gap: var(--space-16); }
+  .stack-layout--lg { gap: var(--space-24); }
+}
+
+/* ── Base Card ────────────────────────────────────────────── */
+.base-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+}
+
+.base-card--hoverable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.base-card__header {
+  padding: var(--space-20) var(--space-24);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.base-card__title {
+  margin: 0;
+  font-size: var(--text-card-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.base-card__body {
+  padding: var(--space-24);
+  flex: 1;
+}
+
+.base-card__footer {
+  padding: var(--space-16) var(--space-24);
+  background: var(--color-bg-app);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+  .base-card__header { padding: var(--space-16); }
+  .base-card__body { padding: var(--space-16); }
+  .base-card__footer { padding: var(--space-12) var(--space-16); }
+}
+
+/* ── Metric Card ──────────────────────────────────────────── */
+.metric-card {
+  height: 100%; /* Ensure uniform height in grid */
+}
+
+.metric-card__value {
+  font-size: var(--text-metric);
+  font-weight: var(--font-weight-bold);
+  color: var(--primary);
+  margin: var(--space-8) 0;
+  line-height: 1.1;
+}
+
+/* ── AI Panel (Unified) ───────────────────────────────────── */
+.ai-panel {
+  background: linear-gradient(180deg, rgba(232, 240, 254, 0.5) 0%, var(--surface) 100%);
+  border: 1px solid var(--primary-soft);
+}
+
+.ai-panel__header {
+  background: transparent;
+  border-bottom: 1px solid rgba(26, 115, 232, 0.1);
+}
+
+/* ── Responsive Tabs ──────────────────────────────────────── */
+.responsive-tabs {
+  display: flex;
+  gap: var(--space-8);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-24);
+}
+
+.responsive-tabs__tab {
+  padding: var(--space-12) var(--space-16);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.responsive-tabs__tab:hover {
+  color: var(--text-main);
+}
+
+.responsive-tabs__tab--active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+@media (max-width: 767px) {
+  .responsive-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border-bottom: none;
+    padding-bottom: var(--space-8);
+  }
+  .responsive-tabs::-webkit-scrollbar { display: none; }
+  
+  .responsive-tabs__tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-8) var(--space-16);
+  }
+  
+  .responsive-tabs__tab--active {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+  }
+}

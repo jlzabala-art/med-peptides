@@ -12,6 +12,13 @@
 
 /* 3. Layout system (workflow, sidebar, stepper, scroll) */
 @import './layout.css';
+@import './components.css';
+
+/* 3b. Modular responsive extensions (Phase 4) */
+@import './responsive-table.css';
+@import './form-grid.css';
+@import './ai-widget.css';
+
 
 /* 4. Header / Navbar */
 @import './header.css';

@@ -5,14 +5,16 @@ const WorkspaceContext = createContext();
 export const WORKSPACE_TEMPLATES = {
   ceo: {
     id: 'ceo',
-    name: 'CEO Workspace',
-    focus: 'Revenue, Profit, Forecasts, Strategic KPIs',
+    name: 'Atlas Command Center',
+    focus: 'Strategic oversight & operational real-time control room',
     layout: [
-      { id: 'rev-today', type: 'kpi', size: 'small', data: { label: 'Revenue Today', field: 'revenueToday' } },
-      { id: 'rev-mtd', type: 'kpi', size: 'small', data: { label: 'MTD Revenue', field: 'revenueMonth' } },
-      { id: 'profit-margin', type: 'kpi', size: 'small', data: { label: 'Profit Margin', field: 'profitMargin' } },
-      { id: 'forecast', type: 'kpi', size: 'small', data: { label: 'Q3 Forecast', field: 'forecast' } },
-      { id: 'timeline', type: 'widget', size: 'large', data: { component: 'UniversalTimeline' } }
+      { id: 'ai-brief', type: 'widget', size: 'full', data: { component: 'AIBrief' } },
+      { id: 'revenue', type: 'kpi', size: 'small', data: { label: 'Revenue', field: 'revenueToday' } },
+      { id: 'open-orders', type: 'kpi', size: 'small', data: { label: 'Open Orders', field: 'openOrders' } },
+      { id: 'approvals', type: 'kpi', size: 'small', data: { label: 'Approvals', field: 'approvals' } },
+      { id: 'open-rfqs', type: 'kpi', size: 'small', data: { label: 'Open RFQs', field: 'openRfqs' } },
+      { id: 'sourcing-hub', type: 'widget', size: 'large', data: { component: 'SourcingHub' } },
+      { id: 'priority-queue', type: 'widget', size: 'small', data: { component: 'PriorityQueue' } }
     ]
   },
   operations: {

@@ -15,16 +15,10 @@ import {
   getAllRelationships,
   updateRelationshipStatus,
 } from '../../services/assignmentService';
-
-
-
-
-
-
-
-
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
+import AdminPageHeader from './AdminPageHeader';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const displayName = (u) =>
@@ -160,6 +154,13 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
       className="anim-slide-up"
       style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
     >
+      {/* Header — normalised */}
+      <AdminPageHeader
+        title="Physician ↔ Patient Assignments"
+        subtitle="Create and manage doctor-patient relationships. All changes take effect immediately."
+        icon={Link2}
+      />
+
       {/* ── Assign form ── */}
       <div className="card" style={{ padding: '1.75rem' }}>
         <h2
@@ -362,7 +363,7 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
         </div>
 
         {loadingRels ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading…</p>
+          <DataTableSkeleton rows={6} columns={6} />
         ) : relationships.length === 0 ? (
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No assignments yet.</p>
         ) : (

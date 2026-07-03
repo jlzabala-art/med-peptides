@@ -1,8 +1,4 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import GitCompare from "lucide-react/dist/esm/icons/git-compare";
-import Bot from "lucide-react/dist/esm/icons/bot";
+import { Bot, Sparkles, ArrowRight, GitCompare, BookOpen } from "lucide-react";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

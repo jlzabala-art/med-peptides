@@ -1494,7 +1494,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
                       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                         <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>{catalogMeta.title || 'Clinical Curation'}</h1>
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', maxWidth: '540px', margin: '0 auto' }}>{catalogMeta.description || 'Access compiled medical catalogs.'}</p>
+                        <p style={{ margin: '0 auto', fontSize: '0.9rem', color: '#475569', maxWidth: '540px' }}>{catalogMeta.description || 'Access compiled medical catalogs.'}</p>
                       </div>
 
                       {/* Sections & Products list mockup */}

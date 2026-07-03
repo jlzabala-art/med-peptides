@@ -20,11 +20,13 @@ import {
   Box,
   Check,
   Cpu,
+  Plus
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function MobileExecutiveDashboard() {
   const [sourcingExpanded, setSourcingExpanded] = useState(false);
+  const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
   // MOCK DATA for layout testing
   const priorities = [
@@ -224,7 +226,7 @@ export default function MobileExecutiveDashboard() {
         </div>
       </div>
 
-      {/* 3. Executive KPI Snapshot */}
+      {/* 3. Executive KPI Snapshot (Horizontal Carousel) */}
       <div style={{ marginBottom: '2rem' }}>
         <h3
           style={{
@@ -239,7 +241,15 @@ export default function MobileExecutiveDashboard() {
         >
           Pulse Dashboard
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ 
+          display: 'flex', 
+          overflowX: 'auto', 
+          gap: '12px', 
+          paddingBottom: '16px', 
+          msOverflowStyle: 'none',  
+          scrollbarWidth: 'none', 
+          WebkitOverflowScrolling: 'touch' 
+        }}>
           {kpis.map((kpi) => (
             <div
               key={kpi.label}
@@ -250,6 +260,8 @@ export default function MobileExecutiveDashboard() {
                 borderRadius: '16px',
                 padding: '16px',
                 height: '100px',
+                minWidth: '140px',
+                flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -623,6 +635,43 @@ export default function MobileExecutiveDashboard() {
           ))}
         </div>
       </div>
+
+      {/* Floating Speed Dial */}
+      <div style={{ position: 'fixed', bottom: '20px', right: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+        {speedDialOpen && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end', marginBottom: '4px' }}>
+            <button style={{ padding: '10px 16px', borderRadius: '20px', background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
+              <Box size={16} /> New RFQ
+            </button>
+            <button style={{ padding: '10px 16px', borderRadius: '20px', background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
+              <CheckCircle2 size={16} /> Review Approvals
+            </button>
+            <button style={{ padding: '10px 16px', borderRadius: '20px', background: 'white', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
+              <BrainCircuit size={16} /> Ask AI
+            </button>
+          </div>
+        )}
+        <button 
+          onClick={() => setSpeedDialOpen(!speedDialOpen)}
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+            color: 'white',
+            border: 'none',
+            boxShadow: '0 4px 12px rgba(14, 165, 233, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'transform 0.2s',
+            transform: speedDialOpen ? 'rotate(45deg)' : 'rotate(0deg)'
+          }}>
+          <Plus size={24} />
+        </button>
+      </div>
+
     </div>
   );
 }

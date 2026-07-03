@@ -64,9 +64,77 @@ import { functions } from '../../firebase';
 import { httpsCallable } from 'firebase/functions';
 import DataTable from '../ui/DataTable';
 import AppActionGroup from '../ui/AppActionGroup';
-import AppStatusChip from '../ui/AppStatusChip';
 import AppFilterBar from '../ui/AppFilterBar';
 import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+
+// ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
+function UniformKPIs({ data }) {
+  const total = data.length;
+  const pending = data.filter(d => ['Pending', 'Processing'].includes(d.status)).length;
+  const shipped = data.filter(d => ['Shipped'].includes(d.status)).length;
+  const completed = data.filter(d => ['Completed', 'Delivered'].includes(d.status)).length;
+  
+  const totalRevenue = data.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
+
+  const stats = [
+    { label: 'Total Orders', value: total, color: '#3b82f6', icon: <ShoppingCart size={16} /> },
+    { label: 'Pending Processing', value: pending, color: '#f59e0b', icon: <Clock size={16} /> },
+    { label: 'Shipped', value: shipped, color: '#8b5cf6', icon: <Truck size={16} /> },
+    { label: 'Completed', value: completed, color: '#10b981', icon: <CheckCircle2 size={16} /> },
+    { label: 'Revenue (Loaded)', value: `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, color: '#059669', icon: <Activity size={16} /> },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+      {stats.map((s, i) => (
+        <div key={i} style={{ flex: '1 1 200px', minWidth: 180, background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
+            <div style={{ color: s.color, background: s.color + '15', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
+              {s.icon}
+            </div>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
+          </div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
+            {s.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Smart Chips ───────────────────────────────────────────────────────────────
+function SmartChips({ activeChip, setActiveChip }) {
+  const chips = [
+    { id: 'All', label: 'All Orders', icon: <Package size={14} /> },
+    { id: 'Processing', label: 'Processing', icon: <Clock size={14} /> },
+    { id: 'Shipped', label: 'Shipped', icon: <Truck size={14} /> },
+    { id: 'Completed', label: 'Completed', icon: <CheckCheck size={14} /> },
+  ];
+
+  return (
+    <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      {chips.map(chip => (
+        <button
+          key={chip.id}
+          onClick={() => setActiveChip(chip.id)}
+          style={{
+            padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap',
+            background: activeChip === chip.id ? '#0f172a' : 'white',
+            color: activeChip === chip.id ? 'white' : '#64748b',
+            border: activeChip === chip.id ? '1px solid #0f172a' : '1px solid #e2e8f0',
+          }}
+          onMouseEnter={e => { if (activeChip !== chip.id) e.currentTarget.style.borderColor = '#94a3b8' }}
+          onMouseLeave={e => { if (activeChip !== chip.id) e.currentTarget.style.borderColor = '#e2e8f0' }}
+        >
+          {chip.icon} {chip.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // Template for admin-side order confirmation email to customer/doctor
 const EMAILJS_CONFIRM_TEMPLATE = 'template_7unfks8';
@@ -107,6 +175,9 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buyerId, accountManagerId, doctorId]);
 
+  const [limitCount, setLimitCount] = useState(50);
+  const [hasMore, setHasMore] = useState(true);
+
   async function fetchOrders() {
     try {
       setLoading(true);
@@ -120,10 +191,11 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       if (doctorId) {
         qBuilder = query(qBuilder, where('doctorId', '==', doctorId));
       }
-      const q = query(qBuilder, orderBy('createdAt', 'desc'), limit(500));
+      const q = query(qBuilder, orderBy('createdAt', 'desc'), limit(limitCount));
       const snap = await getDocs(q);
       const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setOrders(raw); // Removed arbitrary items filter so all real orders show up
+      setOrders(raw);
+      setHasMore(snap.docs.length === limitCount);
       // Inject data context for Atlas AI
       const pendingOrders = raw.filter(o => o.status === 'Pending' || o.status === 'Processing');
       const highValueOrders = raw.filter(o => o.total > 500);
@@ -143,6 +215,10 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [limitCount]);
 
   /* ── Auto-scroll to deep-linked order ───────────────────────────────── */
   useEffect(() => {
@@ -693,28 +769,7 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
     if (f.type === 'statusFilter') setFilterStatus('All');
   };
 
-  const renderCustomFilters = () => (
-    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-      <select
-        value={filterStatus}
-        onChange={(e) => setFilterStatus(e.target.value)}
-        style={{
-          padding: '0.4rem 0.75rem',
-          borderRadius: '4px',
-          border: '1px solid var(--border)',
-          backgroundColor: 'white',
-          color: 'var(--text-main)',
-          outline: 'none',
-        }}
-      >
-        <option value="All">All Statuses</option>
-        <option value="Processing">Processing</option>
-        <option value="Shipped">Shipped</option>
-        <option value="Completed">Completed</option>
-        <option value="Cancelled">Cancelled</option>
-      </select>
-    </div>
-  );
+
 
   /* ── Render ──────────────────────────────────────────────────────────── */
   return (
@@ -771,12 +826,24 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
         icon={ShoppingCart}
       />
 
+      {/* GlobalSearchBar — prominent, above KPIs */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm || ''}
+          onChange={(v) => setSearchTerm ? setSearchTerm(v) : null}
+          placeholder="Search orders by patient, status, or ID..."
+          resultCount={loading ? undefined : orders.length}
+          namespace="admin-orders"
+          size="lg"
+        />
+      </div>
+
+      {/* Uniform KPI Summary Bar */}
+      {!loading && <UniformKPIs data={orders} />}
 
       {/* ── Table ── */}
       {loading ? (
-        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Loading orders…
-        </div>
+        <DataTableSkeleton rows={8} columns={6} />
       ) : orders.length === 0 ? (
         <div
           className="card"
@@ -910,6 +977,18 @@ export default function OrdersTab({ buyerId = null, accountManagerId = null, doc
             </div>
           )}
         />
+      )}
+      
+      {!loading && orders.length > 0 && hasMore && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+          <button 
+            className="btn btn-secondary"
+            onClick={() => setLimitCount(prev => prev + 50)}
+            style={{ padding: '0.6rem 1.5rem', fontWeight: 'bold' }}
+          >
+            Load More Orders
+          </button>
+        </div>
       )}
 
       {/* ── Confirm & Notify Modal ── */}

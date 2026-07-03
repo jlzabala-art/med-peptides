@@ -36,15 +36,19 @@ import {
   CheckSquare,
   Square,
   ArchiveRestore,
+  ClipboardList,
 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import CustomProtocolBuilder from './CustomProtocolBuilder';
 import StandardDrawer from '../ui/StandardDrawer';
 import BulkActionsBar from '../ui/BulkActionsBar';
+import { TextField, Select } from '../ui';
 import { useDataTable } from '../../hooks/ui/useDataTable';
 import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
 import { useProducts } from '../../hooks/admin/useProducts';
-import ProtocolDrawerContent from './protocols/ProtocolDrawerContent';
+import ProtocolHubDashboard from './protocols/ProtocolHubDashboard';
+import SmartProductPicker from '../shared/SmartProductPicker';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
@@ -113,22 +117,20 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
             {/* Phase header */}
             <div className="phase-card-header">
               <GripVertical size={15} color="var(--text-muted)" style={{ cursor: 'grab' }} />
-              <input
+              <TextField
                 value={phase.label ?? ''}
                 placeholder="Phase label"
                 aria-label="Edit phase label"
                 onChange={(e) => updatePhase(pi, { label: e.target.value })}
-                className="admin-premium-input"
                 style={{ fontWeight: 500, flex: 1 }}
               />
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
                 Duration:
               </span>
-              <input
+              <TextField
                 type="number"
                 min="1"
                 value={phase.durationWeeks ?? 4}
-                className="admin-premium-input"
                 style={{ width: '65px', textAlign: 'center' }}
                 aria-label="Edit phase duration in weeks"
                 onChange={(e) => updatePhase(pi, { durationWeeks: parseInt(e.target.value) || 1 })}
@@ -209,7 +211,7 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
                     </button>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                      <input
+                      <TextField
                         type="number"
                         min="0"
                         step="0.1"
@@ -218,41 +220,29 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
                         onChange={(e) =>
                           updateItem(pi, ii, { dosage: parseFloat(e.target.value) || 0 })
                         }
-                        className="admin-premium-input"
                         style={{ width: '75px', textAlign: 'center' }}
                         placeholder="0"
                       />
-                      <select
+                      <Select
                         value={item.doseUnit ?? 'mg'}
                         onChange={(e) => updateItem(pi, ii, { doseUnit: e.target.value })}
-                        className="admin-premium-select"
-                        style={{ width: '65px', padding: '0.3rem', fontSize: '0.8rem' }}
-                      >
-                        <option value="mg">mg</option>
-                        <option value="mcg">mcg</option>
-                        <option value="IU">IU</option>
-                        <option value="ml">ml</option>
-                      </select>
+                        options={['mg', 'mcg', 'IU', 'ml']}
+                        style={{ width: '85px' }}
+                      />
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                      <select
+                      <Select
                         value={item.frequency ?? 'Weekly'}
                         aria-label="Select dosage frequency"
                         onChange={(e) => updateItem(pi, ii, { frequency: e.target.value })}
-                        className="admin-premium-select"
-                        style={{ width: '100%', cursor: 'pointer' }}
-                      >
-                        {['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Custom'].map((f) => (
-                          <option key={f} value={f}>
-                            {f}
-                          </option>
-                        ))}
-                      </select>
+                        options={['Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Custom']}
+                        style={{ width: '120px' }}
+                      />
                     </div>
 
                     <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                      <input
+                      <TextField
                         type="number"
                         min="1"
                         value={item.vialsNeeded ?? 1}
@@ -260,7 +250,6 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
                         onChange={(e) =>
                           updateItem(pi, ii, { vialsNeeded: parseInt(e.target.value) || 1 })
                         }
-                        className="admin-premium-input"
                         style={{ width: '60px', textAlign: 'center' }}
                       />
                       <span
@@ -304,65 +293,10 @@ function PhaseEditor({ phases, products: catalogProducts, onChange }) {
 
               {/* Add product */}
               <div style={{ padding: '0.75rem 1rem 0.5rem', position: 'relative' }}>
-                <input
-                  placeholder="🔍 Add product to phase…"
-                  aria-label="Search and add product to phase"
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  className="admin-premium-input"
-                  style={{ width: '100%', boxSizing: 'border-box' }}
+                <SmartProductPicker
+                  placeholder="Type SKU or product name to add..."
+                  onSelect={(product) => addItem(pi, product)}
                 />
-                <AnimatePresence>
-                  {productSearch && filteredProducts.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      style={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: '1rem',
-                        right: '1rem',
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 'var(--radius-sm)',
-                        boxShadow: 'var(--shadow-sm)',
-                        zIndex: 100,
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                      }}
-                    >
-                      {filteredProducts.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => addItem(pi, p)}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            textAlign: 'left',
-                            padding: '0.65rem 0.85rem',
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            fontSize: '0.83rem',
-                            borderBottom: '1px solid var(--border-light)',
-                            color: 'var(--text-main)',
-                            transition: 'background 0.2s ease',
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = 'var(--accent-soft)')
-                          }
-                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                        >
-                          {p.displayName ?? p.name}
-                          <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem' }}>
-                            ({p.category})
-                          </span>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
             </div>
           </motion.div>
@@ -431,10 +365,9 @@ function SupplementsEditor({ supplements, onChange }) {
                 >
                   Name
                 </label>
-                <input
+                <TextField
                   value={sup.name ?? ''}
                   onChange={(e) => updateSupplement(i, { name: e.target.value })}
-                  className="admin-premium-input"
                   style={{ width: '100%', marginTop: '0.25rem' }}
                   placeholder="e.g. NMN (Nicotinamide Mononucleotide)"
                 />
@@ -445,10 +378,9 @@ function SupplementsEditor({ supplements, onChange }) {
                 >
                   Dosage
                 </label>
-                <input
+                <TextField
                   value={sup.dosage ?? ''}
                   onChange={(e) => updateSupplement(i, { dosage: e.target.value })}
-                  className="admin-premium-input"
                   style={{ width: '100%', marginTop: '0.25rem' }}
                   placeholder="e.g. 500mg daily"
                 />
@@ -459,10 +391,9 @@ function SupplementsEditor({ supplements, onChange }) {
                 >
                   Timing
                 </label>
-                <input
+                <TextField
                   value={sup.timing ?? ''}
                   onChange={(e) => updateSupplement(i, { timing: e.target.value })}
-                  className="admin-premium-input"
                   style={{ width: '100%', marginTop: '0.25rem' }}
                   placeholder="e.g. Morning with breakfast"
                 />
@@ -639,19 +570,13 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
                 >
                   Pathway Title
                 </label>
-                <input
+                <TextField
                   autoFocus
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
                   placeholder="e.g. Advanced Metabolic Reset"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '1rem',
-                  }}
+                  style={{ width: '100%' }}
                 />
               </div>
               <div>
@@ -666,24 +591,19 @@ function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
                 >
                   Therapeutic Category
                 </label>
-                <select
+                <Select
                   value={formData.category}
                   onChange={(e) => setFormData((p) => ({ ...p, category: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '1rem',
-                  }}
-                >
-                  <option value="">Select Category...</option>
-                  <option value="Longevity">Longevity</option>
-                  <option value="Weight Loss">Weight Loss</option>
-                  <option value="Muscle Hypertrophy">Muscle Hypertrophy</option>
-                  <option value="Cognitive Enhancement">Cognitive Enhancement</option>
-                  <option value="Injury Recovery">Injury Recovery</option>
-                </select>
+                  options={[
+                    { label: 'Select Category...', value: '' },
+                    'Longevity',
+                    'Weight Loss',
+                    'Muscle Hypertrophy',
+                    'Cognitive Enhancement',
+                    'Injury Recovery'
+                  ]}
+                  style={{ width: '100%' }}
+                />
               </div>
             </div>
           )}
@@ -1136,8 +1056,8 @@ export default function AdminProtocolsTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [drawerProtocol, setDrawerProtocol] = useState(null);
   const [linkedProduct, setLinkedProduct] = useState(null); // secondary: product detail drawer
-  const { products } = useProducts();
-  const [catalogProducts, setCatalog] = useState([]);
+  const { products: catalogProducts } = useProducts();
+
   const [showPathwayWizard, setShowPathwayWizard] = useState(false);
   const [showCustomBuilder, setShowCustomBuilder] = useState(false);
   const [activeChip, setActiveChip] = useState('all');
@@ -1243,12 +1163,7 @@ export default function AdminProtocolsTab() {
     fetchProtocols();
   }, [fetchProtocols]);
 
-  // Fetch product catalog for phase editor
-  useEffect(() => {
-    getDocs(collection(db, 'products'))
-      .then((snap) => setCatalog(snap.docs.map((d) => ({ id: d.id, ...d.data() }))))
-      .catch(() => {});
-  }, []);
+
 
   // Edit helpers
   const getEdit = (p) => {
@@ -1393,16 +1308,7 @@ export default function AdminProtocolsTab() {
   };
 
   if (loading)
-    return (
-      <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-muted)' }}>
-        <RefreshCw
-          size={28}
-          className="admin-pill-status-dot admin-pill-status-dot--pulse"
-          style={{ marginBottom: '1rem', color: 'var(--primary)' }}
-        />
-        <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>Loading all protocols…</p>
-      </div>
-    );
+    return <DataTableSkeleton rows={10} columns={5} />;
 
   if (error)
     return (
@@ -1437,8 +1343,29 @@ export default function AdminProtocolsTab() {
       </div>
     );
 
+  if (drawerProtocol) {
+    return (
+      <div style={{ height: '100%', overflow: 'hidden' }}>
+        <ProtocolHubDashboard
+          protocol={drawerProtocol}
+          onClose={() => setDrawerProtocol(null)}
+          onSave={async (updates) => {
+            try {
+              await updateProtocolFull(drawerProtocol.id, updates);
+              toast.success('Protocol updated successfully');
+              setDrawerProtocol(null);
+              fetchProtocols();
+            } catch (err) {
+              toast.error('Failed to update protocol: ' + err.message);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div style={{ minHeight: '100%' }}>
+    <div style={{ paddingBottom: '2rem', minHeight: '100%' }}>
       <style>{responsiveStyles}</style>
 
       {/* Header */}
@@ -1763,6 +1690,24 @@ export default function AdminProtocolsTab() {
                         <button
                           onClick={(ev) => {
                             ev.stopPropagation();
+                            navigate(`/prescriptions/new?source=Protocol&protocol=${p.id}`);
+                          }}
+                          className="admin-tooltip-target"
+                          data-tooltip="Generate Prescription"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#8b5cf6',
+                            cursor: 'pointer',
+                            padding: '4px',
+                          }}
+                        >
+                          <ClipboardList size={16} />
+                        </button>
+
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
                             toggleActive();
                           }}
                           className="admin-tooltip-target"
@@ -1863,62 +1808,7 @@ export default function AdminProtocolsTab() {
         )}
       </div>
 
-      {/* ── Protocol Detail Drawer ───────────────────────────────────────────── */}
-      <StandardDrawer
-        isOpen={!!drawerProtocol}
-        onClose={() => setDrawerProtocol(null)}
-        title={drawerProtocol?.protocol_name || 'Protocol Detail'}
-        subtitle={`${drawerProtocol?.therapeutic_category || '—'} · v${drawerProtocol?.version_number ?? 1}`}
-        fullWorkspace={true}
-        actions={
-          <button
-            onClick={() => {
-              setDrawerProtocol(null);
-              navigate(`/admin/protocols/${drawerProtocol?.id}/edit`);
-            }}
-            style={{
-              padding: '0.45rem 1rem',
-              borderRadius: '6px',
-              background: '#eef2ff',
-              color: '#4f46e5',
-              border: '1px solid #c7d2fe',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Edit3 size={14} style={{ marginRight: '0.4rem' }} />
-            Edit Protocol
-          </button>
-        }
-        footer={
-          <button
-            onClick={() => setDrawerProtocol(null)}
-            style={{
-              padding: '0.55rem 1.25rem',
-              borderRadius: '8px',
-              background: 'transparent',
-              color: '#475569',
-              border: '1px solid #e2e8f0',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-            }}
-          >
-            Close
-          </button>
-        }
-      >
-        {drawerProtocol && (
-          <ProtocolDrawerContent
-            protocol={drawerProtocol}
-            products={products}
-            onProductClick={(prod) => setLinkedProduct(prod)}
-          />
-        )}
-      </StandardDrawer>
+
 
       {/* ── Linked Product Secondary Drawer ─────────────────────────────────── */}
       {linkedProduct && (

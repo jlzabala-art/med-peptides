@@ -85,6 +85,9 @@ function MailPlus2(props) {
   return <UserPlus {...props} />;
 }
 
+
+import { NAVIGATION_REGISTRY, getNavigationForRole } from '../config/navigationRegistry';
+
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
 const PINNED_ITEMS = [
   { id: 'dashboard', label: 'Dashboard KPIs', icon: LayoutDashboard },
@@ -181,135 +184,13 @@ function useUpcomingCalendarCount() {
 }
 
 // ── Intent-based navigation groups ────────────────────────────────────────────
-const NAV_GROUPS = [
-  {
-    id: 'sales-operations',
-    label: 'Sales (O2C)',
-    icon: TrendingUp,
-    items: [
-      { id: 'quotations', label: 'Quotations', icon: FileText },
-      { id: 'sales-orders', label: 'Sales Orders', icon: Box },
-      { id: 'invoices', label: 'Invoices', icon: DollarSign },
-      { id: 'payments-received', label: 'Payments Received', icon: DollarSign },
-      { id: 'orders', label: 'Patient Orders', icon: PackageSearch },
-      { id: 'bulk-orders', label: 'Bulk Orders', icon: Box },
-      { id: 'agency-deals', label: 'Agency Deals', icon: Briefcase },
-      { id: 'logistics', label: 'Logistics Tracker', icon: Truck },
-      { id: 'shipping', label: 'Shipping Network', icon: Globe },
-    ],
-  },
-  {
-    id: 'purchasing-operations',
-    label: 'Purchases (P2P)',
-    icon: ShoppingCart,
-    items: [
-      { id: 'wholesellers', label: 'Suppliers/Wholesalers', icon: Building2 },
-      { id: 'purchase-rfqs', label: 'Requests for Quotation', icon: FileText },
-      { id: 'purchase-orders', label: 'Purchase Orders', icon: ShoppingCart },
-      { id: 'purchase-bills', label: 'Supplier Bills', icon: Receipt },
-      { id: 'payments-made', label: 'Payments Made', icon: DollarSign },
-    ],
-  },
-  {
-    id: 'catalog-pim',
-    label: 'Items & Catalog',
-    icon: Box,
-    items: [
-      { id: 'products', label: 'Items', icon: Box },
-      { id: 'pricing-visibility', label: 'Pricing Visibility', icon: EyeOff },
-      { id: 'protocols', label: 'Protocols', icon: ClipboardList },
-      { id: 'competitors', label: 'Competitor Analysis', icon: Activity },
-      { id: 'enrichment', label: 'Catalog Enrichment', icon: Database },
-      { id: 'lab-tests', label: 'Lab Tests & COAs', icon: ScrollText },
-      { id: 'catalog-builder', label: 'Catalog Builder', icon: Wrench },
-    ],
-  },
-  {
-    id: 'crm-users',
-    label: 'CRM & Users',
-    icon: Users,
-    items: [
-      { id: 'leads', label: 'Leads', icon: Users },
-      { id: 'clinics', label: 'Clinics', icon: Building },
-      { id: 'doctors', label: 'Doctors', icon: Stethoscope },
-      { id: 'patients', label: 'Patients', icon: HeartPulse },
-      { id: 'account-managers', label: 'Account Managers', icon: ShieldCheck },
-      { id: 'command-center', label: 'Command Center', icon: Activity },
-      { id: 'territory-rules', label: 'Territory Rules', icon: ShieldCheck },
-      { id: 'access-levels', label: 'Access Levels', icon: Lock },
-      { id: 'invitations', label: 'Invitations', icon: UserPlus },
-    ],
-  },
-  {
-    id: 'finance-management',
-    label: 'Finance & Accounting',
-    icon: DollarSign,
-    items: [
-      { id: 'finance-budget', label: 'Budgets & Variances', icon: PieChart },
-      { id: 'approvals', label: 'Approvals', icon: ShieldCheck },
-      { id: 'finance-payables', label: 'Payables & Payouts', icon: CreditCard },
-      { id: 'finance-approvals', label: 'Control & Approvals', icon: ShieldAlert },
-      { id: 'finance-economics', label: 'Unit Economics', icon: TrendingUp },
-      { id: 'finance-reporting', label: 'Reporting & Data Room', icon: FileText },
-    ],
-  },
-  {
-    id: 'marketing-integrations',
-    label: 'Marketing & External',
-    icon: Globe,
-    items: [
-      { id: 'email-campaigns', label: 'Email Campaigns', icon: Mail },
-      { id: 'marketing', label: 'Content / Social', icon: Globe },
-      { id: 'newsletter', label: 'Newsletter Signups', icon: Mail },
-      { id: 'email-templates', label: 'Email Templates', icon: FileText },
-      { id: 'drip-marketing', label: 'Drip Sequences', icon: Zap },
-      { id: 'catalogs', label: 'Shared Catalogs', icon: BookOpen },
-      { id: 'coupons', label: 'Coupons & Discounts', icon: Tag },
-      { id: 'referrals', label: 'Referral Tracking', icon: Users },
-      { id: 'co-branding', label: 'Co-Branding', icon: Eye },
-      { id: 'sku-sync', label: 'Zoho Books', icon: Link2 },
-      { id: 'crm-intelligence', label: 'Zoho Bigin', icon: Briefcase },
-    ],
-  },
-  {
-    id: 'system-ai',
-    label: 'System & AI',
-    icon: Settings2,
-    badge: 'LIVE',
-    badgeColor: 'var(--color-success)',
-    items: [
-      { id: 'simulations', label: 'Role Simulations', icon: Users },
-      { id: 'ai-agents', label: 'AI Agents Hub', icon: Network },
-      { id: 'prescription-agent', label: 'Prescription Agent', icon: Zap },
-      { id: 'clinical-ai', label: 'Atlas AI', icon: Bot },
-      { id: 'workflows', label: 'Automation Workflows', icon: Settings2 },
-      { id: 'semantic', label: 'AI Semantics', icon: Cpu },
-      { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-      { id: 'ai-logs', label: 'AI Logs', icon: ScrollText },
-      { id: 'audit-logs', label: 'Audit Logs', icon: ShieldCheck },
-      { id: 'relationships', label: 'Relationships', icon: Network },
-      { id: 'views', label: 'Views', icon: Layers },
-      { id: 'home-layout', label: 'Home Layout', icon: LayoutTemplate },
-      { id: 'gadget-repository', label: 'Gadget Repository', icon: Layers },
-      { id: 'settings', label: 'General Settings', icon: Settings },
-      { id: 'deploy', label: 'Deploy & Hosting', icon: Globe },
-    ],
-  },
-  {
-    id: 'import-data',
-    label: 'Import Data',
-    icon: UploadCloud,
-    items: [
-      { id: 'import-catalogs', label: 'Import Catalogs', icon: BookOpen },
-      { id: 'import-prices', label: 'Import Price Lists', icon: Tag },
-      { id: 'import-coa', label: 'Import Certificates', icon: CheckCircle },
-      { id: 'import-rfq', label: 'Import RFQs', icon: FileText },
-      { id: 'import-prescriptions', label: 'Import Prescriptions', icon: ClipboardList },
-      { id: 'import-bloodworks', label: 'Import Bloodworks', icon: Activity },
-      { id: 'import-history', label: 'Import History', icon: Database },
-    ],
-  },
-];
+const NAV_GROUPS = NAVIGATION_REGISTRY.map(group => ({
+  ...group,
+  items: group.items.map(item => ({
+    ...item,
+    id: item.id.replace(/^\//, '') || 'dashboard'
+  }))
+}));
 
 // Tab→group lookup
 const TAB_TO_GROUP = {};
@@ -521,9 +402,7 @@ export default function AdminDashboard() {
     >
       <div style={{ padding: '1rem' }}>
         <React.Suspense fallback={<AdminLoadingFallback />}>
-          <PageTransition locationKey={location.pathname}>
-            <Outlet />
-          </PageTransition>
+          <Outlet />
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />

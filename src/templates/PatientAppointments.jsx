@@ -1,6 +1,6 @@
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Clock from "lucide-react/dist/esm/icons/clock";
-import Chrome from "lucide-react/dist/esm/icons/chrome";
+import Globe from "lucide-react/dist/esm/icons/globe";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
@@ -97,12 +97,12 @@ export default function PatientAppointments() {
         <div>
           {calendarConnected ? (
             <button style={styles.btnSyncActive} onClick={handleDisconnectCalendar}>
-              <Chrome size={14} style={{ marginRight: 6 }} />
+              <Globe size={14} style={{ marginRight: 6 }} />
               Calendar Synced
             </button>
           ) : (
             <button style={styles.btnSync} onClick={() => setShowOauthModal(true)}>
-              <Chrome size={14} style={{ marginRight: 6 }} />
+              <Globe size={14} style={{ marginRight: 6 }} />
               Sync Google Calendar
             </button>
           )}

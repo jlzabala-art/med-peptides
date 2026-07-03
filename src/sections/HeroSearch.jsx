@@ -1,16 +1,4 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import Scale from "lucide-react/dist/esm/icons/scale";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ZapIcon from "lucide-react/dist/esm/icons/zap-icon";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { Zap, Sparkles, Moon, Microscope, Search, ArrowRight, Globe, Activity, ZapIcon, Scale, ShieldCheck, FlaskConical, BookOpen } from "lucide-react";
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
 

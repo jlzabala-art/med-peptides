@@ -1,5 +1,4 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-
+import { Sparkles } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import PeptideCard from '../components/common/PeptideCard';
 

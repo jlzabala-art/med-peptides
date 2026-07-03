@@ -531,7 +531,7 @@ export default function AtlasMessagesHub() {
               </button>
             )}
               <button
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px', border: '1px solid #e0f2fe', marginRight: '8px' }}
+                style={{ background: 'none', cursor: 'pointer', color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '6px', border: '1px solid #e0f2fe', marginRight: '8px' }}
                 title="Start Video Call"
                 onClick={() => toast.success('Starting secure video consultation...')}
               >

@@ -11,6 +11,7 @@ import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import LogOut from "lucide-react/dist/esm/icons/log-out";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Building from "lucide-react/dist/esm/icons/building";
+import { getNavigationForRole } from '../../config/navigationRegistry';
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 
@@ -99,7 +100,7 @@ export default function GlobalAppLayout({
   sidebarProps = null,
   headerProps = null
 }) {
-  const { user, activeRole, logout } = useAuth();
+  const { user, activeRole, baseRole, switchActiveRole, logout } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const location = useLocation();
@@ -108,17 +109,8 @@ export default function GlobalAppLayout({
   const isPatientOrPublic = user && activeRole !== 'admin' && activeRole !== 'professional' && activeRole !== 'wholesaler';
   const showAIButton = isPatientOrPublic;
 
-  // Determine role-aware groups
-  let activeGroups = PUBLIC_GROUPS;
-  if (user) {
-    if (activeRole === 'admin') {
-      if (roleContext === 'ceo') activeGroups = CEO_GROUPS;
-      else if (roleContext === 'medical') activeGroups = MEDICAL_GROUPS;
-      else activeGroups = OPERATIONS_GROUPS;
-    } else if (isPatientOrPublic) {
-      activeGroups = PATIENT_GROUPS;
-    }
-  }
+  const currentEffectiveRole = activeRole || 'admin';
+  const activeGroups = user ? getNavigationForRole(currentEffectiveRole) : [];
 
   // Determine default sidebar props if none provided
   const computedSidebarProps = sidebarProps || {
@@ -135,21 +127,47 @@ export default function GlobalAppLayout({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
-      {/* Universal App Sidebar */}
-      <AppSidebar 
-        isMobile={isMobile}
-        {...computedSidebarProps}
-      />
+  const isSimulating = baseRole === 'admin' && activeRole !== 'admin';
+  const roleLabel = activeRole;
 
-      {/* Main Content Area Wrapper */}
-      <div style={{ 
-        flex: 1, 
-        minWidth: 0, 
-        display: 'flex', 
-        flexDirection: 'column',
-      }}>
+  const exitSimulation = () => {
+    if (switchActiveRole) switchActiveRole('admin');
+    navigate('/admin');
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f1f5f9' }}>
+      {/* Simulation Banner */}
+      {isSimulating && (
+        <div style={{ 
+          background: '#f59e0b', color: 'white', padding: '8px 16px', 
+          textAlign: 'center', display: 'flex', justifyContent: 'center', 
+          alignItems: 'center', gap: '16px', zIndex: 1100, fontWeight: 500, fontSize: '14px'
+        }}>
+          <span>You are viewing Atlas Health as: <strong>{roleLabel}</strong></span>
+          <button onClick={exitSimulation} style={{ 
+            background: 'rgba(0,0,0,0.2)', color: 'white', border: 'none', 
+            padding: '4px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: 600
+          }}>
+            Exit Simulation
+          </button>
+        </div>
+      )}
+      
+      <div style={{ display: 'flex', flex: 1 }}>
+        {/* Universal App Sidebar */}
+        <AppSidebar 
+          isMobile={isMobile}
+          {...computedSidebarProps}
+        />
+
+        {/* Main Content Area Wrapper */}
+        <div style={{ 
+          flex: 1, 
+          minWidth: 0, 
+          display: 'flex', 
+          flexDirection: 'column',
+        }}>
         {/* Universal Utility Header */}
         <AppHeader 
           cartCount={cartCount}
@@ -227,6 +245,7 @@ export default function GlobalAppLayout({
 
         </div>
       </div>
+    </div>
     </div>
   );
 }

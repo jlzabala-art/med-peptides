@@ -1,0 +1,50 @@
+/* ================================================================
+   Form Grid — 2-column to 1-column responsive forms
+   ================================================================
+   Usage:
+     <div className="form-grid">
+       <div className="form-field">...</div>
+       <div className="form-field">...</div>
+       <div className="form-field form-grid__full">...</div>  ← full width
+     </div>
+
+   Variants:
+     .form-grid           → 2 columns
+     .form-grid--3col     → 3 columns
+     .form-grid--compact  → smaller gap
+================================================================ */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-20, 20px);
+}
+
+.form-grid--3col {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-grid--compact {
+  gap: var(--space-12, 12px);
+}
+
+/* Full-width field — spans all columns */
+.form-grid__full {
+  grid-column: 1 / -1;
+}
+
+/* Tablet: 3-col collapses to 2-col */
+@media (max-width: 1023px) {
+  .form-grid--3col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile: everything collapses to 1 column */
+@media (max-width: 767px) {
+  .form-grid,
+  .form-grid--3col {
+    grid-template-columns: 1fr;
+    gap: var(--space-16, 16px);
+  }
+}

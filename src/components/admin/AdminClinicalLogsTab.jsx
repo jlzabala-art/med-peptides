@@ -6,13 +6,11 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
-
-
-
-
-
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 export default function AdminClinicalLogsTab() {
   const [logs, setLogs] = useState([]);
@@ -208,6 +206,25 @@ export default function AdminClinicalLogsTab() {
 
   return (
     <div style={{ padding: '0.5rem' }}>
+      {/* Page Header */}
+      <AdminPageHeader
+        title="Clinical AI Logs"
+        subtitle="AI-assisted clinical interactions, session logs, and safety audit trail."
+        icon={MessageSquare}
+      />
+
+      {/* Prominent search */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search user queries, agents, or session IDs..."
+          resultCount={loading ? undefined : paginatedLogs.length}
+          namespace="admin-clinical-logs"
+          size="lg"
+        />
+      </div>
+
       <AppFilterBar
         searchQuery={searchTerm}
         onSearchChange={setSearchTerm}

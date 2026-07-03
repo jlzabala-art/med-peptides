@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 import SalesOrderListPane from './SalesOrderListPane';
@@ -34,7 +34,7 @@ export default function SalesOrdersHub() {
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'b2b_sales_orders'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'b2b_sales_orders'), orderBy('createdAt', 'desc'), limit(50));
     const unsub = onSnapshot(q, (snap) => {
       const data = snap.docs.map(normalizeOrderData);
       setOrders(data);

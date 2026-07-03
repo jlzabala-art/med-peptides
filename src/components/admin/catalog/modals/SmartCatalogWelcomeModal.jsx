@@ -1,11 +1,17 @@
 import React from 'react';
-import { Brain, FileText, Filter, Box } from 'lucide-react';
+import { Brain, FileText, Filter, Box, X } from 'lucide-react';
 
-export default function SmartCatalogWelcomeModal({ isOpen, selectedCount, filteredCount, onSelect }) {
+export default function SmartCatalogWelcomeModal({ isOpen, selectedCount, filteredCount, onSelect, onClose }) {
   if (!isOpen) return null;
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: '#fff', padding: '32px', borderRadius: '16px', width: '90%', maxWidth: '600px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+      <div style={{ background: '#fff', padding: '32px', borderRadius: '16px', width: '90%', maxWidth: '600px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', position: 'relative' }}>
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+        >
+          <X size={24} />
+        </button>
         <h2 style={{ margin: '0 0 8px 0', fontSize: '1.75rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
           Create Catalog
         </h2>

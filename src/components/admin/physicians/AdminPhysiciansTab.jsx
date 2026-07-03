@@ -103,19 +103,7 @@ export default function AdminPhysiciansTab() {
     fetchPhysicianData();
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ padding: '4rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)' }}>
-        <Loader2 size={32} className="spin" style={{ color: 'var(--primary)' }} />
-        <span>Loading Physician Directory...</span>
-        <style>{`
-          .spin { animation: spin 1s linear infinite; }
-          @keyframes spin { 100% { transform: rotate(360deg); } }
-        `}</style>
-      </div>
-    );
-  }
-
+// Removed early return for loading so PhysiciansDirectory can show Skeletons
   if (showOnboarding) {
     return (
       <PhysicianOnboardingWizard 
@@ -152,6 +140,7 @@ export default function AdminPhysiciansTab() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <PhysiciansDirectory 
           doctors={doctors} 
+          isLoading={loading}
           onSelectDoctor={setSelectedDoctor} 
           patientMap={patientMap} 
           orderMap={orderMap} 

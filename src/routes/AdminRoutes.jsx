@@ -89,11 +89,14 @@ const AdminPrescriptionIntakeTab = lazy(
 );
 const ShippingTrackerTab = lazy(() => import('../components/supplier/ShippingTrackerTab'));
 const AdminMarketingTab = lazy(() => import('../components/admin/AdminMarketingTab'));
-const B2BQuotationsHub = lazy(() => import('../features/quotations/B2BQuotationsHub'));
+const QuotationsHub = lazy(() => import('../components/quotations/QuotationsHub'));
 const SalesOrdersHub = lazy(() => import('../features/sales-orders/SalesOrdersHub'));
 const InvoiceIntelligenceHub = lazy(() => import('../features/invoices/InvoiceIntelligenceHub'));
-const AdminPrescriptionsTab = lazy(
-  () => import('../components/admin/prescriptions/AdminPrescriptionsTab')
+const PrescriptionsDashboard = lazy(
+  () => import('../features/prescriptions/PrescriptionsDashboard')
+);
+const PrescriptionDetail = lazy(
+  () => import('../features/prescriptions/PrescriptionDetail')
 );
 const TransactionEditor = lazy(() => import('../components/admin/transactions/TransactionEditor'));
 const DatabaseMigrationUtility = lazy(
@@ -285,7 +288,7 @@ export default function AdminRoutes() {
             path="quotations"
             element={
               <AdminTabErrorBoundary tabId="quotations" tabLabel="Quotations (B2B)">
-                <B2BQuotationsHub />
+                <QuotationsHub />
               </AdminTabErrorBoundary>
             }
           />
@@ -309,7 +312,15 @@ export default function AdminRoutes() {
             path="prescriptions"
             element={
               <AdminTabErrorBoundary tabId="prescriptions" tabLabel="Prescriptions">
-                <AdminPrescriptionsTab />
+                <PrescriptionsDashboard />
+              </AdminTabErrorBoundary>
+            }
+          />
+          <Route
+            path="prescriptions/:id"
+            element={
+              <AdminTabErrorBoundary tabId="prescription-detail" tabLabel="Prescription Detail">
+                <PrescriptionDetail />
               </AdminTabErrorBoundary>
             }
           />

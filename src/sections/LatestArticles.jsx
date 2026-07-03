@@ -1,5 +1,4 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
+import { ArrowRight, BookOpen } from "lucide-react";
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useBlogPosts } from '../hooks/useBlogPosts';

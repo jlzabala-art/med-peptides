@@ -30,20 +30,22 @@ import AskAtlasBar from './workspace/AskAtlasBar';
 
 import UniversalTimeline from '../shared/UniversalTimeline';
 import TasksEngine from '../shared/TasksEngine';
+import { ExecutiveSummaryWidget, AIBriefWidget, SourcingHubWidget, PriorityQueueWidget } from './widgets/Phase2Widgets';
+
 // Mock metrics component imports (In real app, these would be dedicated components)
 const MetricCard = ({ label, value }) => (
   <div
     style={{
-      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      backgroundColor: 'var(--surface)',
       backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(226, 232, 240, 0.8)',
-      borderRadius: '16px',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-lg)',
       padding: '1.5rem',
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
       justifyContent: 'center',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+      boxShadow: 'var(--shadow-sm)',
       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     }}
   >
@@ -90,13 +92,14 @@ function SortableWidget({ id, widget }) {
 
   const renderWidgetContent = () => {
     if (widget.type === 'kpi') {
-      // Mock Data binding based on field
-      const val =
-        widget.data.field === 'revenueToday'
-          ? '$12,450'
-          : widget.data.field === 'patientsFollowup'
-            ? '45'
-            : '12';
+      let val = '0';
+      if (widget.data.field === 'revenueToday') val = 'AED 0';
+      if (widget.data.field === 'openOrders') val = '0';
+      if (widget.data.field === 'approvals') val = '0';
+      if (widget.data.field === 'openRfqs') val = '0';
+      
+      // Let's create a better metric card matching the image for KPI types if needed, 
+      // but for now we'll just return the MetricCard with the mapped value.
       return <MetricCard label={widget.data.label} value={val} />;
     }
     if (widget.type === 'widget') {
@@ -105,7 +108,7 @@ function SortableWidget({ id, widget }) {
           <div
             style={{
               height: '100%',
-              backgroundColor: 'white',
+              backgroundColor: 'var(--surface)',
               border: '1px solid var(--border)',
               borderRadius: '12px',
               overflow: 'hidden',
@@ -114,12 +117,12 @@ function SortableWidget({ id, widget }) {
             <UniversalTimeline />
           </div>
         );
-      if (widget.data.component === 'TasksEngine')
+        if (widget.data.component === 'TasksEngine')
         return (
           <div
             style={{
               height: '100%',
-              backgroundColor: 'white',
+              backgroundColor: 'var(--surface)',
               border: '1px solid var(--border)',
               borderRadius: '12px',
               overflow: 'hidden',
@@ -128,12 +131,16 @@ function SortableWidget({ id, widget }) {
             <TasksEngine />
           </div>
         );
+      if (widget.data.component === 'ExecutiveSummary') return <ExecutiveSummaryWidget />;
+      if (widget.data.component === 'AIBrief') return <AIBriefWidget />;
+      if (widget.data.component === 'SourcingHub') return <SourcingHubWidget />;
+      if (widget.data.component === 'PriorityQueue') return <PriorityQueueWidget />;
     }
     return (
       <div
         style={{
           padding: '1rem',
-          background: 'white',
+          background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: '12px',
         }}
@@ -208,7 +215,7 @@ function CommandCenterInner() {
       {/* 1. Mobile-First Executive Status Bar */}
       <ExecutiveStatusBar />
 
-      <div style={{ padding: '1rem 1.5rem' }}>
+      <div style={{ padding: '1rem 1.5rem', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
         {/* Header with Executive Toggle */}
         <div
           style={{

@@ -14,26 +14,13 @@ import Building from "lucide-react/dist/esm/icons/building";
 import Target from "lucide-react/dist/esm/icons/target";
 import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect } from 'react';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import ERPListDetailLayout from '../shared/ERPListDetailLayout';
 import { Tabs, StatusChip } from '../ui';
 import ClinicOnboardingWizard from './clinics/ClinicOnboardingWizard';
 import ClinicProfileWorkspace from './clinics/ClinicProfileWorkspace';
 import TerritoryFilter from './clinics/TerritoryFilter';
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 
 // --- MOCK DATA LAYER ---
 const MOCK_CLINICS = [
@@ -189,15 +176,27 @@ export default function AdminClinicsTab() {
 
   return (
     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: '#f1f5f9' }}>
-      {/* Page Header */}
-      <div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Building2 size={24} color="#1a73e8" /> Clinic Network Management
-        </h1>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-          Manage physical clinic locations, organizational structures, territories, and commercial insights.
-        </p>
-      </div>
+      {/* Header — normalised */}
+      <AdminPageHeader
+        title="Clinic Network Management"
+        subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
+        icon={Building2}
+        actions={
+          <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '13px', padding: '0.4rem 1rem' }}>
+            <Plus size={16} /> Add Clinic
+          </button>
+        }
+      />
+
+      {/* GlobalSearchBar — prominent position */}
+      <GlobalSearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Search clinics by name, network, or territory..."
+        resultCount={loading ? undefined : filtered.length}
+        namespace="admin-clinics"
+        size="lg"
+      />
 
       {/* KPI Dashboard */}
       {!loading && <ClinicKPIs data={clinics} />}
@@ -220,11 +219,7 @@ export default function AdminClinicsTab() {
           headerLeft={
             <div style={{ fontWeight: 800, color: '#1e293b', fontSize: '1rem' }}>Active Clinics</div>
           }
-          headerActions={
-            <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '13px', padding: '0.4rem 1rem' }}>
-              <Plus size={16} /> Add Clinic
-            </button>
-          }
+          headerActions={null}
           emptyState={
             <div style={{ textAlign: 'center', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <Building2 size={40} style={{ margin: '0 auto', opacity: 0.4 }} />

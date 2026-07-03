@@ -1,19 +1,4 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Star from "lucide-react/dist/esm/icons/star";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Flame from "lucide-react/dist/esm/icons/flame";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import { Zap, Sparkles, RefreshCw, Moon, Beaker, Layers, ArrowRight, ChevronDown, Droplets, Activity, Brain, Shield, Flame, Star, ShieldCheck, FlaskConical } from "lucide-react";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 

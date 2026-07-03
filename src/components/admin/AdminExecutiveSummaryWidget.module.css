@@ -1,9 +1,9 @@
 .widgetContainer {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@
 }
 
 .iconWrapper {
-  color: #0284c7;
+  color: var(--primary);
   display: flex;
   align-items: center;
 }
@@ -32,14 +32,14 @@
   margin: 0;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-main);
 }
 
 .liveBadge {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #059669;
-  background: #d1fae5;
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
   padding: 2px 8px;
   border-radius: 99px;
   display: inline-flex;
@@ -50,7 +50,7 @@
 .liveDot {
   width: 6px;
   height: 6px;
-  background: #10b981;
+  background: var(--success);
   border-radius: 50%;
   position: relative;
 }
@@ -63,7 +63,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--success);
   animation: pulse-dot 2s infinite;
 }
 
@@ -76,8 +76,8 @@
 .impactBadge {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #0284c7;
-  background: #e0f2fe;
+  color: var(--primary);
+  background: rgba(2, 132, 199, 0.1);
   padding: 4px 10px;
   border-radius: 99px;
 }
@@ -96,9 +96,9 @@
 }
 
 .card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 0.85rem;
   display: flex;
   align-items: center;
@@ -108,10 +108,10 @@
 }
 
 .card:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
 }
 
 .iconContainer {
@@ -124,10 +124,10 @@
   flex-shrink: 0;
 }
 
-.revenueIcon { background: #e6fcf5; color: #0ca678; }
-.rfqIcon { background: #fff9db; color: #f59f00; }
-.shipmentIcon { background: #fff5f5; color: #fa5252; }
-.inventoryIcon { background: #f3f0ff; color: #7950f2; }
+.revenueIcon { background: rgba(12, 166, 120, 0.1); color: var(--success); }
+.rfqIcon { background: rgba(245, 159, 0, 0.1); color: var(--warning); }
+.shipmentIcon { background: rgba(250, 82, 82, 0.1); color: var(--danger); }
+.inventoryIcon { background: rgba(121, 80, 242, 0.1); color: var(--secondary); }
 
 .cardContent {
   display: flex;
@@ -145,27 +145,27 @@
 .cardValue {
   font-size: 1rem;
   font-weight: 700;
-  color: #2b2b2b;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .arrowIcon {
-  color: #adb5bd;
+  color: var(--text-muted);
   opacity: 0.3;
   transition: opacity 0.2s, transform 0.2s;
 }
 
 .card:hover .arrowIcon {
   opacity: 1;
-  color: #0284c7;
+  color: var(--primary);
   transform: translate(2px, -2px);
 }
 
 .cardLabel {
   font-size: 0.72rem;
-  color: #868e96;
+  color: var(--text-muted);
   font-weight: 500;
   margin-top: 2px;
   line-height: 1.2;
@@ -182,9 +182,9 @@
 }
 
 .actionBtn {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #334155;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 6px 14px;
@@ -195,12 +195,12 @@
 }
 
 .actionBtn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--border);
+  color: var(--text-main);
 }
 
 .askAtlasBtn {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #0369a1 100%);
   color: #ffffff;
   border: none;
 }

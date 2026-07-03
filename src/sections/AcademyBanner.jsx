@@ -1,8 +1,4 @@
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Users from "lucide-react/dist/esm/icons/users";
-import Award from "lucide-react/dist/esm/icons/award";
+import { Award, ArrowRight, Users, GraduationCap, BookOpen } from "lucide-react";
 import React from 'react';
 
 

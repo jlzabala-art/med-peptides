@@ -1,6 +1,4 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
+import { Beaker, Search, FlaskConical } from "lucide-react";
 import React from 'react';
 
 

@@ -1,17 +1,4 @@
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Dna from "lucide-react/dist/esm/icons/dna";
-import Flame from "lucide-react/dist/esm/icons/flame";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Heart from "lucide-react/dist/esm/icons/heart";
-import Leaf from "lucide-react/dist/esm/icons/leaf";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import { Bot, Moon, ChevronDown, ArrowRight, Heart, TrendingUp, Activity, Dna, ChevronUp, Brain, Shield, Flame, FlaskConical, Leaf } from "lucide-react";
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 

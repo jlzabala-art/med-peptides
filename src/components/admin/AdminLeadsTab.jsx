@@ -6,7 +6,7 @@ import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import Target from "lucide-react/dist/esm/icons/target";
-import Trello from "lucide-react/dist/esm/icons/trello";
+import Kanban from "lucide-react/dist/esm/icons/kanban";
 import List from "lucide-react/dist/esm/icons/list";
 import Map from "lucide-react/dist/esm/icons/map";
 import Search from "lucide-react/dist/esm/icons/search";
@@ -32,18 +32,8 @@ import { useToast } from '../../hooks/useToast';
 import AdminPageHeader from './AdminPageHeader';
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
-
-
-
-
-
-
-
-
-
-
-
-
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 
 
@@ -517,14 +507,26 @@ export default function AdminLeadsTab() {
 
       </div>
 
-      {/* View Switcher, Search Input & Segment Selectors */}
+      {/* GlobalSearchBar — above main content, prominent position */}
+      <div style={{ marginBottom: '0.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by company, country, account manager, score..."
+          resultCount={loading ? undefined : filteredLeads.length}
+          namespace="admin-leads"
+          size="lg"
+        />
+      </div>
+
+      {/* View Switcher & Segment Selectors */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--surface-raised, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)' }}>
           <button 
             onClick={() => setCurrentView('kanban')}
             style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '6px', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', backgroundColor: currentView === 'kanban' ? 'var(--surface)' : 'transparent', color: currentView === 'kanban' ? 'var(--text-main)' : 'var(--text-muted)', boxShadow: currentView === 'kanban' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
           >
-            <Trello size={14} /> Pipeline Board
+            <Kanban size={14} /> Pipeline Board
           </button>
           <button 
             onClick={() => setCurrentView('table')}
@@ -534,37 +536,22 @@ export default function AdminLeadsTab() {
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', gap: '0.25rem', backgroundColor: 'var(--surface-raised, #f1f5f9)', padding: '4px', borderRadius: '20px', border: '1px solid var(--border)' }}>
-            {['All', 'B2C', 'B2B'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTypeTab(tab)}
-                style={{ padding: '4px 16px', fontSize: '0.75rem', borderRadius: '16px', border: 'none', cursor: 'pointer', fontWeight: 700, backgroundColor: selectedTypeTab === tab ? 'var(--primary, #1e3a8a)' : 'transparent', color: selectedTypeTab === tab ? '#ffffff' : 'var(--text-muted)' }}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', padding: '4px 12px', width: '280px' }}>
-            <Search size={14} color="var(--text-muted)" />
-            <input 
-              type="text"
-              placeholder="Search by company, country, AM, score..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: '0.78rem', width: '100%', color: 'var(--text-main)' }}
-            />
-          </div>
+        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--surface-raised, #f1f5f9)', padding: '4px', borderRadius: '20px', border: '1px solid var(--border)' }}>
+          {['All', 'B2C', 'B2B'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setSelectedTypeTab(tab)}
+              style={{ padding: '4px 16px', fontSize: '0.75rem', borderRadius: '16px', border: 'none', cursor: 'pointer', fontWeight: 700, backgroundColor: selectedTypeTab === tab ? 'var(--primary, #1e3a8a)' : 'transparent', color: selectedTypeTab === tab ? '#ffffff' : 'var(--text-muted)' }}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Main Content Area */}
       {loading ? (
-        <div style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>
-          <RefreshCw size={24} className="animate-spin" style={{ margin: '0 auto 0.5rem' }} />
-          <span>Loading client pipeline...</span>
-        </div>
+        <DataTableSkeleton rows={8} columns={6} />
       ) : (
         <>
           {currentView === 'kanban' ? (

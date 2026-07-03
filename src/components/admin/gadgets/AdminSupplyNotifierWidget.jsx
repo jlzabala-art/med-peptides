@@ -23,6 +23,8 @@ export default function AdminSupplyNotifierWidget({
     const unsub = onSnapshot(q, (snap) => {
       const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       setPendingReqs(list);
+    }, (err) => {
+      console.warn("Could not load recommendations:", err);
     });
 
     return () => unsub();

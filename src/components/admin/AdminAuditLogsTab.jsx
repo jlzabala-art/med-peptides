@@ -2,17 +2,13 @@ import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Filter from "lucide-react/dist/esm/icons/filter";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Search from "lucide-react/dist/esm/icons/search";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-
-
-
-
-
-
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 const fmt = (date) => new Intl.DateTimeFormat('en-GB', {
   day: 'short', month: 'short', year: 'numeric',
@@ -73,27 +69,37 @@ export default function AdminAuditLogsTab() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShieldCheck size={28} color="var(--color-primary)" /> Security Audit Logs
-          </h1>
-          <p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>
-            Immutable record of all critical system actions, price changes, and role updates performed by AdminAI or Super Admins.
-          </p>
-        </div>
-        <button 
-          onClick={fetchLogs}
-          disabled={loading}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem',
-            backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px',
-            color: '#334155', fontWeight: 500, cursor: 'pointer',
-            transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-          }}
-        >
-          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh
-        </button>
+      {/* Header — normalised */}
+      <AdminPageHeader
+        title="Security Audit Logs"
+        subtitle="Immutable record of all critical system actions, price changes, and role updates."
+        icon={ShieldCheck}
+        actions={
+          <button
+            onClick={fetchLogs}
+            disabled={loading}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.5rem 1rem', backgroundColor: 'white',
+              border: '1px solid #e2e8f0', borderRadius: '8px',
+              color: '#334155', fontWeight: 500, cursor: 'pointer',
+            }}
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh
+          </button>
+        }
+      />
+
+      {/* Prominent search */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search actions, users, sources, product IDs..."
+          resultCount={loading ? undefined : filteredLogs.length}
+          namespace="admin-audit-logs"
+          size="lg"
+        />
       </div>
 
       <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden' }}>

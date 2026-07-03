@@ -1,17 +1,14 @@
 import Users from "lucide-react/dist/esm/icons/users";
 import FileText from "lucide-react/dist/esm/icons/file-text";
-import Search from "lucide-react/dist/esm/icons/search";
 import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
 import Activity from "lucide-react/dist/esm/icons/activity";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
-
-
-
-
-
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import GridSkeleton from '../ui/skeletons/GridSkeleton';
 
 export default function PhysicianPatientsTab({ doctorId }) {
   const [patients, setPatients] = useState([]);
@@ -80,63 +77,32 @@ export default function PhysicianPatientsTab({ doctorId }) {
 
   return (
     <div style={{ marginBottom: '2rem' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Users size={24} color="var(--primary)" />
-            My Patients
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-            Manage your clinically supervised patients and review their assigned protocols.
-          </p>
-        </div>
-        <button
-          className="btn btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-        >
-          <PlusCircle size={18} /> Invite New Patient
-        </button>
-      </div>
+      {/* Header — normalised */}
+      <AdminPageHeader
+        title="My Patients"
+        subtitle="Manage your clinically supervised patients and review their assigned protocols."
+        icon={Users}
+        actions={
+          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <PlusCircle size={18} /> Invite New Patient
+          </button>
+        }
+      />
 
-      <div style={{ position: 'relative', marginBottom: '1.5rem', maxWidth: '400px' }}>
-        <Search
-          size={18}
-          style={{
-            position: 'absolute',
-            left: '12px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: 'var(--text-muted)',
-          }}
-        />
-        <input
-          type="text"
-          placeholder="Search by name or email..."
+      {/* GlobalSearchBar */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <GlobalSearchBar
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '0.7rem 1rem 0.7rem 2.5rem',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border)',
-            fontSize: '0.9rem',
-          }}
+          onChange={setSearchTerm}
+          placeholder="Search by name or email..."
+          resultCount={loading ? undefined : filteredPatients.length}
+          namespace="doctor-patients"
+          size="lg"
         />
       </div>
 
       {loading ? (
-        <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Loading patients...
-        </div>
+        <GridSkeleton count={6} cols={3} />
       ) : patients.length === 0 ? (
         <div
           className="card"

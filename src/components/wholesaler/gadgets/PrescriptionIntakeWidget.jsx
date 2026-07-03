@@ -376,7 +376,7 @@ export default function PrescriptionIntakeWidget() {
                   e.currentTarget.style.background = 'var(--color-bg-app)';
                 }}
               >
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContext: 'center', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <FileText size={24} />
                 </div>
                 <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>Enter Prescription</h4>
@@ -417,7 +417,7 @@ export default function PrescriptionIntakeWidget() {
                     opacity: 0, cursor: 'pointer'
                   }}
                 />
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContext: 'center', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <UploadCloud size={24} />
                 </div>
                 <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>Upload PDF / Prescription</h4>

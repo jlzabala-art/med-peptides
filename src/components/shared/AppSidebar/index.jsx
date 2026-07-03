@@ -1,33 +1,13 @@
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Search from "lucide-react/dist/esm/icons/search";
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import Users from "lucide-react/dist/esm/icons/users";
-import UserRound from "lucide-react/dist/esm/icons/user-round";
-import Building from "lucide-react/dist/esm/icons/building";
-import CheckSquare from "lucide-react/dist/esm/icons/check-square";
-import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import BriefcaseMedical from "lucide-react/dist/esm/icons/briefcase-medical";
-import LineChart from "lucide-react/dist/esm/icons/line-chart";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import React, { useState, useEffect } from 'react';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import React, { useEffect } from 'react';
+import { 
+  Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, 
+  ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building,
+  Eye
+} from 'lucide-react';
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
+import { useNavigationStore } from '../../../stores/navigationStore';
+import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
+import QuickCreateDropdown from './QuickCreateDropdown';
 import './AppSidebar.css';
 
 // ── Mobile Bottom Nav ────────────────────────────────────────────────────────
@@ -66,51 +46,98 @@ function MobileBottomNav({ activeId, onNavigate }) {
   );
 }
 
-// ── Desktop Sidebar Item ──────────────────────────────────────────────────────
-function SidebarItem({ item, isActive, expanded, onClick }) {
-  const Icon = item.icon;
-  return (
-    <button
-      className={`sb-item ${isActive ? 'active' : ''}`}
-      onClick={() => onClick(item.id)}
-      data-tooltip={!expanded ? item.label : undefined}
-    >
-      <span className="sb-item-icon">
-        {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
-      </span>
-      <span className="sb-item-label">{item.label}</span>
-      {item.badge && expanded && (
-        <span style={{ marginLeft: 'auto', backgroundColor: '#ef4444', color: 'white', fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '12px' }}>
-          {item.badge}
-        </span>
-      )}
-    </button>
-  );
-}
-
 // ── Main AppSidebar ───────────────────────────────────────────────────────────
 export default function AppSidebar({
   groups = [],
-  pinnedItems = [],
   activeId,
   onNavigate,
   isMobile,
   footer
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const { 
+    expandedGroups, toggleGroup, 
+    favorites, toggleFavorite,
+    recents, addRecent
+  } = useNavigationStore();
+
+  const { simulatedRole, exitSimulation } = useSimulationStore();
+  const simulatedRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
+
+  // Determine the effective role for filtering:
+  // If simulating, use simulatedRole; otherwise, show all (admin sees everything)
+  const effectiveRole = simulatedRole || 'admin';
+
+  // Filter groups and items based on effective role
+  const filteredGroups = groups
+    .filter((group) => !group.roles || group.roles.includes(effectiveRole))
+    .map((group) => ({
+      ...group,
+      items: (group.items || []).filter(
+        (item) => !item.roles || item.roles.includes(effectiveRole)
+      ),
+    }))
+    .filter((group) => group.items.length > 0); // Remove empty groups
+
+  // Local visual expand/collapse
+  const [expanded, setExpanded] = React.useState(true);
 
   if (isMobile) {
     return <MobileBottomNav activeId={activeId} onNavigate={onNavigate} />;
   }
 
-  // Linear/Notion style sidebar
+  // Helper to extract an item by ID from the global registry (so we can render favs/recents)
+  const getItemById = (id) => {
+    for (const g of groups) {
+      const found = g.items?.find(i => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const handleNavigate = (id) => {
+    addRecent(id);
+    onNavigate(id);
+  };
+
+  const renderItem = (item, level = 1) => {
+    if (!item) return null;
+    const Icon = item.icon;
+    const isActive = activeId === item.id;
+    const isFav = favorites.includes(item.id);
+
+    return (
+      <div 
+        key={item.id} 
+        className={`sb-item ${isActive ? 'active' : ''} level-${level}`}
+        data-tooltip={!expanded ? item.label : undefined}
+      >
+        <button className="sb-item-btn" onClick={() => handleNavigate(item.id)}>
+          <span className="sb-item-icon">
+            {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
+          </span>
+          {expanded && <span className="sb-item-label">{item.label}</span>}
+        </button>
+        
+        {expanded && (
+          <button 
+            className={`sb-item-action ${isFav ? 'fav-active' : ''}`} 
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
+            title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+          >
+            <Star size={14} fill={isFav ? "currentColor" : "none"} />
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <aside className={`app-sidebar ${!expanded ? 'collapsed' : ''}`}>
       {/* Top Header Section */}
       <div className="sb-header">
         <div className="sb-brand">
           <AtlasHealthLogo size={24} />
-          <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 700, color: 'var(--sb-text)' }}>Atlas Health</span>
+          {expanded && <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 700, color: 'var(--sb-text)' }}>Atlas Health</span>}
         </div>
         <button 
           className="sb-hamburger" 
@@ -122,55 +149,104 @@ export default function AppSidebar({
       </div>
 
       <nav className="sb-scroll">
-        {/* Render pinned items */}
-        {pinnedItems.length > 0 && (
-          <div className="sb-group">
-            <div className="sb-group-items">
-              {pinnedItems.map(item => (
-                <SidebarItem 
-                  key={item.id} 
-                  item={item} 
-                  isActive={activeId === item.id} 
-                  expanded={expanded}
-                  onClick={onNavigate}
-                />
-              ))}
-            </div>
-            <div className="sb-divider" />
+        
+        {/* Quick Create Dropdown */}
+        {expanded && (
+          <QuickCreateDropdown onNavigate={onNavigate} activeRole={effectiveRole} />
+        )}
+
+        {/* Simulation Badge */}
+        {expanded && simulatedRole && simulatedRoleData && (
+          <div
+            style={{
+              margin: '8px 12px',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              background: `${simulatedRoleData.color}15`,
+              border: `1.5px solid ${simulatedRoleData.color}40`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '6px',
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: simulatedRoleData.color, display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Eye size={13} /> {simulatedRoleData.emoji} {simulatedRoleData.label}
+            </span>
+            <button
+              onClick={exitSimulation}
+              style={{ fontSize: '0.7rem', color: simulatedRoleData.color, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+            >
+              Exit
+            </button>
           </div>
         )}
 
-        {/* Render standard groups */}
-        {groups.map((group, idx) => (
-          <div key={group.id} className="sb-group">
-            {group.label && <div className="sb-group-header">{group.label}</div>}
+        {/* Favorites Section */}
+        {expanded && favorites.length > 0 && (
+          <div className="sb-group">
+            <div className="sb-group-header">Favorites</div>
             <div className="sb-group-items">
-              {group.items?.map(item => (
-                <SidebarItem 
-                  key={item.id} 
-                  item={item} 
-                  isActive={activeId === item.id} 
-                  expanded={expanded}
-                  onClick={onNavigate}
-                />
-              ))}
+              {favorites.map(id => renderItem(getItemById(id)))}
             </div>
-            {idx < groups.length - 1 && <div className="sb-divider" />}
           </div>
-        ))}
+        )}
 
+        {/* Recents Section */}
+        {expanded && recents.length > 0 && (
+          <div className="sb-group">
+            <div className="sb-group-header">Recent</div>
+            <div className="sb-group-items">
+              {recents.map(id => renderItem(getItemById(id)))}
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic Groups — filtered by effective role */}
+        {filteredGroups.map((group) => {
+          const isGroupExpanded = expandedGroups.includes(group.id);
+          const GroupIcon = group.icon;
+
+          return (
+            <div key={group.id} className="sb-group hierarchical">
+              <button 
+                className="sb-group-toggle"
+                onClick={() => {
+                  if (!expanded) setExpanded(true);
+                  toggleGroup(group.id);
+                }}
+              >
+                {GroupIcon && <GroupIcon size={18} strokeWidth={2} style={{ color: 'var(--text-muted)', marginRight: expanded ? 8 : 0 }} />}
+                {expanded && (
+                  <>
+                    <span style={{ flex: 1, textAlign: 'left', fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      {group.label.toUpperCase()}
+                    </span>
+                    {isGroupExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </>
+                )}
+              </button>
+
+              {/* Sub-items (Level 2) */}
+              {(isGroupExpanded || !expanded) && (
+                <div className={`sb-group-items ${!expanded ? 'sb-flyout' : ''}`}>
+                  {group.items?.map(item => renderItem(item, 2))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       {/* Bottom Footer Section */}
       {footer && (
         <div className="sb-footer">
-          <button className="sb-item" onClick={footer.onClick} data-tooltip={!expanded ? footer.label : undefined}>
+          <button className="sb-item sb-item-btn" onClick={footer.onClick} data-tooltip={!expanded ? footer.label : undefined}>
             <span className="sb-item-icon"><LogOut size={18} /></span>
-            <span className="sb-item-label">{footer.label}</span>
+            {expanded && <span className="sb-item-label">{footer.label}</span>}
           </button>
         </div>
       )}
-
     </aside>
   );
 }

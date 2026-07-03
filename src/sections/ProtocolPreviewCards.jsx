@@ -1,8 +1,4 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Zap from "lucide-react/dist/esm/icons/zap";
+import { Zap, Layers, ArrowRight, Clock, FlaskConical } from "lucide-react";
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

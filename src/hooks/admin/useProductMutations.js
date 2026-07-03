@@ -1,53 +1,65 @@
-import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { useToast } from './../../hooks/useToast';
+import { useToast } from '../../hooks/useToast';
 
-export function useProductMutations(products, setProducts) {
+export function useUpdateProduct() {
   const { toast } = useToast();
-  const [savingProduct, setSavingProduct] = useState(null);
+  const queryClient = useQueryClient();
 
-  const updateProduct = async (id, updates) => {
-    setSavingProduct(id);
-    try {
+  return useMutation({
+    mutationFn: async ({ id, updates }) => {
       const productRef = doc(db, 'products', id);
       await updateDoc(productRef, {
         ...updates,
         updatedAt: new Date().toISOString(),
       });
-      // Optimistic update
-      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
+      return { id, updates };
+    },
+    onSuccess: (data) => {
+      // Optimistically update the cache without a full refetch if we want, or just invalidate
+      // queryClient.setQueryData(['admin-products'], (old) => old.map(p => p.id === data.id ? { ...p, ...data.updates } : p));
       toast.success('Product updated successfully');
-      return true;
-    } catch (err) {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+    onError: (err) => {
       console.error('Error updating product:', err);
       toast.error('Failed to update product.');
-      return false;
-    } finally {
-      setSavingProduct(null);
-    }
-  };
+    },
+  });
+}
 
-  const deleteProduct = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return false;
-    setSavingProduct(id);
-    try {
+export function useDeleteProduct() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id) => {
+      if (!window.confirm('Are you sure you want to delete this product?')) {
+        throw new Error('Cancelled');
+      }
       await deleteDoc(doc(db, 'products', id));
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      return id;
+    },
+    onSuccess: (id) => {
       toast.success('Product deleted successfully');
-      return true;
-    } catch (err) {
-      console.error('Error deleting product:', err);
-      toast.error('Failed to delete product.');
-      return false;
-    } finally {
-      setSavingProduct(null);
-    }
-  };
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+    onError: (err) => {
+      if (err.message !== 'Cancelled') {
+        console.error('Error deleting product:', err);
+        toast.error('Failed to delete product.');
+      }
+    },
+  });
+}
 
-  const performBulkUpdate = async (ids, updates, actionName = 'Bulk update') => {
-    try {
-      // Execute in parallel (or batches if large)
+export function useBulkUpdateProduct() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ ids, updates, actionName = 'Bulk update' }) => {
       await Promise.all(
         ids.map((id) =>
           updateDoc(doc(db, 'products', id), {
@@ -56,26 +68,15 @@ export function useProductMutations(products, setProducts) {
           })
         )
       );
-      // Optimistic update
-      setProducts((prev) =>
-        prev.map((p) => {
-          if (ids.includes(p.id)) return { ...p, ...updates };
-          return p;
-        })
-      );
+      return { ids, updates, actionName };
+    },
+    onSuccess: ({ actionName }) => {
       toast.success(`${actionName} successful`);
-      return true;
-    } catch (err) {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+    onError: (err, { actionName }) => {
       console.error(`Error during ${actionName}:`, err);
       toast.error(`Failed to complete ${actionName}.`);
-      return false;
-    }
-  };
-
-  return {
-    savingProduct,
-    updateProduct,
-    deleteProduct,
-    performBulkUpdate,
-  };
+    },
+  });
 }

@@ -37,7 +37,6 @@ import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import Home from 'lucide-react/dist/esm/icons/home';
 import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
 import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -54,7 +53,7 @@ import {
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
+import BaseCard from '../ui/BaseCard';
 import {
   ExecutiveSummaryStrip,
   TodayPrioritiesQueue,
@@ -170,12 +169,13 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
     const startDbTime = performance.now();
     async function loadData() {
       try {
-        const usersSnap = await getDocs(collection(db, 'users'));
-        const ordersSnap = await getDocs(collection(db, 'orders'));
+        // Fix: Limit queries to avoid pulling full collections and hitting permission/size limits
+        const usersSnap = await getDocs(query(collection(db, 'users'), limit(50)));
+        const ordersSnap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(50)));
 
         let rfqsSize = 0;
         try {
-          const rfqsSnap = await getDocs(collection(db, 'purchase_rfqs'));
+          const rfqsSnap = await getDocs(query(collection(db, 'purchase_rfqs'), limit(50)));
           rfqsSize = rfqsSnap.size;
         } catch (e) {
           console.warn('Failed to fetch purchase_rfqs:', e);
@@ -341,7 +341,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
       {/* Dynamic Embedded CSS Styles */}
 
       {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
-      <div className={styles.glassCard} style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(226, 232, 240, 0.8)', padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(148, 163, 184, 0.08)' }}>
         <div
           style={{
             display: 'flex',

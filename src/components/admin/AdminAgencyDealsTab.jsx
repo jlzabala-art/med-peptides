@@ -1,6 +1,5 @@
 import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import Plus from "lucide-react/dist/esm/icons/plus";
-import Search from "lucide-react/dist/esm/icons/search";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import FileText from "lucide-react/dist/esm/icons/file-text";
@@ -10,17 +9,12 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../../firebase';
-
-
-
-
-
-
-
-
 import { Card, TextField, Select } from '../ui';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 export default function AdminAgencyDealsTab() {
   const [deals, setDeals] = useState([]);
@@ -127,31 +121,32 @@ export default function AdminAgencyDealsTab() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Briefcase size={22} color="var(--color-primary)" />
-            Agency Deals
-          </h2>
-          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Manage B2B Brokerage Deals and Commissions.
-          </p>
-        </div>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="gcp-btn gcp-btn--primary"
-          style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
-        >
-          <Plus size={16} /> New Agency Deal
-        </button>
+      {/* Header — normalised */}
+      <AdminPageHeader
+        title="Agency Deals"
+        subtitle="Manage B2B Brokerage Deals and Commissions."
+        icon={Briefcase}
+        actions={
+          <button onClick={() => setShowModal(true)} className="gcp-btn gcp-btn--primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Plus size={16} /> New Agency Deal
+          </button>
+        }
+      />
+
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm || ''}
+          onChange={(v) => setSearchTerm && setSearchTerm(v)}
+          placeholder="Search deals by supplier, customer, status..."
+          resultCount={loading ? undefined : deals.length}
+          namespace="admin-agency-deals"
+          size="lg"
+        />
       </div>
 
       <Card style={{ overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <Loader2 size={24} className="spin" style={{ margin: '0 auto 1rem' }} />
-            Loading Deals...
-          </div>
+          <DataTableSkeleton rows={6} columns={7} />
         ) : deals.length === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             No Agency Deals found. Create one to get started.

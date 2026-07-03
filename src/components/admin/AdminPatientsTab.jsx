@@ -1,7 +1,6 @@
 import Users from "lucide-react/dist/esm/icons/users";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Search from "lucide-react/dist/esm/icons/search";
 import Filter from "lucide-react/dist/esm/icons/filter";
 import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Phone from "lucide-react/dist/esm/icons/phone";
@@ -9,19 +8,12 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import React, { useState, useEffect } from 'react';
-
-
-
-
-
-
-
-
-
-
 import { StatusChip } from '../ui';
 import PatientOnboardingWizard from './patients/PatientOnboardingWizard';
 import PatientProfileWorkspace from './patients/PatientProfileWorkspace';
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import GridSkeleton from '../ui/skeletons/GridSkeleton';
 
 // Mock Patient Data
 const MOCK_PATIENTS = [
@@ -110,45 +102,38 @@ export default function AdminPatientsTab() {
 
   return (
     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: '#f1f5f9' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Users size={24} color="var(--primary)" /> Patient Management
-          </h1>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Central workspace for managing patients, clinical journeys, and commercial health.
-          </p>
-        </div>
-        <button className="gcp-btn-primary" onClick={() => setIsWizardOpen(true)}>
-          <UserPlus size={16} style={{ marginRight: '0.5rem' }} /> Add Patient
-        </button>
-      </div>
+      {/* Header — normalised */}
+      <AdminPageHeader
+        title="Patient Management"
+        subtitle="Central workspace for managing patients, clinical journeys, and commercial health."
+        icon={Users}
+        actions={
+          <button className="gcp-btn-primary" onClick={() => setIsWizardOpen(true)}>
+            <UserPlus size={16} style={{ marginRight: '0.5rem' }} /> Add Patient
+          </button>
+        }
+      />
+
+      {/* GlobalSearchBar — prominent position */}
+      <GlobalSearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Search patients by name, email, clinic, physician..."
+        resultCount={loading ? undefined : filtered.length}
+        namespace="admin-patients"
+        size="lg"
+      />
 
       {!loading && <PatientKPIs data={patients} />}
 
       {/* Main CRM Workspace */}
       <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Toolbar */}
-        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', gap: '1rem', alignItems: 'center', backgroundColor: '#fafafa' }}>
-          <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
-            <Search size={16} style={{ position: 'absolute', left: '12px', top: '10px', color: 'var(--text-muted)' }} />
-            <input 
-              type="text" 
-              placeholder="Search patients by name, email, clinic, physician..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.85rem', outline: 'none' }}
-            />
-          </div>
-          <button className="gcp-btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
-            <Filter size={14} style={{ marginRight: '0.4rem' }} /> Advanced Filters
-          </button>
-        </div>
 
         {/* Patient List */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <GridSkeleton count={6} cols={3} />
+          ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-muted)' }}>
               <Users size={48} style={{ opacity: 0.2, margin: '0 auto 1rem auto' }} />
               <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>Welcome to Patient Management</h3>
@@ -204,7 +189,7 @@ export default function AdminPatientsTab() {
                 </div>
               ))}
             </div>
-          )}
+          ) /* end filtered */ }
         </div>
       </div>
 

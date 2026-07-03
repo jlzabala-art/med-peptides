@@ -1,8 +1,4 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import { Beaker, Globe, Activity, AlertTriangle, X } from "lucide-react";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useEffect, useState, useMemo } from 'react';
 

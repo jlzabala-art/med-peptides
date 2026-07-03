@@ -66,8 +66,9 @@ export const logErrorToAnalytics = (error, context = {}) => {
 };
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { connectAuthEmulator } from 'firebase/auth';
+import { connectFunctionsEmulator } from 'firebase/functions';
 
 let dbInstance;
 try {
@@ -88,6 +89,15 @@ if (typeof window !== 'undefined') {
 
 export const storage = getStorage(app);
 export const functions = getFunctions(app, "us-central1");
+
+// Connect to Emulators if configured
+if (import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
+  console.log('🔗 Connecting to Firebase Emulators...');
+  connectFirestoreEmulator(db, 'localhost', 8080);
+  connectAuthEmulator(auth, 'http://localhost:9099');
+  connectFunctionsEmulator(functions, 'localhost', 5001);
+}
+
 export { ref, uploadBytes, getDownloadURL };
 
 export default app;
