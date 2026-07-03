@@ -1,7 +1,4 @@
-import {
-  Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe,
-  FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck
-} from 'lucide-react';
+import { Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe, FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';

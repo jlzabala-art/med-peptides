@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, UserPlus, ChevronRight } from 'lucide-react';
+import { Users, UserPlus, ChevronRight } from '@/lib/icons';
 import BaseWidget from '../core/BaseWidget';
 
 export default function PatientRosterWidget(props) {

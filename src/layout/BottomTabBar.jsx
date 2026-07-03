@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Search, Grid, ShoppingBag, User } from 'lucide-react';
+import { Home, Search, Grid, ShoppingBag, User } from '@/lib/icons';
 import { useCart } from '../context/CartProvider';
 import { useUIStore } from '../stores/uiStore';
 

@@ -36,27 +36,11 @@ export function ShopProvider({ children }) {
   const { data: catalogData } = useQuery({
     queryKey: ['catalog'],
     queryFn: async () => {
-      try {
-        const firestoreCatalog = await getCatalog();
-        if (firestoreCatalog && firestoreCatalog.length > 0) {
-          return firestoreCatalog;
-        }
-      } catch (err) {
-        console.error('[ShopProvider] Product catalog load error:', err);
-      }
-      let staticProductsList = [];
-      try {
-        const res = await fetch('/data/products.json');
-        if (res.ok) {
-          const data = await res.json();
-          staticProductsList = Array.isArray(data.products) ? data.products : [];
-        }
-      } catch (err) {
-        console.error('[ShopProvider] fetch products error', err);
-      }
-      return staticProductsList.map(enrichV2);
+      // Golden Rule: We no longer fetch the entire catalog into memory on load.
+      // Individual components must fetch their own data using paginated or targeted queries.
+      return [];
     },
-    staleTime: 1000 * 60 * 60, // 1 hour for catalog
+    staleTime: Infinity,
   });
 
   const products = catalogData || [];

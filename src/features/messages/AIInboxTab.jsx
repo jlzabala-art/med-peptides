@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
-import { Bot, Mail, CheckCircle, XCircle, ArrowRight, Activity, AlertTriangle, FileText } from 'lucide-react';
+import { Bot, Mail, CheckCircle, XCircle, ArrowRight, Activity, AlertTriangle, FileText } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 export default function AIInboxTab() {

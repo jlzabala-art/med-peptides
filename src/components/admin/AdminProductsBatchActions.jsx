@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, ClipboardList, XCircle, Download, Percent, BookOpen } from 'lucide-react';
+import { ShoppingCart, ClipboardList, XCircle, Download, Percent, BookOpen, Eye } from '@/lib/icons';
 
 export default function AdminProductsBatchActions({
   selectedIds,
@@ -57,6 +57,15 @@ export default function AdminProductsBatchActions({
           className="btn btn-outline flex items-center gap-2 text-xs py-1.5 px-3 bg-white"
         >
           <BookOpen size={14} /> Include in Catalog
+        </button>
+      )}
+
+      {!readOnly && (
+        <button
+          onClick={() => onManageVisibility?.(selectedIds)}
+          className="btn btn-outline flex items-center gap-2 text-xs py-1.5 px-3 text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100"
+        >
+          <Eye size={14} /> Manage Visibility
         </button>
       )}
     </>

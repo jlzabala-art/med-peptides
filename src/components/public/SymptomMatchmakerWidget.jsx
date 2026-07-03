@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Sparkles, Activity, Search, X, ShoppingCart, Loader2, ArrowRight } from 'lucide-react';
+import { Bot, Sparkles, Activity, Search, X, ShoppingCart, Loader2, ArrowRight } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 const SymptomMatchmakerWidget = ({ onAddToCart }) => {

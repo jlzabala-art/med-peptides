@@ -1,6 +1,7 @@
 import React from 'react';
+import { StatusChip } from '../../ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { Target, TrendingUp, Activity, CheckCircle } from 'lucide-react';
+import { Target, TrendingUp, Activity, CheckCircle } from '@/lib/icons';
 
 export default function ClinicalProgressTracker({ protocol }) {
   // Mock data for tracking expected biomarker improvements over the 12-week protocol
@@ -33,8 +34,11 @@ export default function ClinicalProgressTracker({ protocol }) {
           </h3>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Tracking primary biomarkers and symptom resolution across protocol phases.</p>
         </div>
-        <div style={{ background: '#f0fdf4', color: '#16a34a', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Target size={16} /> 80% Target Resolution
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <StatusChip status={protocol?.status || 'Active'} />
+          <div style={{ background: '#f0fdf4', color: '#16a34a', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Target size={16} /> 80% Target Resolution
+          </div>
         </div>
       </div>
 

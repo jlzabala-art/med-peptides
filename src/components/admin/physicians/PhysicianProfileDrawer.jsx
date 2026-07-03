@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Activity, ShieldCheck, FileText, Loader2, ClipboardList } from 'lucide-react';
+import { Mail, Phone, MapPin, Activity, ShieldCheck, FileText, Loader2, ClipboardList } from '@/lib/icons';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import StandardDrawer from '../../ui/StandardDrawer';

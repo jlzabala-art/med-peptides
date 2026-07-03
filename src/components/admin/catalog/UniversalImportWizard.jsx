@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, X, FileText, CheckCircle, Package, FlaskConical, Receipt, AlertCircle } from 'lucide-react';
+import { UploadCloud, X, FileText, CheckCircle, Package, FlaskConical, Receipt, AlertCircle } from '@/lib/icons';
 
 export default function UniversalImportWizard({ isOpen, onClose }) {
   const [dragActive, setDragActive] = useState(false);

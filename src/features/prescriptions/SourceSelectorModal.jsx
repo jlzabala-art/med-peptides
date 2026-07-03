@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, UploadCloud, Stethoscope, Sparkles, Box, FileEdit } from 'lucide-react';
+import { X, FileText, UploadCloud, Stethoscope, Sparkles, Box, FileEdit } from '@/lib/icons';
 import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 
 const SourceSelectorModal = ({ onClose, onSelectSource }) => {

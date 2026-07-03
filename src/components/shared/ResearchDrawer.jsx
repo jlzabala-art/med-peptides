@@ -13,22 +13,9 @@ import Compass from "lucide-react/dist/esm/icons/compass";
 import Edit2 from "lucide-react/dist/esm/icons/edit-2";
 import Bot from "lucide-react/dist/esm/icons/bot";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import useGuestPreferences, { 
   GOAL_META, LEVEL_META, PREFERENCE_OPTIONS, CONTEXT_QUICK_CHIPS, GOAL_DRAWER_DETAILS, CLINICAL_AI_CONTEXTS
@@ -44,7 +31,7 @@ function StepIndicator({ currentStep, totalSteps }) {
           Step {currentStep} of {totalSteps}
         </span>
         <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-          ~45s left
+          ~{45 - (currentStep * 10)}s left
         </span>
       </div>
       <div style={{ display: 'flex', gap: '0.4rem', width: '100%' }}>
@@ -65,15 +52,15 @@ function StepIndicator({ currentStep, totalSteps }) {
   );
 }
 
-function GoalCard({ id, meta, selected, onSelect }) {
+function SelectionCard({ label, icon, selected, onSelect }) {
   return (
     <button
-      onClick={() => onSelect(id)}
+      onClick={onSelect}
       style={{
         padding: '0.85rem 1rem',
-        borderRadius: '8px',
-        border: `1px solid ${selected ? '#1a73e8' : '#e0e0e0'}`,
-        background: selected ? '#f8f9fa' : 'var(--color-bg-surface)',
+        borderRadius: '12px',
+        border: `1px solid ${selected ? '#1a73e8' : 'var(--border)'}`,
+        background: selected ? 'rgba(26,115,232,0.05)' : 'var(--color-bg-surface)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -84,26 +71,27 @@ function GoalCard({ id, meta, selected, onSelect }) {
         fontFamily: 'inherit',
         color: selected ? '#1a73e8' : 'var(--text-main)',
         position: 'relative',
-        boxShadow: selected ? '0 1px 3px rgba(26,115,232,0.1)' : 'none'
+        boxShadow: selected ? '0 2px 8px rgba(26,115,232,0.1)' : 'none'
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = selected ? '#f1f3f4' : '#f8f9fa'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = selected ? '#f8f9fa' : 'var(--color-bg-surface)'; }}
+      onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = 'var(--surface-raised)'; }}
+      onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = 'var(--color-bg-surface)'; }}
     >
-      <div style={{ fontSize: '1.2rem' }}>
-        {meta.icon}
-      </div>
+      {icon && (
+        <div style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center' }}>
+          {icon}
+        </div>
+      )}
       <span style={{
         fontSize: '0.95rem',
-        fontWeight: selected ? 700 : 500,
+        fontWeight: selected ? 600 : 500,
         letterSpacing: '0.01em',
+        flex: 1
       }}>
-        {meta.label}
+        {label}
       </span>
       {selected && (
         <div
           style={{
-            position: 'absolute', top: '50%', right: '16px',
-            transform: 'translateY(-50%)',
             width: 20, height: 20, borderRadius: '50%',
             backgroundColor: '#1a73e8',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -116,46 +104,29 @@ function GoalCard({ id, meta, selected, onSelect }) {
   );
 }
 
-// ── Main Drawer Component ──────────────────────────────────────────────────────
+// ── Main Modal Component ──────────────────────────────────────────────────────
 
 export default function ResearchDrawer({ onComplete, onOpenAI }) {
-  const { prefs, savePrefs, hasCompleted, isLoaded } = useGuestPreferences();
+  const { prefs, savePrefs, isLoaded } = useGuestPreferences();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  // Custom Mode State
+  
   const [mode, setMode] = useState('personalization'); // 'personalization' | 'goal-detail'
   const [detailGoal, setDetailGoal] = useState(null);
   
-  // AI State
+  const [currentStep, setCurrentStep] = useState(1);
   const [aiInput, setAiInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isSummarizing, setIsSummarizing] = useState(false);
 
-  // Form State (initialized from prefs if available)
+  // Form State
   const [goal, setGoal] = useState(null);
   const [context, setContext] = useState('');
   const [experienceLevel, setExperienceLevel] = useState(null);
   const [preferences, setPreferences] = useState([]);
+  
   const inputRef = useRef(null);
-  const scrollRef = useRef(null);
-
-  // Scroll to top on summarize
-  useEffect(() => {
-    if (scrollRef.current && isSummarizing) {
-      scrollRef.current.scrollTop = 0;
-    }
-  }, [isSummarizing]);
-
-  // Initialize and Open Logic
-  useEffect(() => {
-    if (isLoaded) {
-      if (!hasCompleted && !sessionStorage.getItem('researchDrawerDismissed')) {
-        const t = setTimeout(() => setIsOpen(true), 1500);
-        return () => clearTimeout(t);
-      }
-    }
-  }, [hasCompleted, isLoaded]);
+  const modalRef = useRef(null);
 
   // Listen for manual open trigger
   useEffect(() => {
@@ -166,6 +137,7 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
         setDetailGoal(e.detail.goal || { id: e.detail.goalId, label: e.detail.goalId });
       } else {
         setMode('personalization');
+        setCurrentStep(1);
       }
     };
     window.addEventListener('open-research-drawer', handleOpen);
@@ -182,30 +154,40 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
   }, [isOpen, prefs]);
 
   useEffect(() => {
-    if (isOpen && !isSummarizing && inputRef.current) {
+    if (isOpen && currentStep === 1 && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isOpen, isSummarizing]);
+  }, [isOpen, currentStep]);
 
-  // Keyboard navigation
+  // Keyboard navigation & outside click
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isOpen || isClosing) return;
-      if (e.key === 'Enter' && e.metaKey) {
-        e.preventDefault();
-        handleAnalyze();
-      }
       if (e.key === 'Escape') {
         handleDismiss();
       }
     };
+    
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target)) {
+        handleDismiss();
+      }
+    };
+    
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isClosing, aiInput]);
+    if (isOpen) {
+      setTimeout(() => {
+         window.addEventListener('click', handleClickOutside);
+      }, 100);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, [isOpen, isClosing]);
 
   if (!isOpen) return null;
 
-  // Handlers
   const handleDismiss = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -213,71 +195,76 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
       setIsClosing(false);
       setMode('personalization');
       setDetailGoal(null);
-      setIsSummarizing(false);
+      setCurrentStep(1);
       setAiInput('');
-      sessionStorage.setItem('researchDrawerDismissed', 'true');
-    }, 300);
+    }, 250);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyzeAndProceed = () => {
     if (!aiInput.trim()) return;
     setIsAnalyzing(true);
     
-    // Simulate AI parsing
+    // Simulate AI parsing context and predicting defaults
     setTimeout(() => {
       const lower = aiInput.toLowerCase();
       
-      // Goal extraction
-      let extGoal = 'longevity'; // default
+      let extGoal = 'longevity'; 
       if (lower.match(/recover|heal|injury|joint|pain/)) extGoal = 'recovery';
-      else if (lower.match(/brain|focus|cogniti|memory|adhd/)) extGoal = 'cognition';
-      else if (lower.match(/weight|fat|metabol|lean/)) extGoal = 'weight-loss';
-      else if (lower.match(/muscle|strength|hypertrophy|bulk/)) extGoal = 'muscle';
+      else if (lower.match(/brain|focus|cogniti|memory|adhd/)) extGoal = 'cognitive';
+      else if (lower.match(/weight|fat|metabol|lean/)) extGoal = 'metabolic';
+      else if (lower.match(/muscle|strength|hypertrophy|bulk/)) extGoal = 'performance';
       else if (lower.match(/sleep|insomnia/)) extGoal = 'sleep';
       
-      // Experience extraction
       let extExp = 'beginner';
       if (lower.match(/used before|some experience|intermediate/)) extExp = 'intermediate';
       if (lower.match(/advanced|expert|years|protocol/)) extExp = 'advanced';
 
-      // Preferences extraction
       const extPrefs = [];
-      if (lower.match(/oral|pill|no inject/)) extPrefs.push('oral-only');
-      if (lower.match(/vegan|plant/)) extPrefs.push('vegan');
+      if (lower.match(/oral|pill|no inject/)) extPrefs.push('convenience');
       if (lower.match(/budget|cheap|affordable/)) extPrefs.push('budget');
+      if (lower.match(/safe|safety/)) extPrefs.push('safety');
+      if (lower.match(/fast|quick/)) extPrefs.push('fast');
       
       setGoal(extGoal);
       setExperienceLevel(extExp);
       setPreferences(extPrefs);
       setContext(aiInput);
       
-      savePrefs({ goal: extGoal, context: aiInput, experienceLevel: extExp, preferences: extPrefs });
-      
       setIsAnalyzing(false);
-      setIsSummarizing(true);
-    }, 1500); // 1.5s simulated AI thinking time
+      setCurrentStep(2);
+    }, 1500);
+  };
+
+  const finishFlow = () => {
+    savePrefs({ goal, context, experienceLevel, preferences });
+    onComplete?.();
+    handleDismiss();
   };
 
   const handleQuickPrompt = (prompt) => {
     setAiInput(prompt);
     if (inputRef.current) inputRef.current.focus();
   };
-
-  const finishFlow = () => {
-    onComplete?.();
-    handleDismiss();
+  
+  const togglePreference = (id) => {
+    if (preferences.includes(id)) {
+      setPreferences(preferences.filter(p => p !== id));
+    } else {
+      setPreferences([...preferences, id]);
+    }
   };
 
-  // Render Steps
-  const renderAIOnboarding = () => (
+  const renderStep1 = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.3s ease' }}>
-      <div style={{ background: 'rgba(26, 115, 232, 0.05)', border: '1px solid rgba(26, 115, 232, 0.2)', padding: '1.25rem', borderRadius: '12px' }}>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Sparkles size={18} color="#1a73e8" />
-          Hi! Tell me about your research goals.
+      <StepIndicator currentStep={1} totalSteps={3} />
+      
+      <div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={22} color="#1a73e8" />
+          Tell us about your research goals
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
-          Describe what you want to achieve, your experience level, and any preferences. I will instantly build a custom protocol dashboard for you.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
+          Describe what you want to achieve. Atlas AI will analyze your prompt to instantly tailor protocols specifically for you.
         </p>
       </div>
       
@@ -289,25 +276,18 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
           placeholder="E.g., I'm a beginner looking to heal a nagging joint injury. I prefer oral administration over injections if possible."
           disabled={isAnalyzing}
           style={{
-            width: '100%',
-            minHeight: '140px',
-            padding: '1.25rem',
-            borderRadius: '12px',
-            border: `2px solid ${isAnalyzing ? '#1a73e8' : 'var(--border)'}`,
-            background: 'var(--surface-raised)',
-            color: 'var(--text-main)',
-            fontFamily: 'inherit',
-            fontSize: '1rem',
-            resize: 'vertical',
-            transition: 'border-color 0.3s ease',
-            opacity: isAnalyzing ? 0.7 : 1,
+            width: '100%', minHeight: '140px', padding: '1.25rem',
+            borderRadius: '12px', border: `2px solid ${isAnalyzing ? '#1a73e8' : 'var(--border)'}`,
+            background: 'var(--surface-raised)', color: 'var(--text-main)',
+            fontFamily: 'inherit', fontSize: '1rem', resize: 'vertical',
+            transition: 'border-color 0.3s ease', opacity: isAnalyzing ? 0.7 : 1,
           }}
         />
         {isAnalyzing && (
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(2px)',
+            background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(4px)',
             borderRadius: '12px', flexDirection: 'column', gap: '0.5rem', color: '#1a73e8',
             fontWeight: 600, fontSize: '0.95rem'
           }}>
@@ -322,101 +302,228 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem', display: 'block', fontWeight: 600 }}>
             Quick Prompts:
           </span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
             <button
               onClick={() => handleQuickPrompt("I want to optimize my longevity and slow down aging. I have intermediate experience.")}
+              className="quick-chip"
               style={{
-                padding: '0.75rem 1rem', borderRadius: '8px', textAlign: 'left',
+                padding: '0.5rem 1rem', borderRadius: '20px',
                 border: '1px solid var(--border)', background: 'var(--surface)',
                 fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
-                transition: 'all 0.15s', display: 'flex', gap: '0.5rem', alignItems: 'center'
+                transition: 'all 0.15s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-raised)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
             >
-              🌱 Longevity & Anti-aging (Intermediate)
+              Longevity
             </button>
             <button
-              onClick={() => handleQuickPrompt("I'm an advanced researcher looking for protocols to maximize muscle hypertrophy and fat loss.")}
+              onClick={() => handleQuickPrompt("I'm looking for protocols to maximize muscle hypertrophy and fat loss.")}
+              className="quick-chip"
               style={{
-                padding: '0.75rem 1rem', borderRadius: '8px', textAlign: 'left',
+                padding: '0.5rem 1rem', borderRadius: '20px',
                 border: '1px solid var(--border)', background: 'var(--surface)',
                 fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
-                transition: 'all 0.15s', display: 'flex', gap: '0.5rem', alignItems: 'center'
+                transition: 'all 0.15s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-raised)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
             >
-              💪 Muscle & Fat Loss (Advanced)
+              Weight Loss
             </button>
             <button
-              onClick={() => handleQuickPrompt("I'm a complete beginner looking to improve my cognitive function and focus at work.")}
+              onClick={() => handleQuickPrompt("I'm a beginner looking to improve my cognitive function and focus at work.")}
+              className="quick-chip"
               style={{
-                padding: '0.75rem 1rem', borderRadius: '8px', textAlign: 'left',
+                padding: '0.5rem 1rem', borderRadius: '20px',
                 border: '1px solid var(--border)', background: 'var(--surface)',
                 fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
-                transition: 'all 0.15s', display: 'flex', gap: '0.5rem', alignItems: 'center'
+                transition: 'all 0.15s'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-raised)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface)'}
             >
-              🧠 Brain Focus & Cognition (Beginner)
+              Brain Health
+            </button>
+            <button
+              onClick={() => handleQuickPrompt("I want to improve my deep sleep and circadian rhythm.")}
+              className="quick-chip"
+              style={{
+                padding: '0.5rem 1rem', borderRadius: '20px',
+                border: '1px solid var(--border)', background: 'var(--surface)',
+                fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+            >
+              Sleep
+            </button>
+            <button
+              onClick={() => handleQuickPrompt("I want to heal a joint injury and speed up recovery.")}
+              className="quick-chip"
+              style={{
+                padding: '0.5rem 1rem', borderRadius: '20px',
+                border: '1px solid var(--border)', background: 'var(--surface)',
+                fontSize: '0.85rem', color: 'var(--text-main)', cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+            >
+              Recovery
             </button>
           </div>
         </div>
       )}
+      
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+        <button 
+          onClick={handleAnalyzeAndProceed}
+          disabled={!aiInput.trim() || isAnalyzing}
+          style={{
+            background: !aiInput.trim() || isAnalyzing ? 'var(--border-light)' : '#1a73e8',
+            color: !aiInput.trim() || isAnalyzing ? 'var(--text-light)' : 'white',
+            border: 'none', borderRadius: '8px',
+            padding: '0.8rem 1.5rem', cursor: 'pointer',
+            fontSize: '0.95rem', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            transition: 'background 0.15s'
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.3s ease' }}>
+      <StepIndicator currentStep={2} totalSteps={3} />
+      
+      <div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={18} color="#1a73e8" />
+          Experience Level
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
+          Atlas AI deduced this from your prompt. Please confirm or adjust your experience level with peptide research.
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+        {Object.entries(LEVEL_META).map(([key, meta]) => (
+          <SelectionCard 
+            key={key} 
+            label={meta.label} 
+            icon={meta.icon} 
+            selected={experienceLevel === key}
+            onSelect={() => setExperienceLevel(key)}
+          />
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+        <button 
+          onClick={() => setCurrentStep(1)}
+          style={{
+            background: 'var(--surface)', color: 'var(--text-main)',
+            border: '1px solid var(--border)', borderRadius: '8px',
+            padding: '0.8rem 1.5rem', cursor: 'pointer',
+            fontSize: '0.95rem', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+        <button 
+          onClick={() => setCurrentStep(3)}
+          style={{
+            background: '#1a73e8', color: 'white',
+            border: 'none', borderRadius: '8px',
+            padding: '0.8rem 1.5rem', cursor: 'pointer',
+            fontSize: '0.95rem', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', animation: 'fadeIn 0.3s ease' }}>
+      <StepIndicator currentStep={3} totalSteps={3} />
+      
+      <div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Sparkles size={18} color="#1a73e8" />
+          Administration Preferences
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
+          Atlas AI deduced these preferences. You can select multiple options to further refine your recommendations.
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+        {PREFERENCE_OPTIONS.map((opt) => (
+          <SelectionCard 
+            key={opt.id} 
+            label={opt.label} 
+            selected={preferences.includes(opt.id)}
+            onSelect={() => togglePreference(opt.id)}
+          />
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+        <button 
+          onClick={() => setCurrentStep(2)}
+          style={{
+            background: 'var(--surface)', color: 'var(--text-main)',
+            border: '1px solid var(--border)', borderRadius: '8px',
+            padding: '0.8rem 1.5rem', cursor: 'pointer',
+            fontSize: '0.95rem', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+        <button 
+          onClick={() => setCurrentStep(4)}
+          style={{
+            background: '#1a73e8', color: 'white',
+            border: 'none', borderRadius: '8px',
+            padding: '0.8rem 1.5rem', cursor: 'pointer',
+            fontSize: '0.95rem', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+          }}
+        >
+          Confirm
+        </button>
+      </div>
     </div>
   );
 
   const renderSummary = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: 48, height: 48, background: 'rgba(26, 115, 232, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: '#1a73e8' }}>
-          <Sparkles size={24} />
-        </div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
-          Research Profile Ready
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease', textAlign: 'center', padding: '2rem 1rem' }}>
+      <div style={{ width: 64, height: 64, background: 'rgba(26, 115, 232, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', color: '#1a73e8' }}>
+        <Check size={32} strokeWidth={3} />
+      </div>
+      <div>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>
+          Profile Completed
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
-          Your profile has been built to generate highly personalized protocols.
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', margin: 0 }}>
+          Atlas AI is now adapting all recommendations to your specific goals and preferences.
         </p>
       </div>
 
-      <div style={{ background: 'var(--surface-raised)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>Your Profile</h3>
-          <button onClick={() => setIsSummarizing(false)} style={{ background: 'none', border: 'none', color: '#1a73e8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.8rem' }}>
-            <Edit2 size={12} /> Refine with AI
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {goal && (
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', width: '80px' }}>Goal:</span>
-              <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>{GOAL_META[goal]?.label || goal}</span>
-            </div>
-          )}
-          {context && (
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', width: '80px' }}>Context:</span>
-              <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>{context}</span>
-            </div>
-          )}
-          {experienceLevel && (
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', width: '80px' }}>Experience:</span>
-              <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>{LEVEL_META[experienceLevel]?.label || experienceLevel}</span>
-            </div>
-          )}
-          {preferences.length > 0 && (
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', width: '80px' }}>Prefers:</span>
-              <span style={{ color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 500 }}>
-                {preferences.map(p => PREFERENCE_OPTIONS.find(o => o.id === p)?.label || p).join(', ')}
-              </span>
-            </div>
-          )}
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+        <button 
+          onClick={finishFlow}
+          style={{
+            background: '#1a73e8', color: 'white',
+            border: 'none', borderRadius: '8px',
+            padding: '0.9rem 2rem', cursor: 'pointer',
+            fontSize: '1rem', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            transition: 'background 0.15s'
+          }}
+        >
+          Enter the Platform <ChevronRight size={18} />
+        </button>
       </div>
     </div>
   );
@@ -476,17 +583,18 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
   return (
     <>
       <style>{`
-        @keyframes drawerSlideIn {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
+        @keyframes modalFadeScale {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
-        @keyframes drawerSlideOut {
-          from { transform: translateX(0); }
-          to { transform: translateX(-100%); }
+        @keyframes modalFadeScaleOut {
+          from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          to { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
         }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -494,85 +602,115 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
         .spin-slow {
           animation: spin 3s linear infinite;
         }
+        .quick-chip:hover {
+          background: var(--surface-raised) !important;
+        }
+        
+        /* Mobile overrides */
+        @media (max-width: 768px) {
+          .research-modal {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            animation: none !important;
+          }
+          @keyframes mobileModalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          .research-modal.mobile-anim {
+            animation: mobileModalFadeIn 0.25s ease-out forwards !important;
+          }
+          .research-modal.mobile-anim-out {
+            animation: modalFadeScaleOut 0.2s ease-out forwards !important;
+          }
+        }
       `}</style>
+      
       {/* Backdrop */}
       <div 
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.25)', backdropFilter: 'blur(2px)',
+          background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)',
           zIndex: 99998,
           opacity: isClosing ? 0 : 1,
-          transition: 'opacity 0.2s ease',
+          transition: 'opacity 0.25s ease',
         }}
-        onClick={handleDismiss}
       />
 
-      {/* Drawer */}
+      {/* Centered Modal */}
       <div 
+        ref={modalRef}
+        className={`research-modal ${isClosing ? 'mobile-anim-out' : 'mobile-anim'}`}
         style={{
-          position: 'fixed', top: 0, left: 0, bottom: 0,
-          width: '100%', maxWidth: '420px',
+          position: 'fixed', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%', maxWidth: '700px',
           background: 'var(--color-bg-surface)',
           zIndex: 99999,
-          boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 24px 64px rgba(0, 0, 0, 0.2)',
+          borderRadius: '20px',
           display: 'flex', flexDirection: 'column',
-          animation: `${isClosing ? 'drawerSlideOut' : 'drawerSlideIn'} 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`,
+          maxHeight: '90vh',
+          animation: `${isClosing ? 'modalFadeScaleOut' : 'modalFadeScale'} 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`,
         }}
       >
         {/* Header */}
         <div style={{ 
-          padding: '1.25rem 1.5rem 1rem', 
-          borderBottom: '1px solid #f1f3f4',
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between'
+          padding: '1.5rem 2rem 1rem', 
+          borderBottom: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between'
         }}>
           <div>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              padding: '2px 8px', borderRadius: '4px',
+              padding: '4px 10px', borderRadius: '20px',
               background: 'rgba(26, 115, 232, 0.08)', border: '1px solid rgba(26, 115, 232, 0.2)',
-              fontSize: '0.65rem', fontWeight: 700, color: '#1a73e8',
+              fontSize: '0.7rem', fontWeight: 700, color: '#1a73e8',
               letterSpacing: '0.05em', textTransform: 'uppercase',
-              marginBottom: '0.75rem',
             }}>
-              <Sparkles size={10} style={{ color: '#1a73e8' }} />
-              {mode === 'goal-detail' ? 'Clinical Protocol' : 'Personalize your research'}
+              <Sparkles size={12} style={{ color: '#1a73e8' }} />
+              {mode === 'goal-detail' ? 'Clinical Protocol' : 'Personalization'}
             </div>
-            {mode === 'goal-detail' ? (
-              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                {detailGoal?.label}
-              </h2>
-            ) : (
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Answer a few quick questions to generate more relevant protocols.
-              </p>
-            )}
           </div>
           <button 
             onClick={handleDismiss}
             style={{ 
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-muted)', padding: '0.25rem',
+              background: 'var(--surface)', border: '1px solid var(--border)', cursor: 'pointer',
+              color: 'var(--text-muted)', padding: '0.4rem', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.15s'
             }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-raised)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--surface)'}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Content */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
           {mode === 'goal-detail' ? (
             renderGoalDetail()
-          ) : isSummarizing ? (
-            renderSummary()
+          ) : currentStep === 1 ? (
+            renderStep1()
+          ) : currentStep === 2 ? (
+            renderStep2()
+          ) : currentStep === 3 ? (
+            renderStep3()
           ) : (
-            renderAIOnboarding()
+            renderSummary()
           )}
         </div>
 
-        {/* Footer Navigation */}
-        {mode === 'goal-detail' ? (
+        {/* Footer Navigation for Goal Detail */}
+        {mode === 'goal-detail' && (
           <div style={{ 
-            padding: '1.5rem', 
+            padding: '1.5rem 2rem', 
             borderTop: '1px solid var(--border)',
             display: 'flex', flexDirection: 'column', gap: '0.75rem'
           }}>
@@ -600,67 +738,8 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
               onMouseEnter={(e) => { e.currentTarget.style.background = '#1557b0'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = '#1a73e8'; }}
             >
-              <Bot size={18} /> Preguntar a ClinicalAI
+              <Bot size={18} /> Ask ClinicalAI
             </button>
-            <button 
-              style={{
-                width: '100%', padding: '0.85rem', borderRadius: '10px',
-                fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)', transition: 'all 0.15s'
-              }}
-              onClick={() => {
-                const details = GOAL_DRAWER_DETAILS[detailGoal?.id] || {};
-                handleDismiss();
-                if (details.category) {
-                  navigate(`/collection/peptides?category=${encodeURIComponent(details.category)}`);
-                } else {
-                  navigate('/collection/peptides');
-                }
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-raised)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface)'; }}
-            >
-              Explorar en Catálogo <ArrowRight size={16} />
-            </button>
-          </div>
-        ) : (
-          <div style={{ 
-            padding: '1.5rem 2rem', 
-            borderTop: '1px solid var(--border)',
-            display: 'flex', justifyContent: 'flex-end', alignItems: 'center'
-          }}>
-            {!isSummarizing ? (
-              <button 
-                onClick={handleAnalyze}
-                disabled={!aiInput.trim() || isAnalyzing}
-                style={{
-                  background: !aiInput.trim() || isAnalyzing ? 'var(--border-light)' : '#1a73e8',
-                  color: !aiInput.trim() || isAnalyzing ? 'var(--text-light)' : 'white',
-                  border: 'none', borderRadius: '8px',
-                  padding: '0.6rem 1.25rem', cursor: 'pointer',
-                  fontSize: '0.9rem', fontWeight: 600,
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  transition: 'background 0.15s'
-                }}
-              >
-                <Sparkles size={16} /> Analyze with AI
-              </button>
-            ) : (
-              <button 
-                onClick={finishFlow}
-                style={{
-                  background: '#1a73e8', color: 'white',
-                  border: 'none', borderRadius: '8px',
-                  padding: '0.6rem 1.25rem', cursor: 'pointer',
-                  fontSize: '0.9rem', fontWeight: 600,
-                  display: 'flex', alignItems: 'center', gap: '0.5rem',
-                  transition: 'background 0.15s'
-                }}
-              >
-                Apply Profile to Dashboard <ChevronRight size={16} />
-              </button>
-            )}
           </div>
         )}
       </div>

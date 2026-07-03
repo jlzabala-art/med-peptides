@@ -115,14 +115,14 @@ export function AuthProvider({ children }) {
 
   // Listen for auth state changes
   useEffect(() => {
-    // FORCE ADMIN MODE FOR LOCAL TESTING
-    setUser({ uid: 'dev-admin', email: 'admin@regenpept.test', displayName: 'Local Admin' });
-    setUserProfile({ role: 'admin', approved: true, firstName: 'Local', lastName: 'Admin' });
-    setLoading(false);
-    return () => {};
-    
-    /* Original auth listener commented out for dev mode
+    // Safety timeout: if Firebase Auth doesn't respond in 8s, stop loading
+    // so the app can show the login screen instead of hanging forever.
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(timeoutId);
       setUser(firebaseUser);
       if (firebaseUser) {
         setIsMfaEnrolled(firebaseUser.multiFactor?.enrolledFactors?.length > 0);
@@ -130,6 +130,7 @@ export function AuthProvider({ children }) {
         // Fetch the user's profile from Firestore
         try {
           const docRef = doc(db, 'users', firebaseUser.uid);
+
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             const data = docSnap.data();
@@ -165,7 +166,6 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
     return unsubscribe;
-    */
   }, []);
 
   // Sync with Zoho SalesIQ

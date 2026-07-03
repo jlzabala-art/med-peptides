@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, ShieldCheck, Activity, Search, AlertTriangle, Info, Plus, X } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Activity, Search, AlertTriangle, Info, Plus, X } from '@/lib/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Mock database of interactions

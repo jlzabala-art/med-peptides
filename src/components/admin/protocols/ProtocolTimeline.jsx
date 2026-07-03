@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, ArrowRight, Package } from 'lucide-react';
+import { Target, ArrowRight, Package } from '@/lib/icons';
 
 export default function ProtocolTimeline({ protocol }) {
   const phases = protocol?.phases || [];

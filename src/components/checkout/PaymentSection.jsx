@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, Landmark, FileText, Briefcase } from 'lucide-react';
+import { CreditCard, Landmark, FileText, Briefcase } from '@/lib/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PaymentSection = ({ formData, set, isProfessional }) => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrainCircuit, FlaskConical, Plus, Trash2, Activity } from 'lucide-react';
+import { BrainCircuit, FlaskConical, Plus, Trash2, Activity } from '@/lib/icons';
 
 export default function AILabInsights({ protocol, onUpdate }) {
   const aiInsights = protocol?.aiInsights || {

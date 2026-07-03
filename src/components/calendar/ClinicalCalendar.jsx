@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { format, addDays, startOfWeek, subWeeks, addWeeks, isSameDay } from 'date-fns';
+import { Tabs } from '../ui';
 
 /**
  * Clinical Calendar - Unified UI Component for Atlas Health
@@ -70,17 +71,16 @@ export const ClinicalCalendar = ({ events = [], defaultView = 'weekly', onEventC
   return (
     <div className="clinical-calendar w-full">
       {/* View Switcher */}
-      <div className="flex space-x-2 mb-4 border-b border-gray-200 dark:border-gray-800 pb-2">
-        {['daily', 'weekly', 'monthly', 'timeline'].map(v => (
-          <button 
-            key={v}
-            onClick={() => setView(v)}
-            className={`px-3 py-1 text-sm rounded-md capitalize transition-colors ${view === v ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
-          >
-            {v}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        tabs={[
+          { id: 'daily', label: 'Daily' },
+          { id: 'weekly', label: 'Weekly' },
+          { id: 'monthly', label: 'Monthly' },
+          { id: 'timeline', label: 'Timeline' },
+        ]}
+        activeTab={view}
+        onChange={setView}
+      />
       
       {/* Render selected view */}
       {view === 'weekly' && renderWeeklyView()}

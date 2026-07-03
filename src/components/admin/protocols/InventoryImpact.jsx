@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, TrendingDown, ShoppingCart, CheckCircle, Package } from 'lucide-react';
+import { ShieldAlert, TrendingDown, ShoppingCart, CheckCircle, Package } from '@/lib/icons';
 import { calculateProtocolRequirements, calculateInventoryImpact } from '../../../engine/protocolMath';
 import { useGlobalStore } from '../../../store/globalStore';
 

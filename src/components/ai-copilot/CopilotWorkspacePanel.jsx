@@ -5,11 +5,7 @@ import { useCopilot } from '../../context/CopilotContext';
 import { toast } from 'react-hot-toast';
 import { askCatalogAssistant } from '../../services/catalogAIService';
 
-import {
-  X, Command, Activity, HeartPulse, Target, Briefcase, User, MessageSquare, Mic,
-  ChevronRight, AlertTriangle, CheckCircle2, Zap, DollarSign, Package,
-  ChevronDown, Clock, BrainCircuit, ShieldAlert, ArrowRight, ActivitySquare
-} from 'lucide-react';
+import { X, Command, Activity, HeartPulse, Target, Briefcase, User, MessageSquare, Mic, ChevronRight, AlertTriangle, CheckCircle2, Zap, DollarSign, Package, ChevronDown, Clock, BrainCircuit, ShieldAlert, ArrowRight, ActivitySquare } from '@/lib/icons';
 
 // Subcomponents moved OUTSIDE the main render to satisfy React Hooks ESLint rules.
 

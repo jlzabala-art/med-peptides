@@ -11,33 +11,7 @@ import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from 'firebase
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../../firebase';
 import { getPaginatedProtocols, updateProtocolFull } from '../../services/protocolStorage';
-import {
-  RefreshCw,
-  ChevronDown,
-  ChevronRight,
-  Trash2,
-  Save,
-  Check,
-  Plus,
-  X,
-  AlertTriangle,
-  FlaskConical,
-  Package,
-  Clock,
-  User,
-  GripVertical,
-  Edit3,
-  ExternalLink,
-  Pause,
-  Play,
-  Archive,
-  Activity,
-  Search,
-  CheckSquare,
-  Square,
-  ArchiveRestore,
-  ClipboardList,
-} from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronRight, Trash2, Save, Check, Plus, X, AlertTriangle, FlaskConical, Package, Clock, User, GripVertical, Edit3, ExternalLink, Pause, Play, Archive, Activity, Search, CheckSquare, Square, ArchiveRestore, ClipboardList } from '@/lib/icons';
 import { useToast } from '../../hooks/useToast';
 import CustomProtocolBuilder from './CustomProtocolBuilder';
 import StandardDrawer from '../ui/StandardDrawer';
@@ -49,6 +23,8 @@ import { useProducts } from '../../hooks/admin/useProducts';
 import ProtocolHubDashboard from './protocols/ProtocolHubDashboard';
 import SmartProductPicker from '../shared/SmartProductPicker';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
@@ -422,12 +398,17 @@ function SupplementsEditor({ supplements, onChange }) {
               <textarea
                 value={sup.rationale ?? ''}
                 onChange={(e) => updateSupplement(i, { rationale: e.target.value })}
-                className="admin-premium-input"
                 style={{
                   width: '100%',
                   marginTop: '0.25rem',
                   resize: 'vertical',
                   minHeight: '60px',
+                  padding: '0.75rem',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  border: '1px solid var(--color-border, #cbd5e1)',
+                  backgroundColor: 'var(--color-bg-elevated, #fff)',
+                  color: 'var(--color-text-primary, #1e293b)',
+                  fontSize: '0.875rem'
                 }}
                 placeholder="Rationale for this supplement..."
               />
@@ -1328,7 +1309,6 @@ export default function AdminProtocolsTab() {
         <span style={{ fontWeight: 600 }}>{error}</span>
         <button
           onClick={fetchProtocols}
-          className="admin-premium-input"
           style={{
             marginLeft: 'auto',
             border: '1px solid var(--error)',
@@ -1336,6 +1316,8 @@ export default function AdminProtocolsTab() {
             color: 'var(--error)',
             cursor: 'pointer',
             fontWeight: 700,
+            padding: '0.5rem 1rem',
+            borderRadius: 'var(--radius-md, 8px)',
           }}
         >
           Retry
@@ -1369,121 +1351,48 @@ export default function AdminProtocolsTab() {
       <style>{responsiveStyles}</style>
 
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>
-            Protocols & Pathways
-          </h2>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem', color: '#64748b' }}>
-            Manage clinical pathways, kits, and treatment templates
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            onClick={fetchProtocols}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              padding: '0.5rem 1rem',
-              background: 'white',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              color: '#475569',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'white')}
-          >
-            <RefreshCw size={16} /> Refresh
-          </button>
-          <button
-            onClick={() => setShowPathwayWizard(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              padding: '0.5rem 1rem',
-              background: '#0f172a',
-              border: 'none',
-              borderRadius: '8px',
-              color: 'white',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#1e293b')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#0f172a')}
-          >
-            <Plus size={16} /> Create Pathway
-          </button>
-          <button
-            onClick={() => navigate('/admin/protocols/new/edit')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              padding: '0.5rem 1rem',
-              background: '#3b82f6',
-              border: 'none',
-              borderRadius: '8px',
-              color: 'white',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#2563eb')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#3b82f6')}
-          >
-            <Package size={16} /> Build Custom Kit
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Protocols & Pathways"
+        subtitle="Manage clinical pathways, kits, and treatment templates"
+        icon={ClipboardList}
+        rightContent={
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={fetchProtocols}
+              className="btn btn-outline"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+            >
+              <RefreshCw size={16} /> Refresh
+            </button>
+            <button
+              onClick={() => setShowPathwayWizard(true)}
+              className="btn btn-secondary"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+            >
+              <Plus size={16} /> Create Pathway
+            </button>
+            <button
+              onClick={() => navigate('/admin/protocols/new/edit')}
+              className="btn btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+            >
+              <Package size={16} /> Build Custom Kit
+            </button>
+          </div>
+        }
+      />
 
-      {/* ── Algolia Search Bar ─────────────────────────────────────────────── */}
-      <div style={{ marginBottom: '1rem', position: 'relative', maxWidth: '420px' }}>
-        <Search
-          size={16}
-          style={{
-            position: 'absolute',
-            left: '0.85rem',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: '#94a3b8',
-            pointerEvents: 'none',
-          }}
-        />
-        <input
-          type="search"
-          placeholder="Search protocols (Algolia)…"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '0.6rem 1rem 0.6rem 2.5rem',
-            borderRadius: '10px',
-            border: '1.5px solid #e2e8f0',
-            fontSize: '0.875rem',
-            outline: 'none',
-            background: '#f8fafc',
-            transition: 'border-color 0.2s',
-          }}
-          onFocus={(e) => (e.currentTarget.style.borderColor = '#6366f1')}
-          onBlur={(e) => (e.currentTarget.style.borderColor = '#e2e8f0')}
-        />
-      </div>
+
+      {/* Unified GlobalSearchBar */}
+      <GlobalSearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search protocols by name, category, or tag…"
+        resultCount={!loading ? paginatedProtocols.length : undefined}
+        namespace="admin-protocols"
+        size="lg"
+      />
+
 
       <div style={{ marginBottom: '1.5rem' }}>
         <UniformKPIs data={protocols} />

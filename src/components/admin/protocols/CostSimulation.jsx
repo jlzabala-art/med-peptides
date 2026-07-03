@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, TrendingUp, Download, PieChart } from 'lucide-react';
+import { DollarSign, TrendingUp, Download, PieChart } from '@/lib/icons';
 
 export default function CostSimulation({ protocol }) {
   const [costs, setCosts] = useState([]);

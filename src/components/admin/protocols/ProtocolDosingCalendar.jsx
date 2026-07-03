@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Droplet, Clock } from 'lucide-react';
+import { Calendar, Droplet, Clock } from '@/lib/icons';
 
 export default function ProtocolDosingCalendar({ protocol }) {
   const [selectedPhase, setSelectedPhase] = useState(0);

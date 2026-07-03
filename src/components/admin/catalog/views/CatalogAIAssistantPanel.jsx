@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, Sparkles, AlertCircle, Play, Target, ShieldCheck } from 'lucide-react';
+import { Brain, Sparkles, AlertCircle, Play, Target, ShieldCheck } from '@/lib/icons';
 
 export default function CatalogAIAssistantPanel({ 
   catalogMeta, 

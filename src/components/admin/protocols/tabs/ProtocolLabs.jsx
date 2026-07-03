@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrainCircuit, TestTube, ArrowUpRight } from 'lucide-react';
+import { BrainCircuit, TestTube, ArrowUpRight } from '@/lib/icons';
 import AILabInsights from '../AILabInsights';
 
 export default function ProtocolLabs({ protocol, onUpdate }) {

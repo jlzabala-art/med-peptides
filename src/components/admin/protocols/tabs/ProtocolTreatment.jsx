@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Settings, Activity, Clock, ShieldCheck, Target } from 'lucide-react';
+import { Plus, Settings, Activity, Clock, ShieldCheck, Target } from '@/lib/icons';
 import ProtocolTimeline from '../ProtocolTimeline';
 import ClinicalProgressTracker from '../ClinicalProgressTracker';
 

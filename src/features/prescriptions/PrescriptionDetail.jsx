@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, FileText, CheckCircle, AlertTriangle } from '@/lib/icons';
 import { getPrescription, updatePrescription, createPrescription } from '../../services/prescriptionsService';
 import { getProtocolById } from '../../services/protocolStorage';
 import { generatePrescriptionLines } from '../../engine/protocolMath';

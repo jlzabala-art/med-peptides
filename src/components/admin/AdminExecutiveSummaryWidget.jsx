@@ -25,7 +25,6 @@ export default function AdminExecutiveSummaryWidget({ metrics = {} }) {
           </span>
         </div>
         <div className={styles.headerActions}>
-          <span className={styles.impactBadge}>Impact: +AED 24,000 projected</span>
         </div>
       </div>
 

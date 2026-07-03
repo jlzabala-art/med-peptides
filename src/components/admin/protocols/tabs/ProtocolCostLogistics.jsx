@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, TrendingUp, PackageCheck, Truck } from 'lucide-react';
+import { DollarSign, TrendingUp, PackageCheck, Truck } from '@/lib/icons';
 import CostSimulation from '../CostSimulation';
 import InventoryImpact from '../InventoryImpact';
 

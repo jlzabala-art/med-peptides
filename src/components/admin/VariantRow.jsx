@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function VariantRow({ variant, navigate }) {
+function VariantRow({ variant, navigate }) {
   const [expandedSection, setExpandedSection] = useState(null);
 
   const toggleSection = (section) => {
@@ -163,3 +163,12 @@ export default function VariantRow({ variant, navigate }) {
     </div>
   );
 }
+
+// Prevent re-renders if the variant data and navigate ref haven't changed
+export default React.memo(VariantRow, (prev, next) =>
+  prev.variant.id === next.variant.id &&
+  prev.variant.stock === next.variant.stock &&
+  prev.variant.isActive === next.variant.isActive &&
+  prev.variant.price === next.variant.price &&
+  prev.navigate === next.navigate
+);

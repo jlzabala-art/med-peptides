@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Box, Info } from 'lucide-react';
+import { Trash2, Box, Info } from '@/lib/icons';
 
 export default function TransactionItemTable({ items, onItemsChange, transactionType }) {
   const handleItemChange = (index, field, value) => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Minus, Plus, Package, Activity } from 'lucide-react';
+import { Minus, Plus, Package, Activity } from '@/lib/icons';
 
 const OrderSummary = ({
   enrichedCartItems,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProtocolTimeline from './ProtocolTimeline';
 import ClinicalProgressTracker from './ClinicalProgressTracker';
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings } from '@/lib/icons';
 
 export default function ProtocolTreatmentPlan({ protocol, onUpdate }) {
   const [isEditingPhases, setIsEditingPhases] = useState(false);

@@ -1,4 +1,4 @@
-import { Pill, Zap, Microscope, BrainCircuit, ArrowRight, ShieldCheck } from "lucide-react";
+import { Pill, Zap, Microscope, BrainCircuit, ArrowRight, ShieldCheck } from '@/lib/icons';
 import React from 'react';
 
 

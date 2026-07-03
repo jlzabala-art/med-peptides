@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuotationsUIStore } from '../../../stores/quotationsUIStore';
-import { X, FileText, ClipboardList, Wand2, Copy, PlusCircle, ArrowRight } from 'lucide-react';
+import { X, FileText, ClipboardList, Wand2, Copy, PlusCircle, ArrowRight } from '@/lib/icons';
 
 const CREATION_OPTIONS = [
   {

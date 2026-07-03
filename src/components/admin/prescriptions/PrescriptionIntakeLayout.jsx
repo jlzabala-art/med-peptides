@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Upload, CheckCircle2 } from 'lucide-react';
+import { Upload, CheckCircle2 } from '@/lib/icons';
 import { collection, query, where, orderBy, onSnapshot, limit, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../../firebase';

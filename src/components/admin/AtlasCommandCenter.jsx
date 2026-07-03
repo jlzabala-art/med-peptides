@@ -5,6 +5,7 @@ import Eye from 'lucide-react/dist/esm/icons/eye';
 import React, { useState, useEffect } from 'react';
 import ExecutiveStatusBar from './widgets/ExecutiveStatusBar';
 import MobileExecutiveDashboard from './mobile/MobileExecutiveDashboard';
+import './AtlasCommandCenter.css';
 
 import {
   DndContext,
@@ -76,19 +77,19 @@ function SortableWidget({ id, widget }) {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 1,
-    // 12 column grid system
-    gridColumn:
-      widget.size === 'full'
-        ? 'span 12'
-        : widget.size === 'large'
-          ? 'span 8'
-          : widget.type === 'kpi'
-            ? 'span 3'
-            : 'span 4',
+    // Remove gridColumn from inline style, use class instead
     minHeight: widget.type === 'kpi' ? '120px' : '400px',
     cursor: 'grab',
   };
+
+  let widgetClass = 'atlas-widget ';
+  if (widget.size === 'full') widgetClass += 'atlas-widget-full ';
+  else if (widget.size === 'large') widgetClass += 'atlas-widget-large ';
+  else if (widget.type === 'kpi') widgetClass += 'atlas-widget-kpi ';
+  else widgetClass += 'atlas-widget-normal ';
+
+  // Inline fallback for desktop layout if we want, but CSS handles it better.
+  const inlineGridColumn = widget.size === 'full' ? 'span 12' : widget.size === 'large' ? 'span 8' : widget.type === 'kpi' ? 'span 3' : 'span 4';
 
   const renderWidgetContent = () => {
     if (widget.type === 'kpi') {
@@ -151,7 +152,7 @@ function SortableWidget({ id, widget }) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className={widgetClass} {...attributes} {...listeners}>
       {renderWidgetContent()}
     </div>
   );
@@ -176,14 +177,7 @@ function WorkspaceGrid() {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={activeLayout.map((w) => w.id)} strategy={rectSortingStrategy}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(12, 1fr)',
-            gap: '1.5rem',
-            marginTop: '1.5rem',
-          }}
-        >
+        <div className="atlas-workspace-grid">
           {activeLayout.map((widget) => (
             <SortableWidget key={widget.id} id={widget.id} widget={widget} />
           ))}

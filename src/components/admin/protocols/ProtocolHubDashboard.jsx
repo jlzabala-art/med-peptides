@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X, Save, Stethoscope, Settings, ClipboardList
-} from 'lucide-react';
+import { X, Save, Stethoscope, Settings, ClipboardList } from '@/lib/icons';
 import ProtocolClinicalTab from './tabs/ProtocolClinicalTab';
 import ProtocolOperationsTab from './tabs/ProtocolOperationsTab';
 import ProtocolRecordsTab from './tabs/ProtocolRecordsTab';
@@ -50,6 +48,20 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
         return <ProtocolRecordsTab protocol={editedProtocol} onUpdate={handleUpdate} />;
       default:
         return null;
+    }
+  };
+
+  /**
+   * handleTabChange
+   * Uses View Transitions API (Chrome 111+) for a native cross-fade between tabs.
+   * Falls back to a plain state update on browsers that don't support it yet.
+   * This replaces framer-motion AnimatePresence for this specific transition.
+   */
+  const handleTabChange = (tabId) => {
+    if (document.startViewTransition) {
+      document.startViewTransition(() => setActiveTab(tabId));
+    } else {
+      setActiveTab(tabId);
     }
   };
 
@@ -101,7 +113,7 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
               {TABS.map(tab => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -118,15 +130,22 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
                   }}
                 >
                   {tab.icon}
-                  {tab.label}
+                  <span>
+                    {tab.label}
+                    {tab.subtitle && (
+                      <span style={{ display: 'block', fontSize: '0.65rem', fontWeight: 400, color: 'var(--text-muted)', marginTop: '1px', letterSpacing: '0.01em' }}>
+                        {tab.subtitle}
+                      </span>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Desktop Content Area */}
+          {/* Desktop Content Area — has-view-transition enables native browser cross-fade */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-main)' }}>
-            <div style={{ maxWidth: '1500px', margin: '0 auto' }}>
+            <div style={{ maxWidth: '1500px', margin: '0 auto' }} className="has-view-transition">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -155,7 +174,7 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
                   overflow: 'hidden'
                 }}>
                   <button
-                    onClick={() => setActiveTab(isActive ? null : tab.id)}
+                    onClick={() => handleTabChange(isActive ? null : tab.id)}
                     style={{
                       width: '100%',
                       padding: '1rem',

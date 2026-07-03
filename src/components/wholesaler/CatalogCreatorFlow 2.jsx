@@ -23,36 +23,7 @@ import {
 } from '../../services/catalogPdfEngine/index.js';
 import { useCatalogBuilderStore } from '../../stores/useCatalogBuilderStore';
 
-import {
-  ArrowLeft,
-  Search,
-  Plus,
-  Check,
-  Trash2,
-  SlidersHorizontal,
-  BarChart2,
-  ShieldCheck,
-  Activity,
-  Brain,
-  Target,
-  Shield,
-  Box,
-  X,
-  Layers,
-  LayoutTemplate,
-  Calendar,
-  Percent,
-  Sparkles as SparklesIcon,
-  Download,
-  ChevronDown,
-  ChevronUp,
-  BookOpen,
-  Mail,
-  MessageSquare,
-  ExternalLink,
-  Building2,
-  FileText,
-} from 'lucide-react';
+import { ArrowLeft, Search, Plus, Check, Trash2, SlidersHorizontal, BarChart2, ShieldCheck, Activity, Brain, Target, Shield, Box, X, Layers, LayoutTemplate, Calendar, Percent, Sparkles as SparklesIcon, Download, ChevronDown, ChevronUp, BookOpen, Mail, MessageSquare, ExternalLink, Building2, FileText } from '@/lib/icons';
 
 const PRODUCT_TYPES = [
   { id: 'lyophilized_peptide', label: 'Lyophilized Peptides' },

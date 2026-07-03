@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Clock } from 'lucide-react';
+import { Activity, Clock } from '@/lib/icons';
 import BaseWidget from '../core/BaseWidget';
 
 export default function ClinicalHistoryWidget(props) {

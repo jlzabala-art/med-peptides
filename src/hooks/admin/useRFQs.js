@@ -1,26 +1,71 @@
-import { useFirestoreCollection } from '../data/useFirestoreCollection';
+/**
+ * useRFQs
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Fetches RFQs with pagination (Golden Rule: never load all docs at once).
+ * CRUD mutations go directly to Firestore SDK.
+ */
+import { useCallback } from 'react';
+import { useFirestorePaginatedCollection } from '../data/useFirestorePaginatedCollection';
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../../firebase';
 
 export function useRFQs(options = {}) {
   const {
     data: rfqs,
     isLoading,
     error,
-    refetch,
-    addDocAsync,
-    updateDocAsync,
-    deleteDocAsync,
-  } = useFirestoreCollection('rfqs', {
+    refresh: refetch,
+    hasMore,
+    loadMore,
+    isFetchingMore,
+    totalCount,
+  } = useFirestorePaginatedCollection('rfqs', {
     ...options,
     orderByFields: options.orderByFields || [['createdAt', 'desc']],
+    pageSize: options.pageSize || 50,
   });
+
+  const addRFQ = useCallback(async (data) => {
+    const ref = await addDoc(collection(db, 'rfqs'), {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    refetch();
+    return ref.id;
+  }, [refetch]);
+
+  const updateRFQ = useCallback(async (id, updates) => {
+    await updateDoc(doc(db, 'rfqs', id), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+    refetch();
+  }, [refetch]);
+
+  const deleteRFQ = useCallback(async (id) => {
+    await deleteDoc(doc(db, 'rfqs', id));
+    refetch();
+  }, [refetch]);
 
   return {
     rfqs,
     loading: isLoading,
     error,
     refetch,
-    addRFQ: addDocAsync,
-    updateRFQ: updateDocAsync,
-    deleteRFQ: deleteDocAsync,
+    hasMore,
+    loadMore,
+    isFetchingMore,
+    totalCount,
+    addRFQ,
+    updateRFQ,
+    deleteRFQ,
   };
 }

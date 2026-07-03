@@ -1,28 +1,71 @@
-import { useFirestoreCollection } from '../data/useFirestoreCollection';
+/**
+ * useProtocols
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Fetches protocols with pagination (Golden Rule: never load all docs at once).
+ * CRUD mutations go directly to Firestore via the paginated hook's refresh.
+ */
+import { useCallback } from 'react';
+import { useFirestorePaginatedCollection } from '../data/useFirestorePaginatedCollection';
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../../firebase';
 
 export function useProtocols(options = {}) {
-  // If we need to filter by status or doctor in the future, we pass whereConditions
   const {
     data: protocols,
     isLoading,
     error,
-    refetch,
-    addDocAsync,
-    updateDocAsync,
-    deleteDocAsync,
-  } = useFirestoreCollection('protocols', {
+    refresh: refetch,
+    hasMore,
+    loadMore,
+    isFetchingMore,
+    totalCount,
+  } = useFirestorePaginatedCollection('protocols', {
     ...options,
-    // Provide a default orderBy if not specified
     orderByFields: options.orderByFields || [['name', 'asc']],
+    pageSize: options.pageSize || 100,
   });
+
+  const addProtocol = useCallback(async (data) => {
+    const ref = await addDoc(collection(db, 'protocols'), {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    refetch();
+    return ref.id;
+  }, [refetch]);
+
+  const updateProtocol = useCallback(async (id, updates) => {
+    await updateDoc(doc(db, 'protocols', id), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+    refetch();
+  }, [refetch]);
+
+  const deleteProtocol = useCallback(async (id) => {
+    await deleteDoc(doc(db, 'protocols', id));
+    refetch();
+  }, [refetch]);
 
   return {
     protocols,
     loading: isLoading,
     error,
     refetch,
-    addProtocol: addDocAsync,
-    updateProtocol: updateDocAsync,
-    deleteProtocol: deleteDocAsync,
+    hasMore,
+    loadMore,
+    isFetchingMore,
+    totalCount,
+    addProtocol,
+    updateProtocol,
+    deleteProtocol,
   };
 }

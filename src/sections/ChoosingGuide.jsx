@@ -1,4 +1,4 @@
-import { Beaker, Search, FlaskConical } from "lucide-react";
+import { Beaker, Search, FlaskConical } from '@/lib/icons';
 import React from 'react';
 
 

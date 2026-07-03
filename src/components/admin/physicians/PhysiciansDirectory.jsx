@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MoreVertical, Search, Users, Plus } from 'lucide-react';
+import { Mail, Phone, MoreVertical, Search, Users, Plus } from '@/lib/icons';
 import DataTable from '../../ui/DataTable';
 
 export default function PhysiciansDirectory({ doctors = [], isLoading = false, onSelectDoctor, patientMap = {}, orderMap = {}, onAddPhysician }) {

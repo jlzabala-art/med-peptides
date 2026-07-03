@@ -1,6 +1,6 @@
 import React from 'react';
 import { useClinicalCart } from '../../contexts/ClinicalCartContext';
-import { ShoppingCart, X, Trash2, Plus, Minus, CheckCircle, Package } from 'lucide-react';
+import { ShoppingCart, X, Trash2, Plus, Minus, CheckCircle, Package } from '@/lib/icons';
 
 export default function ClinicalCartDrawer() {
   const { isOpen, closeCart, items, patient, updateQuantity, removeItem, clearCart } = useClinicalCart();

@@ -1,4 +1,4 @@
-import { Bot, Sparkles, ArrowRight, TrendingUp, BookOpen } from "lucide-react";
+import { Bot, Sparkles, ArrowRight, TrendingUp, BookOpen } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 

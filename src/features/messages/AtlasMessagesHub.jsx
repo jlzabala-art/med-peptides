@@ -1,37 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Search,
-  Filter,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Paperclip,
-  Mic,
-  ArrowRight,
-  TrendingUp,
-  Activity,
-  Link2,
-  Plus,
-  Users,
-  Building,
-  ShoppingCart,
-  Box,
-  MessageSquare,
-  FileText,
-  Bot,
-  Zap,
-  ArrowLeft,
-  MoreVertical,
-  X,
-  ShieldAlert,
-  Calendar as CalendarIcon,
-  ListTodo,
-  Send,
-  Copy,
-  ThumbsUp,
-  Loader2,
-  Tag,
-} from 'lucide-react';
+import { Search, Filter, CheckCircle2, AlertTriangle, Clock, Paperclip, Mic, ArrowRight, TrendingUp, Activity, Link2, Plus, Users, Building, ShoppingCart, Box, MessageSquare, FileText, Bot, Zap, ArrowLeft, MoreVertical, X, ShieldAlert, Calendar as CalendarIcon, ListTodo, Send, Copy, ThumbsUp, Loader2, Tag } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Package, Copy, Check, DollarSign, Activity, Settings, Stethoscope } from 'lucide-react';
+import { Package, Copy, Check, DollarSign, Activity, Settings, Stethoscope } from '@/lib/icons';
 
-export default function ProductGridCard({ product, onClick, isSelected, onToggleSelect }) {
+function ProductGridCard({ product, onClick, isSelected, onToggleSelect }) {
   const [copied, setCopied] = React.useState(false);
 
   const handleCopyId = (e) => {
@@ -121,3 +121,12 @@ export default function ProductGridCard({ product, onClick, isSelected, onToggle
     </div>
   );
 }
+
+// Prevent re-renders if the product data and callbacks haven't changed
+export default React.memo(ProductGridCard, (prev, next) =>
+  prev.product.id === next.product.id &&
+  prev.product.stock === next.product.stock &&
+  prev.product.isActive === next.product.isActive &&
+  prev.product.price === next.product.price &&
+  prev.isSelected === next.isSelected
+);

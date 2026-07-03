@@ -1,4 +1,4 @@
-import { Sparkles, Search, TrendingUp, Info, ShieldAlert } from "lucide-react";
+import { Sparkles, Search, TrendingUp, Info, ShieldAlert } from '@/lib/icons';
 import React, { useState } from 'react';
 
 

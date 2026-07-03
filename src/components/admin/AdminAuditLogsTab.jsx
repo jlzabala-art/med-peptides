@@ -3,12 +3,12 @@ import Activity from "lucide-react/dist/esm/icons/activity";
 import Filter from "lucide-react/dist/esm/icons/filter";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import React, { useState, useEffect } from 'react';
-import { db } from '../../firebase';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import Search from "lucide-react/dist/esm/icons/search";
+import React, { useState } from 'react';
 import AdminPageHeader from './AdminPageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import { useAuditLogs } from '../../hooks/admin/useAuditLogs';
 
 const fmt = (date) => new Intl.DateTimeFormat('en-GB', {
   day: 'short', month: 'short', year: 'numeric',
@@ -16,31 +16,10 @@ const fmt = (date) => new Intl.DateTimeFormat('en-GB', {
 }).format(date);
 
 export default function AdminAuditLogsTab() {
-  const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { auditLogs: paginatedLogs, loading: loadingLogs, hasMore, loadMore, fetchAuditLogs: fetchLogs } = useAuditLogs({ pageSize: 100 });
+  const logs = paginatedLogs || [];
+  const loading = loadingLogs;
   const [searchTerm, setSearchTerm] = useState('');
-
-  const fetchLogs = async () => {
-    setLoading(true);
-    try {
-      const q = query(
-        collection(db, 'audit_log'),
-        orderBy('executed_at', 'desc'),
-        limit(100)
-      );
-      const snap = await getDocs(q);
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setLogs(data);
-    } catch (err) {
-      console.error('Error fetching audit logs:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchLogs();
-  }, []);
 
   const filteredLogs = logs.filter(log => {
     const term = searchTerm.toLowerCase();
@@ -192,6 +171,13 @@ export default function AdminAuditLogsTab() {
             </tbody>
           </table>
         </div>
+        {hasMore && !loading && (
+          <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid #e2e8f0' }}>
+            <button className="gcp-btn-secondary" onClick={loadMore} disabled={loadingLogs}>
+              {loadingLogs ? 'Loading...' : 'Load More'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

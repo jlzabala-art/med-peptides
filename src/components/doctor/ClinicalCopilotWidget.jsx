@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrainCircuit, Sparkles, AlertTriangle, Send, Loader2, CheckCircle2, FileSignature } from 'lucide-react';
+import { BrainCircuit, Sparkles, AlertTriangle, Send, Loader2, CheckCircle2, FileSignature } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 const ClinicalCopilotWidget = ({ onDraftGenerated }) => {

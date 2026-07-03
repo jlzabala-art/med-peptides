@@ -3,7 +3,7 @@ import { collection, getDocs, doc, writeBatch } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/Card';
 import { Button } from '../../ui/Button';
-import { Loader2, DatabaseZap } from 'lucide-react';
+import { Loader2, DatabaseZap } from '@/lib/icons';
 
 export default function DatabaseMigrationUtility() {
   const [loading, setLoading] = useState(false);

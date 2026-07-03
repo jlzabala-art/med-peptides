@@ -97,11 +97,9 @@ export default function HomeSectionRenderer({ id, index = 0, visibility = 'all',
       className={sectionConfig.sectionClass || ''}
       withTransition={!!sectionConfig.withTransition}
     >
-      {isLazy ? (
-        <Suspense fallback={<SectionSkeleton minHeight={420} />}>
-          {content}
-        </Suspense>
-      ) : content}
+      <Suspense fallback={<SectionSkeleton minHeight={420} />}>
+        {content}
+      </Suspense>
     </SectionWrapper>
   );
 

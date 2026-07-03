@@ -1,10 +1,5 @@
 import React from 'react';
-import { 
-  Target, Activity, Clock, Layers, Package, Syringe, DollarSign, 
-  FlaskConical, AlertTriangle, Stethoscope, User, ShieldAlert, 
-  ThumbsUp, UserCheck, BrainCircuit, FileText, FileSpreadsheet, 
-  Copy, Eye 
-} from 'lucide-react';
+import { Target, Activity, Clock, Layers, Package, Syringe, DollarSign, FlaskConical, AlertTriangle, Stethoscope, User, ShieldAlert, ThumbsUp, UserCheck, BrainCircuit, FileText, FileSpreadsheet, Copy, Eye } from '@/lib/icons';
 
 export default function ProtocolExecutiveSummary({ protocol, onUpdate }) {
   // Safe fallbacks and calculations

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Download } from 'lucide-react';
+import { FileText, Download } from '@/lib/icons';
 import BaseWidget from '../core/BaseWidget';
 
 export default function BillingInvoicesWidget(props) {

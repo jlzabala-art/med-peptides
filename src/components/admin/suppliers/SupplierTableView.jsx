@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, ChevronRight, Clock, AlertTriangle, FileText, Activity } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronRight, Clock, AlertTriangle, FileText, Activity } from '@/lib/icons';
 import { StatusChip } from '../../ui';
 
 export default function SupplierTableView({ 

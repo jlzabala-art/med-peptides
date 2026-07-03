@@ -18,13 +18,8 @@ import { AtlasCatalogAgent } from '../../services/AtlasCatalogAgent';
 import { generateCatalogPdf, downloadPdfBlob, generateCatalogExcel, downloadExcelBlob } from '../../services/catalogPdfEngine/index.js';
 import { useCatalogBuilderStore } from '../../stores/useCatalogBuilderStore';
 
-import { 
-  ArrowLeft, Search, Plus, Check, Trash2, SlidersHorizontal, 
-  BarChart2, ShieldCheck, Activity, Brain, Target, Shield, Box, X,
-  Layers, LayoutTemplate, Calendar, Percent, Sparkles as SparklesIcon, Download,
-  ChevronDown, ChevronUp, BookOpen, Mail, MessageSquare, ExternalLink, Building2,
-  FileText
-} from 'lucide-react';
+import { ArrowLeft, Search, Plus, Check, Trash2, SlidersHorizontal, BarChart2, ShieldCheck, Activity, Brain, Target, Shield, Box, X, Layers, LayoutTemplate, Calendar, Percent, Sparkles as SparklesIcon, Download, ChevronDown, ChevronUp, BookOpen, Mail, MessageSquare, ExternalLink, Building2, FileText } from '@/lib/icons';
+import { TextField, Select } from '../ui';
 
 
 const PRODUCT_TYPES = [
@@ -1153,16 +1148,13 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
               <div style={{ padding: '24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Catalog Title</label>
-                    <input 
+                    <TextField 
+                      label="Catalog Title"
                       type="text" 
                       value={catalogMeta.title}
                       onChange={(e) => setCatalogMeta(prev => ({...prev, title: e.target.value}))}
                       placeholder="e.g., Summer Medical Supplies"
-                      style={{ width: '100%', fontSize: '1rem', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '10px', outline: 'none' }}
                     />
-                  </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Description</label>
                     <textarea 
@@ -1184,16 +1176,16 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
                       />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Audience</label>
-                      <select 
+                      <Select 
+                        label="Audience"
                         value={catalogMeta.targetAudience}
                         onChange={(e) => setCatalogMeta(prev => ({...prev, targetAudience: e.target.value}))}
-                        style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.95rem', background: '#fff' }}
-                      >
-                        <option value="patients">Patients</option>
-                        <option value="doctors">Doctors / Clinics</option>
-                        <option value="wholesalers">Wholesalers</option>
-                      </select>
+                        options={[
+                          { value: "patients", label: "Patients" },
+                          { value: "doctors", label: "Doctors / Clinics" },
+                          { value: "wholesalers", label: "Wholesalers" }
+                        ]}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1202,15 +1194,15 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
                   <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}><Percent size={14} /> Pricing Multiplier Strategy</div>
                   <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 4px 0' }}>Adjust prices globally. <i>Note: All prices are ex-works, shipping not included.</i></p>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <select 
+                    <Select 
                       value={pricingMultiplier.basePriceKey}
                       onChange={(e) => setPricingMultiplier(prev => ({...prev, basePriceKey: e.target.value}))}
-                      style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                    >
-                      <option value="cost">Base: Cost</option>
-                      <option value="price">Base: Retail Price</option>
-                    </select>
-                    <span style={{ color: '#94a3b8' }}>+</span>
+                      options={[
+                        { value: "cost", label: "Base: Cost" },
+                        { value: "price", label: "Base: Retail Price" }
+                      ]}
+                      style={{ flex: 1 }}
+                    />
                     <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff', overflow: 'hidden', width: '80px' }}>
                       <input 
                         type="number" 
@@ -1232,18 +1224,16 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '8px 0' }} />
 
                 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Publish Format</label>
-                  <select 
+                  <Select 
+                    label="Publish Format"
                     value={publishOptions.format}
                     onChange={(e) => setPublishOptions({...publishOptions, format: e.target.value})}
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem', background: '#f8fafc', outline: 'none' }}
-                  >
-                    <option value="landing_page">Interactive Landing Page</option>
-                    <option value="pdf">PDF Document</option>
-                    <option value="excel">Excel Spreadsheet</option>
-                  </select>
-                </div>
+                    options={[
+                      { value: "landing_page", label: "Interactive Landing Page" },
+                      { value: "pdf", label: "PDF Document" },
+                      { value: "excel", label: "Excel Spreadsheet" }
+                    ]}
+                  />
 
                 {(publishOptions.format === 'pdf' || publishOptions.format === 'landing_page') && (
                   <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
@@ -1296,16 +1286,16 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
                   {publishOptions.showPrices && (
                     <div style={{ paddingLeft: '28px', animation: 'fadeIn 0.2s ease-out' }}>
-                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, fontSize: '0.85rem', color: '#64748b' }}>Select Price Level</label>
-                      <select 
+                      <Select 
+                        label="Select Price Level"
                         value={publishOptions.priceLevel}
                         onChange={(e) => setPublishOptions({...publishOptions, priceLevel: e.target.value})}
-                        style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', background: '#fff', outline: 'none' }}
-                      >
-                        <option value="MSRP">MSRP (Retail)</option>
-                        <option value="wholesale">Wholesale</option>
-                        <option value="custom">Custom Margin (+20%)</option>
-                      </select>
+                        options={[
+                          { value: "MSRP", label: "MSRP (Retail)" },
+                          { value: "wholesale", label: "Wholesale" },
+                          { value: "custom", label: "Custom Margin (+20%)" }
+                        ]}
+                      />
                     </div>
                   )}
                 </div>
@@ -1674,25 +1664,19 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {activeShareTab === 'email' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Client Email</label>
-                          <input 
-                            type="email" 
-                            value={shareEmail}
-                            onChange={e => setShareEmail(e.target.value)}
-                            placeholder="client@clinic.com"
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Subject</label>
-                          <input 
-                            type="text" 
-                            value={shareEmailSubject}
-                            onChange={e => setShareEmailSubject(e.target.value)}
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                          />
-                        </div>
+                        <TextField 
+                          label="Client Email"
+                          type="email" 
+                          value={shareEmail}
+                          onChange={e => setShareEmail(e.target.value)}
+                          placeholder="client@clinic.com"
+                        />
+                        <TextField 
+                          label="Subject"
+                          type="text" 
+                          value={shareEmailSubject}
+                          onChange={e => setShareEmailSubject(e.target.value)}
+                        />
                         <div>
                           <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Message Body</label>
                           <textarea 
@@ -1734,16 +1718,13 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
                     {activeShareTab === 'whatsapp' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Client Phone (with country code)</label>
-                          <input 
-                            type="text" 
-                            value={sharePhone}
-                            onChange={e => setSharePhone(e.target.value)}
-                            placeholder="e.g. +34600123456"
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                          />
-                        </div>
+                        <TextField 
+                          label="Client Phone (with country code)"
+                          type="text" 
+                          value={sharePhone}
+                          onChange={e => setSharePhone(e.target.value)}
+                          placeholder="e.g. +34600123456"
+                        />
                         <div>
                           <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Prefilled Text</label>
                           <textarea 
@@ -1785,28 +1766,23 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
 
                     {activeShareTab === 'bigin' && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Zoho Bigin Contact Email</label>
-                          <input 
-                            type="email" 
-                            value={shareBiginEmail}
-                            onChange={e => setShareBiginEmail(e.target.value)}
-                            placeholder="contact@bigin.com"
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Pipeline Stage</label>
-                          <select 
-                            value={shareBiginStage}
-                            onChange={e => setShareBiginStage(e.target.value)}
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', background: '#fff' }}
-                          >
-                            <option value="qualification">Qualification</option>
-                            <option value="proposition">Proposal / Negotiation</option>
-                            <option value="delivered">Catalog Delivered</option>
-                          </select>
-                        </div>
+                        <TextField 
+                          label="Zoho Bigin Contact Email"
+                          type="email" 
+                          value={shareBiginEmail}
+                          onChange={e => setShareBiginEmail(e.target.value)}
+                          placeholder="contact@bigin.com"
+                        />
+                        <Select 
+                          label="Pipeline Stage"
+                          value={shareBiginStage}
+                          onChange={e => setShareBiginStage(e.target.value)}
+                          options={[
+                            { value: "qualification", label: "Qualification" },
+                            { value: "proposition", label: "Proposal / Negotiation" },
+                            { value: "delivered", label: "Catalog Delivered" }
+                          ]}
+                        />
                         <div>
                           <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '6px' }}>Notes / Context</label>
                           <textarea 

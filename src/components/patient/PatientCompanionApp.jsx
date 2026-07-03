@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Droplet, CheckCircle, Clock, Plane, Info, AlertTriangle, ArrowRight, ChevronRight, Activity } from 'lucide-react';
+import { Calendar, Droplet, CheckCircle, Clock, Plane, Info, AlertTriangle, ArrowRight, ChevronRight, Activity } from '@/lib/icons';
 
 export default function PatientCompanionApp({ protocol }) {
   const [activeTab, setActiveTab] = useState('today');

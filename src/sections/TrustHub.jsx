@@ -1,4 +1,4 @@
-import { ShieldCheck, MessageCircle, Globe } from "lucide-react";
+import { ShieldCheck, MessageCircle, Globe } from '@/lib/icons';
 /**
  * TrustHub.jsx — Phase 5-A
  *

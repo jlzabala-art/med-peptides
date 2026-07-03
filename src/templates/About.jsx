@@ -1,9 +1,4 @@
-import { 
-  ShieldCheck, Microscope, SearchCheck, FileCheck, Activity, Target, Award,
-  CheckCircle2, Users, Zap, Lock, FlaskConical, Dna, Scale, History,
-  ClipboardCheck, ChevronRight, Sparkles, Database, ArrowRight, Globe,
-  Beaker, ShieldAlert, Headphones as Headset, Mail, MessageCircle
-} from 'lucide-react';
+import { ShieldCheck, Microscope, SearchCheck, FileCheck, Activity, Target, Award, CheckCircle2, Users, Zap, Lock, FlaskConical, Dna, Scale, History, ClipboardCheck, ChevronRight, Sparkles, Database, ArrowRight, Globe, Beaker, ShieldAlert, Headphones as Headset, Mail, MessageCircle } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';

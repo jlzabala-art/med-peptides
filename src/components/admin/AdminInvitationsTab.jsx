@@ -28,21 +28,30 @@ import notifier from '../../services/NotificationService';
 import InvitationWizard from './invitations/InvitationWizard';
 import InvitationPreviewPanel from './invitations/InvitationPreviewPanel';
 import BulkInviteModal from './invitations/BulkInviteModal';
+import { useInvitations } from '../../hooks/admin/useInvitations';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 const EMAILJS_TEMPLATE_ID = 'template_7unfks8';
 
 export default function AdminInvitationsTab({ restrictedRoles = null, readOnly = false, tenantId = null }) {
   const { toast } = useToast();
-  const [invitations, setInvitations] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Pagination & Filtering
-  const [lastVisible, setLastVisible] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [pageCursors, setPageCursors] = useState({});
-  const PAGE_SIZE = 20;
+  
+  const additionalConstraints = tenantId ? [['tenantId', '==', tenantId]] : [];
+  const { 
+    invitations: paginatedInvitations, 
+    loading: loadingInvitations, 
+    hasMore, 
+    loadMore, 
+    fetchInvitations, 
+    totalCount 
+  } = useInvitations({
+    pageSize: 50,
+    additionalConstraints
+  });
+  
+  const invitations = paginatedInvitations || [];
+  const loading = loadingInvitations;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -62,35 +71,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     if (deepLinkSearch) setSearchQuery(deepLinkSearch);
   }, [deepLinkSearch]);
 
-  useEffect(() => {
-    fetchInvitations();
-  }, [tenantId]);
-
-  async function fetchInvitations(page = 1) {
-    try {
-      setLoading(true);
-      let qBuilder = collection(db, 'invitations');
-      if (tenantId) qBuilder = query(qBuilder, where('tenantId', '==', tenantId));
-
-      const countSnap = await getCountFromServer(qBuilder);
-      const total = countSnap.data().count;
-      setTotalItems(total);
-      setTotalPages(Math.ceil(total / PAGE_SIZE));
-      let qConstraints = [orderBy('invitedAt', 'desc'), limit(PAGE_SIZE)];
-      if (page > 1 && pageCursors[page]) qConstraints.push(startAfter(pageCursors[page]));
-      const q = query(qBuilder, ...qConstraints);
-      const querySnapshot = await getDocs(q);
-      const list = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setInvitations(list);
-      if (querySnapshot.docs.length > 0) {
-        setPageCursors(prev => ({ ...prev, [page + 1]: querySnapshot.docs[querySnapshot.docs.length - 1] }));
-      }
-    } catch (err) {
-      console.error('Error fetching invitations:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Fetching handled by useInvitations hook
 
   async function handleSendInvitation(formData) {
     if (!formData.name || !formData.email) {
@@ -166,7 +147,7 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
     notifier.confirmCritical('Are you sure you want to delete this invitation?', async () => {
       try {
         await deleteDoc(doc(db, 'invitations', id));
-        setInvitations(prev => prev.filter(i => i.id !== id));
+        fetchInvitations();
         toast.success('Invitation deleted.');
       } catch (err) {
         console.error('Delete error:', err);
@@ -247,61 +228,78 @@ export default function AdminInvitationsTab({ restrictedRoles = null, readOnly =
             </div>
          </div>
       </div>
+      
+      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ flex: 1 }}>
+          <GlobalSearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search by name or email..."
+            resultCount={loading ? undefined : filtered.length}
+          />
+        </div>
+      </div>
 
-      <DataTable
-        data={filtered}
-        keyField="id"
-        selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        rowsPerPage={PAGE_SIZE}
-        onPageChange={(page) => { setCurrentPage(page); fetchInvitations(page); }}
-        emptyTitle="No Invitations Found"
-        emptyDescription="Start provisioning users by clicking 'New Invitation'."
-        renderBatchActions={(selected) => (
-          <button onClick={async () => {
-              notifier.confirmCritical(`Delete ${selected.length} invitations?`, async () => {
-                for (const id of selected) await deleteDoc(doc(db, 'invitations', id));
-                setInvitations((prev) => prev.filter((i) => !selected.includes(i.id)));
-                setSelectedIds([]);
-              });
-            }}
-            className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--error)', borderColor: 'var(--error)' }}
-          >
-            <Trash2 size={14} /> Delete Selected
-          </button>
-        )}
-        columns={[
-          {
-            key: 'name',
-            header: 'Name / Email',
-            render: (inv) => <AppEntityCell title={inv.name} subtitle={inv.email} />,
-          },
-          {
-            key: 'status',
-            header: 'Status',
-            render: (inv) => <AppStatusChip status={getInvitationStatus(inv)} />,
-          },
-          {
-            key: 'actions',
-            header: 'Actions',
-            align: 'right',
-            render: (inv) => (
-              <AppActionGroup
-                actions={[
-                  { type: 'view', onClick: () => setSelectedPreview(inv) },
-                  ...(inv.status !== 'accepted' && !readOnly ? [{ type: 'send', onClick: () => handleResend(inv) }] : []),
-                  ...(!readOnly ? [{ type: 'delete', onClick: () => handleDelete(inv.id) }] : []),
-                ]}
-              />
-            ),
-          },
-        ]}
-      />
+      {loading && invitations.length === 0 ? (
+        <DataTableSkeleton columns={3} rows={8} />
+      ) : (
+        <>
+          <DataTable
+            data={filtered}
+            keyField="id"
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            emptyTitle="No Invitations Found"
+            emptyDescription="Start provisioning users by clicking 'New Invitation'."
+            renderBatchActions={(selected) => (
+              <button onClick={async () => {
+                  notifier.confirmCritical(`Delete ${selected.length} invitations?`, async () => {
+                    for (const id of selected) await deleteDoc(doc(db, 'invitations', id));
+                    fetchInvitations();
+                    setSelectedIds([]);
+                  });
+                }}
+                className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--error)', borderColor: 'var(--error)' }}
+              >
+                <Trash2 size={14} /> Delete Selected
+              </button>
+            )}
+            columns={[
+              {
+                key: 'name',
+                header: 'Name / Email',
+                render: (inv) => <AppEntityCell title={inv.name} subtitle={inv.email} />,
+              },
+              {
+                key: 'status',
+                header: 'Status',
+                render: (inv) => <AppStatusChip status={getInvitationStatus(inv)} />,
+              },
+              {
+                key: 'actions',
+                header: 'Actions',
+                align: 'right',
+                render: (inv) => (
+                  <AppActionGroup
+                    actions={[
+                      { type: 'view', onClick: () => setSelectedPreview(inv) },
+                      ...(inv.status !== 'accepted' && !readOnly ? [{ type: 'send', onClick: () => handleResend(inv) }] : []),
+                      ...(!readOnly ? [{ type: 'delete', onClick: () => handleDelete(inv.id) }] : []),
+                    ]}
+                  />
+                ),
+              },
+            ]}
+          />
+          {hasMore && (
+            <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+              <button className="gcp-btn-secondary" onClick={loadMore} disabled={loadingInvitations}>
+                {loadingInvitations ? 'Loading...' : 'Load More'}
+              </button>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Overlays */}
       {showWizard && (

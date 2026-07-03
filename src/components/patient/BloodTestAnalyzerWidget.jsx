@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileUp, Activity, AlertCircle, CheckCircle2, ChevronRight, Zap, FileText } from 'lucide-react';
+import { FileUp, Activity, AlertCircle, CheckCircle2, ChevronRight, Zap, FileText } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 const BloodTestAnalyzerWidget = ({ onRecommendationClick }) => {

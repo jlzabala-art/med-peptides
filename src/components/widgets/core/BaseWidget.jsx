@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { GripHorizontal, X } from 'lucide-react';
+import { GripHorizontal, X } from '@/lib/icons';
 
 export default function BaseWidget({ 
   id,

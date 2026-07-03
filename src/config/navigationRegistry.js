@@ -1,14 +1,4 @@
-import {
-  LayoutDashboard, Inbox, MessageSquare, Calendar, Bell,
-  Users, Stethoscope, HeartPulse, FileText, Activity, Dna, FlaskConical, Bot,
-  Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag,
-  Building, MapPin, Receipt, CreditCard, Gift, Users2, LineChart, Anchor,
-  Truck, ThermometerSnowflake, Navigation, ClipboardList,
-  Mail, Newspaper, Share2, Ticket, SplitSquareHorizontal, PieChart,
-  BrainCircuit, Sparkles, TerminalSquare, ActivitySquare, LayoutTemplate,
-  ShieldAlert, Fingerprint, Settings, LayoutGrid, UploadCloud, DownloadCloud,
-  CheckCircle, Factory, CheckSquare
-} from 'lucide-react';
+import { LayoutDashboard, Inbox, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Activity, Dna, FlaskConical, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Gift, Users2, LineChart, Anchor, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, SplitSquareHorizontal, PieChart, BrainCircuit, Sparkles, TerminalSquare, ActivitySquare, LayoutTemplate, ShieldAlert, Settings, LayoutGrid, UploadCloud, DownloadCloud, CheckCircle, Factory, CheckSquare } from '@/lib/icons';
 
 // Helper to provide missing icons safely
 const HandshakeIcon = Users2;
@@ -189,7 +179,7 @@ export const NAVIGATION_REGISTRY = [
       { id: '/documents', label: 'Documents', icon: FileText, roles: ['admin', 'supplier', 'patient'] },
       { id: '/users', label: 'Users', icon: Users, roles: ['admin'] },
       { id: '/roles', label: 'Roles', icon: ShieldCheck, roles: ['admin'] },
-      { id: '/permissions', label: 'Permissions', icon: Fingerprint, roles: ['admin'] },
+      { id: '/permissions', label: 'Permissions', icon: ShieldCheck, roles: ['admin'] },
       { id: '/territories', label: 'Territories', icon: MapPin, roles: ['admin'] },
       { id: '/access-levels', label: 'Access Levels', icon: ShieldAlert, roles: ['admin'] },
       { id: '/invitations', label: 'Invitations', icon: Mail, roles: ['admin'] },

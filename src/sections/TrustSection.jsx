@@ -1,4 +1,4 @@
-import { Truck, Zap, Shield, CheckCircle } from "lucide-react";
+import { Truck, Zap, Shield, CheckCircle } from '@/lib/icons';
 export default function TrustSection() {
   const stats = [
     { label: 'Purity Standard', value: '99%+', icon: <CheckCircle className="icon-blue" /> },

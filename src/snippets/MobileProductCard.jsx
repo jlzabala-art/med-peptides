@@ -1,4 +1,4 @@
-import { Zap, Sparkles, Bot, Beaker, Activity, HelpCircle, Check, ChevronRight, ShoppingCart, BookOpen } from "lucide-react";
+import { Zap, Sparkles, Bot, Beaker, Activity, HelpCircle, Check, ChevronRight, ShoppingCart, BookOpen } from '@/lib/icons';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 

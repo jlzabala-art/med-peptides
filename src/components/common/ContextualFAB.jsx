@@ -2,22 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Plus,
-  Box,
-  Building2,
-  ShoppingCart,
-  Receipt,
-  CalendarPlus,
-  MessageSquarePlus,
-  GraduationCap,
-  FileText,
-  Zap,
-  Search,
-  Settings,
-  Bot,
-  CheckCircle2,
-} from 'lucide-react';
+import { Plus, Box, Building2, ShoppingCart, Receipt, CalendarPlus, MessageSquarePlus, GraduationCap, FileText, Zap, Search, Settings, Bot, CheckCircle2 } from '@/lib/icons';
 import { useScrollDirection } from '../../hooks/useScrollDirection';
 
 // Context mapping configuration

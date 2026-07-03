@@ -3,17 +3,7 @@ import { motion } from 'framer-motion';
 import { useQuotationsUIStore } from '../../stores/quotationsUIStore';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
-import {
-  FileText,
-  Search,
-  Plus,
-  Filter,
-  MoreHorizontal,
-  Archive,
-  RefreshCw,
-  LayoutGrid,
-  List as ListIcon
-} from 'lucide-react';
+import { FileText, Search, Plus, Filter, MoreHorizontal, Archive, RefreshCw, LayoutGrid, List as ListIcon } from '@/lib/icons';
 import QuotationBuilderWizard from './modals/QuotationBuilderWizard';
 import QuotationDetailDrawer from './QuotationDetailDrawer';
 import DataTable from '../ui/DataTable';

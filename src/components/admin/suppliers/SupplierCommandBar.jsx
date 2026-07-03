@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, Search, List, Grid, CheckSquare, Settings, Download, Mail, Activity, Archive, Map } from 'lucide-react';
+import { Filter, Search, List, Grid, CheckSquare, Settings, Download, Mail, Activity, Archive, Map } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 export default function SupplierCommandBar({ 

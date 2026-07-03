@@ -1,27 +1,5 @@
 import React, { useState } from 'react';
-import {
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
-  ChevronRight,
-  BarChart3,
-  DollarSign,
-  Activity,
-  Settings,
-  TrendingUp,
-  TrendingDown,
-  BrainCircuit,
-  ShieldAlert,
-  Zap,
-  Factory,
-  PackageSearch,
-  Users,
-  Star,
-  Box,
-  Check,
-  Cpu,
-  Plus
-} from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ArrowRight, ChevronRight, BarChart3, DollarSign, Activity, Settings, TrendingUp, TrendingDown, BrainCircuit, ShieldAlert, Zap, Factory, PackageSearch, Users, Star, Box, Check, Cpu, Plus } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 
 export default function MobileExecutiveDashboard() {

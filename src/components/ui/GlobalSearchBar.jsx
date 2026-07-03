@@ -165,8 +165,14 @@ export default function GlobalSearchBar({
   const { height, fontSize, iconSize } = sizeConfig[size] || sizeConfig.md;
 
   return (
-    <div
-      className={`atlas-search ${className}`}
+    <div className="search-bar-wrap">
+      {/*
+        .search-bar-wrap activates @container search-bar (container-type:inline-size)
+        so the bar adapts to its own container width — not the viewport.
+        E.g. it can shrink in a sidebar without needing a global media query.
+      */}
+      <div
+        className={`atlas-search ${className}`}
       style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
     >
       <style>{`
@@ -366,6 +372,7 @@ export default function GlobalSearchBar({
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

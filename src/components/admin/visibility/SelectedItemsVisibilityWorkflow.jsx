@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, X, Globe, Users, DollarSign, Shield, RefreshCw, Save, Archive } from 'lucide-react';
+import { ArrowLeft, Plus, X, Globe, Users, DollarSign, Shield, RefreshCw, Save, Archive } from '@/lib/icons';
 import { db } from '../../../firebase.js';
 import { doc, getDoc } from 'firebase/firestore';
 

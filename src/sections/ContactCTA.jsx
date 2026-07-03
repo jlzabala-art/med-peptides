@@ -1,4 +1,4 @@
-import { PhoneCall, ArrowRight, BookOpen } from "lucide-react";
+import { PhoneCall, ArrowRight, BookOpen } from '@/lib/icons';
 import { useNavigate } from 'react-router-dom';
 
 export default function ContactCTA() {

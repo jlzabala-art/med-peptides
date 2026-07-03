@@ -1,4 +1,4 @@
-import { Zap, Layers, ArrowRight, Clock, FlaskConical } from "lucide-react";
+import { Zap, Layers, ArrowRight, Clock, FlaskConical } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

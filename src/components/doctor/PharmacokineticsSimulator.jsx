@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, AlertTriangle, Info, TrendingUp } from 'lucide-react';
+import { Activity, AlertTriangle, Info, TrendingUp } from '@/lib/icons';
 import {
   AreaChart,
   Area,

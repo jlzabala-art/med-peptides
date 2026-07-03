@@ -15,10 +15,13 @@ import notifier from '../../services/NotificationService';
 import AdminPageHeader from './AdminPageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import { useAgencyDeals } from '../../hooks/admin/useAgencyDeals';
 
 export default function AdminAgencyDealsTab() {
-  const [deals, setDeals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { agencyDeals: paginatedDeals, loading: loadingDeals, hasMore, loadMore, fetchAgencyDeals } = useAgencyDeals({ pageSize: 50 });
+  const deals = paginatedDeals || [];
+  const loading = loadingDeals;
+  const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   // Contacts from Zoho/Firebase
@@ -36,21 +39,8 @@ export default function AdminAgencyDealsTab() {
   });
 
   useEffect(() => {
-    loadDeals();
     loadContacts(); // Mock for now, ideal: load from Zoho or users
   }, []);
-
-  const loadDeals = async () => {
-    setLoading(true);
-    try {
-      const q = query(collection(db, 'agency_orders'), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      setDeals(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } catch (err) {
-      console.error("Error loading agency deals:", err);
-    }
-    setLoading(false);
-  };
 
   const loadContacts = async () => {
     // In a real scenario, this would fetch from Zoho Books API via Cloud Function
@@ -96,7 +86,7 @@ export default function AdminAgencyDealsTab() {
         supplierId: '', customerId: '', supplierName: '', customerName: '',
         description: '', totalVolume: '', commissionType: 'percentage', commissionValue: ''
       });
-      loadDeals();
+      fetchAgencyDeals();
     } catch (err) {
       console.error(err);
       toast.error('Failed to create deal.');
@@ -111,7 +101,7 @@ export default function AdminAgencyDealsTab() {
           status: 'INVOICED',
           invoicedAt: serverTimestamp()
         });
-        loadDeals();
+        fetchAgencyDeals();
       } catch (err) {
         console.error(err);
         toast.error('Error updating deal status.');
@@ -136,7 +126,7 @@ export default function AdminAgencyDealsTab() {
       <div style={{ marginBottom: '1rem' }}>
         <GlobalSearchBar
           value={searchTerm || ''}
-          onChange={(v) => setSearchTerm && setSearchTerm(v)}
+          onChange={setSearchTerm}
           placeholder="Search deals by supplier, customer, status..."
           resultCount={loading ? undefined : deals.length}
           namespace="admin-agency-deals"
@@ -203,6 +193,13 @@ export default function AdminAgencyDealsTab() {
               ))}
             </tbody>
           </table>
+        )}
+        {hasMore && !loading && (
+          <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+            <button className="gcp-btn-secondary" onClick={loadMore} disabled={loadingDeals}>
+              {loadingDeals ? 'Loading...' : 'Load More'}
+            </button>
+          </div>
         )}
       </Card>
 

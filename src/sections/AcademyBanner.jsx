@@ -1,4 +1,4 @@
-import { Award, ArrowRight, Users, GraduationCap, BookOpen } from "lucide-react";
+import { Award, ArrowRight, Users, GraduationCap, BookOpen } from '@/lib/icons';
 import React from 'react';
 
 

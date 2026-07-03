@@ -52,10 +52,26 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
+  /* Integer font-weight — legacy, usado por font-weight: var(--font-weight-bold) etc. */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+
+  /*
+   * Inter Variable — ejes de variación continuos (wght 100–900, opsz 14–32).
+   * Usar font-variation-settings en lugar de font-weight enteros da precisión exacta.
+   * El eje opsz se gestiona con font-optical-sizing:auto en el body.
+   *
+   * Uso: font-variation-settings: var(--fvs-bold);
+   */
+  --fvs-light:    'wght' 300;
+  --fvs-regular:  'wght' 400;
+  --fvs-medium:   'wght' 500;
+  --fvs-semibold: 'wght' 600;
+  --fvs-bold:     'wght' 700;
+  --fvs-extrabold:'wght' 800;
+  --fvs-black:    'wght' 900;
   
   /* Shadows */
   /* Modern soft shadows */
@@ -140,4 +156,15 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /*
+   * Inter Variable — axes activos:
+   *   opsz (optical size): auto → el navegador elige el valor según font-size
+   *   wght (weight): 400 por defecto, sobrescribible con font-variation-settings
+   *
+   * Esto reemplaza los font-weight enteros (que redondean al peso más cercano
+   * en fuentes estáticas) por un valor exacto del eje continuo de Inter Variable.
+   */
+  font-optical-sizing: auto;
+  font-variation-settings: 'wght' 400;
 }

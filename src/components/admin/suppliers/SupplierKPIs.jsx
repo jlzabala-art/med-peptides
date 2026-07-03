@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, FileText, TrendingDown, Users, Globe, Building2 } from 'lucide-react';
+import { ShieldCheck, FileText, TrendingDown, Users, Globe, Building2 } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 export default function SupplierKPIs({ kpiStats, activeKpiFilter, setActiveKpiFilter, isMobile }) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Check, Copy, X, Star, Building, User } from 'lucide-react';
+import { Lock, Check, Copy, X, Star, Building, User } from '@/lib/icons';
 import { Tabs, StatusChip } from '../../ui';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';

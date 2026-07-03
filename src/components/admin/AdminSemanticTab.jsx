@@ -8,35 +8,15 @@ import X from "lucide-react/dist/esm/icons/x";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Info from "lucide-react/dist/esm/icons/info";
 import Check from "lucide-react/dist/esm/icons/check";
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  startAfter,
-  getDocs,
-  doc,
-  updateDoc,
-  serverTimestamp,
-  where,
-  startAt,
-  endAt,
-  getDoc,
-} from 'firebase/firestore';
+import React, { useState, useCallback } from 'react';
+import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-
-
-
-
-
-
-
-
-
-
 import DataTable from '../ui/DataTable';
+import AdminPageHeader from './AdminPageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import { useSemanticProducts } from '../../hooks/admin/useSemanticProducts';
 
 const CANONICAL_GOALS = [
   'cognitive_mood',
@@ -61,17 +41,23 @@ const GOAL_LABELS = {
 export default function AdminSemanticTab({ readOnly = false }) {
   const { user } = useAuth();
 
-  // Products and Pagination State
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [lastDoc, setLastDoc] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
-
-  // Filters State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGoal, setSelectedGoal] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all'); // 'all' | 'ready' | 'pending'
+  // Use the semantic products hook for data fetching
+  const {
+    products,
+    loading,
+    loadingMore,
+    hasMore,
+    searchTerm,
+    setSearchTerm,
+    selectedGoal,
+    setSelectedGoal,
+    selectedStatus,
+    setSelectedStatus,
+    fetchProducts,
+    log,
+    addLog,
+    updateProductInline
+  } = useSemanticProducts();
 
   // Selection
   const [selectedIds, setSelectedIds] = useState([]);
@@ -80,10 +66,6 @@ export default function AdminSemanticTab({ readOnly = false }) {
   const [editingProduct, setEditingProduct] = useState(null);
   const [refiningIds, setRefiningIds] = useState(new Set());
   const [bulkRefining, setBulkRefining] = useState(false);
-  const [log, setLog] = useState([]);
-
-  const addLog = (msg, type = 'info') =>
-    setLog((prev) => [{ msg, type, ts: new Date().toLocaleTimeString() }, ...prev].slice(0, 15));
 
   const getToken = async () => user?.getIdToken?.();
 
@@ -105,86 +87,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
     return resp.json();
   };
 
-  // Fetch products from Firestore
-  const fetchProducts = useCallback(
-    async (isLoadMore = false) => {
-      if (isLoadMore) setLoadingMore(true);
-      else {
-        setLoading(true);
-        setProducts([]);
-      }
-
-      try {
-        let qRef = collection(db, 'products');
-        let constraints = [];
-
-        // Goal Filter
-        if (selectedGoal && selectedGoal !== 'all') {
-          constraints.push(where('goals', 'array-contains', selectedGoal));
-        }
-
-        // Name Search Prefix Match (case-sensitive)
-        if (searchTerm.trim()) {
-          constraints.push(orderBy('name'));
-          constraints.push(startAt(searchTerm.trim()));
-          constraints.push(endAt(searchTerm.trim() + '\uf8ff'));
-        } else {
-          constraints.push(orderBy('name'));
-        }
-
-        // Pagination
-        if (isLoadMore && lastDoc) {
-          constraints.push(startAfter(lastDoc));
-        }
-
-        constraints.push(limit(20));
-
-        const q = query(qRef, ...constraints);
-        const querySnapshot = await getDocs(q);
-
-        const newDocs = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Apply client-side status filter
-        let filteredDocs = newDocs;
-        if (selectedStatus === 'ready') {
-          filteredDocs = newDocs.filter((p) => p.goals && p.goals.length > 0);
-        } else if (selectedStatus === 'pending') {
-          filteredDocs = newDocs.filter((p) => !(p.goals && p.goals.length > 0));
-        }
-
-        if (isLoadMore) {
-          setProducts((prev) => [...prev, ...filteredDocs]);
-        } else {
-          setProducts(filteredDocs);
-        }
-
-        setLastDoc(querySnapshot.docs[querySnapshot.docs.length - 1] || null);
-        setHasMore(querySnapshot.docs.length === 20);
-
-        if (!isLoadMore) {
-          addLog(`Loaded ${newDocs.length} products (Page 1)`, 'success');
-        } else {
-          addLog(`Loaded ${newDocs.length} additional products`, 'success');
-        }
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        addLog(`Fetch error: ${err.message}`, 'error');
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [searchTerm, selectedGoal, selectedStatus, lastDoc]
-  );
-
-  useEffect(() => {
-    setLastDoc(null);
-    fetchProducts(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, selectedGoal, selectedStatus]);
+  // Removed local fetchProducts and useEffect as they are now in the custom hook
 
   // Run AI refinement for a single product
   async function handleSingleRefine(product) {
@@ -210,8 +113,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
       const docRef = doc(db, 'products', product.id);
       const updatedSnap = await getDoc(docRef);
       if (updatedSnap.exists()) {
-        const updatedData = { id: product.id, ...updatedSnap.data() };
-        setProducts((prev) => prev.map((p) => (p.id === product.id ? updatedData : p)));
+        updateProductInline(product.id, updatedData);
       }
       addLog(`Refined "${product.name}" successfully!`, 'success');
     } catch (err) {
@@ -247,7 +149,6 @@ export default function AdminSemanticTab({ readOnly = false }) {
     try {
       await callRefineAgent({ mode: 'refine_bulk', products: productsToRefine });
       addLog(`Bulk refinement completed successfully!`, 'success');
-      setLastDoc(null);
       await fetchProducts(false);
       setSelectedIds([]);
     } catch (err) {
@@ -283,17 +184,10 @@ export default function AdminSemanticTab({ readOnly = false }) {
 
       await updateDoc(docRef, updatePayload);
 
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                ...updatePayload,
-                updatedAt: new Date(),
-              }
-            : p
-        )
-      );
+      updateProductInline(editingProduct.id, {
+        ...updatePayload,
+        updatedAt: new Date(),
+      });
 
       addLog(`Saved edits for "${editingProduct.name}"`, 'success');
       setEditingProduct(null);
@@ -653,38 +547,13 @@ export default function AdminSemanticTab({ readOnly = false }) {
 
   return (
     <div style={{ padding: '24px', background: 'var(--color-bg-surface)' }}>
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid var(--color-border)',
-          paddingBottom: '16px',
-          marginBottom: '20px',
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '18px',
-              fontWeight: 600,
-              color: 'var(--color-text-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            🔬 AI Semantic Intelligence Sync
-          </h2>
-          <p
-            style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--color-text-secondary)' }}
-          >
-            Enrich Firestore product catalogs for medical/clinical natural language search queries.
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="AI Semantic Intelligence Sync"
+        subtitle="Enrich Firestore product catalogs for medical/clinical natural language search queries."
+        icon={Sparkles}
+        iconBg="linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))"
+        iconColor="var(--color-bg-surface)"
+      />
 
       <div
         style={{
@@ -694,44 +563,47 @@ export default function AdminSemanticTab({ readOnly = false }) {
           overflow: 'hidden',
         }}
       >
-        <DataTable
-          columns={columns}
-          data={products}
-          keyField="id"
-          selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
-          expandableRender={renderExpandedRow}
-          renderBatchActions={(ids) => (
-            <button
-              onClick={() => handleBulkRefine(ids)}
-              disabled={bulkRefining}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '4px',
-                border: 'none',
-                background: 'var(--color-primary)',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-            >
-              {bulkRefining ? (
-                <Loader2 size={14} className="spinner-small" />
-              ) : (
-                <Sparkles size={14} />
-              )}
-              Refine Selected with AI
-            </button>
-          )}
-          emptyTitle="No semantic data found"
-          emptyDescription="No products matched the given filters."
-          searchQuery={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search by product name prefix (case-sensitive)..."
+        {loading && products.length === 0 ? (
+          <DataTableSkeleton columns={5} rows={10} />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={products}
+            keyField="id"
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+            expandableRender={renderExpandedRow}
+            renderBatchActions={(ids) => (
+              <button
+                onClick={() => handleBulkRefine(ids)}
+                disabled={bulkRefining}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  background: 'var(--color-primary)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                {bulkRefining ? (
+                  <Loader2 size={14} className="spinner-small" />
+                ) : (
+                  <Sparkles size={14} />
+                )}
+                Refine Selected with AI
+              </button>
+            )}
+            emptyTitle="No semantic data found"
+            emptyDescription="No products matched the given filters."
+            searchQuery={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Search by product name prefix (case-sensitive)..."
           filters={[
             ...(selectedGoal !== 'all' ? [{ label: 'Canonical Goal', value: selectedGoal, type: 'goal' }] : []),
             ...(selectedStatus !== 'all' ? [{ label: 'AI Status', value: selectedStatus, type: 'status' }] : [])
@@ -772,6 +644,7 @@ export default function AdminSemanticTab({ readOnly = false }) {
             </div>
           )}
         />
+        )}
         {hasMore && products.length > 0 && !loading && (
           <div
             style={{

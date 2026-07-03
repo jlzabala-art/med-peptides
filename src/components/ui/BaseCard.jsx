@@ -17,32 +17,36 @@ export default function BaseCard({
   style = {}
 }) {
   return (
-    <div className={`base-card ${hoverable ? 'base-card--hoverable' : ''} ${className}`} style={style}>
-      {(title || Icon || action) && (
-        <div className="base-card__header">
-          <h3 className="base-card__title">
-            {Icon && <Icon size={20} className="text-primary" />}
-            {title}
-          </h3>
-          {action && <div className="base-card__action">{action}</div>}
+    <div className="base-card-wrap">
+      {/* .base-card-wrap → container-type:inline-size activa las @container base-card rules
+          del components.css. El card responde a su propio ancho, no al viewport global. */}
+      <div className={`base-card ${hoverable ? 'base-card--hoverable' : ''} ${className}`} style={style}>
+        {(title || Icon || action) && (
+          <div className="base-card__header">
+            <h3 className="base-card__title">
+              {Icon && <Icon size={20} className="text-primary" />}
+              {title}
+            </h3>
+            {action && <div className="base-card__action">{action}</div>}
+          </div>
+        )}
+        
+        <div className="base-card__body">
+          {loading ? (
+            <div className="skeleton" style={{ height: '100px', width: '100%' }} />
+          ) : emptyState ? (
+            emptyState
+          ) : (
+            children
+          )}
         </div>
-      )}
-      
-      <div className="base-card__body">
-        {loading ? (
-          <div className="skeleton" style={{ height: '100px', width: '100%' }} />
-        ) : emptyState ? (
-          emptyState
-        ) : (
-          children
+
+        {footer && (
+          <div className="base-card__footer">
+            {footer}
+          </div>
         )}
       </div>
-
-      {footer && (
-        <div className="base-card__footer">
-          {footer}
-        </div>
-      )}
     </div>
   );
 }

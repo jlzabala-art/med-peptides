@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Clock, Send, CheckCircle, TrendingUp, DollarSign } from 'lucide-react';
+import { FileText, Clock, Send, CheckCircle, TrendingUp, DollarSign } from '@/lib/icons';
 
 export default function QuotationsKPIBanner({ quotations = [], loading = false }) {
   // Skeleton KPI

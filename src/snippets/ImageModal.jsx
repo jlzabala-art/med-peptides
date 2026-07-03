@@ -1,4 +1,4 @@
-import { ZoomIn, X } from "lucide-react";
+import { ZoomIn, X } from '@/lib/icons';
 import React, { useEffect } from 'react';
 
 

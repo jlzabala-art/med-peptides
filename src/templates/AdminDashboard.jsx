@@ -400,7 +400,7 @@ export default function AdminDashboard() {
         </div>
       }
     >
-      <div style={{ padding: '1rem' }}>
+      <div style={{ padding: '1.5rem', width: '100%', boxSizing: 'border-box' }}>
         <React.Suspense fallback={<AdminLoadingFallback />}>
           <Outlet />
         </React.Suspense>

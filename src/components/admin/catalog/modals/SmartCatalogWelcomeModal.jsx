@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, FileText, Filter, Box, X } from 'lucide-react';
+import { Brain, FileText, Filter, Box, X } from '@/lib/icons';
 
 export default function SmartCatalogWelcomeModal({ isOpen, selectedCount, filteredCount, onSelect, onClose }) {
   if (!isOpen) return null;

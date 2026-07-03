@@ -28,6 +28,10 @@ import { StatusChip } from '../ui';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppFilterBar from '../ui/AppFilterBar';
+import { useAccountManagers } from '../../hooks/admin/useAccountManagers';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import AdminPageHeader from './AdminPageHeader';
 
 
 
@@ -96,9 +100,11 @@ const RowActions = ({ row, setSelectedManager, handleDelete }) => {
 
 export default function AdminAccountManagersTab() {
   const isMobile = useResponsive();
-  const [managers, setManagers] = useState([]);
+  const { accountManagers: paginatedManagers, loading: loadingManagers, hasMore, loadMore, fetchAccountManagers: refreshManagers, totalCount } = useAccountManagers({ pageSize: 50 });
   const [wholesellers, setWholesellers] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loadingMetadata, setLoadingMetadata] = useState(true);
+  const loading = loadingManagers || loadingMetadata;
+  const managers = paginatedManagers || [];
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -108,19 +114,7 @@ export default function AdminAccountManagersTab() {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
-      const q = query(collection(db, 'users'), where('role', '==', 'account_manager'));
-      const snap = await getDocs(q);
-      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      const enhancedList = list.map(m => ({
-        ...m,
-        assignedClinics: m.assignedClinics ?? Math.floor(Math.random() * 20),
-        assignedDoctors: m.assignedDoctors ?? Math.floor(Math.random() * 50),
-        leads: m.leads ?? Math.floor(Math.random() * 30),
-        revenue: m.revenue ?? Math.floor(Math.random() * 100000),
-      }));
-      setManagers(enhancedList);
-
+      setLoadingMetadata(true);
       const wsSnap = await getDocs(collection(db, 'wholesellers'));
       const wsMap = {};
       wsSnap.docs.forEach((d) => {
@@ -129,9 +123,9 @@ export default function AdminAccountManagersTab() {
       setWholesellers(wsMap);
     } catch (e) {
       console.error(e);
-      toast.error('Failed to load managers');
+      toast.error('Failed to load wholesellers');
     } finally {
-      setLoading(false);
+      setLoadingMetadata(false);
     }
   };
 
@@ -142,7 +136,7 @@ export default function AdminAccountManagersTab() {
   async function handleUpdate(id, data) {
     try {
       await updateDoc(doc(db, 'users', id), data);
-      setManagers((prev) => prev.map((m) => (m.id === id ? { ...m, ...data } : m)));
+      refreshManagers();
       toast.success('Manager updated');
     } catch (err) {
       console.error('Update failed', err);
@@ -154,7 +148,7 @@ export default function AdminAccountManagersTab() {
     notifier.confirmCritical('Are you sure you want to delete this manager?', async () => {
       try {
         await deleteDoc(doc(db, 'users', id));
-        setManagers(prev => prev.filter(m => m.id !== id));
+        refreshManagers();
         toast.success('Manager deleted');
       } catch (err) {
         console.error('Delete failed', err);
@@ -272,23 +266,24 @@ export default function AdminAccountManagersTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%', position: 'relative' }}>
       {/* SECTION 1 & 2: Header + KPI Strip */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: '0 0 0.25rem 0', color: 'var(--text-main)' }}>Account Managers</h1>
-            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>Manage commercial representatives, territories, clinics, and assignments.</p>
-          </div>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
-              <Download size={16} /> <span className="hide-mobile">Export</span>
-            </button>
-            <button className="btn btn-outline" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
-              <Mail size={16} /> <span className="hide-mobile">Invite Manager</span>
-            </button>
-            <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
-              <Plus size={16} /> Add Manager
-            </button>
-          </div>
-        </div>
+        <AdminPageHeader
+          title="Account Managers"
+          subtitle="Manage commercial representatives, territories, clinics, and assignments."
+          icon={Users}
+          rightContent={
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+                <Download size={16} /> <span className="hide-mobile">Export</span>
+              </button>
+              <button className="btn btn-outline" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+                <Mail size={16} /> <span className="hide-mobile">Invite Manager</span>
+              </button>
+              <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+                <Plus size={16} /> Add Manager
+              </button>
+            </div>
+          }
+        />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
@@ -355,14 +350,12 @@ export default function AdminAccountManagersTab() {
 
       {/* SECTION 3: Search + Filters */}
       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.5rem 0.75rem' }}>
-          <Search size={16} color="var(--text-muted)" />
-          <input 
-            type="text" 
-            placeholder="Search by name, email, or territory..." 
+        <div style={{ flex: 1 }}>
+          <GlobalSearchBar
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%', fontSize: '0.9rem' }}
+            onChange={setSearchTerm}
+            placeholder="Search by name, email, or territory..."
+            resultCount={loading ? undefined : filtered.length}
           />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -460,17 +453,28 @@ export default function AdminAccountManagersTab() {
               </div>
             ))}
           </div>
+        ) : loading && managers.length === 0 ? (
+          <DataTableSkeleton columns={5} rows={8} />
         ) : (
-          <DataTable
-            data={filtered}
-            columns={columns}
-            keyField="id"
-            loading={loading}
-            selectable={true}
-            selectedRows={selectedRows}
-            onSelectionChange={setSelectedRows}
-            onRowClick={(row) => setSelectedManager(row)}
-          />
+          <>
+            <DataTable
+              data={filtered}
+              columns={columns}
+              keyField="id"
+              loading={loading}
+              selectable={true}
+              selectedRows={selectedRows}
+              onSelectionChange={setSelectedRows}
+              onRowClick={(row) => setSelectedManager(row)}
+            />
+            {hasMore && (
+              <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+                <button className="gcp-btn-secondary" onClick={loadMore} disabled={loadingManagers}>
+                  {loadingManagers ? 'Loading...' : 'Load More'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

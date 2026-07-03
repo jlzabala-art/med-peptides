@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, HeartPulse, AlertCircle } from 'lucide-react';
+import { Activity, HeartPulse, AlertCircle } from '@/lib/icons';
 import ClinicalProgressTracker from '../ClinicalProgressTracker';
 
 export default function ProtocolMonitoring({ protocol, onUpdate }) {

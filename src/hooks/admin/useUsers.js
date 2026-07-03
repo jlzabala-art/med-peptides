@@ -1,26 +1,29 @@
-import { useFirestoreCollection } from '../data/useFirestoreCollection';
+import { useFirestorePaginatedCollection } from '../data/useFirestorePaginatedCollection';
 
 export function useUsers(options = {}) {
   const {
     data: users,
-    isLoading,
+    isLoading: loading,
+    isFetchingMore: loadingMore,
+    hasMore,
     error,
-    refetch,
-    addDocAsync,
-    updateDocAsync,
-    deleteDocAsync,
-  } = useFirestoreCollection('users', {
+    totalCount,
+    loadMore,
+    refresh: fetchUsers,
+  } = useFirestorePaginatedCollection('users', {
     ...options,
-    orderByFields: options.orderByFields || [['name', 'asc']],
+    orderByFields: options.orderByFields || [['createdAt', 'desc']],
+    pageSize: options.pageSize || 20,
   });
 
   return {
     users,
-    loading: isLoading,
+    loading,
+    loadingMore,
+    hasMore,
     error,
-    refetch,
-    addUser: addDocAsync,
-    updateUser: updateDocAsync,
-    deleteUser: deleteDocAsync,
+    totalCount,
+    loadMore,
+    fetchUsers,
   };
 }

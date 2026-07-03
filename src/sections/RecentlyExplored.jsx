@@ -1,4 +1,4 @@
-import { Pill, Bot, Sparkles, History, ScrollText, ExternalLink, Search, Dna, Clock, FlaskConical, ChevronRight, Trash2 } from "lucide-react";
+import { Pill, Bot, Sparkles, History, ScrollText, ExternalLink, Search, Dna, Clock, FlaskConical, ChevronRight, Trash2 } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * RecentlyExplored.jsx — Phase 4-D (v3 — Premium Redesign)

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileSignature, Sparkles, Loader2, CheckCircle2, Copy } from 'lucide-react';
+import { FileSignature, Sparkles, Loader2, CheckCircle2, Copy } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 const AISoapGeneratorWidget = ({ patientName = "Paciente" }) => {

@@ -4,7 +4,7 @@ import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useCatalogSelectionStore } from '../../../stores/useCatalogSelectionStore';
 import TransactionItemTable from './TransactionItemTable';
-import { ChevronLeft, Save, Send, Box, Filter } from 'lucide-react';
+import { ChevronLeft, Save, Send, Box, Filter } from '@/lib/icons';
 import { CatalogService } from '../catalog/api/catalog.service';
 
 export default function TransactionEditor() {

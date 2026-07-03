@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, Calendar } from 'lucide-react';
+import { Printer, Calendar } from '@/lib/icons';
 
 export default function DosageMatrix({ protocol }) {
   // Extract all unique products across all phases

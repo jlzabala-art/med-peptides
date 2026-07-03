@@ -140,7 +140,7 @@ export default function HomeView({
   return (
     <div style={{ position: 'relative', background: 'var(--background)' }}>
       <MoleculeParticles />
-      <div className="home-seq" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="home-seq" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '140px', paddingBottom: '140px' }}>
         {sections.map((section, idx) => (
           <HomeSectionRenderer
             key={section.id}

@@ -1,4 +1,4 @@
-import { Bot, Moon, ChevronDown, ArrowRight, Heart, TrendingUp, Activity, Dna, ChevronUp, Brain, Shield, Flame, FlaskConical, Leaf } from "lucide-react";
+import { Bot, Moon, ChevronDown, ArrowRight, Heart, TrendingUp, Activity, Dna, ChevronUp, Brain, Shield, Flame, FlaskConical, Leaf } from '@/lib/icons';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 

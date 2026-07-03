@@ -41,6 +41,9 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { logAction } from '../../services/auditLogger';
+import { useBulkOrders } from '../../hooks/admin/useBulkOrders';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 
 
@@ -418,8 +421,7 @@ const sLabel = {
 
 // ── Main Tab ──────────────────────────────────────────────────────────────────
 export default function AdminBulkOrdersTab() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { bulkOrders: orders, loading, hasMore, loadMore, fetchBulkOrders: refreshOrders, totalCount } = useBulkOrders({ pageSize: 50 });
   const [filterStatus, setFilter] = useState('all');
   const [unreadCount, setUnread] = useState(0);
   const [showBuilder, setShowBuilder] = useState(false);
@@ -437,32 +439,22 @@ export default function AdminBulkOrdersTab() {
 
   // Real-time listener
   useEffect(() => {
-    const q = query(collection(db, 'bulk_orders'), orderBy('createdAt', 'desc'), limit(100));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setOrders(all);
-        setUnread(all.filter((o) => o.status === 'submitted').length);
-        setLoading(false);
-        // Inject data context for Atlas AI
-        const submittedOrders = all.filter(o => o.status === 'submitted');
-        const processingOrders = all.filter(o => o.status === 'processing');
-        window.dispatchEvent(new CustomEvent('admin-context-update', {
-          detail: {
-            page: 'bulk-orders',
-            totalBulkOrders: all.length,
-            submittedCount: submittedOrders.length,
-            processingCount: processingOrders.length,
-            recentSubmitted: submittedOrders.slice(0, 5).map(o => ({ id: o.id, user: o.userEmail || o.userId, total: o.totalValue, status: o.status })),
-            summary: `Bulk Orders dashboard: ${all.length} bulk orders. ${submittedOrders.length} newly submitted, ${processingOrders.length} processing.`
-          }
-        }));
-      },
-      () => setLoading(false)
-    );
-    return () => unsub();
-  }, []);
+    if (!orders) return;
+    const all = orders;
+    setUnread(all.filter((o) => o.status === 'submitted').length);
+    const submittedOrders = all.filter(o => o.status === 'submitted');
+    const processingOrders = all.filter(o => o.status === 'processing');
+    window.dispatchEvent(new CustomEvent('admin-context-update', {
+      detail: {
+        page: 'bulk-orders',
+        totalBulkOrders: all.length,
+        submittedCount: submittedOrders.length,
+        processingCount: processingOrders.length,
+        recentSubmitted: submittedOrders.slice(0, 5).map(o => ({ id: o.id, user: o.userEmail || o.userId, total: o.totalValue, status: o.status })),
+        summary: `Bulk Orders dashboard: ${all.length} bulk orders. ${submittedOrders.length} newly submitted, ${processingOrders.length} processing.`
+      }
+    }));
+  }, [orders]);
 
   // Status transition
   async function handleUpdate(orderId, newStatus) {
@@ -492,7 +484,7 @@ export default function AdminBulkOrdersTab() {
   }
 
   // Filtered
-  const filtered = orders.filter((o) => 
+  const filtered = (orders || []).filter((o) => 
     (filterStatus === 'all' || o.status === filterStatus) &&
     (o.wholesalerName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
      o.wholesalerEmail?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -500,11 +492,11 @@ export default function AdminBulkOrdersTab() {
 
   // Stats
   const stats = {
-    submitted: orders.filter((o) => o.status === 'submitted').length,
-    confirmed: orders.filter((o) => o.status === 'confirmed').length,
-    shipped: orders.filter((o) => o.status === 'shipped').length,
-    delivered: orders.filter((o) => o.status === 'delivered').length,
-    total: orders.length,
+    submitted: (orders || []).filter((o) => o.status === 'submitted').length,
+    confirmed: (orders || []).filter((o) => o.status === 'confirmed').length,
+    shipped: (orders || []).filter((o) => o.status === 'shipped').length,
+    delivered: (orders || []).filter((o) => o.status === 'delivered').length,
+    total: totalCount || (orders || []).length,
   };
 
   const columns = [
@@ -671,56 +663,71 @@ export default function AdminBulkOrdersTab() {
       )}
 
       {/* List */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search bulk orders by wholesaler..."
+          resultCount={loading ? undefined : filtered.length}
+        />
+      </div>
+      
       <Card style={{ overflow: 'visible', padding: 0 }}>
-        {loading ? (
-          <div style={{ padding: '3rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <div style={{ height: 80, borderRadius: '18px', background: '#f1f5f9' }} />
-            <div style={{ height: 80, borderRadius: '18px', background: '#f1f5f9' }} />
-          </div>
+        {loading && (!orders || orders.length === 0) ? (
+          <DataTableSkeleton columns={5} rows={8} />
         ) : (
-          <DataTable
-            data={filtered}
-            columns={columns}
-            keyField="id"
-            expandableRender={(o) => renderOrderDetails(o, handleUpdate)}
-            searchQuery={searchTerm}
-            onSearchChange={setSearchTerm}
-            searchPlaceholder="Search by wholesaler name or email..."
-            renderCustomFilters={() => (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {[
-                  { key: 'all', label: `All (${stats.total})`, color: 'var(--color-primary)' },
-                  { key: 'draft', label: `Drafts (${orders.filter(o => o.status === 'draft').length})`, color: 'var(--color-text-tertiary)' },
-                  { key: 'submitted', label: `Pending (${stats.submitted})`, color: '#6366f1' },
-                  { key: 'confirmed', label: `Confirmed (${stats.confirmed})`, color: 'var(--color-success)' },
-                  { key: 'shipped', label: `Shipped (${stats.shipped})`, color: '#f59e0b' },
-                  { key: 'delivered', label: `Delivered (${stats.delivered})`, color: 'var(--color-success)' },
-                ].map((f) => (
-                  <button
-                    key={f.key}
-                    type="button"
-                    onClick={() => setFilter(f.key)}
-                    style={{
-                      padding: '0.35rem 0.85rem',
-                      borderRadius: 'var(--radius-sm)',
-                      cursor: 'pointer',
-                      border: `1px solid ${filterStatus === f.key ? f.color : 'var(--color-border)'}`,
-                      background: filterStatus === f.key ? `${f.color}0d` : 'var(--color-bg-surface)',
-                      color: filterStatus === f.key ? f.color : 'var(--color-text-secondary)',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      transition: 'all 0.12s',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    {f.label}
-                  </button>
-                ))}
+          <>
+            <DataTable
+              data={filtered}
+              columns={columns}
+              keyField="id"
+              expandableRender={(o) => renderOrderDetails(o, handleUpdate)}
+              searchQuery={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Search by wholesaler name or email..."
+              renderCustomFilters={() => (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {[
+                    { key: 'all', label: `All (${stats.total})`, color: 'var(--color-primary)' },
+                    { key: 'draft', label: `Drafts (${(orders || []).filter(o => o.status === 'draft').length})`, color: 'var(--color-text-tertiary)' },
+                    { key: 'submitted', label: `Pending (${stats.submitted})`, color: '#6366f1' },
+                    { key: 'confirmed', label: `Confirmed (${stats.confirmed})`, color: 'var(--color-success)' },
+                    { key: 'shipped', label: `Shipped (${stats.shipped})`, color: '#f59e0b' },
+                    { key: 'delivered', label: `Delivered (${stats.delivered})`, color: 'var(--color-success)' },
+                  ].map((f) => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={() => setFilter(f.key)}
+                      style={{
+                        padding: '0.35rem 0.85rem',
+                        borderRadius: 'var(--radius-sm)',
+                        cursor: 'pointer',
+                        border: `1px solid ${filterStatus === f.key ? f.color : 'var(--color-border)'}`,
+                        background: filterStatus === f.key ? `${f.color}0d` : 'var(--color-bg-surface)',
+                        color: filterStatus === f.key ? f.color : 'var(--color-text-secondary)',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        transition: 'all 0.12s',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              emptyTitle="No bulk orders found"
+              emptyDescription={filterStatus !== 'all' ? 'No bulk orders found with this status.' : 'No bulk orders from wholesalers yet.'}
+            />
+            {hasMore && (
+              <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+                <button className="gcp-btn-secondary" onClick={loadMore} disabled={loading}>
+                  {loading ? 'Loading...' : 'Load More'}
+                </button>
               </div>
             )}
-            emptyTitle="No bulk orders found"
-            emptyDescription={filterStatus !== 'all' ? 'No bulk orders found with this status.' : 'No bulk orders from wholesalers yet.'}
-          />
+          </>
         )}
       </Card>
 

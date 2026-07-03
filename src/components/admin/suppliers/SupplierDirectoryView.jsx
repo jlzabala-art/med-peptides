@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Building, Activity, Star } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, Activity, Star } from '@/lib/icons';
 import { StatusChip } from '../../ui';
 
 export default function SupplierDirectoryView({ 

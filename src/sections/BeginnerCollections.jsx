@@ -1,4 +1,4 @@
-import { Bot, Sparkles, ArrowRight, GitCompare, BookOpen } from "lucide-react";
+import { Bot, Sparkles, ArrowRight, GitCompare, BookOpen } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

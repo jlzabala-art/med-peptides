@@ -1,5 +1,6 @@
  
 import { useMemo, useEffect } from 'react';
+import { useProductBySlug } from '../hooks/data/useProductBySlug';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ProductDetail from './ProductDetail';
 import Breadcrumbs from '../components/common/Breadcrumbs';
@@ -29,54 +30,7 @@ export default function ProductTemplate({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 1. Resolve active product from the global products array (Blueprints)
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const product = useMemo(() => {
-    if (!products || products.length === 0) return null;
-    const targetSlug = (slug || '').toLowerCase().trim();
-
-    for (const p of products) {
-      // Strategy A: Direct name-based slug match (e.g., "bpc-157")
-      const nameSlug = p.name ? p.name.toLowerCase().replace(/\s+/g, '-').trim() : '';
-      if (nameSlug && nameSlug === targetSlug) {
-        return p;
-      }
-
-      // Strategy B: Top-level document ID match (e.g., "bpc-157-5mg-vial")
-      const pId = (p.id || '').toLowerCase().trim();
-      if (pId && pId === targetSlug) {
-        return p;
-      }
-
-      // Strategy C: Top-level slug property match
-      const pSlugProp = (p.slug || '').toLowerCase().trim();
-      if (pSlugProp && pSlugProp === targetSlug) {
-        return p;
-      }
-
-      // Strategy D: Variant document ID match (e.g., "bpc-157-10mg-vial")
-      // Sort variants identical to the PDP sorting order to ensure matching index
-      const sortedVariants = [...(p.variants || [])].sort((a, b) => {
-        const numA = parseFloat((a.dosage || a.strength || '0').replace(/[^0-9.]/g, '')) || 0;
-        const numB = parseFloat((b.dosage || b.strength || '0').replace(/[^0-9.]/g, '')) || 0;
-        return numA - numB;
-      });
-
-      const matchedVarIdx = sortedVariants.findIndex(v => {
-        const vDocId = (v._docId || '').toLowerCase().trim();
-        const vId = (v.id || '').toLowerCase().trim();
-        return (vDocId && vDocId === targetSlug) || (vId && vId === targetSlug);
-      });
-
-      if (matchedVarIdx !== -1) {
-        return {
-          ...p,
-          _preselectedVariantIndex: matchedVarIdx
-        };
-      }
-    }
-    return null;
-  }, [products, slug]);
+  const { product, isLoading: productLoading, error } = useProductBySlug(slug);
 
   // 2. SEO & Analytics
   useEffect(() => {
@@ -126,7 +80,7 @@ export default function ProductTemplate({
   });
 
   // Loading State with Skeletons
-  if (!products || products.length === 0) {
+  if (productLoading) {
     return (
       <div className="container" style={{ paddingBottom: '4rem' }}>
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2.5rem' }}>

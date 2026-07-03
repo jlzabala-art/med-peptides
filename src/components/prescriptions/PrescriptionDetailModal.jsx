@@ -1,26 +1,5 @@
 import React, { useState } from 'react';
-import {
-  X,
-  Edit,
-  CheckCircle,
-  Download,
-  FileText,
-  Send,
-  User,
-  Stethoscope,
-  Activity,
-  Clock,
-  Calendar,
-  Pill,
-  FlaskConical,
-  MoreHorizontal,
-  ChevronDown,
-  Upload,
-  FileCheck,
-  AlertCircle,
-  Check,
-  ArrowUpRight,
-} from 'lucide-react';
+import { X, Edit, CheckCircle, Download, FileText, Send, User, Stethoscope, Activity, Clock, Calendar, Pill, FlaskConical, MoreHorizontal, ChevronDown, Upload, FileCheck, AlertCircle, Check, ArrowUpRight } from '@/lib/icons';
 import StandardDrawer from '../ui/StandardDrawer';
 import StandardDrawerTabs from '../common/StandardDrawerTabs';
 

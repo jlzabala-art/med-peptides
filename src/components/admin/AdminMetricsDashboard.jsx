@@ -284,57 +284,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
     );
   };
 
-  // Mock Wholesaler Leaderboard Data
-  const wholesalers = [
-    {
-      name: 'Gulf Distribution LLC',
-      revenue: 'AED 245,000',
-      patients: 120,
-      orders: 48,
-      growth: '+14%',
-      margin: '18%',
-      score: 96,
-      status: 'Strategic',
-    },
-    {
-      name: 'PurePeptides GCC',
-      revenue: 'AED 134,000',
-      patients: 84,
-      orders: 32,
-      growth: '+22%',
-      margin: '24%',
-      score: 92,
-      status: 'Active',
-    },
-    {
-      name: 'Apex Pharmacy Direct',
-      revenue: 'AED 98,200',
-      patients: 45,
-      orders: 20,
-      growth: '-4%',
-      margin: '15%',
-      score: 78,
-      status: 'Active',
-    },
-    {
-      name: 'Oasis Biotech UAE',
-      revenue: 'AED 62,500',
-      patients: 38,
-      orders: 15,
-      growth: '+8%',
-      margin: '20%',
-      score: 85,
-      status: 'Critical Audit',
-    },
-  ];
-
-  // Cash flow mock data
-  const cashFlowData = [
-    { name: 'Week 1', Incoming: 65000, Outgoing: 42000, Balance: 23000 },
-    { name: 'Week 2', Incoming: 82000, Outgoing: 38000, Balance: 44000 },
-    { name: 'Week 3', Incoming: 54000, Outgoing: 49000, Balance: 5000 },
-    { name: 'Week 4', Incoming: 95000, Outgoing: 52000, Balance: 43000 },
-  ];
+  // Removed mock data for cash flow and wholesalers
 
   return (
     <div className={styles.atlasCommandCenter}>
@@ -541,9 +491,6 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
                     { id: 'todayPriorities', label: "Today's Priorities" },
                     { id: 'businessHealth', label: 'Business Health Lights' },
                     { id: 'financeTasks', label: 'Finance Workspace Tasks' },
-                    { id: 'cashFlow', label: 'Cash Flow forecasting' },
-                    { id: 'crmPipeline', label: 'CRM Sales Funnel' },
-                    { id: 'wholesalersRanking', label: 'Top Wholesalers Leaderboard' },
                     { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
                     { id: 'systemStatus', label: 'Infrastructure Specs' },
                   ].map((w) => (
@@ -613,23 +560,7 @@ export default function AdminMetricsDashboard({ wholesalerId = null }) {
             />
           )}
 
-          {/* ── 5. CASH FLOW ANALYSIS WIDGET ────────────────────────────── */}
-          {visibleWidgets.includes('cashFlow') && (
-            <CashFlowForecast cashFlowData={cashFlowData} riskLevel="Low" />
-          )}
 
-          {/* ── 6. CRM PIPELINE FUNNEL WIDGET ────────────────────────────── */}
-          {visibleWidgets.includes('crmPipeline') && <CrmPipelineFunnel />}
-
-          {/* ── 7. TOP WHOLESALERS LEADERBOARD ────────────────────────── */}
-          {visibleWidgets.includes('wholesalersRanking') && (
-            <WholesalersLeaderboard
-              wholesalersData={wholesalers}
-              onSelect={(ws) => {
-                navigate(`/admin/wholesellers?search=${ws.name}`);
-              }}
-            />
-          )}
 
           {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
           {visibleWidgets.includes('aiWorkspace') && (

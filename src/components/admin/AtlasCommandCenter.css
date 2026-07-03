@@ -1,0 +1,28 @@
+.atlas-workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.atlas-widget {
+  min-height: 400px;
+}
+.atlas-widget-kpi {
+  min-height: 120px;
+}
+
+@media (max-width: 1400px) {
+  .atlas-widget-kpi {
+    grid-column: span 6 !important;
+  }
+  .atlas-widget-large, .atlas-widget-normal, .atlas-widget-full {
+    grid-column: span 12 !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .atlas-widget-kpi {
+    grid-column: span 12 !important;
+  }
+}

@@ -24,7 +24,7 @@ export default function MetricCard({
 
   return (
     <BaseCard 
-      className={`metric-card ${className}`} 
+      className={`metric-card has-view-transition ${className}`} 
       title={title}
       icon={Icon}
       action={HeaderAction}

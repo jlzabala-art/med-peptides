@@ -207,43 +207,55 @@ function SectionLabel({ icon: Icon, label, color = '#6366f1' }) {
   );
 }
 
+import { TextField } from '../ui';
+
 function Field({ label, name, value, onChange, type = 'text', rows }) {
-  const inputStyle = {
-    width: '100%',
-    padding: '0.5rem 0.75rem',
-    border: '1px solid #e2e8f0',
-    borderRadius: '8px',
-    fontSize: '0.88rem',
-    background: '#fff',
-    outline: 'none',
-    boxSizing: 'border-box',
-    color: '#0f172a',
-  };
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-      <label
-        style={{
-          fontSize: '0.76rem',
-          fontWeight: 700,
-          color: '#64748b',
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em',
-        }}
-      >
-        {label}
-      </label>
-      {rows ? (
+  if (rows) {
+    const inputStyle = {
+      width: '100%',
+      padding: '0.5rem 0.75rem',
+      border: '1px solid #e2e8f0',
+      borderRadius: '8px',
+      fontSize: '0.88rem',
+      background: '#fff',
+      outline: 'none',
+      boxSizing: 'border-box',
+      color: '#0f172a',
+      resize: 'vertical',
+      lineHeight: 1.5
+    };
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+        <label
+          style={{
+            fontSize: '0.76rem',
+            fontWeight: 700,
+            color: '#64748b',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {label}
+        </label>
         <textarea
           name={name}
           value={value || ''}
           onChange={onChange}
           rows={rows}
-          style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
+          style={inputStyle}
         />
-      ) : (
-        <input name={name} value={value || ''} onChange={onChange} type={type} style={inputStyle} />
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  return (
+    <TextField
+      label={label}
+      name={name}
+      value={value || ''}
+      onChange={onChange}
+      type={type}
+    />
   );
 }
 

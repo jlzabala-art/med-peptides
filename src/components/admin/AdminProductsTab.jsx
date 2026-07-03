@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  Search, Copy, Download, UploadCloud, Percent, ArrowUpRight,
-  XCircle, EyeOff, Eye, Trash2, BookOpen, Plus,
-  ChevronDown, ChevronUp, Package, ClipboardList, Bot,
-  ShoppingCart, MessageSquare, DollarSign, Activity,
-  FileText, LineChart, Stethoscope, LayoutGrid, List,
-} from 'lucide-react';
+import { Search, Copy, Download, UploadCloud, Percent, ArrowUpRight, XCircle, EyeOff, Eye, Trash2, BookOpen, Plus, ChevronDown, ChevronUp, Package, ClipboardList, Bot, ShoppingCart, MessageSquare, DollarSign, Activity, FileText, LineChart, Stethoscope, LayoutGrid, List } from '@/lib/icons';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +15,8 @@ import AppEntityCell from '../ui/AppEntityCell';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
+import TextField from '../ui/TextField';
+import Select from '../ui/Select';
 
 // Admin Components
 import AdminSupplyNotifierWidget from './gadgets/AdminSupplyNotifierWidget';
@@ -35,6 +31,7 @@ import VariantRow from './VariantRow';
 import ProductGridCard from './ProductGridCard';
 
 // Hooks
+import { useCatalogSelectionStore } from '../../stores/useCatalogSelectionStore';
 import { useToast } from '../../hooks/useToast';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { useDataFilters } from '../../hooks/ui/useDataFilters';
@@ -202,6 +199,13 @@ export default function AdminProductsTab({
   const { mutateAsync: deleteProduct, isPending: isDeleting, variables: deleteVars } = useDeleteProduct();
   const { mutateAsync: performBulkUpdate, isPending: isBulkUpdating } = useBulkUpdateProduct();
   const savingProduct = (isUpdating ? updateVars?.id : null) || (isDeleting ? deleteVars : null);
+
+  const setSelectedCatalogIds = useCatalogSelectionStore(state => state.setSelectedIds);
+
+  const handleManageVisibility = (selectedIds) => {
+    setSelectedCatalogIds(selectedIds);
+    navigate('/admin/pricing-visibility');
+  };
 
   const {
     selectedIds: selectedProductIds,
@@ -928,35 +932,15 @@ export default function AdminProductsTab({
             />
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  marginBottom: '0.5rem',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                Apply to Category:
-              </label>
-              <select
+              <Select
+                label="Apply to Category:"
                 value={bulkCategory}
                 onChange={(e) => setBulkCategory(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                }}
-              >
-                <option value="All">All Categories</option>
-                {categoriesToShow.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
+                options={[
+                  { value: "All", label: "All Categories" },
+                  ...categoriesToShow.map(cat => ({ value: cat, label: cat }))
+                ]}
+              />
             <div>
               <label
                 style={{
@@ -1002,28 +986,13 @@ export default function AdminProductsTab({
                 </button>
               </div>
             </div>
-            <div style={{ width: '150px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  marginBottom: '0.5rem',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                {bulkMode === 'percent' ? 'Percentage (e.g. 5 or -10)' : 'Amount (e.g. 10 or -5)'}
-              </label>
-              <input
+            <div style={{ width: '200px' }}>
+              <TextField
+                label={bulkMode === 'percent' ? 'Percentage (e.g. 5 or -10)' : 'Amount (e.g. 10 or -5)'}
                 type="number"
                 value={bulkValue}
                 onChange={(e) => setBulkValue(e.target.value)}
                 placeholder="0"
-                style={{
-                  width: '100%',
-                  padding: '0.6rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border)',
-                }}
               />
             </div>
             <button
@@ -1240,6 +1209,7 @@ export default function AdminProductsTab({
                     onExportCSV={handleExportCSV}
                     onToggleBulkMode={() => setBulkMode(bulkMode ? null : 'percent')}
                     onOpenCatalogSelect={handleOpenCatalogSelect}
+                    onManageVisibility={handleManageVisibility}
                   />
                 )}
               />

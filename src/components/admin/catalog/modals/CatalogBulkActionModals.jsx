@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tag, Building, Trash2, X, AlertCircle } from 'lucide-react';
+import { Tag, Building, Trash2, X, AlertCircle } from '@/lib/icons';
 import toast from 'react-hot-toast';
 
 export function BulkSupplierModal({ isOpen, onClose, selectedIds, onApply, suppliers = [] }) {

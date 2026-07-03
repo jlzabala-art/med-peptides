@@ -1,4 +1,4 @@
-import { Zap, Sparkles, Moon, Microscope, Search, ArrowRight, Globe, Activity, ZapIcon, Scale, ShieldCheck, FlaskConical, BookOpen } from "lucide-react";
+import { Zap, Sparkles, Moon, Microscope, Search, ArrowRight, Globe, Activity, Scale, ShieldCheck, FlaskConical, BookOpen } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
 
@@ -26,7 +26,7 @@ const QUICK_SUGGESTIONS = [
   { label: 'Weight Loss',       icon: Scale },
   { label: 'Muscle Growth',     icon: Zap },
   { label: 'GHK-Cu',            icon: Sparkles },
-  { label: 'NAD+',              icon: ZapIcon },
+  { label: 'NAD+',              icon: Zap },
   { label: 'Skin Regeneration', icon: Sparkles },
   { label: 'Fat Loss',          icon: Activity },
   { label: 'TB-500',            icon: Microscope },

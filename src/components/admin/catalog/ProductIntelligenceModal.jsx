@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, TrendingUp, AlertTriangle, FileText, CheckCircle, Brain } from 'lucide-react';
+import { X, Sparkles, TrendingUp, AlertTriangle, FileText, CheckCircle, Brain } from '@/lib/icons';
 
 export default function ProductIntelligenceModal({ isOpen, onClose, product }) {
   const [loading, setLoading] = useState(true);

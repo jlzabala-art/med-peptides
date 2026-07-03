@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, ShieldCheck, ChevronRight, ChevronLeft, TrendingUp } from 'lucide-react';
+import { Activity, ShieldCheck, ChevronRight, ChevronLeft, TrendingUp } from '@/lib/icons';
 
 export default function CatalogIntelligenceDrawer({ catalogCart, allProducts }) {
   // Mock intelligence calculation

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Package, Plus, Check } from 'lucide-react';
+import { Search, Package, Plus, Check } from '@/lib/icons';
 import { useProducts } from '../../hooks/admin/useProducts';
 
 /**

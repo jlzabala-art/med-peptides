@@ -1,4 +1,4 @@
-import { Bot, Sparkles, Beaker, Search, ArrowRight, MessageCircle, Activity, HelpCircle, SlidersHorizontal, X, ClipboardList, Clock, FlaskConical, Leaf } from "lucide-react";
+import { Bot, Sparkles, Beaker, Search, ArrowRight, MessageCircle, Activity, HelpCircle, SlidersHorizontal, X, ClipboardList, Clock, FlaskConical, Leaf } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 
 
@@ -26,6 +26,8 @@ import { lockScroll, unlockScroll } from '../utils/scrollLock';
 import { useAlgoliaSearch } from '../hooks/useAlgoliaSearch';
 import { algoliaConfig } from '../services/algolia/config';
 import { useFirestoreData } from '../hooks/useFirestoreData';
+import { useSearchProtocols } from '../hooks/data/useSearchProtocols';
+import { useSearchSupplements } from '../hooks/data/useSearchSupplements';
 
 // Cycling placeholder messages — shows users what the search can do
 const PLACEHOLDER_CYCLE = [
@@ -38,7 +40,7 @@ const PLACEHOLDER_CYCLE = [
   'Try "longevity" to browse anti-aging options…',
 ];
 
-export default function SearchModal({ isOpen, onClose, onSelectProduct, products, protocolIndex = [], supplementCatalogue = [], initialTab = 'peptides', onQueryChange, isLoading = false, isProfessional = false, initialQuery = '' }) {
+export default function SearchModal({ isOpen, onClose, onSelectProduct, products = [], protocolIndex = [], supplementCatalogue = [], initialTab = 'peptides', onQueryChange, isLoading = false, isProfessional = false, initialQuery = '' }) {
   const { allFaqs } = useFirestoreData();
 
   const isMobile = useResponsive('(max-width: 768px)');
@@ -206,9 +208,16 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
     return res;
   }, [algoliaProducts, activeClinicalFilters]);
 
-  const protocolResults = useMemo(() => searchProtocols(searchTerm, protocolIndex), [searchTerm, protocolIndex]);
+  const { protocols: searchedProtocols } = useSearchProtocols(searchTerm, showAll ? 50 : 5);
+  const { supplements: searchedSupplements } = useSearchSupplements(searchTerm, showAll ? 50 : 5);
+
+  const protocolResults = useMemo(() => {
+    // If the hook is returning empty due to small query string, fallback to empty array
+    return searchedProtocols || [];
+  }, [searchedProtocols]);
+
   const supplementResults = useMemo(() => {
-    let res = searchSupplements(searchTerm, supplementCatalogue);
+    let res = searchedSupplements || [];
     if (activeClinicalFilters.route) {
       res = res.filter(p => (p.pharmacokinetics?.route || 'Oral') === activeClinicalFilters.route);
     }
@@ -216,7 +225,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
       res = res.filter(p => (p.storage_conditions?.dry || 'Room Temperature').includes(activeClinicalFilters.storage));
     }
     return res;
-  }, [searchTerm, supplementCatalogue, activeClinicalFilters]);
+  }, [searchedSupplements, activeClinicalFilters]);
 
   // When the modal opens with a pre-filled query, auto-switch to the first
   // tab that actually has results — avoids confusing "no results" screens.

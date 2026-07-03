@@ -3,10 +3,7 @@ import { db } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, limit, writeBatch, doc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import WorkflowDetailWorkspace from './components/WorkflowDetailWorkspace';
-import { 
-  Clock, CheckCircle2, AlertCircle, FileText, Pill, Truck, 
-  DollarSign, Search, Inbox, Inbox as ArchiveIcon, Trash2, UserPlus, FileUp, Filter, Zap
-} from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle, FileText, Pill, Truck, DollarSign, Search, Inbox, Inbox as ArchiveIcon, Trash2, UserPlus, FileUp, Filter, Zap } from '@/lib/icons';
 
 const sidebarViews = [
   { id: 'inbox', label: 'Inbox', icon: Inbox },

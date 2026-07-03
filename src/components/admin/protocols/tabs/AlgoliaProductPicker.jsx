@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, Plus, ScanLine, Fingerprint, Package } from 'lucide-react';
+import { Search, Loader2, Plus, ScanLine, Package } from '@/lib/icons';
 import { searchAlgolia } from '../../../../services/algoliaSearch';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '../../../../firebase';
@@ -148,7 +148,7 @@ export default function AlgoliaProductPicker({ onProductSelect }) {
 
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: searchMode === 'id' ? '#8b5cf6' : 'var(--primary)' }}>
-          {isLoading ? <Loader2 size={18} className="spin" /> : (searchMode === 'id' ? <Fingerprint size={18} /> : <Search size={18} />)}
+          {isLoading ? <Loader2 size={18} className="spin" /> : (searchMode === 'id' ? <ScanLine size={18} /> : <Search size={18} />)}
         </div>
         
         {searchMode === 'text' ? (

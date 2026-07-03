@@ -6,6 +6,7 @@ import '../styles/hero.css';
 
 export default function GuestHeroSearch({
   onOpenSearch,
+  onOpenAI,
 }) {
   const { t } = useTranslation();
   return (
@@ -24,7 +25,7 @@ export default function GuestHeroSearch({
         </div>
 
         {/* Hybrid AI Input */}
-        <HybridHeroInput onSearch={onOpenSearch} />
+        <HybridHeroInput onSearch={onOpenSearch} onOpenAI={onOpenAI} />
 
         {/* Trust Row */}
         <div style={{ marginTop: '4rem' }}>

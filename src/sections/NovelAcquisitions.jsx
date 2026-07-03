@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Sparkles } from '@/lib/icons';
 import { useNavigate } from 'react-router-dom';
 import PeptideCard from '../components/common/PeptideCard';
 

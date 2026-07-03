@@ -2,24 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import {
-  Calendar as CalendarIcon,
-  Clock,
-  Users,
-  Pill,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  Search,
-  AlertTriangle,
-  FileText,
-  BrainCircuit,
-  Activity,
-  HeartPulse,
-  RefreshCw,
-  Plus,
-} from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Pill, CheckCircle2, ChevronLeft, ChevronRight, Filter, Search, AlertTriangle, FileText, BrainCircuit, Activity, HeartPulse, RefreshCw, Plus } from '@/lib/icons';
 import AdminPageHeader from '../components/admin/AdminPageHeader';
 
 import { toast } from 'react-hot-toast';

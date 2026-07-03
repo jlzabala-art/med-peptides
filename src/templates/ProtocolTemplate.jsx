@@ -86,6 +86,7 @@ import ReconstitutionVisualGuide from '../components/protocol/ReconstitutionVisu
 import PharmacokineticsSimulator from '../components/protocol/PharmacokineticsSimulator';
 import ProtocolOutcomesSection from '../components/protocol/ProtocolOutcomesSection';
 import { useDailyDose } from '../hooks/useDailyDose';
+import { useProtocolProducts } from '../hooks/data/useProtocolProducts';
 
 import protocolIndex from "../data/protocol_search_index.json";
 import { normalizeProtocol, frequencyToInjectionsPerWeek } from '../utils/protocolSchemaAdapter';
@@ -283,7 +284,6 @@ export default function ProtocolTemplate({
   cart,
   updateCart,
   setRegion,
-  products,
   allFaqs,
 }) {
   const { setActiveModal } = useUIStore();
@@ -371,6 +371,7 @@ export default function ProtocolTemplate({
     protocol,
     clinicId
   );
+  const { products: protocolProducts } = useProtocolProducts(protocol);
 
   // ── Chart capture for PDF export ─────────────────────────────────────────
   const protocolChartRef = useRef(null);
@@ -2020,7 +2021,7 @@ export default function ProtocolTemplate({
               >
                 <ProtocolSupplyEngine
                   phase_blueprints={activeBlueprintPhases}
-                  products={products || []}
+                  products={protocolProducts || []}
                   region={region || 'US'}
                   tier={isProfessional ? 'clinic' : 'retail'}
                   dailyDose={dailyDose ?? null}
@@ -2041,7 +2042,7 @@ export default function ProtocolTemplate({
             <ProtocolTechnicalSection
               protocol={protocol}
               activeProtocolPhases={activeBlueprintPhases}
-              products={products || []}
+              products={protocolProducts || []}
               updateCart={updateCart}
               localTier={isProfessional ? 'clinic' : 'retail'}
               region={region || 'US'}
@@ -2088,7 +2089,7 @@ export default function ProtocolTemplate({
         // Enrich with product catalog data when available
         const enrichedCards = uniqueCompounds.map(d => {
           const slugKey = d.product_slug || d.slug || d.name || d.product_title;
-          const match = (products || []).find(p =>
+          const match = (protocolProducts || []).find(p =>
             p.slug === slugKey || p.id === slugKey ||
             (p.displayName || p.name || '').toLowerCase() === (d.product_title || d.name || '').toLowerCase()
           );

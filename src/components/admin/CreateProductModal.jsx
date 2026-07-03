@@ -13,6 +13,7 @@ import { db } from '../../firebase';
 
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../context/AuthContext';
+import { TextField, Select } from '../ui';
 
 const CATEGORIES = [
   'Peptides',
@@ -99,17 +100,6 @@ export default function CreateProductModal({ isOpen, onClose, onCreated }) {
     }
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 12px 10px 36px',
-    border: '1px solid var(--color-border, #e2e8f0)',
-    borderRadius: '6px',
-    fontSize: '14px',
-    outline: 'none',
-    backgroundColor: 'white',
-    boxSizing: 'border-box',
-  };
-
   const labelStyle = {
     display: 'block',
     fontSize: '13px',
@@ -167,81 +157,91 @@ export default function CreateProductModal({ isOpen, onClose, onCreated }) {
           <form id="create-product-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
             {/* Name */}
-            <div>
-              <label style={labelStyle}>Item Name *</label>
-              <div style={{ position: 'relative' }}>
-                <Box size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                <input name="name" value={form.name} onChange={handleChange} required style={inputStyle} placeholder="e.g. BPC-157" />
-              </div>
-            </div>
+            <TextField
+              label="Item Name *"
+              name="name" 
+              value={form.name} 
+              onChange={handleChange} 
+              required 
+              placeholder="e.g. BPC-157"
+              icon={Box}
+            />
 
             {/* SKU */}
-            <div>
-              <label style={labelStyle}>SKU *</label>
-              <div style={{ position: 'relative' }}>
-                <Hash size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                <input name="sku" value={form.sku} onChange={handleChange} required style={inputStyle} placeholder="e.g. BPC157-5MG" />
-              </div>
-            </div>
+            <TextField
+              label="SKU *"
+              name="sku" 
+              value={form.sku} 
+              onChange={handleChange} 
+              required 
+              placeholder="e.g. BPC157-5MG"
+              icon={Hash}
+            />
 
             {/* Category */}
-            <div>
-              <label style={labelStyle}>Category</label>
-              <select name="category" value={form.category} onChange={handleChange}
-                style={{ ...inputStyle, padding: '10px 12px', paddingLeft: '12px' }}>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
+            <Select
+              label="Category"
+              name="category" 
+              value={form.category} 
+              onChange={handleChange}
+              options={CATEGORIES.map(c => ({ value: c, label: c }))}
+            />
 
             {/* Dosage */}
-            <div>
-              <label style={labelStyle}>Dosage / Presentation</label>
-              <div style={{ position: 'relative' }}>
-                <Tag size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                <input name="dosage" value={form.dosage} onChange={handleChange} style={inputStyle} placeholder="e.g. 5mg/vial" />
-              </div>
-            </div>
+            <TextField
+              label="Dosage / Presentation"
+              name="dosage" 
+              value={form.dosage} 
+              onChange={handleChange} 
+              placeholder="e.g. 5mg/vial"
+              icon={Tag}
+            />
 
             <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '4px 0' }} />
 
             {/* Prices */}
             <div className="form-grid">
-              <div>
-                <label style={labelStyle}>Retail Price ($/unit)</label>
-                <div style={{ position: 'relative' }}>
-                  <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                  <input type="number" step="0.01" name="guestVialPrice" value={form.guestVialPrice} onChange={handleChange}
-                    style={inputStyle} placeholder="0.00" />
-                </div>
-              </div>
-              <div>
-                <label style={labelStyle}>Pro Price ($/unit)</label>
-                <div style={{ position: 'relative' }}>
-                  <DollarSign size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                  <input type="number" step="0.01" name="proVialPrice" value={form.proVialPrice} onChange={handleChange}
-                    style={inputStyle} placeholder="0.00" />
-                </div>
-              </div>
+              <TextField
+                label="Retail Price ($/unit)"
+                type="number" 
+                step="0.01" 
+                name="guestVialPrice" 
+                value={form.guestVialPrice} 
+                onChange={handleChange}
+                placeholder="0.00"
+                icon={DollarSign}
+              />
+              <TextField
+                label="Pro Price ($/unit)"
+                type="number" 
+                step="0.01" 
+                name="proVialPrice" 
+                value={form.proVialPrice} 
+                onChange={handleChange}
+                placeholder="0.00"
+                icon={DollarSign}
+              />
             </div>
 
             {/* Stock & Supplier */}
             <div className="form-grid">
-              <div>
-                <label style={labelStyle}>Initial Stock (units)</label>
-                <div style={{ position: 'relative' }}>
-                  <Hash size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                  <input type="number" name="stock" value={form.stock} onChange={handleChange}
-                    style={inputStyle} placeholder="0" />
-                </div>
-              </div>
-              <div>
-                <label style={labelStyle}>Supplier</label>
-                <div style={{ position: 'relative' }}>
-                  <Box size={16} style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }} />
-                  <input name="supplier" value={form.supplier} onChange={handleChange}
-                    style={inputStyle} placeholder="e.g. Regpept" />
-                </div>
-              </div>
+              <TextField
+                label="Initial Stock (units)"
+                type="number" 
+                name="stock" 
+                value={form.stock} 
+                onChange={handleChange}
+                placeholder="0"
+                icon={Hash}
+              />
+              <TextField
+                label="Supplier"
+                name="supplier" 
+                value={form.supplier} 
+                onChange={handleChange}
+                placeholder="e.g. Regpept"
+                icon={Box}
+              />
             </div>
 
           </form>

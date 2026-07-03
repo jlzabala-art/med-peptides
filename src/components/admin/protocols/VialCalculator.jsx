@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, AlertCircle } from 'lucide-react';
+import { Package, AlertCircle } from '@/lib/icons';
 import { calculateProtocolRequirements } from '../../../engine/protocolMath';
 
 export default function VialCalculator({ protocol }) {

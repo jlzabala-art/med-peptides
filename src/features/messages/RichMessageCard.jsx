@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Package, ShoppingCart, ArrowRight } from '@/lib/icons';
 
 export default function RichMessageCard({ text, onAction }) {
   // Very simple parsing for demonstration:

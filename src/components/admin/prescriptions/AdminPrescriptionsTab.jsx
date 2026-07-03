@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import {
-  FileText, Search, Activity, Stethoscope, AlertTriangle, CheckCircle2,
-  ChevronRight, FilePlus, FlaskConical, Clock, Calendar, User, Eye, Archive, Package,
-} from 'lucide-react';
+import { FileText, Search, Activity, Stethoscope, AlertTriangle, CheckCircle2, ChevronRight, FilePlus, FlaskConical, Clock, Calendar, User, Eye, Archive, Package } from '@/lib/icons';
 import PrescriptionDetailModal from '../../prescriptions/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../protocols/ProtocolDrawerContent';
 import StandardDrawer from '../../ui/StandardDrawer';

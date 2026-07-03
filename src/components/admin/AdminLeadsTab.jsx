@@ -29,6 +29,7 @@ import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/fi
 import { db } from '../../firebase';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { useToast } from '../../hooks/useToast';
+import { useLeads } from '../../hooks/admin/useLeads';
 import AdminPageHeader from './AdminPageHeader';
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
@@ -59,9 +60,30 @@ export default function AdminLeadsTab() {
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
 
-  const [leads, setLeads] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { leads: paginatedLeads, loading: loadingLeads, hasMore, loadMore, fetchLeads: refreshLeads, totalCount } = useLeads({ pageSize: 50 });
+  const [agencyRfqs, setAgencyRfqs] = useState([]);
   const [catalogProducts, setCatalogProducts] = useState([]);
+  const [loadingMetadata, setLoadingMetadata] = useState(true);
+  
+  const loading = loadingLeads || loadingMetadata;
+
+  const leads = useMemo(() => {
+    const combined = [...(paginatedLeads || []), ...agencyRfqs].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    return combined.map(l => {
+        let st = l.status;
+        if(st === 'completed') st = 'won';
+        if(st === 'draft') st = 'pricing';
+        if(st === 'contacted') st = 'qualified';
+        return { 
+          ...l, 
+          status: st,
+          country: l.country || (l.type === 'rfq' ? 'Spain' : 'UAE'),
+          leadType: l.leadType || (l.type === 'rfq' ? 'Compounding Pharmacy' : 'Distributor'),
+          assignedOwner: l.assignedOwner || 'Jose'
+        };
+      });
+  }, [paginatedLeads, agencyRfqs]);
+
   // View State
   const [currentView, setCurrentView] = useState('kanban'); // 'kanban', 'table'
   const [searchTerm, setSearchTerm] = useState(deepLinkSearch || '');
@@ -74,7 +96,7 @@ export default function AdminLeadsTab() {
   const [selectedLeadIds, setSelectedLeadIds] = useState([]);
 
   useEffect(() => {
-    fetchLeads();
+    fetchMetadata();
   }, []);
 
   async function fetchLeads() {
@@ -151,7 +173,8 @@ export default function AdminLeadsTab() {
          const updatedLead = { ...leadToUpdate, status: newStatus };
          await catalogRepository.saveLeadRequest(updatedLead);
       }
-      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+      refreshLeads();
+      setAgencyRfqs(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
       toast.success(`Lead moved to ${newStatus}`);
     } catch (err) {
       console.error('Error updating lead status:', err);
@@ -162,16 +185,8 @@ export default function AdminLeadsTab() {
   const handleUpdateRFQItems = async (rfqId, updatedItems) => {
     try {
       await updateDoc(doc(db, 'agency_rfqs', rfqId), { items: updatedItems });
-      setLeads(prev => prev.map(l => {
-        if (l.id === rfqId) {
-          return {
-            ...l,
-            message: `RFQ from ${l.originalData.supplierName || 'Supplier'}\nItems: ${updatedItems.length}`,
-            originalData: { ...l.originalData, items: updatedItems }
-          };
-        }
-        return l;
-      }));
+      refreshLeads();
+      setAgencyRfqs(prev => prev.map(l => { if (l.id === rfqId) { return { ...l, message: `RFQ from ${l.originalData.supplierName || 'Supplier'}\nItems: ${updatedItems.length}`, originalData: { ...l.originalData, items: updatedItems } }; } return l; }));
       if (selectedLead && selectedLead.id === rfqId) {
         setSelectedLead(prev => ({
           ...prev,
@@ -569,6 +584,13 @@ export default function AdminLeadsTab() {
                 onRowClick={setSelectedLead}
                 emptyTitle="No commercial leads matching active filters"
               />
+              {hasMore && (
+                <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+                  <button className="gcp-btn-secondary" onClick={loadMore} disabled={loadingLeads}>
+                    {loadingLeads ? 'Loading...' : 'Load More'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </>

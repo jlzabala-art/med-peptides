@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import { Package, Truck } from 'lucide-react';
+import { Package, Truck } from '@/lib/icons';
 import BaseWidget from '../core/BaseWidget';
 
 export default function OrderTrackingWidget(props) {

@@ -1,4 +1,4 @@
-import { Zap, Sparkles, RefreshCw, Moon, Beaker, Layers, ArrowRight, ChevronDown, Droplets, Activity, Brain, Shield, Flame, Star, ShieldCheck, FlaskConical } from "lucide-react";
+import { Zap, Sparkles, RefreshCw, Moon, Beaker, Layers, ArrowRight, ChevronDown, Droplets, Activity, Brain, Shield, Flame, Star, ShieldCheck, FlaskConical } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 

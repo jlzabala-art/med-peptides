@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
@@ -13,131 +12,11 @@ import ToggleRight from "lucide-react/dist/esm/icons/toggle-right";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-
-// ── Static registry (source of truth until Firestore doc is populated) ────────
-const DEFAULT_AGENTS = {
-  rag: {
-    displayName: 'AgentRAG',
-    agentId: 'agent_1779649883481',
-    model: 'gemini-2.5-flash',
-    region: 'us-west1',
-    status: 'active',
-    queryType: 'rag',
-    description: 'General information & RAG queries. Default route for all standard questions.',
-    emoji: '🧠',
-    color: '#8b5cf6',
-    bg: 'rgba(139,92,246,0.08)',
-    tools: ['Google Search (Grounding)', 'RAG Datastore'],
-    consoleUrl: 'https://dialogflow.cloud.google.com/cx/projects/-/locations/us-west1/agents',
-  },
-  prescription: {
-    displayName: 'AgentPrescription',
-    agentId: '0686affe-d47d-4efd-8afb-b64c41276f88',
-    type: 'vertex',
-    model: 'gemini-1.5-flash',
-    region: 'europe-west1',
-    status: 'active',
-    queryType: 'prescription',
-    description: 'Handles medical intake and prescription parsing.',
-    emoji: '℞',
-    color: '#3b82f6',
-    bg: 'rgba(59,130,246,0.08)',
-    tools: ['OCR Parsing', 'Medical Safety Guardrails'],
-    consoleUrl: 'https://dialogflow.cloud.google.com/cx/projects/-/locations/europe-west1/agents',
-  },
-  clinical_data: {
-    displayName: 'AgentClinicalData',
-    agentId: '4abfec3d-9305-4f34-a1b9-2fdaa8ff071a',
-    type: 'vertex',
-    model: 'gemini-2.0-flash-exp',
-    region: 'europe-west1',
-    status: 'active',
-    queryType: 'clinical_data',
-    description: 'In-depth analysis of scientific literature and peptides.',
-    emoji: '🧬',
-    color: '#8b5cf6',
-    bg: 'rgba(139,92,246,0.08)',
-    tools: ['PubMed Search API', 'Clinical Datastore', 'Biomarker Extraction'],
-    consoleUrl: 'https://dialogflow.cloud.google.com/cx/projects/-/locations/europe-west1/agents',
-  },
-  doctor_protocol: {
-    displayName: 'Doctor Protocol AI',
-    agentId: 'f320b876-5f0f-468d-9a7e-294026a5e613',
-    type: 'vertex',
-    model: 'gemini-2.5-pro',
-    region: 'europe-west1',
-    status: 'active',
-    queryType: 'doctor_protocol',
-    description: 'Advanced clinical reasoning for custom patient protocol generation.',
-    emoji: '👨‍⚕️',
-    color: '#ec4899',
-    bg: 'rgba(236,72,153,0.08)',
-    tools: ['Clinical Reasoning', 'Protocol Formatter', 'Interaction Checker'],
-    consoleUrl: 'https://dialogflow.cloud.google.com/cx/projects/-/locations/europe-west1/agents',
-  },
-  logistics: {
-    displayName: 'AgentLogistics',
-    agentId: 'logistics-native-001',
-    type: 'native',
-    model: 'gemini-2.0-flash-lite',
-    region: 'global',
-    status: 'active',
-    queryType: 'logistics',
-    description: 'Orders, shipping, pricing, and stock queries. Native Gemini integration.',
-    emoji: '📦',
-    color: '#f59e0b',
-    bg: 'rgba(245,158,11,0.08)',
-    tools: ['Shipping Cost Estimator', 'Inventory Checker', 'UPS API'],
-    consoleUrl: null,
-  },
-  catalog_builder: {
-    displayName: 'Catalog Builder',
-    agentId: 'catalog-builder-agent-001',
-    type: 'native',
-    model: 'gemini-2.5-flash',
-    region: 'global',
-    status: 'active',
-    queryType: 'catalog_builder',
-    description: 'Generates structured clinical merchandising catalogs, groupings, and copy.',
-    emoji: '📖',
-    color: '#10b981',
-    bg: 'rgba(16,185,129,0.08)',
-    tools: ['JSON Schema Generator', 'SEO Copywriting'],
-    consoleUrl: null, // Custom gemini agent
-  },
-  document_processor: {
-    displayName: 'Document Processing AI',
-    agentId: 'doc-processor-001',
-    type: 'native',
-    model: 'gemini-2.5-flash',
-    region: 'global',
-    status: 'active',
-    queryType: 'document_processing',
-    description: 'Reads PDFs, extracts Product Name, Purity, Batch, and generates semantic text for Vector DB.',
-    emoji: '📄',
-    color: '#ef4444',
-    bg: 'rgba(239,68,68,0.08)',
-    tools: ['Gemini Vision', 'Text Extraction', 'Data Matching'],
-    consoleUrl: null,
-  },
-  admin_assistant: {
-    displayName: 'Admin Co-Pilot',
-    agentId: 'admin-agent-001',
-    type: 'native',
-    model: 'gemini-2.5-pro',
-    region: 'global',
-    status: 'active',
-    queryType: 'admin_assistant',
-    description: 'Autonomous Admin Assistant. Analyzes commercial data (sales, LTV, trends) and helps orchestrate ERP tasks.',
-    emoji: '🤖',
-    color: '#0ea5e9',
-    bg: 'rgba(14,165,233,0.08)',
-    tools: ['Sales Intelligence', 'CRM Lookup', 'Financial Reports'],
-    consoleUrl: null,
-  },
-};
+import Network from "lucide-react/dist/esm/icons/network";
+import { useAIAgents } from '../../hooks/admin/useAIAgents';
+import AdminPageHeader from './AdminPageHeader';
+import GridSkeleton from '../ui/skeletons/GridSkeleton';
+// Default agents are now managed in useAIAgents
 
 // ── Status badge ─────────────────────────────────────────────────────────────
 function StatusChip({ status }) {
@@ -532,109 +411,36 @@ function SummaryBar({ agents }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function AdminAIAgentsTab() {
-  const [agents, setAgents] = useState(DEFAULT_AGENTS);
-  const [metrics, setMetrics] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { agents, metrics, loading, refresh, toggleAgent, saveAgentConfig } = useAIAgents();
   const [toast, setToast] = useState(null);
-
   const [editModal, setEditModal] = useState({ open: false, agentKey: null, data: {} });
-
-  // Load from Firestore (overrides static defaults if present)
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true);
-    try {
-      const snap = await getDoc(doc(db, 'ai_config', 'agents'));
-      const usageSnap = await getDoc(doc(db, 'ai_metrics', 'usage'));
-
-      if (usageSnap.exists()) {
-        setMetrics(usageSnap.data()?.agents || {});
-      }
-
-      if (snap.exists()) {
-        const data = snap.data();
-        // Merge: use Firestore status/agentId but keep static metadata. 
-        // We iterate over ALL keys in Firestore to allow dynamic agents to appear.
-        const merged = { ...DEFAULT_AGENTS };
-        for (const key of Object.keys(data)) {
-          merged[key] = { 
-            ...(merged[key] || { 
-              displayName: key, 
-              status: 'active', 
-              type: 'native', 
-              model: 'unknown', 
-              region: 'global', 
-              emoji: '🤖', 
-              tools: [], 
-              description: 'Dynamically loaded from database.' 
-            }), 
-            ...data[key] 
-          };
-        }
-        setAgents(merged);
-        // Inject data context for Atlas AI
-        const activeAgents = Object.entries(merged).filter(([_, a]) => a.status === 'active');
-        const tokenSum = Object.values(usageSnap.data()?.agents || {}).reduce((acc, m) => acc + (m.tokens || 0), 0);
-        window.dispatchEvent(new CustomEvent('admin-context-update', {
-          detail: {
-            page: 'ai-agents',
-            totalAgents: Object.keys(merged).length,
-            activeAgentsCount: activeAgents.length,
-            totalTokensUsed: tokenSum,
-            agentList: activeAgents.map(([key, a]) => ({ key, name: a.name, model: a.model })),
-            summary: `AI Agents Panel: ${activeAgents.length} active agents. Total tokens used: ${tokenSum}.`
-          }
-        }));
-      }
-    } catch (err) {
-      console.error('[AdminAIAgentsTab] Load failed:', err);
-      if (!silent) showToast('Failed to load agent config from Firestore', 'error');
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-    const interval = setInterval(() => load(true), 30000); // 30s auto-refresh
-    return () => clearInterval(interval);
-  }, [load]);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  async function handleToggle(agentKey, enable) {
-    setSaving(true);
+  const handleToggle = async (key, currentStatus) => {
+    const isEnable = currentStatus !== 'active';
     try {
-      const newStatus = enable ? 'active' : 'disabled';
-      // Persist to Firestore
-      const configRef = doc(db, 'ai_config', 'agents');
-      const snap = await getDoc(configRef);
-      const existing = snap.exists() ? snap.data() : {};
-      await setDoc(configRef, {
-        ...existing,
-        [agentKey]: {
-          ...(existing[agentKey] || {}),
-          status: newStatus,
-          agentId: agents[agentKey].agentId,
-        },
-      });
-      setAgents((prev) => ({
-        ...prev,
-        [agentKey]: { ...prev[agentKey], status: newStatus },
-      }));
-      showToast(`${agents[agentKey].displayName} ${enable ? 'enabled' : 'disabled'} ✓`);
+      await toggleAgent(key, isEnable);
+      showToast(isEnable ? 'Agent activated' : 'Agent disabled', 'success');
     } catch (err) {
-      console.error('[AdminAIAgentsTab] Toggle failed:', err);
-      showToast('Failed to update agent status', 'error');
-    } finally {
-      setSaving(false);
+      showToast('Toggle failed', 'error');
     }
   };
 
-  const handleEditConfig = (agentKey) => {
+  const handleSaveConfig = async (key, data) => {
+    try {
+      await saveAgentConfig(key, data);
+      showToast('Agent config saved', 'success');
+      setEditModal({ open: false, agentKey: null, data: {} });
+    } catch (err) {
+      showToast('Save failed', 'error');
+    }
+  };
+
+  const openEdit = (agentKey) => {
     const agent = agents[agentKey];
     setEditModal({
       open: true,
@@ -646,154 +452,15 @@ export default function AdminAIAgentsTab() {
     });
   };
 
-  async function saveConfig() {
-    setSaving(true);
-    try {
-      const { agentKey, data } = editModal;
-      const configRef = doc(db, 'ai_config', 'agents');
-      const snap = await getDoc(configRef);
-      const existing = snap.exists() ? snap.data() : {};
-      await setDoc(configRef, {
-        ...existing,
-        [agentKey]: {
-          ...(existing[agentKey] || {}),
-          model: data.model,
-          systemInstruction: data.systemInstruction,
-        },
-      });
-      setAgents((prev) => ({
-        ...prev,
-        [agentKey]: {
-          ...prev[agentKey],
-          model: data.model,
-          systemInstruction: data.systemInstruction,
-        },
-      }));
-      showToast('Configuration updated ✓');
-      setEditModal({ open: false, agentKey: null, data: {} });
-    } catch (err) {
-      console.error('[AdminAIAgentsTab] Save config failed:', err);
-      showToast('Failed to update config', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', paddingBottom: '4rem' }}>
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '1.5rem',
-          padding: '1rem 1.5rem',
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--surface)',
-        }}
-      >
-        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,113,189,0.2)' }}>
-          <Sparkles size={22} color="var(--color-bg-surface)" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '1.25rem',
-              fontWeight: 900,
-              color: 'var(--text-main)',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            AI Agents
-          </h2>
-          <p
-            style={{
-              margin: '0.15rem 0 0',
-              fontSize: '0.8rem',
-              color: 'var(--text-muted)',
-              fontWeight: 500,
-            }}
-          >
-            Vertex AI Agent Builder · europe-west1 · Dialogflow CX · Pay-per-use
-          </p>
-        </div>
-        <button
-          id="refresh-ai-agents"
-          onClick={load}
-          disabled={loading}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.45rem 1rem',
-            borderRadius: 'var(--radius-sm)',
-            border: 'none',
-            background: loading ? 'var(--color-text-tertiary)' : 'var(--primary)',
-            color: 'var(--color-bg-surface)',
-            fontWeight: 700,
-            fontSize: '0.8rem',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            transition: 'background 0.2s',
-          }}
-        >
-          <RefreshCw
-            size={13}
-            style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }}
-          />
-          {loading ? 'Loading…' : 'Refresh'}
-        </button>
-      </div>
+    <div className="anim-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <AdminPageHeader 
+        title="AI Agents Topology"
+        subtitle="Manage, configure, and monitor all Atlas autonomous agents across the network."
+        icon={Network}
+      />
 
-      {/* Summary KPIs */}
-      <SummaryBar agents={agents} />
-
-      {/* Budget Banner */}
-      <div
-        style={{
-          marginTop: '1.5rem',
-          padding: '1rem 1.5rem',
-          borderRadius: '4px',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-          background: 'rgba(59, 130, 246, 0.04)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ color: '#1a73e8', display: 'flex' }}>
-            <AlertTriangle size={20} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
-              Monthly AI Budget Limit: €50.00
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Enforced via Google Cloud Billing Alerts.
-            </div>
-          </div>
-        </div>
-        <a
-          href="https://console.cloud.google.com/billing/budgets"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            fontSize: '0.8rem',
-            color: '#1a73e8',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            textDecoration: 'none',
-          }}
-        >
-          Manage Budget <ExternalLink size={14} />
-        </a>
-      </div>
+      <AgentsSummaryBar agents={agents} />
 
       {/* Agent Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>

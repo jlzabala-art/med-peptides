@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Pill, Box, Zap, ChevronDown } from 'lucide-react';
+import { Package, Pill, Box, Zap, ChevronDown } from '@/lib/icons';
 import VialCalculator from '../VialCalculator';
 import AlgoliaProductPicker from './AlgoliaProductPicker';
 

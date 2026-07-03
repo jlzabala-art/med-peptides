@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarDays, Droplet, ActivitySquare } from 'lucide-react';
+import { CalendarDays, Droplet, ActivitySquare } from '@/lib/icons';
 import ProtocolDosingCalendar from '../ProtocolDosingCalendar';
 import DosageMatrix from '../DosageMatrix';
 import ReconstitutionPlanner from '../ReconstitutionPlanner';

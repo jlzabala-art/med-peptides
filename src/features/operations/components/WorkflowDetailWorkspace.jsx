@@ -1,20 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Archive, 
-  Trash2, 
-  EyeOff, 
-  CheckCircle2, 
-  Zap, 
-  Building2, 
-  FileText,
-  Clock,
-  User,
-  MapPin,
-  ChevronRight,
-  Package,
-  DollarSign
-} from 'lucide-react';
+import { ArrowLeft, Archive, Trash2, EyeOff, CheckCircle2, Zap, Building2, FileText, Clock, User, MapPin, ChevronRight, Package, DollarSign } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { db, functions } from '../../../firebase';

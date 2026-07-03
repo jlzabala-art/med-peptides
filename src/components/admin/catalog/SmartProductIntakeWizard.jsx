@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, UploadCloud, ChevronRight, ChevronLeft, Save, Bot, CheckCircle, Sparkles } from 'lucide-react';
+import { X, UploadCloud, ChevronRight, ChevronLeft, Save, Bot, CheckCircle, Sparkles } from '@/lib/icons';
 import toast from 'react-hot-toast';
 import { extractApiPeptidesFromImage } from '../../../services/atlasAiService';
 

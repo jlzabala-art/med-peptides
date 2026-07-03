@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droplets, AlertTriangle, CheckCircle, PackageOpen } from 'lucide-react';
+import { Droplets, AlertTriangle, CheckCircle, PackageOpen } from '@/lib/icons';
 
 export default function ReconstitutionPlanner({ protocol }) {
   // Extract products

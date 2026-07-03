@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, Search, ArrowRight, Bot } from 'lucide-react';
+import { Sparkles, Search, ArrowRight, Bot } from '@/lib/icons';
 import useGuestPreferences from '../../hooks/useGuestPreferences';
 
 export default function HybridHeroInput({ onSearch }) {
@@ -31,35 +31,32 @@ export default function HybridHeroInput({ onSearch }) {
   const handleAnalyze = (input) => {
     setIsAnalyzing(true);
     
-    // Simulate AI parsing
+    // Tiny delay for UI feedback (shows the spinning bot icon briefly)
     setTimeout(() => {
+      // Very basic categorization for preferences
       const lower = input.toLowerCase();
-      
-      let extGoal = 'longevity'; // default
+      let extGoal = 'longevity'; 
       if (lower.match(/recover|heal|injury|joint|pain/)) extGoal = 'recovery';
       else if (lower.match(/brain|focus|cogniti|memory|adhd/)) extGoal = 'cognition';
       else if (lower.match(/weight|fat|metabol|lean/)) extGoal = 'weight-loss';
       else if (lower.match(/muscle|strength|hypertrophy|bulk/)) extGoal = 'muscle';
       else if (lower.match(/sleep|insomnia/)) extGoal = 'sleep';
       
-      let extExp = 'beginner';
-      if (lower.match(/used before|some experience|intermediate/)) extExp = 'intermediate';
-      if (lower.match(/advanced|expert|years|protocol/)) extExp = 'advanced';
-
-      const extPrefs = [];
-      if (lower.match(/oral|pill|no inject/)) extPrefs.push('oral-only');
-      if (lower.match(/vegan|plant/)) extPrefs.push('vegan');
-      if (lower.match(/budget|cheap|affordable/)) extPrefs.push('budget');
-      
-      savePrefs({ goal: extGoal, context: input, experienceLevel: extExp, preferences: extPrefs });
+      // Save basic context so other parts of the site can adapt
+      savePrefs({ goal: extGoal, context: input });
       
       setIsAnalyzing(false);
       setQuery('');
       
-      // Dispatch event to show summary or notify UI
-      window.dispatchEvent(new CustomEvent('ai-profile-updated', { detail: { goal: extGoal } }));
-      
-    }, 1500);
+      // Invoke Semantic Search / AI Assistant Modal directly
+      if (onOpenAI) {
+        onOpenAI(input, input);
+      } else {
+        window.dispatchEvent(new CustomEvent('open-clinical-ai', { 
+          detail: { query: input, autoSend: true, displayText: input }
+        }));
+      }
+    }, 400);
   };
 
   return (

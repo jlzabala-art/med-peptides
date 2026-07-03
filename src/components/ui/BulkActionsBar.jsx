@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, CheckSquare } from 'lucide-react';
+import { X, CheckSquare } from '@/lib/icons';
 
 /**
  * BulkActionsBar

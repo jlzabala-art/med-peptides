@@ -1,9 +1,5 @@
 import React, { useEffect } from 'react';
-import { 
-  Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, 
-  ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building,
-  Eye
-} from 'lucide-react';
+import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building, Eye } from '@/lib/icons';
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import { useNavigationStore } from '../../../stores/navigationStore';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
