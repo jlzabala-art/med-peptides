@@ -1,3 +1,5 @@
+"use client";
+
 import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
@@ -16,6 +18,8 @@ import { useDropzone } from 'react-dropzone';
 
 import { getFunctions, httpsCallable } from 'firebase/firestore';
 import { db, functions } from '../../../firebase';
+
+
 import { doc, updateDoc } from 'firebase/firestore';
 
 export default function ScanPriceListWidget({ onClose, onScanComplete }) {

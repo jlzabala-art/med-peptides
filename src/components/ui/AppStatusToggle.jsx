@@ -1,6 +1,7 @@
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+
+
 import React from 'react';
+import { Eye, EyeOff } from '@/lib/icons';
 
 
 

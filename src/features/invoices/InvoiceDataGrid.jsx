@@ -1,13 +1,14 @@
-import CloudLightning from "lucide-react/dist/esm/icons/cloud-lightning";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+
+
+
+
 import React, { useState, useEffect } from 'react';
 
 
 
 
 import { toast } from 'react-hot-toast';
+import { CloudLightning, Phone, MessageSquare, ExternalLink } from '@/lib/icons';
 
 export default function InvoiceDataGrid({ invoices, onSelect, selectedInvoice }) {
   const getStatusColor = (status) => {

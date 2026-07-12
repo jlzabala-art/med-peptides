@@ -1,12 +1,5 @@
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import FileWarning from "lucide-react/dist/esm/icons/file-warning";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Database from "lucide-react/dist/esm/icons/database";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Brain from "lucide-react/dist/esm/icons/brain";
 import React from 'react';
+import { Eye, EyeOff, ShieldAlert, FileWarning, DollarSign, Database, Globe, Brain } from '@/lib/icons';
 
 
 

@@ -1,3 +1,5 @@
+"use client";
+
 import Settings2 from "lucide-react/dist/esm/icons/settings-2";
 import Zap from "lucide-react/dist/esm/icons/zap";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
@@ -10,6 +12,7 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { Card } from '../ui';
 
 

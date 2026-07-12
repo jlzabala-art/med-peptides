@@ -1,9 +1,9 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import ServerCrash from "lucide-react/dist/esm/icons/server-crash";
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, limit } from 'firebase/firestore';
 import { db } from '../../../firebase';
+
 
 
 
@@ -13,6 +13,7 @@ import InteractiveWorldMap from './InteractiveWorldMap';
 import CountryDetailDrawer from './CountryDetailDrawer';
 import ProductAvailabilityMatrix from './ProductAvailabilityMatrix';
 import DistributorTerritoryManager from './DistributorTerritoryManager';
+import { Loader2, Globe, ServerCrash } from '@/lib/icons';
 
 // Default standard markets if 'global_markets' collection is empty
 const DEFAULT_MARKETS = [
@@ -45,7 +46,7 @@ export default function AtlasCommandCenter() {
       try {
         setLoading(true);
         // 1. Fetch Global Markets
-        const marketsSnap = await getDocs(collection(db, 'global_markets'));
+        const marketsSnap = await getDocs(query(collection(db, 'global_markets'), limit(100)));
         let fetchedMarkets = marketsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         if (fetchedMarkets.length === 0) {
           // If the collection hasn't been seeded yet, fallback to defaults
@@ -53,18 +54,18 @@ export default function AtlasCommandCenter() {
         }
 
         // 2. Fetch Products
-        const prodSnap = await getDocs(collection(db, 'products'));
+        const prodSnap = await getDocs(query(collection(db, 'products'), limit(100)));
         const prodList = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         // 3. Fetch Distributors
-        const wholeSnap = await getDocs(collection(db, 'wholesellers'));
+        const wholeSnap = await getDocs(query(collection(db, 'wholesellers'), limit(50)));
         const wholeList = wholeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         // 4. Fetch Orders for Revenue
-        const ordSnap = await getDocs(collection(db, 'orders'));
+        const ordSnap = await getDocs(query(collection(db, 'orders'), limit(100)));
         const ordList = ordSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         // Also fetch B2B orders for more complete revenue
-        const b2bSnap = await getDocs(collection(db, 'b2b_sales_orders'));
+        const b2bSnap = await getDocs(query(collection(db, 'b2b_sales_orders'), limit(100)));
         const b2bList = b2bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         setMarkets(fetchedMarkets);

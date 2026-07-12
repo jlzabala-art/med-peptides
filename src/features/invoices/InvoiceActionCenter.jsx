@@ -1,13 +1,14 @@
 import React from 'react';
-import Zap from "lucide-react/dist/esm/icons/zap";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Target from "lucide-react/dist/esm/icons/target";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import PhoneCall from "lucide-react/dist/esm/icons/phone-call";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
+import { Zap, AlertTriangle, Target, CheckCircle2, DollarSign, Bell, PhoneCall, ArrowRight, CalendarDays } from '@/lib/icons';
+
+
+
+
+
+
+
+
+
 
 export default function InvoiceActionCenter({ invoice }) {
   // If invoice is null, show Global Collections Center

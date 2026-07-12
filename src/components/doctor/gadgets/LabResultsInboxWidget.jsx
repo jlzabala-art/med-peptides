@@ -1,11 +1,11 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { FlaskConical, Check, X, FileText } from '@/lib/icons';
 
 
 

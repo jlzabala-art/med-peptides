@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { useFirestoreData } from '../hooks/useFirestoreData';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import Catalog from './Catalog';
 import CategoryDetailView from './CategoryDetailView';
 import Breadcrumbs from '../components/common/Breadcrumbs';
@@ -59,15 +59,17 @@ export default function CollectionTemplate({
   onOpenSearch,
   products,
   EXCHANGE_RATES,
+  slug: propSlug,
 }) {
   const { allFaqs } = useFirestoreData();
-  const { slug } = useParams();
-  const navigate = useNavigate();
+  const params = useParams();
+  const slug = propSlug || params?.slug;
+  const router = useRouter();
 
   const handleProductSelect = (name) => {
     const target = (products || []).find(p => p.name === name);
-    if (target?.slug) navigate(`/product/${target.slug}`);
-    else if (target?.name) navigate(`/product/${target.name.toLowerCase().replace(/\s+/g, '-')}`);
+    if (target?.slug) router.push(`/product/${target.slug}`);
+    else if (target?.name) router.push(`/product/${target.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
   const s = (slug || '').toLowerCase();
@@ -77,8 +79,8 @@ export default function CollectionTemplate({
     return (
       <RestrictedCatalogRoute catalogName="products">
         <PeptideCollectionPage
-          onNavigate={(productSlug) => navigate(`/product/${productSlug}`)}
-          onBack={() => navigate(-1)}
+          onNavigate={(productSlug) => router.push(`/product/${productSlug}`)}
+          onBack={() => router.back()}
           toggleCompare={toggleCompare}
         />
       </RestrictedCatalogRoute>
@@ -90,8 +92,8 @@ export default function CollectionTemplate({
     return (
       <RestrictedCatalogRoute catalogName="protocols">
         <ProtocolCollectionPage
-          onNavigate={(slug) => navigate(`/protocol/${slug}`)}
-          onBack={() => navigate(-1)}
+          onNavigate={(slug) => router.push(`/protocol/${slug}`)}
+          onBack={() => router.back()}
         />
       </RestrictedCatalogRoute>
     );
@@ -102,8 +104,8 @@ export default function CollectionTemplate({
     return (
       <RestrictedCatalogRoute catalogName="products">
         <SupplementCollectionPage
-          onNavigate={(supplementSlug) => navigate(`/supplements/${supplementSlug}`)}
-          onBack={() => navigate(-1)}
+          onNavigate={(supplementSlug) => router.push(`/supplements/${supplementSlug}`)}
+          onBack={() => router.back()}
           toggleCompare={toggleCompare}
         />
       </RestrictedCatalogRoute>
@@ -115,7 +117,7 @@ export default function CollectionTemplate({
     return (
       <RestrictedCatalogRoute catalogName="apis">
         <SuppliesView
-          onBack={() => navigate(-1)}
+          onBack={() => router.back()}
           onSelectProduct={handleProductSelect}
           updateCart={updateCart}
           cart={cart}
@@ -143,7 +145,7 @@ export default function CollectionTemplate({
         setIsCartOpen={setIsCartOpen}
         setPendingQuote={setPendingQuote}
         onOpenSearch={onOpenSearch || (() => {})}
-        onSelectCategory={(cat) => navigate(`/collection/${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`)}
+        onSelectCategory={(cat) => router.push(`/collection/${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`)}
         onSelectProduct={handleProductSelect}
         EXCHANGE_RATES={EXCHANGE_RATES || {}}
         products={products || []}
@@ -175,7 +177,7 @@ export default function CollectionTemplate({
         updateCart={updateCart}
         setRegion={setRegion}
         EXCHANGE_RATES={EXCHANGE_RATES || {}}
-        onBack={() => navigate(-1)}
+        onBack={() => router.back()}
         onSelectProduct={handleProductSelect}
         allFaqs={allFaqs}
       />

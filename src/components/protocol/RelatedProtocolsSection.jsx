@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Activity from "lucide-react/dist/esm/icons/activity";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Brain from "lucide-react/dist/esm/icons/brain";
@@ -21,7 +24,7 @@ import GitCompare from "lucide-react/dist/esm/icons/git-compare";
  */
 
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -38,7 +41,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 import { getRelatedProtocols, getMatchReason } from '../../utils/ProtocolMatchingEngine';
-import { PROTOCOL_BLUEPRINTS } from '../../data/protocolBlueprints';
+import { useProtocols } from '../../hooks/shared/useProtocols';
 
 // ── Shared theming (mirrors TrendingProtocols) ────────────────────────────
 const THEME_MAP = {
@@ -246,20 +249,35 @@ export function RelatedCard({ id, protocol, matchReason, onClick }) {
 }
 
 // ── Main Section ──────────────────────────────────────────────────────────
-export default function RelatedProtocolsSection({ protocolId }) {
-  const navigate = useNavigate();
-  const related = useMemo(() => getRelatedProtocols(protocolId), [protocolId]);
-  const sourceBlueprint = PROTOCOL_BLUEPRINTS[protocolId];
-  const meta = sourceBlueprint?.clinical_metadata;
 
-  if (!related || related.length === 0) return null;
+// ── Main Section ──────────────────────────────────────────────────────────
+export default function RelatedProtocolsSection({ protocolId }) {
+  const router = useRouter();
+  
+  // Fetch public protocols from Firestore using our new unified hook
+  const { protocols: allProtocols, loading } = useProtocols({ publicOnly: true });
+
+  const related = useMemo(() => {
+    if (loading || !allProtocols.length) return [];
+    const source = allProtocols.find(p => (p.id || p.protocol_id) === protocolId);
+    if (!source) return [];
+    return getRelatedProtocols(source, allProtocols);
+  }, [protocolId, allProtocols, loading]);
+
+  const sourceBlueprint = useMemo(() => {
+    return allProtocols.find(p => (p.id || p.protocol_id) === protocolId);
+  }, [allProtocols, protocolId]);
+
+  const meta = sourceBlueprint?.clinical_metadata || sourceBlueprint?.clinical_evidence;
+
+  if (loading || !related || related.length === 0) return null;
 
   // Phase 9 — "See More" filters by clinical_goal + protocol_class
   const handleSeeMore = () => {
     const params = new URLSearchParams();
     if (meta?.clinical_goal) params.set('goal', meta.clinical_goal);
     if (meta?.protocol_class) params.set('class', meta.protocol_class);
-    navigate(`/protocols?${params.toString()}`);
+    router.push(`/protocols?${params.toString()}`);
   };
 
   return (
@@ -328,7 +346,7 @@ export default function RelatedProtocolsSection({ protocolId }) {
               id={id}
               protocol={protocol}
               matchReason={matchReason}
-              onClick={() => navigate(`/protocol/${id}`)}
+              onClick={() => router.push(`/protocol/${id}`)}
             />
           </div>
         ))}

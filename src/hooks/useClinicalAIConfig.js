@@ -22,7 +22,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { doc, getDoc } from 'firebase/firestore';
 
 const SESSION_KEY = 'rp_cache_clinicalai_config_v2';   // bumped to bust old cache

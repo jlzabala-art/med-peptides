@@ -1,12 +1,7 @@
-import X from "lucide-react/dist/esm/icons/x";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Book from "lucide-react/dist/esm/icons/book";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import FileText from "lucide-react/dist/esm/icons/file-text";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X, ExternalLink, Book, Shield, Beaker, FileText } from '@/lib/icons';
 
 
 

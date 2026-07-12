@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { collection, query, limit, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { useStaticData } from '../hooks/useStaticData';
 import { useProductSearch } from './useProductSearch';
 

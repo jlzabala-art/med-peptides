@@ -1,10 +1,13 @@
+"use client";
+
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Battery from "lucide-react/dist/esm/icons/battery";
 import Moon from "lucide-react/dist/esm/icons/moon";
 import Frown from "lucide-react/dist/esm/icons/frown";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';

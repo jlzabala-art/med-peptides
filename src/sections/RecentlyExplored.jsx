@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Pill, Bot, Sparkles, History, ScrollText, ExternalLink, Search, Dna, Clock, FlaskConical, ChevronRight, Trash2 } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
@@ -16,7 +17,7 @@ import { Pill, Bot, Sparkles, History, ScrollText, ExternalLink, Search, Dna, Cl
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -492,7 +493,7 @@ function TypeLegend({ items }) {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function RecentlyExplored() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [items,      setItems]      = useState([]);
   const [confirming, setConfirming] = useState(false);
 
@@ -523,7 +524,7 @@ export default function RecentlyExplored() {
   }, [load]);
 
   const handleNav = (path) => {
-    navigate(path);
+    router.push(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

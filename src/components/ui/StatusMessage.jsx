@@ -1,11 +1,12 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+
+
+
 import React from 'react';
 
 
 
 import './ui.css';
+import { Loader2, CheckCircle, AlertCircle } from '@/lib/icons';
 
 export default function StatusMessage({ 
   status = 'loading', // 'loading', 'success', 'error'

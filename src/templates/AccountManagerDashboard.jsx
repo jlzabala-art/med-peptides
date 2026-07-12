@@ -1,20 +1,8 @@
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import Users from "lucide-react/dist/esm/icons/users";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Blocks from "lucide-react/dist/esm/icons/blocks";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Share2 from "lucide-react/dist/esm/icons/share-2";
+"use client";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'next/navigation';
 
 
 
@@ -48,6 +36,7 @@ import ManagerInvitationsTab from '../components/wholesaler/ManagerInvitationsTa
 import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
 import UserSettings from './UserSettings';
 import NotificationBell from '../components/ui/NotificationBell';
+import { LayoutDashboard, Users, ShoppingBag, MessageSquare, Blocks, Settings, Activity, UserPlus, LogOut, Bot, Mail, Tag, Eye, Zap, Share2 } from '@/lib/icons';
 
 const NAV_GROUPS = [
   {
@@ -81,11 +70,11 @@ const NAV_GROUPS = [
 
 export default function AccountManagerDashboard() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Determine active tab from URL path
-  const currentPath = location.pathname.split('/').pop();
+  const currentPath = pathname.split('/').pop();
   const activeTab = NAV_GROUPS.flatMap(g => g.items).some(item => item.id === currentPath) ? currentPath : 'overview';
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -115,7 +104,7 @@ export default function AccountManagerDashboard() {
 
           <Route path="email-campaigns" element={
             <AdminTabErrorBoundary tabId="email-campaigns">
-              <EmailCampaignBuilder ownerId={user.uid} ownerType="wholesaler" onBack={() => navigate('/account-manager/overview')} />
+              <EmailCampaignBuilder ownerId={user.uid} ownerType="wholesaler" onBack={() => router.push('/account-manager/overview')} />
             </AdminTabErrorBoundary>
           } />
           <Route path="drip-marketing" element={<AdminTabErrorBoundary tabId="drip-marketing"><DripMarketing ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
@@ -123,7 +112,7 @@ export default function AccountManagerDashboard() {
           <Route path="referrals" element={<AdminTabErrorBoundary tabId="referrals"><ReferralTracking ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
           <Route path="co-branding" element={<AdminTabErrorBoundary tabId="co-branding"><CoBranding ownerId={user.uid} ownerType="wholesaler" /></AdminTabErrorBoundary>} />
 
-          <Route path="settings" element={<AdminTabErrorBoundary tabId="settings"><UserSettings onBack={() => navigate('/account-manager')} /></AdminTabErrorBoundary>} />
+          <Route path="settings" element={<AdminTabErrorBoundary tabId="settings"><UserSettings onBack={() => router.push('/account-manager')} /></AdminTabErrorBoundary>} />
         </Routes>
       </div>
     </AppPortalLayout>

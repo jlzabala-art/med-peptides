@@ -19,6 +19,7 @@ import {
   setDoc,
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
+
 import { useToast } from '../../../hooks/useToast';
 
 const DEFAULT_ADVANCED_FILTERS = {};

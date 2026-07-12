@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import Download from 'lucide-react/dist/esm/icons/download';

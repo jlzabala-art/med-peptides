@@ -1,11 +1,7 @@
-import Tag from "lucide-react/dist/esm/icons/tag";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Search from "lucide-react/dist/esm/icons/search";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Edit2 from "lucide-react/dist/esm/icons/edit-2";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+"use client";
+
 import React, { useState } from 'react';
+import { Tag, Plus, Search, Trash2, Edit2, Copy, CheckCircle } from '@/lib/icons';
 
 
 

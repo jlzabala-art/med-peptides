@@ -1,6 +1,7 @@
-import Edit3 from "lucide-react/dist/esm/icons/edit-3";
-import Save from "lucide-react/dist/esm/icons/save";
+"use client";
+
 import React, { useState } from 'react';
+import { Edit3, Save } from '@/lib/icons';
 
 
 

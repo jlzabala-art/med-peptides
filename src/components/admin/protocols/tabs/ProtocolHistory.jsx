@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import History from 'lucide-react/dist/esm/icons/history';
 import Edit3 from 'lucide-react/dist/esm/icons/edit-3';

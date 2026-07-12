@@ -1,10 +1,7 @@
-import Clock from "lucide-react/dist/esm/icons/clock";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Activity from "lucide-react/dist/esm/icons/activity";
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { Clock, ArrowRight, AlertTriangle, CheckCircle2, Activity } from '@/lib/icons';
 
 
 
@@ -12,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function PriorityActionCenter({ activities }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const defaultActivities = activities || [
     { id: '1', type: 'lab_result', title: 'Critical Review Required', patient: 'Michael T.', time: '1 hr ago', status: 'urgent', icon: AlertTriangle, color: 'var(--color-danger)' },
@@ -26,7 +23,7 @@ export default function PriorityActionCenter({ activities }) {
         <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Clock size={20} color="var(--primary)" /> Requires Attention
         </h3>
-        <button onClick={() => navigate('/doctor/patients')} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>
+        <button onClick={() => router.push('/doctor/patients')} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}>
           View All Queue
         </button>
       </div>

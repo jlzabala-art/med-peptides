@@ -1,26 +1,25 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import LogIn from "lucide-react/dist/esm/icons/log-in";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Info from "lucide-react/dist/esm/icons/info";
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 import { useTranslation } from 'react-i18next';
+import { ArrowLeft, LogIn, ShieldAlert, Globe, Info } from '@/lib/icons';
 
 export default function ExitProfessionalMode({ onBack, onLogin }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const router = useRouter();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleBack = onBack || (() => navigate('/'));
-  const handleLogin = onLogin || (() => navigate('/login'));
+  const handleBack = onBack || (() => router.push('/'));
+  const handleLogin = onLogin || (() => router.push('/login'));
 
   return (
     <div className="view-container" style={{ 

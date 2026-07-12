@@ -1,15 +1,16 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { useRouter } from 'next/navigation';
+import { FlaskConical } from '@/lib/icons';
+import { Layers } from '@/lib/icons';
+import { BookOpen } from '@/lib/icons';
+import { Beaker } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
 import React from 'react';
 
 
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 
 const DISCOVERY_CARDS = [
   {
@@ -56,7 +57,7 @@ const DISCOVERY_CARDS = [
 
 
 export default function QuickDiscovery({ onOpenSearch }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleCardClick = (card) => {
     if (card.soon) return;                       // Coming Soon — no action
@@ -64,7 +65,7 @@ export default function QuickDiscovery({ onOpenSearch }) {
       // Open search modal with the correct pre-selected tab
       onOpenSearch(undefined, card.searchTab);
     } else if (card.route) {
-      navigate(card.route);
+      router.push(card.route);
     }
   };
 

@@ -1,6 +1,7 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+"use client";
+
 import React, { useState } from 'react';
+import { ChevronDown, ChevronUp } from '@/lib/icons';
 
 
 

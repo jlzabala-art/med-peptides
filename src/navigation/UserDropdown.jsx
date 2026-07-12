@@ -1,40 +1,43 @@
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import User from 'lucide-react/dist/esm/icons/user';
-import Bookmark from 'lucide-react/dist/esm/icons/bookmark';
-import ClipboardList from 'lucide-react/dist/esm/icons/clipboard-list';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import LogOut from 'lucide-react/dist/esm/icons/log-out';
-import LogIn from 'lucide-react/dist/esm/icons/log-in';
-import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
-import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Package from 'lucide-react/dist/esm/icons/package';
-import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
-import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
-import Layers from 'lucide-react/dist/esm/icons/layers';
-import BookOpen from 'lucide-react/dist/esm/icons/book-open';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import Globe from 'lucide-react/dist/esm/icons/globe';
-import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
-import HardDrive from 'lucide-react/dist/esm/icons/hard-drive';
-import Search from 'lucide-react/dist/esm/icons/search';
-import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import Zap from 'lucide-react/dist/esm/icons/zap';
-import MailPlus from 'lucide-react/dist/esm/icons/mail-plus';
-import History from 'lucide-react/dist/esm/icons/history';
-import GitMerge from 'lucide-react/dist/esm/icons/git-merge';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import Brain from 'lucide-react/dist/esm/icons/brain';
-import Tag from 'lucide-react/dist/esm/icons/tag';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 
 import { USER_MENU, VISITOR_MENU } from './navConfig';
 import '../styles/header.css';
+import { LayoutDashboard, ShieldCheck, User, Bookmark, ClipboardList, Settings, LogOut, LogIn, UserPlus, FlaskConical, Users, Package, LayoutGrid, BarChart2, Layers, BookOpen, ChevronDown, Globe, ArrowUpRight, HardDrive, Search, CheckCircle2, MessageSquare, Zap, MailPlus, History, GitMerge, Activity, Brain, Tag } from '@/lib/icons';
 
 // ── Icon map for all known paths ──────────────────────────────────────────────
 const PATH_ICONS = {
@@ -80,12 +83,9 @@ const DOMAIN_ORDER = ['Operations', 'Architecture', 'Intelligence'];
 
 // ── MenuItem ──────────────────────────────────────────────────────────────────
 function MenuItem({ label, path, onClose, danger = false }) {
-  const [pathname, search] = path.includes('?') ? path.split('?') : [path, undefined];
-  const to = search ? { pathname, search: `?${search}` } : pathname;
-
   return (
     <Link
-      to={to}
+      href={path}
       className={`dropdown-item ${danger ? 'dropdown-item--danger' : ''}`}
       onClick={onClose}
     >
@@ -118,7 +118,7 @@ export default function UserDropdown({
 }) {
   const { activeRole, baseRole, switchActiveRole, userProfile: authUserProfile } = useAuth();
   const userProfile = propUserProfile || authUserProfile;
-  const location = useLocation();
+  const pathname = usePathname();
 
   const defaultExpanded = Object.fromEntries(DOMAIN_ORDER.map((d) => [d, false]));
   const [expandedDomains, setExpandedDomains] = useState({ ...defaultExpanded });
@@ -184,7 +184,7 @@ export default function UserDropdown({
     .filter((i) => !i.section)
     .filter((item) => {
       // Hide 'Admin Dashboard' redundant link if already on /admin
-      if (activeRole === 'admin' && item.path === '/admin' && location.pathname === '/admin')
+      if (activeRole === 'admin' && item.path === '/admin' && pathname === '/admin')
         return false;
       return true;
     });

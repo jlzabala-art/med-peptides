@@ -1,14 +1,17 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Check from "lucide-react/dist/esm/icons/check";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Search from "lucide-react/dist/esm/icons/search";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
+"use client";
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState } from 'react';
+import { Mail, Phone, MessageCircle, FileText, Check, HelpCircle, Shield, AlertTriangle, Search, Calendar } from '@/lib/icons';
 
 
 

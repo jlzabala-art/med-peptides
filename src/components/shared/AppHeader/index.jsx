@@ -1,3 +1,5 @@
+"use client";
+
 import Search from "lucide-react/dist/esm/icons/search";
 import Bell from "lucide-react/dist/esm/icons/bell";
 import User from "lucide-react/dist/esm/icons/user";

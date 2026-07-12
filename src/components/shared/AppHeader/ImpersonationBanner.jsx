@@ -1,11 +1,13 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
+"use client";
+
 import React, { useEffect, useState } from 'react';
 
 
 import { signOut } from 'firebase/auth';
-import { auth } from '../../../firebase';
+import * as fb from '../../../firebase';
+const auth = fb?.auth;
 import { useAuth } from '../../../context/AuthContext';
+import { AlertTriangle, LogOut } from '@/lib/icons';
 
 export default function ImpersonationBanner() {
   const { user } = useAuth();

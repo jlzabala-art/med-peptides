@@ -1,3 +1,5 @@
+"use client";
+
 import User from "lucide-react/dist/esm/icons/user";
 import Building2 from "lucide-react/dist/esm/icons/building-2";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";

@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import Lock from "lucide-react/dist/esm/icons/lock";
 import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
@@ -9,13 +10,13 @@ import React from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+
 import '../../styles/hero_card.css';
 
 export default function CardPrescription() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleUploadTrigger = (e) => {
     e.stopPropagation();
@@ -31,7 +32,7 @@ export default function CardPrescription() {
   };
 
   const handleLoginRedirect = () => {
-    navigate('/login?tab=register');
+    router.push('/login?tab=register');
   };
 
   return (

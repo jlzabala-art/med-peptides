@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Search from "lucide-react/dist/esm/icons/search";
 import X from "lucide-react/dist/esm/icons/x";
 import Users from "lucide-react/dist/esm/icons/users";
@@ -14,7 +17,7 @@ import FileText from "lucide-react/dist/esm/icons/file-text";
 import User from "lucide-react/dist/esm/icons/user";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../../../context/AuthContext';
 import { searchIndex } from '../../../navigation/searchIndex';
 import { performDatabaseSearch } from '../../../services/searchDatabaseService';
@@ -56,7 +59,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
   const [combinedResults, setCombinedResults] = useState([]);
   const [isSearchingDB, setIsSearchingDB] = useState(false);
   const inputRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Reset state and focus on open
   useEffect(() => {
@@ -140,14 +143,14 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
       e.preventDefault();
       const selected = combinedResults[selectedIndex];
       if (selected) {
-        navigate(selected.path);
+        router.push(selected.path);
         onClose();
       }
     }
   };
 
   const handleSelect = (path) => {
-    navigate(path);
+    router.push(path);
     onClose();
   };
 

@@ -1,9 +1,11 @@
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Info from "lucide-react/dist/esm/icons/info";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 
 
@@ -12,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 
 
 import './ui.css';
+import { CheckCircle, Info, AlertTriangle, XCircle, Sparkles, X } from '@/lib/icons';
 
 const ICONS = {
   success: CheckCircle,

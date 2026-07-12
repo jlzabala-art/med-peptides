@@ -1,6 +1,7 @@
+import { useRouter } from 'next/navigation';
  
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { usePageMeta } from '../hooks/usePageMeta';
 import SearchModal from '../snippets/SearchModal';
 
@@ -10,7 +11,7 @@ import SearchModal from '../snippets/SearchModal';
  * /supplements/:slug; everything else goes to /product/:slug.
  */
 export default function SearchTemplate({ products = [], allFaqs = [], protocolIndex = [], isLoading = false }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   usePageMeta({
     title: 'Search Compounds, Protocols & FAQs',
@@ -30,20 +31,20 @@ export default function SearchTemplate({ products = [], allFaqs = [], protocolIn
 
     // Primary: productType stamped by repository
     const routeFn = ROUTE_MAP[p.productType] || ROUTE_MAP[p.type];
-    if (routeFn) { navigate(routeFn(slug)); return; }
+    if (routeFn) { router.push(routeFn(slug)); return; }
 
     // Fallback: array-lookup for objects without productType
     const isKnownPeptide = products.some(
       (pr) => pr.id === p.id || pr.slug === slug || pr.name === p.name
     );
-    navigate(isKnownPeptide ? `/product/${slug}` : `/supplements/${slug}`);
+    router.push(isKnownPeptide ? `/product/${slug}` : `/supplements/${slug}`);
   };
 
   return (
     <div style={{ paddingTop: '80px', minHeight: '80vh' }}>
       <SearchModal 
         isOpen={true} 
-        onClose={() => navigate(-1)}
+        onClose={() => router.push(-1)}
         onSelectProduct={handleSelect}
         products={products}
         allFaqs={allFaqs}

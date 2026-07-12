@@ -1,7 +1,8 @@
+"use client";
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, vi, expect } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'next/navigation';
 import AdminUsersTab from '../AdminUsersTab.jsx';
 
 vi.mock('firebase/firestore', () => {

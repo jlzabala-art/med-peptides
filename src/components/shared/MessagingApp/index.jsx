@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { messagingService } from '../../../services/messagingService';
 import ConversationsList from './ConversationsList';

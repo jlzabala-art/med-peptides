@@ -1,6 +1,5 @@
-import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
 import React from 'react';
+import { Lightbulb, ArrowUpRight } from '@/lib/icons';
 
 
 

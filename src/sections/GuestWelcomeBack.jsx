@@ -1,7 +1,7 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Bot from "lucide-react/dist/esm/icons/bot";
+import { Sparkles } from '@/lib/icons';
+import { RefreshCw } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { Bot } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 /**
  * GuestWelcomeBack.jsx

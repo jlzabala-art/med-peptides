@@ -1,9 +1,10 @@
-import Pin from "lucide-react/dist/esm/icons/pin";
-import PinOff from "lucide-react/dist/esm/icons/pin-off";
-import Star from "lucide-react/dist/esm/icons/star";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+import { usePathname } from 'next/navigation';
+import { Pin } from '@/lib/icons';
+import { PinOff } from '@/lib/icons';
+import { Star } from '@/lib/icons';
+import { ChevronDown } from '@/lib/icons';
 import React, { useState, useEffect, useCallback } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import Link from 'next/link';
 import { getPortalTabs } from '../config/portalConfig';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,14 +36,19 @@ function usePinnedTabs(uid, role) {
   return { pinned, toggle };
 }
 
-function SidebarNavItem({ tab, isActive, onPin, isPinned, showPin }) {
+function SidebarNavItem({ tab, isActive: _ignored, onPin, isPinned, showPin }) {
+  const pathname = usePathname() || '';
   const Icon = tab.icon;
+  
+  // Calculate active state similar to how NavLink did
+  const isExactRoot = ['/admin', '/doctor', '/supplier', '/patient', '/wholesaler'].includes(tab.path);
+  const isActive = isExactRoot ? pathname === tab.path : pathname.startsWith(tab.path);
+
   return (
     <motion.div className="sidebar-item-wrapper" whileHover="hover">
-      <NavLink
-        to={tab.path}
-        className={({ isActive: a }) => `sidebar-link ${a ? 'active' : ''}`}
-        end={['/admin', '/doctor', '/supplier', '/patient', '/patient', '/wholesaler'].includes(tab.path)}
+      <Link
+        href={tab.path}
+        className={`sidebar-link ${isActive ? 'active' : ''}`}
       >
         <motion.div
           variants={{ hover: { scale: 1.08 } }}
@@ -51,7 +57,7 @@ function SidebarNavItem({ tab, isActive, onPin, isPinned, showPin }) {
           <Icon size={17} className="sidebar-icon" />
         </motion.div>
         <span className="sidebar-label">{tab.label}</span>
-      </NavLink>
+      </Link>
 
       {/* Pin button — appears on hover */}
       <motion.button

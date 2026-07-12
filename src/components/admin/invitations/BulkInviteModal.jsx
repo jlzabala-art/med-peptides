@@ -1,8 +1,7 @@
-import Upload from "lucide-react/dist/esm/icons/upload";
-import X from "lucide-react/dist/esm/icons/x";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+"use client";
+
 import React, { useState } from 'react';
+import { Upload, X, FileText, AlertCircle } from '@/lib/icons';
 
 
 

@@ -337,3 +337,13 @@ export function trackBlogView(slug) {
     device_type: getDeviceType(),
   });
 }
+
+export function trackProtocolPDFDownload(protocolTitle, protocolId, audienceType) {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'protocol_pdf_download', {
+      protocol_title: protocolTitle,
+      protocol_id:    protocolId,
+      audience_type:  audienceType,
+    });
+  }
+}

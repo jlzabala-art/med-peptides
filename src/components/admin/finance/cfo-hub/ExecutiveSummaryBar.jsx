@@ -1,20 +1,6 @@
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import ArrowDownRight from "lucide-react/dist/esm/icons/arrow-down-right";
-import Package from "lucide-react/dist/esm/icons/package";
-import Receipt from "lucide-react/dist/esm/icons/receipt";
-import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
-
-
-
-
-
-
-
-
+import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight, Package, Receipt, FileText } from '@/lib/icons';
+import { formatAEDtoDual } from '../../../../utils/currencies';
 
 export default function ExecutiveSummaryBar({ data, totalBalance }) {
   const pnl = data?.dashboardData?.profitAndLoss || {};
@@ -30,14 +16,14 @@ export default function ExecutiveSummaryBar({ data, totalBalance }) {
   const taxLiability = 12400;
 
   const kpis = [
-    { label: 'Revenue (MTD)', value: `$${revenue.toLocaleString()}`, trend: '+12.4%', isPositive: true, icon: DollarSign },
-    { label: 'Net Profit', value: `$${netProfit.toLocaleString()}`, trend: '+8.2%', isPositive: true, icon: TrendingUp },
+    { label: 'Revenue (MTD)', value: formatAEDtoDual(revenue), trend: '+12.4%', isPositive: true, icon: DollarSign },
+    { label: 'Net Profit', value: formatAEDtoDual(netProfit), trend: '+8.2%', isPositive: true, icon: TrendingUp },
     { label: 'Gross Margin', value: `${grossMargin}%`, trend: '+2.1%', isPositive: true, icon: ArrowUpRight },
-    { label: 'Cash Position', value: `$${totalBalance.toLocaleString()}`, trend: '+5.0%', isPositive: true, icon: DollarSign },
-    { label: 'A/R', value: `$${ar.toLocaleString()}`, trend: '-1.2%', isPositive: true, icon: Receipt },
-    { label: 'A/P', value: `$${ap.toLocaleString()}`, trend: '+4.5%', isPositive: false, icon: FileText },
-    { label: 'Inventory Value', value: `$${inventoryValue.toLocaleString()}`, trend: '+1.1%', isPositive: true, icon: Package },
-    { label: 'Tax Liability', value: `$${taxLiability.toLocaleString()}`, trend: '+12.0%', isPositive: false, icon: TrendingDown },
+    { label: 'Cash Position', value: formatAEDtoDual(totalBalance), trend: '+5.0%', isPositive: true, icon: DollarSign },
+    { label: 'A/R', value: formatAEDtoDual(ar), trend: '-1.2%', isPositive: true, icon: Receipt },
+    { label: 'A/P', value: formatAEDtoDual(ap), trend: '+4.5%', isPositive: false, icon: FileText },
+    { label: 'Inventory Value', value: formatAEDtoDual(inventoryValue), trend: '+1.1%', isPositive: true, icon: Package },
+    { label: 'Tax Liability', value: formatAEDtoDual(taxLiability), trend: '+12.0%', isPositive: false, icon: TrendingDown },
   ];
 
   return (

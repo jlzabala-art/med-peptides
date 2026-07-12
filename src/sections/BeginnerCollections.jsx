@@ -1,7 +1,8 @@
+import { useRouter } from 'next/navigation';
 import { Bot, Sparkles, ArrowRight, GitCompare, BookOpen } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -291,7 +292,7 @@ function CollectionCard({ collection, isOpen, onToggle, onItemClick, onSeedSearc
     if (onItemClick) {
       onItemClick(itemName);
     } else {
-      navigate(`/product/${toSlug(itemName)}`);
+      router.push(`/product/${toSlug(itemName)}`);
     }
   };
 
@@ -447,11 +448,11 @@ function CollectionCard({ collection, isOpen, onToggle, onItemClick, onSeedSearc
                       e.stopPropagation();
                       const slug = toSlug(item.name);
                       if (item.badge === 'Supplement' || item.name.toLowerCase() === 'berberine' || item.name.toLowerCase() === 'nmn') {
-                        navigate(`/supplements/${slug}`);
+                        router.push(`/supplements/${slug}`);
                       } else if (item.name.toLowerCase() === 'eterna-longevity-platform') {
-                        navigate(`/testing/${slug}`);
+                        router.push(`/testing/${slug}`);
                       } else {
-                        navigate(`/product/${slug}`);
+                        router.push(`/product/${slug}`);
                       }
                     }}
                     style={{
@@ -479,7 +480,7 @@ function CollectionCard({ collection, isOpen, onToggle, onItemClick, onSeedSearc
 }
 
 export default function BeginnerCollections({ onItemClick, onSeedSearch, onOpenSearch, onOpenAI }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [openId, setOpenId] = useState(COLLECTIONS[0].id);
 
   return (
@@ -543,7 +544,6 @@ export default function BeginnerCollections({ onItemClick, onSeedSearch, onOpenS
               onSeedSearch={onSeedSearch}
               onOpenSearch={onOpenSearch}
               onOpenAI={onOpenAI}
-              navigate={navigate}
             />
           ))}
         </div>

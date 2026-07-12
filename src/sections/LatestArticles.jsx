@@ -1,6 +1,6 @@
+import Link from 'next/link';
 import { ArrowRight, BookOpen } from '@/lib/icons';
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useBlogPosts } from '../hooks/useBlogPosts';
 import BlogCard from '../components/blog/BlogCard';
 
@@ -42,7 +42,7 @@ export default function LatestArticles() {
       </div>
 
       <div className="latest-articles__actions">
-        <Link to="/blog" className="latest-articles__cta-btn">
+        <Link href="/blog" className="latest-articles__cta-btn">
           Explore All Articles
           <ArrowRight size={16} aria-hidden="true" />
         </Link>

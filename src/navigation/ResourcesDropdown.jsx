@@ -1,9 +1,9 @@
-import Info from "lucide-react/dist/esm/icons/info";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Scale from "lucide-react/dist/esm/icons/scale";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
+
+
+
+
+
 
 
 
@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 
 import { RESOURCES_MENU } from './navConfig';
 import '../styles/header.css';
+import { Info, Mail, Scale, ShieldCheck, FileText } from '@/lib/icons';
 
 const ICON_MAP = { Info, Mail, Scale, ShieldCheck, FileText };
 

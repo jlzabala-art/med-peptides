@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Link2 from "lucide-react/dist/esm/icons/link-2";
 import Mail from "lucide-react/dist/esm/icons/mail";
@@ -11,6 +13,7 @@ import React, { useState } from 'react';
 
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../../firebase';
+
 import Spinner from '../../ui/Spinner';
 import Card from '../../ui/Card';
 import { useQueryClient } from '@tanstack/react-query';

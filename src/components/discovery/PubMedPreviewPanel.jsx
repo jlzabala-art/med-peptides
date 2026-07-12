@@ -1,12 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Activity from "lucide-react/dist/esm/icons/activity";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 
@@ -20,6 +13,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { getPubMedLiterature } from '../../services/pubmedService';
 import { lockScroll, unlockScroll } from '../../utils/scrollLock';
+import { X, ExternalLink, BookOpen, Clock, Loader2, AlertCircle, ChevronDown, ChevronUp, Activity } from '@/lib/icons';
 
 export default function PubMedPreviewPanel({ isOpen, onClose, product }) {
   const [articles, setArticles] = useState([]);

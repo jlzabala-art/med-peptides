@@ -1,9 +1,12 @@
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import LinkIcon from "lucide-react/dist/esm/icons/link";
+"use client";
+
+
+
+
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
+
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
@@ -13,6 +16,7 @@ import Spinner from '../ui/Spinner';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
+import { UserPlus, Mail, LinkIcon } from '@/lib/icons';
 
 export default function ManagerInvitationsTab() {
   const { currentUser } = useAuth();

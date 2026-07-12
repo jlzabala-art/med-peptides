@@ -1,8 +1,5 @@
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Plus from 'lucide-react/dist/esm/icons/plus';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -13,10 +10,12 @@ import {
   addDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { useAuth } from '../../context/AuthContext';
 
 import ConversationThread from './ConversationThread';
+import { MessageSquare, Users, Search, Plus, ArrowLeft } from '@/lib/icons';
 
 const mobileStyles = `
   .mw-tabs { display: none; }

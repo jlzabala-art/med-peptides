@@ -1,9 +1,6 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Users, Calendar, Microscope, Activity } from '@/lib/icons';
 
 
 

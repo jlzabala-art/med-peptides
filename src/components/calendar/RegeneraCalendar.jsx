@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Checkbox, TextField, Select, Button } from '../../components/ui';
 import './CalendarCloud.css';
@@ -10,6 +12,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { useCalendarEvents } from '../../hooks/useCalendarEvents';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../firebase';
+
 import ProtocolDayBadge from './ProtocolDayBadge';
 import { useAuth } from '../../context/AuthContext';
 import CalendarContextDrawer from './CalendarContextDrawer';

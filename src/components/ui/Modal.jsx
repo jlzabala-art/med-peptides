@@ -1,6 +1,9 @@
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
+
 import { useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from '@/lib/icons';
 
 
 /**

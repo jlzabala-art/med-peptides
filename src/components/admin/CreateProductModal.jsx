@@ -1,8 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Box from "lucide-react/dist/esm/icons/box";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Hash from "lucide-react/dist/esm/icons/hash";
+"use client";
+
 import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -11,9 +8,11 @@ import { db } from '../../firebase';
 
 
 
+
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../context/AuthContext';
 import { TextField, Select } from '../ui';
+import { X, Box, Tag, DollarSign, Hash } from '@/lib/icons';
 
 const CATEGORIES = [
   'Peptides',

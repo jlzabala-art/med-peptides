@@ -5,7 +5,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 900;
+  z-index: 9999;
   padding: 0;
   background-color: transparent;
   border-bottom: 1px solid transparent;
@@ -14,7 +14,7 @@
 }
 
 .site-header--opaque {
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   border-bottom: 1px solid var(--border-light);
   box-shadow: 0 4px 20px rgba(0, 54, 102, 0.05);
 }

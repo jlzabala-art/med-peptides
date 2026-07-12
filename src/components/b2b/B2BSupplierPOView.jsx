@@ -1,12 +1,9 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+"use client";
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { Card } from '../ui';
 
 
@@ -14,6 +11,7 @@ import { Card } from '../ui';
 
 
 import ZohoPaperPreview from '../admin/ZohoPaperPreview';
+import { Loader2, ShieldCheck, CheckCircle, UploadCloud, FileText } from '@/lib/icons';
 
 export default function B2BSupplierPOView() {
   const { poId } = useParams();

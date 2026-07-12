@@ -1,5 +1,9 @@
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+
 import { useCatalogSelectionStore } from '../../../stores/useCatalogSelectionStore';
 import VisibilityOverviewTab from './VisibilityOverviewTab';
 import RegionalAccessTab from './RegionalAccessTab';
@@ -10,15 +14,15 @@ import SelectedItemsVisibilityWorkflow from './SelectedItemsVisibilityWorkflow';
 import ContextTooltip from '../../shared/widgets/ContextTooltip';
 
 export default function PricingVisibilityTab() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
   const selectedItemIds = useCatalogSelectionStore(state => state.selectedIds);
   const clearSelection = useCatalogSelectionStore(state => state.clearSelection);
 
   const handleClearSelection = () => {
     clearSelection();
-    navigate('/admin/pricing-visibility', { replace: true, state: {} });
+    router.push('/admin/pricing-visibility', { replace: true, state: {} });
   };
 
   if (selectedItemIds.length > 0) {

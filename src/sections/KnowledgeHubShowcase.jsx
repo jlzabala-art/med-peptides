@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Pill, Zap, Microscope, BrainCircuit, ArrowRight, ShieldCheck } from '@/lib/icons';
 import React from 'react';
 
@@ -6,7 +7,7 @@ import React from 'react';
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 import '../styles/knowledge_hub_showcase.css';
 
 /* ─── Pillar definitions ────────────────────────────────────────────────────
@@ -43,7 +44,7 @@ const PILLARS = [
 ];
 
 export default function KnowledgeHubShowcase() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <section className="khs-section">
@@ -70,10 +71,10 @@ export default function KnowledgeHubShowcase() {
             <div
               key={pillar.id}
               className={`khs-card khs-card--${pillar.id}`}
-              onClick={() => navigate(pillar.link)}
+              onClick={() => router.push(pillar.link)}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate(pillar.link)}
+              onKeyDown={(e) => e.key === 'Enter' && router.push(pillar.link)}
             >
               {/* Subtle top-glow accent — now light-mode friendly */}
               <div
@@ -126,7 +127,7 @@ export default function KnowledgeHubShowcase() {
               protocols tailored to your goals.
             </p>
           </div>
-          <button onClick={() => navigate('/collection/protocols')} className="khs-bridge-cta">
+          <button onClick={() => router.push('/collection/protocols')} className="khs-bridge-cta">
             View Protocols
           </button>
         </div>

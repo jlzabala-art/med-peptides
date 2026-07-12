@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Bell from "lucide-react/dist/esm/icons/bell";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import Clock from "lucide-react/dist/esm/icons/clock";
@@ -13,7 +16,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 
 const MOCK_NOTIFICATIONS = [
   {
@@ -55,7 +58,7 @@ export default function GlobalNotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const unreadCount = notifications.length;
-  const navigate = useNavigate();
+  const router = useRouter();
   const dropdownRef = useRef(null);
 
   // Close on outside click
@@ -71,7 +74,7 @@ export default function GlobalNotificationCenter() {
 
   const handleAction = (path) => {
     setIsOpen(false);
-    navigate(path);
+    router.push(path);
   };
 
   const removeNotification = (e, id) => {

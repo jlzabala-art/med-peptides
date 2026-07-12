@@ -1,9 +1,5 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import List from "lucide-react/dist/esm/icons/list";
-import Maximize2 from "lucide-react/dist/esm/icons/maximize-2";
-import Check from "lucide-react/dist/esm/icons/check";
-import Settings2 from "lucide-react/dist/esm/icons/settings-2";
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
 
 
@@ -13,6 +9,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { usePreferences } from '../../../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
+import { Globe, DollarSign, List, Maximize2, Check, Settings2 } from '@/lib/icons';
 
 export default function GlobalPreferencesDropdown() {
   const [isOpen, setIsOpen] = useState(false);

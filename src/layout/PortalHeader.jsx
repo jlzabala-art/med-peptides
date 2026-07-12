@@ -1,20 +1,23 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Menu from "lucide-react/dist/esm/icons/menu";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { Globe } from '@/lib/icons';
+import { Menu } from '@/lib/icons';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FiSearch, FiBell, FiCpu } from 'react-icons/fi';
+import { Search } from '@/lib/icons';
+import { Bell } from '@/lib/icons';
 
 
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { useLocation, useNavigate } from 'react-router-dom';
+
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
 import UserDropdown from '../navigation/UserDropdown';
 
 export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
-  const { userProfile, activeRole } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { userProfile, activeRole, switchActiveRole } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const { t, i18n } = useTranslation();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -27,7 +30,7 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
   };
 
   // Create a simple breadcrumb from the pathname
-  const pathParts = location.pathname.split('/').filter(Boolean);
+  const pathParts = pathname.split('/').filter(Boolean);
   const breadcrumb = pathParts.length > 0 
     ? pathParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' / ')
     : 'Dashboard';
@@ -49,7 +52,7 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
       <div className="header-right">
         {/* Global Search */}
         <div className="search-bar">
-          <FiSearch className="search-icon" />
+          <Search className="search-icon" />
           <input type="text" placeholder={t('header.search') || "Search..."} className="search-input" />
         </div>
 
@@ -80,7 +83,7 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
 
         {/* Notifications */}
         <button className="icon-btn" aria-label="Notifications">
-          <FiBell className="bell-ringing" />
+          <Bell className="bell-ringing" />
           <span className="badge">3</span>
         </button>
 
@@ -153,11 +156,64 @@ export default function PortalHeader({ onToggleAI, onToggleSidebar }) {
               onClose={() => setIsUserMenuOpen(false)}
               onLogout={() => {
                 setIsUserMenuOpen(false);
-                navigate('/login');
+                router.push('/login');
               }}
             />
           )}
         </div>
+        
+        {/* Admin Role Switcher */}
+        {userProfile?.role === 'admin' && (
+          <div style={{ paddingLeft: '1.25rem', borderLeft: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <select 
+                value={activeRole}
+                onChange={(e) => {
+                  const newRole = e.target.value;
+                  if (switchActiveRole) {
+                    switchActiveRole(newRole);
+                    router.push(`/portal/${newRole === 'admin' ? '' : newRole}`);
+                  }
+                }}
+                style={{
+                  padding: '0.4rem 2rem 0.4rem 2rem',
+                  borderRadius: '999px',
+                  border: '1.5px solid rgba(0,54,102,0.1)',
+                  background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: 'var(--color-primary)',
+                  cursor: 'pointer',
+                  appearance: 'none',
+                  boxShadow: '0 2px 8px rgba(0,54,102,0.05)',
+                  transition: 'all 0.2s ease',
+                  letterSpacing: '0.02em',
+                  textTransform: 'uppercase'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,54,102,0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(0,54,102,0.2)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,54,102,0.05)';
+                  e.currentTarget.style.borderColor = 'rgba(0,54,102,0.1)';
+                }}
+              >
+                <option value="admin">👀 View as Admin</option>
+                <option value="doctor">👀 View as Doctor</option>
+                <option value="patient">👀 View as Patient</option>
+                <option value="wholesaler">👀 View as Wholesaler</option>
+                <option value="clinic">👀 View as Clinic</option>
+              </select>
+              <div style={{ position: 'absolute', right: '0.8rem', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary)' }}><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+              <div style={{ position: 'absolute', left: '0.6rem', pointerEvents: 'none', display: 'flex', alignItems: 'center', opacity: 0.7 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary)' }}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`

@@ -1,3 +1,5 @@
+"use client";
+
 import Upload from "lucide-react/dist/esm/icons/upload";
 import FileSpreadsheet from "lucide-react/dist/esm/icons/file-spreadsheet";
 import Settings from "lucide-react/dist/esm/icons/settings";

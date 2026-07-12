@@ -1,8 +1,9 @@
 import React from 'react';
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import User from "lucide-react/dist/esm/icons/user";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+import { CheckCircle2, Clock, User, FileText } from '@/lib/icons';
+
+
+
+
 
 function fmtDate(date) {
   if (!date) return 'N/A';

@@ -1,3 +1,5 @@
+"use client";
+
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import X from "lucide-react/dist/esm/icons/x";

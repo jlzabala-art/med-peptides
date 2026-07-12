@@ -1,9 +1,12 @@
+"use client";
+
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Send from "lucide-react/dist/esm/icons/send";
 import User from "lucide-react/dist/esm/icons/user";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 

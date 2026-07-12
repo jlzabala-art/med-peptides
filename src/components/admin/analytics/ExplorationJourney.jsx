@@ -1,10 +1,4 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Compass from "lucide-react/dist/esm/icons/compass";
-import Zap from "lucide-react/dist/esm/icons/zap";
+import { Search, FlaskConical, BookOpen, ShoppingCart, ArrowRight, Compass, Zap } from '@/lib/icons';
 
 
 

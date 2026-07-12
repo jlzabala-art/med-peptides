@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
  
 /**
  * HowItWorks — Phase 6
@@ -18,7 +19,7 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 // ─── Inline SVG icons ─────────────────────────────────────────────────────────
 
@@ -90,7 +91,7 @@ const STEPS = [
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 export default function HowItWorks() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div style={containerStyle}>
@@ -131,7 +132,7 @@ export default function HowItWorks() {
             {/* Link */}
             <button
               style={{ ...stepLinkStyle, color: step.color }}
-              onClick={() => navigate(step.href)}
+              onClick={() => router.push(step.href)}
             >
               Explore →
             </button>
@@ -211,10 +212,4 @@ const stepLinkStyle = {
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  fontSize: '0.82rem',
-  fontWeight: 700,
-  padding: 0,
-  marginTop: '0.5rem',
-  transition: 'opacity 0.15s',
 };
-

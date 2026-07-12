@@ -1,4 +1,5 @@
-import Search from "lucide-react/dist/esm/icons/search";
+"use client";
+
 import React, { useState, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 
@@ -6,6 +7,7 @@ import { useBlogPosts } from '../hooks/useBlogPosts';
 import BlogCard from '../components/blog/BlogCard';
 import blogHeroImg from '../assets/images/blog_hero_knowledge.png';
 import '../styles/blog.css';
+import { Search } from '@/lib/icons';
 
 // Display label → actual category value in blogData
 const CATEGORIES = [

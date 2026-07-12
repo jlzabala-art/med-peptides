@@ -11,7 +11,8 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 /**
  * useFirestoreCollection
@@ -24,7 +25,7 @@ import { db } from '../../firebase';
  * @param {boolean} options.enabled - Whether the query is enabled (default: true)
  */
 export function useFirestoreCollection(collectionPath, options = {}) {
-  const { whereConditions = [], orderByFields = [], enabled = true } = options;
+  const { whereConditions = [], orderByFields = [], enabled = true, initialData } = options;
   const queryClient = useQueryClient();
 
   // 1. Fetching Data
@@ -34,6 +35,7 @@ export function useFirestoreCollection(collectionPath, options = {}) {
     error,
     refetch,
   } = useQuery({
+    initialData,
     queryKey: [collectionPath, JSON.stringify(whereConditions), JSON.stringify(orderByFields)],
     queryFn: async () => {
       let q = collection(db, collectionPath);

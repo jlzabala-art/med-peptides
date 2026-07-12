@@ -1,14 +1,17 @@
-import Activity from "lucide-react/dist/esm/icons/activity";
-import User from "lucide-react/dist/esm/icons/user";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import HeartPulse from "lucide-react/dist/esm/icons/heart-pulse";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+"use client";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { Activity } from '@/lib/icons';
+import { User } from '@/lib/icons';
+import { Calendar } from '@/lib/icons';
+import { Beaker } from '@/lib/icons';
+import { ClipboardList } from '@/lib/icons';
+import { LogOut } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
+import { HeartPulse } from '@/lib/icons';
+import { Stethoscope } from '@/lib/icons';
 import React, { useState, useCallback } from 'react';
-import { Outlet, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Outlet, Navigate } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -23,8 +26,8 @@ import PortalLayout from '../components/ui/PortalLayout';
 
 export default function ClinicalLayout() {
   const { user, isPhysician, logout, loading } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
 
   // Redirect or show loader if auth state isn't ready
   if (loading) {
@@ -51,14 +54,14 @@ export default function ClinicalLayout() {
   ];
 
   // Map current path to active item ID
-  const currentPath = location.pathname;
+  const currentPath = pathname;
   const currentItem = pinnedItems.find(item => item.path === currentPath) || pinnedItems[0];
   const activeTab = currentItem?.id || 'dashboard';
 
   const navToTab = useCallback((tabId) => {
     const targetItem = pinnedItems.find(item => item.id === tabId);
     if (targetItem) {
-      navigate(targetItem.path);
+      router.push(targetItem.path);
     }
   }, [navigate, pinnedItems]);
 

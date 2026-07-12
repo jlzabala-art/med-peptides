@@ -1,3 +1,5 @@
+"use client";
+
 import Cpu from "lucide-react/dist/esm/icons/cpu";
 import Brain from "lucide-react/dist/esm/icons/brain";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
@@ -27,7 +29,7 @@ import './AdminOverviewTab.css';
 
 
 import DashboardEngine from '../../engine/DashboardEngine';
-import { doc, getDoc } from 'firebase/firestore';
+import configRepository from '../../repositories/configRepository';
 import { db } from '../../firebase';
 import notifier from '../../services/NotificationService';
 
@@ -67,9 +69,9 @@ export default function AdminOverviewTab({
   useEffect(() => {
     async function fetchAgents() {
       try {
-        const snap = await getDoc(doc(db, 'ai_config', 'agents'));
-        if (snap.exists()) {
-          setAgents(snap.data());
+        const agentsData = await configRepository.getAiAgents();
+        if (agentsData) {
+          setAgents(agentsData);
         }
       } catch (err) {}
     };

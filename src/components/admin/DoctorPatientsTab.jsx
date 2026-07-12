@@ -1,3 +1,5 @@
+"use client";
+
 import Users from "lucide-react/dist/esm/icons/users";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
@@ -6,6 +8,7 @@ import Activity from "lucide-react/dist/esm/icons/activity";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import AdminPageHeader from './AdminPageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';

@@ -50,6 +50,13 @@ const PaymentSection = ({ formData, set, isProfessional }) => {
           description="Pago instantáneo seguro vía Stripe." 
         />
         
+        <PayCard 
+          method="apple_pay" 
+          icon={CreditCard} 
+          label="Apple Pay / Google Pay" 
+          description="Pago express seguro." 
+        />
+
         {isProfessional && (
           <>
             <PayCard 
@@ -77,6 +84,16 @@ const PaymentSection = ({ formData, set, isProfessional }) => {
       </div>
 
       <AnimatePresence>
+        {formData.paymentMethod === 'apple_pay' && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.8rem', color: '#475569' }}
+          >
+            <strong>Nota:</strong> Serás redirigido a Apple/Google Pay en el paso final para confirmar con biometría.
+          </motion.div>
+        )}
         {formData.paymentMethod === 'net_30' && (
           <motion.div 
             initial={{ opacity: 0, height: 0 }}

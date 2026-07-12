@@ -1,7 +1,5 @@
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React from 'react';
+import { TrendingUp, TrendingDown, AlertTriangle } from '@/lib/icons';
 
 
 

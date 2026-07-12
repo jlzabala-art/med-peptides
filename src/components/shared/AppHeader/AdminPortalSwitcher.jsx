@@ -1,24 +1,14 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAdminRoleSimulation } from '../../../hooks/admin/useAdminRoleSimulation';
-import { useNavigate } from 'react-router-dom';
+
 import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, ChevronDown, User, Stethoscope, Building2, FlaskConical, LayoutDashboard, ShoppingCart, Search, Check, Settings, Grid, X, Briefcase } from '@/lib/icons';
 
 // Icons
-import Shield from 'lucide-react/dist/esm/icons/shield';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import User from 'lucide-react/dist/esm/icons/user';
-import Stethoscope from 'lucide-react/dist/esm/icons/stethoscope';
-import Building2 from 'lucide-react/dist/esm/icons/building-2';
-import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Check from 'lucide-react/dist/esm/icons/check';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import Grid from 'lucide-react/dist/esm/icons/grid';
-import X from 'lucide-react/dist/esm/icons/x';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
 
 const PORTALS = [
   {
@@ -142,7 +132,7 @@ function addRecentPortal(id) {
 export default function AdminPortalSwitcher() {
   const { isAdmin, activeRole, switchActiveRole } = useAuth();
   const { simulatedRole, setSimulatedRole } = useAdminRoleSimulation();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -210,12 +200,12 @@ export default function AdminPortalSwitcher() {
     if (portal.isSimulatedRole) {
       setSimulatedRole(portal.id);
       if (window.location.pathname !== '/admin') {
-        navigate('/admin');
+        router.push('/admin');
       }
     } else {
       setSimulatedRole('admin');
       switchActiveRole(portal.id);
-      navigate(portal.route);
+      router.push(portal.route);
     }
     setIsOpen(false);
   };
@@ -777,7 +767,7 @@ export default function AdminPortalSwitcher() {
                 <button
                   onClick={() => {
                     setIsOpen(false);
-                    navigate('/admin/access-levels');
+                    router.push('/admin/access-levels');
                   }}
                   style={{
                     flex: 1,
@@ -803,7 +793,7 @@ export default function AdminPortalSwitcher() {
                 <button
                   onClick={() => {
                     setIsOpen(false);
-                    navigate('/admin/settings');
+                    router.push('/admin/settings');
                   }}
                   style={{
                     flex: 1,

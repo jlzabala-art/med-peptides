@@ -1,10 +1,5 @@
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Calculator from "lucide-react/dist/esm/icons/calculator";
-import PackageCheck from "lucide-react/dist/esm/icons/package-check";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Users from "lucide-react/dist/esm/icons/users";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
+import { FileText, Calculator, PackageCheck, UserPlus, Users, ArrowRight } from '@/lib/icons';
 
 
 

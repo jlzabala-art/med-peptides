@@ -1,6 +1,7 @@
+import { useRouter } from 'next/navigation';
 import { Bot, Moon, ChevronDown, ArrowRight, Heart, TrendingUp, Activity, Dna, ChevronUp, Brain, Shield, Flame, FlaskConical, Leaf } from '@/lib/icons';
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -272,7 +273,7 @@ function PeptideAccordionItem({ category, peptide, isOpen, onToggle, onCardClick
 
 // ── Main section ──────────────────────────────────────────────────────────────
 export default function TrendingPeptides({ onSelectProduct }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const isMobile = useResponsive('(max-width: 767px)');
   const { allItems, loading } = useCategoryBestItems('peptides', 'peptide_id');
 
@@ -311,7 +312,7 @@ export default function TrendingPeptides({ onSelectProduct }) {
     if (onSelectProduct) {
       onSelectProduct(peptide.name || peptide.displayName);
     } else {
-      navigate(`/product/${id}`);
+      router.push(`/product/${id}`);
     }
   }
 
@@ -434,7 +435,7 @@ export default function TrendingPeptides({ onSelectProduct }) {
         {/* ── Footer CTAs (unchanged) ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           <button
-            onClick={() => navigate('/collection/peptides')}
+            onClick={() => router.push('/collection/peptides')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
               padding: '0.85rem 2rem',
@@ -451,7 +452,7 @@ export default function TrendingPeptides({ onSelectProduct }) {
             <ArrowRight size={15} />
           </button>
           <button
-            onClick={() => navigate('/protocol-finder')}
+            onClick={() => router.push('/protocol-finder')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               padding: '0.85rem 1.75rem', background: 'white',

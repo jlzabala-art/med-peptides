@@ -1,75 +1,49 @@
+"use client";
+
 import Users from "lucide-react/dist/esm/icons/users";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Filter from "lucide-react/dist/esm/icons/filter";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StatusChip } from '../ui';
+import DataTable from '../ui/DataTable';
 import PatientOnboardingWizard from './patients/PatientOnboardingWizard';
 import PatientProfileWorkspace from './patients/PatientProfileWorkspace';
 import AdminPageHeader from './AdminPageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
+import { formatAEDtoDual } from '../../utils/currencies';
+import { useSearchParams } from 'next/navigation';
 
-// Mock Patient Data
-const MOCK_PATIENTS = [
-  {
-    id: 'pat_001',
-    name: 'Emily Chen',
-    age: 42,
-    gender: 'Female',
-    clinic: 'Atlas Longevity Center',
-    physician: 'Dr. Sarah Jenkins',
-    manager: 'Mike O\'Connor',
-    status: 'Active',
-    program: 'Metabolic Optimization',
-    lastActivity: '2023-10-15',
-    revenue: 4500,
-    riskScore: 'Low',
-    email: 'emily.c@example.com',
-    phone: '+1 555-0102',
-    avatar: ''
-  },
-  {
-    id: 'pat_002',
-    name: 'James Wilson',
-    age: 55,
-    gender: 'Male',
-    clinic: 'Peak Performance Med',
-    physician: 'Dr. Robert Silva',
-    manager: 'Carlos Silva',
-    status: 'Awaiting Follow-Up',
-    program: 'Longevity Protocol',
-    lastActivity: '2023-10-10',
-    revenue: 12000,
-    riskScore: 'Medium',
-    email: 'jwilson@example.com',
-    phone: '+1 555-0921',
-    avatar: ''
+import { useFirestorePaginatedCollection } from '../../hooks/data/useFirestorePaginatedCollection';
+import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
+import { usePatientAggregates } from '../../hooks/data/usePatientAggregates';
+import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
+import { useDataTable } from '../../hooks/ui/useDataTable';
+import BulkActionsBar from '../ui/BulkActionsBar';
+import PatientFiltersBar from './patients/PatientFiltersBar';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useToast } from '../../hooks/useToast';
+import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert } from '@/lib/icons';
+
+function PatientKPIs() {
+  const { data: aggs, isLoading } = usePatientAggregates();
+  const fmtCurrency = (val) => formatAEDtoDual(val);
+
+  if (isLoading) {
+    return <GridSkeleton count={5} cols={5} />;
   }
-];
 
-function PatientKPIs({ data }) {
-  const active = data.filter(d => d.status === 'Active').length;
-  const newPatients = data.filter(d => d.status === 'New').length || 1;
-  const awaiting = data.filter(d => d.status === 'Awaiting Follow-Up').length;
-  const revenue = data.reduce((acc, curr) => acc + curr.revenue, 0);
-
-  const fmtCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+  const kpis = [
+    { label: 'Total Patients', value: aggs?.totalPatients || 0, color: '#3b82f6', bg: '#eff6ff' },
+    { label: 'Active', value: aggs?.activePatients || 0, color: '#10b981', bg: '#ecfdf5' },
+    { label: 'New This Month', value: aggs?.newPatients || 0, color: '#8b5cf6', bg: '#f5f3ff' },
+    { label: 'Awaiting Follow-Up', value: aggs?.awaitingFollowUp || 0, color: '#f59e0b', bg: '#fffbeb' },
+    { label: 'Total Revenue', value: fmtCurrency(aggs?.totalRevenue || 0), color: '#ec4899', bg: '#fdf2f8' }
+  ];
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem', flexShrink: 0 }}>
-      {[
-        { label: 'Total Patients', value: data.length, color: '#3b82f6', bg: '#eff6ff' },
-        { label: 'Active', value: active, color: '#10b981', bg: '#ecfdf5' },
-        { label: 'New This Month', value: newPatients, color: '#8b5cf6', bg: '#f5f3ff' },
-        { label: 'Awaiting Follow-Up', value: awaiting, color: '#f59e0b', bg: '#fffbeb' },
-        { label: 'Total Revenue', value: fmtCurrency(revenue), color: '#ec4899', bg: '#fdf2f8' }
-      ].map((kpi, idx) => (
+      {kpis.map((kpi, idx) => (
         <div key={idx} style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.2s ease' }} className="hover-card-subtle">
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>{kpi.label}</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
@@ -80,29 +54,127 @@ function PatientKPIs({ data }) {
 }
 
 export default function AdminPatientsTab() {
-  const [patients, setPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+
+  const [filters, setFilters] = useState({});
+
+  // Fetch doctors for the filter dropdown
+  const { data: doctors } = useFirestoreCollection('users', {
+    whereConditions: [['roles', 'array-contains', 'doctor']]
+  });
+
+  // Construct where conditions based on filters
+  const whereConditions = useMemo(() => {
+    const conditions = [];
+    if (filters.status) conditions.push(['status', '==', filters.status]);
+    if (filters.physicianId) conditions.push(['physicianId', '==', filters.physicianId]);
+    return conditions;
+  }, [filters]);
+
+  const { 
+    data: paginatedPatients, 
+    isLoading: loading, 
+    hasMore, 
+    loadMore,
+    isFetchingMore
+  } = useFirestorePaginatedCollection('patients', {
+    whereConditions,
+    orderByFields: [['createdAt', 'desc']],
+    pageSize: 50
+  });
 
   useEffect(() => {
-    // Simulate fetch
-    setTimeout(() => {
-      setPatients(MOCK_PATIENTS);
-      setLoading(false);
-    }, 400);
-  }, []);
+    const patientId = searchParams.get('patientId');
+    if (patientId && paginatedPatients && paginatedPatients.length > 0 && !selectedPatient) {
+      const p = paginatedPatients.find(p => p.id === patientId);
+      if (p) {
+        setSelectedPatient(p);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('patientId');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  }, [searchParams, paginatedPatients, selectedPatient]);
 
-  const filtered = patients.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.clinic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.physician.toLowerCase().includes(searchTerm.toLowerCase())
+  const {
+    selectedIds,
+    selectedCount,
+    clearSelection,
+    selectedItems,
+    search: searchTerm,
+    setSearch: setSearchTerm,
+    toggleRowSelection,
+  } = useDataTable(paginatedPatients, {
+    idField: 'id',
+    initialPageSize: 50,
+  });
+
+  const { hits: algoliaHits, isAlgoliaActive, loading: algoliaLoading } = useAlgoliaSearch(
+    'atlas_patients',
+    searchTerm,
+    { hitsPerPage: 50 },
+    300
   );
+
+  const filtered = isAlgoliaActive && searchTerm.trim()
+    ? algoliaHits.map(h => paginatedPatients.find(p => p.id === h.objectID) || { ...h, id: h.objectID }).filter(Boolean)
+    : paginatedPatients;
+
+  async function handleBulkStatusChange(newStatus) {
+    const ids = [...selectedIds];
+    if (!ids.length) return;
+    if (!window.confirm(`Update status to "${newStatus}" for ${ids.length} patient(s)?`)) return;
+    try {
+      await Promise.all(ids.map(id => updateDoc(doc(db, 'patients', id), { status: newStatus })));
+      clearSelection();
+      toast.success(`${ids.length} patients updated. Please refresh to see changes.`);
+    } catch (err) {
+      toast.error('Failed to update patients: ' + err.message);
+    }
+  }
+
+  async function handleBulkDelete() {
+    const ids = [...selectedIds];
+    if (!ids.length) return;
+    if (!window.confirm(`Permanently delete ${ids.length} patient(s)?`)) return;
+    try {
+      await Promise.all(ids.map(id => deleteDoc(doc(db, 'patients', id))));
+      clearSelection();
+      toast.success(`${ids.length} patients deleted. Please refresh to see changes.`);
+    } catch (err) {
+      toast.error('Failed to delete patients: ' + err.message);
+    }
+  }
+
+  function handleBulkExportCSV() {
+    const items = selectedItems;
+    if (!items.length) return;
+    const headers = ['ID', 'Name', 'Age', 'Gender', 'Clinic', 'Physician', 'Status'];
+    const rows = items.map(p => [
+      p.id,
+      `"${(p.name || '').replace(/"/g, '""')}"`,
+      p.age || '',
+      p.gender || '',
+      `"${(p.clinic || '').replace(/"/g, '""')}"`,
+      `"${(p.physician || '').replace(/"/g, '""')}"`,
+      p.status || ''
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patients_export_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${items.length} patients to CSV.`);
+  }
 
   return (
     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: '#f1f5f9' }}>
-      {/* Header — normalised */}
       <AdminPageHeader
         title="Patient Management"
         subtitle="Central workspace for managing patients, clinical journeys, and commercial health."
@@ -114,91 +186,103 @@ export default function AdminPatientsTab() {
         }
       />
 
-      {/* GlobalSearchBar — prominent position */}
       <GlobalSearchBar
         value={searchTerm}
         onChange={setSearchTerm}
-        placeholder="Search patients by name, email, clinic, physician..."
-        resultCount={loading ? undefined : filtered.length}
+        placeholder="Search patients by name, email, clinic, physician (Algolia)..."
+        resultCount={loading && !algoliaLoading ? undefined : filtered.length}
+        isLoading={algoliaLoading}
         namespace="admin-patients"
         size="lg"
       />
 
-      {!loading && <PatientKPIs data={patients} />}
+      <PatientKPIs />
 
-      {/* Main CRM Workspace */}
       <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        
+        <PatientFiltersBar filters={filters} setFilters={setFilters} doctors={doctors} />
 
-        {/* Patient List */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-          {loading ? (
+          {loading && !isFetchingMore ? (
             <GridSkeleton count={6} cols={3} />
-          ) : filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-muted)' }}>
-              <Users size={48} style={{ opacity: 0.2, margin: '0 auto 1rem auto' }} />
-              <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>Welcome to Patient Management</h3>
-              <p style={{ margin: '0 0 1.5rem 0', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>
-                Manage patients, programs, clinics, physicians, prescriptions, and follow-ups from one centralized workspace.
-              </p>
-              <button className="gcp-btn-primary" onClick={() => setIsWizardOpen(true)}>Create First Patient</button>
-            </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
-              {filtered.map(patient => (
-                <div 
-                  key={patient.id} 
-                  onClick={() => setSelectedPatient(patient)}
-                  className="hover-card-subtle"
-                  style={{ 
-                    border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem', 
-                    cursor: 'pointer', transition: 'all 0.2s', backgroundColor: 'white'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
-                        {patient.name.substring(0,2).toUpperCase()}
+            <>
+              <DataTable 
+                data={filtered}
+                columns={[
+                  { 
+                    key: 'name', 
+                    header: 'Patient Name', 
+                    render: (row) => (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8rem' }}>
+                          {row.name ? row.name.substring(0,2).toUpperCase() : '??'}
+                        </div>
+                        <div style={{ fontWeight: 600 }}>{row.name}</div>
                       </div>
-                      <div>
-                        <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '1rem' }}>{patient.name}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{patient.age} y/o • {patient.gender}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-                    <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Program</span>
-                      <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{patient.program}</span>
-                    </div>
-                    <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Clinic</span>
-                      <span style={{ color: 'var(--text-main)' }}>{patient.clinic}</span>
-                    </div>
-                    <div style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-muted)' }}>Physician</span>
-                      <span style={{ color: 'var(--text-main)' }}>{patient.physician}</span>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
-                    <StatusChip status={patient.status} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>
-                      Open Profile <ChevronRight size={14} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) /* end filtered */ }
+                    )
+                  },
+                  { 
+                    key: 'demographics', 
+                    header: 'Age / Gender', 
+                    render: (row) => <span style={{ color: 'var(--text-muted)' }}>{row.age} y/o • {row.gender}</span> 
+                  },
+                  { key: 'program', header: 'Program', render: (row) => <span style={{ fontWeight: 600 }}>{row.program}</span> },
+                  { key: 'clinic', header: 'Clinic' },
+                  { key: 'physician', header: 'Physician' },
+                  { key: 'status', header: 'Status', render: (row) => <StatusChip status={row.status} /> },
+                  {
+                    key: 'portal',
+                    header: 'Portal',
+                    render: (row) => row.linkedUserId
+                      ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-success)', backgroundColor: 'rgba(16,185,129,0.08)', borderRadius: '20px', padding: '0.2rem 0.6rem' }}><ShieldCheck size={12} /> Vinculado</span>
+                      : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', backgroundColor: 'var(--color-bg-hover)', borderRadius: '20px', padding: '0.2rem 0.6rem' }}><ShieldAlert size={12} /> Sin Acceso</span>,
+                  },
+                ]}
+                selectedIds={Array.from(selectedIds)}
+                onSelectionChange={(newArr) => {
+                   clearSelection();
+                   newArr.forEach(id => toggleRowSelection(id));
+                }}
+                enableExport={false}
+                onRowClick={setSelectedPatient} 
+                emptyTitle="Welcome to Patient Management"
+                emptyDescription="Manage patients, programs, clinics, physicians, prescriptions, and follow-ups from one centralized workspace."
+                emptyActionLabel="Create First Patient"
+                onEmptyAction={() => setIsWizardOpen(true)}
+              />
+              {hasMore && !isAlgoliaActive && (
+                 <div style={{ padding: '1rem', display: 'flex', justifyContent: 'center' }}>
+                    <button 
+                      className="gcp-btn-secondary" 
+                      onClick={loadMore} 
+                      disabled={isFetchingMore}
+                    >
+                      {isFetchingMore ? 'Loading more...' : 'Load More Patients'}
+                    </button>
+                 </div>
+              )}
+            </>
+          )}
         </div>
       </div>
+
+      <BulkActionsBar
+        selectedCount={selectedCount}
+        onClear={clearSelection}
+        actions={[
+          { label: 'Mark Active', icon: <Activity size={14} />, onClick: () => handleBulkStatusChange('Active') },
+          { label: 'Export CSV', icon: <Archive size={14} />, onClick: handleBulkExportCSV },
+          { label: 'Delete', icon: <Trash2 size={14} />, onClick: handleBulkDelete, variant: 'danger' },
+        ]}
+      />
 
       {isWizardOpen && (
         <PatientOnboardingWizard 
           onClose={() => setIsWizardOpen(false)}
           onComplete={(newPat) => {
-            setPatients(prev => [newPat, ...prev]);
             setIsWizardOpen(false);
+            window.location.reload(); 
           }}
         />
       )}

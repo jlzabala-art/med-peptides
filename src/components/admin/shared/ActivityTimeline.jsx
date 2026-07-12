@@ -1,11 +1,5 @@
 import React from 'react';
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Edit from "lucide-react/dist/esm/icons/edit";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Truck from "lucide-react/dist/esm/icons/truck";
+import { CheckCircle2, FileText, Mail, Edit, Eye, DollarSign, Truck } from '@/lib/icons';
 
 function fmtShortDate(date) {
   if (!date) return '';

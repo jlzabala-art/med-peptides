@@ -1,5 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../firebase';
+import * as fb from '../firebase';
+const functions = fb?.functions;
 
 /**
  * Atlas AI Service for data extraction

@@ -1,13 +1,12 @@
-import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Save from "lucide-react/dist/esm/icons/save";
-import X from "lucide-react/dist/esm/icons/x";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { functions, db, storage } from '../../../firebase';
+
+
+
 import { ref, uploadBytes } from 'firebase/storage';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -18,6 +17,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 import { Card } from '../../ui';
 import * as XLSX from 'xlsx';
+import { UploadCloud, FileText, Loader2, Save, X, CheckCircle } from '@/lib/icons';
 
 export default function BaseImportTab({ title, description, context, renderDiffTable, onSave }) {
   const { user } = useAuth();

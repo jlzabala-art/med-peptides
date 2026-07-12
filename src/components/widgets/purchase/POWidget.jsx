@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
@@ -20,7 +22,8 @@ import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
  */
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 
 
 

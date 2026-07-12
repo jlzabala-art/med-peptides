@@ -25,7 +25,8 @@
  *   const { pendingReminders, dismissReminder } = useRefillReminders('admin');
  */
 import { useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import {
   collection,
   query,

@@ -1,9 +1,10 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Search from "lucide-react/dist/esm/icons/search";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { useRouter } from 'next/navigation';
+import { ArrowRight } from '@/lib/icons';
+import { Bot } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -83,7 +84,7 @@ const GOALS = [
 ];
 
 export default function GoalEntryFlow({ onOpenAI, onSeedSearch }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [hovered, setHovered] = useState(null);
   const [selected, setSelected] = useState(null);
 
@@ -95,7 +96,7 @@ export default function GoalEntryFlow({ onOpenAI, onSeedSearch }) {
       onSeedSearch(query);
     } else {
       // Unify exploration under the collection view
-      navigate(`/collection/protocols?q=${encodeURIComponent(goal.label)}`);
+      router.push(`/collection/protocols?q=${encodeURIComponent(goal.label)}`);
     }
   };
 

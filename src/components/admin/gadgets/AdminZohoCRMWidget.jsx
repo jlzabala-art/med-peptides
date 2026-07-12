@@ -1,3 +1,5 @@
+"use client";
+
 import Building2 from "lucide-react/dist/esm/icons/building-2";
 import User from "lucide-react/dist/esm/icons/user";
 import Phone from "lucide-react/dist/esm/icons/phone";
@@ -28,6 +30,8 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';
+
+
 
 
 

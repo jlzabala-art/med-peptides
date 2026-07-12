@@ -1,8 +1,8 @@
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
+"use client";
+
 import React, { useState } from 'react';
 import UniversalItemPicker from '../shared/ItemPicker/UniversalItemPicker';
+import { Trash2, Plus, ShoppingBag } from '@/lib/icons';
 
 export default function B2BOrderBuilderTable({ items, onChange }) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);

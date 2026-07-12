@@ -1,7 +1,7 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
+import { FlaskConical } from '@/lib/icons';
 
 
 export default function QuickMatchChip({ quickMatch, onDismiss, onAdd, isLoading, isTyping }) {

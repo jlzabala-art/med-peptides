@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Tabs, Toggle, TextField, StatusChip } from '../ui';
 import X from "lucide-react/dist/esm/icons/x";

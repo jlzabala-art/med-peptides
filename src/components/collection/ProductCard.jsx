@@ -1,11 +1,11 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Bot from "lucide-react/dist/esm/icons/bot";
+
+
+
+
+
+
+
+
 
 
 
@@ -15,6 +15,7 @@ import Bot from "lucide-react/dist/esm/icons/bot";
 
 
 import { motion } from 'framer-motion';
+import { ArrowRight, Eye, FlaskConical, Beaker, Zap, Activity, ShieldCheck, Bot } from '@/lib/icons';
 
 export default function ProductCard({
   title,

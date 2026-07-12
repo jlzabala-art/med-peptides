@@ -1,12 +1,12 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Check from "lucide-react/dist/esm/icons/check";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import { Mail } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
+import { Check } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { Brain } from '@/lib/icons';
+import { Zap } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { Moon } from '@/lib/icons';
+import { RefreshCw } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 /**
  * HealthNewsletterSection.jsx
@@ -35,7 +35,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useGuestPreferences, { GOAL_META } from '../hooks/useGuestPreferences';
 
 // ── Cloud Function URL ────────────────────────────────────────────────────────
-const SUBSCRIBE_URL = `${import.meta.env.VITE_FUNCTIONS_BASE_URL || 'https://europe-west1-med-peptides-app.cloudfunctions.net'}/newsletterSubscribe`;
+const SUBSCRIBE_URL = `${process.env.NEXT_PUBLIC_FUNCTIONS_BASE_URL || 'https://europe-west1-med-peptides-app.cloudfunctions.net'}/newsletterSubscribe`;
 
 // ── Goal-specific copy ────────────────────────────────────────────────────────
 const GOAL_COPY = {

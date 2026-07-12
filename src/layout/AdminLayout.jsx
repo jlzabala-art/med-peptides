@@ -1,3 +1,4 @@
+"use client";
 /**
  * AdminLayout — Route wrapper for /admin/* routes.
  *
@@ -9,7 +10,7 @@
  * AdminDashboard already ships a complete Google Cloud-style sidebar.
  */
 import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 
 export default function AdminLayout() {

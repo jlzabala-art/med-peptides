@@ -1,75 +1,13 @@
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Settings from 'lucide-react/dist/esm/icons/settings';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Database from 'lucide-react/dist/esm/icons/database';
-import Layers from 'lucide-react/dist/esm/icons/layers';
-import PackageSearch from 'lucide-react/dist/esm/icons/package-search';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import Bot from 'lucide-react/dist/esm/icons/bot';
-import Link2 from 'lucide-react/dist/esm/icons/link-2';
-import BarChart3 from 'lucide-react/dist/esm/icons/bar-chart-3';
-import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import ClipboardList from 'lucide-react/dist/esm/icons/clipboard-list';
-import Zap from 'lucide-react/dist/esm/icons/zap';
-import Globe from 'lucide-react/dist/esm/icons/globe';
-import Wrench from 'lucide-react/dist/esm/icons/wrench';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Receipt from 'lucide-react/dist/esm/icons/receipt';
-import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
-import Box from 'lucide-react/dist/esm/icons/box';
-import Tag from 'lucide-react/dist/esm/icons/tag';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import Eye from 'lucide-react/dist/esm/icons/eye';
-import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
-import Mail from 'lucide-react/dist/esm/icons/mail';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import BookOpen from 'lucide-react/dist/esm/icons/book-open';
-import Cpu from 'lucide-react/dist/esm/icons/cpu';
-import LogOut from 'lucide-react/dist/esm/icons/log-out';
-import Menu from 'lucide-react/dist/esm/icons/menu';
-import X from 'lucide-react/dist/esm/icons/x';
-import Building2 from 'lucide-react/dist/esm/icons/building-2';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import Truck from 'lucide-react/dist/esm/icons/truck';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Building from 'lucide-react/dist/esm/icons/building';
-import Stethoscope from 'lucide-react/dist/esm/icons/stethoscope';
-import HeartPulse from 'lucide-react/dist/esm/icons/heart-pulse';
-import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
-import Lock from 'lucide-react/dist/esm/icons/lock';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import LayoutTemplate from 'lucide-react/dist/esm/icons/layout-template';
-import Network from 'lucide-react/dist/esm/icons/network';
-import ScrollText from 'lucide-react/dist/esm/icons/scroll-text';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
-import Calendar from 'lucide-react/dist/esm/icons/calendar';
-import UploadCloud from 'lucide-react/dist/esm/icons/upload-cloud';
-import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
-import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
-import PieChart from 'lucide-react/dist/esm/icons/pie-chart';
-import CreditCard from 'lucide-react/dist/esm/icons/credit-card';
-import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
-import Pill from 'lucide-react/dist/esm/icons/pill';
-import FilePlus from 'lucide-react/dist/esm/icons/file-plus';
-import ArrowLeftRight from 'lucide-react/dist/esm/icons/arrow-left-right';
-import UserCog from 'lucide-react/dist/esm/icons/user-cog';
-import BarChart4 from 'lucide-react/dist/esm/icons/bar-chart-4';
-import Workflow from 'lucide-react/dist/esm/icons/workflow';
-import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap';
-import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
-import Package from 'lucide-react/dist/esm/icons/package';
-import Inbox from 'lucide-react/dist/esm/icons/inbox';
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
-import { db, auth } from '../firebase';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { conversationRepository } from '../repositories/conversationRepository';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
 import PortalLayout from '../components/ui/PortalLayout';
 import PageTransition from '../components/PageTransition';
@@ -87,6 +25,7 @@ function MailPlus2(props) {
 
 
 import { NAVIGATION_REGISTRY, getNavigationForRole } from '../config/navigationRegistry';
+import { ShieldCheck, ArrowLeft, Settings, Users, Database, Layers, PackageSearch, LayoutDashboard, Bot, Link2, BarChart3, ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench, ShoppingCart, Receipt, FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail, Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp, Truck, Search, Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle, PieChart, CreditCard, ShieldAlert, Pill, FilePlus, ArrowLeftRight, UserCog, BarChart4, Workflow, GraduationCap, PackageOpen, Package, Inbox } from '../lib/icons';
 
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
 const PINNED_ITEMS = [
@@ -103,26 +42,10 @@ function useUnreadMessagesCount() {
 
   useEffect(() => {
     if (!user) return;
-    const effectiveRole = userRole;
-    const effectiveId = user.uid;
-    const q =
-      effectiveRole === 'admin' || isAdmin
-        ? query(collection(db, 'conversations'))
-        : query(
-            collection(db, 'conversations'),
-            where('participants', 'array-contains', effectiveId)
-          );
-    const unsub = onSnapshot(q, (snap) => {
-      let count = 0;
-      snap.forEach((doc) => {
-        const data = doc.data();
-        if (data.unreadCount?.[effectiveId] > 0) {
-          count++;
-        }
-      });
-      setUnread(count);
-    });
-    return unsub;
+    return conversationRepository.subscribeToUnreadMessages(
+      { userId: user.uid, isAdmin: isAdmin || userRole === 'admin' },
+      setUnread
+    );
   }, [user, isAdmin, userRole]);
 
   return unread;
@@ -131,16 +54,7 @@ function useUnreadMessagesCount() {
 function useInboxPendingCount() {
   const [count, setCount] = useState(0);
   useEffect(() => {
-    const q = query(
-      collection(db, 'operations_queue'),
-      where('status', 'in', ['New', 'AI Processing', 'Awaiting Review', 'Awaiting Approval'])
-    );
-    const unsub = onSnapshot(
-      q,
-      (snap) => setCount(snap.size),
-      () => {}
-    );
-    return unsub;
+    return conversationRepository.subscribeToInboxPending(setCount);
   }, []);
   return count;
 }
@@ -150,34 +64,8 @@ function useUpcomingCalendarCount() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!user || !auth.currentUser) return;
-    const q = query(
-      collection(db, 'calendar_events'),
-      where('ownerIds', 'array-contains', user.uid),
-      orderBy('start', 'asc')
-    );
-
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        let pending = 0;
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-        const todayIso = startOfToday.toISOString();
-
-        snap.forEach((doc) => {
-          const data = doc.data();
-          const startStr = data.start?.toDate ? data.start.toDate().toISOString() : data.start;
-          if (startStr && startStr >= todayIso) {
-            pending++;
-          }
-        });
-        setCount(pending);
-      },
-      () => {}
-    );
-
-    return unsub;
+    if (!user) return;
+    return conversationRepository.subscribeToUpcomingCalendarEvents(user.uid, setCount);
   }, [user]);
 
   return count;
@@ -228,13 +116,13 @@ function AdminLoadingFallback() {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-export default function AdminDashboard() {
+export default function AdminDashboard({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const { isAdmin, loading: authLoading, logout, userProfile } = useAuth();
   const { simulatedRole, allowedAdminTabs, isSimulating } = useAdminRoleSimulation();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const unreadMessages = useUnreadMessagesCount();
   const pendingInboxItems = useInboxPendingCount();
   const upcomingCalendarCount = useUpcomingCalendarCount();
@@ -279,82 +167,78 @@ export default function AdminDashboard() {
   }, [unreadMessages, pendingInboxItems, upcomingCalendarCount]);
 
   const filteredNavGroups = React.useMemo(() => {
-    // 1. Role simulation logic
-    if (isSimulating) {
-      if (allowedAdminTabs.includes('*')) return NAV_GROUPS;
-      return NAV_GROUPS.map((group) => ({
-        ...group,
-        items: group.items.filter((item) => allowedAdminTabs.includes(item.id)),
-      })).filter((group) => group.items.length > 0);
+    // 1. Determine which role to use for navigation (simulated or real)
+    const roleToUse = isSimulating ? simulatedRole : (userProfile?.role || 'admin');
+
+    // 2. Fetch the proper navigation structure for that role from the registry
+    const baseNavGroups = getNavigationForRole(roleToUse).map(group => ({
+      ...group,
+      items: group.items.map(item => ({
+        ...item,
+        id: item.id.replace(/^\//, '') || 'dashboard'
+      }))
+    }));
+
+    // 3. Role simulation or Admin overrides filtering
+    if (isSimulating || isAdmin || userProfile?.role === 'admin') {
+      return baseNavGroups.filter(group => group.items.length > 0);
     }
 
-    // 2. Normal Auth logic
-    if (isAdmin || userProfile?.role === 'admin') {
-      return NAV_GROUPS;
-    }
+    // 4. Normal Auth logic for non-admin users with specific allowed tabs
     if (!userProfile?.allowedAdminTabs || userProfile.allowedAdminTabs.length === 0) {
-      return NAV_GROUPS;
+      return baseNavGroups.filter(group => group.items.length > 0);
     }
-    return NAV_GROUPS.map((group) => ({
+
+    // Filter by allowedAdminTabs if the user is restricted
+    return baseNavGroups.map((group) => ({
       ...group,
       items: group.items.filter((item) => userProfile.allowedAdminTabs.includes(item.id)),
     })).filter((group) => group.items.length > 0);
-  }, [userProfile, isAdmin, isSimulating, allowedAdminTabs]);
+  }, [userProfile, isAdmin, isSimulating, simulatedRole]);
 
   // Derive active tab from the URL path instead of query params.
   // E.g., /admin/users -> 'users', /admin -> 'dashboard'
-  const pathParts = location.pathname.split('/').filter(Boolean);
+  const pathParts = pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
-  React.useEffect(() => {
-    // If simulating, do not forcibly redirect the admin (or redirect them if you strictly want to enforce it).
-    // Let's enforce it to make the simulation authentic.
-    if (isSimulating && !allowedAdminTabs.includes('*')) {
-      if (
-        !allowedAdminTabs.includes(activeTab) &&
-        activeTab !== 'dashboard' &&
-        activeTab !== 'my-profile'
-      ) {
-        navigate(`/admin/${allowedAdminTabs[0]}`);
-      } else if (activeTab === 'dashboard' && !allowedAdminTabs.includes('dashboard')) {
-        navigate(`/admin/${allowedAdminTabs[0]}`);
-      }
-      return;
-    }
+  // Flatten allowed tab IDs from the filtered groups
+  const allowedNavIds = React.useMemo(() => {
+    return filteredNavGroups.flatMap(group => group.items.map(i => i.id));
+  }, [filteredNavGroups]);
 
-    if (isAdmin || userProfile?.role === 'admin') return; // Admins bypass restrictions
-    if (userProfile?.allowedAdminTabs && userProfile.allowedAdminTabs.length > 0) {
+  React.useEffect(() => {
+    // Let admins bypass restrictions if they are not simulating
+    if (!isSimulating && (isAdmin || userProfile?.role === 'admin')) return;
+
+    if (allowedNavIds.length > 0) {
       if (
-        !userProfile.allowedAdminTabs.includes(activeTab) &&
+        !allowedNavIds.includes(activeTab) &&
         activeTab !== 'dashboard' &&
         activeTab !== 'my-profile'
       ) {
-        // Not allowed to access this tab
-        navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
-      } else if (activeTab === 'dashboard' && !userProfile.allowedAdminTabs.includes('dashboard')) {
-        // They requested the root dashboard, but it's not explicitly allowed. Redirect.
-        navigate(`/admin/${userProfile.allowedAdminTabs[0]}`);
+        router.push(`/admin/${allowedNavIds[0]}`);
+      } else if (activeTab === 'dashboard' && !allowedNavIds.includes('dashboard')) {
+        router.push(`/admin/${allowedNavIds[0]}`);
       }
     }
   }, [
-    userProfile?.allowedAdminTabs,
+    allowedNavIds,
     activeTab,
-    navigate,
+    router,
     isAdmin,
     userProfile?.role,
     isSimulating,
-    allowedAdminTabs,
   ]);
 
   const navToTab = useCallback(
     (tabId) => {
       if (tabId === 'b2c-shop') {
-        navigate('/');
+        router.push('/');
         return;
       }
-      navigate(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
+      router.push(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
     },
-    [navigate]
+    [router]
   );
 
   const handleLogout = () => {
@@ -402,7 +286,7 @@ export default function AdminDashboard() {
     >
       <div style={{ padding: '1.5rem', width: '100%', boxSizing: 'border-box' }}>
         <React.Suspense fallback={<AdminLoadingFallback />}>
-          <Outlet />
+          {children}
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />

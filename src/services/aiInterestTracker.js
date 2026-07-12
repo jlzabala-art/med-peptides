@@ -14,7 +14,8 @@
  */
 
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 // ── Known peptide/supplement names → slug map ─────────────────────────────────
 // Add entries as the catalog grows

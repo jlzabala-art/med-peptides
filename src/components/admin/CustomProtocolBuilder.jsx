@@ -1,9 +1,5 @@
-import PackagePlus from "lucide-react/dist/esm/icons/package-plus";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import X from "lucide-react/dist/esm/icons/x";
-import Save from "lucide-react/dist/esm/icons/save";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 
 
@@ -12,8 +8,10 @@ import React, { useState, useEffect } from 'react';
 
 
 import { db } from '../../firebase';
+
 import { collection, getDocs, addDoc } from 'firebase/firestore';
 import notifier from '../../services/NotificationService';
+import { PackagePlus, Beaker, Plus, X, Save, AlertTriangle } from '@/lib/icons';
 
 export default function CustomProtocolBuilder({ onSaved, onClose }) {
   const [products, setProducts] = useState([]);

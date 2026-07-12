@@ -1,15 +1,16 @@
 import React from 'react';
-import Zap from "lucide-react/dist/esm/icons/zap";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Play from "lucide-react/dist/esm/icons/play";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import Target from "lucide-react/dist/esm/icons/target";
+import { Zap, CheckCircle2, FileText, Play, Truck, DollarSign, AlertTriangle, ShieldAlert, TrendingUp, Bell, Target } from '@/lib/icons';
+
+
+
+
+
+
+
+
+
+
+
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount || 0);

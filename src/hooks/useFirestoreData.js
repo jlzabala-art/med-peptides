@@ -1,5 +1,6 @@
  
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getActiveSupplements } from '../repositories/supplementRepository';
 import { buildProtocolIndex } from '../utils/searchEngine';

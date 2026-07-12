@@ -1,3 +1,5 @@
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 const uuidv4 = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -10,7 +12,7 @@ const uuidv4 = () => {
   });
 };
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 import { 
   searchProducts, 
   searchProtocols, 
@@ -133,8 +135,8 @@ export function useClinicalAI({
   externalPageContext,
   contextMode = 'clinical'
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const scrollRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -145,24 +147,32 @@ export function useClinicalAI({
   const typingIntervalRef = useRef(null);
 
   const [sessionId, setSessionId] = useState(() => {
-    return localStorage.getItem('clinicalAI_activeSessionId') || uuidv4();
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('clinicalAI_activeSessionId') || uuidv4();
+    }
+    return uuidv4();
   });
 
   const [sessions, setSessions] = useState(() => {
-    try {
-      const saved = localStorage.getItem('clinicalAI_sessions');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('clinicalAI_sessions');
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
     }
+    return [];
   });
 
   const [messages, setMessages] = useState(() => {
+    if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(`clinicalAI_messages_${sessionId}`);
       const parsed = saved ? JSON.parse(saved) : null;
       if (parsed && parsed.length > 0) {
         return parsed;
       }
+    }
       const initialGreeting = contextMode === 'admin' 
         ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
         : contextMode === 'doctor'
@@ -433,7 +443,7 @@ export function useClinicalAI({
         messageText = suggestion.message;
         displayText = suggestion.displayText;
       } else if (suggestion.action === 'NAVIGATE') {
-        navigate(suggestion.payload);
+        router.push(suggestion.payload);
         setIsOpen(false);
         return;
       } else if (suggestion.action === 'URL') {
@@ -617,7 +627,7 @@ export function useClinicalAI({
             slug: p.slug,
             category: p.category
           })),
-          current_page: location.pathname,
+          current_page: pathname,
           research_mode: true,
           user_profile: userCtx ? {
             goals: userCtx.goals || [],
@@ -625,18 +635,18 @@ export function useClinicalAI({
             research_level: activeBeginnerMode ? 'beginner' : (userCtx?.researchLevel || 'intermediate')
           } : null,
           page_context: { 
-            path: location.pathname,
-            isProductPage: location.pathname.startsWith('/product/'),
-            isSupplementPage: location.pathname.startsWith('/supplements/'),
-            isProtocolPage: location.pathname.startsWith('/protocol/') || location.pathname.startsWith('/protocols/'),
-            activeEntity: location.pathname.split('/').pop(),
+            path: pathname,
+            isProductPage: pathname.startsWith('/product/'),
+            isSupplementPage: pathname.startsWith('/supplements/'),
+            isProtocolPage: pathname.startsWith('/protocol/') || pathname.startsWith('/protocols/'),
+            activeEntity: pathname.split('/').pop(),
             activeSection: activeSectionRef.current,
             activeEntityData: (() => {
-              const activeSlug = location.pathname.split('/').pop();
-              if (location.pathname.startsWith('/product/') || location.pathname.startsWith('/supplements/')) {
+              const activeSlug = pathname.split('/').pop();
+              if (pathname.startsWith('/product/') || pathname.startsWith('/supplements/')) {
                 return products.find(p => p.slug === activeSlug || p.id === activeSlug || p.name?.toLowerCase() === activeSlug?.toLowerCase()) || null;
               }
-              if (location.pathname.startsWith('/protocol/') || location.pathname.startsWith('/protocols/')) {
+              if (pathname.startsWith('/protocol/') || pathname.startsWith('/protocols/')) {
                 return protocols.find(p => p.protocol_slug === activeSlug || p.protocol_id === activeSlug || p.id === activeSlug || p.slug === activeSlug) || null;
               }
               return null;

@@ -1,3 +1,5 @@
+"use client";
+
 import Database from "lucide-react/dist/esm/icons/database";
 import Folder from "lucide-react/dist/esm/icons/folder";
 import FileIcon from "lucide-react/dist/esm/icons/file";
@@ -12,6 +14,7 @@ import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect, useRef } from 'react';
 import { storage } from '../../firebase';
+
 import {
   ref,
   listAll,

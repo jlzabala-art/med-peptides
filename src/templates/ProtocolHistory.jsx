@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Search from "lucide-react/dist/esm/icons/search";
 import Star from "lucide-react/dist/esm/icons/star";
@@ -7,7 +10,7 @@ import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
 import FilterX from "lucide-react/dist/esm/icons/filter-x";
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -52,7 +55,7 @@ const parseDate = (d) => {
 };
 
 export default function ProtocolHistory() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // ── State (lazy init from localStorage)
   const [protocols, setProtocols]           = useState([]);
@@ -124,7 +127,7 @@ export default function ProtocolHistory() {
   // ── Stable handlers
   const handleNavigate = useCallback((id) => {
     // Navigating to the consolidated protocol view
-    navigate(`/protocol/${id}`);
+    router.push(`/protocol/${id}`);
   }, [navigate]);
 
   // PHASE 4: Optimistic favorite toggle — instant UI, Firestore in background
@@ -204,7 +207,7 @@ export default function ProtocolHistory() {
           <div>
             <button
               className="ph-back-btn"
-              onClick={() => navigate('/')}
+              onClick={() => router.push('/')}
               aria-label="Back to Knowledge Hub"
             >
               <ArrowLeft size={16} /> Back to Hub
@@ -328,7 +331,7 @@ export default function ProtocolHistory() {
             hasActiveFilters={hasActiveFilters}
             searchOnly={debouncedSearch.trim() !== '' && !filterFavorite && statusFilter === 'all'}
             onClear={clearFilters}
-            onBuild={() => navigate('/')}
+            onBuild={() => router.push('/')}
           />
         )}
 

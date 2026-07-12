@@ -1,3 +1,5 @@
+"use client";
+
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
@@ -11,6 +13,7 @@ import { calculateVariantHealthScore } from '../useVariantHealthScore';
 import { useAuth } from '../../../../context/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase';
+
 import AppActionGroup from '../../../ui/AppActionGroup';
 import UnifiedItemWorkspaceDrawer from './UnifiedItemWorkspaceDrawer';
 import ExpandedProductRow from './ExpandedProductRow';

@@ -1,11 +1,13 @@
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 
 
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { getVariants } from '../../repositories/productRepository';
+import { RefreshCw, CheckCircle } from '@/lib/icons';
 
 export default function VariantPricingEditor({ product, categoryDiscount }) {
   const [variants, setVariants] = useState([]);

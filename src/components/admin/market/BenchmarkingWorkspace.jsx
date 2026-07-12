@@ -1,7 +1,5 @@
-import Table from "lucide-react/dist/esm/icons/table";
-import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
-import Search from "lucide-react/dist/esm/icons/search";
 import React from 'react';
+import { Table, LayoutGrid, Search } from '@/lib/icons';
 
 
 
@@ -41,7 +39,7 @@ export default function BenchmarkingWorkspace({ onProductClick, matches = [], lo
                 wholesale: match.myPPMs ? match.myPPMs.wholesaler * match.myMg : 0,
                 distributor: match.myPPMs ? match.myPPMs.distributor * match.myMg : 0,
                 margin: 'TBD',
-                compAvg: match.competitors.length > 0 ? match.competitors.reduce((acc, curr) => acc + curr.price_usd, 0) / match.competitors.length : 0,
+                compAvg: match.competitors.length > 0 ? (match.competitors.reduce((acc, curr) => acc + (curr.ppm || (curr.price_usd / (curr.dosage_mg || match.myMg))), 0) / match.competitors.length) * match.myMg : 0,
                 score: 85
               };
 

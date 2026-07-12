@@ -1,3 +1,5 @@
+"use client";
+
 import Wrench from "lucide-react/dist/esm/icons/wrench";
 import Database from "lucide-react/dist/esm/icons/database";
 import FileText from "lucide-react/dist/esm/icons/file-text";

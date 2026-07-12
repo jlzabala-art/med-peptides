@@ -1,31 +1,12 @@
-import Package from "lucide-react/dist/esm/icons/package";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Info from "lucide-react/dist/esm/icons/info";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Download from "lucide-react/dist/esm/icons/download";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
-import Send from "lucide-react/dist/esm/icons/send";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ROUTE } from '../constants/productEnums';
 import { useAuth } from '../context/AuthContext';
-import { db } from '../firebase';
-import { collection, query, where, orderBy, onSnapshot, getDoc, doc, getDocs, limit, updateDoc, arrayUnion, addDoc } from 'firebase/firestore';
+import { orderRepository } from '../repositories/orderRepository';
+import userRepository from '../repositories/userRepository';
+import { recommendationRepository } from '../repositories/recommendationRepository';
 
 
 
@@ -58,6 +39,7 @@ import DraggableDashboard from '../components/widgets/core/DraggableDashboard';
 import OrderTrackingWidget from '../components/widgets/logistics/OrderTrackingWidget';
 import BillingInvoicesWidget from '../components/widgets/finance/BillingInvoicesWidget';
 import ClinicalHistoryWidget from '../components/widgets/clinical/ClinicalHistoryWidget';
+import { Package, Clock, CheckCircle2, Truck, ExternalLink, ShieldCheck, ArrowLeft, ClipboardList, Info, FileText, MessageSquare, Download, Loader2, FlaskConical, Stethoscope, Bell, Check, X, UserPlus, BrainCircuit, Send, Sparkles } from '@/lib/icons';
 
 
 // ─── Status Configuration ────────────────────────────────────────────────────
@@ -275,19 +257,12 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
     if (!user?.uid) return;
     setInvitesLoading(true);
     try {
-      const q = query(
-        collection(db, 'doctor_patient_relationships'),
-        where('patientId', '==', user.uid),
-        where('status', '==', 'pending')
-      );
-      const snap = await getDocs(q);
+      const rels = await userRepository.getPendingInvitesForPatient(user.uid);
       const list = await Promise.all(
-        snap.docs.map(async (d) => {
-          const rel = d.data();
-          const docSnap = await getDoc(doc(db, 'users', rel.doctorId));
-          const docData = docSnap.exists() ? docSnap.data() : {};
+        rels.map(async (rel) => {
+          const docData = await userRepository.getUserById(rel.doctorId) || {};
           return {
-            id: d.id,
+            id: rel.id,
             doctorId: rel.doctorId,
             doctorName: [docData.firstName, docData.lastName].filter(Boolean).join(' ') || docData.displayName || 'Physician',
             specialty: docData.specialty || 'Medical Specialist',
@@ -308,26 +283,8 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
   const handleAcceptInvite = async (relId, doctorId) => {
     try {
       setSupLoading(true);
-      // 1. Update relationship status to 'active'
-      const relRef = doc(db, 'doctor_patient_relationships', relId);
-      await updateDoc(relRef, {
-        status: 'active',
-        activatedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      // 2. Update patient's assignedPhysicianIds in users
-      const patientRef = doc(db, 'users', user.uid);
-      await updateDoc(patientRef, {
-        assignedPhysicianIds: arrayUnion(doctorId)
-      });
-      // 3. Update doctor's assignedPatientIds in users
-      const doctorRef = doc(db, 'users', doctorId);
-      await updateDoc(doctorRef, {
-        assignedPatientIds: arrayUnion(user.uid)
-      });
-      // 4. Refresh supervisor and invitations
-      const docSnap = await getDoc(doctorRef);
-      if (docSnap.exists()) setSupervisor({ id: doctorId, ...docSnap.data() });
+      const updatedDoctor = await userRepository.acceptSupervisionInvite(relId, doctorId, user.uid);
+      if (updatedDoctor) setSupervisor(updatedDoctor);
       setPendingInvites(prev => prev.filter(inv => inv.id !== relId));
     } catch (e) {
       console.error('[AcceptInvite] failed:', e);
@@ -339,11 +296,7 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
   const handleDeclineInvite = async (relId) => {
     try {
       setSupLoading(true);
-      const relRef = doc(db, 'doctor_patient_relationships', relId);
-      await updateDoc(relRef, {
-        status: 'revoked',
-        updatedAt: new Date().toISOString(),
-      });
+      await userRepository.declineSupervisionInvite(relId);
       setPendingInvites(prev => prev.filter(inv => inv.id !== relId));
     } catch (e) {
       console.error('[DeclineInvite] failed:', e);
@@ -366,12 +319,8 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
     if (activeTab === 'my-supervisor' && activeRole === 'patient') {
       (async () => {
         try {
-          const q = query(
-            collection(db, 'users'),
-            where('role', '==', 'doctor')
-          );
-          const snap = await getDocs(q);
-          setAvailablePhysicians(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+          const physicians = await userRepository.getDoctors();
+          setAvailablePhysicians(physicians);
         } catch (e) {
           console.error('[UserDashboard] fetch available doctors', e);
         }
@@ -398,22 +347,15 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
         throw new Error('A pending or active supervision relationship already exists with this doctor.');
       }
 
-      const docRef = doc(db, 'users', selectedPhysicianId);
-      const docSnap = await getDoc(docRef);
-      const doctorData = docSnap.exists() ? docSnap.data() : {};
+      const doctorData = await userRepository.getUserById(selectedPhysicianId) || {};
       const doctorName = doctorData.displayName || [doctorData.firstName, doctorData.lastName].filter(Boolean).join(' ') || 'Physician';
 
-      await addDoc(collection(db, 'doctor_patient_relationships'), {
+      await userRepository.requestSupervision({
         patientId: user.uid,
         patientEmail: user.email || '',
         doctorId: selectedPhysicianId,
-        doctorName: doctorName,
-        status: 'pending',
-        createdBy: 'patient',
-        initiatedByRole: 'patient',
-        notes: requestNotes.trim(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        doctorName,
+        notes: requestNotes,
       });
 
       setRequestSuccess('Supervision request sent successfully!');
@@ -433,14 +375,8 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
     if (!user?.uid) return;
     setRecLoading(true);
     try {
-      const q = query(
-        collection(db, 'recommendations'),
-        where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(20)
-      );
-      const snap = await getDocs(q);
-      setRecommendations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const recs = await recommendationRepository.getRecommendationsForUser(user.uid);
+      setRecommendations(recs);
     } catch (e) {
       console.error('recommendations fetch', e);
       setRecommendations([]);
@@ -452,11 +388,7 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
   const handleAcceptRecommendation = async (rec) => {
     try {
       setRecLoading(true);
-      const recRef = doc(db, 'recommendations', rec.id);
-      await updateDoc(recRef, {
-        status: 'accepted',
-        updatedAt: new Date().toISOString(),
-      });
+      await recommendationRepository.acceptRecommendation(rec.id);
       if (acceptRecommendation) {
         acceptRecommendation(rec);
       }
@@ -472,11 +404,7 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
     if (!window.confirm('Are you sure you want to decline this recommendation?')) return;
     try {
       setRecLoading(true);
-      const recRef = doc(db, 'recommendations', recId);
-      await updateDoc(recRef, {
-        status: 'rejected',
-        updatedAt: new Date().toISOString(),
-      });
+      await recommendationRepository.declineRecommendation(recId);
       await fetchRecommendations();
     } catch (e) {
       console.error('[DeclineRecommendation] failed:', e);
@@ -505,11 +433,11 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
     (async () => {
       setSupLoading(true);
       try {
-        const userSnap = await getDoc(doc(db, 'users', user.uid));
-        const ids = userSnap.data()?.assignedPhysicianIds ?? [];
+        const userData = await userRepository.getUserById(user.uid);
+        const ids = userData?.assignedPhysicianIds || [];
         if (ids.length > 0) {
-          const docSnap = await getDoc(doc(db, 'users', ids[0]));
-          if (docSnap.exists()) setSupervisor({ id: ids[0], ...docSnap.data() });
+          const supervisor = await userRepository.getUserById(ids[0]);
+          if (supervisor) setSupervisor({ id: ids[0], ...supervisor });
         } else {
           setSupervisor(null);
         }
@@ -586,16 +514,9 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
   useEffect(() => {
     if (!user) return;
 
-    const q = query(
-      collection(db, 'orders'),
-      where('uid', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const ordersList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const unsubscribe = orderRepository.subscribeToUserOrders(
+      user.uid,
+      (ordersList) => {
         setOrders(ordersList);
         setLoading(false);
       },

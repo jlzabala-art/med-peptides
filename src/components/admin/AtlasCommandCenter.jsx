@@ -1,3 +1,5 @@
+"use client";
+
 import Activity from 'lucide-react/dist/esm/icons/activity';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
 import Settings from 'lucide-react/dist/esm/icons/settings';
@@ -209,7 +211,7 @@ function CommandCenterInner() {
       {/* 1. Mobile-First Executive Status Bar */}
       <ExecutiveStatusBar />
 
-      <div style={{ padding: '1rem 1.5rem', maxWidth: '1600px', margin: '0 auto', width: '100%' }}>
+      <div style={{ padding: '1rem 1.5rem', width: '100%', boxSizing: 'border-box' }}>
         {/* Header with Executive Toggle */}
         <div
           style={{

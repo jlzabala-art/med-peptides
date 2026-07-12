@@ -1,3 +1,5 @@
+"use client";
+
 import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
 import Settings from "lucide-react/dist/esm/icons/settings";
 import FileText from "lucide-react/dist/esm/icons/file-text";

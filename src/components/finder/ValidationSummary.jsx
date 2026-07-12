@@ -1,3 +1,5 @@
+"use client";
+
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import Info from "lucide-react/dist/esm/icons/info";

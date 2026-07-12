@@ -10,17 +10,7 @@ export default function ProtocolLabs({ protocol, onUpdate }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animation: 'fadeIn 0.4s ease-out' }}>
       
-      {/* Header & KPI Summary */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <BrainCircuit size={24} color="var(--primary)" /> Laboratory & Biomarkers
-          </h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, maxWidth: '600px' }}>
-            Track pre-treatment baselines and analyze critical post-treatment biomarker shifts using our AI-driven insight engine.
-          </p>
-        </div>
-      </div>
+      {/* Header removed */}
 
       {/* Premium Mini KPIs for Labs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>

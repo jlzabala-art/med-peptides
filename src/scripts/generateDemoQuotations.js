@@ -1,5 +1,6 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 /**
  * Run this function once manually (e.g. from the browser console) to generate demo quotations.

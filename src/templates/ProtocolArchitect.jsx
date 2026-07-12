@@ -1,3 +1,5 @@
+"use client";
+
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";

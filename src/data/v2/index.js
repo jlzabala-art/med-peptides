@@ -14,49 +14,30 @@
  * Shape of each record: see src/schemas/productSchema.js
  */
 
-import productsV2    from './products.v2.json';
-import supplementsV2 from './supplements.v2.json';
-import catalogV2     from './catalog.v2.json';
+export let products = [];
+export let supplements = [];
+export let catalog = [];
 
-/** All peptide products in canonical v2 format (54 entries, grouped variants). */
-export const products = productsV2;
+let _byName = new Map();
+let _bySlug = new Map();
+export let categories = [];
 
-/** All supplement products in canonical v2 format (59 entries, grouped variants). */
-export const supplements = supplementsV2;
+export function initializeData(data) {
+  products = data.products || [];
+  supplements = data.supplements || [];
+  catalog = data.catalog || [];
 
-/**
- * Combined catalog: peptides + supplements sorted by category then name.
- * 113 entries total. Use this for global search, compare, and protocol views.
- */
-export const catalog = catalogV2;
-
-// ── Convenience helpers ───────────────────────────────────────────────────────
-
-/**
- * Fast name → product lookup (case-insensitive).
- * Built once at module load time.
- */
-const _byName = new Map(
-  catalogV2.map((p) => [(p.name ?? '').toLowerCase().trim(), p])
-);
+  _byName = new Map(catalog.map((p) => [(p.name ?? '').toLowerCase().trim(), p]));
+  _bySlug = new Map(catalog.map((p) => [p.slug ?? '', p]));
+  categories = [...new Set(catalog.map((p) => p.category).filter(Boolean))].sort();
+}
 
 /** Find a v2 product by its canonical name (case-insensitive). */
 export function findByName(name) {
   return _byName.get((name ?? '').toLowerCase().trim()) ?? null;
 }
 
-/**
- * Fast slug → product lookup.
- * Built once at module load time.
- */
-const _bySlug = new Map(
-  catalogV2.map((p) => [p.slug ?? '', p])
-);
-
 /** Find a v2 product by its slug. */
 export function findBySlug(slug) {
   return _bySlug.get(slug ?? '') ?? null;
 }
-
-/** All unique product categories across peptides + supplements. */
-export const categories = [...new Set(catalogV2.map((p) => p.category).filter(Boolean))].sort();

@@ -1,3 +1,5 @@
+"use client";
+
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Send from "lucide-react/dist/esm/icons/send";
@@ -7,6 +9,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';

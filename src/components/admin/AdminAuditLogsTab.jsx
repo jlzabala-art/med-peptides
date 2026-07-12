@@ -1,3 +1,5 @@
+"use client";
+
 import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Filter from "lucide-react/dist/esm/icons/filter";

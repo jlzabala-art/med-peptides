@@ -1,14 +1,5 @@
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import PackageSearch from "lucide-react/dist/esm/icons/package-search";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import ArrowDownRight from "lucide-react/dist/esm/icons/arrow-down-right";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+
 /**
  * AdminFinanceWidget.jsx
  *
@@ -32,8 +23,10 @@ import { auth } from '../../../firebase';
 
 
 
+
 import { Card, CardHeader, CardContent, CardFooter } from '../../ui/Card';
 import Button from '../../ui/Button';
+import { TrendingUp, DollarSign, PackageSearch, RefreshCw, AlertCircle, ChevronDown, ChevronUp, BarChart2, ArrowUpRight, ArrowDownRight, Sparkles } from '@/lib/icons';
 
 // ── CF endpoint (same region as other agents) ─────────────────────────────────
 const FINANCE_CF_URL =

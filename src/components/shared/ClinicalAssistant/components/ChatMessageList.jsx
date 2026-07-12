@@ -1,5 +1,5 @@
-import ChevronsDown from "lucide-react/dist/esm/icons/chevrons-down";
-import Bot from "lucide-react/dist/esm/icons/bot";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import ChatMessageItem from './ChatMessageItem';
 import ResearchCompass from './ResearchCompass';
+import { ChevronsDown, Bot } from '@/lib/icons';
 
 export default function ChatMessageList({ 
   messages, 

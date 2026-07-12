@@ -1,3 +1,5 @@
+"use client";
+
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";

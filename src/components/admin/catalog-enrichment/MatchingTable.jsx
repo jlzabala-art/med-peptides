@@ -1,9 +1,6 @@
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React from 'react';
 import { Card } from '../../ui';
+import { AlertCircle, CheckCircle, HelpCircle, Loader2 } from '@/lib/icons';
 
 
 

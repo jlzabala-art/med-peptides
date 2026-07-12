@@ -1,3 +1,4 @@
+"use client";
 import Layers from "lucide-react/dist/esm/icons/layers";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
@@ -26,7 +27,7 @@ import Plus from "lucide-react/dist/esm/icons/plus";
  * Admin also sees admin_notifications badge for new unread bulk orders.
  */
 
-import { useLocation } from 'react-router-dom';
+import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -426,7 +427,7 @@ export default function AdminBulkOrdersTab() {
   const [unreadCount, setUnread] = useState(0);
   const [showBuilder, setShowBuilder] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const location = useLocation();
+  const location = usePathname();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
 

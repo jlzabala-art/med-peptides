@@ -1,8 +1,9 @@
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Package from "lucide-react/dist/esm/icons/package";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+
+
+
+
 import React from 'react';
+import { CheckCircle, Clock, Package, AlertCircle } from '@/lib/icons';
 
 
 

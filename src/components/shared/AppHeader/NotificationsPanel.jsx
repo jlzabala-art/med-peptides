@@ -1,3 +1,5 @@
+"use client";
+
 import Bell from "lucide-react/dist/esm/icons/bell";
 import Package from "lucide-react/dist/esm/icons/package";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
@@ -8,6 +10,7 @@ import FileText from "lucide-react/dist/esm/icons/file-text";
 import Check from "lucide-react/dist/esm/icons/check";
 import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -49,6 +52,7 @@ const getIconForType = (type) => {
 export default function NotificationsPanel({ onClose }) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [activeTab, setActiveTab] = useState('all');
+  const router = useRouter();
 
   const filteredNotifications = notifications.filter(n => {
     if (activeTab === 'unread') return !n.read;
@@ -158,15 +162,15 @@ export default function NotificationsPanel({ onClose }) {
         <div style={{ padding: '0.75rem', textAlign: 'center', borderTop: '1px solid var(--border-light)', backgroundColor: 'var(--background)' }}>
           <button 
             onClick={() => {
-              // Optionally dispatch custom event to open the centralized Notification Hub
-              window.dispatchEvent(new CustomEvent('nav:notifications'));
+              router.push('/admin/notifications');
               onClose();
             }}
             style={{ 
-            background: 'none', border: 'none', color: 'var(--text-main)', 
-            fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' 
+            background: 'none', border: 'none', color: 'var(--primary)', 
+            fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '4px', margin: '0 auto',
           }}>
-            View All Activity
+            View all notifications →
           </button>
         </div>
       </div>

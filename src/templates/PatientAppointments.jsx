@@ -1,18 +1,11 @@
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Info from "lucide-react/dist/esm/icons/info";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { useAuth } from '../context/AuthContext';
+import { Calendar, Clock, Globe, CheckCircle2, CalendarDays, ArrowRight, Info, Beaker, AlertTriangle, RefreshCw, X } from '@/lib/icons';
 
 
 

@@ -1,13 +1,10 @@
-import Scale from "lucide-react/dist/esm/icons/scale";
-import PanelLeft from "lucide-react/dist/esm/icons/panel-left";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import History from "lucide-react/dist/esm/icons/history";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import { getActiveProducts } from '../../../repositories/productRepository';
@@ -37,10 +34,11 @@ import ChatSuggestions from './components/ChatSuggestions';
 import ContextActionCards from './components/ContextActionCards';
 import SessionHistoryDrawer from './components/SessionHistoryDrawer';
 import ResearchDetailDrawer from './components/ResearchDetailDrawer';
+import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen } from '@/lib/icons';
 
 export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false, pageContext = null, contextMode = 'clinical', agentType = 'default', suggestedPrompts = [] }) {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const { user, userProfile } = useAuth();
 
   const themeAccent = useMemo(() => {
@@ -56,6 +54,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   }, [contextMode]);
   const [products, setProducts] = useState(() => {
     try {
+      if (typeof window === 'undefined') return [];
       const saved = localStorage.getItem('regenpept_products_cache');
       return saved ? JSON.parse(saved) : [];
     } catch {
@@ -64,13 +63,14 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   });
   const [protocols, setProtocols] = useState(() => {
     try {
+      if (typeof window === 'undefined') return [];
       const saved = localStorage.getItem('regenpept_protocols_cache');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
   const [showSupportCard, setShowSupportCard] = useState(false);
   const [supportContext, setSupportContext] = useState(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -135,13 +135,13 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     const handleNavInternal = (e) => {
       const href = e.detail?.href;
       if (href) {
-        navigate(href);
+        router.push(href);
         setIsOpen(false);
       }
     };
     window.addEventListener('nav:internal', handleNavInternal);
     return () => window.removeEventListener('nav:internal', handleNavInternal);
-  }, [navigate, setIsOpen]);
+  }, [router, setIsOpen]);
 
 
 
@@ -275,7 +275,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     };
   }, [setIsOpen, setMessages, setInput]);
 
-  const isProductPage = /^\/product\//.test(location.pathname);
+  const isProductPage = /^\/product\//.test(pathname);
 
   // Prevent auto-keyboard on mobile when drawer is opened or loading states change
   useEffect(() => {
@@ -638,7 +638,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           scrollRef={scrollRef}
           messagesEndRef={messagesEndRef}
           InstantResultsTabs={(props) => <InstantResultsTabs {...props} onCompare={handleCompare} />}
-          navigate={(path) => { navigate(path); setIsOpen(false); }}
+          navigate={(path) => { router.push(path); setIsOpen(false); }}
           setIsOpen={setIsOpen}
           onSend={handleSend}
           onRate={rateMessage}

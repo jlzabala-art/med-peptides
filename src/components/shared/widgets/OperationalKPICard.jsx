@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useState } from 'react';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import { ArrowRight } from '@/lib/icons';
 
 /**
  * Operational Action Card

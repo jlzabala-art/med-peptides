@@ -1,9 +1,12 @@
+"use client";
+
 import Activity from "lucide-react/dist/esm/icons/activity";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 

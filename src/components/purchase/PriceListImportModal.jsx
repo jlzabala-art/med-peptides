@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Upload from "lucide-react/dist/esm/icons/upload";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
@@ -7,7 +9,8 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState } from 'react';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { extractApiPeptidesFromImage } from '../../services/atlasAiService';
 
 

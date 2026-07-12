@@ -1,6 +1,8 @@
+"use client";
+import { useRouter } from 'next/navigation';
  
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import ComparePeptidesModal from '../components/discovery/ComparePeptidesModal';
 
 /**
@@ -9,7 +11,7 @@ import ComparePeptidesModal from '../components/discovery/ComparePeptidesModal';
  */
 export default function CompareTemplate({ products }) {
   const { slug1, slug2 } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Find products by slug
   const p1 = products?.find(p => p.slug === slug1);
@@ -24,7 +26,7 @@ export default function CompareTemplate({ products }) {
       <div className="container">
         <button 
           className="btn-text" 
-          onClick={() => navigate(-1)}
+          onClick={() => router.push(-1)}
           style={{ margin: '2rem 0', color: 'var(--text-muted)' }}
         >
           ← Back
@@ -34,7 +36,7 @@ export default function CompareTemplate({ products }) {
       {p1 ? (
         <ComparePeptidesModal 
           isOpen={true}
-          onClose={() => navigate(-1)}
+          onClose={() => router.push(-1)}
           baseProduct={p1}
           comparedProducts={toCompare}
         />

@@ -1,11 +1,6 @@
-import Link from "lucide-react/dist/esm/icons/link";
-import Edit2 from "lucide-react/dist/esm/icons/edit-2";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+"use client";
+
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { TextField, Checkbox } from '../../../components/ui';
 
@@ -17,8 +12,10 @@ import { TextField, Checkbox } from '../../../components/ui';
 
 
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { findMatchingProduct, getFuzzySuggestions, slugify } from './LeadUtils';
+import {  Edit2, Plus, Check, X, Trash2, ArrowUpRight, AlertTriangle } from '@/lib/icons';
 
 function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUpdated }) {
   const match = findMatchingProduct(item.peptide_name, catalogProducts);

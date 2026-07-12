@@ -1,12 +1,7 @@
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+"use client";
+
 import React, { useEffect, useState } from 'react';
+import { Shield, Lock, Eye, FileText, ChevronRight, Mail, HelpCircle, ArrowRight } from '@/lib/icons';
 
 
 

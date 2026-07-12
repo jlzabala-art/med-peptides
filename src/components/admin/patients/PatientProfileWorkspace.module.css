@@ -1,0 +1,155 @@
+.workspaceContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.3s ease;
+}
+
+.workspaceHeader {
+  padding: 1.5rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.headerPatientInfo {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mainLayout {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .mainLayout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .contentArea {
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .workspaceHeader {
+    padding: 1rem;
+  }
+  
+  .contentArea {
+    padding: 1rem;
+  }
+  
+  .headerPatientInfo {
+    gap: 0.75rem;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+
+.colSpan4 {
+  grid-column: span 4;
+}
+
+.colSpan8 {
+  grid-column: span 8;
+}
+
+.colSpan12 {
+  grid-column: span 12;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .colSpan4, .colSpan8 {
+    grid-column: span 12;
+  }
+}
+
+.journeyContainer {
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.journeySteps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+
+.digitalTwinCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.infoCard {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.aiCard {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  border: 1px solid #bae6fd;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.1);
+}

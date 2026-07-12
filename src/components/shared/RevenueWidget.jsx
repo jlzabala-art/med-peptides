@@ -1,3 +1,5 @@
+"use client";
+
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import Package from "lucide-react/dist/esm/icons/package";

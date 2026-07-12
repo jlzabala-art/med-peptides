@@ -1,7 +1,8 @@
+"use client";
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, test, vi, expect, beforeEach, afterEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'next/navigation';
 import AdminSkuMappingTab from '../SkuMappingTab/AdminSkuMappingTab.jsx';
 
 vi.mock('../../../context/AuthContext', () => ({

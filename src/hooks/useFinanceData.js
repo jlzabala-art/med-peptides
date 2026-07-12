@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../firebase';
+import * as fb from '../firebase';
+const functions = fb?.functions;
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useFinanceData() {

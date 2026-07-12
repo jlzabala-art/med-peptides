@@ -1,10 +1,11 @@
-import Eye from "lucide-react/dist/esm/icons/eye";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Database from "lucide-react/dist/esm/icons/database";
+
+
+
+
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAutoSave } from '../../../hooks/useAutoSave';
+import { Eye, ShieldAlert, FileText, Database } from '@/lib/icons';
 
 
 

@@ -1,6 +1,7 @@
+"use client";
 /* eslint-disable no-unused-vars */
 import { memo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, usePathname } from 'next/navigation';
 import './breadcrumbs.css';
 
 /**
@@ -9,7 +10,7 @@ import './breadcrumbs.css';
  * Example: /admin?s=operations&t=users => Admin / Operations / Active Users
  */
 const Breadcrumbs = () => {
-  const { pathname, search } = useLocation();
+  const { pathname, search } = usePathname();
   const params = new URLSearchParams(search);
   const section = params.get('s'); // e.g., 'operations', 'architecture', 'intelligence'
   const sub = params.get('t'); // e.g., 'users', 'products'

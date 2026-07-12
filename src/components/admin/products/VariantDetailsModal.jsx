@@ -1,16 +1,18 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Select from 'react-select';
-import Save from 'lucide-react/dist/esm/icons/save';
-import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import { doc, updateDoc, collection, getDocs, query, addDoc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
+const storage = fb?.storage;
 import { useToast } from '../../../hooks/useToast';
 import RightWorkspacePanel from '../catalog/RightWorkspacePanel';
 import { Button } from '../../ui';
 import { getCategorySchema } from './VariantSchemas';
+import { Save, PackageOpen, AlertCircle } from '@/lib/icons';
 
 export default function VariantDetailsModal({
   isOpen,

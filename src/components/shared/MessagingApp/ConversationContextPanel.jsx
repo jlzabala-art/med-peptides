@@ -1,17 +1,3 @@
-import User from "lucide-react/dist/esm/icons/user";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
-import LinkIcon from "lucide-react/dist/esm/icons/link";
-import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
 
 
@@ -28,6 +14,7 @@ import React from 'react';
 
 
 import './MessagingApp.css';
+import { User, Activity, ShoppingBag, ClipboardList, Briefcase, Truck, Mail, Phone, Calendar, Clock, AlertTriangle, PlusCircle, LinkIcon, FileText } from '@/lib/icons';
 
 export default function ConversationContextPanel({ conversation }) {
   if (!conversation) return null;

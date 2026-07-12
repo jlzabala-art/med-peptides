@@ -21,6 +21,7 @@ const STORAGE_KEY = 'mp_protocol_requests';
  */
 export function useProtocolRequests() {
   const [protocolRequests, setProtocolRequests] = useState(() => {
+    if (typeof window === 'undefined') return [];
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];

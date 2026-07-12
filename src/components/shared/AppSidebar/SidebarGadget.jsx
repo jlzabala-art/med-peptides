@@ -1,10 +1,9 @@
-import Settings from "lucide-react/dist/esm/icons/settings";
-import Save from "lucide-react/dist/esm/icons/save";
-import X from "lucide-react/dist/esm/icons/x";
-import ListOrdered from "lucide-react/dist/esm/icons/list-ordered";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { useAuth } from '../../../context/AuthContext';
 import AppSidebar from './index';
 
@@ -12,6 +11,7 @@ import AppSidebar from './index';
 
 
 import SidebarOrderModal from './SidebarOrderModal';
+import { Settings, Save, X, ListOrdered } from '@/lib/icons';
 
 export default function SidebarGadget(props) {
   const { user } = useAuth();

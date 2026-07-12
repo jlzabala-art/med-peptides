@@ -1,9 +1,9 @@
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Dna from "lucide-react/dist/esm/icons/dna";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Star from "lucide-react/dist/esm/icons/star";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import { Clock } from '@/lib/icons';
+import { Dna } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
+import { Star } from '@/lib/icons';
+import { TrendingUp } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 /**
  * DiscoveryHub.jsx — Phase 4-B

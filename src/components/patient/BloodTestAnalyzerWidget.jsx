@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileUp, Activity, AlertCircle, CheckCircle2, ChevronRight, Zap, FileText } from '@/lib/icons';

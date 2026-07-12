@@ -1,7 +1,5 @@
-import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from '../components/ui';
 
@@ -9,6 +7,7 @@ import { Checkbox } from '../components/ui';
 
 
 import * as XLSX from 'xlsx';
+import { UploadCloud, FileText, Loader2, CheckCircle } from '@/lib/icons';
 
 export default function GadgetImportTab({ title, description, context, apiUrl, apiKey, onSave }) {
   const [files, setFiles] = useState([]);

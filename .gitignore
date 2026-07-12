@@ -38,3 +38,12 @@ node_modules_bad/
 
 # Ignore Firebase Admin SDK keys
 med-peptides-app-*.json
+
+.next
+
+*.log
+*.txt
+scratch/
+test-screenshots/
+.env*
+cloudrun_backend/

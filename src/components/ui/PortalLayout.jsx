@@ -1,22 +1,26 @@
-import Menu from 'lucide-react/dist/esm/icons/menu';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Bell from 'lucide-react/dist/esm/icons/bell';
-import HelpCircle from 'lucide-react/dist/esm/icons/help-circle';
-import User from 'lucide-react/dist/esm/icons/user';
-import Bot from 'lucide-react/dist/esm/icons/bot';
-import X from 'lucide-react/dist/esm/icons/x';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Maximize2 from 'lucide-react/dist/esm/icons/maximize-2';
-import List from 'lucide-react/dist/esm/icons/list';
+"use client";
+
+import { useRouter } from 'next/navigation';
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 
 import ClinicalAssistant from '../shared/ClinicalAssistant';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
 import { db } from '../../firebase';
+
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import CommandPalette from '../CommandPalette';
 import useSessionTracking from '../../hooks/useSessionTracking';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -27,6 +31,7 @@ import useAdminNotifications from '../../hooks/useAdminNotifications';
 import { useCopilot } from '../../context/CopilotContext';
 import CopilotWorkspacePanel from '../ai-copilot/CopilotWorkspacePanel';
 import ContextualFAB from '../common/ContextualFAB';
+import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List } from '@/lib/icons';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -100,7 +105,7 @@ export default function PortalLayout({
   headerActions,
 }) {
   useSessionTracking(); // Start tracking session for the current user
-  const routerNavigate = useNavigate();
+  const routerNavigate = useRouter();
   const { user, userProfile } = useAuth();
   const { currency, updateCurrency, density, updateDensity } = usePreferences();
 

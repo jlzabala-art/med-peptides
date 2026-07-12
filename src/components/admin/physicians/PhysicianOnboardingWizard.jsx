@@ -1,23 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import User from "lucide-react/dist/esm/icons/user";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Upload from "lucide-react/dist/esm/icons/upload";
-import Info from "lucide-react/dist/esm/icons/info";
-import Check from "lucide-react/dist/esm/icons/check";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Wand2 from "lucide-react/dist/esm/icons/wand-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import Send from "lucide-react/dist/esm/icons/send";
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 
 
@@ -41,10 +23,13 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
+const storage = fb?.storage;
 import { Card } from '../../ui';
 import DraftBanner from '../../ui/DraftBanner';
 import notifier from '../../../services/NotificationService';
+import { X, CheckCircle, ChevronRight, ChevronLeft, User, Mail, Phone, MapPin, Stethoscope, Lock, Upload, Info, Check, ImageIcon, Briefcase, FileText, Wand2, AlertCircle, Copy, Send } from '@/lib/icons';
 
 const STEPS = [
   { id: 1, title: 'Identity', icon: User },

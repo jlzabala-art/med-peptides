@@ -1,12 +1,5 @@
-import Info from "lucide-react/dist/esm/icons/info";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Bot from "lucide-react/dist/esm/icons/bot";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
 import { useFirestoreData } from '../hooks/useFirestoreData';
@@ -25,6 +18,7 @@ import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { getFAQForProduct } from '../utils/discoveryEngine';
+import { Info, HelpCircle, BookOpen, ChevronRight, Beaker, Zap, Activity, FlaskConical, Bot } from '@/lib/icons';
 
 /**
  * ObjectiveDetailView — Redesigned scientific catalog for research goals.

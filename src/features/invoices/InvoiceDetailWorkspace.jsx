@@ -1,11 +1,11 @@
-import X from "lucide-react/dist/esm/icons/x";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import CloudLightning from "lucide-react/dist/esm/icons/cloud-lightning";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Box from "lucide-react/dist/esm/icons/box";
+
+
+
+
+
+
+
+
 import React from 'react';
 
 
@@ -16,6 +16,7 @@ import React from 'react';
 
 
 import AccountManagerWorkspace from './AccountManagerWorkspace';
+import { X, ExternalLink, ShieldCheck, AlertTriangle, CloudLightning, Activity, Calendar, Box } from '@/lib/icons';
 
 export default function InvoiceDetailWorkspace({ invoice, onClose }) {
   const amount = Number(invoice.grandTotal) || Number(invoice.totalAmount) || 0;

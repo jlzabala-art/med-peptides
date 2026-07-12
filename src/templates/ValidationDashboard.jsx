@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Activity from "lucide-react/dist/esm/icons/activity";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
@@ -11,7 +14,7 @@ import Search from "lucide-react/dist/esm/icons/search";
 import Clock from "lucide-react/dist/esm/icons/clock";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -26,7 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import { runValidationSuite } from '../validation/engine/runner';
 
 export default function ValidationDashboard({ products }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0, lastId: '' });
   const [results, setResults] = useState(null);

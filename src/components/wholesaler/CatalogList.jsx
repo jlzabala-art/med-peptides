@@ -1,22 +1,24 @@
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import Edit3 from "lucide-react/dist/esm/icons/edit-3";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
-import Users from "lucide-react/dist/esm/icons/users";
-import FileDown from "lucide-react/dist/esm/icons/file-down";
-import Search from "lucide-react/dist/esm/icons/search";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Send from "lucide-react/dist/esm/icons/send";
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+"use client";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 
@@ -41,7 +43,9 @@ import { catalogRepository } from '../../repositories/catalogRepository';
 import { getProtocolTemplates } from '../../repositories/protocolRepository';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import ExpandableTableRow from '../common/ExpandableTableRow';
+import { FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock, ChevronDown, ChevronUp } from '@/lib/icons';
 
 export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelectCatalogToEdit }) {
   const [catalogs, setCatalogs] = useState([]);

@@ -1,3 +1,5 @@
+"use client";
+
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';

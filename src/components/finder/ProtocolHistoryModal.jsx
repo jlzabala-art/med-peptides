@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Search from "lucide-react/dist/esm/icons/search";
 import Clock from "lucide-react/dist/esm/icons/clock";

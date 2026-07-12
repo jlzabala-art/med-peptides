@@ -1,3 +1,5 @@
+"use client";
+
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import Activity from "lucide-react/dist/esm/icons/activity";

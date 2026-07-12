@@ -1,0 +1,74 @@
+"use client";
+
+import '../i18n';
+import React from 'react';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { get, set, del } from 'idb-keyval';
+import { HelmetProvider } from 'react-helmet-async';
+
+// Contexts
+import { AuthProvider } from '../context/AuthContext';
+import { TenantProvider } from '../context/TenantContext';
+import { ShopProvider } from '../context/ShopProvider';
+import { CartProvider } from '../context/CartProvider';
+import { PermissionsProvider } from '../context/PermissionsContext';
+import { ThemeProvider } from '../context/ThemeContext';
+import { NotificationProvider } from '../context/NotificationContext';
+import { PreferencesProvider } from '../context/PreferencesContext';
+import { HeaderProvider } from '../context/HeaderContext';
+import { CopilotProvider } from '../context/CopilotContext';
+import { ClinicalCartProvider } from '../context/ClinicalCartContext';
+import { ModalProvider } from '../hooks/ui/useModalStack';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const persister = createAsyncStoragePersister({
+  storage: {
+    getItem: async (key) => await get(key),
+    setItem: async (key, value) => await set(key, value),
+    removeItem: async (key) => await del(key),
+  },
+});
+
+export default function NextProviders({ children, serverUser }) {
+  return (
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+      <AuthProvider serverUser={serverUser}>
+        <PermissionsProvider>
+          <TenantProvider>
+            <ShopProvider>
+              <CartProvider>
+                <ClinicalCartProvider>
+                  <HelmetProvider>
+                    <ThemeProvider>
+                      <NotificationProvider>
+                        <PreferencesProvider>
+                          <CopilotProvider>
+                            <HeaderProvider>
+                              <ModalProvider>{children}</ModalProvider>
+                            </HeaderProvider>
+                          </CopilotProvider>
+                        </PreferencesProvider>
+                      </NotificationProvider>
+                    </ThemeProvider>
+                  </HelmetProvider>
+                </ClinicalCartProvider>
+              </CartProvider>
+            </ShopProvider>
+          </TenantProvider>
+        </PermissionsProvider>
+      </AuthProvider>
+    </PersistQueryClientProvider>
+  );
+}

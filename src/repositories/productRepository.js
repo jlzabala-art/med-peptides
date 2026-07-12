@@ -28,8 +28,11 @@ import {
   query,
   where,
   orderBy,
+  limit,
+  startAfter
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { normalizeProduct } from './mappers';
 
 // Build a lookup map from normalised product name → local enrichment fields.
 // This is built once at module load time (O(n), tiny dataset).
@@ -122,7 +125,7 @@ function _resolveLocalEnrich(firestoreName, firestoreId) {
   }
 
   // No match found — warn in dev so mismatches are easy to spot exactly once
-  if (import.meta.env.DEV && (firestoreName || firestoreId)) {
+  if (process.env.NODE_ENV === 'development' && (firestoreName || firestoreId)) {
     const warnKey = `${firestoreName}_${firestoreId}`;
     if (!globalThis.__warnedMismatches) {
       globalThis.__warnedMismatches = new Set();
@@ -164,8 +167,9 @@ export function invalidateProductsCache() {
  */
 export async function getAllProducts() {
   try {
-    const snap = await getDocs(productsCol());
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const q = query(productsCol(), limit(200));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
   } catch (err) {
     console.error('[productRepository] getAllProducts:', err);
     throw err;
@@ -187,8 +191,10 @@ export async function getActiveProducts() {
   }
 
   try {
-    // Full collection scan — safe for small/medium catalogs and avoids index deps.
-    const snap = await getDocs(productsCol());
+    // Soft limit of 200 to prevent runaway reads as per Golden Rule,
+    // while still returning enough to group variants in getCatalog().
+    const q = query(productsCol(), limit(200));
+    const snap = await getDocs(q);
 
     const results = [];
     for (const d of snap.docs) {
@@ -218,6 +224,42 @@ export async function getActiveProducts() {
 }
 
 /**
+ * Fetch products with real pagination.
+ * 
+ * @param {number} pageSize 
+ * @param {object} lastDoc - A Firestore document snapshot (or null for first page)
+ * @returns {Promise<{items: Array, lastDoc: object}>}
+ */
+export async function getActiveProductsPaginated(pageSize = 50, lastDoc = null) {
+  try {
+    let q = query(productsCol(), orderBy('name'), limit(pageSize));
+    if (lastDoc) {
+      q = query(productsCol(), orderBy('name'), startAfter(lastDoc), limit(pageSize));
+    }
+    
+    const snap = await getDocs(q);
+    const results = [];
+    
+    for (const d of snap.docs) {
+      const data = d.data();
+      const explicitlyInactive =
+        data.isActive === false ||
+        (data.status && !['active', 'published'].includes(data.status));
+
+      if (!explicitlyInactive) {
+        results.push({ id: d.id, ...data });
+      }
+    }
+    
+    const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+    return { items: results, lastDoc: newLastDoc };
+  } catch (err) {
+    console.error('[productRepository] getActiveProductsPaginated:', err);
+    throw err;
+  }
+}
+
+/**
  * Fetch a single product by its slug id.
  * Returns null if not found.
  */
@@ -225,7 +267,7 @@ export async function getProduct(productId) {
   try {
     const ref = doc(db, 'products', productId);
     const snap = await getDoc(ref);
-    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    return snap.exists() ? normalizeProduct(snap.data(), snap.id) : null;
   } catch (err) {
     console.error('[productRepository] getProduct:', err);
     throw err;
@@ -241,7 +283,7 @@ export async function getVariants(productId) {
   try {
     const q = query(variantsCol(productId), orderBy('sortOrder', 'asc'));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
   } catch (err) {
     // Firestore throws when `sortOrder` field doesn't exist on some docs
     // (requires a composite index). Fall back to unordered fetch + client sort.
@@ -272,7 +314,7 @@ export async function getAvailableVariants(productId) {
       orderBy('sortOrder', 'asc')
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
   } catch (err) {
     console.error(`[productRepository] getAvailableVariants(${productId}):`, err);
     throw err;
@@ -287,7 +329,7 @@ export async function getVariant(productId, variantId) {
   try {
     const ref = doc(db, 'products', productId, 'variants', variantId);
     const snap = await getDoc(ref);
-    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    return snap.exists() ? normalizeProduct(snap.data(), snap.id) : null;
   } catch (err) {
     console.error(`[productRepository] getVariant(${productId}, ${variantId}):`, err);
     throw err;
@@ -509,7 +551,7 @@ export async function getVariantsByRoute(productId, route) {
       orderBy('sortOrder', 'asc')
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
   } catch (err) {
     console.error(`[productRepository] getVariantsByRoute(${productId}, ${route}):`, err);
     throw err;
@@ -532,7 +574,7 @@ export async function getVariantsBySupplier(productId, supplierId) {
       orderBy('sortOrder', 'asc')
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
   } catch (err) {
     console.error(`[productRepository] getVariantsBySupplier(${productId}, ${supplierId}):`, err);
     throw err;
@@ -587,9 +629,9 @@ export async function getProtocolsForVariant(productId, variantId) {
  */
 export async function getSuppliers() {
   try {
-    const q = query(suppliersCol(), where('isActive', '==', true));
+    const q = query(suppliersCol(), where('isActive', '==', true), limit(200));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
   } catch (err) {
     console.error('[productRepository] getSuppliers:', err);
     throw err;
@@ -607,10 +649,40 @@ export async function getSupplier(supplierId) {
   try {
     const ref = doc(db, 'suppliers', supplierId);
     const snap = await getDoc(ref);
-    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    return snap.exists() ? normalizeProduct(snap.data(), snap.id) : null;
   } catch (err) {
     console.error(`[productRepository] getSupplier(${supplierId}):`, err);
     throw err;
+  }
+}
+
+/**
+ * Fetch peptide_related_engine discovery data.
+ */
+export async function getRelatedEngineData() {
+  try {
+    const snap = await getDocs(collection(db, 'peptide_related_engine'));
+    return snap.docs.map(d => d.data());
+  } catch (err) {
+    console.error('[productRepository] getRelatedEngineData:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetch product enrichments from productEnrichments collection.
+ */
+export async function getProductEnrichment(cacheKey) {
+  try {
+    const docRef = doc(db, 'productEnrichments', cacheKey);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data().enrichment;
+    }
+    return null;
+  } catch (err) {
+    console.error(`[productRepository] getProductEnrichment(${cacheKey}):`, err);
+    return null;
   }
 }
 
@@ -634,4 +706,7 @@ export const productRepository = {
   getProtocolsForVariant,
   getSuppliers,
   getSupplier,
+  getActiveProductsPaginated,
+  getRelatedEngineData,
+  getProductEnrichment,
 };

@@ -147,7 +147,7 @@ function normalisePricingKeys(pricing) {
       if (normalised[key]) {
         const fixed = normaliseTierEntry(normalised[key]);
         if (fixed !== normalised[key]) {
-          if (import.meta.env.MODE !== 'production') {
+          if (process.env.NODE_ENV !== 'production') {
             console.warn(
               '[resolvePrice] Tier "%s" uses legacy "base" field instead of "perUnit". ' +
               'Update Firestore docs to use "perUnit".',
@@ -283,7 +283,7 @@ function extractBase(pricing, tier) {
   const entry = key ? pricing[key] : null;
   if (!entry) {
     // Dev-time diagnostic: log available keys so mismatches are easy to spot
-    if (import.meta.env.MODE !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       console.debug(
         '[resolvePrice] extractBase: no entry for tier key "%s" (tier=%s). ' +
         'Pricing keys present: %s',

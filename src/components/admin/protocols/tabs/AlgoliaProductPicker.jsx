@@ -1,8 +1,11 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Loader2, Plus, ScanLine, Package } from '@/lib/icons';
 import { searchAlgolia } from '../../../../services/algoliaSearch';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../../../firebase';
+import * as fb from '../../../../firebase';
+const db = fb?.db;
 import notifier from '../../../../services/NotificationService';
 
 export default function AlgoliaProductPicker({ onProductSelect }) {

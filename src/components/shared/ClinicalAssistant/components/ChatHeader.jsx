@@ -1,8 +1,3 @@
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import X from "lucide-react/dist/esm/icons/x";
-import FileDown from "lucide-react/dist/esm/icons/file-down";
-import PanelLeft from "lucide-react/dist/esm/icons/panel-left";
-import Zap from "lucide-react/dist/esm/icons/zap";
 import React from 'react';
 
 
@@ -10,6 +5,7 @@ import React from 'react';
 
 
 import { generateClinicalBriefPDF } from '../utils/PDFGenerator';
+import { Trash2, X, FileDown, PanelLeft, Zap } from '@/lib/icons';
 
 export default function ChatHeader({ 
   onClear, 

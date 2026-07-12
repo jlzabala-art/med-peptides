@@ -1,9 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
+import { X, TrendingUp, TrendingDown, DollarSign, Activity } from '@/lib/icons';
 
 
 

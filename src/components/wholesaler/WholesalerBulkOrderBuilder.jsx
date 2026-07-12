@@ -1,22 +1,24 @@
-import PackageOpen from "lucide-react/dist/esm/icons/package-open";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Minus from "lucide-react/dist/esm/icons/minus";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Send from "lucide-react/dist/esm/icons/send";
-import Save from "lucide-react/dist/esm/icons/save";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import User from "lucide-react/dist/esm/icons/user";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Building from "lucide-react/dist/esm/icons/building";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import Layers from "lucide-react/dist/esm/icons/layers";
+"use client";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * WholesalerBulkOrderBuilder.jsx
  *
@@ -38,6 +40,8 @@ import {
   serverTimestamp, getDocs, limit, orderBy
 } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
+
+
 import { logAction } from '../../services/auditLogger';
 import { useAuth } from '../../context/AuthContext';
 
@@ -59,6 +63,7 @@ import { useAuth } from '../../context/AuthContext';
 
 
 
+import { PackageOpen, ClipboardList, Plus, Minus, Trash2, Send, Save, ChevronDown, ChevronUp, ShoppingBag, User, Stethoscope, Building, CheckCircle2, AlertCircle, Loader2, RefreshCw, Eye, Layers } from '@/lib/icons';
 import {
   BULK_STATUS, BULK_STATUS_META, RX_STATUS_META, RX_STATUS, aggregatePrescriptionItems
 } from '../../config/prescriptionConfig';

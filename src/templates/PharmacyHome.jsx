@@ -1,3 +1,4 @@
+import { usePathname } from 'next/navigation';
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -19,7 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import { useLocation, Outlet } from 'react-router-dom';
+
 
 
 
@@ -99,18 +100,20 @@ export function PlaceholderTab() {
   );
 }
 
-export default function PharmacyHome() {
-  const { userProfile } = useAuth();
-  const location = useLocation();
+export const PharmacyHomeContext = React.createContext({});
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
+export default function PharmacyHome({ children }) {
+  const { userProfile } = useAuth();
+  const pathname = usePathname();
+
+  const pathParts = pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   return (
     <AppPortalLayout allowedRoles={['compounding_pharmacy', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
-          <Outlet context={{ userProfile }} />
+          <PharmacyHomeContext.Provider value={{ userProfile }}>{children}</PharmacyHomeContext.Provider>
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

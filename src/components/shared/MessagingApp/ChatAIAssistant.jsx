@@ -1,3 +1,5 @@
+"use client";
+
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import X from "lucide-react/dist/esm/icons/x";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";

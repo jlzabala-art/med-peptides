@@ -1,3 +1,7 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Search from "lucide-react/dist/esm/icons/search";
 import Microscope from "lucide-react/dist/esm/icons/microscope";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
@@ -6,7 +10,7 @@ import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
 /* eslint-disable no-unused-vars */
 import React, { lazy, Suspense, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+
 
 
 
@@ -14,9 +18,9 @@ import { Link, useNavigate } from 'react-router-dom';
 
 
 import { usePageMeta } from '../hooks/usePageMeta';
-// import FeaturedProtocols from '../sections/FeaturedProtocols'; // TODO: re-enable when optimized
+import dynamic from 'next/dynamic';
 
-const FeaturedPeptides = lazy(() => import('../sections/FeaturedPeptides'));
+const FeaturedPeptides = dynamic(() => import('../sections/FeaturedPeptides'));
 
 // ── Browse tile data ──────────────────────────────────────────────────────────
 const BROWSE_TILES = [
@@ -97,7 +101,7 @@ function CatalogPage({ onOpenSearch }) {
     path: '/catalog',
   });
 
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSearchClick = useCallback(() => {
     if (onOpenSearch) onOpenSearch('');

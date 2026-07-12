@@ -1,11 +1,6 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Package from "lucide-react/dist/esm/icons/package";
 import React from 'react';
 import { Card } from '../../ui';
+import { Globe, MapPin, AlertTriangle, ShieldCheck, DollarSign, Package } from '@/lib/icons';
 
 
 

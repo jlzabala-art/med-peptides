@@ -1,9 +1,6 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
 import { Card } from '../../ui';
+import { Users, UserPlus, DollarSign, Activity } from '@/lib/icons';
 
 
 

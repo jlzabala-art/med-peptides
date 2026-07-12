@@ -1,12 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Database from "lucide-react/dist/esm/icons/database";
-import Search from "lucide-react/dist/esm/icons/search";
-import Package from "lucide-react/dist/esm/icons/package";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
+import { X, Sparkles, AlertCircle, Database, Search, Package, DollarSign, Activity } from '@/lib/icons';
 
 
 

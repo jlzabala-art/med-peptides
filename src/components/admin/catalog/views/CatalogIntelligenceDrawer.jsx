@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Activity, ShieldCheck, ChevronRight, ChevronLeft, TrendingUp } from '@/lib/icons';
 

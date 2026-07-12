@@ -1,6 +1,5 @@
 import React from 'react';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import Clock from 'lucide-react/dist/esm/icons/clock';
+import { AlertCircle, Clock } from '@/lib/icons';
 
 export function PriorityQueue({ queue, onSelectProfile }) {
   const getSeverityColor = (type) => {

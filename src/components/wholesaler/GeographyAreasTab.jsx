@@ -1,15 +1,19 @@
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import Save from "lucide-react/dist/esm/icons/save";
-import Check from "lucide-react/dist/esm/icons/check";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import Lock from "lucide-react/dist/esm/icons/lock";
+"use client";
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { useAuth } from '../../context/AuthContext';
+import { MapPin, ShieldAlert, Save, Check, ShieldCheck, Eye, EyeOff, Lock } from '@/lib/icons';
 
 
 

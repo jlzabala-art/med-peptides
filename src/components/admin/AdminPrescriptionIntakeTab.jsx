@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import IntakeDashboardHeader from './prescriptions/IntakeDashboardHeader';
 import PrescriptionIntakeLayout from './prescriptions/PrescriptionIntakeLayout';

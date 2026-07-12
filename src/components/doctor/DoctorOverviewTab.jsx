@@ -1,3 +1,5 @@
+"use client";
+
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Users from "lucide-react/dist/esm/icons/users";
@@ -13,8 +15,9 @@ import Building from "lucide-react/dist/esm/icons/building";
 import User from "lucide-react/dist/esm/icons/user";
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActions';
+
 
 
 
@@ -111,15 +114,7 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
     queryKey: ['prescriptions', doctorId],
     queryFn: async () => {
       if (!doctorId) return [];
-      const q = query(collection(db, 'prescriptions'), where('doctorId', '==', doctorId));
-      const snap = await getDocs(q);
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      docs.sort((a, b) => {
-        const tA = a.createdAt?.seconds || 0;
-        const tB = b.createdAt?.seconds || 0;
-        return tB - tA;
-      });
-      return docs;
+      return await fetchDoctorPrescriptionsAction(doctorId);
     },
     enabled: !!doctorId
   });

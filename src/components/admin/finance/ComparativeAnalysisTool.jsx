@@ -1,8 +1,7 @@
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import ArrowDownRight from "lucide-react/dist/esm/icons/arrow-down-right";
-import Scale from "lucide-react/dist/esm/icons/scale";
-import Filter from "lucide-react/dist/esm/icons/filter";
+"use client";
+
 import React, { useState } from 'react';
+import { ArrowUpRight, ArrowDownRight, Scale, Filter } from '@/lib/icons';
 
 
 

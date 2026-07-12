@@ -1,12 +1,7 @@
+"use client";
+
 import React, { useMemo } from 'react';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import FileWarning from 'lucide-react/dist/esm/icons/file-warning';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import ImageOff from 'lucide-react/dist/esm/icons/image-off';
-import Building from 'lucide-react/dist/esm/icons/building';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Settings2 from 'lucide-react/dist/esm/icons/settings-2';
+import { AlertTriangle, FileWarning, DollarSign, ImageOff, Building, ArrowRight, Search, Settings2 } from '@/lib/icons';
 
 export default function MissingDataCenterView({ variants = [], onAction }) {
   const missingDataItems = useMemo(() => {

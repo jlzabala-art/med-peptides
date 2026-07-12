@@ -1,15 +1,17 @@
-import Layers from "lucide-react/dist/esm/icons/layers";
-import LayoutList from "lucide-react/dist/esm/icons/layout-list";
-import Filter from "lucide-react/dist/esm/icons/filter";
+
+
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import FinancialKPIHeader from './FinancialKPIHeader';
 import InvoiceDataGrid from './InvoiceDataGrid';
 import InvoiceEmptyState from './InvoiceEmptyState';
 import InvoiceDetailWorkspace from './InvoiceDetailWorkspace';
 import CollectionCenter from './CollectionCenter';
 import InvoiceSmartFilters from './InvoiceSmartFilters';
+import { Layers, LayoutList, Filter } from '@/lib/icons';
 
 
 

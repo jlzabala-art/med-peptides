@@ -1,6 +1,7 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Filter from "lucide-react/dist/esm/icons/filter";
+
+
 import React from 'react';
+import { X, Filter } from '@/lib/icons';
 
 
 

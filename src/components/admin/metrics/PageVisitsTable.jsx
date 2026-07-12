@@ -1,5 +1,5 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
 import React from 'react';
+import { Globe } from '@/lib/icons';
 
 
 export default function PageVisitsTable({ visitsPeriod, setVisitsPeriod, prioritizedViews }) {

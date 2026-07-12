@@ -1,8 +1,11 @@
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+"use client";
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import { CheckCircle2, AlertCircle, Loader2 } from '@/lib/icons';
 
 
 

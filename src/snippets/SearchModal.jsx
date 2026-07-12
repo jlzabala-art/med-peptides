@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Bot, Sparkles, Beaker, Search, ArrowRight, MessageCircle, Activity, HelpCircle, SlidersHorizontal, X, ClipboardList, Clock, FlaskConical, Leaf } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 
@@ -16,7 +17,7 @@ import { Bot, Sparkles, Beaker, Search, ArrowRight, MessageCircle, Activity, Hel
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useUIStore } from '../stores/uiStore';
-import { useNavigate } from 'react-router-dom';
+
 import { searchProtocols, searchSupplements, getSearchThemes, isQuestion, buildFAQIndex } from '../utils/searchEngine';
 import { classifyQuery, QUERY_TYPE_TO_INTENT } from '../utils/classifyQuery';
 import { useResponsive } from '../hooks/useResponsive';
@@ -153,7 +154,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [activeClinicalFilters, setActiveClinicalFilters] = useState({ route: null, storage: null });
-  const navigate = useNavigate();
+  const router = useRouter();
   const inputRef = useRef(null);
   // ─── Phase 6: session-level query history for repeat/empty detection ────────
   const seenQueriesRef = useRef(new Map()); // query → count
@@ -320,7 +321,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
       }
       if (activeTab === 'protocols') { 
         trackToolUsage('search_result_click', { type: 'protocol', id: item.protocol_id, term: searchTerm });
-        onClose(); navigate(`/protocol/${item.protocol_id}`); 
+        onClose(); router.push(`/protocol/${item.protocol_id}`); 
       }
     } else if (e.key === 'Enter' && searchTerm.trim().length > 2) {
       // Phase 3: Intelligent Routing on Enter
@@ -800,7 +801,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
                           results={protocolResults}
                           focusedItem={navigableItems[focusedIndex]}
                           onClose={onClose}
-                          navigate={navigate}
+                          navigate={(path) => router.push(path)}
                           THEME={THEME}
                           isProfessional={isProfessional}
                           isMobile={isMobile}
@@ -983,7 +984,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             {isProfessional && (
               <button
-                onClick={() => { onClose(); navigate('/search'); }}
+                onClick={() => { onClose(); router.push('/search'); }}
                 style={{
                   background: 'none', border: `1px solid ${THEME.accentA}30`,
                   borderRadius: '4px',

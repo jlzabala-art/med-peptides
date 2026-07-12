@@ -1,6 +1,7 @@
  
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 /**
  * Add a blog post to Firestore `blogPosts` collection.

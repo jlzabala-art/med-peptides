@@ -1,9 +1,8 @@
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Minus from "lucide-react/dist/esm/icons/minus";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+"use client";
+
 import React, { useState } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -11,6 +10,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 
 import { catalog } from '../../../data/v2/index.js';
+import { ShoppingCart, Plus, Minus, CheckCircle2 } from '@/lib/icons';
 
 export default function BulkRestockPortalWidget() {
   const { user } = useAuth();

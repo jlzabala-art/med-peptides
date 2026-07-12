@@ -1,7 +1,10 @@
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import EditablePriceCell from './EditablePriceCell';
 import BulkPriceAdjust from './BulkPriceAdjust';
 import './PriceTable.module.css';

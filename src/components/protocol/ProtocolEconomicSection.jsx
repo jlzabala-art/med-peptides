@@ -1,3 +1,5 @@
+"use client";
+
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import Check from "lucide-react/dist/esm/icons/check";
 import CreditCard from "lucide-react/dist/esm/icons/credit-card";

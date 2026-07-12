@@ -1,3 +1,5 @@
+"use client";
+
 import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";

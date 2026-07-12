@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import DoctorNav from '../components/doctor/DoctorNav';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';

@@ -1,6 +1,7 @@
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 
+
 // Simple in-memory cache to avoid repeated Firestore reads for the same tenant
 const tenantCache = {};
 

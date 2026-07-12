@@ -1,24 +1,14 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Send from "lucide-react/dist/esm/icons/send";
-import X from "lucide-react/dist/esm/icons/x";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Check from "lucide-react/dist/esm/icons/check";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+"use client";
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { db } from '../firebase.js';
-import { doc, getDoc } from 'firebase/firestore';
+import { useParams, useSearchParams } from 'next/navigation';
+
 import { catalogRepository } from '../repositories/catalogRepository';
 import { productRepository } from '../repositories/productRepository';
 import { protocolRepository } from '../repositories/protocolRepository';
 import { searchCatalogSemantic, askCatalogAssistant } from '../services/catalogAIService';
 import { resolveCatalogContact } from '../utils/contactRouter';
+import UniversalProductCard from '../components/universal/UniversalProductCard';
+import { Search, MessageSquare, Send, X, Phone, Mail, ChevronDown, HelpCircle, Shield, Check, ExternalLink, FileText } from '@/lib/icons';
 
 
 
@@ -117,10 +107,9 @@ export default function PublicCatalogView() {
                 .substring(0, 60);
 
               try {
-                const docRef = doc(db, 'productEnrichments', cacheKey);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                  enrichMap[name] = docSnap.data().enrichment;
+                const enrichment = await productRepository.getProductEnrichment(cacheKey);
+                if (enrichment) {
+                  enrichMap[name] = enrichment;
                 }
               } catch (err) {
                 console.warn('[PublicCatalogView] Failed to fetch enrichment:', err);
@@ -341,15 +330,18 @@ export default function PublicCatalogView() {
                 {searchResult.relevanceExplanation}
               </p>
               {/* Matched Products Grid */}
-              <div style={productsGridStyle}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                 {searchResult.matchedProductIds?.map(prodId => {
                   const prod = getProductInfo(prodId);
                   if (!prod) return null;
                   return (
-                    <div key={prodId} style={productCardStyle}>
-                      <h4 style={productTitleStyle}>{prod.displayName || prod.name}</h4>
-                      <p style={productDescStyle}>{prod.desc || prod.science?.desc}</p>
-                    </div>
+                    <UniversalProductCard 
+                      key={prodId}
+                      product={prod}
+                      viewMode="grid"
+                      onAddToCart={(p, q) => console.log('Add to cart', p, q)} // TODO: integrate with cart
+                      onClick={() => console.log('Navigate to product', p)}
+                    />
                   );
                 })}
               </div>
@@ -390,104 +382,25 @@ export default function PublicCatalogView() {
 
                   if (activeTemplate === 'minimal') {
                     return (
-                      <div key={prodId} style={{
-                        backgroundColor: 'var(--color-bg-surface)',
-                        border: '1px solid #dadce0',
-                        borderRadius: '8px',
-                        padding: '1rem',
-                        textAlign: 'center',
-                        boxShadow: '0 1px 2px 0 rgba(60,64,67,0.05)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        minHeight: '200px'
-                      }}>
-                        {prod.imageUrl || prod.image || prod.thumbnail ? (
-                          <img 
-                            src={prod.imageUrl || prod.image || prod.thumbnail} 
-                            alt={pName} 
-                            style={{ width: '80px', height: '80px', objectFit: 'contain', marginBottom: '0.75rem', borderRadius: '4px' }}
-                          />
-                        ) : (
-                          <div style={{ width: '80px', height: '80px', backgroundColor: '#f8fafc', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.7rem', marginBottom: '0.75rem' }}>
-                            No Image
-                          </div>
-                        )}
-                        <div>
-                          <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.88rem', fontWeight: 700, color: '#202124' }}>{pName}</h4>
-                          {(prod.sku || prod.variantSku) && (
-                            <span style={{ fontSize: '0.7rem', color: '#5f6368', display: 'block', marginBottom: '0.5rem' }}>
-                              SKU: {prod.sku || prod.variantSku}
-                            </span>
-                          )}
-                        </div>
-                        {showPrices && (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto' }}>
-                            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#137333' }}>{formattedPrice}</span>
-                            <span style={{ fontSize: '0.6rem', color: '#5f6368' }}>ex-works — shipping not included</span>
-                          </div>
-                        )}
-                      </div>
+                      <UniversalProductCard 
+                        key={prodId}
+                        product={prod}
+                        viewMode="grid"
+                        onAddToCart={(p, q) => console.log('Add to cart', p, q)}
+                        onClick={() => console.log('Navigate to product', p)}
+                      />
                     );
                   }
 
                   if (activeTemplate === 'standard') {
                     return (
-                      <div key={prodId} style={{
-                        backgroundColor: 'var(--color-bg-surface)',
-                        border: '1px solid #dadce0',
-                        borderRadius: '8px',
-                        padding: '1.25rem',
-                        boxShadow: '0 1px 2px 0 rgba(60,64,67,0.05)',
-                        display: 'flex',
-                        gap: '1rem',
-                        alignItems: 'start'
-                      }}>
-                        <div style={{ flexShrink: 0 }}>
-                          {prod.imageUrl || prod.image || prod.thumbnail ? (
-                            <img 
-                              src={prod.imageUrl || prod.image || prod.thumbnail} 
-                              alt={pName} 
-                              style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #e2e8f0' }}
-                            />
-                          ) : (
-                            <div style={{ width: '80px', height: '80px', backgroundColor: '#e8f0fe', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: primaryColor }}>
-                              <FileText size={28} />
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                              <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#202124' }}>{pName}</h4>
-                              <span style={productBadgeStyle}>{prod.productType || 'peptide'}</span>
-                            </div>
-                            {(prod.sku || prod.variantSku) && (
-                              <span style={{ fontSize: '0.72rem', color: '#5f6368', display: 'block', marginBottom: '0.5rem' }}>
-                                SKU: {prod.sku || prod.variantSku}
-                              </span>
-                            )}
-                            <p style={{ ...productDescStyle, margin: '0.25rem 0 0.75rem 0', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                              {prod.desc || prod.science?.desc || 'Details currently under review.'}
-                            </p>
-                            
-                            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#5f6368', marginBottom: '0.75rem' }}>
-                              <span><strong>Route:</strong> {prod.defaultVariant?.route?.replace('_', ' ') || prod.route || 'Injectable'}</span>
-                              {prod.dosage && <span><strong>Dosage:</strong> {prod.dosage}</span>}
-                            </div>
-                          </div>
-
-                          {showPrices && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f3f4', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
-                              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#137333' }}>{formattedPrice}</span>
-                                <span style={{ fontSize: '0.6rem', color: '#5f6368' }}>ex-works — shipping not included</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <UniversalProductCard 
+                        key={prodId}
+                        product={prod}
+                        viewMode="list"
+                        onAddToCart={(p, q) => console.log('Add to cart', p, q)}
+                        onClick={() => console.log('Navigate to product', p)}
+                      />
                     );
                   }
 

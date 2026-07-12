@@ -1,6 +1,7 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { appointmentRepository } from '../repositories/appointmentRepository';
 import { useAuth } from '../context/AuthContext';
 import { Calendar as CalendarIcon, Clock, Users, Pill, CheckCircle2, ChevronLeft, ChevronRight, Filter, Search, AlertTriangle, FileText, BrainCircuit, Activity, HeartPulse, RefreshCw, Plus } from '@/lib/icons';
 import AdminPageHeader from '../components/admin/AdminPageHeader';
@@ -42,20 +43,10 @@ export default function DoctorAppointments() {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Fetch mock data or real data and map to events
-        const rxQuery = query(
-          collection(db, 'prescriptions'),
-          where('doctorId', '==', activeDoctorId),
-          orderBy('createdAt', 'desc'),
-          limit(10)
-        );
-        const refillQuery = query(
-          collection(db, 'refill_reminders'),
-          where('doctorId', '==', activeDoctorId),
-          limit(10)
-        );
-
-        const [rxSnap, refillSnap] = await Promise.all([getDocs(rxQuery), getDocs(refillQuery)]);
+        const [rxData, refillData] = await Promise.all([
+          appointmentRepository.getPrescriptionsForDoctor(activeDoctorId, 10),
+          appointmentRepository.getRefillRemindersForDoctor(activeDoctorId, 10)
+        ]);
 
         const loadedEvents = [];
         let rxToday = 0;
@@ -64,12 +55,11 @@ export default function DoctorAppointments() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        rxSnap.forEach((d) => {
-          const data = d.data();
+        rxData.forEach((data) => {
           const dDate = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
           if (dDate >= today) rxToday++;
           loadedEvents.push({
-            id: d.id,
+            id: data.id,
             title: `Prescription: ${data.patient?.name || 'Patient'}`,
             type: 'Prescription',
             date: dDate,
@@ -78,11 +68,10 @@ export default function DoctorAppointments() {
           });
         });
 
-        refillSnap.forEach((d) => {
-          const data = d.data();
+        refillData.forEach((data) => {
           const rDate = data.remindAt?.toDate ? data.remindAt.toDate() : new Date();
           loadedEvents.push({
-            id: d.id,
+            id: data.id,
             title: `Refill: ${data.patientName || 'Patient'}`,
             type: 'Follow-Up',
             date: rDate,

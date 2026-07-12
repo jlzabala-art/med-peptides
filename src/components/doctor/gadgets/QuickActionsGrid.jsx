@@ -1,10 +1,11 @@
+import { useRouter } from 'next/navigation';
 import Users from "lucide-react/dist/esm/icons/users";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -46,7 +47,7 @@ function ActionBtn({ icon: Icon, title, desc, onClick, color }) {
 }
 
 export default function QuickActionsGrid() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className="card" style={{ padding: '2rem', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0' }}>
@@ -54,10 +55,10 @@ export default function QuickActionsGrid() {
         <PlusCircle size={20} color="var(--primary)" /> Quick Actions
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <ActionBtn icon={Users} title="Patient Directory" desc="Manage profiles" onClick={() => navigate('/doctor/patients')} color="#0ea5e9" />
-        <ActionBtn icon={FlaskConical} title="Clinical Research" desc="Studies & literature" onClick={() => navigate('/doctor/research')} color="var(--color-success)" />
-        <ActionBtn icon={ClipboardList} title="Lab Results" desc="Biomarker review" onClick={() => navigate('/doctor/lab-results')} color="var(--color-warning)" />
-        <ActionBtn icon={Calendar} title="Appointments" desc="Schedule visits" onClick={() => navigate('/doctor/appointments')} color="#8b5cf6" />
+        <ActionBtn icon={Users} title="Patient Directory" desc="Manage profiles" onClick={() => router.push('/doctor/patients')} color="#0ea5e9" />
+        <ActionBtn icon={FlaskConical} title="Clinical Research" desc="Studies & literature" onClick={() => router.push('/doctor/research')} color="var(--color-success)" />
+        <ActionBtn icon={ClipboardList} title="Lab Results" desc="Biomarker review" onClick={() => router.push('/doctor/lab-results')} color="var(--color-warning)" />
+        <ActionBtn icon={Calendar} title="Appointments" desc="Schedule visits" onClick={() => router.push('/doctor/appointments')} color="#8b5cf6" />
       </div>
     </div>
   );

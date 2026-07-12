@@ -1,65 +1,65 @@
-import { lazy } from 'react';
+import dynamic from 'next/dynamic';
 
 // Shared Components
-const TrustStrip = lazy(() => import('../sections/TrustStrip'));
+const TrustStrip = dynamic(() => import('../sections/TrustStrip'), { ssr: true });
 
 // Guest Components - Eager load above-the-fold
 import GuestHeroSearch from '../sections/GuestHeroSearch';
 import ResearchIntakeCTA from '../components/shared/ResearchIntakeCTA';
 
 // Guest Components - Lazy load
-const QuickDiscovery = lazy(() => import('../sections/QuickDiscovery'));
-const FeaturedCategories = lazy(() => import('../sections/FeaturedCategories'));
-const StepByStepGuide = lazy(() => import('../sections/StepByStepGuide'));
-const UserSegmentEntry = lazy(() => import('../sections/UserSegmentEntry'));
-const MobileQuickNav = lazy(() => import('../sections/MobileQuickNav'));
-const ProfessionalUpgradeCTA = lazy(() => import('../sections/ProfessionalUpgradeCTA'));
-const GuestIntroTeaser = lazy(() => import('../sections/GuestIntroTeaser'));
+const QuickDiscovery = dynamic(() => import('../sections/QuickDiscovery'), { ssr: true });
+const FeaturedCategories = dynamic(() => import('../sections/FeaturedCategories'), { ssr: true });
+const StepByStepGuide = dynamic(() => import('../sections/StepByStepGuide'), { ssr: true });
+const UserSegmentEntry = dynamic(() => import('../sections/UserSegmentEntry'), { ssr: true });
+const MobileQuickNav = dynamic(() => import('../sections/MobileQuickNav'), { ssr: true });
+const ProfessionalUpgradeCTA = dynamic(() => import('../sections/ProfessionalUpgradeCTA'), { ssr: true });
+const GuestIntroTeaser = dynamic(() => import('../sections/GuestIntroTeaser'), { ssr: true });
 
 // Phase 2–8 New Sections
-const GuestModeBanner = lazy(() => import('../sections/GuestModeBanner'));
-const WhyChooseMedPeptides = lazy(() => import('../sections/WhyChooseMedPeptides'));
-const PeptideIntroEducation = lazy(() => import('../sections/PeptideIntroEducation'));
-const PriceTransparency = lazy(() => import('../sections/PriceTransparency'));
-const HowItWorks = lazy(() => import('../sections/HowItWorks'));
-const EmotionalTrust = lazy(() => import('../sections/EmotionalTrust'));
-const GoalLifestyleStrip = lazy(() => import('../sections/GoalLifestyleStrip'));
-const KeyPeptides = lazy(() => import('../sections/KeyPeptides'));
-const ClinicalAIPromo = lazy(() => import('../sections/ClinicalAIPromo'));
-const KnowledgeHubShowcase = lazy(() => import('../sections/KnowledgeHubShowcase'));
+const GuestModeBanner = dynamic(() => import('../sections/GuestModeBanner'), { ssr: true });
+const WhyChooseMedPeptides = dynamic(() => import('../sections/WhyChooseMedPeptides'), { ssr: true });
+const PeptideIntroEducation = dynamic(() => import('../sections/PeptideIntroEducation'), { ssr: true });
+const PriceTransparency = dynamic(() => import('../sections/PriceTransparency'), { ssr: true });
+const HowItWorks = dynamic(() => import('../sections/HowItWorks'), { ssr: true });
+const EmotionalTrust = dynamic(() => import('../sections/EmotionalTrust'), { ssr: true });
+const GoalLifestyleStrip = dynamic(() => import('../sections/GoalLifestyleStrip'), { ssr: true });
+const KeyPeptides = dynamic(() => import('../sections/KeyPeptides'), { ssr: true });
+const ClinicalAIPromo = dynamic(() => import('../sections/ClinicalAIPromo'), { ssr: true });
+const KnowledgeHubShowcase = dynamic(() => import('../sections/KnowledgeHubShowcase'), { ssr: true });
 
 // Rules 5.0 — Phase additions
-const BeginnerCollections = lazy(() => import('../sections/BeginnerCollections'));
-const NotSureWhereToStart = lazy(() => import('../sections/NotSureWhereToStart'));
-const ProtocolPreviewCards = lazy(() => import('../sections/ProtocolPreviewCards'));
-const GuidedSearchHints = lazy(() => import('../sections/GuidedSearchHints'));
-const GoalEntryFlow = lazy(() => import('../sections/GoalEntryFlow'));
-const RecentlyExplored = lazy(() => import('../sections/RecentlyExplored'));
-const EternaDiagnosticsShowcase = lazy(() => import('../sections/EternaDiagnosticsShowcase'));
-const LatestArticles = lazy(() => import('../sections/LatestArticles'));
+const BeginnerCollections = dynamic(() => import('../sections/BeginnerCollections'), { ssr: true });
+const NotSureWhereToStart = dynamic(() => import('../sections/NotSureWhereToStart'), { ssr: true });
+const ProtocolPreviewCards = dynamic(() => import('../sections/ProtocolPreviewCards'), { ssr: true });
+const GuidedSearchHints = dynamic(() => import('../sections/GuidedSearchHints'), { ssr: true });
+const GoalEntryFlow = dynamic(() => import('../sections/GoalEntryFlow'), { ssr: true });
+const RecentlyExplored = dynamic(() => import('../sections/RecentlyExplored'), { ssr: true });
+const EternaDiagnosticsShowcase = dynamic(() => import('../sections/EternaDiagnosticsShowcase'), { ssr: true });
+const LatestArticles = dynamic(() => import('../sections/LatestArticles'), { ssr: true });
 
 // Guest Intelligence — preferences, newsletter
-const GuestWelcomeBack = lazy(() => import('../sections/GuestWelcomeBack'));
-const HealthNewsletterSection = lazy(() => import('../sections/HealthNewsletterSection'));
+const GuestWelcomeBack = dynamic(() => import('../sections/GuestWelcomeBack'), { ssr: true });
+const HealthNewsletterSection = dynamic(() => import('../sections/HealthNewsletterSection'), { ssr: true });
 
 // Professional Components - Eager load above-the-fold
-import Hero from '../sections/Hero';
+// (No eager load sections for professional yet)
 
 // Professional Components - Lazy load
-const PowerSearch = lazy(() => import('../sections/PowerSearch'));
-const DiscoveryHub = lazy(() => import('../sections/DiscoveryHub'));
-const TrustHub = lazy(() => import('../sections/TrustHub'));
-const ExpertAccessStrip = lazy(() => import('../sections/ExpertAccessStrip'));
-const TrendingPeptides = lazy(() => import('../sections/TrendingPeptides'));
-const TrendingProtocols = lazy(() => import('../sections/TrendingProtocols'));
-const NovelAcquisitions = lazy(() => import('../sections/NovelAcquisitions'));
-const PathwayNavigation = lazy(() => import('../sections/PathwayNavigation'));
-const ProtocolHighlight = lazy(() => import('../sections/ProtocolHighlight'));
-const InstitutionalSolutions = lazy(() => import('../sections/InstitutionalSolutions'));
-const ProfessionalDashboard = lazy(() => import('../sections/ProfessionalDashboard'));
-const GlobalLogistics = lazy(() => import('../sections/GlobalLogistics'));
-const PlatformCapabilitiesPro = lazy(() => import('../sections/PlatformCapabilitiesPro'));
-const ContactCTA = lazy(() => import('../sections/ContactCTA'));
+const PowerSearch = dynamic(() => import('../sections/PowerSearch'), { ssr: true });
+const DiscoveryHub = dynamic(() => import('../sections/DiscoveryHub'), { ssr: true });
+const TrustHub = dynamic(() => import('../sections/TrustHub'), { ssr: true });
+const ExpertAccessStrip = dynamic(() => import('../sections/ExpertAccessStrip'), { ssr: true });
+const TrendingPeptides = dynamic(() => import('../sections/TrendingPeptides'), { ssr: true });
+const TrendingProtocols = dynamic(() => import('../sections/TrendingProtocols'), { ssr: true });
+const NovelAcquisitions = dynamic(() => import('../sections/NovelAcquisitions'), { ssr: true });
+const PathwayNavigation = dynamic(() => import('../sections/PathwayNavigation'), { ssr: true });
+const ProtocolHighlight = dynamic(() => import('../sections/ProtocolHighlight'), { ssr: true });
+const InstitutionalSolutions = dynamic(() => import('../sections/InstitutionalSolutions'), { ssr: true });
+const ProfessionalDashboard = dynamic(() => import('../sections/ProfessionalDashboard'), { ssr: true });
+const GlobalLogistics = dynamic(() => import('../sections/GlobalLogistics'), { ssr: true });
+const PlatformCapabilitiesPro = dynamic(() => import('../sections/PlatformCapabilitiesPro'), { ssr: true });
+const ContactCTA = dynamic(() => import('../sections/ContactCTA'), { ssr: true });
 
 /**
  * MASTER REGISTRY OF HOME SECTIONS
@@ -389,16 +389,6 @@ export const HOME_SECTIONS = {
 
   // ── PROFESSIONAL SECTIONS ────────────────────────────────────────────────────
 
-  Hero: {
-    id: 'Hero',
-    label: '🏆 Hero Profesional — Portada de Bienvenida',
-    description: 'Sección hero de alto impacto diseñada para usuarios profesionales verificados.',
-    component: Hero,
-    category: 'professional',
-    defaultEnabled: true,
-    defaultOrder: 0,
-    defaultVisibility: 'all',
-  },
   PowerSearch: {
     id: 'PowerSearch',
     label: '🔎 Buscador Avanzado (Power Search)',

@@ -1,6 +1,8 @@
+'use client';
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { db } from '../../../firebase';
+
 
 import TopKPIBar from './TopKPIBar';
 import MatchingTable from './MatchingTable';

@@ -1,5 +1,7 @@
-import Users from "lucide-react/dist/esm/icons/users";
+"use client";
+
 import React, { useState } from 'react';
+import { Users } from '@/lib/icons';
 
 
 export default function DoctorCohortTable({ wholesalerId, scopedDoctors, doctorsWithPatients }) {

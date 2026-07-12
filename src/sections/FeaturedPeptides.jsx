@@ -1,10 +1,11 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Flame from "lucide-react/dist/esm/icons/flame";
-import Star from "lucide-react/dist/esm/icons/star";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Bot from "lucide-react/dist/esm/icons/bot";
+import { useRouter } from 'next/navigation';
+import { FlaskConical } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { Flame } from '@/lib/icons';
+import { Star } from '@/lib/icons';
+import { Syringe } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { Bot } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
 
@@ -14,7 +15,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 import { getCatalog } from '../repositories/productRepository';
 import { trackPeptideView } from '../hooks/useAnalytics';
 import '../styles/featured_peptides.css';
@@ -284,7 +285,7 @@ const PAGE_SIZE = 6;
  *   Items whose slug is in this set are hidden to prevent duplicates.
  */
 export default function FeaturedPeptides({ excludeSlugs }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Phase 4-C: filter out anything that is trending in another tab
   const dedupedPeptides = excludeSlugs && excludeSlugs.size > 0
@@ -357,7 +358,7 @@ export default function FeaturedPeptides({ excludeSlugs }) {
         peptide_id: nameSlug,
         peptide_name: name
       });
-      navigate(`/product/${nameSlug}`);
+      router.push(`/product/${nameSlug}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

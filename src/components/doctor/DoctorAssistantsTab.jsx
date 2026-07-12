@@ -1,3 +1,5 @@
+"use client";
+
 import Users from "lucide-react/dist/esm/icons/users";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
@@ -8,6 +10,7 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '../../firebase';
+
 import { collection, query, where, getDocs, addDoc, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 

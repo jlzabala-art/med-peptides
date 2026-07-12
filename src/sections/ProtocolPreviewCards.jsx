@@ -1,7 +1,8 @@
+import { useRouter } from 'next/navigation';
 import { Zap, Layers, ArrowRight, Clock, FlaskConical } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -110,13 +111,13 @@ function ComplexityBadge({ level }) {
 
 function ProtocolPreviewCard({ protocol, onView }) {
   const [hovered, setHovered] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleView = () => {
     if (onView) {
       onView(protocol.slug);
     } else {
-      navigate(`/protocol/${protocol.slug}`);
+      router.push(`/protocol/${protocol.slug}`);
     }
   };
 

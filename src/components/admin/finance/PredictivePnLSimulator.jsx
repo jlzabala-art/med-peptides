@@ -1,12 +1,11 @@
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+"use client";
+
 import React, { useState } from 'react';
 
 
 
 
+import { Bot, Sparkles, TrendingUp, AlertTriangle } from '@/lib/icons';
 import { 
   ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Area 
 } from 'recharts';

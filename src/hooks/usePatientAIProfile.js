@@ -9,7 +9,8 @@
 
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 /**
  * @param {string|null} uid  Firebase auth UID

@@ -1,3 +1,5 @@
+"use client";
+
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import Beaker from "lucide-react/dist/esm/icons/beaker";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";

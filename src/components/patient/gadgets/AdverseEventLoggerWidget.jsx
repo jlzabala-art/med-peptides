@@ -1,11 +1,12 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+"use client";
+
 import React, { useState } from 'react';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { AlertTriangle, CheckCircle2, ShieldAlert } from '@/lib/icons';
 
 
 

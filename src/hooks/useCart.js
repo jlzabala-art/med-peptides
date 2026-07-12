@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 export function useCart(products, isProfessional, user) {
   // ── Cart expiration: clear if older than 30 days ────────────────────────
   const [cart, setCart] = useState(() => {
+    if (typeof window === 'undefined') return {};
     try {
       const saved = localStorage.getItem('mp_cart');
       const meta = localStorage.getItem('mp_cart_meta');
@@ -34,6 +35,7 @@ export function useCart(products, isProfessional, user) {
   });
 
   const [cartMetadata, setCartMetadata] = useState(() => {
+    if (typeof window === 'undefined') return {};
     try {
       const saved = localStorage.getItem('mp_cart_meta');
       return saved ? JSON.parse(saved) : {};

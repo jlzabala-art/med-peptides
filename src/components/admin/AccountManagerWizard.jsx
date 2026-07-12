@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import Shield from "lucide-react/dist/esm/icons/shield";
 import Map from "lucide-react/dist/esm/icons/map";

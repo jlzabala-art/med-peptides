@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { writeBatch, doc, collection } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 

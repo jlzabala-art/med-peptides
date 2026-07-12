@@ -1,5 +1,6 @@
 import { collection, query, orderBy, limit, onSnapshot, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 export const INVOICES_COLLECTION = 'b2b_invoices';
 

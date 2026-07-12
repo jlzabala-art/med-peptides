@@ -1,9 +1,5 @@
-import Bell from "lucide-react/dist/esm/icons/bell";
-import ArrowDownCircle from "lucide-react/dist/esm/icons/arrow-down-circle";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import React from 'react';
+import { Bell, ArrowDownCircle, UserPlus, AlertTriangle, TrendingUp } from '@/lib/icons';
 
 
 

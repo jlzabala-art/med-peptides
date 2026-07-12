@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import PortalSidebar from './PortalSidebar';
 import PortalHeader from './PortalHeader';
@@ -66,6 +66,8 @@ export default function AppPortalLayout({ allowedRoles = [], children }) {
   const { user, activeRole, loading } = useAuth();
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleOpenAI = () => setIsAIOpen(true);
@@ -77,12 +79,18 @@ export default function AppPortalLayout({ allowedRoles = [], children }) {
     };
   }, []);
 
-  if (loading) return <AtlasLoadingScreen />;
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.replace('/login');
+      } else if (allowedRoles.length > 0 && !allowedRoles.includes(activeRole)) {
+        router.replace('/');
+      }
+    }
+  }, [user, activeRole, loading, allowedRoles, router]);
 
-  if (!user) return <Navigate to="/login" replace />;
-
-  if (allowedRoles.length > 0 && !allowedRoles.includes(activeRole)) {
-    return <Navigate to="/" replace />;
+  if (loading || !user || (allowedRoles.length > 0 && !allowedRoles.includes(activeRole))) {
+    return <AtlasLoadingScreen />;
   }
 
   return (
@@ -101,14 +109,14 @@ export default function AppPortalLayout({ allowedRoles = [], children }) {
         <main className="portal-page-wrapper">
           <AnimatePresence mode="wait">
             <motion.div
-              key={window.location.pathname}
+              key={pathname}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
               style={{ width: '100%' }}
             >
-              {children || <Outlet />}
+              {children}
             </motion.div>
           </AnimatePresence>
         </main>

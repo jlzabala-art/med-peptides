@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from 'react';
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";

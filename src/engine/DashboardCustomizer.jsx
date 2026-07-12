@@ -1,8 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
-import Check from "lucide-react/dist/esm/icons/check";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
+"use client";
+
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -26,6 +23,7 @@ import {
   useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { X, GripVertical, Check, Eye, EyeOff } from '@/lib/icons';
 
 // Format IDs to readable names
 const formatId = (id) => {

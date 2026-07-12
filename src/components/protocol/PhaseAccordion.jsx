@@ -1,3 +1,5 @@
+"use client";
+
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";

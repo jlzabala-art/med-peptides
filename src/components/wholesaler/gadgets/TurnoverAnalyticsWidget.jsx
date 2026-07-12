@@ -1,12 +1,11 @@
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Package from "lucide-react/dist/esm/icons/package";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { TrendingUp, DollarSign, Package, BarChart3, ArrowUpRight } from '@/lib/icons';
 
 
 

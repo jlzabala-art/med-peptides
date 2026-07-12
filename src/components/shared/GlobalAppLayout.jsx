@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Home from "lucide-react/dist/esm/icons/home";
 import Search from "lucide-react/dist/esm/icons/search";
 import Heart from "lucide-react/dist/esm/icons/heart";
@@ -13,7 +17,7 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Building from "lucide-react/dist/esm/icons/building";
 import { getNavigationForRole } from '../../config/navigationRegistry';
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Outlet } from 'react-router-dom';
+
 
 
 
@@ -103,8 +107,8 @@ export default function GlobalAppLayout({
   const { user, activeRole, baseRole, switchActiveRole, logout } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const isPatientOrPublic = user && activeRole !== 'admin' && activeRole !== 'professional' && activeRole !== 'wholesaler';
   const showAIButton = isPatientOrPublic;
@@ -115,9 +119,11 @@ export default function GlobalAppLayout({
   // Determine default sidebar props if none provided
   const computedSidebarProps = sidebarProps || {
     groups: activeGroups,
-    activeId: location.pathname,
-    onNavigate: (path) => navigate(path),
-    footer: user ? { label: 'Logout', icon: LogOut, onClick: () => { logout?.(); navigate('/login'); } } : undefined
+    activeId: pathname,
+    // item.id values in navigationRegistry are now absolute paths like /admin/patients
+    // so we pass them directly to router.push
+    onNavigate: (path) => router.push(path),
+    footer: user ? { label: 'Logout', icon: LogOut, onClick: () => { logout?.(); router.push('/login'); } } : undefined
   };
 
   useEffect(() => {
@@ -130,9 +136,15 @@ export default function GlobalAppLayout({
   const isSimulating = baseRole === 'admin' && activeRole !== 'admin';
   const roleLabel = activeRole;
 
+  // Find simulation role metadata for styled banner
+  const simulatedRoleData = isSimulating
+    ? [{ id: 'ceo', label: 'CEO', emoji: '👔', color: '#0ea5e9' }, { id: 'medical_director', label: 'Medical Director', emoji: '🩺', color: '#10b981' }, { id: 'doctor', label: 'Doctor', emoji: '👨‍⚕️', color: '#14b8a6' }, { id: 'clinic_manager', label: 'Clinic Manager', emoji: '🏥', color: '#8b5cf6' }, { id: 'pharmacist', label: 'Pharmacist', emoji: '💊', color: '#f59e0b' }, { id: 'sales', label: 'Sales', emoji: '📈', color: '#ef4444' }, { id: 'operations', label: 'Operations', emoji: '⚙️', color: '#64748b' }, { id: 'finance', label: 'Finance', emoji: '💰', color: '#22c55e' }, { id: 'supplier', label: 'Supplier', emoji: '🏭', color: '#f97316' }, { id: 'patient', label: 'Patient', emoji: '🧬', color: '#ec4899' }].find(r => r.id === activeRole)
+    : null;
+  const bannerColor = simulatedRoleData?.color || '#f59e0b';
+
   const exitSimulation = () => {
     if (switchActiveRole) switchActiveRole('admin');
-    navigate('/admin');
+    router.push('/admin');
   };
 
   return (
@@ -140,16 +152,33 @@ export default function GlobalAppLayout({
       {/* Simulation Banner */}
       {isSimulating && (
         <div style={{ 
-          background: '#f59e0b', color: 'white', padding: '8px 16px', 
-          textAlign: 'center', display: 'flex', justifyContent: 'center', 
-          alignItems: 'center', gap: '16px', zIndex: 1100, fontWeight: 500, fontSize: '14px'
+          background: bannerColor,
+          color: 'white', 
+          padding: '7px 16px', 
+          textAlign: 'center', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '16px', 
+          zIndex: 1100, 
+          fontWeight: 500, 
+          fontSize: '13px',
+          letterSpacing: '0.01em',
+          flexShrink: 0,
         }}>
-          <span>You are viewing Atlas Health as: <strong>{roleLabel}</strong></span>
+          <span>{simulatedRoleData?.emoji} Viewing as: <strong>{simulatedRoleData?.label || roleLabel}</strong></span>
           <button onClick={exitSimulation} style={{ 
-            background: 'rgba(0,0,0,0.2)', color: 'white', border: 'none', 
-            padding: '4px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: 600
+            background: 'rgba(0,0,0,0.18)', 
+            color: 'white', 
+            border: '1px solid rgba(255,255,255,0.3)', 
+            padding: '3px 10px', 
+            borderRadius: '5px', 
+            cursor: 'pointer', 
+            fontSize: '12px', 
+            fontWeight: 700,
+            transition: 'background 0.15s',
           }}>
-            Exit Simulation
+            ✕ Exit Simulation
           </button>
         </div>
       )}
@@ -196,7 +225,7 @@ export default function GlobalAppLayout({
                 <RefillReminderBanner role={roleContext} />
               </div>
             )}
-            {children || <Outlet />}
+            {children}
           </main>
 
           {/* AI Floating Action Button */}

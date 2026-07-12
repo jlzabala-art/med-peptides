@@ -1,3 +1,5 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
@@ -11,7 +13,7 @@ import Lock from "lucide-react/dist/esm/icons/lock";
 /* eslint-disable no-unused-vars, react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from 'react';
 import { Checkbox } from '../components/ui';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
 
 
 
@@ -26,7 +28,7 @@ import { getProtocolById, updateProtocol } from '../services/protocolStorage';
 
 export default function ProtocolValidation({ products }) {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const protocolId = searchParams.get('id');
 
   const [loading, setLoading] = useState(true);
@@ -130,7 +132,7 @@ export default function ProtocolValidation({ products }) {
     if (validationResults.status === 'blocked' && !bypassWarning) return;
     setIsUpdating(true);
     await updateProtocol(protocolId, { approvedAt: new Date().toISOString(), validationStatus: 'approved' });
-    navigate(`/protocol-finder/result?id=${protocolId}`);
+    router.push(`/protocol-finder/result?id=${protocolId}`);
   };
 
   if (loading) return (
@@ -215,7 +217,7 @@ export default function ProtocolValidation({ products }) {
       {/* Sticky Mobile Actions */}
       <footer className="sticky-action-bar">
         <div className="container action-grid">
-          <button onClick={() => navigate(-1)} className="btn-secondary-clinical">
+          <button onClick={() => router.push(-1)} className="btn-secondary-clinical">
             <ArrowLeft size={18} /> <span>Edit</span>
           </button>
           <button

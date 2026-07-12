@@ -1,3 +1,5 @@
+"use client";
+
 import Brain from "lucide-react/dist/esm/icons/brain";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Compass from "lucide-react/dist/esm/icons/compass";
@@ -22,6 +24,7 @@ import LanguageSplit from './gadgets/LanguageSplit';
 import FrictionSignals from './gadgets/FrictionSignals';
 import { Card, MetricCard, Button } from '../ui';
 import { db } from '../../firebase';
+
 
 // ─── Data fetch ───────────────────────────────────────────────────────────────
 async function fetchLogs() {

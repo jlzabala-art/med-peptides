@@ -43,6 +43,7 @@ import AnimatedNumber from '../../ui/AnimatedNumber';
 
 import { exportToCSV } from '../../../utils/exportUtils';
 import { useToast } from '../../../hooks/useToast';
+import { formatAEDtoDual } from '../../../utils/currencies';
 
 export default function FinanceBudget({ dashboardData }) {
   const { formatCurrency } = usePreferences();
@@ -223,11 +224,18 @@ export default function FinanceBudget({ dashboardData }) {
         gap: '1rem'
       }}>
         {[
-          { key: 'all', title: 'Budget Utilization', value: `${totalSpent.toLocaleString()} AED / ${totalBudget.toLocaleString()} AED`, sub: `${totalPct}% consumed`, icon: Landmark, color: 'var(--primary)', highlight: '#eff6ff' },
-          { key: 'burn', title: 'Burn Rate', value: '3,250 AED', sub: 'Per week average', icon: TrendingDown, color: '#f59e0b', highlight: '#fef3c7' },
-          { key: 'remaining', title: 'Remaining Budget', value: `${remainingBudget.toLocaleString()} AED`, sub: 'Available Q3 funds', icon: Coins, color: '#10b981', highlight: '#dcfce7' },
-          { key: 'forecast', title: 'Forecast End of Q', value: '+2,350 AED', sub: 'Projected overspend', icon: ArrowUpRight, color: '#ef4444', highlight: '#fee2e2' },
-          { key: 'cash', title: 'Cash Position', value: '180,000 AED', sub: 'Current liquidity', icon: Landmark, color: '#06b6d4', highlight: '#ecfeff' }
+          { key: 'all', title: 'Budget Utilization', value: (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span>{totalSpent.toLocaleString()} / {totalBudget.toLocaleString()} AED</span>
+                <span style={{ fontSize: '0.65em', color: 'var(--text-muted)' }}>
+                  ≈ {Math.round(totalSpent / 3.6725).toLocaleString()} / {Math.round(totalBudget / 3.6725).toLocaleString()} USD
+                </span>
+              </div>
+            ), sub: `${totalPct}% consumed`, icon: Landmark, color: 'var(--primary)', highlight: '#eff6ff' },
+          { key: 'burn', title: 'Burn Rate', value: formatAEDtoDual(3250), sub: 'Per week average', icon: TrendingDown, color: '#f59e0b', highlight: '#fef3c7' },
+          { key: 'remaining', title: 'Remaining Budget', value: formatAEDtoDual(remainingBudget), sub: 'Available Q3 funds', icon: Coins, color: '#10b981', highlight: '#dcfce7' },
+          { key: 'forecast', title: 'Forecast End of Q', value: formatAEDtoDual(2350, '+'), sub: 'Projected overspend', icon: ArrowUpRight, color: '#ef4444', highlight: '#fee2e2' },
+          { key: 'cash', title: 'Cash Position', value: formatAEDtoDual(180000), sub: 'Current liquidity', icon: Landmark, color: '#06b6d4', highlight: '#ecfeff' }
         ].map(kpi => {
           const Icon = kpi.icon;
           const isSelected = selectedKpi === kpi.key;

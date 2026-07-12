@@ -1,8 +1,5 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Send from "lucide-react/dist/esm/icons/send";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -10,8 +7,10 @@ import React, { useState } from 'react';
 
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import toast from 'react-hot-toast';
+import { Mail, Phone, MessageCircle, FileText, Send } from '@/lib/icons';
 
 export default function CommunicationHub({ entityId, entityType, entityName, email, phone }) {
   const [noteContent, setNoteContent] = useState('');

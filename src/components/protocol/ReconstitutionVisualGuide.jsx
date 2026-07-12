@@ -1,15 +1,5 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Droplet from "lucide-react/dist/esm/icons/droplet";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Info from "lucide-react/dist/esm/icons/info";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Sliders from "lucide-react/dist/esm/icons/sliders";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect */
 /**
  * ReconstitutionVisualGuide — State-of-the-Art Interactive Edition
@@ -34,6 +24,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 
 import SyringeVisualizer from '../SyringeVisualizer';
+import { FlaskConical, Droplet, Activity, Sparkles, Info, ChevronRight, ShieldCheck, Sliders, BookOpen, AlertTriangle, CheckCircle2, Syringe } from '@/lib/icons';
 
 // Helper parsers for robust handling of standard databases strings
 const parseMg = (val) => {

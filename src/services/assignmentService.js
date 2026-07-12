@@ -41,7 +41,8 @@ import {
   serverTimestamp,
   arrayUnion,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 const RELATIONSHIPS_COL = 'doctor_patient_relationships';
 const USERS_COL = 'users';

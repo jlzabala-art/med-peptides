@@ -1,15 +1,17 @@
-import Settings from "lucide-react/dist/esm/icons/settings";
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { WIDGET_REGISTRY, DEFAULT_DOCTOR_CONFIG, DEFAULT_PATIENT_CONFIG, DEFAULT_WHOLESALER_CONFIG, DEFAULT_ADMIN_CONFIG, DEFAULT_CLINIC_CONFIG } from './WidgetRegistry';
 import { motion } from 'framer-motion';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 
 import DashboardCustomizer from './DashboardCustomizer';
+import { Settings, X } from '@/lib/icons';
 
 export default function DashboardEngine({ role, dataContext }) {
   const { user } = useAuth();

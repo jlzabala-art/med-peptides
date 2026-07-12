@@ -1,14 +1,12 @@
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Bot from "lucide-react/dist/esm/icons/bot";
+"use client";
+import { useRouter } from 'next/navigation';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * SupplementDetailPage — Phase 2: premium hero + full layout
  * Route: /supplements/:slug
  */
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { getSupplementWithVariants, getActiveSupplements } from '../repositories/supplementRepository';
 import { trackRecentView } from '../utils/recentViews';
@@ -21,6 +19,7 @@ import { usePricingTier } from '../hooks/usePricingTier';
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
 import ProtocolTOC from "../components/protocol/ProtocolTOC";
 import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, Zap, ShoppingCart, Bot } from '@/lib/icons';
 
 /* ── name → slug helper (for related links) ──────────────────────────────── */
 function nameToSlug(name) {
@@ -100,7 +99,7 @@ const CATEGORY_ICON = {
 /* ─── component ─────────────────────────────────────────────────────────────── */
 export default function SupplementDetailPage({ onAddToCart, region }) {
   const { slug } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { tier } = usePricingTier();
 
   const [supplement, setSupplement] = useState(null);
@@ -267,7 +266,7 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>Supplement not found</h1>
         <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Could not find <code style={{ background: 'var(--color-text-primary)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{slug}</code></p>
         <button
-          onClick={() => navigate('/collection/supplements')}
+          onClick={() => router.push('/collection/supplements')}
           style={{ marginTop: '1rem', background: 'var(--color-primary-hover)', color: 'white', border: 'none', borderRadius: '10px', padding: '0.75rem 1.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem' }}
         >
           ← Back to Supplements
@@ -301,9 +300,9 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
         <div className="sdp-container">
           {/* Breadcrumb */}
           <nav style={{ fontSize: '0.78rem', color: 'rgba(0,54,102,0.45)', display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '2rem', fontWeight: 600 }}>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>Home</span>
+            <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>Home</span>
             <span>›</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/collection/supplements')}>Supplements</span>
+            <span style={{ cursor: 'pointer' }} onClick={() => router.push('/collection/supplements')}>Supplements</span>
             <span>›</span>
             <span style={{ color: 'var(--primary)' }}>{supplement.name}</span>
           </nav>
@@ -943,9 +942,9 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
                       onClick={() => {
                         const targetSlug = resolveProtocolSlug(p);
                         if (targetSlug === 'collection') {
-                          navigate('/collection/protocols');
+                          router.push('/collection/protocols');
                         } else {
-                          navigate(`/protocol/${targetSlug}`);
+                          router.push(`/protocol/${targetSlug}`);
                         }
                       }}
                       style={{
@@ -1040,7 +1039,7 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
               {supplement.commonly_combined_with.map((c, i) => (
                 <button
                   key={i}
-                  onClick={() => navigate(`/supplements/${nameToSlug(c)}`)}
+                  onClick={() => router.push(`/supplements/${nameToSlug(c)}`)}
                   style={{ 
                     background: 'var(--section-alt, #EEF4FA)', 
                     border: '1px solid var(--border)', 
@@ -1073,7 +1072,7 @@ export default function SupplementDetailPage({ onAddToCart, region }) {
 
         {/* ── Back CTA ── */}
         <button
-          onClick={() => navigate('/collection/supplements')}
+          onClick={() => router.push('/collection/supplements')}
           style={{ background: 'transparent', border: '1px solid #334155', color: 'var(--color-text-tertiary)', borderRadius: '10px', padding: '0.65rem 1.25rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = accent; e.currentTarget.style.color = 'var(--color-border)'; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-text-primary)'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
@@ -1288,7 +1287,7 @@ function RelatedSupplements({ related, accent, navigate }) {
         {related.map(r => (
           <button
             key={r.slug}
-            onClick={() => navigate(`/supplements/${r.slug}`)}
+            onClick={() => router.push(`/supplements/${r.slug}`)}
             style={{
               background: 'var(--color-bg-surface)',
               border: '1px solid var(--border)',

@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { useAuth } from '../context/AuthContext';
 import DoctorNav from '../components/doctor/DoctorNav';
 import styles from './DoctorSettings.module.css';

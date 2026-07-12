@@ -1,9 +1,10 @@
-import UserCircle from "lucide-react/dist/esm/icons/user-circle";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import CheckSquare from "lucide-react/dist/esm/icons/check-square";
+
+
+
+
+
 import React from 'react';
+import { UserCircle, Phone, Mail, Calendar, CheckSquare } from '@/lib/icons';
 
 
 

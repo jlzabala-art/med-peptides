@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { X, UploadCloud, ChevronRight, ChevronLeft, Save, Bot, CheckCircle, Sparkles } from '@/lib/icons';
 import toast from 'react-hot-toast';

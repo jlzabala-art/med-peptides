@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useEffect } from 'react';

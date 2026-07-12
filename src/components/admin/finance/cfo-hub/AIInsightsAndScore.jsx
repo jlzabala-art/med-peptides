@@ -1,13 +1,10 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React from 'react';
 
 
 
 
 import { Card } from '../../../ui';
+import { Sparkles, ShieldAlert, TrendingUp, AlertTriangle } from '@/lib/icons';
 
 export default function AIInsightsAndScore({ data }) {
   // Compute score dynamically if possible, or use a weighted mock

@@ -1,7 +1,7 @@
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 
-const appId = import.meta.env.VITE_ALGOLIA_APP_ID;
-const apiKey = import.meta.env.VITE_ALGOLIA_SEARCH_KEY;
+const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID;
+const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY;
 
 let client = null;
 

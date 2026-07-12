@@ -1,15 +1,9 @@
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import PackageSearch from "lucide-react/dist/esm/icons/package-search";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Mail from "lucide-react/dist/esm/icons/mail";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, getDocs, limit, onSnapshot } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 
 
@@ -20,6 +14,7 @@ import { db } from '../../firebase';
 
 
 import { formatDistanceToNow } from 'date-fns';
+import { UserPlus, FileText, Pill, DollarSign, Activity, Settings, PackageSearch, Stethoscope, Mail } from '@/lib/icons';
 
 const EVENT_ICONS = {
   'PATIENT_CREATED': UserPlus,

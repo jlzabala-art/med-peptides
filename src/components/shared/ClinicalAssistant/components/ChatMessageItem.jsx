@@ -1,13 +1,5 @@
-import User from "lucide-react/dist/esm/icons/user";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import Check from "lucide-react/dist/esm/icons/check";
-import Volume2 from "lucide-react/dist/esm/icons/volume-2";
-import VolumeX from "lucide-react/dist/esm/icons/volume-x";
-import ThumbsUp from "lucide-react/dist/esm/icons/thumbs-up";
-import ThumbsDown from "lucide-react/dist/esm/icons/thumbs-down";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Coins from "lucide-react/dist/esm/icons/coins";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 
@@ -31,6 +23,7 @@ import AgentBadge from './AgentBadge';
 import PendingActionCard from './PendingActionCard';
 import PriceImportTable from './PriceImportTable';
 import StockImportTable from './StockImportTable';
+import { User, Bot, Copy, Check, Volume2, VolumeX, ThumbsUp, ThumbsDown, ExternalLink, Coins } from '@/lib/icons';
 
 export default function ChatMessageItem({ msg, idx, onProductClick, InstantResultsTabs, navigate, setIsOpen, onSend, onRate, onDeepDive, contextMode = 'patient', onConfirmAction }) {
   const [copyIdx, setCopyIdx] = useState(null);

@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, orderBy, doc, updateDoc, limit, startAfter, getCountFromServer } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import ShipmentStepper from '../ui/ShipmentStepper';
 import Card from '../ui/Card';
 import Modal from '../ui/Modal';
@@ -32,7 +35,7 @@ export default function ShippingTrackerTab({ supplierId }) {
   // React Query mutation to fetch AI insight
   const fetchInsight = async () => {
     const response = await axios.post(
-      `${process.env.REACT_APP_SUPPLIER_AI_URL}/insights`,
+      `${process.env.NEXT_PUBLIC_SUPPLIER_AI_URL}/insights`,
       { supplierId }
     );
     return response.data;

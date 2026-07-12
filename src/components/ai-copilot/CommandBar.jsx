@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Search from "lucide-react/dist/esm/icons/search";
 import Command from "lucide-react/dist/esm/icons/command";
 import Activity from "lucide-react/dist/esm/icons/activity";
@@ -11,12 +14,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 import { useCopilot } from '../../context/CopilotContext';
-import { useNavigate } from 'react-router-dom';
+
 
 export default function CommandBar() {
   const { isCommandBarOpen, setIsCommandBarOpen } = useCopilot();
   const inputRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (isCommandBarOpen) {
@@ -32,7 +35,7 @@ export default function CommandBar() {
   const handleAction = (actionStr) => {
     handleClose();
     // Dummy action logic
-    if (actionStr === 'inactive_physicians') navigate('/admin/physicians');
+    if (actionStr === 'inactive_physicians') router.push('/admin/physicians');
   };
 
   return (

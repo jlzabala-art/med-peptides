@@ -1,5 +1,8 @@
-import X from 'lucide-react/dist/esm/icons/x';
+"use client";
+
+
 import React, { useEffect } from 'react';
+import { X } from '@/lib/icons';
 
 /**
  * StandardDrawer
@@ -68,7 +71,7 @@ export default function StandardDrawer({
 
       {/* Drawer Panel */}
       <div
-        className={fullWorkspace ? 'drawer-full-workspace' : ''}
+        className={`standard-drawer-panel ${fullWorkspace ? 'drawer-full-workspace' : ''}`}
         style={{
           position: 'relative',
           width: fullWorkspace ? undefined : width,
@@ -77,7 +80,6 @@ export default function StandardDrawer({
           boxShadow: '-4px 0 24px rgba(0,0,0,0.1)',
           display: 'flex',
           flexDirection: 'column',
-          animation: 'drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         {/* Header */}
@@ -182,10 +184,26 @@ export default function StandardDrawer({
         .drawer-full-workspace {
           width: calc(100vw - 260px);
         }
+        .standard-drawer-panel {
+          height: 100vh;
+          animation: drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
         @media (max-width: 768px) {
           .drawer-full-workspace {
             width: 100vw;
           }
+          .standard-drawer-panel {
+            width: 100vw !important;
+            height: 85vh;
+            margin-top: auto;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            animation: bottomSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+        }
+        @keyframes bottomSheetSlideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
         }
       `}</style>
     </div>

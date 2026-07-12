@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import blogRepository from '../repositories/blogRepository';
 import localBlogPosts from '../data/blogData';
 
 export function useBlogPosts(includeDrafts = false) {
@@ -12,13 +11,7 @@ export function useBlogPosts(includeDrafts = false) {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const q = collection(db, 'blogPosts');
-        const snapshot = await getDocs(q);
-        
-        const fetchedPosts = [];
-        snapshot.forEach(doc => {
-          fetchedPosts.push({ slug: doc.id, ...doc.data() });
-        });
+        const fetchedPosts = await blogRepository.getAllBlogPosts();
         
         // Filtrar borradores si includeDrafts es false
         const filtered = includeDrafts 

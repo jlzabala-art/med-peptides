@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from 'next/navigation';
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Bot from "lucide-react/dist/esm/icons/bot";
@@ -18,8 +21,8 @@ import Users from "lucide-react/dist/esm/icons/users";
 import Settings from "lucide-react/dist/esm/icons/settings";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Brain from "lucide-react/dist/esm/icons/brain";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
-import { useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePatientAIProfile } from '../hooks/usePatientAIProfile';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
@@ -41,8 +44,7 @@ import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 
 
 
-import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 
@@ -84,6 +86,7 @@ export const PATIENT_NAV_GROUPS = [
     items: [
       { id: 'appointments', label: 'Care Team', icon: Users },
       { id: 'prescriptions', label: 'My Prescriptions', icon: ClipboardList },
+      { id: 'calendar', label: 'My Calendar', icon: Calendar },
       { id: 'messages', label: 'Messages', icon: MessageSquare },
       { id: 'clinical-ai', label: 'Atlas Health', icon: Brain },
     ],
@@ -104,12 +107,14 @@ export function openAI(q = '') {
   }));
 }
 
-export default function PatientHome() {
+export const PatientContext = React.createContext({});
+
+export default function PatientHome({ children }) {
   const { user, userProfile } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
   const uid = user?.uid;
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
+  const pathParts = pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   const name = userProfile?.firstName || userProfile?.name?.split(' ')[0] || 'Patient';
@@ -123,7 +128,9 @@ export default function PatientHome() {
         <p style={{ margin: '0 0 2rem 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
           {activeTab === 'prescriptions' ? 'Manage your active recommendations and protocols.' : 'Overview of your active treatments and insights.'}
         </p>
-        <Outlet context={{ userProfile, uid, name }} />
+        <PatientContext.Provider value={{ userProfile, uid, name }}>
+          {children}
+        </PatientContext.Provider>
       </div>
     </AppPortalLayout>
   );

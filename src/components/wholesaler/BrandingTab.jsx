@@ -1,13 +1,17 @@
-import Paintbrush from "lucide-react/dist/esm/icons/paintbrush";
-import Check from "lucide-react/dist/esm/icons/check";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import Save from "lucide-react/dist/esm/icons/save";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+"use client";
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { useAuth } from '../../context/AuthContext';
+import { Paintbrush, Check, Globe, HelpCircle, Save, AlertCircle } from '@/lib/icons';
 
 
 

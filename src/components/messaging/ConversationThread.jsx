@@ -1,3 +1,5 @@
+"use client";
+
 import Send from "lucide-react/dist/esm/icons/send";
 import Package from "lucide-react/dist/esm/icons/package";
 import FileText from "lucide-react/dist/esm/icons/file-text";
@@ -16,7 +18,12 @@ import {
   doc,
   increment
 } from 'firebase/firestore';
-import { db, storage, uploadBytes, getDownloadURL, ref } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
+const storage = fb?.storage;
+const uploadBytes = fb?.uploadBytes;
+const getDownloadURL = fb?.getDownloadURL;
+const ref = fb?.ref;
 
 
 

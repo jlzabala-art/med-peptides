@@ -1,12 +1,12 @@
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import X from "lucide-react/dist/esm/icons/x";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+"use client";
+
 import React, { useEffect } from 'react';
 
 
 
 import FAQAccordion from './FAQAccordion';
 import { lockScroll, unlockScroll } from '../../utils/scrollLock';
+import { HelpCircle, X, Loader2 } from '@/lib/icons';
 
 export default function FAQModal({ isOpen, onClose, faqItems, loading = false, product, relatedProducts, onProductClick }) {
   // ESC to close

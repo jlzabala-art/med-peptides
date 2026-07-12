@@ -1,3 +1,5 @@
+"use client";
+
 import Mail from "lucide-react/dist/esm/icons/mail";
 import Copy from "lucide-react/dist/esm/icons/copy";
 import Check from "lucide-react/dist/esm/icons/check";

@@ -1,7 +1,9 @@
+"use client";
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
 import { collection, getDocs, updateDoc, doc, setDoc, query, limit, getCountFromServer, where } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import toast from 'react-hot-toast';
 
 export function useSupplierData() {

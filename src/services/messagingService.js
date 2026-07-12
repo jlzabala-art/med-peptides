@@ -1,4 +1,6 @@
-import { db, storage } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
+const storage = fb?.storage;
 import { 
   collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, 
   query, where, orderBy, onSnapshot, serverTimestamp 

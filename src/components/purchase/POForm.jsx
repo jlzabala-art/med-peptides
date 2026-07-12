@@ -1,12 +1,9 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Send from "lucide-react/dist/esm/icons/send";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Save from "lucide-react/dist/esm/icons/save";
+"use client";
+
 import React, { useState } from 'react';
 import { addDoc, updateDoc, doc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 
 
@@ -15,6 +12,7 @@ import { db } from '../../firebase';
 
 import { Card } from '../ui';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
+import { X, Send, Plus, Trash2, CheckCircle, Save } from '@/lib/icons';
 
 
 export default function POForm({ po, onClose }) {

@@ -1,3 +1,5 @@
+"use client";
+
 import Beaker from "lucide-react/dist/esm/icons/beaker";
 import Info from "lucide-react/dist/esm/icons/info";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";

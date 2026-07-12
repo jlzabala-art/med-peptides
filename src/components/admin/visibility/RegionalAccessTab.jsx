@@ -1,10 +1,7 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import FileWarning from "lucide-react/dist/esm/icons/file-warning";
+"use client";
+
 import React, { useState } from 'react';
+import { Globe, MapPin, ChevronRight, CheckCircle2, AlertTriangle, FileWarning } from '@/lib/icons';
 
 
 

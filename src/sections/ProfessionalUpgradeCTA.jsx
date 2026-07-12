@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
  
 /**
  * ProfessionalUpgradeCTA
@@ -13,7 +14,7 @@
  * Enabled by default. Complements UserSegmentEntry (which is more compact).
  */
 
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 
 // ─── Icons (inline SVG — no extra dependency) ──────────────────────────────
@@ -72,7 +73,7 @@ const FEATURES = [
 
 // ─── Component ────────────────────────────────────────────────────────────
 export default function ProfessionalUpgradeCTA() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user, isProfessional } = useAuth?.() ?? {};
 
   // Determine state
@@ -85,7 +86,7 @@ export default function ProfessionalUpgradeCTA() {
         <div style={containerStyle}>
           <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
             You're viewing the guest home.{' '}
-            <button onClick={() => navigate('/')} style={linkBtnStyle}>
+            <button onClick={() => router.push('/')} style={linkBtnStyle}>
               Go to your professional dashboard →
             </button>
           </p>
@@ -160,7 +161,7 @@ export default function ProfessionalUpgradeCTA() {
             <>
               <button
                 style={primaryBtnStyle}
-                onClick={() => navigate('/login?role=professional&type=register')}
+                onClick={() => router.push('/login?role=professional&type=register')}
                 id="pro-cta-register-btn"
               >
                 <LockOpenIcon />
@@ -168,7 +169,7 @@ export default function ProfessionalUpgradeCTA() {
               </button>
               <button
                 style={secondaryBtnStyle}
-                onClick={() => navigate('/auth?mode=login')}
+                onClick={() => router.push('/auth?mode=login')}
                 id="pro-cta-login-btn"
               >
                 Already registered? Sign in
@@ -178,7 +179,7 @@ export default function ProfessionalUpgradeCTA() {
           {state === 'pending' && (
             <button
               style={secondaryBtnStyle}
-              onClick={() => navigate('/')}
+              onClick={() => router.push('/')}
             >
               Continue browsing as guest →
             </button>

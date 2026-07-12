@@ -1,6 +1,8 @@
 import { useCallback } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, auth } from '../firebase'; // verify path
+import * as fb from '../firebase';
+const db = fb?.db;
+const auth = fb?.auth; // verify path
 
 export function useCalendarSync() {
   const syncEvent = useCallback(async (eventData) => {

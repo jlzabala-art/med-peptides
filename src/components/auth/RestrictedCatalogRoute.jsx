@@ -1,7 +1,8 @@
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+"use client";
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { ShieldAlert } from '@/lib/icons';
 
 
 export default function RestrictedCatalogRoute({ catalogName, children }) {

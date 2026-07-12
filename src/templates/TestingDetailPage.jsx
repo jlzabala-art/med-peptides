@@ -1,16 +1,7 @@
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Check from "lucide-react/dist/esm/icons/check";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Award from "lucide-react/dist/esm/icons/award";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import Binary from "lucide-react/dist/esm/icons/binary";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
+"use client";
+import { useRouter } from 'next/navigation';
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { getSupplementWithVariants } from '../repositories/supplementRepository';
 import { trackRecentView } from '../utils/recentViews';
@@ -29,10 +20,11 @@ import { usePricingTier } from '../hooks/usePricingTier';
 
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
 import ProtocolTOC from '../components/protocol/ProtocolTOC';
+import { ShieldCheck, Bot, ShoppingCart, ArrowRight, Check, Activity, Award, BarChart3, Binary, ChevronRight, HelpCircle } from '@/lib/icons';
 
 export default function TestingDetailPage({ onAddToCart, region }) {
   const { slug } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { tier } = usePricingTier();
 
   const [product, setProduct] = useState(null);
@@ -117,7 +109,7 @@ export default function TestingDetailPage({ onAddToCart, region }) {
       <div style={{ padding: '6rem 2rem', textAlign: 'center', background: '#F4F8FB', minHeight: '80vh' }}>
         <h2 style={{ fontSize: '2rem', color: '#0D1B2E', marginBottom: '1rem' }}>Product Not Found</h2>
         <p style={{ color: '#64748B', marginBottom: '2rem' }}>{error || 'The diagnostic product could not be loaded.'}</p>
-        <button onClick={() => navigate('/')} style={{ padding: '0.75rem 1.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}>
+        <button onClick={() => router.push('/')} style={{ padding: '0.75rem 1.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}>
           Back to Home
         </button>
       </div>
@@ -138,9 +130,9 @@ export default function TestingDetailPage({ onAddToCart, region }) {
         <div className="sdp-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
           {/* Breadcrumbs */}
           <nav style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.45)', display: 'flex', gap: '0.4rem', alignItems: 'center', marginBottom: '2rem', fontWeight: 600 }}>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>Home</span>
+            <span style={{ cursor: 'pointer' }} onClick={() => router.push('/')}>Home</span>
             <span>›</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/collection/diagnostics')}>Diagnostics</span>
+            <span style={{ cursor: 'pointer' }} onClick={() => router.push('/collection/diagnostics')}>Diagnostics</span>
             <span>›</span>
             <span style={{ color: '#00d1ff' }}>{product.name}</span>
           </nav>

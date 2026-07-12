@@ -1,9 +1,10 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import Users from "lucide-react/dist/esm/icons/users";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+
+
+
+
+
 import React from 'react';
+import { AlertTriangle, Clock, TrendingDown, Users, ShieldAlert } from '@/lib/icons';
 
 
 

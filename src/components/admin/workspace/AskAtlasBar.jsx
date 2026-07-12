@@ -1,8 +1,5 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Building from "lucide-react/dist/esm/icons/building";
-import Users from "lucide-react/dist/esm/icons/users";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -10,6 +7,7 @@ import React, { useState } from 'react';
 
 
 import { useWorkspace } from './WorkspaceContext';
+import { Sparkles, ArrowRight, Activity, Building, Users } from '@/lib/icons';
 
 export default function AskAtlasBar() {
   const { setActiveWorkspaceId } = useWorkspace();

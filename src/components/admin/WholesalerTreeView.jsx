@@ -1,3 +1,5 @@
+"use client";
+
 import Building2 from "lucide-react/dist/esm/icons/building-2";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
@@ -10,6 +12,7 @@ import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 
 
 

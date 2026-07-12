@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Clock, FlaskConical, ShieldCheck, Activity, Layers, BookOpen, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, ExternalLink, Pill, Stethoscope, Target, BarChart2 } from '@/lib/icons';
 import StandardDrawerTabs from '../../common/StandardDrawerTabs';

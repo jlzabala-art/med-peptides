@@ -1,5 +1,8 @@
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
+
 import React, { useEffect } from 'react';
+import { X } from '@/lib/icons';
 
 
 /**

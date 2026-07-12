@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 
 const Checkbox = forwardRef(({ 

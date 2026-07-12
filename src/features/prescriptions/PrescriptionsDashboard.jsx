@@ -1,7 +1,8 @@
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { Plus, Filter, Search, FileText, ChevronRight } from '@/lib/icons';
 import { getPrescriptionsByFilter } from '../../services/prescriptionsService';
-import { useNavigate } from 'react-router-dom';
+
 import SourceSelectorModal from './SourceSelectorModal';
 
 import DataTable from '../../components/ui/DataTable';
@@ -12,7 +13,7 @@ const PrescriptionsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isSourceModalOpen, setIsSourceModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     fetchPrescriptions();
@@ -31,7 +32,7 @@ const PrescriptionsDashboard = () => {
 
   const handleCreatePrescription = (sourceType) => {
     setIsSourceModalOpen(false);
-    navigate(`/prescriptions/new?source=${encodeURIComponent(sourceType)}`);
+    router.push(`/prescriptions/new?source=${encodeURIComponent(sourceType)}`);
   };
 
   const columns = [
@@ -111,7 +112,7 @@ const PrescriptionsDashboard = () => {
         data={prescriptions}
         isLoading={loading}
         keyField="id"
-        onRowClick={(row) => navigate(`/prescriptions/${row.id}`)}
+        onRowClick={(row) => router.push(`/prescriptions/${row.id}`)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search by patient, doctor, or ID..."

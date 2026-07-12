@@ -1,3 +1,5 @@
+"use client";
+
 import Upload from "lucide-react/dist/esm/icons/upload";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";

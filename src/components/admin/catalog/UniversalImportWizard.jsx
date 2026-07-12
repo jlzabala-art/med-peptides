@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadCloud, X, FileText, CheckCircle, Package, FlaskConical, Receipt, AlertCircle } from '@/lib/icons';

@@ -1,3 +1,5 @@
+"use client";
+
 import Pill from "lucide-react/dist/esm/icons/pill";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";

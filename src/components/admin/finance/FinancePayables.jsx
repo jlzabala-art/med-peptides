@@ -1,11 +1,9 @@
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import FileWarning from "lucide-react/dist/esm/icons/file-warning";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import CreditCard from "lucide-react/dist/esm/icons/credit-card";
-import Download from "lucide-react/dist/esm/icons/download";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import PayoutManagerWidget from '../gadgets/PayoutManagerWidget';
 import { db } from '../../../firebase';
+
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 
@@ -16,6 +14,7 @@ import { usePreferences } from '../../../context/PreferencesContext';
 import { exportToCSV } from '../../../utils/exportUtils';
 import SkeletonLoader from '../../ui/SkeletonLoader';
 import AnimatedNumber from '../../ui/AnimatedNumber';
+import { ShieldAlert, FileWarning, CheckCircle, CreditCard, Download } from '@/lib/icons';
 
 export default function FinancePayables({ dashboardData }) {
   const { formatCurrency, density } = usePreferences();

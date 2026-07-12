@@ -1,13 +1,7 @@
+"use client";
+
 import React, { useState } from 'react';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Filter from 'lucide-react/dist/esm/icons/filter';
-import SortAsc from 'lucide-react/dist/esm/icons/arrow-up-down';
-import LayoutTemplate from 'lucide-react/dist/esm/icons/layout-template';
-import Save from 'lucide-react/dist/esm/icons/save';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import X from 'lucide-react/dist/esm/icons/x';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import Clock from 'lucide-react/dist/esm/icons/clock';
+import { Search, Filter, SortAsc, LayoutTemplate, Save, ChevronDown, X, AlertTriangle, Clock } from '@/lib/icons';
 
 export default function CatalogCommandBar({ filterState }) {
   const {

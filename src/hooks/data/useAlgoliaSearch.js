@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { algoliasearch } from 'algoliasearch';
 
-const APP_ID = import.meta.env.VITE_ALGOLIA_APP_ID;
-const SEARCH_KEY = import.meta.env.VITE_ALGOLIA_SEARCH_KEY;
+const APP_ID = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '';
+const SEARCH_KEY = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '';
 
 let _client = null;
 function getClient() {
@@ -81,8 +81,9 @@ export function useAlgoliaSearch(indexName, query, searchParams = {}, debounce =
   useEffect(() => {
     if (!isAlgoliaActive) return;
 
-    // Don't search on empty query — show local data instead
-    if (!query || query.trim() === '') {
+    const hasFilters = searchParams?.facetFilters && searchParams.facetFilters.length > 0;
+    // Don't search on empty query unless we have facetFilters — show local data instead
+    if ((!query || query.trim() === '') && !hasFilters) {
       setHits([]);
       return;
     }
@@ -97,4 +98,58 @@ export function useAlgoliaSearch(indexName, query, searchParams = {}, debounce =
   }, [query, debounce, search, isAlgoliaActive]);
 
   return { hits, loading, error, isAlgoliaActive };
+}
+
+export function useAlgoliaFacets(indexName, facetFields = []) {
+  const [facets, setFacets] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchFacets() {
+      if (!indexName || facetFields.length === 0) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const client = getClient();
+        if (!client) {
+          setLoading(false);
+          return;
+        }
+        // with algoliasearch v5 we use search
+        const { results } = await client.search([{
+          indexName,
+          query: '',
+          facets: facetFields,
+          hitsPerPage: 0
+        }]);
+        
+        if (isMounted && results && results[0]) {
+          const returnedFacets = results[0].facets;
+          const formattedFacets = {};
+          for (const field of facetFields) {
+            formattedFacets[field] = [];
+            if (returnedFacets && returnedFacets[field]) {
+              formattedFacets[field] = Object.entries(returnedFacets[field])
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count);
+            }
+          }
+          setFacets(formattedFacets);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) setError(err.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    fetchFacets();
+    return () => { isMounted = false; };
+  }, [indexName, facetFields.join(',')]);
+
+  return { facets, loading, error };
 }

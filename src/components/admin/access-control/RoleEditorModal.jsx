@@ -1,11 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Save from "lucide-react/dist/esm/icons/save";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Users from "lucide-react/dist/esm/icons/users";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import Layers from "lucide-react/dist/esm/icons/layers";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -16,6 +10,7 @@ import React, { useState } from 'react';
 
 
 import notifier from '../../../services/NotificationService';
+import { X, Save, AlertTriangle, Users, Globe, DollarSign, Cpu, Layers } from '@/lib/icons';
 
 export default function RoleEditorModal({ role, onClose, onSave }) {
   const [activeTab, setActiveTab] = useState('modules');

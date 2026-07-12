@@ -1,11 +1,8 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Download from "lucide-react/dist/esm/icons/download";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+"use client";
+
+import Link from 'next/link';
 /* eslint-disable no-unused-vars */
 import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useResponsive } from '../hooks/useResponsive';
 import { usePageMeta } from '../hooks/usePageMeta';
 import SyringeVisualizer from '../components/SyringeVisualizer';
@@ -13,6 +10,7 @@ import VialVisualizer from '../components/VialVisualizer';
 import { jsPDF } from 'jspdf';
 import { motion } from 'framer-motion';
 import { trackToolUsage } from '../hooks/useAnalytics';
+import { FlaskConical, Download, BookOpen, ChevronRight, AlertCircle } from '@/lib/icons';
 
 
 

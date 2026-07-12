@@ -1,8 +1,5 @@
-import Target from "lucide-react/dist/esm/icons/target";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Minus from "lucide-react/dist/esm/icons/minus";
 import React from 'react';
+import { Target, TrendingDown, TrendingUp, Minus } from '@/lib/icons';
 
 
 

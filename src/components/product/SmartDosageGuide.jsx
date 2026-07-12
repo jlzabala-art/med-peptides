@@ -1,10 +1,5 @@
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Info from "lucide-react/dist/esm/icons/info";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import { useMemo, useState } from 'react';
 
@@ -16,6 +11,7 @@ import { useMemo, useState } from 'react';
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { getPeptidePK } from '../../data/peptidePharmacokinetics';
+import { Clock, Zap, AlertTriangle, ChevronDown, ChevronUp, Info, GraduationCap } from '@/lib/icons';
 
 /**
  * SmartDosageGuide

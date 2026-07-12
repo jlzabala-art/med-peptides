@@ -35,9 +35,17 @@
 
 .mainPortalGrid {
   display: grid;
-  grid-template-columns: 2.2fr 0.8fr;
   gap: 1.5rem;
   margin-top: 1.5rem;
+  width: 100%;
+}
+
+.mainPortalGrid.withSidebar {
+  grid-template-columns: 2fr 1fr;
+}
+
+.mainPortalGrid.fullWidth {
+  grid-template-columns: 1fr;
 }
 
 .widgetsCol {
@@ -129,8 +137,8 @@
   color: #64748b;
 }
 
-@media (max-width: 1024px) {
-  .mainPortalGrid {
+@media (max-width: 992px) {
+  .mainPortalGrid.withSidebar, .mainPortalGrid.fullWidth {
     grid-template-columns: 1fr;
   }
   .atlasCommandCenter {

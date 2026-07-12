@@ -1,15 +1,12 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import LineChart from "lucide-react/dist/esm/icons/line-chart";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Link2 from "lucide-react/dist/esm/icons/link-2";
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
+const functions = fb?.functions;
 import { collection, getDocs } from 'firebase/firestore';
 
 
@@ -20,9 +17,10 @@ import { collection, getDocs } from 'firebase/firestore';
 
 
 import AppStatusToggle from '../../ui/AppStatusToggle';
+import { ChevronDown, ChevronUp, Bot, MessageSquare, FileText, LineChart, Stethoscope, Link2 } from '@/lib/icons';
 
 export default function ProductMicrosite({ product, onUpdateProduct }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [summary, setSummary] = useState(product.clinical_summary || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [chatInput, setChatInput] = useState('');

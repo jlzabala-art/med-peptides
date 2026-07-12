@@ -1,6 +1,8 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useRef, useEffect, useState, memo } from 'react';
+import { ArrowRight } from '@/lib/icons';
 
 
 /**

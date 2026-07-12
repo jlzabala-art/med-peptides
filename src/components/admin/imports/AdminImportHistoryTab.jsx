@@ -1,12 +1,9 @@
-import History from "lucide-react/dist/esm/icons/history";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import User from "lucide-react/dist/esm/icons/user";
-import Database from "lucide-react/dist/esm/icons/database";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
+
 import { Card } from '../../ui';
 
 
@@ -15,6 +12,7 @@ import { Card } from '../../ui';
 
 
 import { format } from 'date-fns';
+import { History, FileText, Calendar, User, Database, CheckCircle } from '@/lib/icons';
 
 export default function AdminImportHistoryTab() {
   const [history, setHistory] = useState([]);

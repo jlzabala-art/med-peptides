@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import SidebarGadget from './AppSidebar/SidebarGadget';
 import AppHeader from './AppHeader/index';

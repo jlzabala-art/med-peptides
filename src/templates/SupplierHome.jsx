@@ -1,3 +1,5 @@
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import Globe from "lucide-react/dist/esm/icons/globe";
@@ -18,7 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import { Routes, Route, useNavigate, useLocation, Navigate, Outlet } from 'react-router-dom';
+
 
 import OrdersTab from '../components/admin/OrdersTab';
 import AdminClientsTab from '../components/admin/AdminClientsTab';
@@ -94,12 +96,14 @@ export function PlaceholderTab() {
   );
 }
 
-export default function SupplierHome() {
-  const { user, userProfile, logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+export const SupplierHomeContext = React.createContext({});
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
+export default function SupplierHome({ children }) {
+  const { user, userProfile, logout } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const pathParts = pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   const handleLogout = () => {
@@ -111,7 +115,7 @@ export default function SupplierHome() {
     <AppPortalLayout allowedRoles={['supplier', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
-          <Outlet context={{ userProfile }} />
+          <SupplierHomeContext.Provider value={{ userProfile }}>{children}</SupplierHomeContext.Provider>
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

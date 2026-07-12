@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState } from 'react';
 import { collection, getDocs, doc, writeBatch } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { Card, CardHeader, CardTitle, CardContent } from '../../ui/Card';
 import { Button } from '../../ui/Button';
 import { Loader2, DatabaseZap } from '@/lib/icons';

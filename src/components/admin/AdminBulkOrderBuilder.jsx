@@ -1,3 +1,5 @@
+"use client";
+
 import Layers from "lucide-react/dist/esm/icons/layers";
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import Plus from "lucide-react/dist/esm/icons/plus";

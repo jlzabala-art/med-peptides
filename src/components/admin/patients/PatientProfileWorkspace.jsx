@@ -1,26 +1,22 @@
-import X from 'lucide-react/dist/esm/icons/x';
-import User from 'lucide-react/dist/esm/icons/user';
-import MapPin from 'lucide-react/dist/esm/icons/map-pin';
-import Phone from 'lucide-react/dist/esm/icons/phone';
-import Mail from 'lucide-react/dist/esm/icons/mail';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import ShieldPlus from 'lucide-react/dist/esm/icons/shield-plus';
-import Dna from 'lucide-react/dist/esm/icons/dna';
-import Clock from 'lucide-react/dist/esm/icons/clock';
-import MailOpen from 'lucide-react/dist/esm/icons/mail-open';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+"use client";
+
 import React, { useState } from 'react';
 
 import { Tabs, StatusChip } from '../../ui';
 import GlobalRelationshipPanel from '../../shared/GlobalRelationshipPanel';
+import styles from './PatientProfileWorkspace.module.css';
 import UniversalTimeline from '../../shared/UniversalTimeline';
 import TasksEngine from '../../shared/TasksEngine';
 import CommunicationHub from '../../shared/CommunicationHub';
 import RevenueWidget from '../../shared/RevenueWidget';
+import ClinicalTimeline from './ClinicalTimeline';
 import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
+import PrescriptionBuilder from '../prescriptions/PrescriptionBuilder';
+import { X, User, MapPin, Phone, Mail, Activity, FileText, ShoppingCart, ShieldPlus, Dna, Clock, MailOpen, AlertCircle, ShieldCheck, ShieldAlert, Search, ExternalLink } from '@/lib/icons';
+import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
+import { db } from '../../../firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 // --- Sub-components ---
 
@@ -29,33 +25,19 @@ function PatientJourney({ status }) {
   const currentIndex = steps.indexOf(status) > -1 ? steps.indexOf(status) : 2;
 
   return (
-    <div
-      style={{
-        padding: '1.5rem',
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        border: '1px solid var(--border)',
-        marginBottom: '1.5rem',
-      }}
-    >
+    <div className={styles.journeyContainer}>
       <h3
         style={{
           margin: '0 0 1rem 0',
           fontSize: '0.85rem',
           color: 'var(--text-muted)',
           textTransform: 'uppercase',
+          fontWeight: 800,
         }}
       >
         Clinical Journey
       </h3>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'relative',
-        }}
-      >
+      <div className={styles.journeySteps}>
         <div
           style={{
             position: 'absolute',
@@ -65,6 +47,7 @@ function PatientJourney({ status }) {
             height: '2px',
             backgroundColor: 'var(--border)',
             zIndex: 0,
+            minWidth: '400px', // Ensures the line doesn't crush too small on horizontal scroll
           }}
         ></div>
         <div
@@ -77,6 +60,7 @@ function PatientJourney({ status }) {
             backgroundColor: 'var(--primary)',
             zIndex: 0,
             transition: 'width 0.4s',
+            minWidth: `${(currentIndex / (steps.length - 1)) * 400}px`,
           }}
         ></div>
         {steps.map((step, idx) => {
@@ -92,6 +76,7 @@ function PatientJourney({ status }) {
                 position: 'relative',
                 zIndex: 1,
                 gap: '0.5rem',
+                minWidth: '80px', // Ensures text has space when scrolling
               }}
             >
               <div
@@ -117,6 +102,7 @@ function PatientJourney({ status }) {
                   fontSize: '0.75rem',
                   fontWeight: isCurrent ? 700 : 500,
                   color: isCurrent ? 'var(--text-main)' : 'var(--text-muted)',
+                  textAlign: 'center',
                 }}
               >
                 {step}
@@ -131,20 +117,15 @@ function PatientJourney({ status }) {
 
 function DigitalTwin({ patient }) {
   return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        border: '1px solid var(--border)',
-        padding: '2rem',
-      }}
-    >
+    <div className={styles.digitalTwinCard}>
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '2rem',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}
       >
         <div>
@@ -188,14 +169,7 @@ function DigitalTwin({ patient }) {
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2rem',
-        }}
-      >
+      <div className={styles.metricGrid}>
         {/* Metric 1 */}
         <div
           style={{ padding: '1.25rem', border: '1px solid var(--border)', borderRadius: '12px' }}
@@ -369,10 +343,171 @@ function DigitalTwin({ patient }) {
   );
 }
 
+// --- Portal Access Panel ---
+
+function PortalAccessPanel({ patient, onLinked }) {
+  const [linkedUser, setLinkedUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [candidates, setCandidates] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [linking, setLinking] = useState(false);
+
+  // Load linked user on mount
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    findLinkedUser(patient)
+      .then(u => { if (!cancelled) setLinkedUser(u); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [patient.id, patient.linkedUserId]);
+
+  async function handleSearch() {
+    if (!search.trim()) return;
+    setSearching(true);
+    try {
+      // Search by displayName or email (basic Firestore contains-like via prefix)
+      const snap = await getDocs(collection(db, 'users'));
+      const term = search.trim().toLowerCase();
+      const results = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(u =>
+          (u.displayName || '').toLowerCase().includes(term) ||
+          (u.email || '').toLowerCase().includes(term)
+        )
+        .slice(0, 8);
+      setCandidates(results);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleLink(user) {
+    setLinking(true);
+    try {
+      await linkPatientToUser(patient.id, user.id);
+      setLinkedUser(user);
+      setCandidates([]);
+      setSearch('');
+      if (onLinked) onLinked(user);
+    } finally {
+      setLinking(false);
+    }
+  }
+
+  async function handleUnlink() {
+    if (!linkedUser) return;
+    if (!window.confirm(`Desvincular el acceso al portal de ${patient.name}?`)) return;
+    setLinking(true);
+    try {
+      await unlinkPatientFromUser(patient.id, linkedUser.id);
+      setLinkedUser(null);
+    } finally {
+      setLinking(false);
+    }
+  }
+
+  const cardStyle = {
+    border: '1px solid var(--color-border)',
+    borderRadius: '12px',
+    padding: '1.25rem',
+    backgroundColor: 'var(--color-bg-surface)',
+  };
+
+  if (loading) return <div style={cardStyle}><span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Checking portal access…</span></div>;
+
+  return (
+    <div style={cardStyle}>
+      <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <ShieldCheck size={16} /> Portal Access
+      </h3>
+
+      {linkedUser ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ShieldCheck size={18} color="var(--color-success)" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{linkedUser.displayName || linkedUser.email}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{linkedUser.email} · {linkedUser.role}</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <a
+              href={`/admin/users?search=${encodeURIComponent(linkedUser.email)}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}
+            >
+              <ExternalLink size={14} /> Ver en Users
+            </a>
+            <button
+              onClick={handleUnlink}
+              disabled={linking}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-danger)', background: 'none', border: '1px solid var(--color-danger)', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer' }}
+            >
+              <ShieldAlert size={14} /> Desvincular
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <ShieldAlert size={16} color="var(--text-muted)" />
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin acceso al portal vinculado.</span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              placeholder="Buscar usuario por nombre o email…"
+              style={{ flex: 1, border: '1px solid var(--color-border)', borderRadius: '6px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', outline: 'none', color: 'var(--text-main)', backgroundColor: 'var(--color-bg-app)' }}
+            />
+            <button
+              onClick={handleSearch}
+              disabled={searching}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'white', backgroundColor: 'var(--primary)', border: 'none', borderRadius: '6px', padding: '0.4rem 0.85rem', cursor: 'pointer', fontWeight: 600 }}
+            >
+              <Search size={14} /> {searching ? 'Buscando…' : 'Buscar'}
+            </button>
+          </div>
+          {candidates.length > 0 && (
+            <div style={{ marginTop: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
+              {candidates.map(u => (
+                <div
+                  key={u.id}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)' }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.displayName || '—'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email} · {u.role}</div>
+                  </div>
+                  <button
+                    onClick={() => handleLink(u)}
+                    disabled={linking}
+                    style={{ fontSize: '0.78rem', color: 'var(--primary)', background: 'none', border: '1px solid var(--primary)', borderRadius: '6px', padding: '0.25rem 0.6rem', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    Vincular
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // --- Main Workspace ---
 
 export default function PatientProfileWorkspace({ patient, onClose }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
   // Fetch transactions for this patient
   const { prescriptions, loading: loadingPrescriptions } = usePrescriptions({
@@ -398,21 +533,8 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
       content: (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <PatientJourney status="Program" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '1.5rem',
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                border: '1px solid var(--border)',
-                padding: '1.5rem',
-              }}
-            >
+          <div className={styles.overviewGrid}>
+            <div className={`${styles.infoCard} ${styles.colSpan4}`}>
               <h3
                 style={{
                   fontSize: '0.85rem',
@@ -450,7 +572,31 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
                   >
                     Phone
                   </div>
-                  <div style={{ fontWeight: 600 }}>{patient.phone}</div>
+                  <div style={{ fontWeight: 600 }}>{patient.phone || '—'}</div>
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'var(--text-muted)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    National ID
+                  </div>
+                  <div style={{ fontWeight: 600 }}>{patient.nationalId || '—'}</div>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'var(--text-muted)',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Address
+                  </div>
+                  <div style={{ fontWeight: 600 }}>{patient.address || '—'}</div>
                 </div>
                 <div>
                   <div
@@ -463,20 +609,13 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
                     Age / Gender
                   </div>
                   <div style={{ fontWeight: 600 }}>
-                    {patient.age} / {patient.gender}
+                    {patient.age || '—'} / {patient.gender || '—'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div
-              style={{
-                backgroundColor: '#f0f9ff',
-                borderRadius: '12px',
-                border: '1px solid #bae6fd',
-                padding: '1.5rem',
-              }}
-            >
+            <div className={`${styles.aiCard} ${styles.colSpan8}`}>
               <h3
                 style={{
                   fontSize: '0.85rem',
@@ -506,6 +645,52 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
                 </div>
               </div>
             </div>
+            
+            {/* Relationship Graph inside Overview */}
+            <div className={styles.colSpan12}>
+              <GlobalRelationshipPanel
+                patient={patient}
+                physician={mockPhysician}
+                clinic={mockClinic}
+                manager={mockManager}
+                activeEntity="patient"
+              />
+            </div>
+
+            {/* Portal Access */}
+            <div className={styles.colSpan12}>
+              <PortalAccessPanel patient={patient} />
+            </div>
+
+            {/* Revenue and Risk Score */}
+            <div className={styles.colSpan8} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <RevenueWidget entityId={patient.id} entityType="patient" />
+            </div>
+
+            
+            <div className={`${styles.infoCard} ${styles.colSpan4}`} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div
+                style={{
+                  fontSize: '0.7rem',
+                  color: 'var(--text-muted)',
+                  textTransform: 'uppercase',
+                  fontWeight: 700,
+                  marginBottom: '0.5rem'
+                }}
+              >
+                Overall Risk Score
+              </div>
+              <div
+                style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 800,
+                  color: patient.riskScore === 'High' ? 'var(--color-danger)' : 'var(--color-success)',
+                }}
+              >
+                {patient.riskScore}
+              </div>
+            </div>
+
           </div>
         </div>
       ),
@@ -523,20 +708,29 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
               padding: '1.5rem',
             }}
           >
-            <h3
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <FileText size={16} /> Prescriptions
-            </h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3
+                style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  color: 'var(--text-muted)',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  margin: 0
+                }}
+              >
+                <FileText size={16} /> Prescriptions
+              </h3>
+              <button 
+                className="gcp-btn-primary" 
+                style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
+                onClick={() => setIsBuilderOpen(true)}
+              >
+                New
+              </button>
+            </div>
             {loadingPrescriptions ? (
               <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 Loading prescriptions...
@@ -648,7 +842,7 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
             padding: '2rem',
           }}
         >
-          <UniversalTimeline entityId={patient.id} entityType="patient" />
+          <ClinicalTimeline patientId={patient.id} patientName={patient.name} patientCreatedAt={patient.createdAt} />
         </div>
       ),
     },
@@ -709,29 +903,10 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
   ];
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        zIndex: 40,
-        backgroundColor: '#f8fafc',
-        display: 'flex',
-        flexDirection: 'column',
-        animation: 'slideInRight 0.3s ease',
-      }}
-    >
+    <div className={styles.workspaceContainer}>
       {/* Header */}
-      <div
-        style={{
-          padding: '1.5rem 2rem',
-          backgroundColor: 'white',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-        }}
-      >
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+      <div className={styles.workspaceHeader}>
+        <div className={styles.headerPatientInfo}>
           <div
             style={{
               width: 64,
@@ -775,6 +950,7 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
                 gap: '1rem',
                 fontSize: '0.85rem',
                 color: 'var(--text-muted)',
+                flexWrap: 'wrap',
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -787,7 +963,7 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className={styles.headerActions}>
           <button
             className="gcp-btn-secondary"
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
@@ -817,71 +993,21 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
       </div>
 
       {/* Main Content Layout */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Left: Content Tabs */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+      <div className={styles.mainLayout}>
+        <div className={styles.contentArea}>
           <Tabs activeTab={activeTab} onChange={setActiveTab} tabs={tabs} />
-        </div>
-
-        {/* Right: Universal Relationship Panel */}
-        <div
-          style={{
-            width: '320px',
-            borderLeft: '1px solid var(--border)',
-            backgroundColor: '#f1f5f9',
-            overflowY: 'auto',
-            padding: '1.5rem',
-          }}
-        >
-          <GlobalRelationshipPanel
-            patient={patient}
-            physician={mockPhysician}
-            clinic={mockClinic}
-            manager={mockManager}
-            activeEntity="patient"
-          />
-
-          {/* Mini Stats under the relationship graph */}
-          <div
-            style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
-          >
-            <RevenueWidget entityId={patient.id} entityType="patient" />
-            <div
-              style={{
-                backgroundColor: 'white',
-                padding: '1rem',
-                borderRadius: '12px',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '0.7rem',
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  fontWeight: 700,
-                }}
-              >
-                Risk Score
-              </div>
-              <div
-                style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 800,
-                  color:
-                    patient.riskScore === 'High' ? 'var(--color-danger)' : 'var(--color-success)',
-                }}
-              >
-                {patient.riskScore}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      <style>{`
-        @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      `}</style>
+      {isBuilderOpen && (
+        <PrescriptionBuilder 
+          onClose={() => setIsBuilderOpen(false)}
+          onComplete={() => {
+            setIsBuilderOpen(false);
+          }}
+          patient={patient}
+        />
+      )}
     </div>
   );
 }

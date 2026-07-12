@@ -487,12 +487,11 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
     needsHumanReview: true // Always true for Phase 6 (Nothing is sent automatically)
   });
 
-  // Init Algolia
-  const algoliasearch = require("algoliasearch");
+  // Init Algolia (v5 API)
+  const { algoliasearch } = require("algoliasearch");
   const APP_ID = process.env.ALGOLIA_APP_ID;
   const ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY;
   const algoliaClient = (APP_ID && ADMIN_KEY) ? algoliasearch(APP_ID, ADMIN_KEY) : null;
-  const productsIndex = algoliaClient ? algoliaClient.initIndex("products") : null;
 
   // 4. Create Operations Queue Item(s)
   let index = 0;
@@ -508,11 +507,12 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
         let matchedProductName = null;
         
         try {
-          if (productsIndex) {
-            const { hits } = await productsIndex.search(prod.name, { hitsPerPage: 1 });
-            if (hits.length > 0) {
-              matchedProductId = hits[0].objectID;
-              matchedProductName = hits[0].name;
+          if (algoliaClient) {
+            const { hits } = await algoliaClient.search({ requests: [{ indexName: 'products', query: prod.name, hitsPerPage: 1 }] });
+            const firstHits = hits?.[0]?.hits || [];
+            if (firstHits.length > 0) {
+              matchedProductId = firstHits[0].objectID;
+              matchedProductName = firstHits[0].name;
               matchStatus = 'FOUND';
               confidence = 98; // Fuzzy matched
             }

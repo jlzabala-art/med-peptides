@@ -1,12 +1,11 @@
-import Upload from "lucide-react/dist/esm/icons/upload";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+"use client";
+
 import React, { useState } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { doc, writeBatch } from 'firebase/firestore';
 import { db, functions } from '../../../firebase';
+
+
 import * as XLSX from 'xlsx';
 
 
@@ -14,6 +13,7 @@ import * as XLSX from 'xlsx';
 
 
 import { Card } from '../../ui';
+import { Upload, Loader2, Sparkles, CheckCircle, AlertTriangle } from '@/lib/icons';
 
 export default function SupplierPriceListUpdater() {
   const [isParsing, setIsParsing] = useState(false);

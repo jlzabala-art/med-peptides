@@ -1,9 +1,10 @@
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Landmark from "lucide-react/dist/esm/icons/landmark";
-import Truck from "lucide-react/dist/esm/icons/truck";
+
+
+
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAutoSave } from '../../../hooks/useAutoSave';
+import { Building2, Landmark, Truck } from '@/lib/icons';
 
 
 

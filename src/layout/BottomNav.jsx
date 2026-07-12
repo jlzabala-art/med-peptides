@@ -1,20 +1,21 @@
-import Home from "lucide-react/dist/esm/icons/home";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Search from "lucide-react/dist/esm/icons/search";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import { usePathname } from 'next/navigation';
+import { Home } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { ShoppingCart } from '@/lib/icons';
 
 
 
 
-import { useLocation } from 'react-router-dom';
+
 import '../styles/bottom-nav.css';
 
 function BottomNav({ onGoHome, onOpenSearch, onOpenCart, onOpenProducts, cartCount = 0 }) {
-  const location = useLocation();
-  const isHome = location.pathname === '/';
+  const pathname = usePathname();
+  const isHome = pathname === '/';
   const isProducts =
-    location.pathname.startsWith('/collection') ||
-    location.pathname.startsWith('/product');
+    pathname.startsWith('/collection') ||
+    pathname.startsWith('/product');
 
   return (
     <nav className="bottom-nav" aria-label="Mobile navigation">

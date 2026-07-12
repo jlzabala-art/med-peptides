@@ -1,19 +1,8 @@
-import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
-import List from 'lucide-react/dist/esm/icons/list';
-import Download from 'lucide-react/dist/esm/icons/download';
-import Upload from 'lucide-react/dist/esm/icons/upload';
-import Edit from 'lucide-react/dist/esm/icons/edit';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Box from 'lucide-react/dist/esm/icons/box';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import LayoutTemplate from 'lucide-react/dist/esm/icons/layout-template';
-import Layers from 'lucide-react/dist/esm/icons/layers';
-import Tag from 'lucide-react/dist/esm/icons/tag';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
+"use client";
+
+import { usePathname } from 'next/navigation';
 import React, { useState, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+
 import { useCatalogBuilderStore } from '../../../../stores/useCatalogBuilderStore';
 
 import CatalogTableView from './CatalogTableView';
@@ -22,6 +11,7 @@ import CatalogOverviewDashboard from './CatalogOverviewDashboard';
 import CatalogCommandBar from './CatalogCommandBar';
 import CatalogBulkActionsBar from './CatalogBulkActionsBar';
 import { useCatalogFilters } from '../useCatalogFilters';
+import { LayoutGrid, List, Download, Upload, Edit, Sparkles, Box, ChevronDown, LayoutTemplate, Layers, Tag, DollarSign, BarChart2, LayoutDashboard } from '@/lib/icons';
 
 const CatalogProductsWorkspace = ({
   products = [],
@@ -38,7 +28,7 @@ const CatalogProductsWorkspace = ({
   prevPage,
   onAction,
 }) => {
-  const location = useLocation();
+  const pathname = usePathname();
   const [showBulkActions, setShowBulkActions] = useState(false);
   const [matrixViewType, setMatrixViewType] = useState('grouped'); // 'grouped' | 'flat'
   const activeCatalogSelectedIds = useCatalogBuilderStore((state) => state.selectedProducts);

@@ -1,6 +1,6 @@
+import Link from 'next/link';
  
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './BlogCard.css';
 import warmBlogImg from '../../assets/images/warm_blog_image.png';
 
@@ -27,7 +27,7 @@ export default function BlogCard({ post }) {
     : 'May 20, 2026';
 
   return (
-    <Link to={`/blog/${slug}`} className="blog-card-link" aria-label={`Read blog post: ${title}`}>
+    <Link href={`/blog/${slug}`} className="blog-card-link" aria-label={`Read blog post: ${title}`}>
       <article className="blog-card">
         <div className="blog-card__image-wrapper">
           <img 

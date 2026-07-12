@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState } from 'react';
 import styles from '../../templates/Catalog.module.css';
 import { trackEvent } from '../../hooks/useAnalytics';

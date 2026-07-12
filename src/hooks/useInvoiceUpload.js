@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
-import { storage, functions } from '../firebase';
+import * as fb from '../firebase';
+const storage = fb?.storage;
+const functions = fb?.functions;
 import { ref, uploadBytes } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
 

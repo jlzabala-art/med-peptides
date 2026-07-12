@@ -1,8 +1,9 @@
-import Truck from "lucide-react/dist/esm/icons/truck";
-import Check from "lucide-react/dist/esm/icons/check";
-import PackageOpen from "lucide-react/dist/esm/icons/package-open";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
+import { Truck, Check, PackageOpen } from '@/lib/icons';
 import {
   collection,
   query,

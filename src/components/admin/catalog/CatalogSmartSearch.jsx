@@ -1,3 +1,5 @@
+"use client";
+
 import Search from "lucide-react/dist/esm/icons/search";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Filter from "lucide-react/dist/esm/icons/filter";

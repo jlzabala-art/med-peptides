@@ -1,9 +1,8 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
-import Users from 'lucide-react/dist/esm/icons/users';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import Eye from 'lucide-react/dist/esm/icons/eye';
-import X from 'lucide-react/dist/esm/icons/x';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
+import { Users, ChevronDown, Eye, X } from '@/lib/icons';
 
 /**
  * RoleSimulationDropdown

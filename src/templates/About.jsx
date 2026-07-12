@@ -1,9 +1,11 @@
+"use client";
+
+import Link from 'next/link';
 import { ShieldCheck, Microscope, SearchCheck, FileCheck, Activity, Target, Award, CheckCircle2, Users, Zap, Lock, FlaskConical, Dna, Scale, History, ClipboardCheck, ChevronRight, Sparkles, Database, ArrowRight, Globe, Beaker, ShieldAlert, Headphones as Headset, Mail, MessageCircle } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import '../styles/about.css';
 
 
@@ -165,10 +167,10 @@ const About = () => {
               transition={{ delay: 0.4 }}
               className="about-hero__actions"
             >
-              <Link to="/collection/peptides" className="about-btn-primary">
+              <Link href="/collection/peptides" className="about-btn-primary">
                 Explore Catalog <ArrowRight size={18} />
               </Link>
-              <Link to="/contact" className="about-btn-ghost">
+              <Link href="/contact" className="about-btn-ghost">
                 Contact Our Team <ChevronRight size={18} />
               </Link>
             </motion.div>
@@ -622,7 +624,7 @@ const About = () => {
               Prefer to talk directly? Reach us via our contact form or on WhatsApp — we typically respond within a few hours.
             </p>
             <div className="about-support__actions">
-              <Link to="/contact" className="about-support__btn-primary">
+              <Link href="/contact" className="about-support__btn-primary">
                 <Mail size={18} /> Contact Our Team
               </Link>
               <a

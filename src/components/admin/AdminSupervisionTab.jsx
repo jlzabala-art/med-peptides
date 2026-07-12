@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * AdminSupervisionTab.jsx
@@ -16,6 +18,7 @@ import { getAllRelationships, updateRelationshipStatus } from '../../services/as
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import notifier from '../../services/NotificationService';
 import { db } from '../../firebase';
+
 import { MetricCard, StatusChip } from '../ui';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -1,9 +1,9 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { useRouter } from 'next/navigation';
 
 
-import { useNavigate } from 'react-router-dom';
+
 import { trackPeptideView } from '../../hooks/useAnalytics';
+import { ArrowRight, Sparkles } from '@/lib/icons';
 
 /**
  * RelatedPeptidesRow — Premium Card Grid / Carousel.
@@ -11,7 +11,7 @@ import { trackPeptideView } from '../../hooks/useAnalytics';
  * Designed for visual discovery and premium feel.
  */
 export default function RelatedPeptidesRow({ peptides = [], allProducts = [], title = 'Related Research Peptides' }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   if (!peptides.length) return null;
 
   const resolveProduct = (entry) =>
@@ -25,7 +25,7 @@ export default function RelatedPeptidesRow({ peptides = [], allProducts = [], ti
         peptide_id: slug,
         peptide_name: name
       });
-      navigate(`/product/${slug}`);
+      router.push(`/product/${slug}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };

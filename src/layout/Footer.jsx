@@ -1,11 +1,13 @@
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Scale from "lucide-react/dist/esm/icons/scale";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import X from "lucide-react/dist/esm/icons/x";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+"use client";
+import { useRouter } from 'next/navigation';
+import { Lock } from '@/lib/icons';
+import { Shield } from '@/lib/icons';
+import { FileText } from '@/lib/icons';
+import { Scale } from '@/lib/icons';
+import { ExternalLink } from '@/lib/icons';
+import { AlertTriangle } from '@/lib/icons';
+import { X } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
 import { memo, useState } from 'react';
 
 
@@ -15,7 +17,7 @@ import { memo, useState } from 'react';
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 import { useTenant } from '../context/TenantContext';
 
 const S = {
@@ -149,7 +151,7 @@ const mobileCSS = `
 `;
 
 function Footer() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { tenant } = useTenant();
   const year = new Date().getFullYear();
   const [showQuickDisclaimer, setShowQuickDisclaimer] = useState(false);
@@ -212,7 +214,7 @@ function Footer() {
                     All peptide compounds are strictly for <strong>laboratory research use only</strong>. Dietary supplements are excluded from research-only restrictions.
                   </p>
                   <button 
-                    onClick={() => { navigate('/legal'); window.scrollTo(0,0); }}
+                    onClick={() => { router.push('/legal'); window.scrollTo(0,0); }}
                     style={{ background: 'none', border: 'none', padding: 0, color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', cursor: 'pointer' }}
                   >
                     View Full Compliance Protocol <ChevronRight size={10} />
@@ -229,7 +231,7 @@ function Footer() {
                   <button
                     key={link.label}
                     className="footer-link"
-                    onClick={() => { navigate(link.path); window.scrollTo(0,0); }}
+                    onClick={() => { router.push(link.path); window.scrollTo(0,0); }}
                     style={S.link}
                   >
                     <span style={{ color: 'var(--secondary)', opacity: 0.8 }}>{link.icon}</span>
@@ -247,7 +249,7 @@ function Footer() {
                   <button
                     key={link.label}
                     className="footer-link"
-                    onClick={() => { navigate(link.path); window.scrollTo(0,0); }}
+                    onClick={() => { router.push(link.path); window.scrollTo(0,0); }}
                     style={S.link}
                   >
                     <span style={{ color: 'var(--secondary)', opacity: 0.8 }}>{link.icon}</span>

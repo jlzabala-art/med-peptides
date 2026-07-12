@@ -1,6 +1,9 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+
 import { useCopilot } from '../../context/CopilotContext';
 import { toast } from 'react-hot-toast';
 import { askCatalogAssistant } from '../../services/catalogAIService';
@@ -157,7 +160,7 @@ export default function CopilotWorkspacePanel() {
   const { isOpen, closeCopilot, contextData, mode, setMode } = useCopilot();
   const [query, setQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {

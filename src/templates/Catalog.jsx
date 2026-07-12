@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 import { trackEvent } from '../hooks/useAnalytics';

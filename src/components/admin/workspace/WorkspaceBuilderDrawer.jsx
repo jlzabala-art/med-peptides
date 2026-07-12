@@ -1,10 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import LayoutTemplate from "lucide-react/dist/esm/icons/layout-template";
-import PlusCircle from "lucide-react/dist/esm/icons/plus-circle";
-import Save from "lucide-react/dist/esm/icons/save";
-import Share2 from "lucide-react/dist/esm/icons/share-2";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import Plus from "lucide-react/dist/esm/icons/plus";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -15,6 +10,7 @@ import React, { useState } from 'react';
 
 import { useWorkspace, WORKSPACE_TEMPLATES } from './WorkspaceContext';
 import CustomKPIBuilder from './CustomKPIBuilder';
+import { X, LayoutTemplate, PlusCircle, Save, Share2, Settings, Plus } from '@/lib/icons';
 
 export default function WorkspaceBuilderDrawer({ onClose }) {
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, removeWidget, activeLayout } = useWorkspace();

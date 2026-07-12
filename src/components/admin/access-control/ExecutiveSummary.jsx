@@ -1,9 +1,5 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Edit3 from "lucide-react/dist/esm/icons/edit-3";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Clock from "lucide-react/dist/esm/icons/clock";
 import React from 'react';
+import { Users, Shield, Edit3, AlertTriangle, Clock } from '@/lib/icons';
 
 
 

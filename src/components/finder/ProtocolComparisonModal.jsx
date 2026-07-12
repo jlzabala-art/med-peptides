@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Divide from "lucide-react/dist/esm/icons/divide";
 import Activity from "lucide-react/dist/esm/icons/activity";

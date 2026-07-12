@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Zap, Sparkles, Moon, Microscope, Search, ArrowRight, Globe, Activity, Scale, ShieldCheck, FlaskConical, BookOpen } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
@@ -16,7 +17,7 @@ import React, { useState, useRef } from 'react';
 
 
 import { useResponsive } from '../hooks/useResponsive';
-import { useNavigate } from 'react-router-dom';
+
 import { classifyQuery, QUERY_TYPE_TO_INTENT } from '../utils/classifyQuery';
 import '../styles/hero_search.css';
 
@@ -46,7 +47,7 @@ const STATIC_TRUST = [
  * Refined for a premium medical-pharmaceutical aesthetic.
  */
 export default function HeroSearch({ onOpenSearch, searchQuery = '', setSearchQuery }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [focused, setFocused] = useState(false);
   const isMobile = useResponsive('(max-width: 768px)');
   const inputRef = useRef(null);

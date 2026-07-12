@@ -1,18 +1,17 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import Bug from 'lucide-react/dist/esm/icons/bug';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import User from 'lucide-react/dist/esm/icons/user';
-import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
-import { useNavigate } from 'react-router-dom';
+
+import { Bug, ShieldCheck, Activity, User, FlaskConical } from '@/lib/icons';
 
 export default function DevAutoLogin() {
   const { login, logout, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
-  if (import.meta.env.MODE === 'production') {
+  if (process.env.NODE_ENV === 'production') {
     return null;
   }
 
@@ -53,7 +52,7 @@ export default function DevAutoLogin() {
     try {
       await login(email, 'password123');
       setIsOpen(false);
-      navigate('/');
+      router.push('/');
     } catch (e) {
       console.error('AutoLogin failed:', e);
       alert(`AutoLogin failed for ${email}. Make sure the user is seeded.`);

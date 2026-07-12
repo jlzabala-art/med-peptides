@@ -1,7 +1,8 @@
+"use client";
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'next/navigation';
 import AdminProtocolsTab from '../AdminProtocolsTab.jsx';
 import { getPaginatedProtocols, updateProtocolFull } from '../../../services/protocolStorage';
 

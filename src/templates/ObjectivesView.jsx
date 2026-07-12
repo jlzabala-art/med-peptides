@@ -1,13 +1,5 @@
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Moon from "lucide-react/dist/esm/icons/moon";
+"use client";
+
 /* eslint-disable no-unused-vars */
 
 
@@ -20,6 +12,7 @@ import Moon from "lucide-react/dist/esm/icons/moon";
 
 
 import { useEffect } from 'react';
+import { Beaker, Activity, Zap, Sparkles, Brain, ShieldCheck, Droplets, FlaskConical, ArrowRight, Moon } from '@/lib/icons';
 
 const objectives = [
   {

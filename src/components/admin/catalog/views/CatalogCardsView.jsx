@@ -1,11 +1,6 @@
-import Box from 'lucide-react/dist/esm/icons/box';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical';
-import Package from 'lucide-react/dist/esm/icons/package';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
 import React from 'react';
 import { calculateProductHealthScore } from '../useProductHealthScore';
+import { Box, Sparkles, MoreVertical, Package, AlertCircle, ShieldAlert } from '@/lib/icons';
 
 export default function CatalogCardsView({ items, loading, onRowClick, onAction, filterState }) {
   if (loading) {

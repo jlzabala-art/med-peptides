@@ -1,9 +1,5 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Play from "lucide-react/dist/esm/icons/play";
-import Video from "lucide-react/dist/esm/icons/video";
-import Target from "lucide-react/dist/esm/icons/target";
+"use client";
+
 import { useState, useRef, useEffect } from 'react';
 
 
@@ -13,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 
 import { useHeaderHeight } from '../../hooks/useHeaderHeight';
 import { highlightMatch } from '../../utils/textUtils';
+import { ChevronDown, ChevronUp, ArrowRight, Play, Video, Target } from '@/lib/icons';
 
 /**
  * FAQAccordion — renders a list of FAQ items with expand/collapse,

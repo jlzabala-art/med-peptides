@@ -1,21 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import Box from 'lucide-react/dist/esm/icons/box';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import FileWarning from 'lucide-react/dist/esm/icons/file-warning';
-import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
-import LinkIcon from 'lucide-react/dist/esm/icons/link';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
-import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import PackageX from 'lucide-react/dist/esm/icons/package-x';
-import { motion, AnimatePresence } from 'framer-motion';
+"use client";
 
-import X from 'lucide-react/dist/esm/icons/x';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Box, AlertCircle, FileWarning, ShieldAlert, LinkIcon, Activity, CheckCircle, TrendingDown, TrendingUp, ArrowRight, Sparkles, PackageX, X, ChevronDown, ChevronUp } from '@/lib/icons';
+
 
 export default function OperationalActionCards({ products, activeFilters = [], onFilterSelect, onAction, globalKpis, totalProducts }) {
   const [hoveredCard, setHoveredCard] = useState(null);

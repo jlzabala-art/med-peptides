@@ -1,10 +1,9 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import X from "lucide-react/dist/esm/icons/x";
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
 import { useCopilot } from '../../context/CopilotContext';
+import { Sparkles, X } from '@/lib/icons';
 
 export default function FloatingLauncher() {
   const { isOpen, toggleCopilot } = useCopilot();

@@ -1,8 +1,5 @@
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import AlertOctagon from "lucide-react/dist/esm/icons/alert-octagon";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -11,8 +8,10 @@ import { db } from '../../../firebase';
 
 
 
+
 import { useToast } from '../../../hooks/useToast';
 import { useAuth } from '../../../context/AuthContext';
+import { Check, X, ShieldAlert, Clock, AlertOctagon } from '@/lib/icons';
 
 export default function AdminApprovalsWidget() {
   const { toast } = useToast();

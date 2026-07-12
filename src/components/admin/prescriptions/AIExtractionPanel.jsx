@@ -1,10 +1,5 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import User from "lucide-react/dist/esm/icons/user";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Building from "lucide-react/dist/esm/icons/building";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
+import { Sparkles, User, Stethoscope, Building, Calendar, FileText } from '@/lib/icons';
 
 
 

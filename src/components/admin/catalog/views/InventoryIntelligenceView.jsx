@@ -1,3 +1,5 @@
+"use client";
+
 import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';

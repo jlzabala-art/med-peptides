@@ -1,3 +1,5 @@
+"use client";
+
 import Menu from "lucide-react/dist/esm/icons/menu";
 import X from "lucide-react/dist/esm/icons/x";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
@@ -21,6 +23,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 
 // ── Agents visible to the doctor (clinical subset) ─────────────────────────
 const DOCTOR_AGENTS = [

@@ -1,4 +1,6 @@
-import { NavLink } from 'react-router-dom';
+"use client";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Home, Search, Grid, ShoppingBag, User } from '@/lib/icons';
 import { useCart } from '../context/CartProvider';
 import { useUIStore } from '../stores/uiStore';
@@ -6,26 +8,26 @@ import { useUIStore } from '../stores/uiStore';
 export default function BottomTabBar() {
   const { cartCount } = useCart();
   const setActiveModal = useUIStore(s => s.setActiveModal);
+  const pathname = usePathname();
 
   // We hide the bottom bar on desktop screens using CSS media queries
   return (
     <nav className="bottom-tab-bar rp-mobile-only glass-panel">
-      <NavLink 
-        to="/" 
-        end
-        className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}
+      <Link 
+        href="/" 
+        className={`tab-item ${pathname === '/' ? 'active' : ''}`}
       >
         <Home size={22} strokeWidth={2.5} />
         <span>Inicio</span>
-      </NavLink>
+      </Link>
 
-      <NavLink 
-        to="/catalog" 
-        className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}
+      <Link 
+        href="/catalog" 
+        className={`tab-item ${pathname?.startsWith('/catalog') ? 'active' : ''}`}
       >
         <Grid size={22} strokeWidth={2.5} />
         <span>Catálogo</span>
-      </NavLink>
+      </Link>
 
       <button 
         className="tab-item"
@@ -50,13 +52,13 @@ export default function BottomTabBar() {
         <span>Carrito</span>
       </button>
 
-      <NavLink 
-        to="/dashboard" 
-        className={({ isActive }) => `tab-item ${isActive ? 'active' : ''}`}
+      <Link 
+        href="/dashboard" 
+        className={`tab-item ${pathname?.startsWith('/dashboard') || pathname?.startsWith('/patient') ? 'active' : ''}`}
       >
         <User size={22} strokeWidth={2.5} />
         <span>Perfil</span>
-      </NavLink>
+      </Link>
     </nav>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import Database from "lucide-react/dist/esm/icons/database";
 import FileUp from "lucide-react/dist/esm/icons/file-up";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { format, addDays, startOfWeek, subWeeks, addWeeks, isSameDay } from 'date-fns';
 import { Tabs } from '../ui';

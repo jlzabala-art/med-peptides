@@ -1,13 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Users from "lucide-react/dist/esm/icons/users";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import ShieldPlus from "lucide-react/dist/esm/icons/shield-plus";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Navigation from "lucide-react/dist/esm/icons/navigation";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -25,9 +17,12 @@ import UniversalTimeline from '../../shared/UniversalTimeline';
 import TasksEngine from '../../shared/TasksEngine';
 import CommunicationHub from '../../shared/CommunicationHub';
 import RevenueWidget from '../../shared/RevenueWidget';
+import ImportPrescriptionModal from '../prescriptions/ImportPrescriptionModal';
+import { X, Building2, MapPin, Users, Briefcase, Activity, ShoppingCart, ShieldPlus, ChevronRight, Navigation, FileUp } from '@/lib/icons';
 
 export default function ClinicProfileWorkspace({ clinic, onClose }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Mocks for relationships
   const mockManager = { id: 'mgr_1', name: clinic.manager };
@@ -166,6 +161,13 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            onClick={() => setIsImportOpen(true)}
+            className="gcp-btn-secondary" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}
+          >
+            <FileUp size={16} /> Import Rx
+          </button>
           <button className="gcp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Users size={16} /> Add Physician
           </button>
@@ -216,6 +218,12 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
       <style>{`
         @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
       `}</style>
+      
+      <ImportPrescriptionModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        context={{ clinicId: clinic.id, clinicName: clinic.name }}
+      />
     </div>
   );
 }

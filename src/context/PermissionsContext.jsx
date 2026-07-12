@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+
 import { useAuth, ADMIN_EMAILS } from "../context/AuthContext";
 
 const PermissionsContext = createContext();

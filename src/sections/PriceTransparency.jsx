@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 /**
  * PriceTransparency — Phase 5
@@ -14,7 +15,7 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 
 // ─── Inline icons ─────────────────────────────────────────────────────────────
@@ -54,7 +55,7 @@ const PRO_FEATURES = [
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 export default function PriceTransparency() {
-  const navigate  = useNavigate();
+  const navigate  = useRouter();
   const { isProfessional } = useAuth?.() ?? {};
 
   // Professional users already have this context — don't clutter their view
@@ -82,7 +83,7 @@ export default function PriceTransparency() {
           <button
             id="pt-apply-btn"
             style={ctaStyle}
-            onClick={() => navigate('/login?role=professional&type=register')}
+            onClick={() => router.push('/login?role=professional&type=register')}
           >
             Apply for Professional Access →
           </button>

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Calendar, Droplet, CheckCircle, Clock, Plane, Info, AlertTriangle, ArrowRight, ChevronRight, Activity } from '@/lib/icons';
 

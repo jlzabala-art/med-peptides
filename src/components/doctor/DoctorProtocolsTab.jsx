@@ -1,3 +1,5 @@
+"use client";
+
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Copy from "lucide-react/dist/esm/icons/copy";
@@ -8,6 +10,7 @@ import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
 

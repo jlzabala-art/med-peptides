@@ -1,10 +1,10 @@
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Save from "lucide-react/dist/esm/icons/save";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
+import { ShieldCheck, RefreshCw, AlertCircle, Save } from '@/lib/icons';
 
 
 

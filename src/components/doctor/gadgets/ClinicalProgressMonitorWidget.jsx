@@ -1,11 +1,11 @@
-import ActivitySquare from "lucide-react/dist/esm/icons/activity-square";
-import Battery from "lucide-react/dist/esm/icons/battery";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Frown from "lucide-react/dist/esm/icons/frown";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { ActivitySquare, Battery, Moon, Frown } from '@/lib/icons';
 
 
 

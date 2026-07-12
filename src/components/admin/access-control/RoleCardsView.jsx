@@ -1,12 +1,5 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import Edit2 from "lucide-react/dist/esm/icons/edit-2";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React from 'react';
+import { Users, Shield, Globe, DollarSign, Cpu, Edit2, Copy, Trash2 } from '@/lib/icons';
 
 
 

@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * FagronPhysicianWorkspace
  * ────────────────────────────────────────────────────────────────────────────
@@ -33,6 +35,8 @@ import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../firebase';
+
+
 import { RX_STATUS, rxEvent } from '../../config/prescriptionConfig';
 
 // ── Constants ─────────────────────────────────────────────────────────────────

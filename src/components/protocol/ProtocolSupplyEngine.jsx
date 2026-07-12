@@ -1,15 +1,5 @@
-import Package from "lucide-react/dist/esm/icons/package";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Info from "lucide-react/dist/esm/icons/info";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import History from "lucide-react/dist/esm/icons/history";
+"use client";
+
 /* eslint-disable no-undef, no-unused-vars */
 import React, { useMemo, useState, useCallback } from 'react';
 
@@ -32,6 +22,7 @@ import { resolveProductId } from '../../data/compoundIndex';
 import { resolveProductPrice } from '../../utils/resolveProductPrice';
 import { parseFrequencyToInjectionsPerWeek } from '../../utils/dosageUtils';
 import { derivePhaseSupply, buildSupplyManifest, ACCESSORY_DEFS } from '../../utils/supplyMath';
+import { Package, Syringe, Droplets, CheckCircle2, ChevronRight, AlertTriangle, ShoppingCart, Info, Activity, FlaskConical, Zap, History } from '@/lib/icons';
 
 // ── Number Ticker (Smooth counting animation) ───────────────────────────────────
 const NumberTicker = ({ value, prefix = '', suffix = '' }) => {

@@ -1,16 +1,6 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import X from "lucide-react/dist/esm/icons/x";
-import User from "lucide-react/dist/esm/icons/user";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Package from "lucide-react/dist/esm/icons/package";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import Terminal from "lucide-react/dist/esm/icons/terminal";
-import Zap from "lucide-react/dist/esm/icons/zap";
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
 
@@ -24,12 +14,13 @@ import React, { useState, useEffect, useRef } from 'react';
 
 
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
-import { useNavigate } from 'react-router-dom';
+
+import { Search, X, User, Building2, Stethoscope, Package, Loader2, ArrowRight, Activity, EyeOff, Tag, Terminal, Zap } from '@/lib/icons';
 
 // Initialize Algolia client (using placeholders or env variables)
 const searchClient = algoliasearch(
-  import.meta.env.VITE_ALGOLIA_APP_ID || 'LATCOP1VMD',
-  import.meta.env.VITE_ALGOLIA_SEARCH_KEY || 'test_key'
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'LATCOP1VMD',
+  process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || 'test_key'
 );
 
 export default function Omnibar({ isOpen, onClose }) {
@@ -38,7 +29,7 @@ export default function Omnibar({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const inputRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (isOpen) {
@@ -122,7 +113,7 @@ export default function Omnibar({ isOpen, onClose }) {
 
   const handleNavigate = (path) => {
     onClose();
-    navigate(path);
+    router.push(path);
   };
 
   if (!isOpen) return null;

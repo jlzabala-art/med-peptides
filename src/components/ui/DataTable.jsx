@@ -1,3 +1,5 @@
+"use client";
+
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from '@/lib/icons';
 import React, { useState, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';

@@ -1,26 +1,16 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/**
+ * ThemeContext.jsx — Thin compatibility wrapper over Zustand themeStore.
+ * Todos los imports existentes `useTheme` siguen funcionando.
+ * ThemeProvider ya no se necesita en AppProviders (no tiene estado propio).
+ */
+export { useThemeStore as ThemeStore } from '../stores/themeStore';
 
-const ThemeContext = createContext();
+export const useTheme = () => {
+  const { theme, toggleTheme, setTheme } = require('../stores/themeStore').useThemeStore();
+  return { theme, toggleTheme, setTheme };
+};
 
+// No-op provider for backward compat during transition period
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return children;
 }
-
-export const useTheme = () => useContext(ThemeContext);

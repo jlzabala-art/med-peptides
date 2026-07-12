@@ -1,7 +1,7 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Link from 'next/link';
+import { ArrowRight } from '@/lib/icons';
 import React from 'react';
 
-import { Link } from 'react-router-dom';
 import homeData from '../data/homeData.js';
 import { renderWithGradient } from '../utils/textUtils';
 

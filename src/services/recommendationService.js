@@ -35,7 +35,8 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { logAction } from './auditLogger.js';
 
 const RECS_COL = 'recommendations';

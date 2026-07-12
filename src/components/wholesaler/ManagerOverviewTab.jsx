@@ -1,3 +1,5 @@
+"use client";
+
 import Users from "lucide-react/dist/esm/icons/users";
 import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";

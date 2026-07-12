@@ -1,7 +1,7 @@
-import Shield from "lucide-react/dist/esm/icons/shield";
-import FileCheck from "lucide-react/dist/esm/icons/file-check";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import PackageCheck from "lucide-react/dist/esm/icons/package-check";
+import { Shield } from '@/lib/icons';
+import { FileCheck } from '@/lib/icons';
+import { Globe } from '@/lib/icons';
+import { PackageCheck } from '@/lib/icons';
 
 
 

@@ -1,3 +1,5 @@
+"use client";
+
 // Updated CommandPalette with premium glassmorphism, recent history, and keyboard hints
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Search from "lucide-react/dist/esm/icons/search";
@@ -9,7 +11,7 @@ import Command from "lucide-react/dist/esm/icons/command";
 import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
 import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useDebounce } from '../hooks/useDebounce';
 import { searchProductsAndProtocols, searchUsers, searchOrders } from '../services/searchProviders';
@@ -88,7 +90,7 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const navigate = useNavigate();
+  const router = useRouter();
   const inputRef = useRef(null);
 
   const config = useMemo(() => PORTAL_CONFIGS[portalType] || PORTAL_CONFIGS.admin, [portalType]);
@@ -191,11 +193,11 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
 
   const handleSelect = (item) => {
     if (item.type === 'Recent' && item.path) {
-      navigate(item.path);
+      router.push(item.path);
     } else if (item.action === 'ask-ai') {
       if (onAskAI) onAskAI(searchQuery);
     } else if (item.path) {
-      navigate(item.path);
+      router.push(item.path);
     }
     addToRecent(item);
     onClose();

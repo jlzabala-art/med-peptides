@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { Plus, UserPlus, Stethoscope, ClipboardList, FileText, HeartPulse, Receipt, ShoppingBag, CheckCircle, CheckSquare, Users, Building, ActivitySquare, Factory, Database, Truck, Navigation, CreditCard, ShieldCheck, MessageSquare, Package } from '@/lib/icons';

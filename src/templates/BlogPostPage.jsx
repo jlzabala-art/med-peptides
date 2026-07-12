@@ -1,23 +1,9 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import User from "lucide-react/dist/esm/icons/user";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import Share2 from "lucide-react/dist/esm/icons/share-2";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Check from "lucide-react/dist/esm/icons/check";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import XIcon from "lucide-react/dist/esm/icons/x";
-import LinkIcon from "lucide-react/dist/esm/icons/link";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+"use client";
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { trackBlogView } from '../utils/analytics';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'next/navigation';
 
 
 
@@ -37,8 +23,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useBlogPosts } from '../hooks/useBlogPosts';
 import { useStaticData } from '../hooks/useStaticData';
-import { PROTOCOL_BLUEPRINTS } from '../data/protocolBlueprints';
+import { useProtocols } from '../hooks/shared/useProtocols';
 import '../styles/blog.css';
+import { ArrowLeft, Calendar, Clock, User, Tag, Share2, Sparkles, ChevronRight, BookOpen, ArrowRight, Check, Copy, X, Link as LinkIcon, Plus, ShoppingCart } from '@/lib/icons';
 
 // TipTool component: shows tooltip for complex words and opens ClinicAI on click
 const TipTool = ({ word }) => {
@@ -83,20 +70,22 @@ const renderParagraph = (text, complicatedWords = []) => {
 // InteractiveResourceCard component: renders a detailed card for products, supplements or protocols
 const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
   const { products, supplements } = useStaticData();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [added, setAdded] = useState(false);
 
   // Extract slug from URL
   const slug = link.url ? link.url.split('/').pop() : '';
-  const isProduct = link.url?.startsWith('/product');
-  const isSupplement = link.url?.startsWith('/supplement') || link.url?.includes('supplement');
-  const isProtocol = link.url?.startsWith('/protocol');
+  const isProduct = Boolean(products.find(p => p.slug === slug));
+  const isSupplement = Boolean(supplements.find(s => s.slug === slug));
+  // if not in products or supplements, we assume it's a protocol slug
+  const isProtocol = !isProduct && !isSupplement;
 
-  // Lookup data
+  const { protocols } = useProtocols({ publicOnly: true });
+
   let item = null;
-  let priceStr = '';
+  let categoryLabel = 'Featured Product';
   let detailStr = '';
-  let categoryLabel = '';
+  let priceStr = '';
 
   if (isProduct) {
     item = products.find(p => p.slug === slug);
@@ -116,16 +105,20 @@ const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
       const price = item.pricing?.retail?.perUnit;
       priceStr = price ? `$${price}` : '';
     }
-  } else if (isProtocol) {
-    // Look up protocol title and details from PROTOCOL_BLUEPRINTS
-    const key = Object.keys(PROTOCOL_BLUEPRINTS).find(
-      k => k.toLowerCase() === slug.replace(/[^a-zA-Z]/g, '').toLowerCase() || 
-           PROTOCOL_BLUEPRINTS[k].title.toLowerCase().includes(slug.replace(/-/g, ' ').toLowerCase())
+  } else if (isProtocol && protocols?.length > 0) {
+    // Look up protocol by slug or title from fetched protocols
+    item = protocols.find(
+      p => {
+        const pSlug = (p.slug || p.protocol_id || p.id || '').toLowerCase();
+        const pTitle = (p.title || p.protocol_title || '').toLowerCase();
+        const searchSlug = slug.replace(/[^a-zA-Z]/g, '').toLowerCase();
+        const searchTitle = slug.replace(/-/g, ' ').toLowerCase();
+        return pSlug === searchSlug || pTitle.includes(searchTitle);
+      }
     );
-    if (key) {
-      item = PROTOCOL_BLUEPRINTS[key];
+    if (item) {
       categoryLabel = 'Clinical Protocol';
-      detailStr = item.summary?.duration || 'Multi-phase';
+      detailStr = (item.duration_weeks ? `${item.duration_weeks} Weeks` : item.summary?.duration) || 'Multi-phase';
       priceStr = item.expectedResults?.weightLoss || item.expectedResults?.metric || '';
     }
   }
@@ -324,7 +317,7 @@ const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
 
 export default function BlogPostPage() {
   const { slug } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { posts: blogPosts, loading } = useBlogPosts();
 
   // Find current post
@@ -469,7 +462,7 @@ useEffect(() => {
           <h2 style={{ fontSize: '2rem', color: 'var(--primary)', marginBottom: '1rem' }}>Article Not Found</h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>The longevity research paper you are looking for does not exist or has been moved.</p>
           <button 
-            onClick={() => navigate('/blog')}
+            onClick={() => router.push('/blog')}
             className="tag-pill" 
             style={{ padding: '0.75rem 1.5rem', cursor: 'pointer', fontSize: '1rem', border: '1px solid var(--primary)' }}
           >
@@ -826,7 +819,7 @@ useEffect(() => {
                       aria-label="Close share panel"
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px', display: 'flex' }}
                     >
-                      <XIcon size={16} />
+                      <X size={16} />
                     </button>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

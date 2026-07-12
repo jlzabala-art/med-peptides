@@ -1,9 +1,7 @@
+"use client";
+
 import React, { useMemo } from 'react';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import Database from 'lucide-react/dist/esm/icons/database';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import PieChart from 'lucide-react/dist/esm/icons/pie-chart';
+import { Activity, Database, AlertTriangle, ShieldCheck, PieChart } from '@/lib/icons';
 
 const Card = ({ title, icon: Icon, children }) => (
   <div

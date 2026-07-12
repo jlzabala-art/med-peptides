@@ -1,15 +1,15 @@
-import Dna from "lucide-react/dist/esm/icons/dna";
-import Heart from "lucide-react/dist/esm/icons/heart";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Check from "lucide-react/dist/esm/icons/check";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Smartphone from "lucide-react/dist/esm/icons/smartphone";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { Dna } from '@/lib/icons';
+import { Heart } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { FileText } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { Plus } from '@/lib/icons';
+import { Check } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
+import { Smartphone } from '@/lib/icons';
+import { Cpu } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

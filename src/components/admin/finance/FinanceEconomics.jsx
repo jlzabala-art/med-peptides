@@ -1,11 +1,8 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import PieChart from "lucide-react/dist/esm/icons/pie-chart";
-import Landmark from "lucide-react/dist/esm/icons/landmark";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 
@@ -14,6 +11,8 @@ import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/f
 
 
 import ProfitMarginAnalysis from './ProfitMarginAnalysis';
+import { AlertTriangle, TrendingUp, DollarSign, CheckCircle, PieChart, Landmark } from '@/lib/icons';
+import { formatAEDtoDual } from '../../../utils/currencies';
 
 export default function FinanceEconomics({ dashboardData }) {
   const lotusBilled = dashboardData?.lotuslandData?.totalBilled || 0;
@@ -63,11 +62,11 @@ export default function FinanceEconomics({ dashboardData }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
             <div>
               <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Customer LTV</p>
-              <p style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--primary)', margin: 0 }}>$1,250</p>
+              <div style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--primary)', margin: 0 }}>{formatAEDtoDual(1250)}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Blended CAC</p>
-              <p style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--warning)', margin: 0 }}>$380</p>
+              <div style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--warning)', margin: 0 }}>{formatAEDtoDual(380)}</div>
             </div>
           </div>
           <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
@@ -83,7 +82,7 @@ export default function FinanceEconomics({ dashboardData }) {
             B2B Revenue Concentration
           </h3>
           <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Lotusland Total Billed</p>
-          <p style={{ fontSize: '2.25rem', fontWeight: '800', color: '#3b82f6', margin: '0 0 1.5rem 0' }}>${lotusBilled.toLocaleString()}</p>
+          <div style={{ fontSize: '2.25rem', fontWeight: '800', color: '#3b82f6', margin: '0 0 1.5rem 0' }}>{formatAEDtoDual(lotusBilled)}</div>
           <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '16px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
             <p style={{ fontSize: '0.75rem', fontWeight: '600', color: '#1e3a8a', lineHeight: 1.6, margin: 0 }}>
               <span style={{ fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'rgba(59, 130, 246, 0.2)', padding: '0.125rem 0.5rem', borderRadius: '4px', marginRight: '0.5rem' }}>Note</span>
@@ -99,7 +98,7 @@ export default function FinanceEconomics({ dashboardData }) {
             Estimated Tax Liability
           </h3>
           <p style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>Accrued VAT/Corporate (5%)</p>
-          <p style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--error)', margin: '0 0 1.5rem 0' }}>$12,450.00</p>
+          <div style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--error)', margin: '0 0 1.5rem 0' }}>{formatAEDtoDual(12450)}</div>
           <div className="finance-progress-bg" style={{ background: 'var(--surface-raised)' }}>
             <div className="finance-progress-bar" style={{ width: '45%', background: 'var(--error)' }} />
           </div>
@@ -136,15 +135,15 @@ export default function FinanceEconomics({ dashboardData }) {
                     </div>
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{alert.reason}</p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', fontSize: '0.75rem', fontWeight: '800' }}>
-                      <span style={{ background: 'var(--surface)', padding: '0.375rem 0.75rem', borderRadius: '8px', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>Old COGS: <span style={{ color: 'var(--primary)' }}>${alert.old_cogs}</span></span>
-                      <span style={{ background: 'var(--surface)', padding: '0.375rem 0.75rem', borderRadius: '8px', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>New COGS: <span style={{ color: 'var(--primary)' }}>${alert.new_cogs}</span></span>
+                      <span style={{ background: 'var(--surface)', padding: '0.375rem 0.75rem', borderRadius: '8px', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>Old COGS: <span style={{ color: 'var(--primary)' }}>{formatAEDtoDual(alert.old_cogs)}</span></span>
+                      <span style={{ background: 'var(--surface)', padding: '0.375rem 0.75rem', borderRadius: '8px', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>New COGS: <span style={{ color: 'var(--primary)' }}>{formatAEDtoDual(alert.new_cogs)}</span></span>
                       <span style={{ background: 'rgba(220, 38, 38, 0.1)', padding: '0.375rem 0.75rem', borderRadius: '8px', color: 'var(--text-muted)', border: '1px solid rgba(220, 38, 38, 0.2)' }}>Current Margin: <span style={{ color: 'var(--error)' }}>{alert.current_margin_percent}%</span></span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'var(--surface)', padding: '1rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)', width: '100%', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                     <div>
                       <div style={{ fontSize: '0.625rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>Suggested Price</div>
-                      <div style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--success)' }}>${alert.recommended_price}</div>
+                      <div style={{ fontSize: '1.875rem', fontWeight: '800', color: 'var(--success)' }}>{formatAEDtoDual(alert.recommended_price)}</div>
                     </div>
                     <button 
                       onClick={() => handleApprovePriceIncrease(alert.id)}

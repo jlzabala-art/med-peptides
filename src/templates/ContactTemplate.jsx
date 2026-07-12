@@ -1,6 +1,9 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
  
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import Contact from './Contact';
 import { usePageMeta } from '../hooks/usePageMeta';
 
@@ -19,7 +22,7 @@ const ContactTemplate = memo(({
   pendingQuote,
   setPendingQuote
 }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const structuredData = useMemo(() => ({
     "@context": "https://schema.org",
@@ -66,9 +69,9 @@ const ContactTemplate = memo(({
   // Prevents the user from getting trapped if there is no previous history on mobile
   const handleBack = useCallback(() => {
     if (window.history.length > 1) {
-      navigate(-1);
+      router.push(-1);
     } else {
-      navigate('/catalog'); // Safe fallback to catalog
+      router.push('/catalog'); // Safe fallback to catalog
     }
   }, [navigate]);
 

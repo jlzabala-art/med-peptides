@@ -1,21 +1,10 @@
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
-import Database from "lucide-react/dist/esm/icons/database";
-import Info from "lucide-react/dist/esm/icons/info";
-import Search from "lucide-react/dist/esm/icons/search";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import { useLocation } from 'react-router-dom';
+"use client";
+
+import { usePathname } from 'next/navigation';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { CheckCircle2, XCircle, HelpCircle, RefreshCw, AlertTriangle, ChevronRight, ChevronDown, ExternalLink, Check, X, Database, Info, Search, ArrowRight, ArrowLeft } from '@/lib/icons';
 
 
 
@@ -123,7 +112,7 @@ export default function AdminSkuMappingTab() {
   const [log, setLog] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const location = useLocation();
+  const pathname = usePathname();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
 

@@ -1,7 +1,6 @@
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Home from "lucide-react/dist/esm/icons/home";
+import Link from 'next/link';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { ChevronRight, Home } from '@/lib/icons';
 
 
 
@@ -55,7 +54,7 @@ const Breadcrumbs = ({ items }) => {
         }
       `}</style>
 
-      <Link to="/" className="breadcrumb-item breadcrumb-link">
+      <Link href="/" className="breadcrumb-item breadcrumb-link">
         <Home size={12} />
         <span className="sr-only">Home</span>
       </Link>
@@ -64,7 +63,7 @@ const Breadcrumbs = ({ items }) => {
           <ChevronRight size={11} className="breadcrumb-separator" />
           {item.path ? (
             <Link 
-              to={item.path} 
+              href={item.path} 
               className="breadcrumb-item breadcrumb-link"
             >
               {item.label}

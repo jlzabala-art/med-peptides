@@ -1,11 +1,11 @@
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Package from "lucide-react/dist/esm/icons/package";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { Activity, Clock, Package, CheckCircle2 } from '@/lib/icons';
 
 
 

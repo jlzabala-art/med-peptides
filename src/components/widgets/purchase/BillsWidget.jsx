@@ -1,3 +1,5 @@
+"use client";
+
 import Receipt from "lucide-react/dist/esm/icons/receipt";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import X from "lucide-react/dist/esm/icons/x";
@@ -18,7 +20,8 @@ import LinkIcon from "lucide-react/dist/esm/icons/link";
  */
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 
 
 

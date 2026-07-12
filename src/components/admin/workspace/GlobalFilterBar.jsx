@@ -1,8 +1,3 @@
-import Filter from "lucide-react/dist/esm/icons/filter";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Building from "lucide-react/dist/esm/icons/building";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
 
 
@@ -10,6 +5,7 @@ import React from 'react';
 
 
 import { useWorkspace } from './WorkspaceContext';
+import { Filter, Calendar, MapPin, Building, Activity } from '@/lib/icons';
 
 export default function GlobalFilterBar() {
   const { globalFilters, setGlobalFilters } = useWorkspace();

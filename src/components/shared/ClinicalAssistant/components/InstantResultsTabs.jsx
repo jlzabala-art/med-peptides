@@ -1,6 +1,7 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Scale from "lucide-react/dist/esm/icons/scale";
+"use client";
+
 import React, { useState } from 'react';
+import { FlaskConical, Scale } from '@/lib/icons';
 
 
 

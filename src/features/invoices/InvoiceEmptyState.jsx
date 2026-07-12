@@ -1,6 +1,7 @@
-import Database from "lucide-react/dist/esm/icons/database";
-import Link2 from "lucide-react/dist/esm/icons/link-2";
+
+
 import React from 'react';
+import { Database, Link2 } from '@/lib/icons';
 
 
 

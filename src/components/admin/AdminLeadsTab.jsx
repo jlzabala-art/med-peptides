@@ -1,3 +1,4 @@
+"use client";
 import Users from "lucide-react/dist/esm/icons/users";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import Mail from "lucide-react/dist/esm/icons/mail";
@@ -24,7 +25,7 @@ import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import X from "lucide-react/dist/esm/icons/x";
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { catalogRepository } from '../../repositories/catalogRepository';
@@ -47,16 +48,21 @@ import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 
 
+import dynamic from 'next/dynamic';
 import LeadKanbanBoard from './leads/LeadKanbanBoard';
 import LeadProfileDrawer from './leads/LeadProfileDrawer';
 import { calculateDetailedAIScore } from './leads/LeadUtils';
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// Recharts is heavy (~200KB) — loaded only when the chart section renders
+const { BarChart: RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = 
+  typeof window !== 'undefined' ? require('recharts') : {};
+
 
 export default function AdminLeadsTab() {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const location = usePathname();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
 

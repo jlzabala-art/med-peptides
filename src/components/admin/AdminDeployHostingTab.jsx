@@ -1,3 +1,5 @@
+"use client";
+
 import GitBranch from "lucide-react/dist/esm/icons/git-branch";
 import GitCommit from "lucide-react/dist/esm/icons/git-commit";
 import Database from "lucide-react/dist/esm/icons/database";

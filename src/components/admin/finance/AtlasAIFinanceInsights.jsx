@@ -1,11 +1,5 @@
-import Bot from "lucide-react/dist/esm/icons/bot";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Send from "lucide-react/dist/esm/icons/send";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+"use client";
+
 import React, { useState, useMemo } from 'react';
 
 
@@ -16,6 +10,7 @@ import React, { useState, useMemo } from 'react';
 
 
 import { usePreferences } from '../../../context/PreferencesContext';
+import { Bot, AlertTriangle, Send, TrendingUp, RefreshCw, CheckCircle, ChevronDown, ChevronUp } from '@/lib/icons';
 
 export default function AtlasAIFinanceInsights({ pendingInvoices = [] }) {
   const { formatCurrency } = usePreferences();

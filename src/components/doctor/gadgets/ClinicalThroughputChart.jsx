@@ -1,8 +1,8 @@
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import React from 'react';
 import { motion } from 'framer-motion';
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp } from '@/lib/icons';
 
 export default function ClinicalThroughputChart({ data }) {
   const chartData = data || [

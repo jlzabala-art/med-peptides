@@ -1,18 +1,20 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'next/navigation';
 import { emailCampaignRepository } from '../repositories/emailCampaignRepository';
 import { catalogRepository } from '../repositories/catalogRepository';
 
 export default function CatalogEmailTracker() {
   const { eventId } = useParams();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [status, setStatus] = useState('Tracking referral click...');
 
   useEffect(() => {
     async function trackAndRedirect() {
       if (!eventId) {
-        navigate('/');
+        router.push('/');
         return;
       }
 
@@ -31,7 +33,7 @@ export default function CatalogEmailTracker() {
           if (catalog) {
             const recipientParam = encodeURIComponent(campaign.recipient.name || '');
             const clinicParam = encodeURIComponent(campaign.recipient.clinic || '');
-            navigate(`/catalog/${catalog.slug}?recipient=${recipientParam}&clinic=${clinicParam}&utm_source=email_campaign`);
+            router.push(`/catalog/${catalog.slug}?recipient=${recipientParam}&clinic=${clinicParam}&utm_source=email_campaign`);
             return;
           }
         }
@@ -41,7 +43,7 @@ export default function CatalogEmailTracker() {
       
       // Fallback
       setStatus('Redirecting to Atlas Health catalog...');
-      setTimeout(() => navigate('/'), 1500);
+      setTimeout(() => router.push('/'), 1500);
     }
 
     trackAndRedirect();

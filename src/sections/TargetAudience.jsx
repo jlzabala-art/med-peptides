@@ -1,8 +1,8 @@
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import UserCheck from "lucide-react/dist/esm/icons/user-check";
-import Timer from "lucide-react/dist/esm/icons/timer";
+import { Microscope } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { Brain } from '@/lib/icons';
+import { UserCheck } from '@/lib/icons';
+import { Timer } from '@/lib/icons';
 import React from 'react';
 
 

@@ -1,11 +1,12 @@
-import FileUp from "lucide-react/dist/esm/icons/file-up";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { FileUp, FileText, CheckCircle2 } from '@/lib/icons';
 
 
 

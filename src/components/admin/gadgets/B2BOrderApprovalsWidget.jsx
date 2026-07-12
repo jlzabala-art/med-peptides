@@ -1,8 +1,9 @@
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
+import { Building2, Check, X } from '@/lib/icons';
 import {
   collection,
   query,

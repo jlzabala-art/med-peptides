@@ -1,16 +1,8 @@
 import React from 'react';
 import styles from '../../templates/Catalog.module.css';
+import { Activity, Moon, Zap, Sparkles, Droplets, ShieldCheck, Beaker, FlaskConical, Brain } from '@/lib/icons';
 
 // Icons
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Brain from "lucide-react/dist/esm/icons/brain";
 
 const ICONS_MAP = {
   "Recovery & Repair": Activity,

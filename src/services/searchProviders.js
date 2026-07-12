@@ -1,9 +1,8 @@
-import Box from "lucide-react/dist/esm/icons/box";
-import User from "lucide-react/dist/esm/icons/user";
-import Package from "lucide-react/dist/esm/icons/package";
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { searchAlgolia } from './algoliaSearch';
+import { Box, User, Package } from '@/lib/icons';
 
 
 

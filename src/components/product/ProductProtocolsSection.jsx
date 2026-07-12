@@ -1,5 +1,4 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { useRouter } from 'next/navigation';
 /**
  * ProductProtocolsSection.jsx
  * Displays protocols that feature the current peptide.
@@ -7,13 +6,14 @@ import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 import { RelatedCard } from '../protocol/RelatedProtocolsSection';
+import { Sparkles, ArrowRight } from '@/lib/icons';
 
 export default function ProductProtocolsSection({ protocols, peptideName }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   if (!protocols || protocols.length === 0) return null;
 
@@ -83,7 +83,7 @@ export default function ProductProtocolsSection({ protocols, peptideName }) {
                 id={protocol.id}
                 protocol={protocol}
                 matchReason="Contains Compound"
-                onClick={() => navigate(`/protocol/${protocol.slug || protocol.id}`)}
+                onClick={() => router.push(`/protocol/${protocol.slug || protocol.id}`)}
               />
             </div>
           ))}
@@ -92,7 +92,7 @@ export default function ProductProtocolsSection({ protocols, peptideName }) {
         {/* View All Protocols CTA */}
         <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
           <button
-            onClick={() => navigate('/protocols')}
+            onClick={() => router.push('/protocols')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               padding: '0.75rem 1.75rem',

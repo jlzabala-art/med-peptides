@@ -1,21 +1,24 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import Edit from "lucide-react/dist/esm/icons/edit";
-import Link from "lucide-react/dist/esm/icons/link";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Archive from "lucide-react/dist/esm/icons/archive";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import MoreHorizontal from "lucide-react/dist/esm/icons/more-horizontal";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import Download from "lucide-react/dist/esm/icons/download";
-import Package from "lucide-react/dist/esm/icons/package";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Copy from "lucide-react/dist/esm/icons/copy";
+"use client";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useRef, useEffect } from 'react';
+import { Search, Eye, Edit, Link, DollarSign, Mail, Archive, Trash2, CheckCircle, XCircle, MoreHorizontal, EyeOff, Download, Package, ClipboardList, Bot, Copy } from '@/lib/icons';
 
 
 

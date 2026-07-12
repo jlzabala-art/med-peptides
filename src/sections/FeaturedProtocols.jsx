@@ -1,11 +1,12 @@
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Flame from "lucide-react/dist/esm/icons/flame";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import { useRouter } from 'next/navigation';
+import { Clock } from '@/lib/icons';
+import { Layers } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
+import { Flame } from '@/lib/icons';
+import { RefreshCw } from '@/lib/icons';
+import { Eye } from '@/lib/icons';
+import { Loader2 } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
@@ -16,7 +17,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 import { getPublicProtocols } from '../services/protocolStorage.js';
 import { useQuery } from '@tanstack/react-query';
 import { getProtocolTemplate } from '../repositories/protocolRepository';
@@ -439,7 +440,7 @@ function CategoryAccordion({ category, protocols, isActive, onToggle, onProtocol
 }
 
 export default function FeaturedProtocols({ searchQuery = '' }) {
-  const navigate    = useNavigate();
+  const navigate    = useRouter();
   const sectionRef  = useRef(null);
   const sidebarRef  = useRef(null);
   const [activeFilter, setFilter] = useState(() => {
@@ -636,7 +637,7 @@ export default function FeaturedProtocols({ searchQuery = '' }) {
     }
     localStorage.setItem('Atlas Health_last_protocol_id', id);
     const targetSlug = protocol?.slug || protocol?.id || id;
-    navigate(`/protocol/${targetSlug}`);
+    router.push(`/protocol/${targetSlug}`);
   };
 
   const handleNext = () => {

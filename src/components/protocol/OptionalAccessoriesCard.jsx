@@ -1,13 +1,12 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import Package from "lucide-react/dist/esm/icons/package";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
+"use client";
+
 import React, { useState, memo } from 'react';
 
 
 
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Droplets, Package, Syringe } from '@/lib/icons';
 
 const OPTIONAL_ACCESSORIES = [
   { id: 'bac_water_10ml',  label: 'Bacteriostatic Water 10 mL', detail: '1 vial per compound reconstituted', Icon: Droplets,  color: '#0369a1' },

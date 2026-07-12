@@ -1,18 +1,7 @@
+"use client";
+
 import React, { useState } from 'react';
-import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import Heart from 'lucide-react/dist/esm/icons/heart';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import Smile from 'lucide-react/dist/esm/icons/smile';
-import Moon from 'lucide-react/dist/esm/icons/moon';
-import Droplets from 'lucide-react/dist/esm/icons/droplets';
-import Dumbbell from 'lucide-react/dist/esm/icons/dumbbell';
-import Bell from 'lucide-react/dist/esm/icons/bell';
-import Users from 'lucide-react/dist/esm/icons/users';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
-import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
+import { CheckCircle, AlertTriangle, Heart, Activity, Smile, Moon, Droplets, Dumbbell, Bell, Users, TrendingUp, Sparkles, ChevronDown, ChevronUp } from '@/lib/icons';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const PHASE_COLORS = {
@@ -289,9 +278,9 @@ function PhaseCard({ phase, defaultExpanded = false }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function ProtocolPatientJourney({ protocol, onUpdate }) {
-  const phases = buildJourneyFromProtocol(protocol);
+  const phases = protocol?.patient_journey_data || buildJourneyFromProtocol(protocol);
   const totalWeeks = protocol?.duration_weeks || 12;
-  const phasePct = Math.round(phases.reduce((acc, p) => acc + p.adherence, 0) / phases.length);
+  const phasePct = phases.length > 0 ? Math.round(phases.reduce((acc, p) => acc + (p.adherence || 0), 0) / phases.length) : 0;
 
   return (
     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

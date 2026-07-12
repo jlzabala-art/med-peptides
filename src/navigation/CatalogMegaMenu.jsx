@@ -1,6 +1,6 @@
+import Link from 'next/link';
  
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { getNavigationMetadata } from '../repositories/navigationRepository';
 import { CATALOG_BROWSE } from './navConfig';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +15,7 @@ function ColHeader({ title }) {
 function NavItem({ label, path, highlight = false, onClick }) {
   return (
     <Link
-      to={path}
+      href={path}
       className={`mega-menu-link ${highlight ? 'mega-menu-link--highlight' : ''}`}
       onClick={onClick}
     >

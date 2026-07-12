@@ -1,12 +1,14 @@
+import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { doc, setDoc, serverTimestamp, onDisconnect } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { useLocation } from 'react-router-dom';
+
 
 export function usePresence() {
   const { user } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!user) return;
@@ -21,7 +23,7 @@ export function usePresence() {
           role: user.role || 'user',
           isOnline: isOnline,
           lastActiveAt: serverTimestamp(),
-          currentPath: location.pathname
+          currentPath: pathname
         }, { merge: true });
       } catch (e) {
         console.error("Error updating presence:", e);
@@ -60,5 +62,5 @@ export function usePresence() {
       // Mark offline on unmount (e.g. logout)
       updatePresence(false);
     };
-  }, [user, location.pathname]);
+  }, [user, pathname]);
 }

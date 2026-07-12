@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import Settings from 'lucide-react/dist/esm/icons/settings';
@@ -18,10 +21,11 @@ import FilePlus from 'lucide-react/dist/esm/icons/file-plus';
 /* eslint-disable no-unused-vars, react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+
 import AppPortalLayout from '../layout/AppPortalLayout';
 
 import AdminUsersTab from '../components/admin/AdminUsersTab';
@@ -94,12 +98,15 @@ function WorkplaceLoadingFallback() {
   );
 }
 
-export default function RoleDashboard({ onBack }) {
+export default function RoleDashboard({ onBack, defaultTab = '' }) {
   const { isProfessional, loading: authLoading, user, userProfile } = useAuth();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('');
+  const router = useRouter();
   const [viewConfig, setViewConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
+
+  // Active tab is now controlled by Next.js router, but fallback to state if not provided
+  const [internalTab, setInternalTab] = useState('');
+  const activeTab = defaultTab || internalTab;
 
   const roleKey = userProfile?.role?.toLowerCase() || 'guest';
 
@@ -151,7 +158,7 @@ export default function RoleDashboard({ onBack }) {
         setViewConfig(configData);
         const availableTabs = Object.keys(configData.tabs || {});
         if (availableTabs.length > 0) {
-          setActiveTab(availableTabs[0]);
+          setInternalTab(availableTabs[0]);
         }
       } else {
         console.warn(`No viewConfig found for roleKey: ${searchKey}`);
@@ -167,7 +174,7 @@ export default function RoleDashboard({ onBack }) {
         }
         setViewConfig({ tabs: fallbackTabs });
         if (Object.keys(fallbackTabs).length > 0) {
-          setActiveTab(Object.keys(fallbackTabs)[0]);
+          setInternalTab(Object.keys(fallbackTabs)[0]);
         }
       }
     } catch (err) {

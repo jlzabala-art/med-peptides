@@ -1,8 +1,3 @@
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Users from "lucide-react/dist/esm/icons/users";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 
@@ -11,6 +6,7 @@ import React from 'react';
 
 
 import OutcomeProgressBar from './OutcomeProgressBar';
+import { CheckCircle2, TrendingUp, Users, Clock, Sparkles } from '@/lib/icons';
 
 /**
  * ProtocolOutcomesSection — Highly visual expected outcomes section.

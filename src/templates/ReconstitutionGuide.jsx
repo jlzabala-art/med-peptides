@@ -1,13 +1,9 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
-import Snowflake from "lucide-react/dist/esm/icons/snowflake";
-import Calculator from "lucide-react/dist/esm/icons/calculator";
+"use client";
+
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -17,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { usePageMeta } from '../hooks/usePageMeta';
 import '../styles/reconstitution_guide.css';
+import { FlaskConical, ArrowRight, ChevronDown, Droplets, Syringe, Snowflake, Calculator } from '@/lib/icons';
 
 /* ── Data ─────────────────────────────────────────────────────── */
 
@@ -74,7 +71,7 @@ export default function ReconstitutionGuide() {
     path: '/reconstitution-guide',
   });
 
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState('what');
   const sectionRefs = useRef({});
 
@@ -124,7 +121,7 @@ export default function ReconstitutionGuide() {
           </p>
           <button
             className="rg-hero__cta"
-            onClick={() => navigate('/calculator')}
+            onClick={() => router.push('/calculator')}
           >
             Use Calculator
             <ArrowRight size={16} />
@@ -238,7 +235,7 @@ export default function ReconstitutionGuide() {
               </div>
               <button
                 className="rg-calc-block__btn"
-                onClick={() => navigate('/calculator')}
+                onClick={() => router.push('/calculator')}
               >
                 Open Calculator
                 <ArrowRight size={15} />
@@ -292,14 +289,14 @@ export default function ReconstitutionGuide() {
             <div className="rg-cta-btns">
               <button
                 className="rg-cta-btn rg-cta-btn--primary"
-                onClick={() => navigate('/calculator')}
+                onClick={() => router.push('/calculator')}
               >
                 Use Calculator
                 <ArrowRight size={16} />
               </button>
               <button
                 className="rg-cta-btn rg-cta-btn--outline"
-                onClick={() => navigate('/all-peptides')}
+                onClick={() => router.push('/all-peptides')}
               >
                 Browse Peptides
                 <ArrowRight size={16} />

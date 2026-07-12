@@ -1,15 +1,16 @@
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import X from "lucide-react/dist/esm/icons/x";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { useRouter } from 'next/navigation';
+import { ChevronLeft } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { Pill } from '@/lib/icons';
+import { ClipboardList } from '@/lib/icons';
+import { Bot } from '@/lib/icons';
+import { X } from '@/lib/icons';
+import { Microscope } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -38,7 +39,7 @@ const GOALS = [
 import { GOAL_DRAWER_DETAILS, CLINICAL_AI_CONTEXTS } from '../hooks/useGuestPreferences';
 
 export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onSeedSearch, onOpenAI }) {
-  const navigate    = useNavigate();
+  const navigate    = useRouter();
   const scrollRef   = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX,     setStartX]     = useState(0);

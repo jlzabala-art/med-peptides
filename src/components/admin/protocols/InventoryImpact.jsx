@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, TrendingDown, ShoppingCart, CheckCircle, Package } from '@/lib/icons';
 import { calculateProtocolRequirements, calculateInventoryImpact } from '../../../engine/protocolMath';
-import { useGlobalStore } from '../../../store/globalStore';
+import { useGlobalStore } from '../../../stores/globalStore';
 
 export default function InventoryImpact({ protocol }) {
   const [inventory, setInventory] = useState([]);

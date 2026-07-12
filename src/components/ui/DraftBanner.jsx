@@ -1,9 +1,10 @@
-import FileEdit from "lucide-react/dist/esm/icons/file-edit";
-import X from "lucide-react/dist/esm/icons/x";
+
+
 import React from 'react';
 
 
 import Button from './Button';
+import { FileEdit, X } from '@/lib/icons';
 
 export default function DraftBanner({ 
   onResume, 

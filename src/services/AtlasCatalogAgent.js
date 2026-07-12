@@ -14,7 +14,7 @@
 import { GoogleGenAI, Type } from '@google/genai';
 
 // Use the environment variable API key (not the old hardcoded one that was blocked)
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+const apiKey = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY) : '';
 const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const AtlasCatalogAgent = {

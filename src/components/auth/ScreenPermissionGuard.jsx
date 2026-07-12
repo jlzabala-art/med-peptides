@@ -1,7 +1,7 @@
 import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { usePermissions } from '../../contexts/PermissionsContext';
+import { redirect } from 'next/navigation';
+import { usePermissions } from '../../context/PermissionsContext';
 
 import { useTranslation } from 'react-i18next';
 

@@ -1,3 +1,5 @@
+"use client";
+
 import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 import Bot from "lucide-react/dist/esm/icons/bot";
 import React, { useState } from 'react';

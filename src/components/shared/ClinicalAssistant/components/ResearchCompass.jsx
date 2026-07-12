@@ -1,12 +1,7 @@
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Heart from "lucide-react/dist/esm/icons/heart";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Target from "lucide-react/dist/esm/icons/target";
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Zap, Heart, Brain, Clock, Shield, Target } from '@/lib/icons';
 
 
 

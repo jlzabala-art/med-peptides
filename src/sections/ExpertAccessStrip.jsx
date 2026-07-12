@@ -1,10 +1,11 @@
-import GitCompare from "lucide-react/dist/esm/icons/git-compare";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Search from "lucide-react/dist/esm/icons/search";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Link from 'next/link';
+import { GitCompare } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { BookOpen } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { Beaker } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 /**
  * ExpertAccessStrip.jsx — Phase 6-A
@@ -27,7 +28,6 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
  *   - Category tag: "Expert Tools" eyebrow.
  */
 
-import { Link } from 'react-router-dom';
 
 
 
@@ -113,7 +113,7 @@ export default function ExpertAccessStrip() {
           {SHORTCUTS.map(({ id, label, desc, to, Icon, accent, bg, border, onClick }) => (
             <Link
               key={id}
-              to={to}
+              href={to}
               onClick={onClick}
               className="eas-card"
               style={{ '--accent': accent, '--bg': bg, '--border': border }}

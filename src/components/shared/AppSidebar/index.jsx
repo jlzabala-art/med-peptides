@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+"use client";
+
+import React, { useEffect, useMemo } from 'react';
 import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building, Eye } from '@/lib/icons';
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import { useNavigationStore } from '../../../stores/navigationStore';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
+import { usePathname } from 'next/navigation';
 import QuickCreateDropdown from './QuickCreateDropdown';
 import './AppSidebar.css';
 
@@ -51,16 +54,16 @@ export default function AppSidebar({
   footer
 }) {
   const { 
-    expandedGroups, toggleGroup, 
+    expandedGroups, toggleGroup, setExpandedGroups,
     favorites, toggleFavorite,
     recents, addRecent
   } = useNavigationStore();
 
   const { simulatedRole, exitSimulation } = useSimulationStore();
   const simulatedRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
+  const pathname = usePathname() || '';
 
   // Determine the effective role for filtering:
-  // If simulating, use simulatedRole; otherwise, show all (admin sees everything)
   const effectiveRole = simulatedRole || 'admin';
 
   // Filter groups and items based on effective role
@@ -72,7 +75,22 @@ export default function AppSidebar({
         (item) => !item.roles || item.roles.includes(effectiveRole)
       ),
     }))
-    .filter((group) => group.items.length > 0); // Remove empty groups
+    .filter((group) => group.items.length > 0);
+
+  // Auto-expand the group that contains the current active route
+  useEffect(() => {
+    if (!pathname) return;
+    // Extract the slug from /admin/<slug> or treat '' as Overview
+    const parts = pathname.split('/').filter(Boolean);
+    const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
+    for (const group of filteredGroups) {
+      const hasActive = group.items?.some(item => item.id === currentSlug || item.id === '');
+      if (hasActive && !expandedGroups.includes(group.id)) {
+        toggleGroup(group.id);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // Local visual expand/collapse
   const [expanded, setExpanded] = React.useState(true);
@@ -95,15 +113,18 @@ export default function AppSidebar({
     onNavigate(id);
   };
 
-  const renderItem = (item, level = 1) => {
+  const renderItem = (item, level = 1, prefix = '') => {
     if (!item) return null;
     const Icon = item.icon;
-    const isActive = activeId === item.id;
+    // Extract current slug from pathname: /admin/patients -> 'patients', /admin -> ''
+    const parts = pathname.split('/').filter(Boolean);
+    const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
+    const isActive = item.id === '' ? currentSlug === '' : currentSlug === item.id || currentSlug.startsWith(item.id + '/');
     const isFav = favorites.includes(item.id);
 
     return (
       <div 
-        key={item.id} 
+        key={`${prefix}${item.id}`} 
         className={`sb-item ${isActive ? 'active' : ''} level-${level}`}
         data-tooltip={!expanded ? item.label : undefined}
       >
@@ -183,7 +204,7 @@ export default function AppSidebar({
           <div className="sb-group">
             <div className="sb-group-header">Favorites</div>
             <div className="sb-group-items">
-              {favorites.map(id => renderItem(getItemById(id)))}
+              {favorites.map(id => renderItem(getItemById(id), 1, 'fav-'))}
             </div>
           </div>
         )}
@@ -193,7 +214,7 @@ export default function AppSidebar({
           <div className="sb-group">
             <div className="sb-group-header">Recent</div>
             <div className="sb-group-items">
-              {recents.map(id => renderItem(getItemById(id)))}
+              {recents.map(id => renderItem(getItemById(id), 1, 'recent-'))}
             </div>
           </div>
         )}
@@ -226,7 +247,7 @@ export default function AppSidebar({
               {/* Sub-items (Level 2) */}
               {(isGroupExpanded || !expanded) && (
                 <div className={`sb-group-items ${!expanded ? 'sb-flyout' : ''}`}>
-                  {group.items?.map(item => renderItem(item, 2))}
+                  {group.items?.map(item => renderItem(item, 2, `group-${group.id}-`))}
                 </div>
               )}
             </div>

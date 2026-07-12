@@ -1,3 +1,5 @@
+"use client";
+
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
@@ -37,6 +39,8 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';
+
+
 
 
 

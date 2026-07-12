@@ -1,9 +1,12 @@
+"use client";
+
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Search from "lucide-react/dist/esm/icons/search";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { catalog } from '../../../data/v2/index.js';

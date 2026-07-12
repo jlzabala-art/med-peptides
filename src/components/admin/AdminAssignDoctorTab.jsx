@@ -1,3 +1,5 @@
+"use client";
+
 import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import User from "lucide-react/dist/esm/icons/user";
 import Link2 from "lucide-react/dist/esm/icons/link-2";

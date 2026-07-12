@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { collection, query, orderBy, limit, startAfter, getDocs, where, startAt, endAt } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
-export function useSemanticProducts() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+export function useSemanticProducts(options = {}) {
+  const { initialData = null } = options;
+  const [products, setProducts] = useState(initialData || []);
+  const [loading, setLoading] = useState(!initialData);
   const [loadingMore, setLoadingMore] = useState(false);
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(true);
@@ -97,6 +99,13 @@ export function useSemanticProducts() {
   );
 
   useEffect(() => {
+    // Skip first fetch if initialData is provided and no filters are active yet
+    if (initialData && products.length > 0 && products[0] === initialData[0] && !lastDoc && searchTerm === '' && selectedGoal === 'all' && selectedStatus === 'all') {
+      if (initialData.length > 0) {
+        setHasMore(initialData.length === 20); // Guess based on limit
+      }
+      return;
+    }
     setLastDoc(null);
     fetchProducts(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps

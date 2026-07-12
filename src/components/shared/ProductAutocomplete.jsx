@@ -1,15 +1,16 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Search from "lucide-react/dist/esm/icons/search";
-import Package from "lucide-react/dist/esm/icons/package";
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
+import * as fb from '../../firebase';
+const db = fb?.db;
+import { X, Search, Package } from '@/lib/icons';
 
 
 
 
 export default function ProductAutocomplete({ value, onChange, onSelect, placeholder = "Search product..." }) {
-  const [query, setQuery] = useState(value || '');
+  const [searchTerm, setSearchTerm] = useState(value || '');
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [open, setOpen] = useState(false);
@@ -17,12 +18,13 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
 
   // Sync state if prop changes (e.g. form reset or value populated)
   useEffect(() => {
-    setQuery(value || '');
+    setSearchTerm(value || '');
   }, [value]);
 
-  // Load products from firestore once
+  // Load products from firestore once (Limited to 200 to prevent crashing)
   useEffect(() => {
-    getDocs(collection(db, 'products')).then(snap => {
+    const q = query(collection(db, 'products'), limit(200));
+    getDocs(q).then(snap => {
       const flattened = [];
       snap.docs.forEach(docSnap => {
         const p = docSnap.data();
@@ -63,22 +65,22 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
     }).catch(err => console.error("Error loading products for autocomplete:", err));
   }, []);
 
-  // Filter products when query changes, starting only after 3 letters
+  // Filter products when searchTerm changes, starting only after 3 letters
   useEffect(() => {
-    if (!query || query.length < 3) {
+    if (!searchTerm || searchTerm.length < 3) {
       setFiltered([]);
       setOpen(false);
       return;
     }
-    const q = query.toLowerCase();
+    const qTerm = searchTerm.toLowerCase();
     const results = products.filter(p => 
-      p.name.toLowerCase().includes(q) ||
-      p.sku.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q)
+      p.name.toLowerCase().includes(qTerm) ||
+      p.sku.toLowerCase().includes(qTerm) ||
+      p.category.toLowerCase().includes(qTerm)
     );
     setFiltered(results.slice(0, 10)); // limit to top 10 for better UX
     setOpen(results.length > 0);
-  }, [query, products]);
+  }, [searchTerm, products]);
 
   // Close dropdown on clicking outside
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
 
   const handleSelect = (prod) => {
     const fullName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
-    setQuery(fullName);
+    setSearchTerm(fullName);
     setOpen(false);
     onChange(fullName);
     if (onSelect) {
@@ -102,7 +104,7 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
   };
 
   const handleClear = () => {
-    setQuery('');
+    setSearchTerm('');
     onChange('');
     if (onSelect) onSelect(null);
   };
@@ -112,9 +114,9 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
         <input
           type="text"
-          value={query}
+          value={searchTerm}
           onChange={e => {
-            setQuery(e.target.value);
+            setSearchTerm(e.target.value);
             onChange(e.target.value);
           }}
           placeholder={placeholder}
@@ -122,7 +124,7 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
           style={{ width: '100%', paddingRight: '2rem' }}
           autoComplete="off"
         />
-        {query ? (
+        {searchTerm ? (
           <button
             type="button"
             onClick={handleClear}

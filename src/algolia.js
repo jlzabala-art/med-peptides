@@ -1,7 +1,7 @@
 import { algoliasearch } from 'algoliasearch';
 
-const appId = import.meta.env.VITE_ALGOLIA_APP_ID;
-const searchKey = import.meta.env.VITE_ALGOLIA_SEARCH_KEY;
+const appId = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '';
+const searchKey = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '';
 
 let searchClient = null;
 

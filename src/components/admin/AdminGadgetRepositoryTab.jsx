@@ -1,3 +1,5 @@
+"use client";
+
 import Settings from "lucide-react/dist/esm/icons/settings";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";

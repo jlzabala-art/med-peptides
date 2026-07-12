@@ -1,3 +1,6 @@
+"use client";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Mail from "lucide-react/dist/esm/icons/mail";
 import Lock from "lucide-react/dist/esm/icons/lock";
 import User from "lucide-react/dist/esm/icons/user";
@@ -14,8 +17,9 @@ import Eye from "lucide-react/dist/esm/icons/eye";
 import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
 import { useAuth, ADMIN_EMAILS } from '../context/AuthContext';
+import { useRegistration } from '../hooks/useRegistration';
 
 
 
@@ -33,16 +37,19 @@ import { useAuth, ADMIN_EMAILS } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import useGuestPreferences, { GOAL_META, LEVEL_META } from '../hooks/useGuestPreferences';
 export default function AuthPage({ onBack }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
   // Deep-link redirect: ProtectedRoute saves the original URL in state.from
   // (e.g. /admin?t=orders&orderId=ORD-XXX from an email CTA). After login we
   // send the admin back there instead of the default page.
-  const redirectTo = location.state?.from?.pathname
-    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+  const redirectTo = typeof window !== 'undefined' && window.history.state?.from?.pathname
+    ? `${window.history.state.from.pathname}${window.history.state.from.search || ''}`
     : null;
-  const { user, userProfile, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, register, logout, resetPassword, loginWithGoogle, loading } = useAuth();
+  const { user, userProfile, updateProfileData, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, logout, resetPassword, loginWithGoogle, loading: authLoading } = useAuth();
+  const { register, loading: registerLoading, error: registerError } = useRegistration();
+  const loading = authLoading || registerLoading;
   const { prefs, hasCompleted } = useGuestPreferences();
   // Detect admin from email hardlist (in case profile hasn't loaded yet)
   const isAdminByEmail = ADMIN_EMAILS.includes(user?.email?.toLowerCase());
@@ -77,6 +84,7 @@ export default function AuthPage({ onBack }) {
   // Professional-only extra fields
   const [country, setCountry] = useState('');
   const [licenseId, setLicenseId] = useState('');
+  const [taxId, setTaxId] = useState('');
   const [intendedUse, setIntendedUse] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -112,7 +120,7 @@ export default function AuthPage({ onBack }) {
     );
   };
 
-  const handleBack = onBack ?? (() => navigate(-1));
+  const handleBack = onBack ?? (() => router.back());
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -122,25 +130,31 @@ export default function AuthPage({ onBack }) {
   useEffect(() => {
     if (!loading && user && userProfile) {
       const role = (userProfile.role || 'guest').toLowerCase();
+      
+      // Do not redirect if role is pending (needs onboarding)
+      if (role === 'pending') {
+        return;
+      }
+
       const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(user.email?.toLowerCase());
       const isPhysicianUser = role === 'doctor';
 
       const redirectable = isAdminUser || isPhysicianUser || role === 'wholesaler' || role === 'patient';
       if (redirectable) {
         if (redirectTo) {
-          navigate(redirectTo, { replace: true });
+          router.push(redirectTo, { replace: true });
         } else if (isAdminUser) {
-          navigate('/admin', { replace: true });
+          router.push('/admin', { replace: true });
         } else if (isPhysicianUser) {
-          navigate('/doctor', { replace: true });
+          router.push('/doctor', { replace: true });
         } else if (role === 'wholesaler') {
-          navigate('/wholesaler', { replace: true });
+          router.push('/wholesaler', { replace: true });
         } else if (role === 'patient') {
-          navigate('/patient', { replace: true });
+          router.push('/patient', { replace: true });
         }
       }
     }
-  }, [user, userProfile, loading, redirectTo, navigate]);
+  }, [user, userProfile, loading, redirectTo, router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -156,15 +170,15 @@ export default function AuthPage({ onBack }) {
 
       setTimeout(() => {
         if (redirectTo) {
-          navigate(redirectTo, { replace: true });
+          router.push(redirectTo, { replace: true });
         } else if (isAdminUser) {
-          navigate('/admin', { replace: true });
+          router.push('/admin', { replace: true });
         } else if (isPhysicianUser) {
-          navigate('/doctor', { replace: true });
+          router.push('/doctor', { replace: true });
         } else if (role === 'wholesaler') {
-          navigate('/wholesaler', { replace: true });
+          router.push('/wholesaler', { replace: true });
         } else if (role === 'patient') {
-          navigate('/patient', { replace: true });
+          router.push('/patient', { replace: true });
         } else {
           handleBack();
         }
@@ -185,22 +199,130 @@ export default function AuthPage({ onBack }) {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
+    const isGoogleOnboarding = user && userProfile?.role === 'pending';
+
+    // Password check only for new email registrations
+    if (!isGoogleOnboarding && password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
     }
 
-    // Customer flow — only needs confirm password check
-    if (accountType === 'customer') {
-      if (password !== confirmPassword) {
+    // Wholesaler flow
+    if (accountType === 'wholesaler') {
+      if (!institution || !taxId) {
+        setError('Company name and Tax ID are required for Wholesaler registration.');
+        return;
+      }
+      setSubmitting(true);
+      try {
+        if (isGoogleOnboarding) {
+          await updateProfileData({
+            institution,
+            taxId,
+            country,
+            role: 'wholesaler_pending',
+            professionalStatus: 'pending_review',
+            roleData: {
+              wholesaler: {
+                taxId: taxId || '',
+                country: country || '',
+                institution: institution || '',
+                verifiedAt: null,
+                verifiedBy: null,
+                creditLimit: 0,
+                paymentTerms: 'net30',
+              }
+            }
+          });
+          setSuccess('Profile updated! We will review your wholesale account shortly.');
+        } else {
+          await register(email, password, fullName, institution, 'wholesaler', 'wholesaler', { country, taxId, guestPreferences: prefs, inviteId });
+          setSuccess('Application submitted. We will review your wholesale account shortly.');
+        }
+      } catch (err) {
+        if (err.code === 'auth/email-already-in-use') {
+          setError('An account with this email already exists.');
+        } else {
+          setError(err.message);
+        }
+      }
+      setSubmitting(false);
+      return;
+    }
+
+    // Professional (Doctor/Clinic) flow
+    if (accountType === 'doctor' || accountType === 'clinic') {
+      if (!licenseId) {
+        setError('Medical License ID is required.');
+        return;
+      }
+      setSubmitting(true);
+      try {
+        if (isGoogleOnboarding) {
+          await updateProfileData({
+            institution,
+            licenseId,
+            country,
+            role: 'doctor',
+            professionalStatus: 'pending_review',
+            roleData: {
+              doctor: {
+                licenseId: licenseId || '',
+                country: country || '',
+                institution: institution || '',
+                intendedUse: '',
+                verifiedAt: null,
+                verifiedBy: null,
+              }
+            }
+          });
+          setSuccess(`Profile updated! You'll receive a confirmation when your account is activated.`);
+        } else {
+          await register(email, password, fullName, institution, accountType, accountType, { country, licenseId, taxId, guestPreferences: prefs, inviteId });
+          setSuccess(`Application submitted. You'll receive a confirmation when your account is activated.`);
+        }
+      } catch (err) {
+        if (err.code === 'auth/email-already-in-use') {
+          setError('An account with this email already exists.');
+        } else {
+          setError(err.message);
+        }
+      }
+      setSubmitting(false);
+      return;
+    }
+
+    // Patient/Customer flow
+    if (accountType === 'patient' || accountType === 'customer') {
+      if (!isGoogleOnboarding && password !== confirmPassword) {
         setError('Passwords do not match.');
         return;
       }
       setSubmitting(true);
       try {
-        await register(email, password, fullName, '', '', 'customer', { guestPreferences: prefs, inviteId }, selectedGoals);
-        setSuccess('Account created! Welcome to Atlas Health.');
-        setTimeout(() => navigate('/'), 1500);
+        if (isGoogleOnboarding) {
+          await updateProfileData({
+            role: 'patient',
+            goals: selectedGoals,
+            approved: true,
+            professionalStatus: 'not_requested',
+            roleData: {
+              patient: {
+                goals: selectedGoals,
+                country: country || '',
+                medicalHistory: [],
+                allergies: [],
+                currentMedications: [],
+              }
+            }
+          });
+          setSuccess('Profile updated! Welcome to Atlas Health.');
+          setTimeout(() => router.push('/patient'), 1500);
+        } else {
+          await register(email, password, fullName, '', 'patient', 'patient', { guestPreferences: prefs, inviteId }, selectedGoals);
+          setSuccess('Account created! Welcome to Atlas Health.');
+          setTimeout(() => router.push('/patient'), 1500);
+        }
       } catch (err) {
         if (err.code === 'auth/email-already-in-use') {
           setError('An account with this email already exists. Please log in.');
@@ -211,25 +333,6 @@ export default function AuthPage({ onBack }) {
       setSubmitting(false);
       return;
     }
-
-    // Professional flow — userType required
-    if (!userType) {
-      setError('Please select a profession/user type.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await register(email, password, fullName, institution, userType, 'professional', { country, licenseId, intendedUse, guestPreferences: prefs, inviteId });
-      setSuccess('Application submitted. You’ll receive a confirmation when your account is activated.');
-    } catch (err) {
-      if (err.code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists. Please log in.');
-      } else {
-        setError(err.message);
-      }
-    }
-    setSubmitting(false);
   };
 
   const handleForgotPassword = async () => {
@@ -260,15 +363,15 @@ export default function AuthPage({ onBack }) {
 
       setTimeout(() => {
         if (redirectTo) {
-          navigate(redirectTo, { replace: true });
+          router.push(redirectTo, { replace: true });
         } else if (isAdminUser) {
-          navigate('/admin', { replace: true });
+          router.push('/admin', { replace: true });
         } else if (isPhysicianUser) {
-          navigate('/doctor', { replace: true });
+          router.push('/doctor', { replace: true });
         } else if (role === 'wholesaler') {
-          navigate('/wholesaler', { replace: true });
+          router.push('/wholesaler', { replace: true });
         } else if (role === 'patient') {
-          navigate('/patient', { replace: true });
+          router.push('/patient', { replace: true });
         } else {
           handleBack();
         }
@@ -279,14 +382,22 @@ export default function AuthPage({ onBack }) {
     setSubmitting(false);
   };
 
+  // Immediate redirect for Admin users to avoid rendering issues
+  useEffect(() => {
+    if (user) {
+      const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
+      if (isAdminNow) {
+        const target = redirectTo || '/admin';
+        router.push(target);
+      }
+    }
+  }, [user, isAdmin, isAdminByEmail, userProfile, redirectTo, router]);
+
   // If user is logged in, show profile status (Centered layout)
   if (user) {
-    // Admin users: redirect immediately without showing the Basic Account card
+    // Admin users: render nothing while redirecting
     const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
     if (isAdminNow) {
-      // Do immediate redirect
-      const target = redirectTo || '/admin';
-      navigate(target, { replace: true });
       return null;
     }
     if (loading) {
@@ -547,60 +658,71 @@ export default function AuthPage({ onBack }) {
             <Microscope size={28} />
           </div>
         </div>
-        <div style={{ width: '100%' }}>
-          <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '1.5rem', color: '#202124', marginBottom: '0.5rem', lineHeight: 1.2, fontWeight: 500, fontFamily: 'var(--font-heading)' }}>
-              {tab === 'login' ? 'Sign in' : 'Create an account'}
-            </h2>
-            <p style={{ color: '#5f6368', margin: 0, fontSize: '0.95rem', fontFamily: 'var(--font-sans)' }}>
-              {tab === 'login' ? 'to continue to Atlas Health' : 'to access your personalized research portal'}
-            </p>
-          </div>
+        
+        {userProfile?.role === 'pending' ? (
+            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '1.5rem', color: '#202124', marginBottom: '0.5rem', lineHeight: 1.2, fontWeight: 500, fontFamily: 'var(--font-heading)' }}>
+                Complete your profile
+              </h2>
+              <p style={{ color: '#5f6368', margin: 0, fontSize: '0.95rem', fontFamily: 'var(--font-sans)' }}>
+                Tell us a little bit more about yourself to personalize your experience.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                <h2 style={{ fontSize: '1.5rem', color: '#202124', marginBottom: '0.5rem', lineHeight: 1.2, fontWeight: 500, fontFamily: 'var(--font-heading)' }}>
+                  {tab === 'login' ? 'Sign in' : 'Create an account'}
+                </h2>
+                <p style={{ color: '#5f6368', margin: 0, fontSize: '0.95rem', fontFamily: 'var(--font-sans)' }}>
+                  {tab === 'login' ? 'to continue to Atlas Health' : 'to access your personalized research portal'}
+                </p>
+              </div>
 
-          {/* Framer Motion Segmented Control */}
-          <div className="gcp-segment-bg">
-            <motion.div 
-              className="gcp-segment-pill"
-              initial={false}
-              animate={{
-                left: tab === 'login' ? '4px' : '50%',
-                width: 'calc(50% - 4px)'
-              }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            />
-            <button 
-              className="gcp-segment-btn" 
-              data-active={tab === 'login'}
-              onClick={() => { setTab('login'); setError(''); setSuccess(''); }}
-            >
-              Sign In
-            </button>
-            <button 
-              className="gcp-segment-btn" 
-              data-active={tab === 'register'}
-              onClick={() => { setTab('register'); setError(''); setSuccess(''); setAccountType(''); }}
-            >
-              Register
-            </button>
-          </div>
+              {/* Framer Motion Segmented Control */}
+              <div className="gcp-segment-bg">
+                <motion.div 
+                  className="gcp-segment-pill"
+                  initial={false}
+                  animate={{
+                    left: tab === 'login' ? '4px' : '50%',
+                    width: 'calc(50% - 4px)'
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+                <button 
+                  className="gcp-segment-btn" 
+                  data-active={tab === 'login'}
+                  onClick={() => { setTab('login'); setError(''); setSuccess(''); }}
+                  style={{ width: '50%', padding: '0.75rem 0', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-muted)' }}
+                >
+                  Sign in
+                </button>
+                <button 
+                  className="gcp-segment-btn" 
+                  data-active={tab === 'register'}
+                  onClick={() => { setTab('register'); setError(''); setSuccess(''); }}
+                  style={{ width: '50%', padding: '0.75rem 0', fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-muted)' }}
+                >
+                  Create account
+                </button>
+              </div>
+            </>
+          )}
 
           <AnimatePresence mode="wait">
             <motion.div
-              key={tab + accountType}
+              key={userProfile?.role === 'pending' ? 'onboarding' : tab + accountType}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {tab === 'register' && !accountType && (
-              <div style={{ display: 'grid', gap: '1rem', marginTop: '0.5rem' }}>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', margin: 0 }}>
-                  Choose how you'd like to register:
-                </p>
-
-                {/* Card: Basic Account */}
+              {(tab === 'register' || userProfile?.role === 'pending') && !accountType && (
+              <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
+                {/* Card: Patient / Customer */}
                 <button
-                  onClick={() => setAccountType('customer')}
+                  onClick={() => setAccountType('patient')}
                   style={{
                     textAlign: 'left', background: 'white', border: '1px solid #cbd5e1',
                     borderRadius: '8px', padding: '1.25rem 1.5rem',
@@ -611,19 +733,16 @@ export default function AuthPage({ onBack }) {
                   onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                   <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <User size={18} color="#0284c7" /> Basic Account
+                    <User size={18} color="#0284c7" /> Patient / Customer
                   </div>
                   <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                    For browsing, checkout, and order history.
-                  </div>
-                  <div style={{ marginTop: '0.75rem', display: 'inline-block', padding: '0.45rem 1rem', backgroundColor: '#0284c7', color: 'white', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
-                    Create Basic Account
+                    For browsing, managing treatments, and order history.
                   </div>
                 </button>
 
-                {/* Card: Professional Access */}
+                {/* Card: Healthcare Provider */}
                 <button
-                  onClick={() => setAccountType('professional')}
+                  onClick={() => setAccountType('doctor')}
                   style={{
                     textAlign: 'left', background: 'white', border: '1px solid #cbd5e1',
                     borderRadius: '8px', padding: '1.25rem 1.5rem',
@@ -634,13 +753,30 @@ export default function AuthPage({ onBack }) {
                   onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'none'; }}
                 >
                   <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Microscope size={18} color="#0ea5e9" /> Professional Access
+                    <Microscope size={18} color="#0ea5e9" /> Healthcare Provider
                   </div>
                   <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>
-                    For qualified professionals who need advanced protocols, professional pricing, and extended documentation.
+                    For doctors and clinics who need professional pricing and patient management.
                   </div>
-                  <div style={{ marginTop: '0.75rem', display: 'inline-block', padding: '0.45rem 1rem', backgroundColor: '#0ea5e9', color: 'white', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
-                    Apply for Professional Access
+                </button>
+
+                {/* Card: Wholesaler */}
+                <button
+                  onClick={() => setAccountType('wholesaler')}
+                  style={{
+                    textAlign: 'left', background: 'white', border: '1px solid #cbd5e1',
+                    borderRadius: '8px', padding: '1.25rem 1.5rem',
+                    cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s',
+                    fontFamily: 'var(--font-sans)',
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#8b5cf6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(139,92,246,0.08)'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0f172a', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Building2 size={18} color="#8b5cf6" /> Wholesaler / Distributor
+                  </div>
+                  <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                    For bulk purchasing and B2B distribution channels.
                   </div>
                 </button>
               </div>
@@ -748,58 +884,63 @@ export default function AuthPage({ onBack }) {
                   Sign in with Google
                 </button>
               </form>
-            ) : accountType === 'customer' ? (
+            ) : accountType === 'patient' || accountType === 'customer' ? (
               /* ── CUSTOMER REGISTRATION FORM ── */
               <form onSubmit={handleRegister} style={{ display: 'grid', gap: '1.15rem' }}>
                 <button type="button" onClick={() => setAccountType('')} style={{ background: 'none', border: 'none', padding: '0 0 0.25rem 0', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-sans)' }}>
                   ← Back to account type selection
                 </button>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><User size={18} /></div>
-                  <input
-                    type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Full Name" required style={inputStyle}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><Mail size={18} /></div>
-                  <input
-                    type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email Address" required style={inputStyle}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><Lock size={18} /></div>
-                  <input
-                    type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password (min 6 chars)" required style={{...inputStyle, paddingRight: '2.5rem'}}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><Lock size={18} /></div>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password" required style={{...inputStyle, paddingRight: '2.5rem'}}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
+                
+                {!(user && userProfile?.role === 'pending') && (
+                  <>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><User size={18} /></div>
+                      <input
+                        type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Full Name" required style={inputStyle}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Mail size={18} /></div>
+                      <input
+                        type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email Address" required style={inputStyle}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input
+                        type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password (min 6 chars)" required style={{...inputStyle, paddingRight: '2.5rem'}}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm Password" required style={{...inputStyle, paddingRight: '2.5rem'}}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </>
+                )}
 
                 <div style={{ marginTop: '0.5rem' }}>
                   <p style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                    SELECT YOUR RESEARCH GOALS (OPTIONAL)
+                    SELECT YOUR HEALTH GOALS (OPTIONAL)
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                     {AVAILABLE_GOALS.map(goal => (
@@ -832,109 +973,126 @@ export default function AuthPage({ onBack }) {
                 </div>
 
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem', marginTop: '0.5rem' }} disabled={submitting}>
-                  {submitting ? 'Creating account...' : 'Create Basic Account'}
+                  {submitting ? 'Creating account...' : 'Create Account'}
                 </button>
               </form>
-            ) : accountType === 'professional' ? (
-              /* ── PROFESSIONAL REGISTRATION FORM ── */
+            ) : accountType === 'doctor' || accountType === 'clinic' ? (
+              /* ── HEALTHCARE PROVIDER REGISTRATION FORM ── */
               <form onSubmit={handleRegister} style={{ display: 'grid', gap: '1.15rem' }}>
                 <button type="button" onClick={() => setAccountType('')} style={{ background: 'none', border: 'none', padding: '0 0 0.25rem 0', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-sans)' }}>
                   ← Back to account type selection
                 </button>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><User size={18} /></div>
-                  <input 
-                    type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Full Professional Name" required style={inputStyle}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
-                {/* NEW USER TYPE SELECTOR */}
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><GraduationCap size={18} /></div>
-                  <select 
-                    value={userType} onChange={(e) => setUserType(e.target.value)}
-                    required
-                    style={{...inputStyle, paddingLeft: '2.8rem', outline: 'none', appearance: 'none', color: userType ? 'inherit' : 'var(--text-muted)'}}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  >
-                    <option value="" disabled>Select User Role</option>
-                    <option value="Academic">Academic Institution</option>
-                    <option value="Researcher">Independent Researcher</option>
-                    <option value="Healthcare Provider">Healthcare Provider/Clinic</option>
-                    <option value="Corporate">Corporate / Industry R&D</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-muted)' }}>
-                    <ChevronDown size={16} />
+                
+                {!(user && userProfile?.role === 'pending') && (
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconWrapStyle}><User size={18} /></div>
+                    <input 
+                      type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Full Professional Name" required style={inputStyle}
+                      onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                    />
                   </div>
-                </div>
+                )}
 
                 <div style={{ position: 'relative' }}>
                   <div style={iconWrapStyle}><Building2 size={18} /></div>
                   <input 
                     type="text" value={institution} onChange={(e) => setInstitution(e.target.value)}
-                    placeholder="Institution / Affiliation / License #" style={inputStyle}
+                    placeholder="Institution / Clinic Name" required style={inputStyle}
                     onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
                     onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
 
+                
+                {!(user && userProfile?.role === 'pending') && (
+                  <>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Mail size={18} /></div>
+                      <input 
+                        type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Professional Email Address" required style={inputStyle}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                    
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input 
+                        type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password (min 6 chars)" required style={inputStyle}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Admin approval notice */}
+                <div style={{ backgroundColor: 'rgba(0,163,224,0.07)', border: '1px solid rgba(0,163,224,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  <strong style={{ color: 'var(--secondary)' }}>⏳ Manual review required.</strong>{' '}
+                  Your application will be reviewed by our team. You will be notified once your account is activated.
+                </div>
+                
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem', marginTop: '0.5rem' }} disabled={submitting}>
+                  {submitting ? 'Submitting...' : 'Apply for Healthcare Provider Access'}
+                </button>
+              </form>
+            ) : accountType === 'wholesaler' ? (
+              /* ── WHOLESALER REGISTRATION FORM ── */
+              <form onSubmit={handleRegister} style={{ display: 'grid', gap: '1.15rem' }}>
+                <button type="button" onClick={() => setAccountType('')} style={{ background: 'none', border: 'none', padding: '0 0 0.25rem 0', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-sans)' }}>
+                  ← Back to account type selection
+                </button>
+                
+                {!(user && userProfile?.role === 'pending') && (
+                  <div style={{ position: 'relative' }}>
+                    <div style={iconWrapStyle}><User size={18} /></div>
+                    <input 
+                      type="text" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Contact Person Name" required style={inputStyle}
+                      onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                    />
+                  </div>
+                )}
+
                 <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><Mail size={18} /></div>
+                  <div style={iconWrapStyle}><Building2 size={18} /></div>
                   <input 
-                    type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Institutional Email Address" required style={inputStyle}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><Lock size={18} /></div>
-                  <input 
-                    type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password (min 6 chars)" required style={inputStyle}
+                    type="text" value={institution} onChange={(e) => setInstitution(e.target.value)}
+                    placeholder="Company Name" required style={inputStyle}
                     onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
                     onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
 
-                {/* Country */}
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><span style={{ fontSize: '1rem' }}>🌍</span></div>
-                  <input
-                    type="text" value={country} onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Country" style={inputStyle}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
+                {!(user && userProfile?.role === 'pending') && (
+                  <>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Mail size={18} /></div>
+                      <input 
+                        type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Company Email Address" required style={inputStyle}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
 
-                {/* License / Professional ID */}
-                <div style={{ position: 'relative' }}>
-                  <div style={iconWrapStyle}><ShieldCheck size={18} /></div>
-                  <input
-                    type="text" value={licenseId} onChange={(e) => setLicenseId(e.target.value)}
-                    placeholder="License or Professional ID (if applicable)" style={inputStyle}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
-
-                {/* Intended Use */}
-                <div>
-                  <textarea
-                    value={intendedUse} onChange={(e) => setIntendedUse(e.target.value)}
-                    placeholder="Intended use (brief description of your research or clinical context)"
-                    rows={3}
-                    style={{ ...inputStyle, paddingLeft: '1rem', resize: 'vertical', height: 'auto', lineHeight: 1.5 }}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
-                  />
-                </div>
-
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input 
+                        type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password (min 6 chars)" required style={inputStyle}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                  </>
+                )}
+                
                 {/* Admin approval notice */}
                 <div style={{ backgroundColor: 'rgba(0,163,224,0.07)', border: '1px solid rgba(0,163,224,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   <strong style={{ color: 'var(--secondary)' }}>⏳ Manual review required.</strong>{' '}
@@ -942,7 +1100,7 @@ export default function AuthPage({ onBack }) {
                 </div>
 
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem', marginTop: '0.5rem' }} disabled={submitting}>
-                  {submitting ? 'Submitting Application...' : 'Submit Application'}
+                  {submitting ? 'Submitting...' : 'Apply for Wholesaler Access'}
                 </button>
               </form>
             ) : null}
@@ -973,6 +1131,5 @@ export default function AuthPage({ onBack }) {
           )}
         </div>
       </div>
-    </div>
   );
 }

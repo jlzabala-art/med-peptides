@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { useToast } from '../../hooks/useToast';
 
 export function useUpdateProduct() {

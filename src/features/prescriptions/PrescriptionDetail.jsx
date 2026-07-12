@@ -1,5 +1,7 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Save, FileText, CheckCircle, AlertTriangle } from '@/lib/icons';
 import { getPrescription, updatePrescription, createPrescription } from '../../services/prescriptionsService';
 import { getProtocolById } from '../../services/protocolStorage';
@@ -11,7 +13,7 @@ const PrescriptionDetail = () => {
   const [searchParams] = useSearchParams();
   const source = searchParams.get('source');
   const isNew = id === 'new';
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [prescription, setPrescription] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ const PrescriptionDetail = () => {
   const handleSave = async () => {
     if (isNew) {
       const newId = await createPrescription(prescription);
-      navigate(`/prescriptions/${newId}`);
+      router.push(`/prescriptions/${newId}`);
     } else {
       await updatePrescription(id, prescription);
       // Optional: show toast notification
@@ -85,7 +87,7 @@ const PrescriptionDetail = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <button onClick={() => navigate('/prescriptions')} className="mr-4 text-gray-400 hover:text-gray-900 transition-colors">
+          <button onClick={() => router.push('/prescriptions')} className="mr-4 text-gray-400 hover:text-gray-900 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>

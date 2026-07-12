@@ -1,10 +1,13 @@
+"use client";
+
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import User from "lucide-react/dist/esm/icons/user";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import Settings from "lucide-react/dist/esm/icons/settings";
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { db } from '../../config/firebase';
+import * as fb from '../../config/firebase';
+const db = fb?.db;
 import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 

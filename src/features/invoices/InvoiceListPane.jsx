@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import Search from "lucide-react/dist/esm/icons/search";
-import Filter from "lucide-react/dist/esm/icons/filter";
-import ArrowUpDown from "lucide-react/dist/esm/icons/arrow-up-down";
-import Plus from "lucide-react/dist/esm/icons/plus";
+import { Search, Filter, ArrowUpDown, Plus } from '@/lib/icons';
+
+
+
+
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount || 0);

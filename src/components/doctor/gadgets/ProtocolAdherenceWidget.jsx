@@ -1,6 +1,6 @@
-import ActivitySquare from "lucide-react/dist/esm/icons/activity-square";
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { ActivitySquare } from '@/lib/icons';
 
 
 export default function ProtocolAdherenceWidget() {

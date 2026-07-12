@@ -1,3 +1,5 @@
+"use client";
+
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import Calendar from "lucide-react/dist/esm/icons/calendar";

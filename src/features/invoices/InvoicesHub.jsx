@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 
+
 import InvoiceListPane from './InvoiceListPane';
 import InvoiceWorkspace from './InvoiceWorkspace';
 import InvoiceActionCenter from './InvoiceActionCenter';

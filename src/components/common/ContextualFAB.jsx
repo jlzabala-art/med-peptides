@@ -1,8 +1,11 @@
+"use client";
+
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Box, Building2, ShoppingCart, Receipt, CalendarPlus, MessageSquarePlus, GraduationCap, FileText, Zap, Search, Settings, Bot, CheckCircle2 } from '@/lib/icons';
+import { Plus, Box, Building2, ShoppingCart, Receipt, CalendarPlus, MessageSquarePlus, GraduationCap, FileText, FilePlus, Zap, Search, Settings, Bot, CheckCircle2 } from '@/lib/icons';
 import { useScrollDirection } from '../../hooks/useScrollDirection';
 
 // Context mapping configuration
@@ -27,6 +30,28 @@ const getContextConfig = (pathname) => {
           label: 'Import Catalog',
           icon: <FileText size={16} color="#0ea5e9" />,
           bg: '#e0f2fe',
+        },
+      ],
+    };
+  }
+  if (isMatch('/admin/prescriptions')) {
+    return {
+      id: 'prescriptions',
+      theme: '#e11d48', // Rose
+      icon: <FileText size={20} />,
+      label: 'New Prescription',
+      actions: [
+        {
+          id: 'new_prescription_manual',
+          label: 'Manual Prescription',
+          icon: <FileText size={16} color="#e11d48" />,
+          bg: '#ffe4e6',
+        },
+        {
+          id: 'import_pdf',
+          label: 'Import PDF',
+          icon: <FilePlus size={16} color="#e11d48" />,
+          bg: '#ffe4e6',
         },
       ],
     };
@@ -245,7 +270,8 @@ const getContextConfig = (pathname) => {
 
 export default function ContextualFAB() {
   const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
+  const router = useRouter();
   const { isAtTop, scrollDirection } = useScrollDirection();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -259,9 +285,9 @@ export default function ContextualFAB() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
-  }, [location.pathname, scrollDirection]);
+  }, [pathname, scrollDirection]);
 
-  const config = getContextConfig(location.pathname);
+  const config = getContextConfig(pathname);
   // Show label if scrolling up, at top, or on desktop (always show on desktop)
   const showLabel = !isMobile || isAtTop || scrollDirection === 'up';
 
@@ -269,7 +295,11 @@ export default function ContextualFAB() {
     setIsOpen(false);
     console.log(`[FAB Action Clicked] ${actionId}`);
 
-    if (actionId === 'open_ai_copilot') {
+    if (actionId === 'new_prescription_manual') {
+      router.push('/admin/products');
+    } else if (actionId === 'import_pdf') {
+      router.push('/admin/prescription-intake');
+    } else if (actionId === 'open_ai_copilot') {
       window.dispatchEvent(
         new CustomEvent('open-clinical-ai', {
           detail: { query: 'Hi, I need help with my research.', autoSend: false },
@@ -277,8 +307,20 @@ export default function ContextualFAB() {
       );
     } else if (actionId === 'open_personalization') {
       window.dispatchEvent(new Event('open-research-drawer'));
+    } else if (actionId === 'new_msg') {
+      window.dispatchEvent(new Event('open-compose-menu'));
     }
   };
+
+  // On desktop, the Messaging UI has its own compose button, so hide FAB
+  if (!isMobile && config.id === 'messages') {
+    return null;
+  }
+
+  // Hide the default FAB entirely on protocols page to avoid UI clutter
+  if (pathname.includes('/admin/protocols')) {
+    return null;
+  }
 
   return (
     <>

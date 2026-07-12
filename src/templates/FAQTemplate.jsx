@@ -1,8 +1,12 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
  
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams as useParams } from 'next/navigation';
 import FAQDiscoveryView from './FAQDiscoveryView';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 /**
@@ -11,7 +15,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
  */
 export default function FAQTemplate() {
   const { topic } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
@@ -29,10 +33,10 @@ export default function FAQTemplate() {
 
   return (
     <FAQDiscoveryView 
-      onBack={() => navigate(-1)}
+      onBack={() => router.push(-1)}
       onSelectProduct={(name) => {
         const target = products.find(p => p.name === name);
-        if (target?.slug) navigate(`/product/${target.slug}`);
+        if (target?.slug) router.push(`/product/${target.slug}`);
       }}
       products={products}
       // pass the topic if needed to preselect / filter

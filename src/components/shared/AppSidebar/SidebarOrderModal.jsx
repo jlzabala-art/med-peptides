@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
 import Settings2 from "lucide-react/dist/esm/icons/settings-2";

@@ -1,9 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import User from "lucide-react/dist/esm/icons/user";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Phone from "lucide-react/dist/esm/icons/phone";
+"use client";
+
 import React, { useState } from 'react';
 import { collection, addDoc, updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -13,9 +9,11 @@ import { db } from '../../firebase';
 
 
 
+
 import { useToast } from '../../hooks/useToast';
 import { logAction } from '../../services/auditLogger';
 import { useAuth } from '../../context/AuthContext';
+import { X, UserPlus, Mail, User, Building2, Phone } from '@/lib/icons';
 
 export default function CreateUserModal({
   isOpen,

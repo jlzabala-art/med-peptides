@@ -1,8 +1,11 @@
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 import toast from 'react-hot-toast';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase';
+
 import { CatalogService } from '../api/catalog.service';
 import { useCatalogSelectionStore } from '../../../../stores/useCatalogSelectionStore';
 import { useCatalogBuilderStore } from '../../../../stores/useCatalogBuilderStore';
@@ -18,8 +21,8 @@ export function useCatalogActionRouter({
   setIsAiModalOpen,
   currentFilters
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const setSelectedIds = useCatalogSelectionStore((state) => state.setSelectedIds);
 
   const checkItemInTransaction = async (itemId) => {
@@ -201,11 +204,11 @@ export function useCatalogActionRouter({
       };
       
       const routeType = routeTypeMap[action];
-      navigate(`/admin/transactions/new/${routeType}`);
+      router.push(`/admin/transactions/new/${routeType}`);
     } else if (action === 'bulk_manage_visibility') {
       const selectedIds = product;
       setSelectedIds(selectedIds); // Set in global store
-      navigate('/admin/pricing-visibility');
+      router.push('/admin/pricing-visibility');
     } else if (action === 'bulk_add_to_catalog' || action === 'catalog_builder') {
       const selectedIds = product;
       const filteredIds = variant; // passed from Workspace
@@ -218,7 +221,7 @@ export function useCatalogActionRouter({
       const updatedIds = useCatalogBuilderStore.getState().selectedProducts;
       const updatedData = useCatalogBuilderStore.getState().cartProductsData;
       
-      navigate('/admin/catalog-builder', { 
+      router.push('/admin/catalog-builder', { 
         state: { 
           selectedProducts: updatedIds, 
           filteredProducts: filteredIds, 

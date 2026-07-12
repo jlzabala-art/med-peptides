@@ -1,10 +1,11 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Smartphone from "lucide-react/dist/esm/icons/smartphone";
-import BellRing from "lucide-react/dist/esm/icons/bell-ring";
-import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+
+
+
+
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAutoSave } from '../../../hooks/useAutoSave';
+import { Mail, Smartphone, BellRing, MessageCircle } from '@/lib/icons';
 
 
 

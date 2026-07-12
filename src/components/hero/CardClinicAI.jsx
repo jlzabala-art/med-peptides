@@ -1,3 +1,5 @@
+"use client";
+
 import Bot from "lucide-react/dist/esm/icons/bot";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState } from 'react';

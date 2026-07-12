@@ -1,8 +1,10 @@
+import { usePathname } from 'next/navigation';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiCpu } from 'react-icons/fi';
+import { X } from '@/lib/icons';
+import { Cpu } from '@/lib/icons';
 import { useAuth } from '../context/AuthContext';
-import { useLocation } from 'react-router-dom';
+
 import ClinicalAssistant from '../components/shared/ClinicalAssistant';
 
 const ROLE_SUGGESTED_PROMPTS = {
@@ -29,10 +31,10 @@ const ROLE_AGENT_TYPE = {
 
 export default function PortalAIDrawer({ isOpen, onClose }) {
   const { activeRole, userProfile } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
 
   // Basic context parsing
-  const currentPath = location.pathname;
+  const currentPath = pathname;
 
   return (
     <AnimatePresence>
@@ -57,11 +59,11 @@ export default function PortalAIDrawer({ isOpen, onClose }) {
           >
             <div className="drawer-header">
               <div className="drawer-title">
-                <FiCpu className="title-icon" />
+                <Cpu className="title-icon" />
                 <h2>Regenpept AI</h2>
               </div>
               <button className="close-btn" onClick={onClose} aria-label="Close Drawer">
-                <FiX />
+                <X />
               </button>
             </div>
 

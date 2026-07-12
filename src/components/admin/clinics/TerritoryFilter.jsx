@@ -1,7 +1,5 @@
-import Map from "lucide-react/dist/esm/icons/map";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Users from "lucide-react/dist/esm/icons/users";
 import React from 'react';
+import { Map, MapPin, Users } from '@/lib/icons';
 
 
 

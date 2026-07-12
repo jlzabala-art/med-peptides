@@ -1,5 +1,5 @@
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { Beaker } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
 import React from 'react';
 
 

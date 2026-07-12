@@ -1,11 +1,5 @@
-import Download from "lucide-react/dist/esm/icons/download";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Presentation from "lucide-react/dist/esm/icons/presentation";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import Zap from "lucide-react/dist/esm/icons/zap";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -20,6 +14,7 @@ import FinancePnL from './FinancePnL';
 import ComparativeAnalysisTool from './ComparativeAnalysisTool';
 import PredictivePnLSimulator from './PredictivePnLSimulator';
 import notifier from '../../../services/NotificationService';
+import { Download, FileText, CheckCircle, BarChart3, TrendingUp, Presentation, Briefcase, Zap } from '@/lib/icons';
 
 export default function FinanceReporting({ dashboardData, totalBalance, activeSubs }) {
   const [generating, setGenerating] = useState(false);

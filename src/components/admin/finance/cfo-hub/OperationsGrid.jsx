@@ -1,3 +1,5 @@
+"use client";
+
 import Package from "lucide-react/dist/esm/icons/package";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Activity from "lucide-react/dist/esm/icons/activity";
@@ -5,6 +7,7 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import React, { useState } from 'react';
 import { Card } from '../../../ui';
+import { formatAEDtoDual } from '../../../../utils/currencies';
 
 
 
@@ -58,8 +61,8 @@ export default function OperationsGrid({ data, products }) {
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.8rem' }}>
-            <div style={{ color: 'var(--text-muted)' }}>Revenue: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>AED {s.revenue.toLocaleString()}</span></div>
-            <div style={{ color: 'var(--text-muted)' }}>Profit: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>AED {s.profit.toLocaleString()}</span></div>
+            <div style={{ color: 'var(--text-muted)' }}>Revenue: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{formatAEDtoDual(s.revenue)}</span></div>
+            <div style={{ color: 'var(--text-muted)' }}>Profit: <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{formatAEDtoDual(s.profit)}</span></div>
           </div>
         </div>
       ))}
@@ -76,7 +79,7 @@ export default function OperationsGrid({ data, products }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>Profit at Risk</span>
-            <span style={{ fontWeight: 600, color: 'var(--color-danger)' }}>AED {item.profitRisk.toLocaleString()}</span>
+            <span style={{ fontWeight: 600, color: 'var(--color-danger)' }}>{formatAEDtoDual(item.profitRisk)}</span>
           </div>
         </div>
       ))}
@@ -88,16 +91,16 @@ export default function OperationsGrid({ data, products }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <div style={{ padding: '1rem', backgroundColor: 'rgba(16,185,129,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16,185,129,0.2)' }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Expected Revenue (30d)</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-success)' }}>AED 420,000</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-success)' }}>{formatAEDtoDual(420000)}</div>
         </div>
         <div style={{ padding: '1rem', backgroundColor: 'rgba(239,68,68,0.05)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239,68,68,0.2)' }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Expected Payables (30d)</div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-danger)' }}>AED 185,000</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-danger)' }}>{formatAEDtoDual(185000)}</div>
         </div>
       </div>
       <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>Expected Closing Cash</span>
-        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>AED 480,600</span>
+        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>{formatAEDtoDual(480600)}</span>
       </div>
     </div>
   );
@@ -107,11 +110,11 @@ export default function OperationsGrid({ data, products }) {
       <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
           <span style={{ color: 'var(--text-muted)' }}>VAT Due (Q2)</span>
-          <span style={{ fontWeight: 600, color: 'var(--color-danger)' }}>AED 42,500</span>
+          <span style={{ fontWeight: 600, color: 'var(--color-danger)' }}>{formatAEDtoDual(42500)}</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
           <span style={{ color: 'var(--text-muted)' }}>Corporate Tax Accrued</span>
-          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>AED 120,000</span>
+          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{formatAEDtoDual(120000)}</span>
         </div>
         <div style={{ borderTop: '1px solid var(--border)', margin: '0.5rem 0' }}></div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

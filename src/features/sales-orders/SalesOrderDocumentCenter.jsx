@@ -1,11 +1,12 @@
 import React from 'react';
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import File from "lucide-react/dist/esm/icons/file";
-import Download from "lucide-react/dist/esm/icons/download";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import FileCheck from "lucide-react/dist/esm/icons/file-check";
-import PackageCheck from "lucide-react/dist/esm/icons/package-check";
-import Truck from "lucide-react/dist/esm/icons/truck";
+import { FileText, File, Download, ExternalLink, FileCheck, PackageCheck, Truck } from '@/lib/icons';
+
+
+
+
+
+
+
 
 export default function SalesOrderDocumentCenter({ order }) {
   

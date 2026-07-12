@@ -1,12 +1,6 @@
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import CloudOff from "lucide-react/dist/esm/icons/cloud-off";
-import Database from "lucide-react/dist/esm/icons/database";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Star from "lucide-react/dist/esm/icons/star";
 import React from 'react';
 import { Card } from '../../ui';
+import { CheckCircle, XCircle, AlertTriangle, CloudOff, Database, Activity, Star } from '@/lib/icons';
 
 
 

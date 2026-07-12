@@ -1,17 +1,9 @@
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Target from "lucide-react/dist/esm/icons/target";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
+"use client";
+
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -24,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 import '../styles/what_are_protocols.css';
+import { BookOpen, ArrowRight, Layers, Target, Clock, FlaskConical, ShieldCheck, ChevronDown, Microscope, Zap, BrainCircuit } from '@/lib/icons';
 
 /* Encode a context object for admin ClinicalAI deep-link */
 const encodeCtx = (obj) => btoa(JSON.stringify(obj));
@@ -187,7 +180,7 @@ const FAQ_ITEMS = [
    Component
    ════════════════════════════════════════════════════════════════ */
 export default function WhatAreProtocolsPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState('what');
 
   /* Scroll spy */
@@ -234,7 +227,7 @@ export default function WhatAreProtocolsPage() {
           </p>
           <button
             className="wap-hero__cta"
-            onClick={() => navigate('/protocols')}
+            onClick={() => router.push('/protocols')}
           >
             Explore Clinical Protocols
             <ArrowRight size={16} />
@@ -394,7 +387,7 @@ export default function WhatAreProtocolsPage() {
                   key={p.title}
                   className="warp-protocol-card"
                   style={{ cursor: 'pointer', transition: 'transform 0.18s, box-shadow 0.18s' }}
-                  onClick={() => navigate(`/admin?t=clinical-ai&ctx=${encodeCtx(p.aiContext)}`)}
+                  onClick={() => router.push(`/admin?t=clinical-ai&ctx=${encodeCtx(p.aiContext)}`)}
                   onMouseEnter={e => {
                     e.currentTarget.style.transform = 'scale(1.025)';
                     e.currentTarget.style.boxShadow = '0 8px 28px rgba(139,92,246,0.22)';
@@ -440,7 +433,7 @@ export default function WhatAreProtocolsPage() {
                   {/* Subtle AI icon — top-right corner */}
                   <button
                     title="Ver en ClinicalAI"
-                    onClick={() => navigate(`/admin?t=clinical-ai&ctx=${encodeCtx(s.aiContext)}`)}
+                    onClick={() => router.push(`/admin?t=clinical-ai&ctx=${encodeCtx(s.aiContext)}`)}
                     style={{
                       position: 'absolute',
                       top: '12px',
@@ -522,14 +515,14 @@ export default function WhatAreProtocolsPage() {
             <div className="warp-cta-buttons">
               <button
                 className="wap-cta-btn"
-                onClick={() => navigate('/protocols')}
+                onClick={() => router.push('/protocols')}
               >
                 Browse Clinical Protocols
                 <ArrowRight size={18} />
               </button>
               <button
                 className="wap-cta-btn--outline"
-                onClick={() => navigate('/protocols?level=beginner')}
+                onClick={() => router.push('/protocols?level=beginner')}
               >
                 Browse Beginner Protocols
                 <ArrowRight size={18} />

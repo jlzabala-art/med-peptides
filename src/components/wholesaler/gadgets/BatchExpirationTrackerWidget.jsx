@@ -1,9 +1,12 @@
+"use client";
+
 import AlertOctagon from "lucide-react/dist/esm/icons/alert-octagon";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
 import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 

@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
  
 /**
  * FloatingProCTA — Phase 8
@@ -15,13 +16,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 
 const SESSION_KEY = 'fpcta_dismissed';
 
 export default function FloatingProCTA() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { isProfessional } = useAuth?.() ?? {};
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(() => {
@@ -50,7 +51,7 @@ export default function FloatingProCTA() {
         <button
           id="fpcta-main-btn"
           style={desktopBtnStyle}
-          onClick={() => navigate('/login?role=professional&type=register')}
+          onClick={() => router.push('/login?role=professional&type=register')}
           aria-label="Apply for professional access"
         >
           <span style={lockIconStyle}>🔬</span>
@@ -71,7 +72,7 @@ export default function FloatingProCTA() {
         <button
           id="fpcta-mobile-btn"
           style={mobileBtnStyle}
-          onClick={() => navigate('/login?role=professional&type=register')}
+          onClick={() => router.push('/login?role=professional&type=register')}
         >
           🔬 Unlock Professional Access
         </button>

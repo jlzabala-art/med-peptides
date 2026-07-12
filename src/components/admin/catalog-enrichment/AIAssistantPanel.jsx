@@ -1,11 +1,9 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Zap from "lucide-react/dist/esm/icons/zap";
 import React from 'react';
 
 
 
 import { Card } from '../../ui';
+import { Sparkles, ArrowRight, Zap } from '@/lib/icons';
 
 export default function AIAssistantPanel() {
   const insights = [

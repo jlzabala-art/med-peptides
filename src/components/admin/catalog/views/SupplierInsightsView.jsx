@@ -1,3 +1,5 @@
+"use client";
+
 import ShieldAlert from 'lucide-react/dist/esm/icons/shield-alert';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import TrendingDown from 'lucide-react/dist/esm/icons/trending-down';

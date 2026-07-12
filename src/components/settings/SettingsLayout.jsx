@@ -1,13 +1,17 @@
-import User from "lucide-react/dist/esm/icons/user";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Monitor from "lucide-react/dist/esm/icons/monitor";
-import Palette from "lucide-react/dist/esm/icons/palette";
-import Plug from "lucide-react/dist/esm/icons/plug";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import AccountOverview from './AccountOverview';
 import ProfileSection from './sections/ProfileSection';
@@ -29,7 +33,8 @@ import SmartSaveIndicator from './SmartSaveIndicator';
 
 
 
-import { useLocation, useNavigate } from 'react-router-dom';
+
+import { User, Settings, Bell, Shield, Monitor, Palette, Plug, Lock, ChevronRight, ArrowLeft } from '@/lib/icons';
 
 const SECTIONS = [
   { id: 'profile', label: 'My Account', icon: User, component: ProfileSection },

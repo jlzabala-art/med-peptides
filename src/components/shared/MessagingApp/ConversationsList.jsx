@@ -1,13 +1,5 @@
-import User from "lucide-react/dist/esm/icons/user";
-import Users from "lucide-react/dist/esm/icons/users";
-import Search from "lucide-react/dist/esm/icons/search";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Filter from "lucide-react/dist/esm/icons/filter";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Truck from "lucide-react/dist/esm/icons/truck";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -20,6 +12,7 @@ import React, { useState } from 'react';
 
 
 import './MessagingApp.css';
+import { User, Users, Search, Plus, Filter, MessageSquare, Briefcase, Stethoscope, Building2, Truck } from '@/lib/icons';
 
 export default function ConversationsList({ conversations, activeConversation, onSelect, currentUserId }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,13 +76,19 @@ export default function ConversationsList({ conversations, activeConversation, o
 
   const [showComposeMenu, setShowComposeMenu] = useState(false);
 
+  React.useEffect(() => {
+    const handleOpenCompose = () => setShowComposeMenu(true);
+    window.addEventListener('open-compose-menu', handleOpenCompose);
+    return () => window.removeEventListener('open-compose-menu', handleOpenCompose);
+  }, []);
+
   return (
     <div className="messaging-sidebar">
       <div className="messaging-sidebar-header">
         <span>Messages</span>
         <div style={{ position: 'relative' }}>
           <button 
-            className="chat-action-btn primary-action"
+            className="chat-action-btn primary-action hide-on-mobile"
             onClick={() => setShowComposeMenu(!showComposeMenu)}
           >
             <Plus size={18} />
@@ -169,7 +168,7 @@ export default function ConversationsList({ conversations, activeConversation, o
             <MessageSquare size={40} className="empty-state-icon" />
             <h3>Start a Conversation</h3>
             <p>Connect with patients, doctors, and your internal team.</p>
-            <button className="empty-state-btn">
+            <button className="empty-state-btn" onClick={() => setShowComposeMenu(true)}>
               <Plus size={16} /> New Message
             </button>
           </div>

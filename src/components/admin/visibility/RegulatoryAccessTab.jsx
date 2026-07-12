@@ -1,9 +1,5 @@
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React from 'react';
+import { ShieldAlert, CheckCircle2, Clock, XCircle, AlertTriangle } from '@/lib/icons';
 
 
 

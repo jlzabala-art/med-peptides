@@ -1,0 +1,120 @@
+/* Responsive Table Styles */
+.responsiveTableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.flexibleTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.flexibleTable th {
+  text-align: left;
+  padding: 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.flexibleTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.flexibleRow {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: white;
+}
+
+.flexibleRow:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.flexibleRow.selected {
+  background-color: #f0f9ff;
+}
+
+/* Mobile responsive view for table */
+@media (max-width: 768px) {
+  .flexibleTable thead {
+    display: none;
+  }
+  .flexibleTable, .flexibleTable tbody, .flexibleTable tr, .flexibleTable td {
+    display: block;
+    width: 100%;
+  }
+  .flexibleRow {
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .flexibleTable td {
+    border-bottom: none;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .flexibleTable td::before {
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-right: 1rem;
+  }
+  .flexibleTable td:first-child {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+/* Smart Chips */
+.chipsScrollRow {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.smartChip {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.smartChipActive {
+  background: #0f172a;
+  color: white;
+  border: 1px solid #0f172a;
+}
+
+.smartChipInactive {
+  background: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.smartChipInactive:hover {
+  border-color: #94a3b8;
+  color: #334155;
+}

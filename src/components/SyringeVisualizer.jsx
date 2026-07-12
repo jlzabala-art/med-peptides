@@ -1,3 +1,5 @@
+"use client";
+
  
 /**
  * SyringeVisualizer — High-Precision Edition

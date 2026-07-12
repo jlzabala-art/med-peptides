@@ -1,16 +1,5 @@
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import BellRing from "lucide-react/dist/esm/icons/bell-ring";
-import Receipt from "lucide-react/dist/esm/icons/receipt";
-import Download from "lucide-react/dist/esm/icons/download";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Search from "lucide-react/dist/esm/icons/search";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Check from "lucide-react/dist/esm/icons/check";
+"use client";
+
 import React, { useState, useMemo } from 'react';
 import AdminApprovalsWidget from '../gadgets/AdminApprovalsWidget';
 import AtlasAIFinanceInsights from './AtlasAIFinanceInsights';
@@ -30,6 +19,7 @@ import AtlasAIFinanceInsights from './AtlasAIFinanceInsights';
 import { exportToCSV } from '../../../utils/exportUtils';
 import { usePreferences } from '../../../context/PreferencesContext';
 import notifier from '../../../services/NotificationService';
+import { FileText, ClipboardList, Clock, BellRing, Receipt, Download, ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Search, CheckCircle, Check } from '@/lib/icons';
 
 export default function FinanceApprovals({ dashboardData }) {
   const pendingInvoices = dashboardData?.pendingInvoices || [];

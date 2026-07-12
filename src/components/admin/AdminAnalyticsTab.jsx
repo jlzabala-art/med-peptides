@@ -1,3 +1,5 @@
+"use client";
+
 import Users from "lucide-react/dist/esm/icons/users";
 import Eye from "lucide-react/dist/esm/icons/eye";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
@@ -24,10 +26,12 @@ import { useState, useEffect, useRef } from 'react';
 
 
 
-import PlatformHealth from './analytics/PlatformHealth';
-import ExplorationJourney from './analytics/ExplorationJourney';
-import DiscoveryInsights from './analytics/DiscoveryInsights';
-import FrictionInsights from './analytics/FrictionInsights';
+import dynamic from 'next/dynamic';
+
+const PlatformHealth = dynamic(() => import('./analytics/PlatformHealth'), { ssr: false });
+const ExplorationJourney = dynamic(() => import('./analytics/ExplorationJourney'), { ssr: false });
+const DiscoveryInsights = dynamic(() => import('./analytics/DiscoveryInsights'), { ssr: false });
+const FrictionInsights = dynamic(() => import('./analytics/FrictionInsights'), { ssr: false });
 
 /* ── Constants ───────────────────────────────────────────────── */
 const ENDPOINT = '/api/analytics-overview';

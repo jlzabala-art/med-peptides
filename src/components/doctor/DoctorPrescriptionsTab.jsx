@@ -1,21 +1,5 @@
-import ClipboardList from 'lucide-react/dist/esm/icons/clipboard-list';
-import Plus from 'lucide-react/dist/esm/icons/plus';
-import User from 'lucide-react/dist/esm/icons/user';
-import Building from 'lucide-react/dist/esm/icons/building';
-import XCircle from 'lucide-react/dist/esm/icons/x-circle';
-import Clock from 'lucide-react/dist/esm/icons/clock';
-import Activity from 'lucide-react/dist/esm/icons/activity';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import Copy from 'lucide-react/dist/esm/icons/copy';
-import Search from 'lucide-react/dist/esm/icons/search';
-import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-import Stethoscope from 'lucide-react/dist/esm/icons/stethoscope';
-import FlaskConical from 'lucide-react/dist/esm/icons/flask-conical';
-import Calendar from 'lucide-react/dist/esm/icons/calendar';
-import Package from 'lucide-react/dist/esm/icons/package';
-import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import FilePlus from 'lucide-react/dist/esm/icons/file-plus';
+"use client";
+
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { RX_STATUS_META, RX_TYPE, RX_STATUS, rxEvent } from '../../config/prescriptionConfig';
@@ -27,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
 import PrescriptionDetailModal from '../prescriptions/PrescriptionDetailModal';
+import { ClipboardList, Plus, User, Building, XCircle, Clock, Activity, FileText, Copy, Search, ChevronRight, Stethoscope, FlaskConical, Calendar, Package, CheckCircle2, AlertCircle, FilePlus } from '@/lib/icons';
 
 // ── Responsive CSS ────────────────────────────────────────────────────────────
 const responsiveStyles = `

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Plus, Settings, Activity, Clock, ShieldCheck, Target } from '@/lib/icons';
 import ProtocolTimeline from '../ProtocolTimeline';
@@ -33,16 +35,8 @@ export default function ProtocolTreatment({ protocol, onUpdate }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', animation: 'fadeIn 0.4s ease-out' }}>
       
-      {/* Header & KPI Summary */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Activity size={24} color="var(--primary)" /> Treatment Plan
-          </h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0, maxWidth: '600px' }}>
-            Visual timeline of the protocol phases, durations, and clinical milestones required to achieve the patient's therapeutic objectives.
-          </p>
-        </div>
+      {/* Action Bar */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <button 
           onClick={() => setIsEditingPhases(!isEditingPhases)}
           className={isEditingPhases ? "gcp-btn-primary" : "gcp-btn-secondary"} 

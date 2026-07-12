@@ -1,9 +1,10 @@
 import React from 'react';
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
+
+
+
+
 import OperationalKPICard from '../../components/shared/widgets/OperationalKPICard';
+import { TrendingUp, DollarSign, AlertCircle, CalendarDays } from '@/lib/icons';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount || 0);

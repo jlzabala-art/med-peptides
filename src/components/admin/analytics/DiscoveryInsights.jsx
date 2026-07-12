@@ -1,8 +1,4 @@
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Search from "lucide-react/dist/esm/icons/search";
-import Lightbulb from "lucide-react/dist/esm/icons/lightbulb";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import { FlaskConical, BookOpen, Search, Lightbulb, TrendingUp } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 
 

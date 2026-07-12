@@ -1,8 +1,5 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import UserCheck from "lucide-react/dist/esm/icons/user-check";
+"use client";
+
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -12,8 +9,10 @@ import { db } from '../../firebase';
 
 
 
+
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '../ui/DataTable';
+import { Users, Mail, Phone, Calendar, UserCheck } from '@/lib/icons';
 
 export default function ManagerClientsTab() {
   const { currentUser } = useAuth();

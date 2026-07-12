@@ -1,9 +1,11 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { AlertTriangle, ArrowRight } from '@/lib/icons';
 
 
 

@@ -1,9 +1,7 @@
+"use client";
+
 import React, { useState } from 'react';
-import Edit2 from "lucide-react/dist/esm/icons/edit-2";
-import Check from "lucide-react/dist/esm/icons/check";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import { Edit2, Check, AlertTriangle, ChevronDown, ChevronRight } from '@/lib/icons';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);

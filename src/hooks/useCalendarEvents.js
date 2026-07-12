@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { auth } from '../firebase';
+import * as fb from '../firebase';
+const auth = fb?.auth;
 import {
   subscribeToCalendarEvents,
   createCalendarEvent,

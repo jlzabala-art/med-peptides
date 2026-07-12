@@ -33,7 +33,7 @@ function dispatchContextEvent(productsList) {
   );
 }
 
-export function useProducts(allowedCategories = ['All']) {
+export function useProducts(allowedCategories = ['All'], options = {}) {
   // Build where conditions only when categories are restricted
   const whereConditions =
     allowedCategories.includes('All') || allowedCategories.length === 0
@@ -55,6 +55,7 @@ export function useProducts(allowedCategories = ['All']) {
     whereConditions,
     orderByFields: [['name', 'asc']],
     pageSize: 50,
+    initialData: options.initialData,
     onDataLoaded: (newDocs) => {
       // Dispatch context event when new data arrives
       dispatchContextEvent(newDocs);

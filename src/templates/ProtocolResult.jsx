@@ -1,3 +1,6 @@
+"use client";
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import Clock from "lucide-react/dist/esm/icons/clock";
@@ -23,7 +26,7 @@ import FileSearch from "lucide-react/dist/esm/icons/file-search";
 import Dna from "lucide-react/dist/esm/icons/dna";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
 
 
 
@@ -53,7 +56,7 @@ import CostBreakdown from '../components/CostBreakdown';
 
 export default function ProtocolResult({ products, region, isProfessional, addProtocolRequest, onOpenCart }) {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const protocolId = searchParams.get('id');
   const [loading, setLoading] = useState(true);
   const [protocol, setProtocol] = useState(null);
@@ -129,7 +132,7 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
     return (
       <div style={{ padding: '5rem 1rem', textAlign: 'center' }}>
         <h2>Protocol not found.</h2>
-        <button onClick={() => navigate('/protocol-finder')} className="btn btn-primary" style={{ marginTop: '1rem' }}>Return to Finder</button>
+        <button onClick={() => router.push('/protocol-finder')} className="btn btn-primary" style={{ marginTop: '1rem' }}>Return to Finder</button>
       </div>
     );
   }
@@ -173,7 +176,7 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
         {/* Header Section */}
         <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
           <button 
-            onClick={() => navigate(`/protocol-finder?id=${protocolId}`)}
+            onClick={() => router.push(`/protocol-finder?id=${protocolId}`)}
             style={{ 
               backgroundColor: 'white', 
               border: '1px solid var(--border)', 
@@ -216,7 +219,7 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
           }}>
             {/* 1. Patient Inputs (Completed) */}
             <button 
-              onClick={() => navigate(`/protocol-finder?id=${protocolId}`)}
+              onClick={() => router.push(`/protocol-finder?id=${protocolId}`)}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--color-success)', fontWeight: 700, fontSize: '0.85rem' }}
             >
               <CheckCircle2 size={16} /> Inputs
@@ -225,7 +228,7 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
 
             {/* 2. Validation (Completed) */}
             <button 
-              onClick={() => navigate(`/protocol-finder/validation?id=${protocolId}`)}
+              onClick={() => router.push(`/protocol-finder/validation?id=${protocolId}`)}
               style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--color-success)', fontWeight: 700, fontSize: '0.85rem' }}
             >
               <CheckCircle2 size={16} /> Validation

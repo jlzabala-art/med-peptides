@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
-import { X, Edit, CheckCircle, Download, FileText, Send, User, Stethoscope, Activity, Clock, Calendar, Pill, FlaskConical, MoreHorizontal, ChevronDown, Upload, FileCheck, AlertCircle, Check, ArrowUpRight } from '@/lib/icons';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { serverAutoDraftQuotationFromPrescription } from '../../app/actions/transactionActions';
+import { generateClinicalProtocol, getProtocolFilename } from '../../services/pdfService';
+import { checkInteractionsAction, matchProtocolAction } from '../../actions/aiActions';
+import { X, Edit, CheckCircle, Download, FileText, Send, User, Stethoscope, Activity, Clock, Calendar, Pill, FlaskConical, MoreHorizontal, ChevronDown, Upload, FileCheck, AlertCircle, Check, ArrowUpRight, Wand2, RefreshCw } from '@/lib/icons';
 import StandardDrawer from '../ui/StandardDrawer';
 import StandardDrawerTabs from '../common/StandardDrawerTabs';
+import DocumentPreviewModal from '../ui/DocumentPreviewModal';
 
 // ── Status Configuration ──────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -123,790 +129,12 @@ function PatientAvatar({ name, size = 52 }) {
 
 // ── Tab Components ────────────────────────────────────────────────────────────
 
-function OverviewTab({ rx }) {
-  const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
-  const patEmail = rx.patient?.email || rx.patientEmail || null;
-  const patPhone = rx.patient?.phone || rx.patientPhone || null;
-  const doctor = rx.doctor?.name || rx.doctorName || null;
-  const docEmail = rx.doctor?.email || rx.doctorEmail || null;
-  const manager = rx.accountManager || null;
-  const diagnosis = rx.diagnosis || null;
-  const protocol = rx.protocol || rx.protocolName || null;
-  const notes = rx.clinicalNotes || rx.notes || null;
+import OverviewTab from './tabs/OverviewTab';
+import ItemsTab from './tabs/ItemsTab';
+import FollowUpTab from './tabs/FollowUpTab';
+import DocumentsTab from './tabs/DocumentsTab';
+import TimelineTab from './tabs/TimelineTab';
 
-  const InfoRow = ({ icon: Icon, label, value, color = '#64748b' }) =>
-    value ? (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '0.75rem',
-          padding: '0.6rem 0',
-          borderBottom: '1px solid #f8fafc',
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '8px',
-            background: '#f8fafc',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <Icon size={14} color={color} />
-        </div>
-        <div>
-          <div
-            style={{
-              fontSize: '0.72rem',
-              color: '#94a3b8',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {label}
-          </div>
-          <div
-            style={{ fontSize: '0.9rem', color: '#0f172a', fontWeight: 600, marginTop: '0.1rem' }}
-          >
-            {value}
-          </div>
-        </div>
-      </div>
-    ) : null;
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-      {/* Left: Patient & Team */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div
-          style={{
-            background: '#f8fafc',
-            borderRadius: '12px',
-            padding: '1.25rem',
-            border: '1px solid #f1f5f9',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              color: '#94a3b8',
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              marginBottom: '0.75rem',
-            }}
-          >
-            Patient
-          </div>
-          <InfoRow icon={User} label="Name" value={patient} color="#6366f1" />
-          <InfoRow icon={ArrowUpRight} label="Email" value={patEmail} color="#3b82f6" />
-          <InfoRow icon={ArrowUpRight} label="Phone" value={patPhone} color="#3b82f6" />
-        </div>
-        <div
-          style={{
-            background: '#f8fafc',
-            borderRadius: '12px',
-            padding: '1.25rem',
-            border: '1px solid #f1f5f9',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              color: '#94a3b8',
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              marginBottom: '0.75rem',
-            }}
-          >
-            Care Team
-          </div>
-          <InfoRow icon={Stethoscope} label="Prescribing Doctor" value={doctor} color="#10b981" />
-          <InfoRow icon={ArrowUpRight} label="Doctor Email" value={docEmail} color="#10b981" />
-          {manager && (
-            <InfoRow icon={User} label="Account Manager" value={manager} color="#f59e0b" />
-          )}
-        </div>
-      </div>
-
-      {/* Right: Clinical Info */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div
-          style={{
-            background: '#f8fafc',
-            borderRadius: '12px',
-            padding: '1.25rem',
-            border: '1px solid #f1f5f9',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              color: '#94a3b8',
-              textTransform: 'uppercase',
-              letterSpacing: '0.07em',
-              marginBottom: '0.75rem',
-            }}
-          >
-            Clinical Information
-          </div>
-          {diagnosis ? (
-            <div style={{ marginBottom: '1rem' }}>
-              <div
-                style={{
-                  fontSize: '0.72rem',
-                  color: '#94a3b8',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: '0.3rem',
-                }}
-              >
-                Diagnosis
-              </div>
-              <div
-                style={{
-                  background: 'white',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '0.7rem 1rem',
-                  fontSize: '0.9rem',
-                  color: '#0f172a',
-                  fontWeight: 600,
-                }}
-              >
-                {diagnosis}
-              </div>
-            </div>
-          ) : (
-            <div
-              style={{
-                fontSize: '0.85rem',
-                color: '#94a3b8',
-                fontStyle: 'italic',
-                marginBottom: '0.75rem',
-              }}
-            >
-              No diagnosis specified
-            </div>
-          )}
-          {protocol && (
-            <div style={{ marginBottom: '0.75rem' }}>
-              <div
-                style={{
-                  fontSize: '0.72rem',
-                  color: '#94a3b8',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: '0.3rem',
-                }}
-              >
-                Protocol
-              </div>
-              <div
-                style={{
-                  background: 'white',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '0.7rem 1rem',
-                  fontSize: '0.9rem',
-                  color: '#6366f1',
-                  fontWeight: 700,
-                }}
-              >
-                {protocol}
-              </div>
-            </div>
-          )}
-        </div>
-        {notes && (
-          <div
-            style={{
-              background: '#fffbeb',
-              borderRadius: '12px',
-              padding: '1.25rem',
-              border: '1px solid #fde68a',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 800,
-                color: '#92400e',
-                textTransform: 'uppercase',
-                letterSpacing: '0.07em',
-                marginBottom: '0.5rem',
-              }}
-            >
-              Clinical Notes
-            </div>
-            <p
-              style={{
-                margin: 0,
-                fontSize: '0.88rem',
-                color: '#78350f',
-                lineHeight: 1.6,
-                whiteSpace: 'pre-wrap',
-              }}
-            >
-              {notes}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ItemsTab({ rx, products = [], onProductClick }) {
-  const items = rx.items || rx.products || [];
-
-  const getProductDetails = (productId, fallbackName) => {
-    if (!productId) return { name: fallbackName || 'Unknown Product' };
-    const found = products.find((p) => p.id === productId);
-    return found || { name: fallbackName || 'Unknown Product', id: productId };
-  };
-
-  if (items.length === 0) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '4rem 2rem',
-          gap: '1rem',
-          color: '#94a3b8',
-        }}
-      >
-        <Pill size={40} color="#e2e8f0" />
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ margin: '0 0 0.25rem 0', color: '#475569', fontWeight: 700 }}>No Items</h3>
-          <p style={{ margin: 0, fontSize: '0.85rem' }}>
-            No prescription items have been added yet.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      {/* Desktop Table */}
-      <div
-        style={{
-          background: 'white',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
-            gap: '0',
-            background: '#f8fafc',
-            padding: '0.7rem 1.25rem',
-            borderBottom: '1px solid #e2e8f0',
-          }}
-        >
-          {['Product', 'Dose', 'Frequency', 'Duration', 'Units'].map((h) => (
-            <div
-              key={h}
-              style={{
-                fontSize: '0.72rem',
-                fontWeight: 800,
-                color: '#94a3b8',
-                textTransform: 'uppercase',
-                letterSpacing: '0.07em',
-              }}
-            >
-              {h}
-            </div>
-          ))}
-        </div>
-        {items.map((item, idx) => (
-          <div
-            key={idx}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
-              padding: '1rem 1.25rem',
-              borderBottom: idx < items.length - 1 ? '1px solid #f8fafc' : 'none',
-              alignItems: 'center',
-              gap: '0',
-              transition: 'background 0.1s',
-              cursor: onProductClick && item.productId ? 'pointer' : 'default',
-            }}
-            onClick={() => {
-              const product = getProductDetails(item.productId, item.name || item.productName);
-              if (onProductClick && item.productId) onProductClick(product);
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#f8fafc')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-          >
-            {(() => {
-              const product = getProductDetails(item.productId, item.name || item.productName);
-              return (
-                <React.Fragment>
-                  <div>
-                    <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>
-                      {product.name}
-                      {!item.productId && (
-                        <span
-                          style={{
-                            marginLeft: '6px',
-                            fontSize: '0.65rem',
-                            padding: '2px 4px',
-                            background: '#fef08a',
-                            color: '#854d0e',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          Legacy Name
-                        </span>
-                      )}
-                    </div>
-                    {item.concentration && (
-                      <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.1rem' }}>
-                        {item.concentration}
-                      </div>
-                    )}
-                    {item.category && (
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          marginTop: '0.25rem',
-                          padding: '0.15rem 0.5rem',
-                          background: '#f1f5f9',
-                          color: '#64748b',
-                          borderRadius: '6px',
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {item.category}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: '0.9rem', color: '#334155', fontWeight: 700 }}>
-                    {item.dosage || item.dose || item.strength || '—'}
-                  </div>
-                  <div style={{ fontSize: '0.88rem', color: '#475569' }}>
-                    {item.frequency || '—'}
-                  </div>
-                  <div style={{ fontSize: '0.88rem', color: '#475569' }}>
-                    {item.duration || '—'}
-                  </div>
-                  <div>
-                    <span style={{ fontWeight: 800, color: '#6366f1', fontSize: '0.95rem' }}>
-                      {item.quantity || '—'}
-                    </span>
-                    {item.unit && (
-                      <span
-                        style={{ fontSize: '0.78rem', color: '#94a3b8', marginLeft: '0.25rem' }}
-                      >
-                        {item.unit}
-                      </span>
-                    )}
-                  </div>
-                </React.Fragment>
-              );
-            })()}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FollowUpTab({ rx }) {
-  const reviewInterval = rx.followUpInterval || rx.reviewInterval || null;
-  const requiredTests = rx.requiredTests || rx.labTests || [];
-  const followUpDate = rx.followUpDate || null;
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      {/* Timeline Visual */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-          borderRadius: '14px',
-          padding: '1.5rem',
-          color: 'white',
-        }}
-      >
-        <div
-          style={{
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            opacity: 0.8,
-            textTransform: 'uppercase',
-            letterSpacing: '0.07em',
-            marginBottom: '0.5rem',
-          }}
-        >
-          Next Clinical Milestone
-        </div>
-        <div style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.25rem' }}>
-          {reviewInterval ||
-            (followUpDate
-              ? new Date(followUpDate).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'Not Scheduled')}
-        </div>
-        <div style={{ fontSize: '0.9rem', opacity: 0.85 }}>
-          {followUpDate
-            ? `Scheduled for ${followUpDate}`
-            : 'No follow-up date set — add one via the calendar.'}
-        </div>
-      </div>
-
-      {/* Required Tests */}
-      <div
-        style={{
-          background: 'white',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '1.25rem',
-        }}
-      >
-        <div
-          style={{
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            color: '#94a3b8',
-            textTransform: 'uppercase',
-            letterSpacing: '0.07em',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}
-        >
-          <FlaskConical size={14} color="#6366f1" /> Required Tests
-        </div>
-        {requiredTests.length === 0 ? (
-          <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic' }}>
-            No required tests specified for this prescription.
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {requiredTests.map((test, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.65rem 0.9rem',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                  border: '1px solid #f1f5f9',
-                }}
-              >
-                <div
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: '50%',
-                    background: '#e0e7ff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Check size={12} color="#6366f1" />
-                </div>
-                <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#334155' }}>
-                  {test}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DocumentsTab({ rx }) {
-  const documents = rx.documents || rx.attachments || [];
-
-  if (documents.length === 0) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '4rem 2rem',
-          gap: '1.25rem',
-          border: '2px dashed #e2e8f0',
-          borderRadius: '14px',
-        }}
-      >
-        <div
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #eff6ff, #e0e7ff)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Upload size={28} color="#6366f1" />
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ margin: '0 0 0.35rem 0', color: '#334155', fontWeight: 700 }}>
-            No Documents Attached
-          </h3>
-          <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: '#94a3b8', maxWidth: 300 }}>
-            Upload patient consent forms, lab results, or supporting clinical documents.
-          </p>
-          <button
-            style={{
-              padding: '0.6rem 1.25rem',
-              borderRadius: '8px',
-              background: '#6366f1',
-              color: 'white',
-              border: 'none',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Upload size={14} /> Upload Document
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      {documents.map((doc, i) => (
-        <div
-          key={i}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-            padding: '1rem 1.25rem',
-            background: 'white',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: '10px',
-              background: '#eff6ff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <FileCheck size={20} color="#3b82f6" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>
-              {doc.name || `Document ${i + 1}`}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '0.15rem' }}>
-              {doc.type || 'PDF'} · {doc.uploadedAt || 'Unknown date'}
-            </div>
-          </div>
-          <button
-            style={{
-              padding: '0.4rem',
-              background: 'transparent',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              color: '#64748b',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Download size={14} />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function TimelineTab({ rx }) {
-  const timeline = [...(rx.timeline || [])].reverse();
-
-  const getEventIcon = (event = '') => {
-    if (event.includes('upload') || event.includes('document'))
-      return { icon: Upload, color: '#3b82f6', bg: '#eff6ff' };
-    if (event.includes('assign') || event.includes('manager'))
-      return { icon: User, color: '#f59e0b', bg: '#fffbeb' };
-    if (event.includes('update') || event.includes('edit'))
-      return { icon: Edit, color: '#10b981', bg: '#ecfdf5' };
-    if (event.includes('cancel') || event.includes('expired'))
-      return { icon: AlertCircle, color: '#ef4444', bg: '#fef2f2' };
-    if (event.includes('fulfill') || event.includes('deliver'))
-      return { icon: CheckCircle, color: '#059669', bg: '#d1fae5' };
-    if (event.includes('sent') || event.includes('send'))
-      return { icon: Send, color: '#8b5cf6', bg: '#f5f3ff' };
-    return { icon: Clock, color: '#64748b', bg: '#f8fafc' };
-  };
-
-  if (timeline.length === 0) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4rem 2rem',
-          gap: '1rem',
-          color: '#94a3b8',
-        }}
-      >
-        <Clock size={36} color="#e2e8f0" />
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ margin: 0, fontWeight: 600, color: '#475569' }}>No Timeline Events</p>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>
-            Events will appear here as the prescription progresses.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0', position: 'relative' }}>
-      {/* Vertical line */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '19px',
-          top: '28px',
-          bottom: 0,
-          width: '2px',
-          background: 'linear-gradient(to bottom, #e2e8f0, transparent)',
-          zIndex: 0,
-        }}
-      />
-
-      {timeline.map((item, i) => {
-        const { icon: Icon, color, bg } = getEventIcon(item.event || '');
-        const date = item.timestamp
-          ? new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          : '';
-        return (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              gap: '1rem',
-              padding: '0.75rem 0',
-              position: 'relative',
-              zIndex: 1,
-            }}
-          >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: bg,
-                border: `2px solid ${color}20`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Icon size={16} color={color} />
-            </div>
-            <div
-              style={{
-                flex: 1,
-                background: 'white',
-                border: '1px solid #f1f5f9',
-                borderRadius: '10px',
-                padding: '0.75rem 1rem',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 700,
-                    color: '#0f172a',
-                    fontSize: '0.88rem',
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {(item.event || '').replace(/_/g, ' ')}
-                </div>
-                {date && (
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      color: '#94a3b8',
-                      flexShrink: 0,
-                      marginLeft: '0.5rem',
-                    }}
-                  >
-                    {date}
-                  </span>
-                )}
-              </div>
-              {item.note && (
-                <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.3rem' }}>
-                  {item.note}
-                </div>
-              )}
-              {item.actorRole && (
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>
-                  By {item.actorRole}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Main Modal Component ──────────────────────────────────────────────────────
 const TABS = ['Overview', 'Items', 'Follow-Up', 'Documents', 'Timeline'];
 
 export default function PrescriptionDetailModal({
@@ -918,6 +146,89 @@ export default function PrescriptionDetailModal({
 }) {
   const [activeTab, setActiveTab] = useState('Overview');
   const [moreOpen, setMoreOpen] = useState(false);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [isRefilling, setIsRefilling] = useState(false);
+  const [protocolMatch, setProtocolMatch] = useState(null);
+  const [isMatching, setIsMatching] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
+
+  useEffect(() => {
+    if (rx && rx.items && rx.items.length > 0) {
+      setIsMatching(true);
+      matchProtocolAction(rx.items).then(res => {
+        setProtocolMatch(res);
+      }).catch(err => {
+        console.error("Protocol Match Error:", err);
+      }).finally(() => {
+        setIsMatching(false);
+      });
+    }
+  }, [rx]);
+
+  const handleRefill = async () => {
+    try {
+      setIsRefilling(true);
+      const res = await serverDuplicatePrescriptionAction(rx.id, 'admin');
+      if (res.success) {
+        alert('Refill draft created successfully!');
+        // Close modal or trigger a reload. We'll just alert and let user find it in drafts.
+        if (onClose) onClose();
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to create refill: ' + err.message);
+    } finally {
+      setIsRefilling(false);
+    }
+  };
+
+  const handleAutoDraft = async () => {
+    try {
+      setIsDrafting(true);
+      const res = await serverAutoDraftQuotationFromPrescription({ rxId: rx.id, createdByAdminUid: 'admin' });
+      alert(`Draft Quotation created: ${res.quoteId}\nTotal: $${res.total.toFixed(2)}`);
+      // Optionally trigger the open wizard with the draft id
+      // window.dispatchEvent(new CustomEvent('open-quotation-wizard', { detail: { source: 'prescription', id: rx.id, existingQuoteId: res.id } }));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to auto-draft quotation: ' + err.message);
+    } finally {
+      setIsDrafting(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const patient = rx.patient?.name || rx.patientName || 'Patient';
+      const asProtocol = {
+        protocol_title: `Prescription: ${patient}`,
+        metadata: {
+          scientificName: `Clinical Prescription`,
+          description: `Personalized prescription for ${patient}. Issued: ${rx.createdAt ? new Date(rx.createdAt).toLocaleDateString() : (rx.dateIssued || 'N/A')}`
+        },
+        phases: [{
+          phase_title: 'Primary Treatment',
+          start_week: 1,
+          end_week: parseInt(rx.duration) || 4,
+          drugs_used: (rx.items || []).map(i => ({
+            product_title: i.name || i.product_title || 'Medication',
+            product_slug: i.product_slug || i.name || '',
+            weekly_dose: i.dosage || i.dose || i.quantity || '',
+            dosing_frequency: i.frequency || '',
+            route: i.route || 'SC',
+            vial_strength_used: i.strength || '',
+            description: i.instructions || ''
+          }))
+        }]
+      };
+      
+      const user = { name: patient };
+      await generateClinicalProtocol(asProtocol, { user });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate PDF: ' + err.message);
+    }
+  };
 
   if (!rx) return null;
 
@@ -946,28 +257,25 @@ export default function PrescriptionDetailModal({
       actions={
         <>
           <button
-            onClick={() => {
-              // We dispatch a custom event or you could use the Zustand store directly if imported.
-              // For simplicity, we can just fire a custom event that QuotationsHub listens to,
-              // or navigate to quotations.
-              window.dispatchEvent(new CustomEvent('open-quotation-wizard', { detail: { source: 'prescription', id: rx.id } }));
-            }}
+            disabled={isDrafting}
+            onClick={handleAutoDraft}
             style={{
               padding: '0.45rem 0.8rem',
               borderRadius: '6px',
               border: 'none',
-              background: 'var(--primary)',
+              background: 'linear-gradient(to right, #4f46e5, #7c3aed)',
               color: 'white',
               fontWeight: 600,
               fontSize: '0.8rem',
-              cursor: 'pointer',
+              cursor: isDrafting ? 'wait' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',
-              marginRight: '0.5rem'
+              marginRight: '0.5rem',
+              opacity: isDrafting ? 0.7 : 1
             }}
           >
-            Create Quotation
+            <Wand2 size={13} /> {isDrafting ? 'Drafting...' : 'Zero-Click Quote'}
           </button>
           <button
             style={{
@@ -1004,6 +312,7 @@ export default function PrescriptionDetailModal({
             <CheckCircle size={13} /> Approve
           </button>
           <button
+            onClick={handleExportPDF}
             style={{
               padding: '0.45rem 0.8rem',
               borderRadius: '6px',
@@ -1020,6 +329,50 @@ export default function PrescriptionDetailModal({
           >
             <Download size={13} /> Export PDF
           </button>
+
+          {rx.fileUrl && (
+            <button
+              onClick={() => setPreviewPdfUrl(rx.fileUrl)}
+              style={{
+                padding: '0.45rem 0.8rem',
+                borderRadius: '6px',
+                border: '1px solid #3b82f6',
+                background: '#eff6ff',
+                color: '#2563eb',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <FileText size={13} /> View Original PDF
+            </button>
+          )}
+          
+          <button
+            onClick={handleRefill}
+            disabled={isRefilling}
+            style={{
+              padding: '0.45rem 0.8rem',
+              borderRadius: '6px',
+              border: '1px solid #10b981',
+              background: '#ecfdf5',
+              color: '#059669',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              cursor: isRefilling ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              opacity: isRefilling ? 0.7 : 1,
+            }}
+          >
+            <RefreshCw size={13} className={isRefilling ? "animate-spin" : ""} />
+            {isRefilling ? 'Refilling...' : '1-Click Refill'}
+          </button>
+
           <button
             style={{
               padding: '0.45rem 0.8rem',
@@ -1166,13 +519,19 @@ export default function PrescriptionDetailModal({
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {activeTab === 'Overview' && <OverviewTab rx={rx} />}
           {activeTab === 'Items' && (
-            <ItemsTab rx={rx} products={products} onProductClick={onProductClick} />
+            <ItemsTab rx={rx} products={products} onProductClick={onProductClick} protocolMatch={protocolMatch} isMatching={isMatching} />
           )}
           {activeTab === 'Follow-Up' && <FollowUpTab rx={rx} />}
           {activeTab === 'Documents' && <DocumentsTab rx={rx} />}
           {activeTab === 'Timeline' && <TimelineTab rx={rx} />}
         </div>
       </div>
+
+      <DocumentPreviewModal
+        isOpen={!!previewPdfUrl}
+        onClose={() => setPreviewPdfUrl(null)}
+        fileUrl={previewPdfUrl}
+      />
     </StandardDrawer>
   );
 }

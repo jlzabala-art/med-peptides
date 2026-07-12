@@ -1,9 +1,12 @@
+"use client";
+
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Users from "lucide-react/dist/esm/icons/users";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, limit, getCountFromServer, getAggregateFromServer, sum, count } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 
 
 
@@ -12,6 +15,11 @@ import PhysiciansAnalyticsHeader from './PhysiciansAnalyticsHeader';
 import PhysiciansDirectory from './PhysiciansDirectory';
 import PhysicianProfileDrawer from './PhysicianProfileDrawer';
 import PhysicianOnboardingWizard from './PhysicianOnboardingWizard';
+import AdminPageHeader from '../AdminPageHeader';
+import GlobalSearchBar from '../../ui/GlobalSearchBar';
+import { useAlgoliaSearch } from '../../../hooks/data/useAlgoliaSearch';
+import PhysicianFiltersBar from './PhysicianFiltersBar';
+
 
 export default function AdminPhysiciansTab() {
   const [loading, setLoading] = useState(true);
@@ -25,6 +33,15 @@ export default function AdminPhysiciansTab() {
   // UI State
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({});
+
+  const { hits: algoliaHits, isAlgoliaActive, loading: algoliaLoading } = useAlgoliaSearch(
+    'atlas_physicians',
+    searchTerm,
+    { hitsPerPage: 50 },
+    300
+  );
 
   useEffect(() => {
     async function fetchPhysicianData() {
@@ -115,37 +132,55 @@ export default function AdminPhysiciansTab() {
     );
   }
 
+  const filteredDoctors = isAlgoliaActive && searchTerm.trim()
+    ? algoliaHits.map(h => doctors.find(d => d.id === h.objectID) || { ...h, id: h.objectID }).filter(Boolean)
+    : doctors;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '1.5rem', backgroundColor: 'var(--background)' }}>
       {/* Page Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Users size={24} color="var(--primary)" /> Physicians Management
-          </h1>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Enterprise directory and performance tracking</div>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="gcp-btn-secondary">Import CSV</button>
-          <button className="gcp-btn-primary" onClick={() => setShowOnboarding(true)}>
-            <Plus size={16} style={{ marginRight: '0.5rem' }} /> Add Physician
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Physicians Management"
+        subtitle="Enterprise directory and performance tracking"
+        icon={Users}
+        actions={
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button className="gcp-btn-secondary">Import CSV</button>
+            <button className="gcp-btn-primary" onClick={() => setShowOnboarding(true)}>
+              <Plus size={16} style={{ marginRight: '0.5rem' }} /> Add Physician
+            </button>
+          </div>
+        }
+      />
+
+      <GlobalSearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Search physicians by name, email, clinic (Algolia)..."
+        resultCount={loading && !algoliaLoading ? undefined : filteredDoctors.length}
+        isLoading={algoliaLoading}
+        namespace="admin-physicians"
+        size="lg"
+      />
 
       {/* Analytics Header */}
       <PhysiciansAnalyticsHeader stats={globalStats} />
 
-      {/* Main Directory Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <PhysiciansDirectory 
-          doctors={doctors} 
-          isLoading={loading}
-          onSelectDoctor={setSelectedDoctor} 
-          patientMap={patientMap} 
-          orderMap={orderMap} 
-          onAddPhysician={() => setShowOnboarding(true)}
-        />
+      <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <PhysicianFiltersBar filters={filters} setFilters={setFilters} />
+        
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+          <PhysiciansDirectory 
+            doctors={filteredDoctors} 
+            isLoading={loading}
+            filters={filters}
+            onSelectDoctor={setSelectedDoctor} 
+            patientMap={patientMap} 
+            orderMap={orderMap} 
+            onAddPhysician={() => setShowOnboarding(true)}
+            onRefresh={() => window.location.reload()}
+          />
+        </div>
       </div>
 
       {/* Drawers & Modals */}

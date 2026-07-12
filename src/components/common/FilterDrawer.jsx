@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Star from "lucide-react/dist/esm/icons/star";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";

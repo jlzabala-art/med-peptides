@@ -1,5 +1,5 @@
 import React from 'react';
-import Activity from 'lucide-react/dist/esm/icons/activity';
+import { Activity } from '@/lib/icons';
 
 export default function HealthMatrixWidget({ statusData = [] }) {
   const defaultStatus = [

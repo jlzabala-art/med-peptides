@@ -1,13 +1,10 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Send from "lucide-react/dist/esm/icons/send";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import FileCheck from "lucide-react/dist/esm/icons/file-check";
+"use client";
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { Card } from '../ui';
 
 
@@ -16,10 +13,11 @@ import { Card } from '../ui';
 
 
 import { useTranslation } from 'react-i18next';
+import { Loader2, Send, ShieldCheck, CheckCircle, Truck, FileCheck } from '@/lib/icons';
 
 export default function PublicSupplierQuote() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { t } = useTranslation();
   const [rfq, setRfq] = useState(null);
   const [loading, setLoading] = useState(true);

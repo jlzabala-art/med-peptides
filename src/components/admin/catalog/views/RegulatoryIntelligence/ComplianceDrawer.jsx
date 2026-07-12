@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import X from 'lucide-react/dist/esm/icons/x';
 import FileText from 'lucide-react/dist/esm/icons/file-text';

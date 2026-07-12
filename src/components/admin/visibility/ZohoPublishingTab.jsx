@@ -1,9 +1,5 @@
-import Database from "lucide-react/dist/esm/icons/database";
-import RefreshCcw from "lucide-react/dist/esm/icons/refresh-ccw";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Clock from "lucide-react/dist/esm/icons/clock";
 import React from 'react';
+import { Database, RefreshCcw, CheckCircle2, AlertCircle, Clock } from '@/lib/icons';
 
 
 

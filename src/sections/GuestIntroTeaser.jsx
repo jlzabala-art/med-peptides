@@ -1,9 +1,10 @@
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import X from "lucide-react/dist/esm/icons/x";
-import Dna from "lucide-react/dist/esm/icons/dna";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import { useRouter } from 'next/navigation';
+import { BookOpen } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
+import { X } from '@/lib/icons';
+import { Dna } from '@/lib/icons';
+import { Zap } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 /**
  * GuestIntroTeaser
@@ -23,7 +24,7 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -41,7 +42,7 @@ const HIGHLIGHTS = [
 const DISMISS_KEY = 'hide_peptide_intro';
 
 export default function GuestIntroTeaser() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [dismissed, setDismissed] = useState(() => {
     try { return !!localStorage.getItem(DISMISS_KEY); }
@@ -103,7 +104,7 @@ export default function GuestIntroTeaser() {
         <div className="git-actions">
           <button
             className="git-btn git-btn--primary"
-            onClick={() => navigate('/what-are-peptides')}
+            onClick={() => router.push('/what-are-peptides')}
           >
             Read the beginner's guide
             <ArrowRight size={15} aria-hidden="true" />

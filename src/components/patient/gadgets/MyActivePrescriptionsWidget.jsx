@@ -1,12 +1,12 @@
-import Pill from "lucide-react/dist/esm/icons/pill";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { Pill, Clock, AlertTriangle, RefreshCw } from '@/lib/icons';
 
 
 

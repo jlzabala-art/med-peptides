@@ -1,8 +1,8 @@
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import { Building2 } from '@/lib/icons';
+import { Pill } from '@/lib/icons';
+import { Microscope } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
 import React from 'react';
 
 

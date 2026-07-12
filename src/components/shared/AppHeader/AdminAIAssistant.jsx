@@ -1,3 +1,5 @@
+"use client";
+
 import Bot from "lucide-react/dist/esm/icons/bot";
 import X from "lucide-react/dist/esm/icons/x";
 import Send from "lucide-react/dist/esm/icons/send";

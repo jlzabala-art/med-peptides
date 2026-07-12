@@ -39,10 +39,12 @@ import {
   doc, onSnapshot, getDoc, setDoc, serverTimestamp,
   addDoc, collection, getDocs, query, orderBy, limit, deleteDoc
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { useAuth } from '../context/AuthContext';
 import { HOME_SECTIONS } from '../config/homeLayoutRegistry';
-import { version as APP_VERSION } from "../../package.json";
+import pkg from "../../package.json";
+const APP_VERSION = pkg.version;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -60,6 +62,7 @@ export const GUEST_ROLES = ['patient', 'guest'];
 // ─── Cache helpers ─────────────────────────────────────────────────────────────
 
 function readCache() {
+  if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -134,14 +137,19 @@ const DEFAULT_LAYOUT = {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useHomeLayout() {
-  const cached = readCache();
-  const [layout, setLayout]             = useState(cached ?? DEFAULT_LAYOUT);
-  const [loading, setLoading]           = useState(!cached);
+  const [layout, setLayout]             = useState(DEFAULT_LAYOUT);
+  const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
   const [newSectionsAdded, setNewSectionsAdded] = useState(false); // Phase 2 notice flag
   const { user, isAdmin } = useAuth();
 
   useEffect(() => {
+    const cached = readCache();
+    if (cached) {
+      setLayout(cached);
+      setLoading(false);
+    }
+
     const ref = doc(db, 'config', 'homeLayout');
 
     // ── Strategy: Admins use onSnapshot (real-time, needed for the admin panel).

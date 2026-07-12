@@ -1,8 +1,9 @@
+import { useRouter } from 'next/navigation';
 import { PhoneCall, ArrowRight, BookOpen } from '@/lib/icons';
-import { useNavigate } from 'react-router-dom';
+
 
 export default function ContactCTA() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <section style={{ padding: 'clamp(2rem, 5vw, 4rem) 0.5rem clamp(4rem, 8vw, 6rem)' }}>
@@ -130,10 +131,10 @@ export default function ContactCTA() {
           `}} />
 
           <div className="cta-btn-group">
-            <button className="cta-primary-btn" onClick={() => navigate('/contact')}>
+            <button className="cta-primary-btn" onClick={() => router.push('/contact')}>
               Talk to Specialist <ArrowRight size={18} />
             </button>
-            <button className="cta-secondary-btn" onClick={() => navigate('/products')}>
+            <button className="cta-secondary-btn" onClick={() => router.push('/products')}>
               <BookOpen size={18} /> View Catalogue
             </button>
           </div>

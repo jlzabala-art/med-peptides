@@ -1,5 +1,5 @@
 import React from 'react';
-import { useClinicalCart } from '../../contexts/ClinicalCartContext';
+import { useClinicalCart } from '../../context/ClinicalCartContext';
 import { ShoppingCart, X, Trash2, Plus, Minus, CheckCircle, Package } from '@/lib/icons';
 
 export default function ClinicalCartDrawer() {

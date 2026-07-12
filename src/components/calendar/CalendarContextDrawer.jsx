@@ -1,10 +1,10 @@
-import User from "lucide-react/dist/esm/icons/user";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import CalendarIcon from "lucide-react/dist/esm/icons/calendar";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+
+
+
+
+
+
+
 import React from 'react';
 
 
@@ -14,6 +14,7 @@ import React from 'react';
 
 
 import './CalendarCloud.css';
+import { User, Activity, ShoppingBag, ClipboardList, Clock, CalendarIcon, FileText } from '@/lib/icons';
 
 export default function CalendarContextDrawer({ event, isOpen, onClose }) {
   if (!isOpen || !event) return null;

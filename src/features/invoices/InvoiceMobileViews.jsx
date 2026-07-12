@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Search from "lucide-react/dist/esm/icons/search";
-import Filter from "lucide-react/dist/esm/icons/filter";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import Download from "lucide-react/dist/esm/icons/download";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+
+
+
+
+
+
+
+
+
 
 import ProductGrid from '../../components/admin/shared/ProductGrid';
 import ActivityTimeline from "../../components/admin/shared/ActivityTimeline";
 import InvoiceActionCenter from './InvoiceActionCenter';
+import { ArrowLeft, ChevronRight, Search, Filter, DollarSign, Bell, Download, Mail, FileText } from '@/lib/icons';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount || 0);

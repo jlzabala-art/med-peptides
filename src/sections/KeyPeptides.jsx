@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Zap, Sparkles, RefreshCw, Moon, Beaker, Layers, ArrowRight, ChevronDown, Droplets, Activity, Brain, Shield, Flame, Star, ShieldCheck, FlaskConical } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
@@ -17,7 +18,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
 import { getActiveProducts } from '../repositories/productRepository';
 import priorityMap from "../config/peptide_priority_map.json";
@@ -280,7 +281,7 @@ function PeptideCard({ peptide, onClick, onViewCategory, highlighted }) {
 
 /* ─── Section ───────────────────────────────────────────────────────────── */
 export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   /* Firestore fetch */
   const [peptides, setPeptides]         = useState([]);
@@ -571,9 +572,9 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                   peptide={p}
                   onClick={() => {
                     trackKeyPeptideCardClick(p.name, p.slug, p.category, 'filtered');
-                    onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                    onSelectProduct ? onSelectProduct(p) : router.push(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
                   }}
-                  onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                  onViewCategory={(cat) => router.push(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
                   highlighted={matchedSlugs ? matchedSlugs.has(p.slug) : false}
                 />
               </motion.div>
@@ -593,7 +594,7 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
                     <button
                       className="kp-cta-pill"
-                      onClick={() => navigate('/collection/peptides')}
+                      onClick={() => router.push('/collection/peptides')}
                       aria-label={`View all ${peptides.length} peptides in the collection`}
                     >
                       <span className="kp-cta-pill-count">
@@ -629,9 +630,9 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                                 peptide={p}
                                 onClick={() => {
                                   trackKeyPeptideMostUsedClick(p.name, p.slug, idx);
-                                  onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                                  onSelectProduct ? onSelectProduct(p) : router.push(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
                                 }}
-                                onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                                onViewCategory={(cat) => router.push(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
                               />
                             ))}
                           </div>
@@ -667,9 +668,9 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                                   peptide={p}
                                   onClick={() => {
                                     trackKeyPeptideCardClick(p.name, p.slug, p.category, 'filtered');
-                                    onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                                    onSelectProduct ? onSelectProduct(p) : router.push(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
                                   }}
-                                  onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                                  onViewCategory={(cat) => router.push(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
                                 />
                               ))}
                             </div>
@@ -713,9 +714,9 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                             peptide={p}
                             onClick={() => {
                               trackKeyPeptideMostUsedClick(p.name, p.slug, idx);
-                              onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                              onSelectProduct ? onSelectProduct(p) : router.push(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
                             }}
-                            onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                            onViewCategory={(cat) => router.push(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
                           />
                         </motion.div>
                       ))}
@@ -746,7 +747,7 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                       {/* Catalog CTA for Desktop filters row */}
                       <button
                         className="kp-cta-pill ml-auto"
-                        onClick={() => navigate('/collection/peptides')}
+                        onClick={() => router.push('/collection/peptides')}
                       >
                         <span className="kp-cta-pill-count">
                           {peptides.length} peptides
@@ -780,9 +781,9 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                             peptide={p}
                             onClick={() => {
                               trackKeyPeptideCardClick(p.name, p.slug, p.category, 'filtered');
-                              onSelectProduct ? onSelectProduct(p) : navigate(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
+                              onSelectProduct ? onSelectProduct(p) : router.push(`/product/${p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug}`);
                             }}
-                            onViewCategory={(cat) => navigate(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
+                            onViewCategory={(cat) => router.push(`/collection/peptides?category=${encodeURIComponent(cat)}`)}
                             highlighted={matchedSlugs ? matchedSlugs.has(p.slug) : false}
                           />
                         </motion.div>
@@ -795,7 +796,7 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
                   <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
                     <button
                       className="kp-explore-link"
-                      onClick={() => navigate(`/collection/peptides?category=${encodeURIComponent(activeFilter)}`)}
+                      onClick={() => router.push(`/collection/peptides?category=${encodeURIComponent(activeFilter)}`)}
                     >
                       Explore full {activeFilter} catalog <ArrowRight size={13} strokeWidth={2.5} />
                     </button>
@@ -832,7 +833,7 @@ export default function KeyPeptides({ onSelectProduct, searchQuery = '' }) {
           <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '1rem' }}>
             <button
               className="kp-cta-pill"
-              onClick={() => navigate('/collection/peptides')}
+              onClick={() => router.push('/collection/peptides')}
               aria-label={`View all ${peptides.length} peptides in the collection`}
             >
               <span className="kp-cta-pill-count">

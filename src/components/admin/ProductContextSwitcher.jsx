@@ -1,16 +1,14 @@
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Package from "lucide-react/dist/esm/icons/package";
-import X from "lucide-react/dist/esm/icons/x";
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { BookOpen, DollarSign, Package, X } from '@/lib/icons';
 
 
 
 
 
 export default function ProductContextSwitcher({ searchTerm, productId, currentTab, onClear }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   // If there's no specific search or product focus, don't show the switcher
   if (!searchTerm && !productId) return null;
 
@@ -58,7 +56,7 @@ export default function ProductContextSwitcher({ searchTerm, productId, currentT
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button
-          onClick={() => navigate(`/admin/products?search=${encodeURIComponent(displayTerm)}`)}
+          onClick={() => router.push(`/admin/products?search=${encodeURIComponent(displayTerm)}`)}
           style={{
             display: 'flex', alignItems: 'center', gap: '0.4rem',
             padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)',
@@ -73,7 +71,7 @@ export default function ProductContextSwitcher({ searchTerm, productId, currentT
           <BookOpen size={14} /> Clinical Profile
         </button>
         <button
-          onClick={() => navigate(`/admin/prices?sku=${encodeURIComponent(displayTerm)}`)}
+          onClick={() => router.push(`/admin/prices?sku=${encodeURIComponent(displayTerm)}`)}
           style={{
             display: 'flex', alignItems: 'center', gap: '0.4rem',
             padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)',
@@ -88,7 +86,7 @@ export default function ProductContextSwitcher({ searchTerm, productId, currentT
           <DollarSign size={14} /> Prices Matrix
         </button>
         <button
-          onClick={() => navigate(`/admin/stock?search=${encodeURIComponent(displayTerm)}`)}
+          onClick={() => router.push(`/admin/stock?search=${encodeURIComponent(displayTerm)}`)}
           style={{
             display: 'flex', alignItems: 'center', gap: '0.4rem',
             padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)',

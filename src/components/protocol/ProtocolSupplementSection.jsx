@@ -1,3 +1,5 @@
+"use client";
+
 import Pill from "lucide-react/dist/esm/icons/pill";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";

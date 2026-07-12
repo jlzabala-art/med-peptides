@@ -1,8 +1,5 @@
-import Users from "lucide-react/dist/esm/icons/users";
-import Eye from "lucide-react/dist/esm/icons/eye";
-import EyeOff from "lucide-react/dist/esm/icons/eye-off";
-import Tag from "lucide-react/dist/esm/icons/tag";
 import React from 'react';
+import { Users, Eye, EyeOff, Tag } from '@/lib/icons';
 
 
 

@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
+"use client";
+
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Stethoscope, Settings, ClipboardList } from '@/lib/icons';
-import ProtocolClinicalTab from './tabs/ProtocolClinicalTab';
-import ProtocolOperationsTab from './tabs/ProtocolOperationsTab';
-import ProtocolRecordsTab from './tabs/ProtocolRecordsTab';
+import { X, Save, Stethoscope, Settings, ClipboardList, FileText, User, Loader } from '@/lib/icons';
 import { useProtocolManager } from './hooks/useProtocolManager';
+import { useToast } from '../../../hooks/useToast';
+
+// ── Lazy-load each tab so only the active one loads its JS bundle ──────────────
+const ProtocolClinicalTab  = dynamic(() => import('./tabs/ProtocolClinicalTab'));
+const ProtocolOperationsTab = dynamic(() => import('./tabs/ProtocolOperationsTab'));
+const ProtocolRecordsTab   = dynamic(() => import('./tabs/ProtocolRecordsTab'));
 
 const TABS = [
   {
@@ -27,7 +33,17 @@ const TABS = [
   },
 ];
 
-export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
+function TabFallback() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+      <Loader size={20} style={{ animation: 'spin 1s linear infinite' }} />
+      <span style={{ marginLeft: '0.5rem' }}>Loading…</span>
+    </div>
+  );
+}
+
+export default function ProtocolHubDashboard({ protocol, onSave, onClose, hideHeader = false, onChange }) {
+  const { toast } = useToast();
   const {
     activeTab,
     setActiveTab,
@@ -36,7 +52,35 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
     handleUpdate,
     handleSaveAll,
     handleClose,
-  } = useProtocolManager({ initialProtocol: protocol, onSave, onClose });
+  } = useProtocolManager({ initialProtocol: protocol, onSave, onClose, onChange });
+
+  const [pdfLoading, setPdfLoading] = useState(null); // 'doctor' | 'patient' | null
+
+  const handleDoctorPdf = useCallback(async () => {
+    setPdfLoading('doctor');
+    try {
+      const { generateDoctorPdf } = await import('../../../utils/doctorPdfGenerator');
+      generateDoctorPdf(editedProtocol);
+    } catch (err) {
+      console.error(err);
+      toast?.error?.('Failed to generate Doctor PDF');
+    } finally {
+      setPdfLoading(null);
+    }
+  }, [editedProtocol, toast]);
+
+  const handlePatientPdf = useCallback(async () => {
+    setPdfLoading('patient');
+    try {
+      const { generatePatientGuide } = await import('../../../services/pdfService');
+      await generatePatientGuide(editedProtocol, {});
+    } catch (err) {
+      console.error(err);
+      toast?.error?.('Failed to generate Patient Guide PDF');
+    } finally {
+      setPdfLoading(null);
+    }
+  }, [editedProtocol, toast]);
 
   const renderTabContent = (tabId) => {
     switch (tabId) {
@@ -50,6 +94,7 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
         return null;
     }
   };
+
 
   /**
    * handleTabChange
@@ -68,42 +113,64 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-main)', color: 'var(--text-main)' }}>
       {/* Header */}
-      <div style={{ 
-        padding: '1.5rem', 
-        borderBottom: '1px solid var(--border)',
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        background: 'var(--surface)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10
-      }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>{editedProtocol.protocol_name || 'Unnamed Protocol'}</h2>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            {editedProtocol.therapeutic_category || 'Uncategorized'} • v{editedProtocol.version_number || 1}
+      {!hideHeader && (
+        <div style={{ 
+          padding: '1.5rem', 
+          borderBottom: '1px solid var(--border)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          background: 'var(--surface)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10
+        }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>{editedProtocol.protocol_name || editedProtocol.protocol_title || 'Unnamed Protocol'}</h2>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+              {editedProtocol.therapeutic_category || 'Uncategorized'} • v{editedProtocol.version_number || editedProtocol.protocol_version || '1.0'}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            {!isMobile && (
+              <>
+                <button 
+                  onClick={handleDoctorPdf}
+                  disabled={pdfLoading === 'doctor'}
+                  className="gcp-btn-secondary" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '20px', fontSize: '0.85rem' }}
+                >
+                  {pdfLoading === 'doctor' ? <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <FileText size={16} />} 
+                  Doctor PDF
+                </button>
+                <button 
+                  onClick={handlePatientPdf}
+                  disabled={pdfLoading === 'patient'}
+                  className="gcp-btn-secondary" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '20px', fontSize: '0.85rem' }}
+                >
+                  {pdfLoading === 'patient' ? <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <User size={16} />} 
+                  Patient Guide
+                </button>
+                <button 
+                  onClick={handleSaveAll}
+                  className="gcp-btn-primary" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '20px' }}
+                >
+                  <Save size={16} /> Save Changes
+                </button>
+              </>
+            )}
+            <button 
+              onClick={handleClose}
+              className="gcp-btn-secondary"
+              style={{ padding: '0.5rem', borderRadius: '50%' }}
+            >
+              <X size={18} />
+            </button>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {!isMobile && (
-            <button 
-              onClick={handleSaveAll}
-              className="gcp-btn-primary" 
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '20px' }}
-            >
-              <Save size={16} /> Save Changes
-            </button>
-          )}
-          <button 
-            onClick={handleClose}
-            className="gcp-btn-secondary"
-            style={{ padding: '0.5rem', borderRadius: '50%' }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-      </div>
+      )}
 
       {!isMobile ? (
         <>
@@ -145,7 +212,7 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
 
           {/* Desktop Content Area — has-view-transition enables native browser cross-fade */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-main)' }}>
-            <div style={{ maxWidth: '1500px', margin: '0 auto' }} className="has-view-transition">
+            <div style={{ maxWidth: '1200px', margin: '0 auto' }} className="has-view-transition">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
@@ -154,7 +221,9 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {renderTabContent(activeTab)}
+                  <Suspense fallback={<TabFallback />}>
+                    {renderTabContent(activeTab)}
+                  </Suspense>
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -202,11 +271,12 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose }) {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         style={{ overflow: 'hidden' }}
+                        transition={{ duration: 0.2 }}
                       >
-                        <div style={{ padding: '0 1rem 1rem 1rem', borderTop: '1px solid var(--border-light)' }}>
-                          <div style={{ paddingTop: '1rem' }}>
+                        <div style={{ padding: '0 1rem 1rem 1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                          <Suspense fallback={<TabFallback />}>
                             {renderTabContent(tab.id)}
-                          </div>
+                          </Suspense>
                         </div>
                       </motion.div>
                     )}

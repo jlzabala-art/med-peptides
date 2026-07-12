@@ -1,15 +1,12 @@
-import X from "lucide-react/dist/esm/icons/x";
-import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Database from "lucide-react/dist/esm/icons/database";
-import Link from "lucide-react/dist/esm/icons/link";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+
 import React, { useState } from 'react';
 import GadgetImportTab from '../../../gadgets/GadgetImportTab';
 import { db } from '../../../firebase';
+
 import { collection, doc, setDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { X, UploadCloud, FileText, Database, Link, CheckCircle, Sparkles } from '@/lib/icons';
 
 export default function CatalogImportWizard({ isOpen, onClose }) {
   const [step, setStep] = useState(2);

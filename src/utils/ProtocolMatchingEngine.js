@@ -11,8 +11,6 @@
  *   shared secondary_goals   → +15 (per shared goal, capped at 15)
  */
 
-import { PROTOCOL_BLUEPRINTS } from '../data/protocolBlueprints';
-
 // ── 5-minute in-memory cache ───────────────────────────────────────────────
 const _cache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -28,31 +26,38 @@ function _cached(key, fn) {
 
 // ── Scoring ────────────────────────────────────────────────────────────────
 function score(source, candidate) {
-  const sm = source.clinical_metadata;
-  const cm = candidate.clinical_metadata;
+  // If coming from Firestore, clinical_evidence might replace clinical_metadata
+  // We'll normalize by checking both
+  const sm = source.clinical_metadata || source.clinical_evidence || {};
+  const cm = candidate.clinical_metadata || candidate.clinical_evidence || {};
+  
   if (!sm || !cm) return 0;
 
   let points = 0;
 
-  // Same clinical goal
-  if (sm.clinical_goal === cm.clinical_goal) points += 50;
+  // Same clinical goal (or therapeutic_category)
+  const sourceGoal = sm.clinical_goal || source.therapeutic_category;
+  const candGoal = cm.clinical_goal || candidate.therapeutic_category;
+  if (sourceGoal && sourceGoal === candGoal) points += 50;
 
   // Shared primary compounds
-  const sharedCompounds = (sm.primary_compounds || []).filter(c =>
-    (cm.primary_compounds || []).includes(c)
-  ).length;
+  const sourceCompounds = sm.primary_compounds || source.compounds || [];
+  const candCompounds = cm.primary_compounds || candidate.compounds || [];
+  const sharedCompounds = sourceCompounds.filter(c => candCompounds.includes(c)).length;
   points += Math.min(sharedCompounds * 25, 25);
 
   // Shared protocol class
-  if (sm.protocol_class === cm.protocol_class) points += 20;
+  if (sm.protocol_class && sm.protocol_class === cm.protocol_class) points += 20;
 
   // Similar duration (±2 weeks)
-  if (Math.abs((sm.duration_weeks || 0) - (cm.duration_weeks || 0)) <= 2) points += 10;
+  const sourceDuration = sm.duration_weeks || source.duration_weeks || 0;
+  const candDuration = cm.duration_weeks || candidate.duration_weeks || 0;
+  if (sourceDuration && candDuration && Math.abs(sourceDuration - candDuration) <= 2) points += 10;
 
   // Shared secondary goals
-  const sharedSecondary = (sm.secondary_goals || []).filter(g =>
-    (cm.secondary_goals || []).includes(g)
-  ).length;
+  const sourceSecGoals = sm.secondary_goals || source.secondary_goals || [];
+  const candSecGoals = cm.secondary_goals || candidate.secondary_goals || [];
+  const sharedSecondary = sourceSecGoals.filter(g => candSecGoals.includes(g)).length;
   points += Math.min(sharedSecondary * 5, 15);
 
   return points;
@@ -80,23 +85,28 @@ const CLASS_LABELS = {
 };
 
 export function getMatchReason(source, candidate) {
-  const sm = source.clinical_metadata;
-  const cm = candidate.clinical_metadata;
-  if (!sm || !cm) return null;
+  const sm = source.clinical_metadata || source.clinical_evidence || {};
+  const cm = candidate.clinical_metadata || candidate.clinical_evidence || {};
+  
+  const sourceGoal = sm.clinical_goal || source.therapeutic_category;
+  const candGoal = cm.clinical_goal || candidate.therapeutic_category;
+  if (sourceGoal && sourceGoal === candGoal)
+    return `Same ${GOAL_LABELS[sourceGoal] || sourceGoal} target`;
 
-  if (sm.clinical_goal === cm.clinical_goal)
-    return `Same ${GOAL_LABELS[sm.clinical_goal] || sm.clinical_goal} target`;
-
-  if (sm.protocol_class === cm.protocol_class)
+  if (sm.protocol_class && sm.protocol_class === cm.protocol_class)
     return `Shared ${CLASS_LABELS[sm.protocol_class] || sm.protocol_class} strategy`;
 
-  const sharedC = (sm.primary_compounds || []).filter(c =>
-    (cm.primary_compounds || []).includes(c)
-  );
-  if (sharedC.length > 0)
-    return `Shared compound: ${sharedC[0].replace(/_/g, ' ')}`;
+  const sourceCompounds = sm.primary_compounds || source.compounds || [];
+  const candCompounds = cm.primary_compounds || candidate.compounds || [];
+  const sharedC = sourceCompounds.filter(c => candCompounds.includes(c));
+  if (sharedC.length > 0) {
+    const compoundName = typeof sharedC[0] === 'string' ? sharedC[0].replace(/_/g, ' ') : 'compounds';
+    return `Shared compound: ${compoundName}`;
+  }
 
-  if (Math.abs((sm.duration_weeks || 0) - (cm.duration_weeks || 0)) <= 2)
+  const sourceDuration = sm.duration_weeks || source.duration_weeks || 0;
+  const candDuration = cm.duration_weeks || candidate.duration_weeks || 0;
+  if (sourceDuration && candDuration && Math.abs(sourceDuration - candDuration) <= 2)
     return 'Similar duration';
 
   return 'Clinically related';
@@ -104,24 +114,25 @@ export function getMatchReason(source, candidate) {
 
 // ── Main API ───────────────────────────────────────────────────────────────
 /**
- * Returns top 4 clinically related protocols for a given protocol key.
+ * Returns top 4 clinically related protocols for a given protocol object from a provided pool of protocols.
  * Falls back to same clinical_goal, then to all protocols sorted by goal overlap.
  *
- * @param {string} protocolId - key in PROTOCOL_BLUEPRINTS
+ * @param {Object} sourceProtocol - The main protocol object
+ * @param {Array<Object>} allProtocols - Array of all available protocols from Firestore
  * @returns {Array<{id, protocol, score, matchReason}>}
  */
-export function getRelatedProtocols(protocolId) {
-  return _cached(`related:${protocolId}`, () => {
-    const source = PROTOCOL_BLUEPRINTS[protocolId];
-    if (!source) return [];
+export function getRelatedProtocols(sourceProtocol, allProtocols = []) {
+  if (!sourceProtocol || !allProtocols.length) return [];
+  const protocolId = sourceProtocol.id || sourceProtocol.protocol_id;
 
-    const allIds = Object.keys(PROTOCOL_BLUEPRINTS).filter(id => id !== protocolId);
+  return _cached(`related:${protocolId}:${allProtocols.length}`, () => {
+    const candidates = allProtocols.filter(p => (p.id || p.protocol_id) !== protocolId);
 
-    const scored = allIds.map(id => ({
-      id,
-      protocol: PROTOCOL_BLUEPRINTS[id],
-      score: score(source, PROTOCOL_BLUEPRINTS[id]),
-      matchReason: getMatchReason(source, PROTOCOL_BLUEPRINTS[id]),
+    const scored = candidates.map(candidate => ({
+      id: candidate.id || candidate.protocol_id,
+      protocol: candidate,
+      score: score(sourceProtocol, candidate),
+      matchReason: getMatchReason(sourceProtocol, candidate),
     })).sort((a, b) => b.score - a.score);
 
     // Primary: top 4 with score > 0
@@ -129,17 +140,17 @@ export function getRelatedProtocols(protocolId) {
 
     // Fallback 1: same clinical_goal only
     if (results.length < 2) {
-      const sm = source.clinical_metadata;
-      results = allIds
-        .filter(id => {
-          const m = PROTOCOL_BLUEPRINTS[id]?.clinical_metadata;
-          return m?.clinical_goal === sm?.clinical_goal;
+      const sourceGoal = sourceProtocol.clinical_metadata?.clinical_goal || sourceProtocol.therapeutic_category;
+      results = candidates
+        .filter(candidate => {
+          const candGoal = candidate.clinical_metadata?.clinical_goal || candidate.therapeutic_category;
+          return candGoal && candGoal === sourceGoal;
         })
-        .map(id => ({
-          id,
-          protocol: PROTOCOL_BLUEPRINTS[id],
+        .map(candidate => ({
+          id: candidate.id || candidate.protocol_id,
+          protocol: candidate,
           score: 50,
-          matchReason: `Same ${GOAL_LABELS[sm?.clinical_goal] || sm?.clinical_goal} target`,
+          matchReason: `Same ${GOAL_LABELS[sourceGoal] || sourceGoal} target`,
         }))
         .slice(0, 4);
     }
@@ -152,3 +163,4 @@ export function getRelatedProtocols(protocolId) {
     return results;
   });
 }
+

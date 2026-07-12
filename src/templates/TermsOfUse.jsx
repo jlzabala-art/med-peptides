@@ -1,13 +1,8 @@
-import Scale from "lucide-react/dist/esm/icons/scale";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Ban from "lucide-react/dist/esm/icons/ban";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Info from "lucide-react/dist/esm/icons/info";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
+import { Scale, ChevronRight, AlertCircle, ShieldCheck, Ban, FileText, Mail, Info } from '@/lib/icons';
 
 
 

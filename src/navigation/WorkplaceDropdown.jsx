@@ -1,8 +1,9 @@
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Bookmark from "lucide-react/dist/esm/icons/bookmark";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import History from "lucide-react/dist/esm/icons/history";
-import Settings from "lucide-react/dist/esm/icons/settings";
+import Link from 'next/link';
+
+
+
+
+
 /**
  * WorkplaceDropdown.jsx
  *
@@ -12,13 +13,13 @@ import Settings from "lucide-react/dist/esm/icons/settings";
  */
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 
 
 
 
 import { WORKPLACE_MENU } from './navConfig';
+import { ShoppingCart, Bookmark, ClipboardList, History, Settings } from '@/lib/icons';
 
 const ICONS = {
   '/cart':            <ShoppingCart size={15} />,

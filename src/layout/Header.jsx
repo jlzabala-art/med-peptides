@@ -1,30 +1,35 @@
-import Menu from "lucide-react/dist/esm/icons/menu";
-import X from "lucide-react/dist/esm/icons/x";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Search from "lucide-react/dist/esm/icons/search";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import LogIn from "lucide-react/dist/esm/icons/log-in";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import User from "lucide-react/dist/esm/icons/user";
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Home from "lucide-react/dist/esm/icons/home";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Calculator from "lucide-react/dist/esm/icons/calculator";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Package from "lucide-react/dist/esm/icons/package";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Users from "lucide-react/dist/esm/icons/users";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import BookCopy from "lucide-react/dist/esm/icons/book-copy";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
-import BookMarked from "lucide-react/dist/esm/icons/book-marked";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Menu } from '@/lib/icons';
+import { X } from '@/lib/icons';
+import { ShoppingCart } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { ChevronDown } from '@/lib/icons';
+import { LogIn } from '@/lib/icons';
+import { LogOut } from '@/lib/icons';
+import { User } from '@/lib/icons';
+import { LayoutDashboard } from '@/lib/icons';
+import { Globe } from '@/lib/icons';
+import { Home } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
+import { Calculator } from '@/lib/icons';
+import { BookOpen } from '@/lib/icons';
+import { Beaker } from '@/lib/icons';
+import { HelpCircle } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { ClipboardList } from '@/lib/icons';
+import { Package } from '@/lib/icons';
+import { ShoppingBag } from '@/lib/icons';
+import { Brain } from '@/lib/icons';
+import { Users } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { BookCopy } from '@/lib/icons';
+import { GraduationCap } from '@/lib/icons';
+import { BookMarked } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
 
@@ -54,7 +59,7 @@ import { memo, useState, useRef, useEffect, useCallback } from 'react';
 
 
 
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+
 import ReactDOM from 'react-dom';
 import { REGION_FLAGS } from '../data/regions';
 import { COUNTRIES } from '../data/countries';
@@ -149,9 +154,9 @@ function Header(props) {
   const { scrolled, activeModal, setActiveModal, searchInitialTab, setSearchInitialTab, setManualRegionChange } = useUIStore();
   const { region, setRegion } = useShop();
   const { cartCount, cartBreakdown = {} } = useCart();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isHome = location.pathname === '/';
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === '/';
 
   const onOpenCart = () => setActiveModal('cart');
   const onOpenSearch = () => { setSearchInitialTab('peptides'); setActiveModal('search'); };
@@ -204,7 +209,7 @@ function Header(props) {
   }, []);
 
   const handleNav = (path) => {
-    navigate(path);
+    router.push(path);
     closeAll();
   };
 
@@ -259,7 +264,7 @@ function Header(props) {
             <span style={{ opacity: 0.5 }}>|</span>
             <span style={{ opacity: 0.9 }}>{t('header.loginPrompt', 'Log in to access professional portals')}</span>
             <button 
-              onClick={() => navigate('/login')}
+              onClick={() => router.push('/login')}
               style={{
                 background: 'rgba(255,255,255,0.15)',
                 color: 'white',
@@ -310,14 +315,14 @@ function Header(props) {
           {/* Compact logo on mobile, full logo on desktop */}
           <span className="site-header__logo-desktop">
             {logoUrl ? (
-              <img src={logoUrl} alt={tenantName || "Partner Logo"} style={{ height: '40px', objectFit: 'contain' }} />
+              <Image src={logoUrl} alt={tenantName || "Partner Logo"} width={160} height={40} style={{ height: '40px', width: 'auto', objectFit: 'contain' }} />
             ) : (
               <BrandLogo variant="dark" size="default" />
             )}
           </span>
           <span className="site-header__logo-mobile">
             {logoUrl ? (
-              <img src={logoUrl} alt={tenantName || "Partner Logo"} style={{ height: '32px', objectFit: 'contain' }} />
+              <Image src={logoUrl} alt={tenantName || "Partner Logo"} width={160} height={32} style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
             ) : (
               <BrandLogo variant="dark" size="compact" />
             )}
@@ -336,7 +341,7 @@ function Header(props) {
                 return (
                   <Link
                     key={nav.path}
-                    to={nav.path}
+                    href={nav.path}
                     style={navLinkStyle}
                     onMouseOver={(e) => { e.currentTarget.style.color = 'var(--secondary)'; }}
                     onMouseOut={(e) => { e.currentTarget.style.color = navColor; }}
@@ -379,7 +384,7 @@ function Header(props) {
                       {ACADEMIA_MENU.map(item => (
                         <Link
                           key={item.path}
-                          to={item.path}
+                          href={item.path}
                           onClick={() => setActiveDropdown(null)}
                           style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -696,7 +701,7 @@ function Header(props) {
               backgroundColor: 'var(--background)'
             }}>
               {logoUrl ? (
-                <img src={logoUrl} alt={tenantName || "Partner Logo"} style={{ height: '32px', objectFit: 'contain' }} />
+                <Image src={logoUrl} alt={tenantName || "Partner Logo"} width={160} height={32} style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
               ) : (
                 <BrandLogo variant="dark" size="compact" />
               )}
@@ -745,7 +750,7 @@ function Header(props) {
                         return (
                           <Link 
                             key={item.label}
-                            to={item.path} 
+                            href={item.path} 
                             style={S.drawerLink} 
                             onClick={() => setMobileMenuOpen(false)}
                           >
@@ -770,7 +775,7 @@ function Header(props) {
                                 {CATALOGS_MENU.map(subItem => (
                                   <Link
                                     key={subItem.path}
-                                    to={subItem.path}
+                                    href={subItem.path}
                                     style={{
                                       ...S.drawerLink, fontSize: '0.9rem',
                                       color: 'var(--text-primary)',
@@ -804,7 +809,7 @@ function Header(props) {
                                 {ACADEMIA_MENU.map(subItem => (
                                   <Link
                                     key={subItem.path}
-                                    to={subItem.path}
+                                    href={subItem.path}
                                     style={{
                                       ...S.drawerLink, fontSize: '0.9rem',
                                       color: subItem.soon ? 'var(--text-muted)' : 'var(--text-primary)',
@@ -836,18 +841,19 @@ function Header(props) {
                               aria-expanded={mobileExpanded === 'resources'}
                             >
                               <BookMarked size={18} /> {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
+                              <BookMarked size={18} /> {t(`nav.${item.label.replace(/\s+/g, '')}`, item.label)}
                               <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'resources' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
                             </button>
                             {mobileExpanded === 'resources' && (
                               <div style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column' }}>
                                 {RESOURCES_MENU.map(subItem => (
-                                  <Link
+                                  <Link 
                                     key={subItem.path}
-                                    to={subItem.path}
+                                    href={subItem.path}
                                     style={{ ...S.drawerLink, fontSize: '0.9rem', color: 'var(--text-muted)', paddingTop: '0.55rem', paddingBottom: '0.55rem' }}
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
-                                    {t(`nav.${subItem.label.replace(/\\s+/g, '')}`, subItem.label)}
+                                    {t(`nav.${subItem.label.replace(/\s+/g, '')}`, subItem.label)}
                                   </Link>
                                 ))}
                               </div>
@@ -908,11 +914,11 @@ function Header(props) {
                       </div>
                     </div>
                     {activeRole === 'admin' ? (
-                      <Link to="/admin" className="drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--error, #ef4444)' }}>
+                      <Link href="/admin" className="drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--error, #ef4444)' }}>
                         <LayoutDashboard size={18} /> {t('header.adminBoard', 'Admin Board')}
                       </Link>
                     ) : (
-                      <Link to="/patient" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> {t('header.dashboard', 'Dashboard')}</Link>
+                      <Link href="/patient" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> {t('header.dashboard', 'Dashboard')}</Link>
                     )}                    <button 
                       onClick={() => { logout(); setMobileMenuOpen(false); }}
                       style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', textAlign: 'left' }}
@@ -924,7 +930,7 @@ function Header(props) {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem' }}>
                     <Link
-                      to="/login"
+                      href="/login"
                       className="drawer-link"
                       style={{ backgroundColor: 'var(--primary)', color: 'white', justifyContent: 'center', borderRadius: '12px' }}
                       onClick={() => setMobileMenuOpen(false)}
@@ -932,7 +938,7 @@ function Header(props) {
                       <LogIn size={18} /> Login
                     </Link>
                     <Link
-                      to={{ pathname: '/login', search: '?tab=register' }}
+                      href={{ pathname: '/login', query: { tab: 'register' } }}
                       className="drawer-link"
                       style={{ backgroundColor: 'transparent', color: 'var(--primary)', justifyContent: 'center', border: '1.5px solid var(--primary)', borderRadius: '12px' }}
                       onClick={() => setMobileMenuOpen(false)}

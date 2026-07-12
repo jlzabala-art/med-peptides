@@ -1,8 +1,6 @@
-import X from "lucide-react/dist/esm/icons/x";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import React from 'react';
 import RightWorkspacePanel from './RightWorkspacePanel';
+import { X, SlidersHorizontal, ChevronDown } from '@/lib/icons';
 
 const GOALS = [
   { id: 'weight_loss_glp1', label: 'Weight Loss / GLP-1' },

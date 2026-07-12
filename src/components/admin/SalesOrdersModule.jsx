@@ -1,3 +1,5 @@
+"use client";
+
 import Edit from "lucide-react/dist/esm/icons/edit";
 import Send from "lucide-react/dist/esm/icons/send";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
@@ -5,6 +7,7 @@ import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import B2BDocumentsLayout from './B2BDocumentsLayout';
 import ZohoPaperPreview from './ZohoPaperPreview';
 

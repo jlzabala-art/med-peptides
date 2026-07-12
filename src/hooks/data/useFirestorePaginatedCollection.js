@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   collection,
   query,
@@ -9,7 +9,8 @@ import {
   getDocs,
   getCountFromServer,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 /**
  * useFirestorePaginatedCollection
@@ -65,11 +66,24 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
     orderByFields = [['createdAt', 'desc']],
     pageSize = 50,
     enabled = true,
+    initialData = null,
     onDataLoaded,
   } = options;
 
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Memoize array conditions to prevent infinite loops when arrays are passed inline
+  const whereConditionsStr = JSON.stringify(whereConditions);
+  const orderByFieldsStr = JSON.stringify(orderByFields);
+
+  const memoizedWhere = useMemo(() => JSON.parse(whereConditionsStr), [whereConditionsStr]);
+  const memoizedOrder = useMemo(() => JSON.parse(orderByFieldsStr), [orderByFieldsStr]);
+
+  const onDataLoadedRef = useRef(onDataLoaded);
+  useEffect(() => {
+    onDataLoadedRef.current = onDataLoaded;
+  }, [onDataLoaded]);
+
+  const [data, setData] = useState(initialData || []);
+  const [isLoading, setIsLoading] = useState(initialData ? false : true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
@@ -84,13 +98,13 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
     (startAfterDoc = null, limitOverride = null) => {
       let q = collection(db, collectionPath);
 
-      whereConditions.forEach(([field, op, value]) => {
+      memoizedWhere.forEach(([field, op, value]) => {
         if (value !== undefined && value !== null) {
           q = query(q, where(field, op, value));
         }
       });
 
-      orderByFields.forEach(([field, direction = 'asc']) => {
+      memoizedOrder.forEach(([field, direction = 'asc']) => {
         q = query(q, orderBy(field, direction));
       });
 
@@ -102,7 +116,7 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
 
       return q;
     },
-    [collectionPath, whereConditions, orderByFields, pageSize]
+    [collectionPath, memoizedWhere, memoizedOrder, pageSize]
   );
 
   /** Initial fetch (page 1) */
@@ -134,7 +148,7 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
       // Get total count (non-blocking, for display)
       fetchTotalCount();
 
-      onDataLoaded?.(docs);
+      onDataLoadedRef.current?.(docs);
     } catch (err) {
       console.error(`[useFirestorePaginatedCollection] Error fetching ${collectionPath}:`, err);
       // If it's an index error, provide a helpful message
@@ -150,7 +164,7 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [enabled, collectionPath, buildQuery, pageSize, onDataLoaded]);
+  }, [enabled, collectionPath, buildQuery, pageSize]);
 
   /** Load next page (append mode for infinite scroll) */
   const loadMore = useCallback(async () => {
@@ -177,19 +191,19 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
         cursorsRef.current = [...cursorsRef.current, snap.docs[snap.docs.length - 1]];
       }
 
-      onDataLoaded?.(newDocs);
+      onDataLoadedRef.current?.(newDocs);
     } catch (err) {
       console.error(`[useFirestorePaginatedCollection] Error loading more from ${collectionPath}:`, err);
     } finally {
       setIsFetchingMore(false);
     }
-  }, [hasMore, isFetchingMore, isLoading, buildQuery, pageSize, collectionPath, onDataLoaded]);
+  }, [hasMore, isFetchingMore, isLoading, buildQuery, pageSize, collectionPath]);
 
   /** Get total count (for UI display) — uses Firestore count aggregate */
   const fetchTotalCount = useCallback(async () => {
     try {
       let q = collection(db, collectionPath);
-      whereConditions.forEach(([field, op, value]) => {
+      memoizedWhere.forEach(([field, op, value]) => {
         if (value !== undefined && value !== null) {
           q = query(q, where(field, op, value));
         }
@@ -199,7 +213,7 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
     } catch {
       // Count queries may fail on older Firestore setups — non-critical
     }
-  }, [collectionPath, whereConditions]);
+  }, [collectionPath, memoizedWhere]);
 
   /** Re-run the initial fetch (e.g. after a mutation) */
   const refresh = useCallback(() => {
@@ -208,8 +222,17 @@ export function useFirestorePaginatedCollection(collectionPath, options = {}) {
 
   // Auto-fetch on mount and when key options change
   useEffect(() => {
+    // If we have initialData and this is the very first render, skip the fetch
+    // to avoid overriding Server-Side fetched data.
+    if (initialData && data.length > 0 && data[0] === initialData[0] && !cursorsRef.current.length) {
+      if (initialData.length > 0) {
+        cursorsRef.current = []; // We don't have the firestore document reference for cursors when data comes from server, 
+        // so pagination will require a new fetch or we can just fetch the first page from firestore when they click 'Load More'
+      }
+      return;
+    }
     fetchInitial();
-  }, [fetchInitial]);
+  }, [fetchInitial, initialData]);
 
   return {
     data,

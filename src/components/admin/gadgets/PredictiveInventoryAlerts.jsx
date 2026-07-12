@@ -1,10 +1,5 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import CheckSquare from "lucide-react/dist/esm/icons/check-square";
-import Package from "lucide-react/dist/esm/icons/package";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Eye from "lucide-react/dist/esm/icons/eye";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -14,6 +9,7 @@ import React, { useState } from 'react';
 
 
 import { Button } from '../../ui';
+import { AlertTriangle, TrendingDown, Sparkles, CheckSquare, Package, ChevronRight, Eye } from '@/lib/icons';
 
 export default function PredictiveInventoryAlerts({ products = [], onOpenProduct }) {
   const [orderedMap, setOrderedMap] = useState({});

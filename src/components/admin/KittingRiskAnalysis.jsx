@@ -1,16 +1,14 @@
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import PackageX from "lucide-react/dist/esm/icons/package-x";
-import Replace from "lucide-react/dist/esm/icons/replace";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import PackageSearch from "lucide-react/dist/esm/icons/package-search";
+"use client";
+
 import React, { useState } from 'react';
 
 
 
 
 
-import { PROTOCOL_BLUEPRINTS } from '../../data/protocolBlueprints';
+import { useProtocols } from '../../hooks/shared/useProtocols';
 import notifier from '../../services/NotificationService';
+import { AlertTriangle, PackageX, RefreshCw, Zap, PackageSearch } from '@/lib/icons';
 
 // Mock current physical stock levels
 const mockInventoryStock = {
@@ -25,10 +23,16 @@ const mockInventoryStock = {
 };
 
 export default function KittingRiskAnalysis() {
+  const { products } = useProducts();
+  const { protocols } = useProtocols({ publicOnly: false });
   const [resolving, setResolving] = useState(null);
 
-  // Analyze protocols to find which ones can't be fulfilled
-  const risks = Object.entries(PROTOCOL_BLUEPRINTS).map(([key, protocol]) => {
+  // Map each protocol to its required SKUs and compare against inventory
+  const risks = useMemo(() => {
+    if (!products.length || !protocols.length) return [];
+    
+    return protocols.map((protocol) => {
+      const key = protocol.id || protocol.protocol_id;
     let bottlenecks = [];
     // Check base supplies
     if (mockInventoryStock['Bacteriostatic Water 30ml'] < 2) bottlenecks.push({ item: 'Bacteriostatic Water', type: 'supply', shortage: true });
@@ -61,7 +65,8 @@ export default function KittingRiskAnalysis() {
       return { id: key, name: protocol.title || protocol.phases?.[0]?.name || key, bottlenecks };
     }
     return null;
-  }).filter(Boolean);
+    }).filter(Boolean);
+  }, [products, protocols]);
 
   const handleResolve = (riskId, bottleneck) => {
     setResolving(riskId + bottleneck.item);
@@ -113,7 +118,7 @@ export default function KittingRiskAnalysis() {
                         disabled={resolving === risk.id + btn.item}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', color: 'var(--primary)' }}
                       >
-                        <Replace size={14} />
+                        <RefreshCw size={14} />
                         {resolving === risk.id + btn.item ? 'Updating Zoho...' : 'Auto-Substitute'}
                       </button>
                     ) : (

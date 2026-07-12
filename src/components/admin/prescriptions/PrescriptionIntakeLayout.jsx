@@ -1,11 +1,16 @@
+"use client";
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Upload, CheckCircle2 } from '@/lib/icons';
 import { collection, query, where, orderBy, onSnapshot, limit, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
+const storage = fb?.storage;
 import WorkflowDetailWorkspace from '../../../features/operations/components/WorkflowDetailWorkspace';
 import toast from 'react-hot-toast';
 import { useDropzone } from 'react-dropzone';
+import { usePrescriptionAI } from '../../../hooks/shared/usePrescriptionAI';
 
 export default function PrescriptionIntakeLayout() {
   const [queue, setQueue] = useState([]);
@@ -34,6 +39,7 @@ export default function PrescriptionIntakeLayout() {
     return () => unsubscribe();
   }, []);
 
+  const { queuePrescription } = usePrescriptionAI();
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length === 0) return;
     const file = acceptedFiles[0];
@@ -42,29 +48,8 @@ export default function PrescriptionIntakeLayout() {
       setUploading(true);
       toast.loading('Uploading document...', { id: 'upload-toast' });
 
-      // 1. Upload to Storage
-      const storageRef = ref(storage, `prescriptions/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-
-      // 2. Create in inbound_emails to trigger AI Pipeline
-      const docId = `manual_${Date.now()}`;
-      await setDoc(doc(collection(db, 'inbound_emails'), docId), {
-        from: 'system@regenpept.com',
-        to: 'system@regenpept.com',
-        subject: `Manual Upload: ${file.name}`,
-        textBody: 'Please process the attached prescription document.',
-        htmlBody: '',
-        attachments: [{
-          name: file.name,
-          contentType: file.type,
-          path: `prescriptions/${Date.now()}_${file.name}`,
-          url: downloadURL
-        }],
-        receivedAt: serverTimestamp(),
-        status: 'pending_ai',
-        source: 'manual_upload'
-      });
+      // Reutiliza la función compartida de B2B/B2C para encolar el pipeline de IA
+      await queuePrescription(file, 'b2b_portal');
 
       toast.success('Document uploaded and sent to AI queue!', { id: 'upload-toast' });
     } catch (error) {
@@ -73,7 +58,7 @@ export default function PrescriptionIntakeLayout() {
     } finally {
       setUploading(false);
     }
-  }, []);
+  }, [queuePrescription]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
     onDrop, 

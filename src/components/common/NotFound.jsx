@@ -1,9 +1,13 @@
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Home from "lucide-react/dist/esm/icons/home";
 import Search from "lucide-react/dist/esm/icons/search";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 
 
 
@@ -11,12 +15,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { track404 } from '../../hooks/useAnalytics';
 
 const NotFound = ({ onBack }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    track404(location.pathname);
-  }, [location.pathname]);
+    track404(pathname);
+  }, [pathname]);
 
   return (
     <div style={{
@@ -118,7 +122,7 @@ const NotFound = ({ onBack }) => {
           alignItems: 'center'
         }}>
           <button 
-            onClick={() => navigate('/')}
+            onClick={() => router.push('/')}
             className="btn btn-primary"
             style={{
               width: '100%',
@@ -138,7 +142,7 @@ const NotFound = ({ onBack }) => {
           </button>
 
           <button 
-            onClick={() => onBack ? onBack() : navigate(-1)}
+            onClick={() => onBack ? onBack() : router.push(-1)}
             style={{
               width: '100%',
               maxWidth: '280px',

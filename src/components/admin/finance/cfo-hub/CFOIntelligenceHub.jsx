@@ -1,4 +1,5 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from "../../../../firebase.js";
@@ -10,6 +11,7 @@ import ProfitabilityCommandCenter from './ProfitabilityCommandCenter';
 import OperationsGrid from './OperationsGrid';
 import StrategicIntelligencePanel from './StrategicIntelligencePanel';
 import ProtocolDrillDownDrawer from './ProtocolDrillDownDrawer';
+import { Loader2 } from '@/lib/icons';
 
 export default function CFOIntelligenceHub({ data, totalBalance }) {
   const [products, setProducts] = useState([]);

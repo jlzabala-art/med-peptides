@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { Bot, Sparkles, ArrowRight, TrendingUp, BookOpen } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
@@ -6,7 +7,7 @@ import React, { useState } from 'react';
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 
 /**
  * GuidedSearchHints — Phase 3 (Rules 5.0 Redesign)
@@ -84,7 +85,7 @@ const BEGINNER_EXAMPLES = [
 ];
 
 export default function GuidedSearchHints({ onOpenSearch, onSeedSearch, onOpenAI }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeGoal, setActiveGoal] = useState(null);
 
   /** Seeds the hero search bar if available, otherwise opens modal */
@@ -95,7 +96,7 @@ export default function GuidedSearchHints({ onOpenSearch, onSeedSearch, onOpenAI
     } else if (onOpenSearch) {
       onOpenSearch(label);
     } else {
-      navigate(`/products?search=${encodeURIComponent(label)}`);
+      router.push(`/products?search=${encodeURIComponent(label)}`);
     }
   };
 
@@ -107,7 +108,7 @@ export default function GuidedSearchHints({ onOpenSearch, onSeedSearch, onOpenAI
     } else if (onOpenSearch) {
       onOpenSearch(label);
     } else {
-      navigate('/');
+      router.push('/');
     }
   };
 

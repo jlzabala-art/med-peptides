@@ -1,15 +1,9 @@
+"use client";
+
 import React, { useState, useRef } from 'react';
-import FileText from 'lucide-react/dist/esm/icons/file-text';
-import Upload from 'lucide-react/dist/esm/icons/upload';
-import Link from 'lucide-react/dist/esm/icons/link';
-import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
-import BookOpen from 'lucide-react/dist/esm/icons/book-open';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import FilePlus from 'lucide-react/dist/esm/icons/file-plus';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import GlobalSearchBar from '../../../ui/GlobalSearchBar';
+import { FileText, Upload, Link, Trash2, ExternalLink, BookOpen, ShieldCheck, FilePlus, Search, Sparkles } from '@/lib/icons';
+import PubMedPreviewPanel from '../../../discovery/PubMedPreviewPanel';
 
 // ── constants ─────────────────────────────────────────────────────────────────
 const DOC_TYPES = [
@@ -92,8 +86,14 @@ function DocCard({ doc, onRemove }) {
 }
 
 // ── AddDocModal ───────────────────────────────────────────────────────────────
-function AddDocModal({ open, onClose, onAdd }) {
-  const [form, setForm] = useState({ title: '', type: 'reference', url: '', description: '' });
+export function AddDocModal({ open, onClose, onAdd, defaultType }) {
+  const [form, setForm] = useState({ title: '', type: defaultType || 'reference', url: '', description: '' });
+
+  React.useEffect(() => {
+    if (open) {
+      setForm({ title: '', type: defaultType || 'reference', url: '', description: '' });
+    }
+  }, [open, defaultType]);
 
   if (!open) return null;
 
@@ -101,7 +101,6 @@ function AddDocModal({ open, onClose, onAdd }) {
     e.preventDefault();
     if (!form.title.trim()) return;
     onAdd({ ...form, id: Date.now().toString(), addedAt: new Date().toISOString() });
-    setForm({ title: '', type: 'reference', url: '', description: '' });
     onClose();
   };
 
@@ -162,6 +161,7 @@ export default function ProtocolDocuments({ protocol, onUpdate }) {
   const [search, setSearch]   = useState('');
   const [filter, setFilter]   = useState('all');
   const [showModal, setShowModal] = useState(false);
+  const [showPubMed, setShowPubMed] = useState(false);
 
   const docs = rawDocs.filter(d => {
     const matchesSearch = !search ||
@@ -192,9 +192,14 @@ export default function ProtocolDocuments({ protocol, onUpdate }) {
             PDFs, informed consents, scientific literature, and protocol references.
           </p>
         </div>
-        <button onClick={() => setShowModal(true)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <FilePlus size={16} /> Add Document
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => setShowPubMed(true)} className="gcp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+            <BookOpen size={16} /> Search PubMed
+          </button>
+          <button onClick={() => setShowModal(true)} className="gcp-btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+            <FilePlus size={16} /> Add Document
+          </button>
+        </div>
       </div>
 
       {/* AI tip */}
@@ -218,7 +223,7 @@ export default function ProtocolDocuments({ protocol, onUpdate }) {
       {/* Type filters */}
       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
         {[{ id: 'all', label: 'All' }, ...DOC_TYPES].map(t => (
-          <button
+           <button
             key={t.id}
             onClick={() => setFilter(t.id)}
             style={{
@@ -239,7 +244,7 @@ export default function ProtocolDocuments({ protocol, onUpdate }) {
           const count = rawDocs.filter(d => d.type === t.id).length;
           if (!count) return null;
           return (
-            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: t.color, fontWeight: 700 }}>
+             <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: t.color, fontWeight: 700 }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: t.color, display: 'inline-block' }} />
               {count} {t.label}{count > 1 ? 's' : ''}
             </div>
@@ -256,9 +261,14 @@ export default function ProtocolDocuments({ protocol, onUpdate }) {
             {search ? `No documents match "${search}".` : 'Attach consent forms, PubMed references, or protocol PDFs to enrich this protocol.'}
           </p>
           {!search && (
-            <button onClick={() => setShowModal(true)} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FilePlus size={16} /> Add First Document
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+              <button onClick={() => setShowPubMed(true)} className="gcp-btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px', padding: '0.5rem 1rem' }}>
+                <BookOpen size={16} /> Search PubMed
+              </button>
+              <button onClick={() => setShowModal(true)} className="gcp-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px', padding: '0.5rem 1rem' }}>
+                <FilePlus size={16} /> Add First Document
+              </button>
+            </div>
           )}
         </div>
       ) : (
@@ -268,6 +278,11 @@ export default function ProtocolDocuments({ protocol, onUpdate }) {
       )}
 
       <AddDocModal open={showModal} onClose={() => setShowModal(false)} onAdd={handleAdd} />
+      <PubMedPreviewPanel 
+        isOpen={showPubMed} 
+        onClose={() => setShowPubMed(false)} 
+        product={{ name: protocol?.phases?.[0]?.items?.map(i => i.name).join(' OR ') || protocol?.protocol_name || 'Peptides' }} 
+      />
     </div>
   );
 }

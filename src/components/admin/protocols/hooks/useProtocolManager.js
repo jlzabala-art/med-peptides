@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useGlobalStore } from '../../../../store/globalStore';
+import { useGlobalStore } from '../../../../stores/globalStore';
 
 /**
  * Custom Hook: useProtocolManager
  * Centralizes the state, UI logic, and saving functions for the Protocol Hub Dashboard.
  */
-export function useProtocolManager({ initialProtocol, onSave, onClose }) {
-  const [activeTab, setActiveTab] = useState('overview');
+export function useProtocolManager({ initialProtocol, onSave, onClose, onChange }) {
+  const [activeTab, setActiveTab] = useState('clinical');
   const [editedProtocol, setEditedProtocol] = useState({ ...initialProtocol });
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -22,7 +22,11 @@ export function useProtocolManager({ initialProtocol, onSave, onClose }) {
 
   // Deep update handler for the protocol
   const handleUpdate = (updates) => {
-    setEditedProtocol(prev => ({ ...prev, ...updates }));
+    setEditedProtocol(prev => {
+      const next = { ...prev, ...updates };
+      if (onChange) onChange(next);
+      return next;
+    });
     setHasUnsavedChanges(true);
   };
 

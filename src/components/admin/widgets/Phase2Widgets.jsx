@@ -1,12 +1,6 @@
 import React from 'react';
 import { ExecutiveSummaryStrip, TodayPrioritiesQueue } from './CommandCenterWidgets';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import Box from 'lucide-react/dist/esm/icons/box';
-import Search from 'lucide-react/dist/esm/icons/search';
-import Users from 'lucide-react/dist/esm/icons/users';
+import { TrendingUp, Sparkles, AlertTriangle, ArrowRight, Box, Search, Users } from '@/lib/icons';
 
 export function ExecutiveSummaryWidget() {
   return (

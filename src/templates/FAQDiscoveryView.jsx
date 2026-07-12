@@ -1,13 +1,5 @@
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Search from "lucide-react/dist/esm/icons/search";
-import Info from "lucide-react/dist/esm/icons/info";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -21,13 +13,15 @@ import { usePageMeta } from '../hooks/usePageMeta';
 
 
 
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import DiscoverySearchBar from '../components/discovery/DiscoverySearchBar';
 import FAQAccordion from '../components/discovery/FAQAccordion';
 import RelatedPeptidesRow from '../components/discovery/RelatedPeptidesRow';
 import ComparePeptidesBlock from '../components/discovery/ComparePeptidesBlock';
+import { HelpCircle, Lock, BookOpen, GraduationCap, Sparkles, ChevronRight, Search, Info, MessageSquare, X } from '@/lib/icons';
 import {
   searchFAQ,
   getFAQByCategory,

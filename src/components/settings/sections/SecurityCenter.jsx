@@ -1,9 +1,11 @@
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Smartphone from "lucide-react/dist/esm/icons/smartphone";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import Monitor from "lucide-react/dist/esm/icons/monitor";
-import KeyRound from "lucide-react/dist/esm/icons/key-round";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+"use client";
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { getAuth, updatePassword, signOut } from 'firebase/auth';
@@ -15,7 +17,9 @@ import { db } from '../../../firebase';
 
 
 
+
 import toast from 'react-hot-toast';
+import { Lock, Smartphone, ShieldAlert, Monitor, KeyRound, Loader2 } from '@/lib/icons';
 
 export default function SecurityCenter() {
   const { user } = useAuth();

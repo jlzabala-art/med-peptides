@@ -1,3 +1,5 @@
+"use client";
+
 import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";

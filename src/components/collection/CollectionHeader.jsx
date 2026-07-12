@@ -1,6 +1,7 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+
+
 import React from 'react';
+import { Search, Sparkles } from '@/lib/icons';
 
 
 

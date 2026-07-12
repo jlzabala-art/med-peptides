@@ -1,8 +1,8 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { Search } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { BookOpen } from '@/lib/icons';
+import { MessageSquare } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
 
 
 

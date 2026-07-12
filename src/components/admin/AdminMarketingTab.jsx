@@ -1,3 +1,5 @@
+"use client";
+
 import Globe from "lucide-react/dist/esm/icons/globe";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";

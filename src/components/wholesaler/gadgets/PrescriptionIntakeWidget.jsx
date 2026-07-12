@@ -1,3 +1,5 @@
+"use client";
+
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
 import Clipboard from "lucide-react/dist/esm/icons/clipboard";
@@ -13,6 +15,7 @@ import Activity from "lucide-react/dist/esm/icons/activity";
 import FileCheck from "lucide-react/dist/esm/icons/file-check";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { getCatalog } from '../../../repositories/productRepository';

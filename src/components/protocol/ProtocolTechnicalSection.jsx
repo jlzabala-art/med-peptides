@@ -1,3 +1,5 @@
+"use client";
+
 import Activity from "lucide-react/dist/esm/icons/activity";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Package from "lucide-react/dist/esm/icons/package";

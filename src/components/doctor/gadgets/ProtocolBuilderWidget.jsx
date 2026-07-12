@@ -1,13 +1,12 @@
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Save from "lucide-react/dist/esm/icons/save";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { catalog } from '../../../data/v2/index.js';
+import { Beaker, Plus, Trash2, Save, FlaskConical } from '@/lib/icons';
 
 
 

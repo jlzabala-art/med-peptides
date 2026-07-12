@@ -1,10 +1,5 @@
-import Send from "lucide-react/dist/esm/icons/send";
-import Paperclip from "lucide-react/dist/esm/icons/paperclip";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
-import LinkIcon from "lucide-react/dist/esm/icons/link";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 
 
@@ -17,6 +12,7 @@ import { messagingService } from '../../../services/messagingService';
 import RichMessageCard from './RichMessageCard';
 import ChatAIAssistant from './ChatAIAssistant';
 import './MessagingApp.css';
+import { Send, Paperclip, FileText, ImageIcon, LinkIcon, DollarSign, Sparkles } from '@/lib/icons';
 
 export default function ChatWindow({ conversation, currentUserId, currentUserRole, onBack, onToggleContext }) {
   const [messages, setMessages] = useState([]);

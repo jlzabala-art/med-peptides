@@ -1,7 +1,5 @@
-import Package from "lucide-react/dist/esm/icons/package";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import FileText from "lucide-react/dist/esm/icons/file-text";
 import React from 'react';
+import { Package, ExternalLink, FileText } from '@/lib/icons';
 
 
 

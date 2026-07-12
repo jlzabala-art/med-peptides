@@ -1,10 +1,16 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Activity, ShieldCheck, FileText, Loader2, ClipboardList } from '@/lib/icons';
+import { Mail, Phone, MapPin, Activity, ShieldCheck, FileText, Loader2, ClipboardList, UserPlus, FilePlus } from '@/lib/icons';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import StandardDrawer from '../../ui/StandardDrawer';
 import StandardDrawerTabs from '../../common/StandardDrawerTabs';
 import DataTable from '../../ui/DataTable';
+import ImportPrescriptionModal from '../prescriptions/ImportPrescriptionModal';
+import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
+import { FileUp, Eye } from 'lucide-react';
 
 export default function PhysicianProfileDrawer({ doctor, onClose }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -13,6 +19,8 @@ export default function PhysicianProfileDrawer({ doctor, onClose }) {
   const [prescriptions, setPrescriptions] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
 
   useEffect(() => {
     async function fetchDetailedData() {
@@ -63,9 +71,17 @@ export default function PhysicianProfileDrawer({ doctor, onClose }) {
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'patients', label: 'Patients', count: patients.length || null },
+    { id: 'prescriptions', label: 'Prescriptions', count: prescriptions.length || null },
     { id: 'orders', label: 'Orders', count: orders.length || null },
-    { id: 'prescriptions', label: 'Prescriptions', count: prescriptions.length || null }
+    { id: 'timeline', label: 'Timeline' }
   ];
+
+  // Merge events for Timeline
+  const timelineEvents = [...patients.map(p => ({ ...p, type: 'patient_assigned', date: p.createdAt })), 
+                          ...orders.map(o => ({ ...o, type: 'order_created', date: o.createdAt })), 
+                          ...prescriptions.map(p => ({ ...p, type: 'prescription_issued', date: p.createdAt }))]
+                         .filter(e => e.date)
+                         .sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
 
   return (
     <StandardDrawer
@@ -119,17 +135,41 @@ export default function PhysicianProfileDrawer({ doctor, onClose }) {
             )}
 
             {activeTab === 'prescriptions' && (
-              <DataTable 
-                data={prescriptions}
-                columns={[
-                  { header: 'Document', accessor: (p) => p.documentNumber || p.id },
-                  { header: 'Patient', accessor: (p) => p.patientName || 'Unknown' },
-                  { header: 'Status', accessor: (p) => p.status || 'Draft' }
-                ]}
-                emptyState={
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No prescriptions created by this physician.</div>
-                }
-              />
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                  <button 
+                    onClick={() => setIsImportOpen(true)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '6px 12px', borderRadius: '8px',
+                      backgroundColor: '#e0f2fe', color: '#0369a1',
+                      border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700
+                    }}
+                  >
+                    <FileUp size={14} /> Import Rx
+                  </button>
+                </div>
+                <DataTable 
+                  data={prescriptions}
+                  columns={[
+                    { header: 'Document', accessor: (p) => p.documentNumber || p.id },
+                    { header: 'Patient', accessor: (p) => p.patientName || 'Unknown' },
+                    { header: 'Status', accessor: (p) => p.status || 'Draft' },
+                    { header: 'Action', accessor: (p) => p.fileUrl ? (
+                      <button 
+                        onClick={() => setPreviewPdfUrl(p.fileUrl)}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        title="View PDF"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    ) : '-' }
+                  ]}
+                  emptyState={
+                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No prescriptions created by this physician.</div>
+                  }
+                />
+              </div>
             )}
 
             {activeTab === 'orders' && (
@@ -145,9 +185,52 @@ export default function PhysicianProfileDrawer({ doctor, onClose }) {
                 }
               />
             )}
+
+            {activeTab === 'timeline' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+                {timelineEvents.length === 0 ? (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No activity timeline available.</div>
+                ) : (
+                  timelineEvents.map((event, idx) => (
+                    <div key={idx} style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {event.type === 'patient_assigned' && <UserPlus size={14} color="var(--primary)" />}
+                          {event.type === 'prescription_issued' && <FilePlus size={14} color="var(--primary)" />}
+                          {event.type === 'order_created' && <ClipboardList size={14} color="var(--primary)" />}
+                        </div>
+                        {idx !== timelineEvents.length - 1 && <div style={{ width: '2px', flex: 1, backgroundColor: 'var(--border)', marginTop: '0.5rem', marginBottom: '0.5rem' }} />}
+                      </div>
+                      <div style={{ flex: 1, paddingBottom: '1.5rem' }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
+                          {event.type === 'patient_assigned' && `Patient Assigned: ${event.patientName || 'Unknown'}`}
+                          {event.type === 'prescription_issued' && `Prescription Issued: ${event.documentNumber || event.id}`}
+                          {event.type === 'order_created' && `Order Created: ${event.documentNumber || event.id}`}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                          {new Date(event.date?.seconds * 1000).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
+      
+      <ImportPrescriptionModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        context={{ doctorId: doctor.id, doctorName: doctorName }}
+      />
+
+      <DocumentPreviewModal
+        isOpen={!!previewPdfUrl}
+        onClose={() => setPreviewPdfUrl(null)}
+        fileUrl={previewPdfUrl}
+      />
     </StandardDrawer>
   );
 }

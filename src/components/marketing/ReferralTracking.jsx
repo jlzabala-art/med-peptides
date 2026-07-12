@@ -1,11 +1,8 @@
-import Link from "lucide-react/dist/esm/icons/link";
-import Users from "lucide-react/dist/esm/icons/users";
-import Share2 from "lucide-react/dist/esm/icons/share-2";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+"use client";
+
+import Link from 'next/link';
 import React, { useState } from 'react';
+import {  Users, Share2, DollarSign, TrendingUp, Copy, CheckCircle } from '@/lib/icons';
 
 
 

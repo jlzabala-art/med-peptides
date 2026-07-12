@@ -1,13 +1,24 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+"use client";
+
 import React, { useState, useCallback } from 'react';
 
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronUp } from '@/lib/icons';
 
-export function SectionAccordion({ title, icon: Icon, defaultOpen = false, children, accentColor = 'var(--color-primary)' }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const toggle = useCallback(() => setOpen(prev => !prev), []);
+export function SectionAccordion({ id, title, icon: Icon, defaultOpen = false, isOpen, onToggle, children, accentColor = 'var(--color-primary)' }) {
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  
+  const isControlled = isOpen !== undefined;
+  const open = isControlled ? isOpen : internalOpen;
+  
+  const toggle = useCallback(() => {
+    if (isControlled && onToggle) {
+      onToggle(id);
+    } else {
+      setInternalOpen(prev => !prev);
+    }
+  }, [isControlled, onToggle, id]);
 
   return (
     <div

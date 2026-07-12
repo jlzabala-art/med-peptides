@@ -1,21 +1,8 @@
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import UserCheck from "lucide-react/dist/esm/icons/user-check";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Terminal from "lucide-react/dist/esm/icons/terminal";
-import Database from "lucide-react/dist/esm/icons/database";
-import Activity from "lucide-react/dist/esm/icons/activity";
+import { usePathname } from 'next/navigation';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
+import { FileText, TrendingUp, AlertCircle, ShoppingCart, UserCheck, MessageSquare, ClipboardList, Calendar, ShieldAlert, RefreshCw, Sparkles, BookOpen, Terminal, Database, Activity } from '@/lib/icons';
 
 
 
@@ -33,8 +20,8 @@ import { motion } from 'framer-motion';
 
 
 export default function ContextActionCards({ onActionClick }) {
-  const location = useLocation();
-  const path = location.pathname;
+  const pathname = usePathname();
+  const path = pathname;
 
   // Contextual operational functions based on path
   const getContextCards = () => {

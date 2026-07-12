@@ -1,8 +1,11 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { calculateVariantHealthScore } from '../../useVariantHealthScore';
 import AppActionGroup from '../../../../ui/AppActionGroup';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import { Sparkles } from '@/lib/icons';
 
 const thStyle = {
   padding: '12px',
@@ -39,7 +42,7 @@ const badgeStyle = (isValid) => ({
 });
 
 export default function VariantOverviewTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [touchTimer, setTouchTimer] = React.useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
@@ -240,7 +243,7 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
                 <span 
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/admin/wholesellers?search=${encodeURIComponent(v.supplierName)}&openVariant=${v.id}`);
+                    router.push(`/admin/wholesellers?search=${encodeURIComponent(v.supplierName)}&openVariant=${v.id}`);
                   }}
                   style={{
                     cursor: 'pointer',

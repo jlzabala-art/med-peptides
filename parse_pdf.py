@@ -1,8 +1,7 @@
 import fitz # PyMuPDF
-import re
-import json
+import sys
 
-doc = fitz.open("Med-Peptides_Portfolio Poland.pdf")
+doc = fitz.open(sys.argv[1])
 text = ""
 for page in doc:
     text += page.get_text()

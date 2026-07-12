@@ -1,5 +1,6 @@
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
+
 import React from 'react';
+import { ChevronDown } from '@/lib/icons';
 
 
 export default function Select({ 

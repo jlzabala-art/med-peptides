@@ -1,5 +1,6 @@
 import React from 'react';
-import X from 'lucide-react/dist/esm/icons/x';
+import { X } from '@/lib/icons';
+
 
 export default function ActiveFilterChips({
   activeCategories,

@@ -8,11 +8,21 @@
 .atlas-widget {
   min-height: 400px;
 }
+.atlas-widget-full {
+  grid-column: span 12;
+}
+.atlas-widget-large {
+  grid-column: span 8;
+}
+.atlas-widget-normal {
+  grid-column: span 4;
+}
 .atlas-widget-kpi {
+  grid-column: span 3;
   min-height: 120px;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1024px) {
   .atlas-widget-kpi {
     grid-column: span 6 !important;
   }
@@ -21,7 +31,7 @@
   }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .atlas-widget-kpi {
     grid-column: span 12 !important;
   }

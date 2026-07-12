@@ -1,3 +1,5 @@
+"use client";
+
 import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import Check from "lucide-react/dist/esm/icons/check";
@@ -7,7 +9,8 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
 

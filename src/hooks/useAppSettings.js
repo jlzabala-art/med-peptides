@@ -1,6 +1,7 @@
  
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { onSnapshot, doc } from 'firebase/firestore';
 
 // ── Default settings (overridden by Firestore when available) ────────────────
@@ -34,11 +35,13 @@ const DEFAULT_SETTINGS = {
 export function useAppSettings() {
   // ── Region state (persisted) ─────────────────────────────────────────────
   const [region, setRegion] = useState(() => {
+    if (typeof window === 'undefined') return null;
     try { return localStorage.getItem('mp_region') || null; }
     catch { return null; }
   });
 
   const [selectedCountryCode, setSelectedCountryCode] = useState(() => {
+    if (typeof window === 'undefined') return null;
     try {
       return (
         localStorage.getItem('mp_country_code') ||

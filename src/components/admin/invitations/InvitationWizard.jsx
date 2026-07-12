@@ -1,14 +1,7 @@
-import User from "lucide-react/dist/esm/icons/user";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Send from "lucide-react/dist/esm/icons/send";
-import Mail from "lucide-react/dist/esm/icons/mail";
+"use client";
+
 import React, { useState } from 'react';
+import { User, Shield, MapPin, DollarSign, Cpu, CheckCircle, ArrowRight, ArrowLeft, Send, Mail } from '@/lib/icons';
 
 
 

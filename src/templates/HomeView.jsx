@@ -1,3 +1,5 @@
+"use client";
+
  
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';

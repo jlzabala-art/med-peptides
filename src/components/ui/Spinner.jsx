@@ -1,5 +1,6 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+
 import React from 'react';
+import { Loader2 } from '@/lib/icons';
 
 
 export default function Spinner({ size = 24, text = 'Loading...' }) {

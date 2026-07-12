@@ -1,21 +1,5 @@
-import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
-import List from "lucide-react/dist/esm/icons/list";
-import Search from "lucide-react/dist/esm/icons/search";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import X from "lucide-react/dist/esm/icons/x";
-import Check from "lucide-react/dist/esm/icons/check";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import Weight from "lucide-react/dist/esm/icons/weight";
-import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * PeptideCollectionPage — Phase 3a: Filter state + derived options.
@@ -45,7 +29,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
 
 
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { getActiveProducts } from '../repositories/productRepository';
 import '../styles/collection_shared.css';
 import CollectionHeader from '../components/collection/CollectionHeader';
@@ -54,6 +38,7 @@ import CollectionSidebar, { SidebarSection } from '../components/collection/Coll
 import FilterDrawer from '../components/collection/FilterDrawer';
 import SharedChip from '../components/collection/SharedChip';
 import ProductCard, { SkeletonCard } from '../components/collection/ProductCard';
+import { LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, FlaskConical, X, Check, Brain, Moon, Activity, Shield, Zap, Sparkles, Droplets, Tag, Weight, Dumbbell } from '@/lib/icons';
 
 const PAGE_SIZE = 20;
 
@@ -351,8 +336,8 @@ function consolidateByAdminRoute(peptides) {
 }
 
 export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompare }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useRouter();
+  const location = usePathname();
 
   usePageMeta({
     title: 'Research Peptide Catalog | Browse All Peptides | Atlas Health',
@@ -484,7 +469,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
     // p.slug is the Firestore document ID (e.g. "Semax-30mg-vial") which ProductTemplate does NOT use for URL matching.
     const nameSlug = p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug;
     if (onNavigate) onNavigate(nameSlug);
-    else navigate(`/product/${nameSlug}`);
+    else router.push(`/product/${nameSlug}`);
   };
 
   const hasActiveFilters = !!activeFilters.category || activeFilters.tags.length > 0 || !!activeFilters.search;

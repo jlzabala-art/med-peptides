@@ -1,8 +1,11 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuotationsUIStore } from '../../stores/quotationsUIStore';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { FileText, Search, Plus, Filter, MoreHorizontal, Archive, RefreshCw, LayoutGrid, List as ListIcon } from '@/lib/icons';
 import QuotationBuilderWizard from './modals/QuotationBuilderWizard';
 import QuotationDetailDrawer from './QuotationDetailDrawer';
@@ -22,19 +25,59 @@ export default function QuotationsHub() {
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch quotations (Real-time listener for the new schema)
+  // Fetch quotations and RFQs
   useEffect(() => {
-    const q = query(collection(db, 'quotations_v2'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setQuotations(docs);
+    const qQuotes = query(collection(db, 'quotations'), orderBy('createdAt', 'desc'));
+    const qRfqs = query(collection(db, 'rfqs'), orderBy('createdAt', 'desc'));
+
+    let quotesData = [];
+    let rfqsData = [];
+
+    const processData = () => {
+      const merged = [...quotesData, ...rfqsData].sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+      setQuotations(merged);
       setLoading(false);
+    };
+
+    const unsubQuotes = onSnapshot(qQuotes, (snapshot) => {
+      quotesData = snapshot.docs.map(doc => ({ id: doc.id, type: 'quotation', ...doc.data() }));
+      processData();
     }, (err) => {
       console.error('Error fetching quotations:', err);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubRfqs = onSnapshot(qRfqs, (snapshot) => {
+      rfqsData = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          type: 'rfq',
+          ...d,
+          // Map RFQ fields to expected Quotation fields for the table
+          quotationNumber: d.rfqId,
+          patientName: d.customer?.fullName || 'N/A',
+          clinicName: d.customer?.institution || 'N/A',
+          doctorName: 'N/A',
+          totalAmount: d.totals?.total || 0,
+          status: 'RFQ ' + (d.status || 'Pending'),
+          updatedAt: d.createdAt
+        };
+      });
+      processData();
+    }, (err) => {
+      console.error('Error fetching rfqs:', err);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubQuotes();
+      unsubRfqs();
+    };
   }, []);
 
   // Listen for external events (like clicking "Create Quotation" from Prescriptions)
@@ -73,15 +116,12 @@ export default function QuotationsHub() {
       key: 'status',
       render: (q) => {
         let bg = '#f1f5f9', color = '#64748b';
-        switch (q.status) {
-          case 'Pending Review':
-          case 'Negotiation': bg = '#fef3c7'; color = '#d97706'; break;
-          case 'Sent':
-          case 'Viewed': bg = '#dbeafe'; color = '#2563eb'; break;
-          case 'Accepted':
-          case 'Converted': bg = '#d1fae5'; color = '#059669'; break;
-          case 'Rejected': bg = '#fee2e2'; color = '#dc2626'; break;
-        }
+        const st = (q.status || 'Draft').toLowerCase();
+        if (st.includes('rfq')) { bg = '#e0e7ff'; color = '#4338ca'; } // indigo for RFQ
+        else if (st.includes('pending') || st.includes('negotiation')) { bg = '#fef3c7'; color = '#d97706'; }
+        else if (st.includes('sent') || st.includes('viewed')) { bg = '#dbeafe'; color = '#2563eb'; }
+        else if (st.includes('accepted') || st.includes('converted')) { bg = '#d1fae5'; color = '#059669'; }
+        else if (st.includes('rejected')) { bg = '#fee2e2'; color = '#dc2626'; }
         return (
           <span style={{ padding: '4px 8px', borderRadius: '12px', background: bg, color: color, fontSize: '0.8rem', fontWeight: 600 }}>
             {q.status || 'Draft'}

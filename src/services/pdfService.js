@@ -1817,6 +1817,10 @@ export const generateDosageGuide = async (rawProtocol, formData) => {
   addRunningFooter(doc);
 
   // ── Save ───────────────────────────────────────────────────────────────────
+  if (optionsOrTier?.returnBlob) {
+    return doc.output('blob');
+  }
+
   const slug    = (protocol.protocol_slug || 'CLINICAL').toUpperCase();
   const dateTag = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   doc.save(`REGEN-DOS-ADM-${slug}-${dateTag}.pdf`);

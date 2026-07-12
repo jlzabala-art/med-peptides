@@ -1,9 +1,9 @@
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import X from "lucide-react/dist/esm/icons/x";
-import Search from "lucide-react/dist/esm/icons/search";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import { MapPin } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
+import { Globe } from '@/lib/icons';
+import { X } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 

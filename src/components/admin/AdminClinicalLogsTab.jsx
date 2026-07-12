@@ -1,3 +1,5 @@
+"use client";
+
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import User from "lucide-react/dist/esm/icons/user";
 import Bot from "lucide-react/dist/esm/icons/bot";

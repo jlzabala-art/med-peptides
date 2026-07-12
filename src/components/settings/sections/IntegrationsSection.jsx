@@ -1,10 +1,10 @@
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import CreditCard from "lucide-react/dist/esm/icons/credit-card";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Link2 from "lucide-react/dist/esm/icons/link-2";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+
+
+
+
+
+
+
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -15,6 +15,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 
 import toast from 'react-hot-toast';
+import { Calendar, MessageSquare, CreditCard, Bot, Mail, Link2, ExternalLink } from '@/lib/icons';
 
 export default function IntegrationsSection() {
   const { isProfessional } = useAuth();

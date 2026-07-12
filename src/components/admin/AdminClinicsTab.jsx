@@ -1,3 +1,5 @@
+"use client";
+
 import Building2 from "lucide-react/dist/esm/icons/building-2";
 import Users from "lucide-react/dist/esm/icons/users";
 import FileText from "lucide-react/dist/esm/icons/file-text";

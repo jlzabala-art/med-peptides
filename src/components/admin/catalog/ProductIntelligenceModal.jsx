@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, TrendingUp, AlertTriangle, FileText, CheckCircle, Brain } from '@/lib/icons';
 

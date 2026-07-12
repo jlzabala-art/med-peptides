@@ -1,3 +1,5 @@
+"use client";
+
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";

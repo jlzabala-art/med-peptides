@@ -1,3 +1,5 @@
+"use client";
+
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import Calendar from "lucide-react/dist/esm/icons/calendar";
@@ -29,12 +31,13 @@ import ProtocolTimeline from './ProtocolTimeline';
 
 import { safeStr, humanize, displayDuration, displayPhases } from '../../utils/textUtils';
 import EligibilityBlock from './EligibilityBlock';
+import { useProtocolPDF } from '../../hooks/useProtocolPDF';
 const fmt = (v) => safeStr(v);
 
 
 
 // ── Section Accordion (lazy-render + localStorage persistence) ────────────────
-export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTotal, bundleAdded, localTier = 'retail' }) {
+export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTotal, bundleAdded, localTier = 'retail', audienceType = 'doctor' }) {
   const phases  = protocol?.phase_blueprints || protocol?.phases || [];
   const name    = protocol?.protocol_title || protocol?.name || protocol?.protocol_name || 'Protocol';
   const meta    = protocol?.metadata || {};
@@ -56,6 +59,8 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
   const longDescription  = meta.longDescription || '';
   const lastReviewed     = protocol?.protocol_last_reviewed_at || '—';
   const washoutWeeks     = protocol?.washout_recommended_weeks || protocol?.safety_profile?.washout_recommended_weeks || null;
+
+  const { isGenerating, error: pdfError, generatePDF } = useProtocolPDF();
 
   const numCompounds     = useMemo(() => {
     const compoundMap = new Map();
@@ -162,8 +167,10 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  // ── Download PDF: print the modal directly (pixel-perfect source of truth) ──
-  const handleDownloadPDF = useCallback(() => { window.print(); }, []);
+  // ── Download PDF: generate via hook (jspdf) ──
+  const handleDownloadPDF = useCallback(() => { 
+    generatePDF(protocol, audienceType);
+  }, [generatePDF, protocol, audienceType]);
 
   // Shared sub-section header — solid bar matching PDF section style
   const sectionTitle = (label, color = 'var(--color-primary)', num = null) => (
@@ -263,7 +270,7 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
-                  Clinical Protocol Document
+                  {audienceType === 'patient' ? 'Patient Care Plan' : 'Clinical Protocol Document'}
                 </span>
                 {shortCode && (
                   <span style={{ fontSize: '0.58rem', fontWeight: 700, background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', borderRadius: 2, padding: '0.08rem 0.4rem', letterSpacing: '0.06em', fontFamily: 'monospace' }}>
@@ -492,7 +499,7 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
           })()}
 
           {/* ── 03: RECONSTITUTION & COMPOUNDING PROTOCOL ── */}
-          {(() => {
+          {audienceType === 'doctor' && (() => {
             // Build deduplicated compound list from all phases
             const compoundMap = new Map();
             phases.forEach(ph => {
@@ -1215,21 +1222,32 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
             {/* Disclaimer paragraph */}
             <div style={{ background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', borderLeft: '3px solid #003666', borderRadius: 4, padding: '0.85rem 1rem' }}>
               <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
-                <strong style={{ color: 'var(--color-primary)', fontWeight: 700 }}>DISCLAIMER:</strong> This protocol document has been compiled by Atlas Health for informational and educational purposes only.
-                All compounds referenced are intended for <strong>Laboratory Research Use Only (RUO)</strong> and are not approved for human use by the FDA, EMA, or any other regulatory authority.
-                This document does not constitute medical advice. Always consult a qualified healthcare professional before initiating any therapeutic regimen.
-                Atlas Health assumes no liability for the use or misuse of the information herein.
+                <strong style={{ color: 'var(--color-primary)', fontWeight: 700 }}>DISCLAIMER:</strong> 
+                {audienceType === 'patient' ? (
+                  <>
+                    This care plan is provided for your personal records and educational purposes only. It is not intended to replace professional medical advice, diagnosis, or treatment. Always follow the specific instructions given by your healthcare provider. If you experience any severe adverse effects, contact your doctor immediately.
+                  </>
+                ) : (
+                  <>
+                    This protocol document has been compiled by Atlas Health for informational and educational purposes only.
+                    All compounds referenced are intended for <strong>Laboratory Research Use Only (RUO)</strong> and are not approved for human use by the FDA, EMA, or any other regulatory authority.
+                    This document does not constitute medical advice. Always consult a qualified healthcare professional before initiating any therapeutic regimen.
+                    Atlas Health assumes no liability for the use or misuse of the information herein.
+                  </>
+                )}
               </p>
             </div>
 
             {/* Document ID bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid #f0f4f8' }}>
               <span style={{ fontSize: '0.6rem', color: 'var(--color-border)', letterSpacing: '0.05em' }}>
-                © {new Date().getFullYear()} Atlas Health · Clinical Protocol System · Doc: {shortCode || name} · Generated: {today}
+                © {new Date().getFullYear()} Atlas Health · {audienceType === 'patient' ? 'Patient Care Plan' : 'Clinical Protocol System'} · Doc: {shortCode || name} · Generated: {today}
               </span>
-              <span style={{ fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-bg-surface)', background: 'var(--color-danger)', borderRadius: 3, padding: '0.2rem 0.55rem' }}>
-                RUO
-              </span>
+              {audienceType === 'doctor' && (
+                <span style={{ fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-bg-surface)', background: 'var(--color-danger)', borderRadius: 3, padding: '0.2rem 0.55rem' }}>
+                  RUO
+                </span>
+              )}
             </div>
           </div>
 
@@ -1255,6 +1273,26 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
 
           {/* Right: actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isGenerating}
+              style={{
+                padding: '0.55rem 1.1rem',
+                borderRadius: 8,
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                color: 'var(--color-primary)',
+                background: 'rgba(0,54,102,0.05)',
+                border: '1px solid rgba(0,54,102,0.15)',
+                cursor: isGenerating ? 'not-allowed' : 'pointer',
+                opacity: isGenerating ? 0.7 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+              }}
+            >
+              <Download size={14} /> {isGenerating ? 'Generating...' : 'Download PDF'}
+            </button>
             <button
               onClick={handleClose}
               style={{

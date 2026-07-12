@@ -1,4 +1,5 @@
 import { db } from '../../../../firebase';
+
 import { collection, doc, setDoc, updateDoc, getDocs } from 'firebase/firestore';
 import { pdfData, normalize, customMappings, getSubcategory } from '../regenpept_data';
 

@@ -1,9 +1,10 @@
+"use client";
 import Home from "lucide-react/dist/esm/icons/home";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import Save from "lucide-react/dist/esm/icons/save";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'next/navigation';
 
 
 

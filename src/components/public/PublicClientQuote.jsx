@@ -1,12 +1,9 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import Truck from "lucide-react/dist/esm/icons/truck";
+"use client";
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import { Card } from '../ui';
 
 
@@ -14,6 +11,7 @@ import { Card } from '../ui';
 
 
 import { useTranslation } from 'react-i18next';
+import { Loader2, CheckCircle, ShieldCheck, XCircle, Truck } from '@/lib/icons';
 
 export default function PublicClientQuote() {
   const { id } = useParams();

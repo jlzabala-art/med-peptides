@@ -1,13 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Send from "lucide-react/dist/esm/icons/send";
 import React from 'react';
+import { X, Mail, CheckCircle2, Clock, MapPin, Shield, Cpu, Activity, Send } from '@/lib/icons';
 
 
 

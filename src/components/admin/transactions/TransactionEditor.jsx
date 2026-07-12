@@ -1,7 +1,11 @@
+"use client";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {  useParams } from 'next/navigation';
 import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { useCatalogSelectionStore } from '../../../stores/useCatalogSelectionStore';
 import TransactionItemTable from './TransactionItemTable';
 import { ChevronLeft, Save, Send, Box, Filter } from '@/lib/icons';
@@ -9,8 +13,8 @@ import { CatalogService } from '../catalog/api/catalog.service';
 
 export default function TransactionEditor() {
   const { type } = useParams();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const selectedIds = useCatalogSelectionStore(state => state.selectedIds);
   
   const [items, setItems] = useState([]);
@@ -123,7 +127,7 @@ export default function TransactionEditor() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button 
-            onClick={() => navigate(-1)}
+            onClick={() => router.push(-1)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: '#64748b' }}
           >
             <ChevronLeft size={16} /> Back
@@ -267,7 +271,7 @@ export default function TransactionEditor() {
           <Save size={16} /> Save as Draft
         </button>
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => router.push(-1)}
           style={{ padding: '10px 20px', backgroundColor: 'transparent', color: '#64748b', border: 'none', fontWeight: 500, cursor: 'pointer' }}
         >
           Cancel

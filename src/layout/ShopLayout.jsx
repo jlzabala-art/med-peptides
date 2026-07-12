@@ -1,6 +1,9 @@
+"use client";
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
  
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'next/navigation';
 import Header from './Header';
 import Footer from './Footer';
 import ResearchDrawer from '../components/shared/ResearchDrawer';
@@ -8,7 +11,7 @@ import PageTransition from '../components/PageTransition';
 import BottomNav from './BottomNav';
 import { useUIStore } from '../stores/uiStore';
 import { useCart } from '../context/CartProvider';
-import { useNavigate } from 'react-router-dom';
+
 
 export default function ShopLayout({
   onGoHome,
@@ -16,14 +19,14 @@ export default function ShopLayout({
   onSelectCategory,
   products
 }) {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const { setActiveModal } = useUIStore();
   const { cartCount } = useCart();
 
   const handleOpenSearch = () => setActiveModal('search');
   const handleOpenCart = () => setActiveModal('cart');
-  const handleOpenProducts = () => navigate('/collection/peptides');
+  const handleOpenProducts = () => router.push('/collection/peptides');
 
   return (
     <>
@@ -34,8 +37,8 @@ export default function ShopLayout({
         products={products}
       />
       
-      <div className={`view-container ${(location.pathname !== '/') ? 'with-header-padding' : ''}`}>
-        <PageTransition locationKey={location.pathname}>
+      <div className={`view-container ${(pathname !== '/') ? 'with-header-padding' : ''}`}>
+        <PageTransition locationKey={pathname}>
           <Outlet />
         </PageTransition>
       </div>

@@ -101,7 +101,7 @@ export default class AppErrorBoundary extends Component {
         </div>
 
         {/* Dev detail */}
-        {import.meta.env?.DEV && this.state.error && (
+        {process.env.NODE_ENV !== 'production' && this.state.error && (
           <details style={{ marginTop: '2rem', maxWidth: '600px', textAlign: 'left' }}>
             <summary style={{ cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>
               Error details (dev only)

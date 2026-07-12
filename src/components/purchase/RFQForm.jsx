@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Send from "lucide-react/dist/esm/icons/send";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -11,7 +13,8 @@ import CreditCard from "lucide-react/dist/esm/icons/credit-card";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect, useRef } from 'react';
 import { addDoc, updateDoc, doc, collection, serverTimestamp, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 
 

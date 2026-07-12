@@ -1,7 +1,7 @@
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import React from 'react';
 
 import AdminPageHeader from './AdminPageHeader';
+import { DollarSign } from '@/lib/icons';
 
 export default function AdminPaymentsMadeTab() {
   return (

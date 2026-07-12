@@ -209,7 +209,33 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
 };
 
 /**
- * Load a protocol by ID
+ * Normalizes a phase_blueprint (legacy format) into the UI phase format.
+ * phase_blueprints use: phase_title, default_duration_weeks, drugs[]
+ * UI phases expect:     label, durationWeeks, items[]
+ */
+function normalizePhaseBlueprint(bp, index) {
+  return {
+    index,
+    label: bp.phase_title || bp.label || `Phase ${index + 1}`,
+    durationWeeks: bp.default_duration_weeks || bp.durationWeeks || 4,
+    objective: bp.clinical_purpose?.join(', ') || bp.objective || '',
+    // Map drugs[] → items[] that ProtocolTreatment expects
+    items: (bp.drugs || bp.drugs_used || bp.items || []).map(d => ({
+      productId: d.product_id || d.productId || '',
+      productName: d.product_title || d.productName || d.name || '',
+      dosage: d.dose_logic?.dose_per_administration
+        ? `${d.dose_logic.dose_per_administration} ${d.dose_logic.dose_unit || 'mcg'}`
+        : (d.dosage || d.dosage_mg ? `${d.dosage || d.dosage_mg} mcg` : ''),
+      route: d.route || 'subcutaneous',
+      frequency: d.dose_logic?.administration_frequency || d.frequency || '',
+    })),
+    // keep original for reference
+    _raw: bp,
+  };
+}
+
+/**
+ * Load a protocol by ID, normalizing all known phase formats into a consistent shape.
  */
 export const getProtocolById = async (id) => {
   try {
@@ -218,15 +244,21 @@ export const getProtocolById = async (id) => {
     if (snap.exists()) {
       const data = snap.data();
       
-      // Fallback for subcollections (if phases isn't heavily populated inline)
+      // 1. Try subcollection phases (saved via updateProtocolFull)
       if (!data.phases || data.phases.length === 0) {
           const phasesSnap = await getDocs(collection(db, COLLECTION_NAME, id, 'phases'));
           if (!phasesSnap.empty) {
-              const subPhases = phasesSnap.docs.map(d => d.data()).sort((a, b) => a.index - b.index);
-              data.phases = subPhases;
+              data.phases = phasesSnap.docs
+                .map(d => d.data())
+                .sort((a, b) => (a.index || 0) - (b.index || 0));
           }
       }
-      
+
+      // 2. If still empty, normalize phase_blueprints (legacy import format)
+      if ((!data.phases || data.phases.length === 0) && data.phase_blueprints?.length > 0) {
+          data.phases = data.phase_blueprints.map((bp, i) => normalizePhaseBlueprint(bp, i));
+      }
+
       return { id: snap.id, ...data };
     }
     return null;

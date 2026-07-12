@@ -1,8 +1,11 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Box from "lucide-react/dist/esm/icons/box";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { TrendingUp, AlertTriangle, Box, Sparkles } from '@/lib/icons';
+
+
+
+
 
 export default function DemandForecastingWidget() {
   const [data, setData] = useState([]);

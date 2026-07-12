@@ -1,3 +1,5 @@
+"use client";
+
 import Eye from "lucide-react/dist/esm/icons/eye";
 import EyeOff from "lucide-react/dist/esm/icons/eye-off";
 import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";

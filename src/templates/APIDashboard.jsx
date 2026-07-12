@@ -1,11 +1,5 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Package from "lucide-react/dist/esm/icons/package";
+"use client";
+
 import { useState, useEffect } from 'react';
 
 
@@ -16,7 +10,9 @@ import { useState, useEffect } from 'react';
 
 
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
+import { ArrowLeft, FlaskConical, Lock, Loader2, AlertCircle, ChevronDown, ChevronRight, Package } from '@/lib/icons';
 
 /* ── Helper: derive peptideId from a product name string ──
    e.g. "TB-500 2mg Vial" → "tb-500"

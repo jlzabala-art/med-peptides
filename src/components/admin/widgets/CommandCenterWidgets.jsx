@@ -1,115 +1,21 @@
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
-import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import Server from 'lucide-react/dist/esm/icons/server';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import Users from 'lucide-react/dist/esm/icons/users';
-import Send from 'lucide-react/dist/esm/icons/send';
-import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
-import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
+"use client";
+
 import React, { useState } from 'react';
 import OperationalKPICard from '../../shared/widgets/OperationalKPICard';
 
-import {
-  AreaChart,
-  Area,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { TrendingUp, ArrowRight, Sparkles, AlertTriangle, Briefcase, Server, DollarSign, Users, Send, RefreshCw, MoreHorizontal, ChevronRight, FileText } from '../../../lib/icons';
+import { formatAEDtoDual } from '../../../utils/currencies';
+import dynamic from 'next/dynamic';
 
-// ── Shared styling block inject ──
-export function WidgetStyles() {
-  return (
-    <style>{`
-      .cc-widget-card {
-        background: rgba(255, 255, 255, 0.75);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-radius: 16px;
-        box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 1.25rem;
-      }
-      .cc-widget-card:hover {
-        box-shadow: 0 10px 25px -4px rgba(148, 163, 184, 0.15);
-        border-color: rgba(203, 213, 225, 0.9);
-      }
-      .cc-kpis-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      @media (min-width: 640px) {
-        .cc-kpis-container {
-          grid-template-columns: repeat(3, 1fr);
-        }
-      }
-      @media (min-width: 768px) {
-        .cc-kpis-container {
-          grid-template-columns: repeat(4, 1fr);
-        }
-      }
-      @media (min-width: 1024px) {
-        .cc-kpis-container {
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        }
-      }
-      .cc-kpi-card {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 1rem 1.25rem;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        transition: all 0.2s ease;
-        border-left: 4px solid transparent;
-        position: relative;
-        max-height: 220px;
-      }
-      .cc-kpi-card:hover {
-        background: #ffffff;
-        transform: translateY(-2px);
-      }
-      .cc-health-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
-      }
-      .cc-dot-green { background-color: #10b981; box-shadow: 0 0 8px #10b981; }
-      .cc-dot-yellow { background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
-      .cc-dot-red { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
-      .cc-tab-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.78rem;
-        font-weight: 500;
-        color: #64748b;
-        border-bottom: 2px solid transparent;
-        background: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .cc-tab-btn.active {
-        color: #0284c7;
-        border-bottom-color: #0284c7;
-        font-weight: 600;
-      }
-    `}</style>
-  );
-}
+const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
+const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
+const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
+const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
 
 // Mock Sparkline Component
 function MiniSparkline({ data, color }) {
@@ -170,7 +76,7 @@ export function ExecutiveSummaryStrip({ metrics = {}, visibleKPIs = [], onCardCl
     {
       id: 'revenue',
       label: 'Revenue',
-      value: `AED ${metrics.revenue?.toLocaleString() || '0'}`,
+      value: formatAEDtoDual(metrics.revenue || 0),
       trend: '+18.4%',
       trendUp: true,
       spark: mockSparkDataUp,
@@ -178,7 +84,7 @@ export function ExecutiveSummaryStrip({ metrics = {}, visibleKPIs = [], onCardCl
     {
       id: 'grossProfit',
       label: 'Gross Profit',
-      value: `AED ${metrics.grossProfit?.toLocaleString() || '0'}`,
+      value: formatAEDtoDual(metrics.grossProfit || 0),
       trend: 'Margin 30%',
       trendUp: null,
       spark: mockSparkDataFlat,
@@ -186,7 +92,7 @@ export function ExecutiveSummaryStrip({ metrics = {}, visibleKPIs = [], onCardCl
     {
       id: 'cashPosition',
       label: 'Cash Position',
-      value: `AED ${metrics.cashPosition?.toLocaleString() || '0'}`,
+      value: formatAEDtoDual(metrics.cashPosition || 0),
       trend: 'Optimal',
       trendUp: true,
       spark: mockSparkDataUp,
@@ -225,29 +131,114 @@ export function ExecutiveSummaryStrip({ metrics = {}, visibleKPIs = [], onCardCl
       alert: true,
       spark: mockSparkDataUp,
     },
+    {
+      id: 'activePatients',
+      label: 'Active Patients',
+      value: metrics.activePatients || 0,
+      trend: '+4 this week',
+      trendUp: true,
+      spark: mockSparkDataUp,
+    },
+    {
+      id: 'pendingPrescriptions',
+      label: 'Prescriptions',
+      value: metrics.pendingPrescriptions || 0,
+      trend: 'Awaiting Sign',
+      trendUp: false,
+      alert: true,
+      spark: mockSparkDataFlat,
+    },
+    {
+      id: 'activeProtocols',
+      label: 'Active Protocols',
+      value: metrics.activeProtocols || 0,
+      trend: 'Up to date',
+      trendUp: true,
+      spark: mockSparkDataFlat,
+    },
+    {
+      id: 'dueFollowUps',
+      label: 'Due Follow-Ups',
+      value: metrics.dueFollowUps || 0,
+      trend: 'Requires Action',
+      trendUp: false,
+      alert: metrics.dueFollowUps > 0,
+      spark: mockSparkDataDown,
+    },
+    {
+      id: 'pipelineValue',
+      label: 'Pipeline Value',
+      value: formatAEDtoDual(metrics.pipelineValue || 0),
+      trend: '+12%',
+      trendUp: true,
+      spark: mockSparkDataUp,
+    },
+    {
+      id: 'supplierHealth',
+      label: 'Supplier Health',
+      value: `${metrics.supplierHealth || '98'}%`,
+      trend: 'Stable',
+      trendUp: true,
+      spark: mockSparkDataFlat,
+    },
+    {
+      id: 'systemUptime',
+      label: 'System Uptime',
+      value: `${metrics.systemUptime || '99.9'}%`,
+      trend: 'Operational',
+      trendUp: true,
+      spark: mockSparkDataUp,
+    },
   ];
 
   return (
-    <div className="cc-kpis-container">
-      <WidgetStyles />
-      {kpis
-        .filter((k) => visibleKPIs.length === 0 || visibleKPIs.includes(k.id))
-        .map((k) => (
-          <OperationalKPICard
-            key={k.id}
-            title={k.label}
-            value={k.value}
-            severity={k.alert ? 'critical' : 'neutral'}
-            trend={k.trend}
-            actionLabel="View Details"
-            onClick={() => onCardClick && onCardClick(k.id)}
-          >
-            <MiniSparkline
-              data={k.spark}
-              color={k.trendUp ? '#10b981' : k.trendUp === false ? '#ef4444' : '#64748b'}
-            />
-          </OperationalKPICard>
-        ))}
+    <div className="cc-widget-card">
+      <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>Operational Metrics</h3>
+      </div>
+      <div className="dashboard-kpi-grid" style={{ marginBottom: 0 }}>
+        {kpis
+          .filter((k) => visibleKPIs.length === 0 || visibleKPIs.includes(k.id))
+          .map((k) => {
+            let iconBg = 'rgba(241, 245, 249, 1)';
+            let iconColor = '#64748b';
+            if (k.trendUp === true) {
+              iconBg = 'rgba(16, 185, 129, 0.1)';
+              iconColor = '#10b981';
+            } else if (k.alert) {
+              iconBg = 'rgba(239, 68, 68, 0.1)';
+              iconColor = '#ef4444';
+            } else if (k.trendUp === false) {
+              iconBg = 'rgba(245, 159, 0, 0.1)';
+              iconColor = '#f59e0b';
+            }
+            
+            return (
+              <div 
+                key={k.id} 
+                className="dashboard-kpi-card" 
+                onClick={() => onCardClick && onCardClick(k.id)}
+              >
+                <div 
+                  className="dashboard-kpi-icon-box"
+                  style={{ background: iconBg, color: iconColor }}
+                >
+                  {k.alert ? <AlertTriangle size={18} /> : (k.trendUp ? <TrendingUp size={18} /> : <FileText size={18} />)}
+                </div>
+                <div className="dashboard-kpi-content">
+                  <div className="dashboard-kpi-header">
+                    <span className="dashboard-kpi-value">{k.value}</span>
+                  </div>
+                  <span className="dashboard-kpi-label">{k.label}</span>
+                </div>
+                <MiniSparkline
+                  data={k.spark}
+                  color={k.trendUp ? '#10b981' : k.trendUp === false ? '#ef4444' : '#64748b'}
+                />
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 }
@@ -339,7 +330,9 @@ export function TodayPrioritiesQueue({ priorities = [], onAction }) {
                         : item.priority === 'high'
                           ? '#f59e0b'
                           : '#0284c7',
-                    border: isSelected ? '1px solid #cbd5e1' : '1px solid transparent',
+                    borderTop: isSelected ? '1px solid #cbd5e1' : '1px solid transparent',
+                    borderRight: isSelected ? '1px solid #cbd5e1' : '1px solid transparent',
+                    borderBottom: isSelected ? '1px solid #cbd5e1' : '1px solid transparent',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                   }}
@@ -845,7 +838,6 @@ export function CashFlowForecast({ cashFlowData = [], riskLevel = 'Low' }) {
   );
 }
 
-import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 
 // 6. CRM PIPELINE FUNNEL
 export function CrmPipelineFunnel({ pipelineStages = [] }) {

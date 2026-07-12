@@ -1,9 +1,10 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
-import MessageCircle from "lucide-react/dist/esm/icons/message-circle";
+import { useRouter } from 'next/navigation';
+import { ArrowRight } from '@/lib/icons';
+import { Bot } from '@/lib/icons';
+import { HelpCircle } from '@/lib/icons';
+import { MessageCircle } from '@/lib/icons';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -30,7 +31,7 @@ const GUIDED_PROMPTS = [
 ];
 
 export default function NotSureWhereToStart({ onOpenAI, variant = 'homepage' }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activePrompt, setActivePrompt] = useState(0);
 
   // Rotate the example prompts every 3s
@@ -46,7 +47,7 @@ export default function NotSureWhereToStart({ onOpenAI, variant = 'homepage' }) 
       onOpenAI(prompt || "I'm not sure where to start. Help me find the right research area.");
     } else {
       sessionStorage.setItem('ai_seed_goal', prompt || "I need guidance on where to start.");
-      navigate('/');
+      router.push('/');
     }
   };
 

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import Edit2 from "lucide-react/dist/esm/icons/edit-2";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import Send from "lucide-react/dist/esm/icons/send";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Link from "lucide-react/dist/esm/icons/link";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+
+
+
+
+
+
 
 import ProductGrid from '../../components/admin/shared/ProductGrid';
 import ActivityTimeline from "../../components/admin/shared/ActivityTimeline";
+import { Edit2, Copy, Send, FileText, Link, RefreshCw } from '@/lib/icons';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);

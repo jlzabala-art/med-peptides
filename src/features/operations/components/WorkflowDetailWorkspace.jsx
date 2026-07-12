@@ -1,13 +1,16 @@
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { ArrowLeft, Archive, Trash2, EyeOff, CheckCircle2, Zap, Building2, FileText, Clock, User, MapPin, ChevronRight, Package, DollarSign } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+
 import { db, functions } from '../../../firebase';
+
+
 import { doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 
 export default function WorkflowDetailWorkspace({ item, onBack, onUpdateItem }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [wizardStep, setWizardStep] = useState(0); 
   const [selectedSuppliers, setSelectedSuppliers] = useState(['Lotusland', 'Pharmapolis', 'NP LAB']);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -240,7 +243,7 @@ export default function WorkflowDetailWorkspace({ item, onBack, onUpdateItem }) 
           </p>
           <button 
             onClick={() => {
-              if (item.detectedIntent === 'RFQ') navigate(`/admin/purchase-rfqs?highlight=${item.linkedRecord}`);
+              if (item.detectedIntent === 'RFQ') router.push(`/admin/purchase-rfqs?highlight=${item.linkedRecord}`);
               else toast.success(`Navigating to ${item.linkedRecord}`);
             }}
             style={{

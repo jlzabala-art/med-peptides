@@ -1,14 +1,5 @@
-import Send from "lucide-react/dist/esm/icons/send";
-import Mic from "lucide-react/dist/esm/icons/mic";
-import MicOff from "lucide-react/dist/esm/icons/mic-off";
-import Search from "lucide-react/dist/esm/icons/search";
-import Paperclip from "lucide-react/dist/esm/icons/paperclip";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import X from "lucide-react/dist/esm/icons/x";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef } from 'react';
 
@@ -24,6 +15,7 @@ import React, { useState, useRef } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../../context/AuthContext';
+import { Send, Mic, MicOff, Search, Paperclip, FileText, CheckCircle, AlertCircle, X, ClipboardList, Sparkles } from '@/lib/icons';
 
 const CLINICAL_QUICK_PROMPTS = [
   { label: 'Reconstitute Peptides', text: 'How do I reconstitute a research peptide vial?' },

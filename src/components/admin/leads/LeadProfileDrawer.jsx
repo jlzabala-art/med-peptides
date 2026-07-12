@@ -1,26 +1,5 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Building from "lucide-react/dist/esm/icons/building";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Target from "lucide-react/dist/esm/icons/target";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import User from "lucide-react/dist/esm/icons/user";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import List from "lucide-react/dist/esm/icons/list";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import BarChart2 from "lucide-react/dist/esm/icons/bar-chart-2";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import X from "lucide-react/dist/esm/icons/x";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Download from "lucide-react/dist/esm/icons/download";
-import Upload from "lucide-react/dist/esm/icons/upload";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -48,6 +27,7 @@ import React, { useState } from 'react';
 import { calculateDetailedAIScore } from './LeadUtils';
 import RFQItemsTab from './RFQItemsTab';
 import toast from 'react-hot-toast';
+import { Mail, Phone, MapPin, Building, Clock, Target, ArrowUpRight, CheckCircle2, ShieldAlert, User, DollarSign, List, FileText, BarChart2, Zap, X, MessageSquare, Calendar, ChevronRight, Download, Upload, AlertCircle, RefreshCw } from '@/lib/icons';
 
 export default function LeadProfileDrawer({ 
   lead, 

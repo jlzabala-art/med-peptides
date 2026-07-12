@@ -1,12 +1,13 @@
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import { usePathname } from 'next/navigation';
 import React from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { redirect } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { Loader2 } from '@/lib/icons';
 
 
-export default function ProtectedRoute({ allowedRoles }) {
+export default function ProtectedRoute({ children, allowedRoles }) {
   const { user, activeRole, loading } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
 
   if (loading) {
     return (
@@ -18,14 +19,14 @@ export default function ProtectedRoute({ allowedRoles }) {
 
   // Si no está logueado, enviar al login (guardando la ruta para redirección futura si se desea)
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    redirect('/login');
   }
 
   // Si está logueado pero el rol no está en la lista permitida
   if (allowedRoles && !allowedRoles.includes(activeRole)) {
     // Redirigir al dashboard base (el App router ya decide adónde lo manda según el rol)
-    return <Navigate to="/patient" replace />;
+    redirect('/login');
   }
 
-  return <Outlet />;
+  return children;
 }

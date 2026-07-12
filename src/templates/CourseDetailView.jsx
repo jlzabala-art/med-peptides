@@ -1,10 +1,3 @@
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import MonitorPlay from "lucide-react/dist/esm/icons/monitor-play";
-import Award from "lucide-react/dist/esm/icons/award";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React from 'react';
 
 
@@ -14,6 +7,7 @@ import React from 'react';
 
 
 import { useAuth } from '../context/AuthContext';
+import { ChevronLeft, CheckCircle2, Calendar, Clock, MonitorPlay, Award, ArrowRight } from '@/lib/icons';
 
 export default function CourseDetailView({ onBack }) {
   const { isProfessional } = useAuth();

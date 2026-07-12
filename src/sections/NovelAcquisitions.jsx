@@ -1,5 +1,6 @@
+import { useRouter } from 'next/navigation';
 import { Sparkles } from '@/lib/icons';
-import { useNavigate } from 'react-router-dom';
+
 import PeptideCard from '../components/common/PeptideCard';
 
 const newPeptides = [
@@ -38,7 +39,7 @@ const newPeptides = [
 ];
 
 export default function NovelAcquisitions({ onSelectProduct }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleClick = (p) => {
     if (onSelectProduct) {
@@ -46,7 +47,7 @@ export default function NovelAcquisitions({ onSelectProduct }) {
     } else {
       // Derive name-based slug to match ProductTemplate's resolver (not Firestore doc ID)
       const nameSlug = p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug;
-      navigate(`/product/${nameSlug}`);
+      router.push(`/product/${nameSlug}`);
     }
   };
 

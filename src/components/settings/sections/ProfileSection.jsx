@@ -1,6 +1,8 @@
-import Camera from "lucide-react/dist/esm/icons/camera";
-import Wand2 from "lucide-react/dist/esm/icons/wand-2";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+"use client";
+
+
+
+
 import React, { useRef } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAutoSave } from '../../../hooks/useAutoSave';
@@ -9,8 +11,10 @@ import { useAutoSave } from '../../../hooks/useAutoSave';
 
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../firebase';
+
 import { updateProfile } from 'firebase/auth';
 import toast from 'react-hot-toast';
+import { Camera, Wand2, Trash2 } from '@/lib/icons';
 
 export default function ProfileSection() {
   const { user, userProfile, updateProfileData } = useAuth();

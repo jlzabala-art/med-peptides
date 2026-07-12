@@ -1,11 +1,8 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import User from "lucide-react/dist/esm/icons/user";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+"use client";
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
+import { ArrowLeft, User, Activity, FileText, AlertCircle, CheckCircle2 } from '@/lib/icons';
 
 
 
@@ -15,7 +12,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 export default function PatientDetailAdmin() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Mock patient data for demonstration
   const [patient] = useState({
@@ -45,7 +42,7 @@ export default function PatientDetailAdmin() {
         zIndex: 10
       }}>
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => router.push(-1)}
           style={{
             background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600

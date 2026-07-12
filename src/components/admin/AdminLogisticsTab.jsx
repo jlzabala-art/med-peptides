@@ -1,3 +1,5 @@
+"use client";
+
 import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import FileCheck from "lucide-react/dist/esm/icons/file-check";
 import Truck from "lucide-react/dist/esm/icons/truck";

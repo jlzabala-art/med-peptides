@@ -1,15 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Briefcase from "lucide-react/dist/esm/icons/briefcase";
-import Users from "lucide-react/dist/esm/icons/users";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Check from "lucide-react/dist/esm/icons/check";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Save from "lucide-react/dist/esm/icons/save";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 
 
@@ -25,9 +15,11 @@ import React, { useState, useEffect } from 'react';
 
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
+
 import { Card } from '../../ui';
 import DraftBanner from '../../ui/DraftBanner';
 import notifier from '../../../services/NotificationService';
+import { X, CheckCircle, ChevronRight, ChevronLeft, Building2, MapPin, Briefcase, Users, FileText, Check, AlertCircle, Save } from '@/lib/icons';
 
 const STEPS = [
   { id: 1, title: 'Identity', icon: Building2 },

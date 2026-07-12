@@ -1,3 +1,5 @@
+"use client";
+
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Info from "lucide-react/dist/esm/icons/info";

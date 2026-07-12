@@ -1,6 +1,7 @@
- import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, auth } from '../firebase';
-
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import * as fb from '../firebase';
+const auth = fb?.auth;
+const db = fb?.db;
 const GA_ID = 'G-LYMXGY71FJ';
 
 export async function logPageViewToFirestore(path, title) {

@@ -1,3 +1,5 @@
+"use client";
+
 import Search from "lucide-react/dist/esm/icons/search";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';

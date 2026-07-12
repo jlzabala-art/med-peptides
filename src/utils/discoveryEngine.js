@@ -138,7 +138,7 @@ export function getFAQByCategory(faqItems, categoryId, isProfessional = false) {
  * @param {number}  limit            - max FAQs to return (default 5)
  */
 export function getFAQForProduct(peptideName, faqItems, productId = null, isProfessional = false, limit = 5) {
-  if (!faqItems?.length) return [];
+  if (!Array.isArray(faqItems) || !faqItems.length) return [];
 
   const pName = resolveProductName(peptideName);
 

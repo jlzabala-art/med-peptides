@@ -1,7 +1,7 @@
-import X from "lucide-react/dist/esm/icons/x";
-import Search from "lucide-react/dist/esm/icons/search";
-import Eye from "lucide-react/dist/esm/icons/eye";
+"use client";
+
 import React, { useState, useEffect } from 'react';
+import { X, Search, Eye } from '@/lib/icons';
 
 
 

@@ -1,7 +1,7 @@
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Minus from "lucide-react/dist/esm/icons/minus";
+"use client";
+
 import React, { useMemo } from 'react';
+import { TrendingDown, TrendingUp, Minus } from '@/lib/icons';
 
 
 

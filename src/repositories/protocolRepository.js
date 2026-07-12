@@ -27,8 +27,14 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import { normalizeProtocol } from './mappers.js';
 
 // ── Collection helpers ────────────────────────────────────────────────────────
 const protocolsCol        = ()  => collection(db, 'protocols');        // canonical source
@@ -44,8 +50,9 @@ const monitoringCol       = ()  => collection(db, 'monitoring_profiles');
  */
 export async function getAllProtocols() {
   try {
-    const snap = await getDocs(protocolsCol());
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const q = query(protocolsCol(), limit(200));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
   } catch (err) {
     console.error('[protocolRepository] getAllProtocols:', err);
     throw err;
@@ -60,9 +67,10 @@ export async function getAllProtocols() {
  */
 export async function getProtocolTemplates() {
   try {
-    const snap = await getDocs(protocolsCol());
+    const q = query(protocolsCol(), limit(200));
+    const snap = await getDocs(q);
     return snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
+      .map((d) => normalizeProtocol(d.data(), d.id))
       .filter((p) => !p.status || p.status === 'approved');
   } catch (err) {
     console.error('[protocolRepository] getProtocolTemplates:', err);
@@ -89,7 +97,7 @@ export async function getTemplatesByObjective(objective) {
 
     const byId = new Map();
     [...snap1.docs, ...snap2.docs].forEach((d) => {
-      if (!byId.has(d.id)) byId.set(d.id, { id: d.id, ...d.data() });
+      if (!byId.has(d.id)) byId.set(d.id, normalizeProtocol(d.data(), d.id));
     });
 
     return [...byId.values()].filter((p) => !p.status || p.status === 'approved');
@@ -129,7 +137,7 @@ export async function getTemplatesByGoalGroup(goals) {
     );
     const snap = await getDocs(q);
     return snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
+      .map((d) => normalizeProtocol(d.data(), d.id))
       .filter((p) => !p.status || p.status === 'approved');
   } catch (err) {
     console.error('[protocolRepository] getTemplatesByGoalGroup:', err);
@@ -151,7 +159,7 @@ export async function getTemplatesByCondition(condition) {
     );
     const snap = await getDocs(q);
     return snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
+      .map((d) => normalizeProtocol(d.data(), d.id))
       .filter((p) => !p.status || p.status === 'approved');
   } catch (err) {
     console.error(`[protocolRepository] getTemplatesByCondition(${condition}):`, err);
@@ -173,7 +181,7 @@ export async function getLatestBlueprints(n = 10) {
       limit(n)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
   } catch (err) {
     console.error('[protocolRepository] getLatestBlueprints:', err);
     throw err;
@@ -194,7 +202,7 @@ export async function getApprovedTemplatesByObjective(objective) {
       where('status', '==', 'approved')
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
   } catch (err) {
     console.error(`[protocolRepository] getApprovedTemplatesByObjective(${objective}):`, err);
     throw err;
@@ -214,17 +222,17 @@ export async function getProtocolTemplate(id) {
     // 1. Direct document lookup by doc ID (e.g. 'wm_001')
     const directRef  = doc(db, 'protocols', id);
     const directSnap = await getDoc(directRef);
-    if (directSnap.exists()) return { id: directSnap.id, ...directSnap.data() };
+    if (directSnap.exists()) return normalizeProtocol(directSnap.data(), directSnap.id);
 
     // 2. Fallback: query by protocol_slug field (URL slugs like 'weight-management-structured-12w')
     const q1    = query(protocolsCol(), where('protocol_slug', '==', id));
     const snap1 = await getDocs(q1);
-    if (!snap1.empty) return { id: snap1.docs[0].id, ...snap1.docs[0].data() };
+    if (!snap1.empty) return normalizeProtocol(snap1.docs[0].data(), snap1.docs[0].id);
 
     // 3. Fallback: query by protocol_id field
     const q2    = query(protocolsCol(), where('protocol_id', '==', id));
     const snap2 = await getDocs(q2);
-    if (!snap2.empty) return { id: snap2.docs[0].id, ...snap2.docs[0].data() };
+    if (!snap2.empty) return normalizeProtocol(snap2.docs[0].data(), snap2.docs[0].id);
 
     return null;
   } catch (err) {
@@ -278,6 +286,87 @@ export async function getProtocolVariants(protocolId) {
   return [];
 }
 
+/**
+ * Fetch protocols with real pagination (approved and drafts).
+ * Intended for internal dashboards.
+ * 
+ * @param {number} pageSize 
+ * @param {object} lastDoc - A Firestore document snapshot (or null for first page)
+ * @returns {Promise<{items: Array, lastDoc: object}>}
+ */
+export async function getProtocolTemplatesPaginated(pageSize = 50, lastDoc = null) {
+  try {
+    let q = query(protocolsCol(), orderBy('protocol_id'), limit(pageSize));
+    if (lastDoc) {
+      q = query(protocolsCol(), orderBy('protocol_id'), startAfter(lastDoc), limit(pageSize));
+    }
+    
+    const snap = await getDocs(q);
+    const results = snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
+    const newLastDoc = snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null;
+    
+    return { items: results, lastDoc: newLastDoc };
+  } catch (err) {
+    console.error('[protocolRepository] getProtocolTemplatesPaginated:', err);
+    throw err;
+  }
+}
+
+// ── Write operations ──────────────────────────────────────────────────────────
+
+/**
+ * Creates a new protocol template.
+ * 
+ * @param {object} protocolData
+ * @returns {Promise<string>} The new protocol document ID
+ */
+export async function createProtocol(protocolData) {
+  try {
+    const docRef = await addDoc(protocolsCol(), {
+      ...protocolData,
+      status: protocolData.status || 'draft',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (err) {
+    console.error('[protocolRepository] createProtocol:', err);
+    throw err;
+  }
+}
+
+/**
+ * Updates an existing protocol template.
+ * 
+ * @param {string} protocolId
+ * @param {object} updates
+ */
+export async function updateProtocol(protocolId, updates) {
+  try {
+    await updateDoc(doc(db, 'protocols', protocolId), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.error(`[protocolRepository] updateProtocol(${protocolId}):`, err);
+    throw err;
+  }
+}
+
+/**
+ * Deletes a protocol template permanently.
+ * 
+ * @param {string} protocolId
+ */
+export async function deleteProtocol(protocolId) {
+  try {
+    await deleteDoc(doc(db, 'protocols', protocolId));
+  } catch (err) {
+    console.error(`[protocolRepository] deleteProtocol(${protocolId}):`, err);
+    throw err;
+  }
+}
+
 // ── Legacy compatibility shim ─────────────────────────────────────────────────
 // Keeps existing code that imports { protocolRepository } as a named object.
 
@@ -293,4 +382,8 @@ export const protocolRepository = {
   getProtocolTemplate,
   getMonitoringProfile,
   getProtocolVariants,
+  getProtocolTemplatesPaginated,
+  createProtocol,
+  updateProtocol,
+  deleteProtocol,
 };

@@ -1,3 +1,5 @@
+"use client";
+
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import Save from "lucide-react/dist/esm/icons/save";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
@@ -9,7 +11,7 @@ import Layers from "lucide-react/dist/esm/icons/layers";
 import Cloud from "lucide-react/dist/esm/icons/cloud";
 import CloudOff from "lucide-react/dist/esm/icons/cloud-off";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,10 +27,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import PhaseEditor from './PhaseEditor';
 import { useShop } from '../../context/ShopProvider';
+import dynamic from 'next/dynamic';
 
-const PharmacokineticsSimulator = lazy(() => import('./PharmacokineticsSimulator'));
-const ProtocolHeaderCharts = lazy(() => import('./ProtocolHeaderCharts'));
-const ProtocolGanttChart = lazy(() => import('./ProtocolGanttChart'));
+const PharmacokineticsSimulator = dynamic(() => import('./PharmacokineticsSimulator'));
+const ProtocolHeaderCharts = dynamic(() => import('./ProtocolHeaderCharts'));
+const ProtocolGanttChart = dynamic(() => import('./ProtocolGanttChart'));
 
 // eslint-disable-next-line no-unused-vars
 const AccordionSection = React.memo(({ icon: Icon, title, isActive, onToggle, children }) => {

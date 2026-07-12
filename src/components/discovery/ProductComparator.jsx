@@ -1,3 +1,4 @@
+"use client";
 import X from "lucide-react/dist/esm/icons/x";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Droplets from "lucide-react/dist/esm/icons/droplets";
@@ -7,7 +8,7 @@ import Scale from "lucide-react/dist/esm/icons/scale";
 import Zap from "lucide-react/dist/esm/icons/zap";
 import Beaker from "lucide-react/dist/esm/icons/beaker";
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 
 
@@ -19,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { resolveProductPrice } from '../../utils/resolveProductPrice';
 
 const ProductComparator = ({ compareList, setCompareList, onClose }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   if (!compareList || compareList.length === 0) {
     return (
@@ -31,7 +32,7 @@ const ProductComparator = ({ compareList, setCompareList, onClose }) => {
         <h2 style={{ fontSize: '1.5rem', color: 'var(--primary)', fontWeight: 800 }}>Comparison Engine</h2>
         <p style={{ color: 'var(--text-muted)' }}>Select up to 3 products to compare their clinical profiles side-by-side.</p>
         <button 
-          onClick={() => { onClose(); navigate('/collection/peptides'); }}
+          onClick={() => { onClose(); router.push('/collection/peptides'); }}
           style={{ marginTop: '2rem', background: 'var(--primary)', color: 'white', border: 'none', padding: '0.8rem 2rem', borderRadius: '12px', cursor: 'pointer', fontWeight: 700 }}
         >
           Browse Catalog
@@ -144,7 +145,7 @@ const ProductComparator = ({ compareList, setCompareList, onClose }) => {
                 {/* Footer Action */}
                 <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'var(--color-bg-app)', marginTop: 'auto' }}>
                   <button 
-                    onClick={() => { onClose(); navigate(type === 'supplement' ? `/supplements/${product.slug}` : `/product/${product.slug}`); }}
+                    onClick={() => { onClose(); router.push(type === 'supplement' ? `/supplements/${product.slug}` : `/product/${product.slug}`); }}
                     style={{ width: '100%', background: 'white', border: '1px solid var(--border)', padding: '0.6rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--primary)', transition: 'all 0.2s' }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--secondary)'; e.currentTarget.style.color = 'var(--secondary)'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--primary)'; }}
@@ -159,7 +160,7 @@ const ProductComparator = ({ compareList, setCompareList, onClose }) => {
           {/* Empty slot */}
           {compareList.length < 3 && (
             <div style={{ flex: '1 0 260px', background: 'rgba(255,255,255,0.5)', border: '2px dashed var(--border)', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', gap: '1rem', cursor: 'pointer', transition: 'all 0.2s' }}
-                 onClick={() => { onClose(); navigate('/collection/peptides'); }}
+                 onClick={() => { onClose(); router.push('/collection/peptides'); }}
                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--secondary)'; e.currentTarget.style.background = 'white'; }}
                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'rgba(255,255,255,0.5)'; }}
             >

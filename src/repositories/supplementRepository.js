@@ -30,6 +30,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
+
 // ── Collection helpers ────────────────────────────────────────────────────────
 const supplementsCol  = ()               => collection(db, 'supplements');
 const variantsCol     = (supplementSlug) => collection(db, 'supplements', supplementSlug, 'variants');

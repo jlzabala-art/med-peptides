@@ -1,36 +1,13 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Check from "lucide-react/dist/esm/icons/check";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Target from "lucide-react/dist/esm/icons/target";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Minus from "lucide-react/dist/esm/icons/minus";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Maximize2 from "lucide-react/dist/esm/icons/maximize-2";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import UserCheck from "lucide-react/dist/esm/icons/user-check";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Thermometer from "lucide-react/dist/esm/icons/thermometer";
-import Scale from "lucide-react/dist/esm/icons/scale";
-import Bot from "lucide-react/dist/esm/icons/bot";
-import X from "lucide-react/dist/esm/icons/x";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
 import { trackPeptideView, trackPurchaseIntent } from '../hooks/useAnalytics';
 import { trackRecentView } from '../utils/recentViews';
 import { usePageMeta } from '../hooks/usePageMeta';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 
 
 
@@ -70,8 +47,10 @@ import VialLabelPrinter from '../components/product/VialLabelPrinter';
 import ProtocolTOC from '../components/protocol/ProtocolTOC';
 import ClinicalAssistant from '../components/shared/ClinicalAssistant';
 import { motion, AnimatePresence } from 'framer-motion';
-import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+
+// import { collection, getDocs } from 'firebase/firestore';
+import { protocolRepository } from '../repositories/protocolRepository';
+import { productRepository } from '../repositories/productRepository';
 import { getFAQForProduct, getRelatedPeptides } from '../utils/discoveryEngine';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
 import { resolveVariantPrice, formatPrice } from '../services/pricingService';
@@ -81,6 +60,7 @@ import { useAuth } from '../context/AuthContext';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import app from '../firebase';
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
+import { ArrowLeft, ShoppingCart, Check, FlaskConical, Beaker, FileText, ShieldCheck, Target, Layers, Plus, Minus, ChevronDown, ChevronUp, Maximize2, ExternalLink, Activity, Microscope, Truck, Lock, UserCheck, BookOpen, Zap, Thermometer, Scale, Bot, X, Sparkles } from '@/lib/icons';
 
 export default function ProductDetail({
   product,
@@ -94,14 +74,14 @@ export default function ProductDetail({
   onSelectCategory,
   onSelectProduct,
   products,
+  allFaqs,
 }) {
-  const { allFaqs } = useFirestoreData();
   const { tier, isLoading: tierLoading } = usePricingTier();
 
 
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const { loading: authLoading, userRole } = useAuth();
 
   const isWholesaler = userRole === 'wholesaler' || userRole === 'admin';
@@ -162,17 +142,15 @@ export default function ProductDetail({
     let cancelled = false;
     async function fetchDiscovery() {
       try {
-        const [engineSnap, protocolsSnap] = await Promise.all([
-          getDocs(collection(db, 'peptide_related_engine')),
-          getDocs(collection(db, 'protocols')).catch(() => ({ docs: [] }))
+        const [engineData, protocolsData] = await Promise.all([
+          productRepository.getRelatedEngineData(),
+          protocolRepository.getAllProtocols().catch(() => [])
         ]);
         if (cancelled) return;
 
-        const engineData = engineSnap.docs.map(d => d.data());
         const pSlug = activeProduct.slug || activeProduct.name.toLowerCase().replace(/\s+/g, '-');
 
-        const extractedProtocols = protocolsSnap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
+        const extractedProtocols = protocolsData
           .filter(p => {
             if (!p.protocolMapping) return false;
             if (Array.isArray(p.protocolMapping)) return p.protocolMapping.includes(pSlug) || p.protocolMapping.includes(activeProduct.name);
@@ -1395,7 +1373,7 @@ export default function ProductDetail({
 
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                         <button
-                          onClick={() => navigate('/auth?register=true')}
+                          onClick={() => router.push('/auth?register=true')}
                           className="btn"
                           style={{
                             padding: '0.6rem 1.25rem',
@@ -1413,7 +1391,7 @@ export default function ProductDetail({
                           Request Verified Access
                         </button>
                         <button
-                          onClick={() => navigate('/auth')}
+                          onClick={() => router.push('/auth')}
                           style={{
                             padding: '0.6rem 1.25rem',
                             fontSize: '0.8rem',
@@ -2255,7 +2233,7 @@ export default function ProductDetail({
                       }
                     } else {
                       setShowPurityModal(false);
-                      navigate('/contact', {
+                      router.push('/contact', {
                         state: {
                           topic: 'Regulatory Documentation',
                           prefillMessage: `Hello, I would like to request the Certificate of Analysis (CoA) for the research product: ${activeProduct.name}.`

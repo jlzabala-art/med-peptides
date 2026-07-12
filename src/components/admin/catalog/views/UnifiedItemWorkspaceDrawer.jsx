@@ -1,13 +1,7 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import X from 'lucide-react/dist/esm/icons/x';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import Building from 'lucide-react/dist/esm/icons/building';
-import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 
 import VariantOverviewTable from './tabs/VariantOverviewTable';
 import VariantCommercialTable from './tabs/VariantCommercialTable';
@@ -15,6 +9,7 @@ import VariantInventoryTable from './tabs/VariantInventoryTable';
 import VariantSupplierTable from './tabs/VariantSupplierTable';
 import VariantRegulatoryTable from './tabs/VariantRegulatoryTable';
 import VariantAnalyticsTable from './tabs/VariantAnalyticsTable';
+import { X, LayoutDashboard, DollarSign, PackageOpen, ShieldCheck, Building, BarChart2, Sparkles } from '@/lib/icons';
 
 export default function UnifiedItemWorkspaceDrawer({ product, onClose, onAction, selectedIds = [], onSelectionChange }) {
   const [activeSection, setActiveSection] = useState('overview');

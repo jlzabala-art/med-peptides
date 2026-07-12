@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { messagingService } from '../../services/messagingService';
 import { generateThreadInsights } from '../../services/adminAiService';
 import { db } from '../../firebase';
+
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import RichMessageCard from './RichMessageCard';
 import AIInboxTab from './AIInboxTab';

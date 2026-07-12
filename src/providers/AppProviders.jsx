@@ -1,5 +1,6 @@
+"use client";
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'next/navigation';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -11,13 +12,13 @@ import { AuthProvider } from '../context/AuthContext';
 import { TenantProvider } from '../context/TenantContext';
 import { ShopProvider } from '../context/ShopProvider';
 import { CartProvider } from '../context/CartProvider';
-import { PermissionsProvider } from '../contexts/PermissionsContext';
+import { PermissionsProvider } from '../context/PermissionsContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { NotificationProvider } from '../context/NotificationContext';
 import { PreferencesProvider } from '../context/PreferencesContext';
 import { HeaderProvider } from '../context/HeaderContext';
 import { CopilotProvider } from '../context/CopilotContext';
-import { ClinicalCartProvider } from '../contexts/ClinicalCartContext';
+import { ClinicalCartProvider } from '../context/ClinicalCartContext';
 import { ModalProvider } from '../hooks/ui/useModalStack.jsx';
 
 const queryClient = new QueryClient({
@@ -42,33 +43,31 @@ const persister = createAsyncStoragePersister({
 export default function AppProviders({ children }) {
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-      <BrowserRouter>
-        <AuthProvider>
-          <PermissionsProvider>
-            <TenantProvider>
-              <ShopProvider>
-                <CartProvider>
-                  <ClinicalCartProvider>
-                    <HelmetProvider>
-                      <ThemeProvider>
-                        <NotificationProvider>
-                          <PreferencesProvider>
-                            <CopilotProvider>
-                              <HeaderProvider>
-                                <ModalProvider>{children}</ModalProvider>
-                              </HeaderProvider>
-                            </CopilotProvider>
-                          </PreferencesProvider>
-                        </NotificationProvider>
-                      </ThemeProvider>
-                    </HelmetProvider>
-                  </ClinicalCartProvider>
-                </CartProvider>
-              </ShopProvider>
-            </TenantProvider>
-          </PermissionsProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <PermissionsProvider>
+          <TenantProvider>
+            <ShopProvider>
+              <CartProvider>
+                <ClinicalCartProvider>
+                  <HelmetProvider>
+                    <ThemeProvider>
+                      <NotificationProvider>
+                        <PreferencesProvider>
+                          <CopilotProvider>
+                            <HeaderProvider>
+                              <ModalProvider>{children}</ModalProvider>
+                            </HeaderProvider>
+                          </CopilotProvider>
+                        </PreferencesProvider>
+                      </NotificationProvider>
+                    </ThemeProvider>
+                  </HelmetProvider>
+                </ClinicalCartProvider>
+              </CartProvider>
+            </ShopProvider>
+          </TenantProvider>
+        </PermissionsProvider>
+      </AuthProvider>
     </PersistQueryClientProvider>
   );
 }

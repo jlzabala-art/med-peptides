@@ -1,14 +1,17 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { updateProtocolFull } from '../../services/protocolStorage';
 import { useToast } from '../../hooks/useToast';
 import ProtocolEditorWidget from '../protocol/ProtocolEditorWidget';
 
 export default function AdminProtocolEdit() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { showToast } = useToast();
   const [protocol, setProtocol] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ export default function AdminProtocolEdit() {
           setProtocol({ id: snap.id, ...snap.data() });
         } else {
           showToast('Protocol not found', 'error');
-          navigate('/admin/protocols');
+          router.push('/admin/protocols');
         }
       } catch (err) {
         console.error('Error fetching protocol:', err);
@@ -56,7 +59,7 @@ export default function AdminProtocolEdit() {
       const docId = id === 'new' ? (formData.protocol_slug || `new-${Date.now()}`) : id;
       await updateProtocolFull(docId, formData);
       showToast('Protocol saved successfully', 'success');
-      navigate('/admin/protocols');
+      router.push('/admin/protocols');
     } catch (error) {
       console.error('Save error:', error);
       showToast('Error saving protocol', 'error');
@@ -66,7 +69,7 @@ export default function AdminProtocolEdit() {
   };
 
   const handleCancel = () => {
-    navigate('/admin/protocols');
+    router.push('/admin/protocols');
   };
 
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading Editor...</div>;

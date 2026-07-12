@@ -98,26 +98,30 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       "name": "BPC-157 5mg Vial",
       "product": { "id": "bpc-157-5mg-vial" },
       "strength": "5mg",
+      "dosage_instructions": "Inject 0.1 mL daily",
+      "duration": "8 weeks",
+      "vials_needed": 3,
       "quantity": "5 vials",
       "category": "Category A (Direct Match)"
     }
   ],
   "quotation": [
     {
-      "name": "Caffeine 100mg + Theanine 200mg Capsules",
-      "actives": [
-        { "active": "Caffeine", "concentration": "100mg" },
-        { "active": "Theanine", "concentration": "200mg" }
-      ],
-      "vehicle": "Capsules",
-      "volume": "30 capsules",
-      "specialInstructions": "Take one capsule daily in the morning."
+      "name": "Custom CJC/Ipamorelin Blend",
+      "actives": [{"active": "CJC-1295", "concentration": "5mg"}, {"active": "Ipamorelin", "concentration": "5mg"}],
+      "vehicle": "Injectable Vial",
+      "volume": "10mg total",
+      "duration": "12 weeks",
+      "vials_needed": 4,
+      "specialInstructions": "Inject once daily at bedtime"
     }
   ],
   "warnings": [
-    "Custom compounded formulations require validation and approval from the compounding lab before fulfillment."
+    "Check interactions with existing medications."
   ]
 }
+
+CRITICAL: For peptide prescriptions, it is fundamental to identify the total number of vials needed for the entire treatment duration based on the daily dose, vial size, and reconstitution instructions. Calculate "vials_needed" explicitly as an integer. Extract "duration" as well.
 `;
 
     const contents = [{ role: "user", parts: [{ text: `Prescription Text to analyze:\n"${message}"` }] }];

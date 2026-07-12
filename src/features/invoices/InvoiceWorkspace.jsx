@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import Download from "lucide-react/dist/esm/icons/download";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Link from "lucide-react/dist/esm/icons/link";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+
+
+
+
+
 
 import ProductGrid from '../../components/admin/shared/ProductGrid';
 import ActivityTimeline from "../../components/admin/shared/ActivityTimeline";
+import { Download, Mail, FileText, Link, RefreshCw } from '@/lib/icons';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);

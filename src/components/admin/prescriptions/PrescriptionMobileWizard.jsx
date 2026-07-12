@@ -1,6 +1,5 @@
-import Upload from "lucide-react/dist/esm/icons/upload";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -9,6 +8,7 @@ import AIExtractionPanel from './AIExtractionPanel';
 import ProductMatchingCenter from './ProductMatchingCenter';
 import ClinicalAlertCenter from './ClinicalAlertCenter';
 import IntakeActionCenter from './IntakeActionCenter';
+import { Upload, ChevronRight, ChevronLeft } from '@/lib/icons';
 
 const STEPS = ['Upload', 'Analyze', 'Validate', 'Match', 'Quote'];
 

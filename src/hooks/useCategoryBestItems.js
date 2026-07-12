@@ -35,7 +35,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { collection, getDocs } from 'firebase/firestore';
 
 // ── Ranking helper ────────────────────────────────────────────────────────────

@@ -1,0 +1,1332 @@
+[
+  {
+    "id": "2cGrtl9bkcMcBajRtHAkmwPEa8U2",
+    "shippingCity": "Madrid",
+    "role": "wholesaler",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": true,
+      "canAccessAcademy": true,
+      "customSynthesis": true,
+      "trackCommission": false,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": false,
+      "canAccessCustomSynthesis": true,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": false,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "wholesaler@regenpept.test",
+    "shippingZip": "28013",
+    "uid": "2cGrtl9bkcMcBajRtHAkmwPEa8U2",
+    "lastName": "Wholesaler",
+    "firstName": "Test",
+    "displayName": "Test Wholesaler",
+    "updatedAt": "2026-05-27T10:29:34.221Z",
+    "fullName": "Royal Care Medical Solutions L.L.C",
+    "assignedDoctorIds": [
+      "754OYGgejoelucER7ReDaGUbAJu2"
+    ],
+    "createdAt": "2026-06-29T14:02:54.998Z"
+  },
+  {
+    "id": "3u17gXlStXYuNgLE62wpkLtLop23",
+    "fullName": "Jose Luis Zabala",
+    "email": "jose@mediluxeme.com",
+    "createdAt": "2026-03-22T01:22:28.621Z",
+    "approved": true,
+    "role": "admin",
+    "taxId": "",
+    "shippingCity": "Madrid",
+    "institution": "Mediluxe Health Solutions",
+    "billingStreet": "Magallanes 40",
+    "phone": "654314490",
+    "billingCountry": "Spain",
+    "billingCity": "Madrid",
+    "billingZip": "28015",
+    "shippingZip": "28015",
+    "firstName": "Jose",
+    "lastName": "Luis Zabala",
+    "shippingCountry": "United Arab Emirates",
+    "shippingStreet": "Magallanes 40, Madrid, 28015, Madrid, 28015, Madrid, 28015, Madrid, 28015, Madrid, 28015",
+    "userType": "admin",
+    "isAdmin": true,
+    "updatedAt": "2026-07-03T08:53:48.378Z"
+  },
+  {
+    "id": "6IirwD0gQfYbYDN7jOY8",
+    "name": "Hind Safi Al-Hajri",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901399,
+      "_nanoseconds": 216000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "754OYGgejoelucER7ReDaGUbAJu2",
+    "shippingCity": "Madrid",
+    "role": "doctor",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "institution": "Test Hospital",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": false,
+      "canAccessAcademy": true,
+      "customSynthesis": true,
+      "trackCommission": true,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": true,
+      "canAccessCustomSynthesis": true,
+      "canAccessDoctorDashboard": true,
+      "clinicalLogs": true,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": true
+    },
+    "email": "doctor@regenpept.test",
+    "shippingZip": "28013",
+    "fullName": "Doctor Test",
+    "uid": "754OYGgejoelucER7ReDaGUbAJu2",
+    "lastName": "Doctor",
+    "firstName": "Test",
+    "displayName": "Test Doctor",
+    "updatedAt": "2026-05-27T10:29:33.790Z",
+    "assignedPatientIds": [
+      "2cGrtl9bkcMcBajRtHAkmwPEa8U2"
+    ],
+    "createdAt": "2026-06-29T14:02:53.975Z"
+  },
+  {
+    "id": "7YKh5jkz91PyJi4cHBJVQWqOO0r1",
+    "firstName": "Maria",
+    "lastName": "TestGuest",
+    "email": "b2ctest.new2025@proton.me",
+    "institution": "",
+    "userType": "individual",
+    "role": "professional_pending",
+    "professionalStatus": "pending_review",
+    "permissions": {
+      "canRecommend": false,
+      "canBulkOrder": false,
+      "customSynthesis": false,
+      "clinicalLogs": false,
+      "manageStaff": false,
+      "trackCommission": false
+    },
+    "goals": [],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-05-26T13:44:51.776Z",
+    "assignedPhysicianIds": [],
+    "assignedPatientIds": []
+  },
+  {
+    "id": "9OCrLQZpY76ShE6UxF8w",
+    "name": "Dan Fletcher Jr",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902755,
+      "_nanoseconds": 412000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "AVoIoOWsOqN8mMFYlqO0OKDkhwd2",
+    "lastName": "Supplier",
+    "shippingCity": "Madrid",
+    "role": "supplier",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "createdAt": "2026-06-29T14:02:55.929Z",
+    "firstName": "Test",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": true,
+      "canAccessAcademy": false,
+      "customSynthesis": true,
+      "trackCommission": false,
+      "canAccessCalculator": false,
+      "canAccessClinicalAI": false,
+      "canAccessCustomSynthesis": false,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": false,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "supplier@regenpept.test",
+    "shippingZip": "28013"
+  },
+  {
+    "id": "CE0nXEryOPhBs4fkA80WtnoSBx83",
+    "wholesellerId": "magenta-health",
+    "createdAt": "2026-06-01T14:33:39.837Z",
+    "firstName": "Lynn",
+    "lastName": "Iglesia",
+    "approved": true,
+    "role": "compounding_pharmacy",
+    "phone": "04-2222500",
+    "displayName": "Lynn Iglesia",
+    "zohoContactId": "7006116000000593278",
+    "userType": "professional",
+    "email": "procurement@magenta-health.ae"
+  },
+  {
+    "id": "Cj91SROtoB6irbUq0k2h",
+    "name": "Maryam Khalifa Alhussaini",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901487,
+      "_nanoseconds": 497000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "DYEWKTyepuQBc1DubYr8bkep1n93",
+    "lastName": "Clinic",
+    "shippingCity": "Madrid",
+    "role": "clinic",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "firstName": "Test",
+    "institution": "Test Clinic Affiliation",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": true,
+      "canAccessAcademy": true,
+      "customSynthesis": true,
+      "trackCommission": false,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": true,
+      "canAccessCustomSynthesis": true,
+      "canAccessDoctorDashboard": true,
+      "clinicalLogs": true,
+      "canAccessAdminDashboard": false,
+      "manageStaff": true,
+      "canRecommend": true
+    },
+    "email": "clinic@regenpept.test",
+    "shippingZip": "28013",
+    "fullName": "Clinic Test",
+    "createdAt": "2026-06-29T14:02:52.700Z"
+  },
+  {
+    "id": "ETFxwrPYX6VjZQWNbXlLOQWO7UH2",
+    "lastName": "Sales Agent",
+    "shippingCity": "Madrid",
+    "role": "sales_agent",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "firstName": "Test",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": false,
+      "canAccessAcademy": true,
+      "customSynthesis": false,
+      "trackCommission": true,
+      "canAccessCalculator": false,
+      "canAccessClinicalAI": false,
+      "canAccessCustomSynthesis": false,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": false,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "sales_agent@regenpept.test",
+    "shippingZip": "28013",
+    "createdAt": "2026-06-29T14:02:57.791Z"
+  },
+  {
+    "id": "FGXe7sjGGhUzUvMlVTXNcQOvYMG2",
+    "email": "fagron_dummy1@med-peptides.com",
+    "role": "fagron_clinic",
+    "name": "Fagron Dummy Clinic",
+    "firstName": "Fagron",
+    "lastName": "Clinic",
+    "createdAt": {
+      "_seconds": 1782635187,
+      "_nanoseconds": 479000000
+    },
+    "status": "active"
+  },
+  {
+    "id": "FPC2erpbECahz182u8ds",
+    "name": "Fahad Jassim Al-Theyab",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901693,
+      "_nanoseconds": 459000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "GzQ4ZIpnwYkCt2BudUO3",
+    "name": "Rashid Deham Alsuwaidi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901421,
+      "_nanoseconds": 577000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest",
+    "gender": "Male",
+    "dob": "13-04-1987",
+    "primaryDiagnosis": "Alopecia/Hair Loss"
+  },
+  {
+    "id": "JG6woYpHygGXs28QUkDJ",
+    "name": "Amba Lee Loudon",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902809,
+      "_nanoseconds": 480000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "KLkjg96SzScylW9uwcCi",
+    "name": "Sarah Mohammed Alkhelaifi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901650,
+      "_nanoseconds": 168000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "Ls34ExF56nRfKFJ7kfTShPPGVhs1",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test2@example.com",
+    "institution": "",
+    "userType": "",
+    "role": "guest",
+    "roles": [
+      "guest"
+    ],
+    "professionalStatus": "not_requested",
+    "permissions": {
+      "canRecommend": false,
+      "canBulkOrder": false,
+      "customSynthesis": false,
+      "clinicalLogs": false,
+      "manageStaff": false,
+      "trackCommission": false
+    },
+    "goals": [],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-06-08T14:21:49.830Z",
+    "assignedPhysicianIds": [],
+    "assignedPatientIds": [],
+    "assignedTenantId": null,
+    "tenantId": null,
+    "ownerType": null,
+    "ownerId": null,
+    "sourceDomain": null,
+    "sourceTerritory": null,
+    "attributionLocked": false
+  },
+  {
+    "id": "MBXjS5DKyfNe06ZugTWNGZ31WRy1",
+    "firstName": "Mobile",
+    "lastName": "TestUser",
+    "email": "mobile.test.b2c@proton.me",
+    "institution": "",
+    "userType": "individual",
+    "role": "professional_pending",
+    "professionalStatus": "pending_review",
+    "permissions": {
+      "canRecommend": false,
+      "canBulkOrder": false,
+      "customSynthesis": false,
+      "clinicalLogs": false,
+      "manageStaff": false,
+      "trackCommission": false
+    },
+    "goals": [],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-05-26T14:30:14.139Z",
+    "assignedPhysicianIds": [],
+    "assignedPatientIds": []
+  },
+  {
+    "id": "MMzDsh3ClefZVRA3HFZvF70B0JG3",
+    "lastName": "Guest",
+    "shippingCity": "Madrid",
+    "role": "guest",
+    "professionalStatus": "not_requested",
+    "shippingStreet": "Gran Via 1",
+    "firstName": "Test",
+    "institution": "",
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": false,
+      "canAccessAcademy": true,
+      "customSynthesis": false,
+      "trackCommission": false,
+      "canAccessCalculator": false,
+      "canAccessClinicalAI": false,
+      "canAccessCustomSynthesis": false,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": false,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "guest@regenpept.test",
+    "shippingZip": "28013",
+    "uid": "MMzDsh3ClefZVRA3HFZvF70B0JG3",
+    "displayName": "Test Guest",
+    "updatedAt": "2026-05-26T18:07:00.334Z",
+    "approved": true,
+    "createdAt": "2026-06-29T14:03:00.756Z"
+  },
+  {
+    "id": "MuOV2Fzw5QbS16fL5zv6P15HcKs2",
+    "lastName": "Staff",
+    "shippingCity": "Madrid",
+    "role": "staff",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "firstName": "Test",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": false,
+      "canAccessAcademy": true,
+      "customSynthesis": false,
+      "trackCommission": false,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": true,
+      "canAccessCustomSynthesis": false,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": true,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "staff@regenpept.test",
+    "shippingZip": "28013",
+    "createdAt": "2026-06-29T14:02:58.763Z"
+  },
+  {
+    "id": "NdlBdsK2a8C7M5YIGVCG",
+    "name": "Aljohara Mohammed Al-Mana",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901588,
+      "_nanoseconds": 430000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "NfWLfKYrvlZHAJ5WhLPtmb9RH8T2",
+    "createdAt": "2026-06-01T13:56:33.379Z",
+    "firstName": "Business",
+    "lastName": "Manager",
+    "approved": true,
+    "role": "account_manager",
+    "displayName": "Business Manager",
+    "userType": "professional",
+    "email": "business@mediluxeme.com",
+    "allowedAdminTabs": [
+      "finance"
+    ]
+  },
+  {
+    "id": "OUIwY5rIyiXSxKcedLQ4",
+    "name": "Ali Mohammad Ali Alnasari",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902961,
+      "_nanoseconds": 179000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "PUKamU3tKFOdRZjLtcC69pbnMbH2",
+    "firstName": "Test",
+    "lastName": "Researcher",
+    "email": "researcher@med-peptides.com",
+    "institution": "",
+    "userType": "",
+    "role": "guest",
+    "professionalStatus": "not_requested",
+    "goals": [],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-05-17T16:58:32.236Z"
+  },
+  {
+    "id": "Pm0csib2ZteYzubsVF47",
+    "name": "Naeema Mohd Al-meraikhi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901725,
+      "_nanoseconds": 675000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "PxPiWE7P4kdbWGZKEpDU",
+    "name": "Terrence Oneill",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902924,
+      "_nanoseconds": 136000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "R3rgm6IBYtqSDi2VGQN8",
+    "name": "Amir Alaghband",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902768,
+      "_nanoseconds": 227000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "RSVZ2NHKZBFeg2jHx2ll",
+    "name": "Timothy Micheal Kelly",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902893,
+      "_nanoseconds": 343000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "Rn4nx4apKUPpJPTKy9GW6npnV8d2",
+    "wholesellerId": "magenta-health",
+    "createdAt": "2026-06-01T14:33:38.809Z",
+    "firstName": "Erleen",
+    "lastName": "C. Tumambing",
+    "approved": true,
+    "role": "compounding_pharmacy",
+    "phone": "+971-504904512",
+    "displayName": "Erleen C. Tumambing",
+    "zohoContactId": "7006116000000713081",
+    "userType": "professional",
+    "email": "mb@rx-plus.ae"
+  },
+  {
+    "id": "ShftxOu3AQke3uOMafQs",
+    "name": "Mehdi Alagheband",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781940308,
+      "_nanoseconds": 194000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "Sie4MPiWQQXMkSg2dxBV",
+    "name": "Shaha Ali A Kh Al-Thani",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781903042,
+      "_nanoseconds": 925000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "VKS0loQ8ZkssFpXliHD5",
+    "name": "Haya Hassen Al-Haidose",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901444,
+      "_nanoseconds": 679000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "WZOuYGJMafJasNfbOp8t",
+    "name": "Ryan Sprott",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902834,
+      "_nanoseconds": 169000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "ZaM9lTSwmQRPCZRMKesQSbCGS5q1",
+    "firstName": "Test",
+    "lastName": "GuestUser",
+    "email": "testguest2025@proton.me",
+    "institution": "",
+    "userType": "individual",
+    "role": "professional_pending",
+    "professionalStatus": "pending_review",
+    "permissions": {
+      "canRecommend": false,
+      "canBulkOrder": false,
+      "customSynthesis": false,
+      "clinicalLogs": false,
+      "manageStaff": false,
+      "trackCommission": false
+    },
+    "goals": [],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-05-26T13:33:57.527Z",
+    "assignedPhysicianIds": [],
+    "assignedPatientIds": []
+  },
+  {
+    "id": "ZeuEjqlwTqHkgP4hHcWl",
+    "name": "Abdulaziz Mohd Obaidli",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901463,
+      "_nanoseconds": 702000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "aMt8sCiPFxtj07ZRRzsT",
+    "name": "Sara Meqbil Al Qahtani",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901383,
+      "_nanoseconds": 276000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "byJEDjB6tKILmYSZKOoo",
+    "name": "Esaamuddin Galadari",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902977,
+      "_nanoseconds": 151000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "bzNM6Z2uOrhAH2lrCmsXJbtanYF3",
+    "firstName": "Valentina",
+    "lastName": "Ghorashi",
+    "licenseType": "DHA",
+    "createdAt": {
+      "_seconds": 1782642980,
+      "_nanoseconds": 471000000
+    },
+    "clinicId": "roya-medical-center",
+    "specialty": "Physician Specialist – Obstetrics & Gynecology",
+    "role": "fagron_genomics_doctor",
+    "displayName": "Dr. Valentina Ghorashi",
+    "licenseNumber": "00083445-017",
+    "email": "valentina.ghorashi@royamedicalcenter.test",
+    "status": "active"
+  },
+  {
+    "id": "dA323I47t8fiERRH7vgl",
+    "name": "Lama J M Abuakar",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901540,
+      "_nanoseconds": 876000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "dr_marina_generic",
+    "clinicName": "NOVA PLASTIC SURGERY CLINIC",
+    "firstName": "Marina",
+    "lastName": "Cordeiro Fernandes",
+    "role": "doctor",
+    "professionalStatus": "approved",
+    "licenseId": "DHA 91105367",
+    "email": "marina.cordeiro@novaclinic.test"
+  },
+  {
+    "id": "dr_valentina_generic",
+    "clinicName": "Roya Medical Center LLC",
+    "firstName": "Valentina",
+    "lastName": "Ghorashi",
+    "role": "doctor",
+    "professionalStatus": "approved",
+    "licenseId": "00083445-017",
+    "email": "valentina.ghorashi@royamedicalcenter.test"
+  },
+  {
+    "id": "dsLuG1rZ3SZZDQauURJ42O9Y7Bv2",
+    "firstName": "Test",
+    "lastName": "Researcher",
+    "email": "test_researcher_123456@gmail.com",
+    "institution": "",
+    "userType": "",
+    "role": "guest",
+    "professionalStatus": "not_requested",
+    "goals": [
+      "injury-recovery"
+    ],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-05-18T05:25:29.306Z"
+  },
+  {
+    "id": "eV8f8Hwlk7YoJkzhn1fCoQU85953",
+    "approved": true,
+    "billingCity": "Madrid",
+    "billingCountry": "Spain",
+    "billingStreet": "Magallanes 40",
+    "billingZip": "28015",
+    "createdAt": "2026-04-20T21:28:00.483Z",
+    "email": "jlzabala@gmail.com",
+    "firstName": "Jose",
+    "fullName": "Jose Luis Zabala",
+    "institution": "Mediluxe Health Solutions",
+    "lastName": "Luis Zabala",
+    "phone": "+34 654314490",
+    "shippingCity": "Madrid",
+    "shippingCountry": "Spain",
+    "shippingZip": "28015",
+    "taxId": "",
+    "userType": "researcher",
+    "shippingStreet": "Magallanes 40, Madrid, 28015, Madrid, 28015, Madrid, 28015",
+    "role": "admin",
+    "isAdmin": true,
+    "updatedAt": "2026-07-03T08:53:50.944Z"
+  },
+  {
+    "id": "ehmAWVUqbe1rO4jb3YK5",
+    "name": "Ernst Weeland",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902798,
+      "_nanoseconds": 207000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "fXbowjDJxWQsQF1yNvt3",
+    "name": "Amna Fahad Alhababi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901356,
+      "_nanoseconds": 590000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest",
+    "gender": "Female",
+    "dob": "14-08-2005",
+    "primaryDiagnosis": "Alopecia/Hair Loss"
+  },
+  {
+    "id": "fqSJ4QTFqlmYbMlKcjTR",
+    "name": "Jaffer Ikram Khan Mohammed Ikram Ullah Khan",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902851,
+      "_nanoseconds": 977000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "gIiWzFCD8UhUcRLlg6Cx",
+    "name": "Joseph Christopher Musgrave",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902824,
+      "_nanoseconds": 529000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "iQInHVVlavP1Pe2rE7RQRT01GMb2",
+    "wholesellerId": "magenta-health",
+    "createdAt": "2026-06-01T14:33:36.757Z",
+    "firstName": "Lynn",
+    "lastName": "Iglesia",
+    "approved": true,
+    "role": "compounding_pharmacy",
+    "phone": "",
+    "displayName": "Lynn Iglesia",
+    "zohoContactId": "7006116000000960040",
+    "userType": "professional",
+    "email": "liglesia@magenta-investments.com"
+  },
+  {
+    "id": "ieVT9hLW8YLNdQK20ZZh",
+    "name": "Aziza Mohammed Alsaadi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901524,
+      "_nanoseconds": 699000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "jj3bqnHit7Wwahc0IXj2",
+    "name": "Maytha Ali M S Al Marri",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901474,
+      "_nanoseconds": 253000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "jvaUivJ4EDRYsm56FYUJiw31akI3",
+    "shippingCity": "Madrid",
+    "role": "admin",
+    "shippingStreet": "Gran Via 1",
+    "institution": "",
+    "approved": true,
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": true,
+      "canAccessAcademy": true,
+      "customSynthesis": true,
+      "trackCommission": true,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": true,
+      "canAccessCustomSynthesis": true,
+      "canAccessDoctorDashboard": true,
+      "clinicalLogs": true,
+      "canAccessAdminDashboard": true,
+      "manageStaff": true,
+      "canRecommend": true
+    },
+    "email": "admin@regenpept.test",
+    "shippingZip": "28013",
+    "uid": "jvaUivJ4EDRYsm56FYUJiw31akI3",
+    "phone": "+34600112233",
+    "professionalStatus": "not_requested",
+    "createdAt": "2026-07-03T08:53:05.129Z",
+    "firstName": "Admin",
+    "lastName": "Test",
+    "displayName": "Local Admin",
+    "isAdmin": true,
+    "updatedAt": "2026-07-03T08:53:51.664Z"
+  },
+  {
+    "id": "jyuAHkGwGnUl9P61v0q2",
+    "name": "Shahameh Dizaei",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902946,
+      "_nanoseconds": 295000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "kQh8Yi2HHrgSkdGgYNpi5DJvXX73",
+    "lastName": "Fagron Doctor",
+    "shippingCity": "Madrid",
+    "role": "fagron_doctor",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "createdAt": "2026-06-29T14:02:51.507Z",
+    "firstName": "Test",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": true,
+      "canAccessAcademy": true,
+      "customSynthesis": true,
+      "trackCommission": false,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": true,
+      "canAccessCustomSynthesis": true,
+      "canAccessDoctorDashboard": true,
+      "clinicalLogs": true,
+      "canAccessAdminDashboard": false,
+      "manageStaff": true,
+      "canRecommend": true
+    },
+    "email": "fagron_doctor@regenpept.test",
+    "shippingZip": "28013"
+  },
+  {
+    "id": "l6O48xEZ69bWLM60DhTJ",
+    "name": "Nicola Oneil",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902914,
+      "_nanoseconds": 873000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "licS2sItO9zdqYz1Z9nl",
+    "name": "Dr. Test Doctor",
+    "email": "drtestdoctor@doctor.test",
+    "role": "doctor",
+    "status": "Active",
+    "createdAt": {
+      "_seconds": 1781941556,
+      "_nanoseconds": 862000000
+    },
+    "source": "Auto-Migrated from Prescriptions"
+  },
+  {
+    "id": "n4etmUIbLNEe2Yy7QHQx",
+    "name": "Fatma Hussain Alajmi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901557,
+      "_nanoseconds": 907000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "od7VzbMx4tYASNEB8xTO",
+    "name": "Suzelle Robinson Snowden",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902742,
+      "_nanoseconds": 35000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "pat_noura_alfuttaim",
+    "firstName": "Noura",
+    "lastName": "Majed Mohamed Alfuttaim",
+    "role": "patient",
+    "gender": "Female",
+    "dob": "1960-10-02"
+  },
+  {
+    "id": "pat_reem_alghanim",
+    "firstName": "Reem",
+    "lastName": "F M Alghanim",
+    "role": "patient",
+    "gender": "Female",
+    "dob": "1977-07-23"
+  },
+  {
+    "id": "pat_roukiya_almurjan",
+    "firstName": "Roukiya",
+    "lastName": "M M AlMurjan",
+    "role": "patient",
+    "gender": "Female",
+    "dob": "1972-08-30"
+  },
+  {
+    "id": "pat_tena_brown",
+    "firstName": "Tena",
+    "lastName": "Brown",
+    "role": "patient",
+    "gender": "Female",
+    "dob": "1978-10-10"
+  },
+  {
+    "id": "srb6xEXvPdNzwSdZzbjyQJ1v3y82",
+    "wholesellerId": "magenta-health",
+    "createdAt": "2026-06-01T14:33:40.872Z",
+    "firstName": "Noriel",
+    "lastName": "Punzalan",
+    "approved": true,
+    "role": "compounding_pharmacy",
+    "phone": "+971 4 447 2930",
+    "displayName": "Noriel Punzalan",
+    "zohoContactId": "7006116000001024105",
+    "userType": "professional",
+    "email": "sc@rx-plus.ae"
+  },
+  {
+    "id": "t3GpDD2O5aXI1NrDbqo6kw1rQXv2",
+    "wholesellerId": "magenta-health",
+    "createdAt": "2026-06-01T14:33:41.930Z",
+    "firstName": "Jan",
+    "lastName": "Alomia",
+    "approved": true,
+    "role": "compounding_pharmacy",
+    "phone": "+971506167657",
+    "displayName": "Jan Alomia",
+    "zohoContactId": "7006116000000613306",
+    "userType": "professional",
+    "email": "rxhead@magenta-health.ae"
+  },
+  {
+    "id": "tfxtg7eJKHap88NSIod2rdid5Uv2",
+    "createdAt": "2026-06-01T13:56:31.240Z",
+    "firstName": "Kasia",
+    "lastName": "Manager",
+    "approved": true,
+    "role": "account_manager",
+    "displayName": "Kasia Manager",
+    "userType": "professional",
+    "email": "kasia@mediluxeme.com"
+  },
+  {
+    "id": "txiu4nyFmFrVmts4lXS9",
+    "name": "Noora Shafea Alfahida",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901623,
+      "_nanoseconds": 3000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "uN8SaPvr8IOo99A0GOjEHu936fP2",
+    "wholesellerId": "magenta-health",
+    "createdAt": "2026-06-01T14:33:37.744Z",
+    "firstName": "Safvan",
+    "lastName": "Vadakkan",
+    "approved": true,
+    "role": "compounding_pharmacy",
+    "phone": "",
+    "displayName": "Safvan Vadakkan",
+    "zohoContactId": "7006116000000713101",
+    "userType": "professional",
+    "email": "it@magenta-investments.com"
+  },
+  {
+    "id": "uPg6CQPv11bN0uMTAPGooiH4ibn1",
+    "shippingCity": "Madrid",
+    "role": "patient",
+    "shippingStreet": "Gran Via 1",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": false,
+      "canAccessAcademy": true,
+      "customSynthesis": false,
+      "trackCommission": false,
+      "canAccessCalculator": false,
+      "canAccessClinicalAI": false,
+      "canAccessCustomSynthesis": false,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": false,
+      "canAccessAdminDashboard": false,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "patient@regenpept.test",
+    "shippingZip": "28013",
+    "uid": "uPg6CQPv11bN0uMTAPGooiH4ibn1",
+    "displayName": "Ana Martínez",
+    "assignedPhysicianIds": [
+      "754OYGgejoelucER7ReDaGUbAJu2"
+    ],
+    "updatedAt": "2026-05-27T10:29:34.453Z",
+    "lastName": "Patient",
+    "firstName": "Test",
+    "professionalStatus": "not_requested",
+    "createdAt": "2026-06-29T14:02:59.677Z"
+  },
+  {
+    "id": "v08vbPd80YrxSxkspGQH",
+    "name": "Maryam Saleh Al Snaid",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901573,
+      "_nanoseconds": 301000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "vJzjhu9Skccquu5OnS0VUyGTBH72",
+    "firstName": "Test",
+    "lastName": "Admin",
+    "email": "admin@regenpept.com",
+    "institution": "",
+    "userType": "",
+    "role": "guest",
+    "roles": [
+      "guest"
+    ],
+    "professionalStatus": "not_requested",
+    "permissions": {
+      "canRecommend": false,
+      "canBulkOrder": false,
+      "customSynthesis": false,
+      "clinicalLogs": false,
+      "manageStaff": false,
+      "trackCommission": false
+    },
+    "goals": [],
+    "phone": "",
+    "shippingStreet": "",
+    "shippingCity": "",
+    "shippingZip": "",
+    "shippingCountry": "",
+    "billingStreet": "",
+    "billingCity": "",
+    "billingZip": "",
+    "billingCountry": "",
+    "taxId": "",
+    "approved": false,
+    "createdAt": "2026-06-20T16:45:25.014Z",
+    "assignedPhysicianIds": [],
+    "assignedPatientIds": [],
+    "assignedTenantId": null,
+    "tenantId": null,
+    "ownerType": null,
+    "ownerId": null,
+    "sourceDomain": null,
+    "sourceTerritory": null,
+    "attributionLocked": false
+  },
+  {
+    "id": "vtVgcFhwXbQlsldyo3wDVX3CDK03",
+    "fullName": "Katrina Migliore",
+    "email": "katrina@mediluxeme.com",
+    "institution": "",
+    "approved": false,
+    "createdAt": "2026-03-16T14:20:20.429Z",
+    "_migratedAt": "2026-04-19T17:00:19.337Z",
+    "_migratedFrom": "regenpept-web-app",
+    "isArchived": true
+  },
+  {
+    "id": "w3CTYy9tEFfMAlLY7DYk31NIqoj1",
+    "createdAt": "2026-06-28T09:39:20.669Z",
+    "firstName": "Dummy",
+    "lastName": "Fagron",
+    "approved": true,
+    "role": "fagron_genomics_clinic",
+    "email": "dummy-fagron-clinic@regenpept.test"
+  },
+  {
+    "id": "xaF5RlAIa1T2Y9JhmS0Legi54hg1",
+    "lastName": "Medical Director",
+    "shippingCity": "Madrid",
+    "role": "medical_director",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "createdAt": "2026-06-29T14:02:50.542Z",
+    "firstName": "Test",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": true,
+      "canAccessAcademy": true,
+      "customSynthesis": true,
+      "trackCommission": false,
+      "canAccessCalculator": true,
+      "canAccessClinicalAI": true,
+      "canAccessCustomSynthesis": true,
+      "canAccessDoctorDashboard": true,
+      "clinicalLogs": true,
+      "canAccessAdminDashboard": false,
+      "manageStaff": true,
+      "canRecommend": true
+    },
+    "email": "medical_director@regenpept.test",
+    "shippingZip": "28013"
+  },
+  {
+    "id": "yhmAihvh08FyEon7RSWa",
+    "name": "Ali Ahmad Al Mawlawi",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "fagron-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781901607,
+      "_nanoseconds": 296000000
+    },
+    "notes": "Imported from Fagron TrichoTest bulk ingest"
+  },
+  {
+    "id": "yxHvB9dw4chxaqPqkczV0rnuh3p2",
+    "lastName": "Account Manager",
+    "shippingCity": "Madrid",
+    "role": "account_manager",
+    "professionalStatus": "approved",
+    "shippingStreet": "Gran Via 1",
+    "createdAt": "2026-06-29T14:02:56.927Z",
+    "firstName": "Test",
+    "institution": "",
+    "approved": true,
+    "phone": "+34600112233",
+    "shippingCountry": "Spain",
+    "permissions": {
+      "canBulkOrder": false,
+      "canAccessAcademy": true,
+      "customSynthesis": false,
+      "trackCommission": true,
+      "canAccessCalculator": false,
+      "canAccessClinicalAI": false,
+      "canAccessCustomSynthesis": false,
+      "canAccessDoctorDashboard": false,
+      "clinicalLogs": false,
+      "canAccessAdminDashboard": true,
+      "manageStaff": false,
+      "canRecommend": false
+    },
+    "email": "account_manager@regenpept.test",
+    "shippingZip": "28013"
+  },
+  {
+    "id": "zTnuMIZkRFnPdV1wHUB3",
+    "name": "Jaleh Nasseri",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902905,
+      "_nanoseconds": 237000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  },
+  {
+    "id": "zYhzIv19qHVB4w6DKW1V",
+    "name": "Fazilah Thariani",
+    "role": "patient",
+    "status": "active",
+    "createdBy": "telotest-batch-ingest",
+    "createdAt": {
+      "_seconds": 1781902934,
+      "_nanoseconds": 615000000
+    },
+    "notes": "Imported from Fagron TeloTest bulk ingest"
+  }
+]

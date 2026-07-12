@@ -1,11 +1,11 @@
-import Bot from "lucide-react/dist/esm/icons/bot";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Calculator from "lucide-react/dist/esm/icons/calculator";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import BrainCircuit from "lucide-react/dist/esm/icons/brain-circuit";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import { Bot } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
+import { Zap } from '@/lib/icons';
+import { Calculator } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { BrainCircuit } from '@/lib/icons';
+import { Globe } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { motion } from 'framer-motion';

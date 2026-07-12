@@ -1,10 +1,5 @@
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Activity from "lucide-react/dist/esm/icons/activity";
 import React from 'react';
+import { FileText, Clock, CheckCircle, AlertTriangle, AlertCircle, Activity } from '@/lib/icons';
 
 
 

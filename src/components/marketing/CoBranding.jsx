@@ -1,3 +1,5 @@
+"use client";
+
 import ImageIcon from "lucide-react/dist/esm/icons/image";
 import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
 import Edit3 from "lucide-react/dist/esm/icons/edit-3";

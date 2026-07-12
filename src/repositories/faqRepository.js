@@ -2,6 +2,7 @@
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
+
 export const faqRepository = {
   /**
    * Fetch all FAQ records from Firestore.

@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 
+
 const DEFAULT_ROWS_PER_PAGE = 20;
 
 export const PRESET_VIEWS = [

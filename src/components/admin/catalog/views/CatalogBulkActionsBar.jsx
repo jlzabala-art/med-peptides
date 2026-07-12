@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Tag, Building, Trash2, X, FileText, PackageOpen, ChevronDown, CheckCircle2, MoreHorizontal, Check, PowerOff, BookOpen } from '@/lib/icons';
 import toast from 'react-hot-toast';

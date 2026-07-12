@@ -1,10 +1,5 @@
-import Box from "lucide-react/dist/esm/icons/box";
-import Users from "lucide-react/dist/esm/icons/users";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React from 'react';
+import { Box, Users, Bell, TrendingUp, AlertTriangle, ShieldCheck } from '@/lib/icons';
 
 
 

@@ -1,3 +1,4 @@
+'use client';
 import React, { Component } from 'react';
 import ScreenPermissionGuard from '../auth/ScreenPermissionGuard';
 
@@ -65,7 +66,7 @@ export default class AdminTabErrorBoundary extends Component {
     }
 
     const { tabLabel = 'This section', error, errorInfo, showDetail } = this.state;
-    const isDev = import.meta.env?.DEV;
+    const isDev = process.env.NODE_ENV === 'development';
 
     return (
       <div
@@ -154,7 +155,7 @@ export default class AdminTabErrorBoundary extends Component {
                 }}
               >
                 {error.toString()}
-                {errorInfo?.componentStack && '\n\nComponent Stack:' + errorInfo.componentStack}
+                {errorInfo?.componentStack && '\\n\\nComponent Stack:' + errorInfo.componentStack}
               </pre>
             )}
           </div>

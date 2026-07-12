@@ -1,21 +1,5 @@
-import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
-import List from "lucide-react/dist/esm/icons/list";
-import Search from "lucide-react/dist/esm/icons/search";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import X from "lucide-react/dist/esm/icons/x";
-import Check from "lucide-react/dist/esm/icons/check";
-import Tag from "lucide-react/dist/esm/icons/tag";
-import Leaf from "lucide-react/dist/esm/icons/leaf";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * SupplementCollectionPage — Phase 1: shell + imports
@@ -43,7 +27,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
 
 
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { getActiveSupplements } from '../repositories/supplementRepository';
 import '../styles/collection_shared.css';
 import CollectionHeader from '../components/collection/CollectionHeader';
@@ -52,6 +36,7 @@ import CollectionSidebar, { SidebarSection } from '../components/collection/Coll
 import FilterDrawer from '../components/collection/FilterDrawer';
 import SharedChip from '../components/collection/SharedChip';
 import ProductCard, { SkeletonCard } from '../components/collection/ProductCard';
+import { LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, X, Check, Tag, Leaf, Zap, Moon, Brain, Shield, Activity, Sparkles, Droplets, FlaskConical, Dumbbell } from '@/lib/icons';
 
 const PAGE_SIZE = 20;
 
@@ -200,8 +185,8 @@ function consolidateByName(items) {
 }
 
 export default function SupplementCollectionPage({ onNavigate, onBack, toggleCompare }) {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate  = useRouter();
+  const location  = usePathname();
 
   usePageMeta({
     title: 'Research-Grade Supplement Catalog | Atlas Health',
@@ -342,7 +327,7 @@ export default function SupplementCollectionPage({ onNavigate, onBack, toggleCom
     setPage(1);
     setActiveFilters({ category: null, tags: [], search: '', sort: 'name-asc' });
   };
-  const handleCardClick = (p) => navigate(`/supplements/${p.slug}`);
+  const handleCardClick = (p) => router.push(`/supplements/${p.slug}`);
   const handleSearchChange = (e) => {
     setPage(1);
     setActiveFilters(prev => ({ ...prev, search: e.target.value }));

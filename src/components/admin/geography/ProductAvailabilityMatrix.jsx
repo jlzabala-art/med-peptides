@@ -1,3 +1,5 @@
+"use client";
+
 import Check from "lucide-react/dist/esm/icons/check";
 import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';

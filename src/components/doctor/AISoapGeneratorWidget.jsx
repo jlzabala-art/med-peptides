@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileSignature, Sparkles, Loader2, CheckCircle2, Copy } from '@/lib/icons';

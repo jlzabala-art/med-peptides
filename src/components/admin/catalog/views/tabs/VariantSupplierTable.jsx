@@ -1,7 +1,8 @@
+"use client";
+
 import React, { useState, useMemo } from 'react';
-import UserPlus from 'lucide-react/dist/esm/icons/user-plus';
-import Send from 'lucide-react/dist/esm/icons/send';
 import AppActionGroup from '../../../../ui/AppActionGroup';
+import { UserPlus, Send } from '@/lib/icons';
 
 const thStyle = {
   padding: '12px',

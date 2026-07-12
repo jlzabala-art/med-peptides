@@ -1,11 +1,14 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { ArrowLeft, Plus, X, Globe, Users, DollarSign, Shield, RefreshCw, Save, Archive } from '@/lib/icons';
 import { db } from '../../../firebase.js';
 import { doc, getDoc } from 'firebase/firestore';
 
 export default function SelectedItemsVisibilityWorkflow({ selectedItemIds, onClearSelection }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,7 +83,7 @@ export default function SelectedItemsVisibilityWorkflow({ selectedItemIds, onCle
   };
 
   const handleAddMore = () => {
-    navigate('/admin/products');
+    router.push('/admin/products');
   };
 
   const handleSave = () => {

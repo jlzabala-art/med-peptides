@@ -1,11 +1,5 @@
-import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
-import Circle from 'lucide-react/dist/esm/icons/circle';
-import Clock from 'lucide-react/dist/esm/icons/clock';
-import Plus from 'lucide-react/dist/esm/icons/plus';
-import Filter from 'lucide-react/dist/esm/icons/filter';
-import User from 'lucide-react/dist/esm/icons/user';
-import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import {
   collection,
@@ -18,11 +12,13 @@ import {
   doc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../../context/NotificationContext';
+import { CheckCircle2, Circle, Clock, Plus, Filter, User, AlertCircle, ArrowRight } from '@/lib/icons';
 
 export default function TasksEngine({ entityId = null }) {
   const [tasks, setTasks] = useState([]);

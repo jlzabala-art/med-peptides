@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import Download from 'lucide-react/dist/esm/icons/download';
 import Filter from 'lucide-react/dist/esm/icons/filter';
@@ -11,8 +14,8 @@ import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import Tag from 'lucide-react/dist/esm/icons/tag';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import { motion, AnimatePresence } from 'framer-motion';
-import React, { useState, useMemo, useEffect, lazy, Suspense, useDeferredValue } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useDeferredValue } from 'react';
+
 import { useCatalogData } from './useCatalogData';
 import { useCatalogActionRouter } from './hooks/useCatalogActionRouter';
 import OperationalActionCards from './OperationalActionCards';
@@ -24,12 +27,14 @@ import { MigrationService } from './api/migration.service';
 import { BulkSupplierModal, BulkTagModal, BulkPoModal, BulkQuoteModal } from './modals/CatalogBulkActionModals';
 import ActiveFilterChips from '../../../features/catalog/components/layout/ActiveFilterChips';
 
-const ProductDetailsDrawer = lazy(() => import('../products/ProductDetailsDrawer'));
-const SmartProductIntakeWizard = lazy(() => import('./SmartProductIntakeWizard'));
-const UniversalImportWizard = lazy(() => import('./UniversalImportWizard'));
-const CatalogImportWizard = lazy(() => import('./CatalogImportWizard'));
-const ProductIntelligenceModal = lazy(() => import('./ProductIntelligenceModal'));
-const VariantDetailsModal = lazy(() => import('../products/VariantDetailsModal'));
+import dynamic from 'next/dynamic';
+
+const ProductDetailsDrawer = dynamic(() => import('../products/ProductDetailsDrawer'));
+const SmartProductIntakeWizard = dynamic(() => import('./SmartProductIntakeWizard'));
+const UniversalImportWizard = dynamic(() => import('./UniversalImportWizard'));
+const CatalogImportWizard = dynamic(() => import('./CatalogImportWizard'));
+const ProductIntelligenceModal = dynamic(() => import('./ProductIntelligenceModal'));
+const VariantDetailsModal = dynamic(() => import('../products/VariantDetailsModal'));
 import CatalogHeaderGadget from '../../../gadgets/catalog/CatalogHeaderGadget';
 
 import { GOALS, PRODUCT_TYPES, TYPE_LABELS, GOAL_LABELS } from '../../../constants/catalogFilters';
@@ -44,7 +49,7 @@ export default function CatalogIntelligenceHub({
   hideCosts = false,
   allowedCategories = ['All']
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);

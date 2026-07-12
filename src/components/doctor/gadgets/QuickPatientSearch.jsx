@@ -1,13 +1,15 @@
-import Search from "lucide-react/dist/esm/icons/search";
-import UserPlus from "lucide-react/dist/esm/icons/user-plus";
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 
-import { useNavigate } from 'react-router-dom';
+
+import { Search, UserPlus } from '@/lib/icons';
 
 export default function QuickPatientSearch() {
   const [query, setQuery] = useState('');
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className="card" style={{ padding: '2rem', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
@@ -33,7 +35,7 @@ export default function QuickPatientSearch() {
       </div>
 
       <button 
-        onClick={() => navigate('/doctor/patients/new')}
+        onClick={() => router.push('/doctor/patients/new')}
         style={{ 
           marginTop: '1rem', width: '100%', padding: '0.75rem', 
           background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', 

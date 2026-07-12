@@ -13,7 +13,8 @@
 
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 const DEFAULT_CONFIG = {
   isGlobalRegistrationClosed: false

@@ -66,7 +66,7 @@ export default class ProtocolErrorBoundary extends React.Component {
         <p className="ph-error-boundary__desc">{desc}</p>
 
         {/* Dev hint: show error code in non-production */}
-        {import.meta.env.DEV && this.state.error?.message && (
+        {(process.env.NODE_ENV === "development") && this.state.error?.message && (
           <pre className="ph-error-boundary__code">
             {this.state.error.message}
           </pre>

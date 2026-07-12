@@ -1,7 +1,7 @@
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import FileCheck from "lucide-react/dist/esm/icons/file-check";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import { ShieldCheck } from '@/lib/icons';
+import { Microscope } from '@/lib/icons';
+import { FileCheck } from '@/lib/icons';
+import { AlertCircle } from '@/lib/icons';
 import React from 'react';
 
 

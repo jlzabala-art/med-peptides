@@ -1,3 +1,5 @@
+"use client";
+
 import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import Plus from "lucide-react/dist/esm/icons/plus";

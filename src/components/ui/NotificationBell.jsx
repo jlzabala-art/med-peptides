@@ -1,7 +1,10 @@
-import Bell from "lucide-react/dist/esm/icons/bell";
-import Check from "lucide-react/dist/esm/icons/check";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import X from "lucide-react/dist/esm/icons/x";
+"use client";
+
+import { useRouter } from 'next/navigation';
+
+
+
+
 import React, { useState, useEffect, useRef } from 'react';
 
 
@@ -9,9 +12,11 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+
 import './NotificationBell.css'; // Use external CSS instead of Tailwind
+import { Bell, Check, Trash2, X } from '@/lib/icons';
 
 const NotificationBell = () => {
   const { user } = useAuth();
@@ -19,7 +24,7 @@ const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (!user) return;
@@ -77,7 +82,7 @@ const NotificationBell = () => {
   const handleNotificationClick = (notif) => {
     if (!notif.read) markAsRead(notif.id);
     if (notif.link) {
-      navigate(notif.link);
+      router.push(notif.link);
       setIsOpen(false);
     }
   };

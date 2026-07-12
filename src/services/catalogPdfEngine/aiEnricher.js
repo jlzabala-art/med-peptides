@@ -12,7 +12,7 @@
 import { db } from '../../firebase.js';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-const BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL ||
+const BASE_URL = (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_FUNCTIONS_BASE_URL || process.env.VITE_FUNCTIONS_BASE_URL) : '') ||
   'https://europe-west1-med-peptides-app.cloudfunctions.net';
 
 // ── Session-level memory cache ─────────────────────────────────────────────

@@ -1,3 +1,5 @@
+"use client";
+
 import Mail from "lucide-react/dist/esm/icons/mail";
 import UserIcon from "lucide-react/dist/esm/icons/user";
 import Phone from "lucide-react/dist/esm/icons/phone";
@@ -27,7 +29,8 @@ import { useAuth } from '../../context/AuthContext';
 
 import { getAuth, updatePassword, updateProfile } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../firebase';
+import * as fb from '../../firebase';
+const storage = fb?.storage;
 
 export default function UserProfileTab() {
   const { user, userProfile, updateProfileData } = useAuth();

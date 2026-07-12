@@ -31,6 +31,6 @@
 
 .content:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 
-h2 { margin-bottom: 1rem; font-family: 'Inter', sans-serif; font-size: 1.75rem; color: var(--accent); }
+.container h2 { margin-bottom: 1rem; font-family: 'Inter', sans-serif; font-size: 1.75rem; color: var(--accent); }
 
-p { opacity: 0.85; }
+.container p { opacity: 0.85; }

@@ -1,11 +1,13 @@
-import ChevronLeft from "lucide-react/dist/esm/icons/chevron-left";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+"use client";
+
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 import { getTemplatesByObjective } from '../../repositories/protocolRepository';
+import { ChevronLeft, ChevronRight } from '@/lib/icons';
 
 const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
   currentSlug,
@@ -13,7 +15,7 @@ const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
   goalLabel,
   goalGradient,
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [siblings, setSiblings] = useState([]);
   const [loading, setLoading]   = useState(true);
   const scrollContainerRef = React.useRef(null);
@@ -67,11 +69,11 @@ const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
   const getSlug = (p) => p.protocol_id || p.id || p.protocol_slug;
   const getTitle = (p) => p.protocol_title || p.name || p.protocol_name || getSlug(p);
 
-  const goTo = (p) => navigate(`/protocol/${getSlug(p)}`);
+  const goTo = (p) => router.push(`/protocol/${getSlug(p)}`);
 
   const handleNav = (index) => {
     const target = siblings[(index + siblings.length) % siblings.length];
-    navigate(`/protocol/${getSlug(target)}`);
+    router.push(`/protocol/${getSlug(target)}`);
   };
 
   useEffect(() => {

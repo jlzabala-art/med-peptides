@@ -1,3 +1,5 @@
+"use client";
+
 import Check from "lucide-react/dist/esm/icons/check";
 import X from "lucide-react/dist/esm/icons/x";
 import Shield from "lucide-react/dist/esm/icons/shield";
@@ -5,7 +7,8 @@ import Star from "lucide-react/dist/esm/icons/star";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import React, { useState, useEffect, useCallback } from 'react';
 import { collection, query, where, orderBy, limit, getDocs, startAfter, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 

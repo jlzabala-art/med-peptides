@@ -1,15 +1,13 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Target from "lucide-react/dist/esm/icons/target";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import { ArrowRight } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { Zap } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
+import { Brain } from '@/lib/icons';
+import { Moon } from '@/lib/icons';
+import { Target } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
 import React, { useRef, useEffect, useState } from 'react';
-
-
-
+import Image from 'next/image';
 
 
 
@@ -460,8 +458,8 @@ export default function FeaturedCategories({ onSelectCategory, onOpenSearch }) {
               }}
             >
               {/* Image */}
-              <div className="fc-img-wrap">
-                <img src={cat.image} alt={cat.tagline} loading="lazy" />
+              <div className="fc-img-wrap" style={{ position: 'relative' }}>
+                <Image src={cat.image.startsWith('/') ? 'https://via.placeholder.com/800x600' : cat.image} alt={cat.tagline} fill style={{ objectFit: 'cover' }} />
                 <div className="fc-img-overlay" style={{ background: cat.gradient }} />
               </div>
 

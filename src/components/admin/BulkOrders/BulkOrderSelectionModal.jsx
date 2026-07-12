@@ -1,9 +1,12 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Package from "lucide-react/dist/esm/icons/package";
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, addDoc, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../../firebase';
+
 import { useAuth } from '../../../context/AuthContext';
 
 

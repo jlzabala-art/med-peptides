@@ -1,3 +1,4 @@
+'use client';
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import CreditCard from "lucide-react/dist/esm/icons/credit-card";
@@ -323,7 +324,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     return m ? m[0] : 'row';
   }, [formData.country, EXCHANGE_RATES, region]);
 
-  const cartItems = Object.entries(cart);
+  const cartItems = Object.entries(cart || {});
   
   // Format cart items for the useB2CPricing hook
   const cartItemEntries = useMemo(() => {

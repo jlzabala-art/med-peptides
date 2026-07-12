@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 
 /**
  * EditablePriceCell – renders a numeric value that can be edited inline.

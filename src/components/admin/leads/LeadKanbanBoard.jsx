@@ -1,16 +1,8 @@
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import ArrowUpRight from "lucide-react/dist/esm/icons/arrow-up-right";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Target from "lucide-react/dist/esm/icons/target";
-import Package from "lucide-react/dist/esm/icons/package";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import User from "lucide-react/dist/esm/icons/user";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
+"use client";
+
 import React, { useState } from 'react';
 import { calculateDetailedAIScore } from './LeadUtils';
+import { Mail, Phone, Calendar, ArrowUpRight, DollarSign, Target, Package, Clock, ShieldAlert, User, MapPin } from '@/lib/icons';
 
 
 

@@ -1,12 +1,12 @@
-import X from "lucide-react/dist/esm/icons/x";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Info from "lucide-react/dist/esm/icons/info";
+"use client";
+
+import Link from 'next/link';
 import React, { useEffect } from 'react';
 
 
 
-import { Link } from 'react-router-dom';
 import './ProductDetailDrawer.css';
+import { X, ExternalLink, Info } from '@/lib/icons';
 
 export default function ProductDetailDrawer({ product, onClose }) {
   // Close on escape key

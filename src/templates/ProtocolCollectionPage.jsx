@@ -1,18 +1,5 @@
-import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
-import List from "lucide-react/dist/esm/icons/list";
-import Search from "lucide-react/dist/esm/icons/search";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import X from "lucide-react/dist/esm/icons/x";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import Tag from "lucide-react/dist/esm/icons/tag";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * ProtocolCollectionPage — /collection/protocols
@@ -43,7 +30,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import '../styles/collection_shared.css';
 import CollectionHeader from '../components/collection/CollectionHeader';
 import GoalCard from '../components/collection/GoalCard';
@@ -51,8 +38,9 @@ import CollectionSidebar, { SidebarSection } from '../components/collection/Coll
 import FilterDrawer from '../components/collection/FilterDrawer';
 import SharedChip from '../components/collection/SharedChip';
 import ProductCard, { SkeletonCard } from '../components/collection/ProductCard';
-import { getAllProtocols, getProtocolTemplate } from '../repositories/protocolRepository.js';
+import { getPublicProtocols } from '../services/protocolStorage.js';
 import { ProtocolPreviewModal } from '../components/protocol/ProtocolPreviewModal';
+import { LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, FlaskConical, X, Brain, Moon, Activity, Shield, Zap, Sparkles, Droplets, Tag } from '@/lib/icons';
 
 /* ─────────────────────────────────────────────────────────────
    DATA CONSTANTS
@@ -409,12 +397,12 @@ export const SORT_OPTIONS = [
 
 /* ─────────────────────────────────────────────────────────────
    useProtocols() — Firestore-only data hook
-   Fetches ALL protocols from Firestore (no status filter).
+   Fetches PUBLIC protocols from Firestore.
    No bundle fallback — Firestore is the source of truth.
    ───────────────────────────────────────────────────────────── */
 
 /**
- * useProtocols — fetches all protocols from Firestore.
+ * useProtocols — fetches public protocols from Firestore.
  * Returns { protocols, loading, error }
  */
 function useProtocols() {
@@ -427,10 +415,10 @@ function useProtocols() {
     setLoading(true);
     setError(null);
 
-    getAllProtocols()
+    getPublicProtocols()
       .then(docs => {
         if (cancelled) return;
-        console.log(`[ProtocolCollectionPage] Loaded ${docs.length} protocols from Firestore`);
+        console.log(`[ProtocolCollectionPage] Loaded ${docs.length} public protocols from Firestore`);
         setProtocols(docs.map(d => normalizeProtocolCard(d, 'firestore')));
         setLoading(false);
       })
@@ -452,8 +440,8 @@ function useProtocols() {
    ───────────────────────────────────────────────────────────── */
 
 export default function ProtocolCollectionPage({ onNavigate, onBack }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useRouter();
+  const location = usePathname();
 
   usePageMeta({
     title: 'Clinical Protocol Library | Research Peptide Protocols | Atlas Health',
@@ -662,7 +650,7 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
   const handleDetailClick = useCallback((protocol) => {
     const target = `/protocol/${protocol.slug || protocol.id}`;
     if (onNavigate) onNavigate(protocol.slug || protocol.id);
-    else navigate(target);
+    else router.push(target);
   }, [onNavigate, navigate]);
 
   const handleCardClick = useCallback(async (protocol) => {
@@ -677,14 +665,14 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
         // Slug lookup failed — fall back to page navigation
         const target = `/protocol/${protocol.slug}`;
         if (onNavigate) onNavigate(protocol.slug);
-        else navigate(target);
+        else router.push(target);
       }
     } catch (err) {
       console.error('[ProtocolCollectionPage] handleCardClick fetch error:', err);
       // On error, fall back to full-page navigation
       const target = `/protocol/${protocol.slug}`;
       if (onNavigate) onNavigate(protocol.slug);
-      else navigate(target);
+      else router.push(target);
     } finally {
       setModalLoading(false);
     }

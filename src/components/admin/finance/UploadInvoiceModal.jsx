@@ -1,10 +1,3 @@
-import FileUp from "lucide-react/dist/esm/icons/file-up";
-import X from "lucide-react/dist/esm/icons/x";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
 
 
@@ -15,6 +8,7 @@ import React from 'react';
 
 import { useInvoiceUpload } from '../../../hooks/useInvoiceUpload';
 import { useAuth } from '../../../context/AuthContext';
+import { FileUp, X, CheckCircle, Loader2, AlertTriangle, FileText, Sparkles } from '@/lib/icons';
 
 export default function UploadInvoiceModal({ onClose, onComplete }) {
   const { user } = useAuth();

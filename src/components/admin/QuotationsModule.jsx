@@ -1,3 +1,5 @@
+"use client";
+
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Search from "lucide-react/dist/esm/icons/search";
 import FileText from "lucide-react/dist/esm/icons/file-text";
@@ -12,6 +14,8 @@ import Bot from "lucide-react/dist/esm/icons/bot";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { db, functions } from '../../firebase';
+
+
 import { collection, addDoc, query, orderBy, limit, doc, updateDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import B2BDocumentsLayout from './B2BDocumentsLayout';

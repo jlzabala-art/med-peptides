@@ -1,7 +1,9 @@
+"use client";
+
  
 import { useMemo, useEffect } from 'react';
 import { useProductBySlug } from '../hooks/data/useProductBySlug';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import ProductDetail from './ProductDetail';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import Skeleton from '../components/common/Skeleton';
@@ -17,6 +19,7 @@ import app from '../firebase';
  */
 export default function ProductTemplate({ 
   products, 
+  initialProduct,
   region, 
   isProfessional, 
   isAdmin, 
@@ -24,13 +27,20 @@ export default function ProductTemplate({
   onAddToCart,
   toggleCompare,
   compareList,
-  allFaqs
+  allFaqs,
+  slug: propSlug
 }) {
-  const { slug } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const params = useParams();
+  // If propSlug is provided (Next.js server component passes it), use it.
+  // Otherwise, use params.slug from Next.js client hook.
+  const slug = propSlug || params?.slug; 
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const { product, isLoading: productLoading, error } = useProductBySlug(slug);
+  const { product: fetchedProduct, isLoading: productLoadingFetch, error } = useProductBySlug(slug);
+  
+  const product = initialProduct || fetchedProduct;
+  const productLoading = !initialProduct && productLoadingFetch;
 
   // 2. SEO & Analytics
   useEffect(() => {
@@ -143,8 +153,8 @@ export default function ProductTemplate({
         onAddToCart={onAddToCart}
         toggleCompare={toggleCompare}
         compareList={compareList}
-        onBack={() => navigate(-1)}
-        onSelectCategory={(cat) => navigate(`/collection/${cat.toLowerCase().replace(/ /g, '-')}`)}
+        onBack={() => router.back()}
+        onSelectCategory={(cat) => router.push(`/collection/${cat.toLowerCase().replace(/ /g, '-')}`)}
         onSelectProduct={(name) => {
           const target = products.find(p => p.name === name);
           if (target) {
@@ -153,7 +163,7 @@ export default function ProductTemplate({
               const analytics = getAnalytics(app);
               logEvent(analytics, 'peptide_view', {
                 peptide_name: target.name,
-                protocol_id: location.state?.protocol_id || 'none'
+                protocol_id: 'none'
               });
             } catch (err) {
               console.warn('Analytics error:', err);
@@ -162,10 +172,10 @@ export default function ProductTemplate({
             const targetSlug = target.name
               ? target.name.toLowerCase().replace(/\s+/g, '-')
               : (target.slug || target.id || target.name);
-            navigate(`/product/${targetSlug}`, { state: location.state });
+            router.push(`/product/${targetSlug}`);
           }
         }}
-        onSelectObjective={(obj) => navigate(`/protocol/${obj.toLowerCase().replace(/ /g, '-')}`)}
+        onSelectObjective={(obj) => router.push(`/protocol/${obj.toLowerCase().replace(/ /g, '-')}`)}
         allFaqs={allFaqs}
       />
     </div>

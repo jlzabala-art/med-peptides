@@ -1,6 +1,8 @@
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
+
 import { collection, query, orderBy, getDocs, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -8,6 +10,7 @@ import { Card, CardHeader, CardContent } from '../../ui/Card';
 import Button from '../../ui/Button';
 import Badge from '../../ui/Badge';
 import EmptyState from '../../ui/EmptyState';
+import { DollarSign } from '@/lib/icons';
 
 const DEMO_PAYOUTS = [
   {

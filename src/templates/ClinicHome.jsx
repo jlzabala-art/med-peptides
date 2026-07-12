@@ -1,11 +1,4 @@
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import History from "lucide-react/dist/esm/icons/history";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Brain from "lucide-react/dist/esm/icons/brain";
+import { usePathname } from 'next/navigation';
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,7 +10,8 @@ import { useAuth } from '../context/AuthContext';
 import AppPortalLayout from '../layout/AppPortalLayout';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-import { useLocation, Outlet } from 'react-router-dom';
+
+import { LayoutDashboard, ShoppingBag, Plus, History, Settings, ShieldCheck, MessageSquare, Brain } from '@/lib/icons';
 
 
 
@@ -89,18 +83,20 @@ export function PlaceholderTab() {
   );
 }
 
-export default function ClinicHome() {
-  const { userProfile } = useAuth();
-  const location = useLocation();
+export const ClinicHomeContext = React.createContext({});
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
+export default function ClinicHome({ children }) {
+  const { userProfile } = useAuth();
+  const pathname = usePathname();
+
+  const pathParts = pathname.split('/').filter(Boolean);
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   return (
     <AppPortalLayout allowedRoles={['clinic', 'admin']}>
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
-          <Outlet context={{ userProfile }} />
+          <ClinicHomeContext.Provider value={{ userProfile }}>{children}</ClinicHomeContext.Provider>
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

@@ -1,7 +1,5 @@
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import Activity from "lucide-react/dist/esm/icons/activity";
+"use client";
+
 import React, { useMemo } from 'react';
 import {
   BarChart,
@@ -14,17 +12,23 @@ import {
   Cell
 } from 'recharts';
 
-import { PROTOCOL_BLUEPRINTS } from '../../../data/protocolBlueprints';
+import { useProtocols } from '../../../hooks/shared/useProtocols';
 import { useStaticData } from '../../../hooks/useStaticData';
+import { useProducts } from '../../../hooks/admin/useProducts';
 import { usePreferences } from '../../../context/PreferencesContext';
+import { TrendingUp, TrendingDown, DollarSign, Activity } from '@/lib/icons';
 
 export default function ProfitMarginAnalysis() {
-  const { products: peptides } = useStaticData();
+  const { products } = useProducts();
+  const { protocols } = useProtocols({ publicOnly: false });
   const { formatCurrency } = usePreferences();
 
   // Compute protocol margins dynamically
   const protocolMargins = useMemo(() => {
-    return Object.entries(PROTOCOL_BLUEPRINTS).map(([key, protocol]) => {
+    if (!products.length || !protocols.length) return [];
+    
+    return protocols.map((protocol) => {
+      const key = protocol.id || protocol.protocol_id;
       let totalCost = 0;
       let totalValue = 0; // The theoretical selling price if sold as a bundle
 

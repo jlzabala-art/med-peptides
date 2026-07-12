@@ -1,21 +1,24 @@
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Edit3 from "lucide-react/dist/esm/icons/edit-3";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+"use client";
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
+import { ArrowLeft, Edit3, FlaskConical } from '@/lib/icons';
 
 
-const ProtocolHeaderCharts = lazy(() => import('../protocol/ProtocolHeaderCharts'));
-const ProtocolGanttChart = lazy(() => import('../protocol/ProtocolGanttChart'));
-const InjectionDoseChart = lazy(() => import('../protocol/InjectionDoseChart'));
-const ProtocolSupplyEngine = lazy(() => import('../protocol/ProtocolSupplyEngine'));
+import dynamic from 'next/dynamic';
+
+const ProtocolHeaderCharts = dynamic(() => import('../protocol/ProtocolHeaderCharts'));
+const ProtocolGanttChart = dynamic(() => import('../protocol/ProtocolGanttChart'));
+const InjectionDoseChart = dynamic(() => import('../protocol/InjectionDoseChart'));
+const ProtocolSupplyEngine = dynamic(() => import('../protocol/ProtocolSupplyEngine'));
 
 export default function AdminProtocolView() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [protocol, setProtocol] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +30,7 @@ export default function AdminProtocolView() {
         if (snap.exists()) {
           setProtocol({ id: snap.id, ...snap.data() });
         } else {
-          navigate('/admin/protocols');
+          router.push('/admin/protocols');
         }
       } catch (err) {
         console.error('Error fetching protocol:', err);
@@ -46,7 +49,7 @@ export default function AdminProtocolView() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button onClick={() => navigate('/admin/protocols')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b' }}>
+          <button onClick={() => router.push('/admin/protocols')} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#64748b' }}>
             <ArrowLeft size={20} />
           </button>
           <h1 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

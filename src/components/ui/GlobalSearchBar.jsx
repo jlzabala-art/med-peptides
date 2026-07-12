@@ -1,10 +1,12 @@
+"use client";
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import Search from 'lucide-react/dist/esm/icons/search';
-import X from 'lucide-react/dist/esm/icons/x';
-import Command from 'lucide-react/dist/esm/icons/command';
-import Loader from 'lucide-react/dist/esm/icons/loader';
-import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
-import Clock from 'lucide-react/dist/esm/icons/clock';
+import { Search, X, Command, Loader, TrendingUp, Clock } from '@/lib/icons';
+
+
+
+
+
+
 
 /**
  * GlobalSearchBar

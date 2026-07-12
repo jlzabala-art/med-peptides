@@ -1,11 +1,12 @@
-import Sun from "lucide-react/dist/esm/icons/sun";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Monitor from "lucide-react/dist/esm/icons/monitor";
-import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
-import LayoutList from "lucide-react/dist/esm/icons/layout-list";
+
+
+
+
+
 import React from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useAutoSave } from '../../../hooks/useAutoSave';
+import { Sun, Moon, Monitor, LayoutGrid, LayoutList } from '@/lib/icons';
 
 
 

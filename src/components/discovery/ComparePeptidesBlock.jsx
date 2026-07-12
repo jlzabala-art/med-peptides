@@ -1,8 +1,7 @@
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import MinusCircle from "lucide-react/dist/esm/icons/minus-circle";
 
 
 import { trackPeptideView } from '../../hooks/useAnalytics';
+import { CheckCircle, MinusCircle } from '@/lib/icons';
 
 /**
  * ComparePeptidesBlock — renders a comparison grid between a base peptide

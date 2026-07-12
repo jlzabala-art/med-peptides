@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Package, Pill, Box, Zap, ChevronDown } from '@/lib/icons';
 import VialCalculator from '../VialCalculator';
@@ -109,8 +111,8 @@ export default function ProtocolProducts({ protocol, onUpdate }) {
                     outline: 'none',
                   }}
                 >
-                  {protocol.phases.map(phase => (
-                    <option key={phase.id} value={phase.id}>{phase.name || 'Unnamed Phase'}</option>
+                  {protocol.phases.map((phase, index) => (
+                    <option key={phase.id || `phase-${index}`} value={phase.id || `phase-${index}`}>{phase.name || 'Unnamed Phase'}</option>
                   ))}
                 </select>
                 <ChevronDown size={16} color="var(--text-muted)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />

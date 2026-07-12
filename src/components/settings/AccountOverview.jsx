@@ -1,9 +1,10 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
+
+
+
+
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { Globe, Clock, ShieldCheck, MapPin } from '@/lib/icons';
 
 
 

@@ -1,15 +1,19 @@
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
-const algoliasearch = require("algoliasearch");
+const { algoliasearch } = require("algoliasearch");
 
 const APP_ID = process.env.ALGOLIA_APP_ID;
 const ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY;
 
-// Initialize Algolia client only if keys are present
+// Initialize Algolia client only if keys are present (algoliasearch v5)
 const client = (APP_ID && ADMIN_KEY) ? algoliasearch(APP_ID, ADMIN_KEY) : null;
 
-// Initialize indices
-const productsIndex = client ? client.initIndex("products") : null;
-const protocolsIndex = client ? client.initIndex("protocols") : null;
+// Index name constants — v5 removed initIndex(), pass indexName per-request
+const PRODUCTS_INDEX    = "products";
+const PROTOCOLS_INDEX   = "protocols";
+const PATIENTS_INDEX    = "atlas_patients";
+const CLINICS_INDEX     = "atlas_clinics";
+const PHYSICIANS_INDEX  = "atlas_physicians";
+const PRESCRIPTIONS_INDEX = "prescriptions";
 
 exports.syncProductToAlgolia = onDocumentWritten("products/{productId}", async (event) => {
     if (!client) {
@@ -22,23 +26,13 @@ exports.syncProductToAlgolia = onDocumentWritten("products/{productId}", async (
 
     // Handle delete
     if (!snapshot.after.exists) {
-        await productsIndex.deleteObject(productId);
+        await client.deleteObject({ indexName: PRODUCTS_INDEX, objectID: productId });
         return;
     }
 
     const data = snapshot.after.data();
 
-    // To save Algolia quota, only index active products
-    if (!data.active) {
-        // If it was active before and now isn't, remove it from index
-        const beforeData = snapshot.before.exists ? snapshot.before.data() : null;
-        if (beforeData && beforeData.active) {
-            await productsIndex.deleteObject(productId);
-        }
-        return;
-    }
-
-    // Keep payload extremely lightweight to save record size limits and latency
+    // Index ALL products for Admin search capability
     const algoliaRecord = {
         objectID: productId,
         name: data.name || '',
@@ -46,11 +40,18 @@ exports.syncProductToAlgolia = onDocumentWritten("products/{productId}", async (
         tier: data.tier || '',
         tags: data.tags || [],
         description_short: data.description ? data.description.substring(0, 100) : '',
-        slug: data.slug || ''
+        slug: data.slug || '',
+        // Additional fields for Admin filtering/search:
+        sku: data.sku || '',
+        supplier: data.supplier || '',
+        dosage: data.dosage || '',
+        warehouse: data.warehouse || '',
+        isActive: data.isActive !== undefined ? data.isActive : (data.active !== undefined ? data.active : true),
+        stock: data.stock || 0
     };
 
     try {
-        await productsIndex.saveObject(algoliaRecord);
+        await client.saveObject({ indexName: PRODUCTS_INDEX, body: algoliaRecord });
     } catch (error) {
         console.error("Error syncing product to Algolia:", error);
     }
@@ -65,94 +66,118 @@ exports.syncProtocolToAlgolia = onDocumentWritten("protocols/{protocolId}", asyn
     const snapshot = event.data;
     const protocolId = event.params.protocolId;
 
+    // Handle delete
     if (!snapshot.after.exists) {
-        await protocolsIndex.deleteObject(protocolId);
+        await client.deleteObject({ indexName: PROTOCOLS_INDEX, objectID: protocolId });
         return;
     }
 
     const data = snapshot.after.data();
 
-    // To save Algolia quota, ONLY index public AND active protocols
-    const isEligible = data.active === true && data.visibility === 'public';
-
-    if (!isEligible) {
-        // Remove if it was previously eligible
-        const beforeData = snapshot.before.exists ? snapshot.before.data() : null;
-        if (beforeData && beforeData.active === true && beforeData.visibility === 'public') {
-            await protocolsIndex.deleteObject(protocolId);
-        }
-        return;
-    }
-
-    // Keep payload lightweight
+    // Index ALL protocols (admin needs full search coverage regardless of status/visibility)
     const algoliaRecord = {
-        objectID: protocolId,
-        name: data.protocol_name || '',
-        slug: data.protocol_slug || '',
-        category: data.category || '',
-        theme: data.theme || '',
-        description: data.description ? data.description.substring(0, 100) : ''
+        objectID:    protocolId,
+        name:        data.protocol_name || '',
+        category:    data.therapeutic_category || '',
+        status:      data.status || 'draft',
+        goals:       Array.isArray(data.goals) ? data.goals.join(', ') : (data.goals || ''),
+        tags:        Array.isArray(data.tags) ? data.tags : [],
+        description: data.description ? data.description.substring(0, 200) : '',
+        phaseCount:  Array.isArray(data.phases) ? data.phases.length : 0,
+        slug:        data.slug || data.protocol_slug || '',
+        version:     data.version || 1,
     };
 
     try {
-        await protocolsIndex.saveObject(algoliaRecord);
+        await client.saveObject({ indexName: PROTOCOLS_INDEX, body: algoliaRecord });
     } catch (error) {
         console.error("Error syncing protocol to Algolia:", error);
     }
 });
 
+
 // --- Phase 4: Healthcare Graph Indices ---
 
-const patientsIndex = client ? client.initIndex("atlas_patients") : null;
 exports.syncPatientToAlgolia = onDocumentWritten("patients/{patientId}", async (event) => {
     if (!client) return;
     const snapshot = event.data;
     const patientId = event.params.patientId;
-    
+
     if (!snapshot.after.exists) {
-        await patientsIndex.deleteObject(patientId);
+        await client.deleteObject({ indexName: PATIENTS_INDEX, objectID: patientId });
         return;
     }
-    
+
     const data = snapshot.after.data();
-    await patientsIndex.saveObject({
-        objectID: patientId,
-        ...data
-    });
+    try {
+        await client.saveObject({ indexName: PATIENTS_INDEX, body: { objectID: patientId, ...data } });
+    } catch (error) {
+        console.error("Error syncing patient to Algolia:", error);
+    }
 });
 
-const clinicsIndex = client ? client.initIndex("atlas_clinics") : null;
 exports.syncClinicToAlgolia = onDocumentWritten("clinics/{clinicId}", async (event) => {
     if (!client) return;
     const snapshot = event.data;
     const clinicId = event.params.clinicId;
-    
+
     if (!snapshot.after.exists) {
-        await clinicsIndex.deleteObject(clinicId);
+        await client.deleteObject({ indexName: CLINICS_INDEX, objectID: clinicId });
         return;
     }
-    
+
     const data = snapshot.after.data();
-    await clinicsIndex.saveObject({
-        objectID: clinicId,
-        ...data
-    });
+    try {
+        await client.saveObject({ indexName: CLINICS_INDEX, body: { objectID: clinicId, ...data } });
+    } catch (error) {
+        console.error("Error syncing clinic to Algolia:", error);
+    }
 });
 
-const physiciansIndex = client ? client.initIndex("atlas_physicians") : null;
 exports.syncPhysicianToAlgolia = onDocumentWritten("physicians/{physicianId}", async (event) => {
     if (!client) return;
     const snapshot = event.data;
     const physicianId = event.params.physicianId;
-    
+
     if (!snapshot.after.exists) {
-        await physiciansIndex.deleteObject(physicianId);
+        await client.deleteObject({ indexName: PHYSICIANS_INDEX, objectID: physicianId });
         return;
     }
-    
+
     const data = snapshot.after.data();
-    await physiciansIndex.saveObject({
-        objectID: physicianId,
-        ...data
-    });
+    try {
+        await client.saveObject({ indexName: PHYSICIANS_INDEX, body: { objectID: physicianId, ...data } });
+    } catch (error) {
+        console.error("Error syncing physician to Algolia:", error);
+    }
+});
+
+exports.syncPrescriptionToAlgolia = onDocumentWritten("prescriptions/{prescriptionId}", async (event) => {
+    if (!client) return;
+    const snapshot = event.data;
+    const prescriptionId = event.params.prescriptionId;
+
+    if (!snapshot.after.exists) {
+        await client.deleteObject({ indexName: PRESCRIPTIONS_INDEX, objectID: prescriptionId });
+        return;
+    }
+
+    const data = snapshot.after.data();
+    
+    // Build search record
+    const algoliaRecord = {
+        objectID: prescriptionId,
+        patientName: data.patient?.name || data.patientName || '',
+        doctorName: data.doctor?.name || data.doctorName || '',
+        protocolName: typeof data.protocol === 'object' ? (data.protocol?.name || '') : (data.protocol || ''),
+        status: data.status || 'draft',
+        source: data.source || data.type || '',
+        createdAt_ts: data.createdAt ? new Date(data.createdAt).getTime() : Date.now()
+    };
+
+    try {
+        await client.saveObject({ indexName: PRESCRIPTIONS_INDEX, body: algoliaRecord });
+    } catch (error) {
+        console.error("Error syncing prescription to Algolia:", error);
+    }
 });

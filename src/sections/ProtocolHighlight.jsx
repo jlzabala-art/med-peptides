@@ -1,19 +1,20 @@
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+import { useRouter } from 'next/navigation';
+import { Beaker } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
+import { DollarSign } from '@/lib/icons';
+import { FileText } from '@/lib/icons';
 
 
 
 
 
 
-import { useNavigate } from 'react-router-dom';
+
 
 export default function ProtocolHighlight() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <section style={{ padding: '2rem 1rem' }}>
@@ -66,7 +67,7 @@ export default function ProtocolHighlight() {
           </div>
 
           <button 
-            onClick={() => navigate('/protocol-finder')}
+            onClick={() => router.push('/protocol-finder')}
             className="btn btn-primary"
             style={{ 
               backgroundColor: 'white', 

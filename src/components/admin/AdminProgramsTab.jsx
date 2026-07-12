@@ -1,3 +1,5 @@
+"use client";
+
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Users from "lucide-react/dist/esm/icons/users";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";

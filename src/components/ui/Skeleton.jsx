@@ -1,5 +1,5 @@
 import React from 'react';
-import './Skeleton.css';
+import './skeleton.css';
 
 export default function Skeleton({ variant = 'text', width, height, style = {} }) {
   const inlineStyle = {

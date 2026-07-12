@@ -1,12 +1,5 @@
-import X from "lucide-react/dist/esm/icons/x";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import User from "lucide-react/dist/esm/icons/user";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Building2 from "lucide-react/dist/esm/icons/building-2";
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import ShieldPlus from "lucide-react/dist/esm/icons/shield-plus";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Check from "lucide-react/dist/esm/icons/check";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 
 
@@ -18,6 +11,8 @@ import React, { useState, useEffect } from 'react';
 
 
 import { Card } from '../../ui';
+import { X, CheckCircle, User, MapPin, Building2, Stethoscope, ShieldPlus, ChevronRight, Check } from '@/lib/icons';
+import { createPatient } from '../../../services/patientLinkService';
 
 const STEPS = [
   { id: 1, title: 'Identity', icon: User },
@@ -60,11 +55,17 @@ export default function PatientOnboardingWizard({ onClose, onComplete }) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(r => setTimeout(r, 600));
-      const pData = {
-        id: `pat_${Math.floor(Math.random()*1000)}`,
+      const { id, linkedUserId } = await createPatient({
         ...formData,
+        clinic: formData.clinicId || '',
+        physician: formData.physicianId || '',
+        revenue: 0,
+        lastActivity: new Date().toISOString().split('T')[0],
+      });
+      const pData = {
+        id,
+        ...formData,
+        linkedUserId,
         status: 'New',
         lastActivity: new Date().toISOString().split('T')[0],
         revenue: 0,
@@ -76,7 +77,7 @@ export default function PatientOnboardingWizard({ onClose, onComplete }) {
       setSuccess(true);
       if (onComplete) onComplete(pData);
     } catch (e) {
-      alert('Error creating patient');
+      alert('Error creating patient: ' + e.message);
     } finally {
       setLoading(false);
     }

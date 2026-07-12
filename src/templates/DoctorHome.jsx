@@ -1,3 +1,5 @@
+"use client";
+
 import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import FileText from "lucide-react/dist/esm/icons/file-text";
@@ -18,7 +20,8 @@ import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Brain from "lucide-react/dist/esm/icons/brain";
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
 

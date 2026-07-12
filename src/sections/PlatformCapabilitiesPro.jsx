@@ -1,10 +1,10 @@
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Search from "lucide-react/dist/esm/icons/search";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import FileBarChart from "lucide-react/dist/esm/icons/file-bar-chart";
-import PiggyBank from "lucide-react/dist/esm/icons/piggy-bank";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { Layers } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { FileText } from '@/lib/icons';
+import { FileBarChart } from '@/lib/icons';
+import { PiggyBank } from '@/lib/icons';
+import { ShieldCheck } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
 import React from 'react';
 
 

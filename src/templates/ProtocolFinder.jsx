@@ -1,3 +1,5 @@
+"use client";
+import { useRouter } from 'next/navigation';
 import Target from "lucide-react/dist/esm/icons/target";
 import Zap from "lucide-react/dist/esm/icons/zap";
 import Activity from "lucide-react/dist/esm/icons/activity";
@@ -23,7 +25,7 @@ import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
 import Heart from "lucide-react/dist/esm/icons/heart";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import {  useSearchParams } from 'next/navigation';
 
 
 
@@ -254,7 +256,7 @@ const ObjectivesView = ({ onSelectObjective }) => (
 );
 
 export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1);
   const [selection, setSelection] = useState({
@@ -355,7 +357,7 @@ export default function ProtocolFinder({ onOpenSearch, protocolIndex = [] }) {
       const bestMatch = scored[0].protocol;
 
       if (bestMatch) {
-        navigate(`/protocol/${bestMatch.protocol_slug}`, { state: { alignment: selection } });
+        router.push(`/protocol/${bestMatch.protocol_slug}`, { state: { alignment: selection } });
       }
       setIsAnalyzing(false);
     }, 1500);

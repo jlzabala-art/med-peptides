@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 export function useProtocolBySlug(slug) {
   const [protocol, setProtocol] = useState(null);

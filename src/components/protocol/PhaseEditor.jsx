@@ -1,15 +1,16 @@
-import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Plus from "lucide-react/dist/esm/icons/plus";
+"use client";
+
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { motion, AnimatePresence } from 'framer-motion';
+import { GripVertical, Trash2, Plus } from '@/lib/icons';
 
 
 
 
 const PhaseEditor = React.memo(({ phases, products: catalogProducts, onChange }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [productSearch, setProductSearch] = useState('');
 
   const updatePhase = (pi, patch) =>
@@ -108,7 +109,7 @@ const PhaseEditor = React.memo(({ phases, products: catalogProducts, onChange })
                     style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}
                   >
                     <button
-                      onClick={(e) => { e.stopPropagation(); navigate(`/admin/products?sku=${encodeURIComponent(item.productId)}`); }}
+                      onClick={(e) => { e.stopPropagation(); router.push(`/admin/products?sku=${encodeURIComponent(item.productId)}`); }}
                       style={{ fontWeight: 600, fontSize: '0.85rem', color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', minWidth: '150px' }}
                     >
                       {item.productName ?? item.productId}

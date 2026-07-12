@@ -1,15 +1,11 @@
-import List from "lucide-react/dist/esm/icons/list";
-import Grid from "lucide-react/dist/esm/icons/grid";
-import Search from "lucide-react/dist/esm/icons/search";
-import Filter from "lucide-react/dist/esm/icons/filter";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Copy from "lucide-react/dist/esm/icons/copy";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+"use client";
+
 import React, { useState } from 'react';
 import ExecutiveSummary from './ExecutiveSummary';
 import RoleCardsView from './RoleCardsView';
 import PermissionMatrixView from './PermissionMatrixView';
 import RoleEditorModal from './RoleEditorModal';
+import { List, Grid, Search, Filter, Plus, Copy, RefreshCw } from '@/lib/icons';
 
 
 

@@ -1,16 +1,17 @@
-import PlusSquare from "lucide-react/dist/esm/icons/plus-square";
-import Search from "lucide-react/dist/esm/icons/search";
-import Library from "lucide-react/dist/esm/icons/library";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import User from "lucide-react/dist/esm/icons/user";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import { useRouter } from 'next/navigation';
+import { PlusSquare } from '@/lib/icons';
+import { Search } from '@/lib/icons';
+import { Library } from '@/lib/icons';
+import { Clock } from '@/lib/icons';
+import { ShieldAlert } from '@/lib/icons';
+import { BarChart3 } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
+import { ChevronRight } from '@/lib/icons';
+import { User } from '@/lib/icons';
+import { Bell } from '@/lib/icons';
+import { CheckCircle2 } from '@/lib/icons';
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -34,7 +35,7 @@ export default function ProfessionalDashboard({
   searchQuery,
   setSearchQuery,
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuth();
   const [protocols, setProtocols] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +114,7 @@ export default function ProfessionalDashboard({
             <PlusSquare size={20} color="var(--primary)" /> Quick Workflows
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            <button onClick={() => navigate('/protocol-finder')} style={actionButtonStyle}>
+            <button onClick={() => router.push('/protocol-finder')} style={actionButtonStyle}>
               <div style={iconBox('#eff6ff', 'var(--primary)')}><PlusSquare size={24} /></div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={actionTitleStyle}>Create New Protocol</h4>
@@ -121,7 +122,7 @@ export default function ProfessionalDashboard({
               </div>
               <ChevronRight size={20} color="var(--color-border)" style={{ marginLeft: 'auto' }} />
             </button>
-            <button onClick={() => navigate('/search')} style={actionButtonStyle}>
+            <button onClick={() => router.push('/search')} style={actionButtonStyle}>
               <div style={iconBox('var(--color-success-bg)', 'var(--color-success)')}><Search size={24} /></div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={actionTitleStyle}>Literature Search</h4>
@@ -129,7 +130,7 @@ export default function ProfessionalDashboard({
               </div>
               <ChevronRight size={20} color="var(--color-border)" style={{ marginLeft: 'auto' }} />
             </button>
-            <button onClick={() => navigate('/products')} style={actionButtonStyle}>
+            <button onClick={() => router.push('/products')} style={actionButtonStyle}>
               <div style={iconBox('#faf5ff', '#a855f7')}><Library size={24} /></div>
               <div style={{ textAlign: 'left' }}>
                 <h4 style={actionTitleStyle}>Open Library</h4>
@@ -188,7 +189,7 @@ export default function ProfessionalDashboard({
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-text-primary)', margin: 0 }}>Recent Protocol Activities</h3>
-              <button onClick={() => navigate('/protocol-finder')} style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <button onClick={() => router.push('/protocol-finder')} style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
                 View All
               </button>
             </div>
@@ -203,7 +204,7 @@ export default function ProfessionalDashboard({
                     Start your first multi-phase research protocol to see it here.
                   </p>
                   <button
-                    onClick={() => navigate('/protocol-finder')}
+                    onClick={() => router.push('/protocol-finder')}
                     style={{ padding: '0.75rem 1.5rem', backgroundColor: 'var(--primary)', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 700, cursor: 'pointer' }}
                   >
                     Launch Finder
@@ -253,7 +254,7 @@ export default function ProfessionalDashboard({
                           </td>
                           <td style={{ ...tdStyle, textAlign: 'right' }}>
                             <button
-                              onClick={() => navigate('/protocol-finder?id=' + p.id)}
+                              onClick={() => router.push('/protocol-finder?id=' + p.id)}
                               style={{ padding: '6px 12px', border: '1px solid #e2e8f0', background: 'white', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
                             >
                               Open Workfile

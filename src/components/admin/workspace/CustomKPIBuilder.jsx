@@ -1,10 +1,5 @@
-import Plus from "lucide-react/dist/esm/icons/plus";
-import X from "lucide-react/dist/esm/icons/x";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Users from "lucide-react/dist/esm/icons/users";
-import Building from "lucide-react/dist/esm/icons/building";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+"use client";
+
 import React, { useState } from 'react';
 
 
@@ -14,6 +9,7 @@ import React, { useState } from 'react';
 
 
 import { useWorkspace } from './WorkspaceContext';
+import { Plus, X, Activity, Users, Building, Pill, ArrowRight } from '@/lib/icons';
 
 const METRIC_TYPES = [
   { id: 'count', label: 'Total Count' },

@@ -1,3 +1,6 @@
+"use client";
+
+import Link from 'next/link';
 import Users from "lucide-react/dist/esm/icons/users";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import Check from "lucide-react/dist/esm/icons/check";
@@ -7,10 +10,11 @@ import Activity from "lucide-react/dist/esm/icons/activity";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, where, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { fetchDoctorPatientsAction } from '../../actions/patientsActions';
+
 import { invitePatientByEmail } from '../../services/assignmentService';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
@@ -49,46 +53,7 @@ export default function DoctorPatientsTab({ doctorId, doctorMeta, onCountResolve
     queryKey: ['doctorPatients', doctorId],
     queryFn: async () => {
       if (!doctorId) return [];
-      const relQ = query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', doctorId));
-      const relSnap = await getDocs(relQ);
-      const results = await Promise.all(
-        relSnap.docs.map(async (relDoc) => {
-          const rel = relDoc.data();
-          if (rel.status === 'revoked' || rel.status === 'rejected') return null;
-          const patientId = rel.patientId;
-          let profile = {};
-          if (!rel.patientName && patientId) {
-            try {
-              const fetchPromise = getDoc(doc(db, 'users', patientId));
-              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1000));
-              const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
-              if (userSnap.exists()) profile = userSnap.data();
-            } catch (e) {
-              console.error('Error fetching user doc:', e);
-            }
-          }
-
-          const fallbackFullName = rel.patientName || '';
-          const parts = fallbackFullName.split(' ');
-          const fallbackFirstName = parts[0] || '';
-          const fallbackLastName = parts.slice(1).join(' ') || '';
-
-          return {
-            id: patientId || relDoc.id,
-            relId: relDoc.id,
-            status: rel.status ?? 'active',
-            assignedAt: rel.assignedAt ?? rel.createdAt ?? null,
-            firstName: profile.firstName || fallbackFirstName || '',
-            lastName: profile.lastName || fallbackLastName || '',
-            email: profile.email || rel.patientEmail || '',
-            goals: profile.goals || [],
-            initiatedByRole: rel.initiatedByRole || 'doctor',
-            notes: rel.notes || '',
-          };
-        })
-      );
-      const validResults = results.filter(Boolean);
-      return validResults;
+      return await fetchDoctorPatientsAction(doctorId);
     },
     enabled: !!doctorId
   });

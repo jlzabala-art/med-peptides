@@ -1,3 +1,4 @@
+"use client";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { 
@@ -12,7 +13,11 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions, auth, storage } from '../firebase';
+import { auth, db, functions, storage } from '../firebase';
+
+
+
+
 import { setAnalyticsUserId, setUserProperties, setAnalyticsUserRole } from '../hooks/useAnalytics';
 import { getActiveTenantForResolution } from '../utils/resolvePrice';
 
@@ -91,13 +96,13 @@ export const DEFAULT_ROLE_PERMISSIONS = {
   }
 };
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+export function AuthProvider({ children, serverUser = null }) {
+  const [user, setUser] = useState(serverUser);
   const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [manualActiveRole, setManualActiveRole] = useState(() => sessionStorage.getItem('activeRole'));
+  const [loading, setLoading] = useState(!serverUser);
+  const [manualActiveRole, setManualActiveRole] = useState(() => (typeof window !== 'undefined' ? sessionStorage.getItem('activeRole') : null));
   const [rolePermissions, setRolePermissions] = useState(DEFAULT_ROLE_PERMISSIONS);
-  const [isMfaEnrolled, setIsMfaEnrolled] = useState(false);
+  const [isMfaEnrolled, setIsMfaEnrolled] = useState(serverUser ? serverUser.mfaEnrolled : false);
 
   // Sync role permissions in real-time from Firestore /settings/permissions
   useEffect(() => {
@@ -125,6 +130,16 @@ export function AuthProvider({ children }) {
       clearTimeout(timeoutId);
       setUser(firebaseUser);
       if (firebaseUser) {
+        // Sincronizar token con el servidor de Next.js (Edge Middleware)
+        try {
+          const token = await firebaseUser.getIdToken();
+          await fetch('/api/login', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (e) {
+          console.error('Failed to sync auth token to server', e);
+        }
+
         setIsMfaEnrolled(firebaseUser.multiFactor?.enrolledFactors?.length > 0);
         setAnalyticsUserId(firebaseUser.uid);
         // Fetch the user's profile from Firestore
@@ -158,6 +173,13 @@ export function AuthProvider({ children }) {
           setAnalyticsUserRole('guest', firebaseUser.uid);
         }
       } else {
+        // Sincronizar logout con el servidor
+        try {
+          await fetch('/api/logout');
+        } catch (e) {
+          console.error('Failed to clear auth token from server', e);
+        }
+
         setUserProfile(null);
         setIsMfaEnrolled(false);
         setAnalyticsUserId(null); // Clear on logout
@@ -261,7 +283,7 @@ export function AuthProvider({ children }) {
   
   // Dev-only session diagnostic (stripped from production builds)
   useEffect(() => {
-    if (!user || import.meta.env.PROD) return;
+    if (!user || process.env.NODE_ENV === 'production') return;
     console.log('[AuthContext] Session Hydrated:', {
       uid: user.uid,
       role: userRole,
@@ -287,197 +309,8 @@ export function AuthProvider({ children }) {
     return { cred, profile };
   };
 
-  /**
-   * register — creates a Firebase Auth user + Firestore profile.
-   * @param {string} accountType
-   *   'customer'     → role: 'guest',               professionalStatus: 'not_requested'
-   *   'professional' → role: 'professional_pending', professionalStatus: 'pending_review'
-   *   'patient'      → role: 'patient'              (B2B supervised portal)
-   *   'doctor'       → role: 'doctor'               (B2B supervising professional)
-   */
-  const register = async (email, password, fullName, institution, userType, accountType = 'professional', extraFields = {}, goals = []) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    // Update display name
-    await updateProfile(cred.user, { displayName: fullName });
-    // Split fullName into firstName / lastName for the canonical schema
-    const nameParts = (fullName || '').trim().split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-
-    const isCustomer = accountType === 'customer';
-    const isPatientAccount = accountType === 'patient';
-    const isPhysicianAccount = accountType === 'doctor';
-
-    // ── Check Invitations for Roles ──────────────────────────────────────────
-    let invitationRoles = [];
-    let invitationId = null;
-    let assignedManagerId = null;
-    try {
-      // First check by direct inviteId from URL
-      if (extraFields.inviteId) {
-        const invDocRef = doc(db, 'invitations', extraFields.inviteId);
-        const invSnap = await getDoc(invDocRef);
-        if (invSnap.exists() && invSnap.data().status === 'pending') {
-          const invData = invSnap.data();
-          if (invData.role) invitationRoles = [invData.role];
-          if (invData.roles) invitationRoles = invData.roles;
-          assignedManagerId = invData.createdBy || null;
-          invitationId = invSnap.id;
-        }
-      }
-      
-      // Fallback: check by email
-      if (!invitationId) {
-        const invQ = query(
-          collection(db, 'invitations'),
-          where('email', '==', email.trim().toLowerCase()),
-          where('status', '==', 'pending')
-        );
-        const invSnapDocs = await getDocs(invQ);
-        if (!invSnapDocs.empty) {
-          const invDoc = invSnapDocs.docs[0];
-          const invData = invDoc.data();
-          if (invData.role) invitationRoles = [invData.role];
-          if (invData.roles && invData.roles.length > 0) {
-            invitationRoles = invData.roles;
-          }
-          assignedManagerId = invData.createdBy || null;
-          invitationId = invDoc.id;
-        }
-      }
-    } catch (err) {
-      console.warn('Could not check invitations:', err);
-    }
-
-    // ── Determine role ────────────────────────────────────────────────────────
-    let role = 'professional_pending';
-    let professionalStatus = 'pending_review';
-    
-    if (invitationRoles.length > 0) {
-      role = invitationRoles[0]; // Set primary role to the first in array
-      professionalStatus = 'approved'; // Pre-approved via invitation
-    } else if (isCustomer) {
-      role = 'guest';
-      professionalStatus = 'not_requested';
-    } else if (isPatientAccount) {
-      role = 'patient';
-      professionalStatus = 'not_requested';
-    } else if (isPhysicianAccount) {
-      role = 'doctor';
-      professionalStatus = 'pending_review';
-    } else if (['wholesaler', 'clinic', 'sales_agent', 'staff'].includes(accountType)) {
-      role = `${accountType}_pending`;
-      professionalStatus = 'pending_review';
-    }
-
-    const assignedRoles = invitationRoles.length > 0 ? invitationRoles : [role];
-
-    // ── B2B Auto-Linking for Physician Invitations ──
-    let initialPhysicianIds = [];
-    if (role === 'patient' || role === 'guest') {
-      try {
-        const relsQ = query(
-          collection(db, 'doctor_patient_relationships'),
-          where('patientEmail', '==', email.trim().toLowerCase()),
-          where('status', '==', 'pending')
-        );
-        const relSnap = await getDocs(relsQ);
-        if (!relSnap.empty) {
-          await Promise.all(relSnap.docs.map(async (relDoc) => {
-            const relData = relDoc.data();
-            const relId = relDoc.id;
-            // Update relationship doc with new patient's UID and activate
-            await updateDoc(doc(db, 'doctor_patient_relationships', relId), {
-              patientId: cred.user.uid,
-              status: 'active',
-              activatedAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            });
-            // Update doctor's profile to add this patient
-            const doctorRef = doc(db, 'users', relData.doctorId);
-            await updateDoc(doctorRef, { assignedPatientIds: arrayUnion(cred.user.uid) });
-            // Add to doctor UIDs
-            initialPhysicianIds.push(relData.doctorId);
-          }));
-        }
-      } catch (err) {
-        console.error('[B2B Auto-Link] failed:', err);
-      }
-    }
-
-    const baseRoleKey = role.replace('_pending', '');
-    const defaultPermissions = DEFAULT_ROLE_PERMISSIONS[baseRoleKey] || DEFAULT_ROLE_PERMISSIONS.guest;
-
-    const activeTenant = getActiveTenantForResolution();
-
-    // Create Firestore profile
-    const profile = {
-      firstName,
-      lastName,
-      email,
-      institution: institution || '',
-      userType: (isCustomer || isPatientAccount) ? '' : (userType || ''),
-      role,
-      roles: assignedRoles, // NEW: multiple roles array
-      professionalStatus,
-      permissions: defaultPermissions,
-      goals: goals || [],
-      phone: '',
-      shippingStreet: '',
-      shippingCity: '',
-      shippingZip: '',
-      shippingCountry: '',
-      billingStreet: '',
-      billingCity: '',
-      billingZip: '',
-      billingCountry: '',
-      taxId: '',
-      approved: (isPatientAccount || invitationRoles.length > 0) ? true : false,
-      createdAt: new Date().toISOString(),
-      // B2B Portal — relationship arrays (managed by assignment engine)
-      assignedPhysicianIds: initialPhysicianIds,    // for patients: list of supervising doctor UIDs
-      assignedPatientIds: [],                 // for doctors:  list of supervised patient UIDs
-      // Tenant attribution B2B franchise
-      assignedTenantId: activeTenant?.id || null,
-      tenantId: activeTenant?.id || null,
-      ownerType: activeTenant ? 'wholesaler' : null,
-      ownerId: activeTenant ? (activeTenant.slug || activeTenant.id) : null,
-      sourceDomain: activeTenant ? window.location.hostname : null,
-      sourceTerritory: activeTenant?.territoryGeoIds?.[0] || null,
-      attributionLocked: activeTenant ? true : false,
-      // Account Manager Assignment (from invitation)
-      ...(assignedManagerId && { assignedAccountManagerId: assignedManagerId }),
-      // Professional-only extra fields (country, licenseId, intendedUse)
-      ...(!isCustomer && !isPatientAccount ? { ...extraFields, inviteId: undefined } : {}),
-    };
-    await setDoc(doc(db, 'users', cred.user.uid), profile);
-
-    // If there was an invitation, mark it as accepted securely via Cloud Function
-    if (invitationId) {
-      try {
-        const acceptInv = httpsCallable(functions, 'acceptInvitation');
-        await acceptInv({ inviteId: invitationId });
-      } catch (e) {
-        console.warn('Failed to call acceptInvitation cloud function:', e);
-        // Fallback to client-side write if function isn't deployed yet or fails
-        try {
-          await updateDoc(doc(db, 'invitations', invitationId), {
-            status: 'accepted',
-            acceptedAt: new Date().toISOString(),
-            userId: cred.user.uid
-          });
-        } catch (fallbackErr) {
-          console.warn('Fallback invitation update failed:', fallbackErr);
-        }
-      }
-    }
-    
-    // Fetch fresh profile in case Cloud Function updated roles/manager
-    const freshProfileSnap = await getDoc(doc(db, 'users', cred.user.uid));
-    setUserProfile(freshProfileSnap.exists() ? freshProfileSnap.data() : profile);
-    
-    return cred;
-  };
+  // Note: The `register` function has been refactored out to `src/hooks/useRegistration.js`
+  // for better modularity and separation of concerns.
 
   const logout = async () => {
     await signOut(auth);
@@ -561,7 +394,6 @@ export function AuthProvider({ children }) {
     isStaff,
     loading,
     login,
-    register,
     logout,
     resetPassword,
     loginWithGoogle,

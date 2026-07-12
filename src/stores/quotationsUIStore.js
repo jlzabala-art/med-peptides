@@ -11,9 +11,9 @@ export const useQuotationsUIStore = create((set) => ({
   closeBuilderWizard: () => set({ isBuilderWizardOpen: false, builderSource: null }),
   builderSource: null, // { type: 'prescription'|'protocol'|'items', id: string, data: object }
 
-  activeQuotationId: null,
-  openQuotationDrawer: (id) => set({ activeQuotationId: id }),
-  closeQuotationDrawer: () => set({ activeQuotationId: null }),
+  activeQuotation: null,
+  openQuotationDrawer: (quotation) => set({ activeQuotation: quotation }),
+  closeQuotationDrawer: () => set({ activeQuotation: null }),
 
   // Search and Filters
   searchQuery: '',

@@ -1,8 +1,11 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { getChurnPredictions } from '../../services/accountManagerAiService';
-import Bot from "lucide-react/dist/esm/icons/bot";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import { Bot, AlertTriangle, CheckCircle } from '@/lib/icons';
+
+
+
 
 export default function ManagerChurnWidget({ managerId }) {
   const [predictions, setPredictions] = useState([]);

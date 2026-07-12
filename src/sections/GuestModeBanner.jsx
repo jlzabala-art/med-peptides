@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
  
 /**
  * GuestModeBanner — Phase 2
@@ -14,13 +15,13 @@
  */
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 
 const SESSION_KEY = 'gmb_dismissed';
 
 export default function GuestModeBanner() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { isProfessional } = useAuth?.() ?? {};
 
   const [dismissed, setDismissed] = useState(() => {
@@ -52,7 +53,7 @@ export default function GuestModeBanner() {
           <button
             id="gmb-unlock-btn"
             style={ctaStyle}
-            onClick={() => navigate('/login?role=professional&type=register')}
+            onClick={() => router.push('/login?role=professional&type=register')}
           >
             Unlock Professional Access →
           </button>

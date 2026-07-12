@@ -1,5 +1,8 @@
+"use client";
+import { usePathname } from 'next/navigation';
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+
 import { useAuth } from './AuthContext';
 import { resolveTenantBySlug, resolveTenantById, getTenantSlugFromPath } from '../utils/resolveTenant';
 import { setActiveTenantForResolution } from '../utils/resolvePrice';
@@ -15,14 +18,14 @@ export function useTenant() {
 }
 
 export function TenantProvider({ children }) {
-  const location = useLocation();
+  const pathname = usePathname();
   const { userProfile, loading: authLoading } = useAuth();
   
   const [currentTenant, setCurrentTenant] = useState(null);
   const [loadingTenant, setLoadingTenant] = useState(true);
 
   // Extract tenant slug from current path
-  const pathSlug = useMemo(() => getTenantSlugFromPath(location.pathname), [location.pathname]);
+  const pathSlug = useMemo(() => getTenantSlugFromPath(pathname), [pathname]);
 
   // Resolve tenant based on path or user profile
   useEffect(() => {

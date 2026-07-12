@@ -1,21 +1,7 @@
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import Users from "lucide-react/dist/esm/icons/users";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Laptop from "lucide-react/dist/esm/icons/laptop";
-import History from "lucide-react/dist/esm/icons/history";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Blocks from "lucide-react/dist/esm/icons/blocks";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
+"use client";
+
+import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { triggerHaptic } from '../utils/haptics';
@@ -53,9 +39,7 @@ import RefillReminderBanner      from '../components/shared/RefillReminderBanner
 import AdminTabErrorBoundary     from '../components/admin/AdminTabErrorBoundary';
 import DoctorMessagesTab         from '../components/doctor/DoctorMessagesTab';
 
-// Firestore notifications listener
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import userRepository from '../repositories/userRepository';
 
 // ── Nav groups (Google Cloud-style semantic grouping) ──────────────────────
 // Flat list kept for permission filtering
@@ -117,15 +101,17 @@ const DOCTOR_NAV_GROUPS = [
 ];
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import AppPortalLayout from '../layout/AppPortalLayout';
+import { LayoutDashboard, Users, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker } from '@/lib/icons';
 
-export default function DoctorDashboard() {
+export const DoctorContext = React.createContext({});
+
+export default function DoctorDashboard({ children }) {
   const { user, userProfile, baseRole } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   // Derive active tab from URL (e.g. /doctor/patients -> patients)
-  const pathParts = location.pathname.split('/').filter(Boolean);
+  const pathParts = pathname.split('/').filter(Boolean);
   // Default to 'overview' if exactly /doctor
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'overview';
   const [sharedPatients, setSharedPatients] = useState([]);
@@ -143,8 +129,8 @@ export default function DoctorDashboard() {
     if (!staffDoctorId) return;
     const fetchStaffDoctor = async () => {
       try {
-        const dDoc = await getDoc(doc(db, 'users', staffDoctorId));
-        if (dDoc.exists()) setStaffDoctorProfile(dDoc.data());
+        const dDoc = await userRepository.getUserById(staffDoctorId);
+        if (dDoc) setStaffDoctorProfile(dDoc);
       } catch (err) {
         console.error('Error fetching staff doctor profile:', err);
       }
@@ -159,9 +145,7 @@ export default function DoctorDashboard() {
     if (!isAdmin) return;
     const fetchDoctors = async () => {
       try {
-        const q = query(collection(db, 'users'), where('role', '==', 'doctor'));
-        const snap = await getDocs(q);
-        const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const docs = await userRepository.getDoctors();
         setDoctorsList(docs);
         // Load stored impersonated doctor profile
         const storedId = sessionStorage.getItem('impersonatedDoctorId');
@@ -253,7 +237,9 @@ export default function DoctorDashboard() {
 
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
-          <Outlet context={{ doctorId, doctorMeta, sharedPatients, setSharedPatients, navigate }} />
+          <DoctorContext.Provider value={{ doctorId, doctorMeta, sharedPatients, setSharedPatients }}>
+            {children}
+          </DoctorContext.Provider>
         </AdminTabErrorBoundary>
       </div>
     </AppPortalLayout>

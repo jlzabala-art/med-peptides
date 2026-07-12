@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
  
 /**
  * MobileQuickNav
@@ -13,10 +14,10 @@
  */
 
 import BottomNav from '../layout/BottomNav';
-import { useNavigate } from 'react-router-dom';
+
 
 export default function MobileQuickNav({ onOpenSearch, onOpenCart, cartCount = 0 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <section
@@ -43,10 +44,10 @@ export default function MobileQuickNav({ onOpenSearch, onOpenCart, cartCount = 0
 
       {/* The nav bar, now inline (not fixed) */}
       <BottomNav
-        onGoHome={() => navigate('/')}
+        onGoHome={() => router.push('/')}
         onOpenSearch={onOpenSearch}
         onOpenCart={onOpenCart}
-        onOpenProducts={() => navigate('/collection')}
+        onOpenProducts={() => router.push('/collection')}
         cartCount={cartCount}
       />
     </section>

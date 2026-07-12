@@ -14,8 +14,9 @@ export function CartProvider({ children }) {
   const { tenantId, tenant } = useTenant();
 
   const [cart, setCart] = useState(() => {
+    if (typeof window === 'undefined') return {}; // SSR Fix
     try {
-      const savedCart = localStorage.getItem('mp_cart');
+      const savedCart = window.localStorage.getItem('mp_cart');
       return savedCart ? JSON.parse(savedCart) : {};
     } catch (e) {
       return {};
@@ -50,12 +51,37 @@ export function CartProvider({ children }) {
   }, [tenantId, tenant]);
 
   useEffect(() => {
-    localStorage.setItem('mp_cart', JSON.stringify(cart));
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('mp_cart', JSON.stringify(cart));
+    }
   }, [cart]);
 
-  const updateCart = useCallback((productOrName, delta) => {
+  const clearCart = useCallback(() => {
+    setCart({});
+    setCartMetadata({});
+    setCartOwnership({
+      patientId: null,
+      supervisingPhysicianId: null,
+      supervisingAdminId: null,
+      source: 'patient_selected',
+      recommendationId: null,
+      tenantId: tenantId || null,
+      ownerType: tenantId ? 'wholesaler' : null,
+      ownerId: tenantId ? (tenant?.slug || tenantId) : null,
+      sourceDomain: tenantId ? (typeof window !== 'undefined' ? window.location.hostname : null) : null,
+      attributionLocked: tenantId ? true : false,
+    });
+  }, [tenantId, tenant]);
+
+  const updateCart = useCallback((productOrName, delta, options = {}) => {
+    // Determine the active mode/type (e.g. b2c, wholesale, prescription)
+    const cartType = options?.cartType || 'default';
+    
     if ((delta && delta > 0) || (typeof productOrName === 'object' && productOrName !== null && Array.isArray(productOrName.items))) {
-      setActiveModal('cart');
+      // Allow overriding the modal behavior (e.g., in B2B we might not want the cart drawer to pop out immediately)
+      if (!options?.silent) {
+        setActiveModal('cart');
+      }
     }
 
     if (typeof productOrName === 'object' && productOrName !== null && Array.isArray(productOrName.items)) {
@@ -154,17 +180,24 @@ export function CartProvider({ children }) {
           .filter(([key]) => !supplementCatalogue?.some(s => s.name?.toLowerCase() === key.toLowerCase()))
           .reduce((total, [, qty]) => total + qty, 0);
 
-        if (!isProfessional && (currentPeptideTotal + proposedUnitsToAdd > 10)) {
-          alert("For security and research compliance, individual guest peptide inquiries are strictly limited to 10 units max. Please log in to a Professional account or contact us for bulk institutional requests.");
-          return prev;
+        // Bypass limits for B2B or Wholesale cart types
+        if (cartType !== 'wholesale' && cartType !== 'b2b') {
+          if (!isProfessional && (currentPeptideTotal + proposedUnitsToAdd > 10)) {
+            alert("For security and research compliance, individual guest peptide inquiries are strictly limited to 10 units max. Please log in to a Professional account or contact us for bulk institutional requests.");
+            return prev;
+          }
         }
       }
 
       const currentTotal = Object.values(prev).reduce((a, b) => a + b, 0);
       const diff = delta;
-      if (!isProfessional && (currentTotal + diff > 20)) {
-        alert("For security and research compliance, individual guest inquiries are limited to 20 units total. Please log in to a Professional account or contact us for bulk institutional requirements.");
-        return prev;
+      
+      // Bypass limits for B2B or Wholesale cart types
+      if (cartType !== 'wholesale' && cartType !== 'b2b') {
+        if (!isProfessional && (currentTotal + diff > 20)) {
+          alert("For security and research compliance, individual guest inquiries are limited to 20 units total. Please log in to a Professional account or contact us for bulk institutional requirements.");
+          return prev;
+        }
       }
 
       if (isObject) {
@@ -334,7 +367,8 @@ export function CartProvider({ children }) {
       removeProtocolBundle,
       cartBreakdown,
       cartCount,
-      acceptRecommendation
+      acceptRecommendation,
+      clearCart
     }}>
       {children}
     </CartContext.Provider>

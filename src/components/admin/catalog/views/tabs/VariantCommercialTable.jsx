@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
 
@@ -41,13 +43,21 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
   };
 
   const processedVariants = useMemo(() => {
+    const extractNumber = (val) => {
+      if (val && typeof val === 'object') {
+        return Number(val.perUnit || val.kit) || 0;
+      }
+      return Number(val) || 0;
+    };
+
     return variants.map(v => {
-      const rawCost = v.cost_per_gram || v.cost || v.unitCost || v.pricing?.master?.perUnit || 0;
-      const rawShipping = v.shippingCost || v.shipping || 0;
-      const rawWholesale = v.pricing?.wholesale?.perUnit || v.wholesalePrice || v.wholesale || 0;
-      const rawClinic = v.pricing?.clinic?.perUnit || v.clinicPrice || v.clinic || 0;
-      const rawMsrp = v.pricing?.retail?.perUnit || v.msrp || v.price || 0;
-      const landedCost = rawCost && rawShipping ? Number(rawCost) + Number(rawShipping) : null;
+      const rawCost = extractNumber(v.cost_per_gram || v.cost || v.unitCost || v.pricing?.master?.perUnit);
+      const rawShipping = extractNumber(v.shippingCost || v.shipping);
+      const rawWholesale = extractNumber(v.pricing?.wholesale?.perUnit || v.wholesalePrice || v.wholesale);
+      const rawClinic = extractNumber(v.pricing?.clinic?.perUnit || v.clinicPrice || v.clinic);
+      const rawMsrp = extractNumber(v.pricing?.retail?.perUnit || v.msrp || v.price);
+      
+      const landedCost = rawCost && rawShipping ? rawCost + rawShipping : null;
       const margin = rawMsrp && rawCost ? (((rawMsrp - rawCost) / rawMsrp) * 100).toFixed(0) : null;
 
       // Fallback SKU Generator Algorithm

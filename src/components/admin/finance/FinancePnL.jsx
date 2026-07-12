@@ -1,7 +1,7 @@
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+"use client";
+
 import React, { useMemo } from 'react';
+import { Calendar, DollarSign, TrendingUp } from '@/lib/icons';
 import {
   BarChart,
   Bar,

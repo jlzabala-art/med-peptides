@@ -1,9 +1,5 @@
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Target from "lucide-react/dist/esm/icons/target";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Award from "lucide-react/dist/esm/icons/award";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
+"use client";
+
 
 
 
@@ -12,6 +8,7 @@ import Microscope from "lucide-react/dist/esm/icons/microscope";
 
 import { useEffect, useMemo } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { ShieldCheck, Target, Layers, FileText, Award, Microscope } from '@/lib/icons';
 
 const features = [
   {

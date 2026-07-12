@@ -1,6 +1,8 @@
+"use client";
+import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 
 /**
@@ -17,7 +19,7 @@ export default function ResearchStudyTemplate({
   setRegion,
 }) {
   const { slug } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -77,7 +79,7 @@ export default function ResearchStudyTemplate({
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => router.push(-1)}
               style={{
                 padding: '0.7rem 1.5rem',
                 borderRadius: '12px',
@@ -95,7 +97,7 @@ export default function ResearchStudyTemplate({
               ← Go Back
             </button>
             <button
-              onClick={() => navigate('/faq')}
+              onClick={() => router.push('/faq')}
               style={{
                 padding: '0.7rem 1.5rem',
                 borderRadius: '12px',

@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Package, Copy, Check, DollarSign, Activity, Settings, Stethoscope } from '@/lib/icons';
 

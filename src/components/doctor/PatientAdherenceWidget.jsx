@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import Bot from "lucide-react/dist/esm/icons/bot";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";

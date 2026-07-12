@@ -1,43 +1,12 @@
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Package from "lucide-react/dist/esm/icons/package";
-import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import Box from "lucide-react/dist/esm/icons/box";
-import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
-import Laptop from "lucide-react/dist/esm/icons/laptop";
-import Bell from "lucide-react/dist/esm/icons/bell";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Paintbrush from "lucide-react/dist/esm/icons/paintbrush";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Users from "lucide-react/dist/esm/icons/users";
-import FileText from "lucide-react/dist/esm/icons/file-text";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import {
-  collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, serverTimestamp, getDocs
-} from 'firebase/firestore';
-import { db } from '../firebase';
+import { wholesalerRepository } from '../repositories/wholesalerRepository';
+import { prescriptionRepository } from '../repositories/prescriptionRepository';
 
 
 
@@ -79,6 +48,7 @@ import CatalogCreatorFlow from '../components/wholesaler/CatalogCreatorFlow';
 import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder';
 import DemandForecastingWidget from '../components/wholesaler/DemandForecastingWidget';
 import { Card, MetricCard } from '../components/ui';
+import { LayoutDashboard, Layers, Package, TrendingUp, Settings, LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2, AlertCircle, Truck, Box, BarChart3, Laptop, Bell, MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail, Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText } from '@/lib/icons';
 // ── Flat tab list (for reference) ────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'overview',    label: 'Overview',    icon: LayoutDashboard },
@@ -280,14 +250,14 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
   const handleUpdateKitStatus = async (statusVal) => {
     setActing(true);
     try {
-      const updateData = { kitStatus: statusVal, updatedAt: serverTimestamp() };
+      const updateData = { kitStatus: statusVal, updatedAt: new Date().toISOString() };
       // Auto-set status metadata in timeline
       const timelineEvent = {
         event: `kit_status_${statusVal}`,
         note: t('wholesaler.timeline_notes.kit_status_updated', { status: t(`wholesaler.kit_steps.${statusVal}`, { defaultValue: statusVal }) }),
         timestamp: new Date().toISOString()
       };
-      await updateDoc(doc(db, 'prescriptions', rx.id), {
+      await prescriptionRepository.updatePrescription(rx.id, {
         ...updateData,
         timeline: [...(rx.timeline || []), timelineEvent]
       });
@@ -303,10 +273,10 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
     if (!collectionLabelUrl.trim()) return;
     setActing(true);
     try {
-      await updateDoc(doc(db, 'prescriptions', rx.id), {
+      await prescriptionRepository.updatePrescription(rx.id, {
         collectionLabelUrl: collectionLabelUrl.trim(),
         kitStatus: 'collection_label_sent',
-        updatedAt: serverTimestamp(),
+        updatedAt: new Date().toISOString(),
         timeline: [
           ...(rx.timeline || []),
           {
@@ -329,10 +299,10 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
     if (!labResultsUrl.trim()) return;
     setActing(true);
     try {
-      await updateDoc(doc(db, 'prescriptions', rx.id), {
+      await prescriptionRepository.updatePrescription(rx.id, {
         labResultsUrl: labResultsUrl.trim(),
         kitStatus: 'results_available',
-        updatedAt: serverTimestamp(),
+        updatedAt: new Date().toISOString(),
         timeline: [
           ...(rx.timeline || []),
           {
@@ -384,9 +354,9 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
   const handleSaveRecommendations = async () => {
     setActing(true);
     try {
-      await updateDoc(doc(db, 'prescriptions', rx.id), {
+      await prescriptionRepository.updatePrescription(rx.id, {
         recommendations: recommendations,
-        updatedAt: serverTimestamp(),
+        updatedAt: new Date().toISOString(),
         timeline: [
           ...(rx.timeline || []),
           {
@@ -1133,75 +1103,6 @@ export function PlaceholderTab({ title, description }) {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-import { Outlet, useLocation } from 'react-router-dom';
-import AppPortalLayout from '../layout/AppPortalLayout';
-
-export default function WholesalerHome() {
-  const { user, userProfile, logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [isMobile, setIsMobile]   = useState(window.innerWidth < 1024);
-  const [rxBadge, setRxBadge]     = useState(0);
-
-  // Derive active tab from URL (e.g. /wholesaler/rx-inbox -> rx-inbox)
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  // Default to 'overview' if exactly /wholesaler
-  const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'overview';
-
-  const uid     = user?.uid;
-  const name    = userProfile?.firstName
-    ? `${userProfile.firstName} ${userProfile.lastName || ''}`.trim()
-    : user?.displayName || 'Partner';
-  const company = userProfile?.company || userProfile?.clinicName || '';
-
-  // Responsive guard
-  useEffect(() => {
-    const h = () => setIsMobile(window.innerWidth < 1024);
-    window.addEventListener('resize', h);
-    return () => window.removeEventListener('resize', h);
-  }, []);
-
-  // Badge: unread Rx assigned
-  useEffect(() => {
-    if (!uid) return;
-    const q = query(
-      collection(db, 'prescriptions'),
-      where('wholesalerId', '==', uid),
-      where('status', '==', 'assigned_to_wholesaler'),
-      limit(20)
-    );
-    const unsub = onSnapshot(q, snap => setRxBadge(snap.size), () => {});
-    return () => unsub();
-  }, [uid]);
-
-  const handleLogout = useCallback(() => { logout?.(); window.location.href = '/'; }, [logout]);
-
-  const currentTab = TABS.find(t => t.id === activeTab);
-
-  const topbarActions = rxBadge > 0 ? (
-    <button
-      onClick={() => navigate('/wholesaler/rx-inbox')}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '0.5rem',
-        padding: '0.4rem 0.8rem', borderRadius: '4px',
-        background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)',
-        color: '#4f46e5', fontWeight: 700, fontSize: '0.75rem',
-        cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s', marginRight: '0.5rem'
-      }}
-      title="Unread Rx"
-    >
-      <Bell size={14} /> {rxBadge}
-    </button>
-  ) : null;
-
-  return (
-    <AppPortalLayout allowedRoles={['wholesaler', 'admin']}>
-      <div style={{ padding: '2rem' }}>
-        <RefillReminderBanner role="wholesaler" />
-        <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
-          <Outlet context={{ uid }} />
-        </AdminTabErrorBoundary>
-      </div>
-    </AppPortalLayout>
-  );
+export default function WholesalerHome({ children }) {
+  return <>{children}</>;
 }

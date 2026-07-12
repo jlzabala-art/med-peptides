@@ -1,9 +1,5 @@
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
-import Info from "lucide-react/dist/esm/icons/info";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useMemo, useCallback, memo } from 'react';
 
@@ -15,6 +11,7 @@ import React, { useEffect, useMemo, useCallback, memo } from 'react';
 import { resolveVariantPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
 import { trackEvent } from '../hooks/useAnalytics';
+import { Droplets, Syringe, Info, CheckCircle, ShieldCheck, FlaskConical } from '@/lib/icons';
 
 const SuppliesView = ({
   onSelectProduct,

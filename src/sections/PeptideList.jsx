@@ -1,5 +1,5 @@
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Tag from "lucide-react/dist/esm/icons/tag";
+import { ExternalLink } from '@/lib/icons';
+import { Tag } from '@/lib/icons';
 import React from 'react';
 
 

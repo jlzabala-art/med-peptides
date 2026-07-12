@@ -1,13 +1,9 @@
-import Droplets from "lucide-react/dist/esm/icons/droplets";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Syringe from "lucide-react/dist/esm/icons/syringe";
-import Pipette from "lucide-react/dist/esm/icons/pipette";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Snowflake from "lucide-react/dist/esm/icons/snowflake";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+"use client";
+
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Droplets, Beaker, Syringe, Pipette, FlaskConical, Snowflake, CheckCircle2 } from '@/lib/icons';
 
 
 

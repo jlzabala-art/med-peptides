@@ -1,10 +1,10 @@
-import Download from "lucide-react/dist/esm/icons/download";
 import React from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
 
 import * as XLSX from 'xlsx';
+import { Download } from '@/lib/icons';
 
 export default function ImportCoATab() {
   const handleSave = async (data) => {

@@ -1,20 +1,21 @@
-import Activity from "lucide-react/dist/esm/icons/activity";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Dna from "lucide-react/dist/esm/icons/dna";
-import Flame from "lucide-react/dist/esm/icons/flame";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Heart from "lucide-react/dist/esm/icons/heart";
-import Layers from "lucide-react/dist/esm/icons/layers";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import { useRouter } from 'next/navigation';
+import { Activity } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
+import { Brain } from '@/lib/icons';
+import { ChevronDown } from '@/lib/icons';
+import { ChevronUp } from '@/lib/icons';
+import { Clock } from '@/lib/icons';
+import { Dna } from '@/lib/icons';
+import { Flame } from '@/lib/icons';
+import { FlaskConical } from '@/lib/icons';
+import { Heart } from '@/lib/icons';
+import { Layers } from '@/lib/icons';
+import { Moon } from '@/lib/icons';
+import { Shield } from '@/lib/icons';
+import { Sparkles } from '@/lib/icons';
 /* eslint-disable no-undef */
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 
 
@@ -335,7 +336,7 @@ function AccordionItem({ category, protocol, navigate, isOpen, onToggle }) {
             protocol={protocol}
             onClick={() => {
               trackProtocolClick({ protocolId: protocol.protocol_id, category, source: 'trending_mobile_accordion' });
-              navigate(`/protocol/${protocol.protocol_id}`);
+              router.push(`/protocol/${protocol.protocol_id}`);
             }}
           />
         </div>
@@ -346,7 +347,7 @@ function AccordionItem({ category, protocol, navigate, isOpen, onToggle }) {
 
 // ── Main section ──────────────────────────────────────────────────────────────
 export default function TrendingProtocols() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const isMobile = useResponsive('(max-width: 767px)');
   const { allItems, loading } = useCategoryBestItems('blueprints', 'protocol_id');
 
@@ -459,7 +460,7 @@ export default function TrendingProtocols() {
                 protocol={item}
                 onClick={() => {
                   trackProtocolClick({ protocolId: item.protocol_id, source: 'trending_desktop_grid' });
-                  navigate(`/protocol/${item.protocol_id}`);
+                  router.push(`/protocol/${item.protocol_id}`);
                 }}
               />
             ))}
@@ -494,7 +495,7 @@ export default function TrendingProtocols() {
         {/* ── Footer CTA row ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           <button
-            onClick={() => navigate('/protocol-finder')}
+            onClick={() => router.push('/protocol-finder')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
               padding: '0.85rem 2rem',
@@ -511,7 +512,7 @@ export default function TrendingProtocols() {
             <ArrowRight size={15} />
           </button>
           <button
-            onClick={() => navigate('/protocols')}
+            onClick={() => router.push('/protocols')}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               padding: '0.85rem 1.75rem', background: 'white',

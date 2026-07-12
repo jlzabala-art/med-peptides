@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';

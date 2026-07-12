@@ -1,9 +1,5 @@
-import ArrowRightLeft from "lucide-react/dist/esm/icons/arrow-right-left";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Target from "lucide-react/dist/esm/icons/target";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import { useState, useMemo, useEffect } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -15,6 +11,7 @@ import { useStaticData } from '../hooks/useStaticData';
 
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRightLeft, ShieldCheck, Zap, Target, BookOpen, AlertCircle } from '@/lib/icons';
 
 export default function CompoundComparator() {
   const { products } = useStaticData();

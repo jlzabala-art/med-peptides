@@ -1,16 +1,14 @@
-import CalendarDays from "lucide-react/dist/esm/icons/calendar-days";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import User from "lucide-react/dist/esm/icons/user";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 
 
 
-import { useNavigate } from 'react-router-dom';
+
+import { CalendarDays, Clock, User, ArrowRight } from '@/lib/icons';
 
 export default function DailyScheduleList({ appointments }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   // Dummy data if none provided
   const schedule = appointments || [
     { id: 'a1', time: '09:00 AM', patient: 'Robert M.', type: 'Initial Consultation', duration: '45m' },

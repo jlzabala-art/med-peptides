@@ -1,3 +1,5 @@
+"use client";
+
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import Heart from "lucide-react/dist/esm/icons/heart";

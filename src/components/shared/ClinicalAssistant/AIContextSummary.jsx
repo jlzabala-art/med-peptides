@@ -1,3 +1,5 @@
+"use client";
+
 import Bot from "lucide-react/dist/esm/icons/bot";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";

@@ -1,7 +1,10 @@
+"use client";
+
+import { usePathname } from 'next/navigation';
 import { Mail, Phone, User, Send, ChevronDown, ArrowLeft, CheckCircle2, Globe, FileText, Users, Clock, MessageSquare, Calendar, CloudUpload, ShieldCheck } from '@/lib/icons';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+
 
 
 
@@ -31,7 +34,7 @@ export default function Contact({ cart, pendingQuote, setPendingQuote, onBack, r
   });
 
   const { user, userProfile } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
   const [submitted, setSubmitted] = useState(false);
   const [topic, setTopic] = useState('Product Information');
   const [userType, setUserType] = useState(null);

@@ -1,5 +1,5 @@
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Minus from "lucide-react/dist/esm/icons/minus";
+import { Plus } from '@/lib/icons';
+import { Minus } from '@/lib/icons';
 import React, { useState } from 'react';
 
 

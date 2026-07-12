@@ -1,3 +1,5 @@
+"use client";
+
 import Smartphone from "lucide-react/dist/esm/icons/smartphone";
 import Monitor from "lucide-react/dist/esm/icons/monitor";
 import Moon from "lucide-react/dist/esm/icons/moon";

@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from 'next/navigation';
 import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
@@ -10,6 +13,10 @@ import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import FileUp from "lucide-react/dist/esm/icons/file-up";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import ImportPrescriptionModal from "../admin/prescriptions/ImportPrescriptionModal";
+import DocumentPreviewModal from "../ui/DocumentPreviewModal";
 /**
  * PatientPrescriptionPanel.jsx
  *
@@ -25,8 +32,9 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { useNavigate } from 'react-router-dom';
+import * as fb from '../../firebase';
+const db = fb?.db;
+
 
 
 
@@ -56,7 +64,7 @@ function RxBadge({ status }) {
 }
 
 // ── Individual prescription card ──────────────────────────────────────────────
-function PrescriptionCard({ rx, onPay }) {
+function PrescriptionCard({ rx, onPay, onViewPdf }) {
   const [open, setOpen] = useState(false);
   const [paying, setPaying] = useState(false);
 
@@ -106,6 +114,18 @@ function PrescriptionCard({ rx, onPay }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+          {rx.fileUrl && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onViewPdf(rx.fileUrl, rx.id); }}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                color: 'var(--color-primary)', display: 'flex', alignItems: 'center'
+              }}
+              title="View Original PDF"
+            >
+              <FileText size={16} />
+            </button>
+          )}
           <RxBadge status={rx.status} />
           {open ? <ChevronUp size={14} color="var(--color-border)" /> : <ChevronDown size={14} color="var(--color-border)" />}
         </div>
@@ -313,7 +333,9 @@ const sLabel = {
 export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
   const [prescriptions, setPrescriptions] = useState([]);
   const [loading, setLoading]             = useState(true);
-  const navigate                          = useNavigate();
+  const [isImportOpen, setIsImportOpen]   = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
+  const navigate                          = useRouter();
 
   // Real-time listener — only prescriptions addressed to this patient
   useEffect(() => {
@@ -437,13 +459,42 @@ export default function PatientPrescriptionPanel({ patientUid, onAddToCart }) {
             </div>
           </div>
         </div>
+        <button 
+          onClick={() => setIsImportOpen(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '6px 12px', borderRadius: '8px',
+            backgroundColor: '#e0f2fe', color: '#0369a1',
+            border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700
+          }}
+        >
+          <FileUp size={14} /> Import Rx
+        </button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {prescriptions.map(rx => (
-          <PrescriptionCard key={rx.id} rx={rx} onPay={handlePay} />
+          <PrescriptionCard 
+            key={rx.id} 
+            rx={rx} 
+            onPay={handlePay} 
+            onViewPdf={(url) => setPreviewPdfUrl(url)}
+          />
         ))}
       </div>
+
+      <ImportPrescriptionModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        context={{ patientId: patientUid }}
+      />
+
+      <DocumentPreviewModal
+        isOpen={!!previewPdfUrl}
+        onClose={() => setPreviewPdfUrl(null)}
+        fileUrl={previewPdfUrl}
+        title="Prescription Document"
+      />
     </div>
   );
 }

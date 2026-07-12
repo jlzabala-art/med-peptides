@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 export const DEFAULT_AGENTS = {
   rag: {

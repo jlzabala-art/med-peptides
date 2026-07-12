@@ -1,3 +1,4 @@
+"use client";
 import X from "lucide-react/dist/esm/icons/x";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import Check from "lucide-react/dist/esm/icons/check";
@@ -15,7 +16,7 @@ import Bot from "lucide-react/dist/esm/icons/bot";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 import useGuestPreferences, { 
   GOAL_META, LEVEL_META, PREFERENCE_OPTIONS, CONTEXT_QUICK_CHIPS, GOAL_DRAWER_DETAILS, CLINICAL_AI_CONTEXTS
@@ -108,7 +109,7 @@ function SelectionCard({ label, icon, selected, onSelect }) {
 
 export default function ResearchDrawer({ onComplete, onOpenAI }) {
   const { prefs, savePrefs, isLoaded } = useGuestPreferences();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   
@@ -553,7 +554,7 @@ export default function ResearchDrawer({ onComplete, onOpenAI }) {
                   key={pep.name} 
                   onClick={() => {
                     handleDismiss();
-                    navigate(`/product/${pep.slug}`);
+                    router.push(`/product/${pep.slug}`);
                   }}
                   style={{
                     padding: '1rem',

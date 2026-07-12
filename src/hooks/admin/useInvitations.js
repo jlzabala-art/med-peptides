@@ -12,6 +12,7 @@ export function useInvitations(options = {}) {
     refresh: fetchInvitations,
   } = useFirestorePaginatedCollection('invitations', {
     ...options,
+    initialData: options.initialData,
     orderByFields: options.orderByFields || [['invitedAt', 'desc']],
     pageSize: options.pageSize || 50,
   });

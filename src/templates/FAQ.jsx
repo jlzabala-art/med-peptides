@@ -1,3 +1,5 @@
+"use client";
+
 import HelpCircle from "lucide-react/dist/esm/icons/help-circle";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import Search from "lucide-react/dist/esm/icons/search";

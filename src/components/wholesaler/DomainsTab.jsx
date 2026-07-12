@@ -1,14 +1,18 @@
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Check from "lucide-react/dist/esm/icons/check";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Server from "lucide-react/dist/esm/icons/server";
+"use client";
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+
 import { useAuth } from '../../context/AuthContext';
+import { Globe, Shield, RefreshCw, Check, AlertTriangle, ArrowRight, Server } from '@/lib/icons';
 
 
 

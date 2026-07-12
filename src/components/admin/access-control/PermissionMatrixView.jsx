@@ -1,6 +1,5 @@
-import Check from "lucide-react/dist/esm/icons/check";
-import Minus from "lucide-react/dist/esm/icons/minus";
 import React from 'react';
+import { Check, Minus } from '@/lib/icons';
 
 
 

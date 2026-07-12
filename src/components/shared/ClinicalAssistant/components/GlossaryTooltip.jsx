@@ -1,7 +1,9 @@
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
+"use client";
+
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen } from '@/lib/icons';
 
 
 export default function GlossaryTooltip({ term, definition }) {

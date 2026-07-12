@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState } from 'react';
 import { X, Save, AlertCircle } from '@/lib/icons';
 import { db } from '../../../firebase';
+
 import { doc, updateDoc, writeBatch } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 

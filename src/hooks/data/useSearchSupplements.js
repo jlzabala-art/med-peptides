@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 export function useSearchSupplements(searchQuery = '', maxResults = 10) {
   const [supplements, setSupplements] = useState([]);

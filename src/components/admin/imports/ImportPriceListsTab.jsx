@@ -1,14 +1,16 @@
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { db } from '../../../firebase';
+
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 
 
 import { useShop } from '../../../context/ShopProvider';
 import Fuse from 'fuse.js';
+import { CheckCircle, AlertCircle } from '@/lib/icons';
 
 export default function ImportPriceListsTab() {
   const { products } = useShop();

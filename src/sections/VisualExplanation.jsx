@@ -1,7 +1,7 @@
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Cpu from "lucide-react/dist/esm/icons/cpu";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Activity from "lucide-react/dist/esm/icons/activity";
+import { ArrowRight } from '@/lib/icons';
+import { Cpu } from '@/lib/icons';
+import { Zap } from '@/lib/icons';
+import { Activity } from '@/lib/icons';
 
 
 

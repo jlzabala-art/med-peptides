@@ -1,3 +1,5 @@
+"use client";
+
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import UploadCloud from "lucide-react/dist/esm/icons/upload-cloud";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
@@ -7,7 +9,9 @@ import X from "lucide-react/dist/esm/icons/x";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import Database from "lucide-react/dist/esm/icons/database";
 import React, { useState, useEffect, useRef } from 'react';
-import { db, storage } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
+const storage = fb?.storage;
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../../context/AuthContext';

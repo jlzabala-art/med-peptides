@@ -8,6 +8,7 @@ const ShopContext = createContext();
 export function ShopProvider({ children }) {
   
   const [region, setRegion] = useState(() => {
+    if (typeof window === 'undefined') return null;
     try { return localStorage.getItem('mp_region'); } catch(e) { return null; }
   });
   
@@ -19,6 +20,7 @@ export function ShopProvider({ children }) {
   });
 
   const [compareList, setCompareList] = useState(() => {
+    if (typeof window === 'undefined') return [];
     try {
       const savedCompare = localStorage.getItem('mp_compare');
       return savedCompare ? JSON.parse(savedCompare) : [];

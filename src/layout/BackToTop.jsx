@@ -1,4 +1,4 @@
-import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
+import { ChevronUp } from '@/lib/icons';
 import { useState, useEffect } from 'react';
 
 

@@ -1,15 +1,13 @@
+"use client";
+
 import React, { useState } from 'react';
-import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard';
-import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
-import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
-import PackageOpen from 'lucide-react/dist/esm/icons/package-open';
 
 import VariantOverviewTable from './tabs/VariantOverviewTable';
 import VariantCommercialTable from './tabs/VariantCommercialTable';
 import VariantInventoryTable from './tabs/VariantInventoryTable';
 import VariantRegulatoryTable from './tabs/VariantRegulatoryTable';
 import VariantAnalyticsTable from './tabs/VariantAnalyticsTable';
+import { LayoutDashboard, DollarSign, BarChart2, ShieldCheck, PackageOpen } from '@/lib/icons';
 
 export default function ExpandedProductRow({ row, onAction, selectedIds = [], onSelectionChange }) {
   const [activeTab, setActiveTab] = useState('overview');

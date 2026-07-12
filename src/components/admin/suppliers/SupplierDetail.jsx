@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Lock, Check, Copy, X, Star, Building, User } from '@/lib/icons';
 import { Tabs, StatusChip } from '../../ui';
@@ -6,11 +8,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useCatalogData } from '../catalog/useCatalogData';
 import CatalogTableView from '../catalog/views/CatalogTableView';
 import VariantDetailsModal from '../products/VariantDetailsModal';
+import CreatePurchaseRFQModal from '../procurement/CreatePurchaseRFQModal';
 
 function SupplierProductsTab({ supplierName, initialVariantId }) {
   const { products, variants, loading, refresh } = useCatalogData({ supplierFilter: supplierName });
   const [selectedVariantForEdit, setSelectedVariantForEdit] = useState(null);
   const [hasOpenedInitial, setHasOpenedInitial] = useState(false);
+  const [selectedVariantIds, setSelectedVariantIds] = useState([]);
+  const [showRfqModal, setShowRfqModal] = useState(false);
 
   useEffect(() => {
     if (initialVariantId && variants?.length > 0 && !hasOpenedInitial) {
@@ -28,8 +33,22 @@ function SupplierProductsTab({ supplierName, initialVariantId }) {
     }
   };
 
+  const handleCreateRfq = () => {
+    setShowRfqModal(true);
+  };
+
   return (
     <div style={{ height: '100%', paddingBottom: '2rem' }}>
+      {selectedVariantIds.length > 0 && (
+        <div style={{ padding: '0.75rem', backgroundColor: 'var(--primary-light)', border: '1px solid var(--primary)', borderRadius: '8px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600 }}>
+            {selectedVariantIds.length} items selected
+          </span>
+          <button onClick={handleCreateRfq} className="btn btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}>
+            Request Quotation
+          </button>
+        </div>
+      )}
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center' }}>Loading products...</div>
       ) : (
@@ -42,8 +61,8 @@ function SupplierProductsTab({ supplierName, initialVariantId }) {
           onPageChange={() => {}}
           onRowsPerPageChange={() => {}}
           onAction={handleCatalogAction}
-          selectedIds={[]}
-          onSelectionChange={() => {}}
+          selectedIds={selectedVariantIds}
+          onSelectionChange={setSelectedVariantIds}
           matrixViewType="grouped"
         />
       )}
@@ -60,6 +79,17 @@ function SupplierProductsTab({ supplierName, initialVariantId }) {
              setSelectedVariantForEdit(null);
              refresh();
            }}
+        />
+      )}
+      {showRfqModal && (
+        <CreatePurchaseRFQModal
+          supplierName={supplierName}
+          selectedVariantIds={selectedVariantIds}
+          variants={variants}
+          onClose={() => {
+            setShowRfqModal(false);
+            setSelectedVariantIds([]);
+          }}
         />
       )}
     </div>

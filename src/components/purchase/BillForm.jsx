@@ -1,3 +1,5 @@
+"use client";
+
 import X from "lucide-react/dist/esm/icons/x";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
@@ -6,7 +8,8 @@ import Save from "lucide-react/dist/esm/icons/save";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import React, { useState } from 'react';
 import { addDoc, updateDoc, doc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import * as fb from '../../firebase';
+const db = fb?.db;
 
 
 

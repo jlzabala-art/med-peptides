@@ -1,3 +1,5 @@
+"use client";
+
 /* eslint-disable no-undef, no-unused-vars */
 import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import {

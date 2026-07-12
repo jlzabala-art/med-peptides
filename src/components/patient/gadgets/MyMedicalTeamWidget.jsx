@@ -1,10 +1,12 @@
-import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
+import * as fb from '../../../firebase';
+const db = fb?.db;
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { Stethoscope, MessageSquare } from '@/lib/icons';
 
 
 

@@ -1,5 +1,6 @@
+"use client";
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import './PelletCard.css';
 
 // Icon components (inline SVG — no extra dep needed)
@@ -35,7 +36,7 @@ export default function PelletCard({
   onViewDetails,
   accentColor,
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     id = '',
     name = '',
@@ -53,7 +54,7 @@ export default function PelletCard({
     if (onViewDetails) {
       onViewDetails(product);
     } else if (id) {
-      navigate(`/collection/hormone-pellets/${id}`);
+      router.push(`/collection/hormone-pellets/${id}`);
     }
   };
 

@@ -1,12 +1,13 @@
-import Building from "lucide-react/dist/esm/icons/building";
-import Pill from "lucide-react/dist/esm/icons/pill";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import UserCheck from "lucide-react/dist/esm/icons/user-check";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import Heart from "lucide-react/dist/esm/icons/heart";
+import { useRouter } from 'next/navigation';
+import { Building } from '@/lib/icons';
+import { Pill } from '@/lib/icons';
+import { Microscope } from '@/lib/icons';
+import { Truck } from '@/lib/icons';
+import { UserCheck } from '@/lib/icons';
+import { ArrowRight } from '@/lib/icons';
+import { Clock } from '@/lib/icons';
+import { CheckCircle } from '@/lib/icons';
+import { Heart } from '@/lib/icons';
 /**
  * UserSegmentEntry
  * ─────────────────────────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ import Heart from "lucide-react/dist/esm/icons/heart";
 
 
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+
 
 const segments = [
   {
@@ -116,7 +117,7 @@ function SegmentCards({ onNavigate }) {
 
 // ─── CTA blocks by state ──────────────────────────────────────────────────────
 
-function GuestCTA({ navigate }) {
+function GuestCTA({ router }) {
   return (
     <div className="use-cta-box use-cta-guest">
       <UserCheck size={32} className="use-cta-icon" />
@@ -126,10 +127,10 @@ function GuestCTA({ navigate }) {
         Your account will be reviewed and approved by our team — usually within 24&nbsp;h.
       </p>
       <div className="use-cta-actions">
-        <button className="use-cta-btn use-cta-btn--primary" onClick={() => navigate('/login?tab=register')}>
+        <button className="use-cta-btn use-cta-btn--primary" onClick={() => router.push('/login?tab=register')}>
           <UserCheck size={16} /> Request Verified Access
         </button>
-        <button className="use-cta-btn use-cta-btn--ghost" onClick={() => navigate('/contact')}>
+        <button className="use-cta-btn use-cta-btn--ghost" onClick={() => router.push('/contact')}>
           Contact Institutional Team <ArrowRight size={16} />
         </button>
       </div>
@@ -154,7 +155,7 @@ function PendingCTA() {
   );
 }
 
-function ProfessionalCTA({ navigate }) {
+function ProfessionalCTA({ router }) {
   return (
     <div className="use-cta-box use-cta-pro">
       <CheckCircle size={32} className="use-cta-icon" />
@@ -169,10 +170,10 @@ function ProfessionalCTA({ navigate }) {
         <span className="use-trust-item">✓ Cold-chain logistics</span>
       </div>
       <div className="use-cta-actions">
-        <button className="use-cta-btn use-cta-btn--dark" onClick={() => navigate('/patient')}>
+        <button className="use-cta-btn use-cta-btn--dark" onClick={() => router.push('/patient')}>
           Go to Dashboard <ArrowRight size={16} />
         </button>
-        <button className="use-cta-btn use-cta-btn--ghost" onClick={() => navigate('/contact')}>
+        <button className="use-cta-btn use-cta-btn--ghost" onClick={() => router.push('/contact')}>
           Explore Professional Materials <ArrowRight size={16} />
         </button>
       </div>
@@ -184,7 +185,7 @@ function ProfessionalCTA({ navigate }) {
 
 export default function UserSegmentEntry({ onNavigate }) {
   const { user, isProfessional } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Determine which state the viewer is in
   // isProfessional = logged in AND admin-approved (from AuthContext)
@@ -193,7 +194,7 @@ export default function UserSegmentEntry({ onNavigate }) {
 
   const handleNavigate = (action) => {
     if (onNavigate) onNavigate(action);
-    else navigate(action);
+    else router.push(action);
   };
 
   return (
@@ -213,9 +214,9 @@ export default function UserSegmentEntry({ onNavigate }) {
       <SegmentCards onNavigate={handleNavigate} />
 
       {/* State-aware CTA */}
-      {state === 'guest'        && <GuestCTA navigate={navigate} />}
+      {state === 'guest'        && <GuestCTA router={router} />}
       {state === 'pending'      && <PendingCTA />}
-      {state === 'professional' && <ProfessionalCTA navigate={navigate} />}
+      {state === 'professional' && <ProfessionalCTA router={router} />}
 
       {/* ── Scoped styles ── */}
       <style>{`

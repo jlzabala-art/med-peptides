@@ -1,5 +1,6 @@
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import * as fb from '../firebase';
+const db = fb?.db;
 
 /**
  * Fetch all hormone pellet products from Firestore.

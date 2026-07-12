@@ -1,7 +1,7 @@
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
 
 import useGuestPreferences from '../../hooks/useGuestPreferences';
+import { Sparkles } from '@/lib/icons';
 
 export default function ResearchIntakeCTA() {
   const { hasCompleted } = useGuestPreferences();

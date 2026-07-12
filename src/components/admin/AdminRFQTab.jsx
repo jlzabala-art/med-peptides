@@ -1,18 +1,16 @@
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Send from "lucide-react/dist/esm/icons/send";
-import Receipt from "lucide-react/dist/esm/icons/receipt";
-import Download from "lucide-react/dist/esm/icons/download";
-import { useLocation } from 'react-router-dom';
+"use client";
+
+import { usePathname } from 'next/navigation';
+
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc, limit } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, functions, storage, auth } from '../../firebase';
+
+
+
+
 import { Card } from '../ui';
 import notifier from '../../services/NotificationService';
 import SupplierPriceListUpdater from './gadgets/SupplierPriceListUpdater';
@@ -20,6 +18,7 @@ import DataTable from '../ui/DataTable';
 import AdminPageHeader from './AdminPageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import { FileText, Loader2, Plus, Sparkles, CheckCircle, AlertTriangle, Send, Receipt, Download } from '@/lib/icons';
 
 export default function AdminRFQTab() {
   const [rfqs, setRfqs] = useState([]);
@@ -27,7 +26,7 @@ export default function AdminRFQTab() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [parseProgress, setParseProgress] = useState({ state: 'idle', count: 0 });
   const [searchTerm, setSearchTerm] = useState('');
-  const location = useLocation();
+  const pathname = usePathname();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('rfqId');
 
