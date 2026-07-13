@@ -2,14 +2,21 @@
 
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, Search, ArrowRight, Bot } from '@/lib/icons';
+import { Sparkles, Search, ArrowRight, Bot, Package, User, FlaskConical } from '@/lib/icons';
 import useGuestPreferences from '../../hooks/useGuestPreferences';
+import { performDatabaseSearch } from '../../services/searchDatabaseService';
+import { useAuth } from '../../context/AuthContext';
 
 export default function HybridHeroInput({ onSearch }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const { savePrefs } = useGuestPreferences();
+  const { userProfile, isProfessional } = useAuth();
+  
+  const activeRole = userProfile?.role || (isProfessional ? 'professional' : 'retail');
 
   const EXPLORE_CHIPS = [
     'Longevity', 'Recovery', 'Cognitive', 'Sleep', 'Metabolic', 'Athletic'
@@ -17,6 +24,7 @@ export default function HybridHeroInput({ onSearch }) {
 
   const handleSubmit = (val = query) => {
     if (!val?.trim()) return;
+    setShowSuggestions(false);
     
     // Simple heuristic: if query is less than 3 words and doesn't contain verbs like 'want', 'need', 'help', 'improve'
     // treat it as a direct search
@@ -61,6 +69,24 @@ export default function HybridHeroInput({ onSearch }) {
     }, 400);
   };
 
+  React.useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (query.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const results = await performDatabaseSearch(query, activeRole);
+        setSuggestions(results);
+      } catch (err) {
+        console.error("Search failed:", err);
+      }
+    };
+
+    const debounce = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounce);
+  }, [query, activeRole]);
+
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
       <div style={{
@@ -84,7 +110,12 @@ export default function HybridHeroInput({ onSearch }) {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder={t('hero.hybrid.placeholder', "Describe your health goals or search for a compound...")}
           disabled={isAnalyzing}
@@ -130,6 +161,60 @@ export default function HybridHeroInput({ onSearch }) {
             animation: spin 3s linear infinite;
           }
         `}</style>
+
+        {showSuggestions && suggestions.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 10px)',
+            left: 0,
+            right: 0,
+            background: 'var(--surface, #ffffff)',
+            borderRadius: '16px',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.15)',
+            zIndex: 100,
+            padding: '0.5rem',
+            border: '1px solid var(--border, #e5e7eb)'
+          }}>
+            {suggestions.map((hit) => (
+              <a 
+                key={hit.id} 
+                href={hit.path}
+                onClick={(e) => {
+                  // Allow default navigation
+                  setShowSuggestions(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '1rem',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  borderRadius: '12px',
+                  transition: 'background 0.2s',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(26, 115, 232, 0.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                <div style={{ 
+                  background: 'rgba(26, 115, 232, 0.1)', 
+                  padding: '0.5rem', 
+                  borderRadius: '50%',
+                  color: 'var(--primary, #1a73e8)'
+                }}>
+                  {hit.iconName === 'flask' ? <FlaskConical size={20} /> :
+                   hit.iconName === 'user' ? <User size={20} /> : 
+                   <Package size={20} />}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>{hit.title}</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted, #6b7280)' }}>{hit.description}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{

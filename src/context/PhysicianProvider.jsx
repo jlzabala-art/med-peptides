@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import userRepository from '../repositories/userRepository';
 
 const PhysicianContext = createContext();
 
@@ -8,15 +9,26 @@ export function usePhysician() {
 }
 
 export function PhysicianProvider({ children }) {
-  const { isPhysician } = useAuth();
+  const { isPhysician, authUser } = useAuth();
   const [patients, setPatients] = useState([]);
 
   // Load physician-specific data (e.g., patients list) when needed
   useEffect(() => {
-    if (isPhysician) {
-      // TODO: fetch physician data here
+    async function loadPatients() {
+      if (isPhysician && authUser?.uid) {
+        try {
+          const docs = await userRepository.getPatientsByDoctor(authUser.uid);
+          setPatients(docs);
+        } catch (error) {
+          console.error("Error fetching physician patients:", error);
+        }
+      } else {
+        setPatients([]);
+      }
     }
-  }, [isPhysician]);
+    
+    loadPatients();
+  }, [isPhysician, authUser]);
 
   return (
     <PhysicianContext.Provider value={{ patients, setPatients }}>

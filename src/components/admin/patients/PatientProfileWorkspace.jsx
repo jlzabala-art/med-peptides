@@ -12,7 +12,7 @@ import RevenueWidget from '../../shared/RevenueWidget';
 import ClinicalTimeline from './ClinicalTimeline';
 import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
-import PrescriptionBuilder from '../prescriptions/PrescriptionBuilder';
+import UniversalOrderBuilder from '../../shared/order-builder/UniversalOrderBuilder';
 import { X, User, MapPin, Phone, Mail, Activity, FileText, ShoppingCart, ShieldPlus, Dna, Clock, MailOpen, AlertCircle, ShieldCheck, ShieldAlert, Search, ExternalLink } from '@/lib/icons';
 import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
 import { db } from '../../../firebase';

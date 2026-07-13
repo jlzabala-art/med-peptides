@@ -5,65 +5,24 @@ const { gmailUser, gmailAppPass, ga4PropertyId } = require("./src/config");
 initializeApp();
 
 // ── Triggers ─────────────────────────────────────────────────────────────────
-exports.onNewOrder    = require("./src/triggers/orders")(gmailUser, gmailAppPass);
-exports.onUserCreated = require("./src/triggers/users")(gmailUser, gmailAppPass);
-exports.syncProfileToBigin = require("./src/triggers/users_bigin_sync");
+// Moved to functions-triggers
 exports.generateImpersonationToken = require("./src/users/impersonate").generateImpersonationToken;
-
-// ── Prescription triggers ─────────────────────────────────────────────────────
-const prescriptionTriggers = require("./src/triggers/prescriptions");
-exports.onOrderCreatedForRx   = prescriptionTriggers.onOrderCreatedForRx;   // Notifica al médico cuando el paciente hace checkout
-exports.onPrescriptionCreated = prescriptionTriggers.onPrescriptionCreated; // Sella precios desde catálogo (server-side)
-
-// ── Refill Reminder trigger ───────────────────────────────────────────────────
-// Fires when order.status → 'delivered'. Creates a refill_reminders doc 30 days out.
-exports.onOrderDeliveredRefill = require("./src/triggers/refillReminder");  // Schedules 30-day refill reminder for patient
 
 
 // ── HTTP Handlers ────────────────────────────────────────────────────────────
 exports.analyticsOverview = require("./src/http/analytics")(ga4PropertyId);
-exports.clinicalAiAssistant        = require("./src/http/ai");                // Agent 1 — RAG + router
-exports.prescriptionAiAssistant    = require("./src/http/ai_prescription");   // Agent 2 — Prescription intake
-exports.articleAiAssistant         = require("./src/http/ai_article");        // Agent 4 — Blog article analysis
-exports.safetyAiAssistant          = require("./src/http/ai_safety");         // Agent 5 — Compliance Guardrail
-exports.personalizationAiAssistant = require("./src/http/ai_personalization");// Agent 6 — Onboarding
-exports.doctorAiAssistant          = require("./src/http/ai_doctor");         // Agent 8 — Doctor Protocol Builder
-exports.financeAiAssistant         = require("./src/http/ai_finance");        // Agent 7 — Financial Intelligence (admin only)
-exports.newsletterAiAssistant      = require("./src/http/ai_newsletter");     // AgentNewsletterDigest — weekly personalized digest
 exports.newsletterSubscribe        = require("./src/http/newsletter_subscribe"); // Public — guest email capture
-exports.skuSyncAgent               = require("./src/http/ai_sku_sync");         // AgentSkuSync — Zoho↔Firebase SKU coordination (admin only)
-exports.refineSemanticAgent        = require("./src/http/ai_semantic_refine");   // AgentSemanticRefine — Semantic metadata builder (admin only)
-exports.catalogAiAssistant         = require("./src/http/ai_catalog_builder");   // AgentCatalogBuilder — Dynamic Catalog platform (Vertex AI)
-exports.parseCOADocument           = require("./src/http/parse_coa_document").parseCOADocument; // COA PDF parsing AI
-exports.parseRFQDocument           = require("./src/http/parse_rfq_document").parseRFQDocument; // RFQ PDF parsing AI
-exports.parsePriceListDocument = require('./src/http/parse_price_list').parsePriceListDocument;
-exports.parsePriceListImage = require('./src/http/parse_price_list_image').parsePriceListImage;
-exports.parseUniversalDocument = require('./src/http/parse_universal_document').parseUniversalDocument;
-exports.apiParseDocument = require('./src/http/api_parse_document').apiParseDocument;
-exports.refineImportData = require('./src/http/refine_import_data').refineImportData;
 exports.emailIngestWebhook = require('./src/http/email_ingest_webhook').emailIngestWebhook;
 
 // CRON JOBS
-exports.checkInventoryLevels = require('./src/cron/check_inventory_levels').checkInventoryLevels; 
-const scrapeCompetitors = require('./src/cron/scrapeCompetitors');
-exports.scheduledScrapeCompetitors = scrapeCompetitors.scheduledScrapeCompetitors;
-exports.forceScrapeCompetitors = scrapeCompetitors.forceScrapeCompetitors;
+// Moved to functions-cron codebase
+const { dailyProtocolReview } = require('./src/cron/updateProtocols');
+exports.dailyProtocolReview = dailyProtocolReview;
 
-const weeklyCompetitorDigest = require('./src/cron/weeklyCompetitorDigest');
-exports.weeklyCompetitorDigest = weeklyCompetitorDigest.weeklyCompetitorDigest;
 
 // TRIGGERS
-exports.scoreNewLead = require('./src/triggers/on_lead_created').scoreNewLead;
-exports.onProductCreated = require('./src/triggers/products').onProductCreated;
-exports.updateCatalogStats = require('./src/triggers/catalogStats').updateCatalogStats;
-exports.protocolCompute = require('./src/triggers/protocolCompute').protocolCompute;
+// Moved to functions-triggers
 exports.publicProtocols = require('./src/http/api_protocols').publicProtocols;
-exports.syncProductToAlgolia = require('./src/triggers/algoliaSync').syncProductToAlgolia;
-exports.syncProtocolToAlgolia = require('./src/triggers/algoliaSync').syncProtocolToAlgolia;
-exports.syncPatientToAlgolia = require('./src/triggers/algoliaSync').syncPatientToAlgolia;
-exports.syncClinicToAlgolia = require('./src/triggers/algoliaSync').syncClinicToAlgolia;
-exports.syncPhysicianToAlgolia = require('./src/triggers/algoliaSync').syncPhysicianToAlgolia;
-exports.reconcileSupplierInvoice   = require("./src/http/reconcile_supplier_invoice").reconcileSupplierInvoice; // 3-way invoice matching
 
 exports.acceptInvitation           = require("./src/http/acceptInvitation").acceptInvitation;
 exports.enrichProductData          = require("./src/http/enrich_product").enrichProductData; // Secure invitation acceptance
@@ -71,98 +30,72 @@ exports.generatePaymentLink        = require("./src/http/generatePaymentLink").g
 exports.sendEmail                  = require("./src/http/sendEmail").sendEmail; // Secure EmailJS Backend Dispatch
 
 // ── Zoho CRM Intelligence ────────────────────────────────────────────────────
-const { fetchZohoCRMIntelligence } = require("./src/zoho/fetchZohoCRMIntelligence");
-exports.fetchZohoCRMIntelligence = fetchZohoCRMIntelligence; // Zoho Books contacts + invoices → CRM cache (admin only)
-exports.pushZohoInvoice = require("./src/http/push_zoho_invoice").pushZohoInvoice;
+// Moved to functions-finance
 
 // ── Email / Notifications ────────────────────────────────────────────────────
 exports.sendEmail = require("./src/http/sendEmail").sendEmail;
 
 // ── Finance / CFO Advanced Functions ─────────────────────────────────────────
-exports.predictiveCashFlow = require("./src/http/predictiveCashFlow").predictiveCashFlow;
-exports.stripeWebhook = require("./src/http/stripe_webhook").stripeWebhook;
-exports.monitorMarginHealth = require("./src/triggers/monitorMarginHealth").monitorMarginHealth;
-exports.auditSupplierPayouts = require("./src/triggers/auditSupplierPayouts").auditSupplierPayouts;
-exports.runMonteCarloSimulations = require("./src/http/runMonteCarloSimulations").runMonteCarloSimulations;
-
-const { fetchZohoBiginWholesaler } = require("./src/zoho/fetchZohoBiginWholesaler");
-exports.fetchZohoBiginWholesaler = fetchZohoBiginWholesaler;
-
-const { fetchFinanceDashboard } = require("./src/zoho/fetchFinanceDashboard");
-exports.fetchFinanceDashboard = fetchFinanceDashboard;
-
-const { searchZohoContactByEmail } = require("./src/zoho/searchZohoContactByEmail");
-exports.searchZohoContactByEmail = searchZohoContactByEmail;
-
-const { zohoBooksWebhook } = require("./src/zoho/zohoBooksWebhook");
-exports.zohoBooksWebhook = zohoBooksWebhook;
+// Moved to functions-finance
 
 // ── Order / Prescription / Bulk Order System ──────────────────────────────────
 const { submitBulkOrder } = require("./src/http/submit_bulk_order");
 exports.submitBulkOrder = submitBulkOrder; // Wholesaler bulk order submission + aggregation (wholesaler only)
 
 // ── Scheduled Tasks ──────────────────────────────────────────────────────────
-exports.syncPeptideAnalytics = require("./src/scheduled/analytics_sync")(ga4PropertyId);
-exports.keepAliveZoho        = require("./src/scheduled/zohoKeepAlive");
-exports.syncZohoToFirebase   = require("./src/scheduled/syncZohoToFirebase").syncZohoToFirebase;
-exports.nightlySkuDiscovery  = require("./src/scheduled/nightlySkuDiscovery").nightlySkuDiscovery;
-exports.adminDailyDigest     = require("./src/scheduled/adminDailyDigest").adminDailyDigest;
+// Moved to functions-cron codebase
 
 // ── Calendar & Scheduling ───────────────────────────────────────────────────
 const calendarAuth = require("./src/http/calendarAuth");
 exports.generateCalendarAuthUrl = calendarAuth.generateAuthUrl;
 exports.handleCalendarAuthCallback = calendarAuth.handleAuthCallback;
 
-const calendarSync = require("./src/triggers/calendarSync");
-exports.syncToGoogleCalendar = calendarSync.syncToGoogleCalendar;
-exports.protocolDaySync = calendarSync.protocolDaySync;
+// ── Calendar Sync Triggers ──────────────────────────────────────────────────
+// Moved to functions-triggers
 
 const sendReminders = require("./src/scheduled/sendReminders");
-exports.sendReminders = sendReminders.sendReminders;
+// sendReminders cron moved to functions-cron
 
 // -- Backups --
-exports.scheduledFirestoreExport = require('./src/triggers/scheduled_backups').scheduledFirestoreExport;
+// scheduledFirestoreExport moved to functions-cron
 const backupEndpoints = require('./src/http/backup_endpoints');
 exports.triggerManualBackup = backupEndpoints.triggerManualBackup;
 exports.logGitBackup = backupEndpoints.logGitBackup;
 
 // -- Archiving --
-exports.archiveOldLogs = require('./src/cron/archiveLogs').archiveOldLogs;
+// archiveOldLogs moved to functions-cron
 
 // -- LinkedIn --
 const linkedinAuth = require('./src/http/linkedinAuth');
 exports.generateLinkedinAuthUrl = linkedinAuth.generateAuthUrl;
 exports.handleLinkedinAuthCallback = linkedinAuth.handleAuthCallback;
 
-exports.linkedinAutoPost = require('./src/triggers/linkedinAutoPost').linkedinAutoPost;
+// linkedinAutoPost moved to functions-triggers
 
 // -- Trending Topics Blog Cron --
-exports.trendingTopicsBlog = require('./src/cron/trendingTopicsBlog').trendingTopicsBlog;
+// trendingTopicsBlog moved to functions-cron
 
 // -- LinkedIn Token Refresh Cron --
-exports.linkedinTokenRefresh = require('./src/cron/linkedinTokenRefresh').linkedinTokenRefresh;
+// linkedinTokenRefresh moved to functions-cron
 
 // ── Purchasing (P2P) Placeholder Functions ───────────────────────────────────
-const functions = require('firebase-functions');
-exports.syncPurchaseOrderToZoho = functions.https.onCall(async (data, context) => {
-  console.log("Placeholder: Sync PO to Zoho", data);
+const { onCall } = require('firebase-functions/v2/https');
+exports.syncPurchaseOrderToZoho = onCall(async (request) => {
+  console.log("Placeholder: Sync PO to Zoho", request.data);
   return { success: true, message: "Placeholder only" };
 });
-exports.syncSupplierBillToZoho = functions.https.onCall(async (data, context) => {
-  console.log("Placeholder: Sync Bill to Zoho", data);
+exports.syncSupplierBillToZoho = onCall(async (request) => {
+  console.log("Placeholder: Sync Bill to Zoho", request.data);
   return { success: true, message: "Placeholder only" };
 });
 
-exports.createZohoEstimate = require("./src/http/createZohoEstimate").createZohoEstimate;
+// createZohoEstimate moved to functions-finance
 
 // ── AI Operations ───────────────────────────────────────────────────────────
-const aiOperations = require("./src/http/aiOperations");
-exports.threeWayMatching = aiOperations.threeWayMatching;
-exports.analyzeRFQEndpoint = aiOperations.analyzeRFQEndpoint;
+// Moved to functions-ai codebase
 
 // ── Webhooks ────────────────────────────────────────────────────────────────
-const zohoWebhooks = require("./src/http/zohoWebhooks");
-exports.zohoWebhooks = zohoWebhooks.zohoWebhooks;
+// zohoWebhooks moved to functions-finance
 exports.processInboundEmail = require('./src/webhooks/inboundEmail').processInboundEmail;
 exports.triggerAiOnEmailWorker = require('./src/webhooks/inboundEmail').triggerAiOnEmailWorker;
 exports.reprocessEmail = require('./src/http/reprocessEmail').reprocessEmail;
@@ -172,7 +105,4 @@ exports.acceptPrescription = require('./src/http/acceptPrescription').acceptPres
 exports.calculateRevenueAttribution = require("./src/http/calculateRevenueAttribution").calculateRevenueAttribution;
 
 // ── Strategic Upgrade (Phase 4) ─────────────────────────────────────────────
-const timelineTriggers = require("./src/triggers/timelineTriggers");
-exports.onOrderCreatedForTimeline = timelineTriggers.onOrderCreated;
-exports.onPatientCreatedForTimeline = timelineTriggers.onPatientCreated;
-exports.onTaskCompletedForTimeline = timelineTriggers.onTaskCompleted;
+// Timeline triggers moved to functions-triggers

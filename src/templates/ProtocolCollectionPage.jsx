@@ -36,6 +36,7 @@ import CollectionHeader from '../components/collection/CollectionHeader';
 import GoalCard from '../components/collection/GoalCard';
 import CollectionSidebar, { SidebarSection } from '../components/collection/CollectionSidebar';
 import FilterDrawer from '../components/collection/FilterDrawer';
+import PaginationControl from '../components/common/PaginationControl';
 import SharedChip from '../components/collection/SharedChip';
 import ProductCard, { SkeletonCard } from '../components/collection/ProductCard';
 import { getPublicProtocols } from '../services/protocolStorage.js';
@@ -45,8 +46,6 @@ import { LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, FlaskConical, 
 /* ─────────────────────────────────────────────────────────────
    DATA CONSTANTS
    ───────────────────────────────────────────────────────────── */
-
-const PAGE_SIZE = 20;
 
 /**
  * primary_goal → accent color
@@ -463,6 +462,7 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
   /* ── View ── */
   const [viewMode, setViewMode]               = useState('grid'); // 'grid' | 'list'
   const [page, setPage]                       = useState(1);
+  const [hitsPerPage, setHitsPerPage]         = useState(25);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   /* ── Preview modal ── */
@@ -609,8 +609,8 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
 
   /* ── Pagination ── */
   const displayProtocols = useMemo(
-    () => filteredProtocols.slice(0, page * PAGE_SIZE),
-    [filteredProtocols, page]
+    () => filteredProtocols.slice(0, page * hitsPerPage),
+    [filteredProtocols, page, hitsPerPage]
   );
   const hasMore = displayProtocols.length < filteredProtocols.length;
 
@@ -932,23 +932,16 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
                   ))}
                 </AnimatePresence>
               </motion.div>
-              {hasMore && (
-                <div className="pc-load-more-wrap">
-                  <p className="pc-progress-text">
-                    Showing {displayProtocols.length} of {filteredProtocols.length} protocols
-                  </p>
-                  <button
-                    className="pc-load-more-btn"
-                    onClick={() => setPage(p => p + 1)}
-                  >
-                    Load more protocols <ArrowRight size={16} />
-                  </button>
-                </div>
-              )}
-              {!hasMore && filteredProtocols.length > 0 && (
-                <p className="pc-progress-text" style={{ textAlign: 'center', paddingBottom: '2rem' }}>
-                  All {filteredProtocols.length} protocols loaded
-                </p>
+              {filteredProtocols.length > 0 && (
+                <PaginationControl 
+                  hitsPerPage={hitsPerPage}
+                  setHitsPerPage={(val) => { setHitsPerPage(val); setPage(1); }}
+                  hasMore={hasMore}
+                  onLoadMore={() => setPage(p => p + 1)}
+                  totalHits={filteredProtocols.length}
+                  loadedHits={displayProtocols.length}
+                  isLoading={loading}
+                />
               )}
             </>
           )}

@@ -29,7 +29,9 @@ import {
   where,
   orderBy,
   limit,
-  startAfter
+  startAfter,
+  serverTimestamp,
+  writeBatch
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { normalizeProduct } from './mappers';
@@ -142,24 +144,85 @@ function _resolveLocalEnrich(firestoreName, firestoreId) {
   return {}; // no match
 }
 
+import { createCacheManager } from '../utils/cacheManager';
+
 // ── Collection helpers ────────────────────────────────────────────────────────
 const productsCol  = ()          => collection(db, 'products');
 const variantsCol  = (productId) => collection(db, 'products', productId, 'variants');
 const suppliersCol = ()          => collection(db, 'suppliers');
 
-// ── Module-level cache ────────────────────────────────────────────────────────
-// Caches active products for 5 minutes to avoid repeated Firestore round-trips
-// on re-renders or navigation back to the home page.
-let _activeProductsCache = null;
-let _activeProductsCacheTime = 0;
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+// ── Module-level cache (dual-layer: memory + localStorage) ────────────────────────
+const PRODUCTS_CACHE_KEY = 'regenpept_products_cache_v2';
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes (Firestore is source of truth)
+
+const cache = createCacheManager(PRODUCTS_CACHE_KEY, CACHE_TTL_MS);
 
 export function invalidateProductsCache() {
-  _activeProductsCache = null;
-  _activeProductsCacheTime = 0;
+  cache.invalidate();
 }
 
 // ── Product-level queries ─────────────────────────────────────────────────────
+
+/**
+ * Fetch featured products for the Home Page Server Component.
+ * Bypasses full catalog overhead.
+ */
+export async function getFeaturedProductsServer() {
+  try {
+    const q = query(
+      productsCol(), 
+      where('isActive', '==', true), 
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    
+    // Convert to regular objects immediately
+    const products = snap.docs.map(d => normalizeProduct(d.data(), d.id));
+    
+    // Sort logic to match previous frontend sorting if necessary, or just return
+    return products.sort((a, b) => (a.displayName ?? a.name ?? '').localeCompare(b.displayName ?? b.name ?? ''));
+  } catch (err) {
+    console.error('[productRepository] getFeaturedProductsServer:', err);
+    return [];
+  }
+}
+
+/**
+ * Fetch products for a specific collection on the server.
+ * Ensures the Server Component only serializes what is needed.
+ */
+export async function getProductsByCategoryServer(categorySlug) {
+  try {
+    const isAllOrPeptides = !categorySlug || ['all', 'peptides'].includes(categorySlug.toLowerCase());
+    
+    // If 'all' or 'peptides', we just fetch a limited set or rely on client hydration 
+    // for the full explorer view. We fetch the first 40 to ensure SEO is populated.
+    if (isAllOrPeptides) {
+      const q = query(productsCol(), where('isActive', '==', true), limit(40));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => normalizeProduct(d.data(), d.id));
+    }
+    
+    // Else, try to match category (basic matching logic, categorySlug often maps directly to 'category' field, 
+    // but the DB uses 'category' as a string like 'Recovery & Repair'. So if it's a specific string...)
+    // Since Firebase string matching is case sensitive, we'll fetch a batch and filter to be safe.
+    const q = query(productsCol(), where('isActive', '==', true), limit(100));
+    const snap = await getDocs(q);
+    const products = snap.docs.map(d => normalizeProduct(d.data(), d.id));
+    
+    const target = categorySlug.toLowerCase().replace(/-/g, '');
+    return products.filter(p => {
+      if (!p.category) return false;
+      const catNorm = p.category.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return catNorm.includes(target) || target.includes(catNorm);
+    });
+    
+  } catch (err) {
+    console.error('[productRepository] getProductsByCategoryServer:', err);
+    return [];
+  }
+}
+
 
 /**
  * Fetch all product documents (top-level, no variants).
@@ -184,10 +247,10 @@ export async function getAllProducts() {
  *   (b) Documents missing both `isActive` and `status` fields are treated as
  *       active (permissive default) rather than silently excluded.
  */
-export async function getActiveProducts() {
-  // Return cached data if still fresh
-  if (_activeProductsCache && (Date.now() - _activeProductsCacheTime < CACHE_TTL_MS)) {
-    return _activeProductsCache;
+export async function getActiveProducts({ forceRefresh = false } = {}) {
+  if (!forceRefresh) {
+    const cached = cache.read();
+    if (cached) return cached;
   }
 
   try {
@@ -212,16 +275,14 @@ export async function getActiveProducts() {
       }
     }
 
-    // Cache the result
-    _activeProductsCache = results;
-    _activeProductsCacheTime = Date.now();
-
+    cache.write(results);
     return results;
   } catch (err) {
     console.error('[productRepository] getActiveProducts:', err);
     throw err;
   }
 }
+
 
 /**
  * Fetch products with real pagination.
@@ -686,6 +747,33 @@ export async function getProductEnrichment(cacheKey) {
   }
 }
 
+// ─── Imports Support ────────────────────────────────────────────────────────
+export async function importCoAs(coaRecords) {
+  const batch = writeBatch(db);
+  const now = serverTimestamp();
+  for (const record of coaRecords) {
+    const ref = doc(collection(db, 'batch_coas'));
+    batch.set(ref, {
+      ...record,
+      createdAt: now,
+    });
+  }
+  await batch.commit();
+}
+
+export async function importCatalogs(catalogRecords) {
+  const batch = writeBatch(db);
+  const now = serverTimestamp();
+  for (const record of catalogRecords) {
+    const ref = doc(collection(db, 'imported_catalogs'));
+    batch.set(ref, {
+      ...record,
+      createdAt: now,
+    });
+  }
+  await batch.commit();
+}
+
 // ── Legacy compatibility shim ─────────────────────────────────────────────────
 // Keeps existing code that imports { productRepository } working.
 
@@ -709,4 +797,6 @@ export const productRepository = {
   getActiveProductsPaginated,
   getRelatedEngineData,
   getProductEnrichment,
+  getFeaturedProductsServer,
+  getProductsByCategoryServer,
 };

@@ -3,7 +3,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import PortalSidebar from './PortalSidebar';
 import PortalHeader from './PortalHeader';
-import PortalAIDrawer from './PortalAIDrawer';
+import AtlasAssistantDrawer from './AtlasAssistantDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
 import AtlasHealthLogo from '../components/brand/AtlasHealthLogo';
 import { useTranslation } from 'react-i18next';
@@ -122,7 +122,7 @@ export default function AppPortalLayout({ allowedRoles = [], children }) {
         </main>
       </div>
 
-      <PortalAIDrawer isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} />
+      <AtlasAssistantDrawer isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} />
 
       <style>{`
         .portal-container {

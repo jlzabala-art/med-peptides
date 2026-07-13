@@ -9,7 +9,7 @@ import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { conversationRepository } from '../repositories/conversationRepository';
 import { useAuth } from '../context/AuthContext';
 
-import PortalLayout from '../components/ui/PortalLayout';
+import UniversalAppLayout from '../components/layout/UniversalAppLayout';
 import PageTransition from '../components/PageTransition';
 import Omnibar from '../components/admin/Omnibar';
 import { useAdminRoleSimulation } from '../hooks/admin/useAdminRoleSimulation';
@@ -252,7 +252,7 @@ export default function AdminDashboard({ children }) {
     PINNED_ITEMS.find((i) => i.id === activeTab);
 
   return (
-    <PortalLayout
+    <UniversalAppLayout
       sidebarNavGroups={filteredNavGroups}
       sidebarPinnedItems={dynamicPinnedItems}
       activeNavId={activeTab}
@@ -290,6 +290,6 @@ export default function AdminDashboard({ children }) {
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
-    </PortalLayout>
+    </UniversalAppLayout>
   );
 }

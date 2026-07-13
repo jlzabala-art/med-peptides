@@ -14,6 +14,7 @@ import { buildCatalogIndex } from '../../../utils/classifyQuery';
 import { useClinicalAIConfig } from '../../../hooks/useClinicalAIConfig';
 import BottomSheet from '../BottomSheet';
 import { useClinicalAI } from './useClinicalAI';
+import { useAtlasContext } from '@/hooks/shared/useAtlasContext';
 
 
 
@@ -36,22 +37,23 @@ import SessionHistoryDrawer from './components/SessionHistoryDrawer';
 import ResearchDetailDrawer from './components/ResearchDetailDrawer';
 import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen } from '@/lib/icons';
 
-export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false, pageContext = null, contextMode = 'clinical', agentType = 'default', suggestedPrompts = [] }) {
+export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false, pageContext = null, contextMode: passedContextMode, agentType: passedAgentType, suggestedPrompts: passedSuggestedPrompts }) {
+  const atlasContext = useAtlasContext();
+  const contextMode = passedContextMode || atlasContext.contextMode;
+  const agentType = passedAgentType || atlasContext.agentType;
+  const suggestedPrompts = passedSuggestedPrompts && passedSuggestedPrompts.length > 0 ? passedSuggestedPrompts : atlasContext.suggestedPrompts;
+  const contextActions = atlasContext.contextActions || [];
+  
+  const themeAccent = atlasContext.themeAccent;
+  const themeBgActive = atlasContext.themeBgActive;
+
   const pathname = usePathname();
   const router = useRouter();
   const { user, userProfile } = useAuth();
 
-  const themeAccent = useMemo(() => {
-    if (contextMode === 'admin') return '#1a73e8'; // Google Blue
-    if (contextMode === 'doctor') return '#0f9d58'; // Google Green
-    return '#4285f4'; // Google Light Blue
-  }, [contextMode]);
+  
 
-  const themeBgActive = useMemo(() => {
-    if (contextMode === 'admin') return '#e8f0fe';
-    if (contextMode === 'doctor') return '#e6f4ea';
-    return '#e8f0fe';
-  }, [contextMode]);
+  
   const [products, setProducts] = useState(() => {
     try {
       if (typeof window === 'undefined') return [];
@@ -629,7 +631,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           </div>
         )}
 
-        <ContextActionCards onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
+        <ContextActionCards cards={contextActions} onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
 
         <ChatMessageList 
           messages={messages}
@@ -721,77 +723,16 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     </div>
   );
 
-  if (embedded) {
-    return (
-      <div className="embedded-clinical-assistant" style={{ 
-        height: '100%', 
-        border: '1px solid var(--border)', 
-        borderRadius: '12px', 
-        overflow: 'hidden',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        {renderChatContent()}
-      </div>
-    );
-  }
 
   return (
-    <>
-      <style>{`
-        @keyframes siriPulseEdge {
-          0% { box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.3); border: 2px solid rgba(79, 70, 229, 0.5); }
-          50% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.9), inset 0 0 20px rgba(79, 70, 229, 0.6); border: 2px solid rgba(79, 70, 229, 1); }
-          100% { box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.3); border: 2px solid rgba(79, 70, 229, 0.5); }
-        }
-        .pulse-active {
-          animation: siriPulseEdge 2s infinite ease-in-out;
-        }
-      `}</style>
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                backgroundColor: 'rgba(15, 23, 42, 0.4)',
-                backdropFilter: 'blur(4px)',
-                zIndex: 9990,
-              }}
-            />
-            {/* Right-aligned Drawer Container */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: isMobile ? '100vw' : '520px',
-                backgroundColor: 'white',
-                boxShadow: '-10px 0 30px rgba(0,0,0,0.15)',
-                display: 'flex',
-                flexDirection: 'column',
-                zIndex: 9995,
-                overflow: 'hidden',
-                borderLeft: '1px solid rgba(0,0,0,0.08)'
-              }}
-              className={isPulsing ? 'pulse-active' : ''}
-            >
-              {renderChatContent()}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
+    <div className="embedded-clinical-assistant" style={{ 
+      height: '100%', 
+      border: '1px solid var(--border)', 
+      borderRadius: '12px', 
+      overflow: 'hidden',
+      boxShadow: 'var(--shadow-sm)'
+    }}>
+      {renderChatContent()}
       <SupportEscalationCard 
         showSupportCard={showSupportCard}
         isOpen={isOpen}
@@ -802,6 +743,6 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
         sessionId={sessionId}
         messagesSent={messages.length}
       />
-    </>
+    </div>
   );
 }

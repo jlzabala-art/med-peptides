@@ -19,7 +19,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import { PreferencesProvider } from '../context/PreferencesContext';
 import { HeaderProvider } from '../context/HeaderContext';
 import { CopilotProvider } from '../context/CopilotContext';
-import { ClinicalCartProvider } from '../context/ClinicalCartContext';
+
 import { ModalProvider } from '../hooks/ui/useModalStack';
 
 const queryClient = new QueryClient({
@@ -49,7 +49,7 @@ export default function NextProviders({ children, serverUser }) {
           <TenantProvider>
             <ShopProvider>
               <CartProvider>
-                <ClinicalCartProvider>
+
                   <HelmetProvider>
                     <ThemeProvider>
                       <NotificationProvider>
@@ -63,7 +63,7 @@ export default function NextProviders({ children, serverUser }) {
                       </NotificationProvider>
                     </ThemeProvider>
                   </HelmetProvider>
-                </ClinicalCartProvider>
+
               </CartProvider>
             </ShopProvider>
           </TenantProvider>

@@ -1,38 +1,49 @@
+/**
+ * useBlogPosts.js
+ *
+ * Fetches blog posts exclusively from Firestore (source of truth).
+ * The local blogData.js file is no longer used at runtime — it exists
+ * only as a seeding/editorial reference.
+ *
+ * Cache strategy: React Query handles deduplication and stale-time.
+ * Posts change infrequently, so staleTime is set to 30 minutes.
+ */
 import { useState, useEffect } from 'react';
 import blogRepository from '../repositories/blogRepository';
-import localBlogPosts from '../data/blogData';
 
 export function useBlogPosts(includeDrafts = false) {
-  // Inicializamos con localBlogPosts para que el usuario no vea un salto o pantalla en blanco (FCP)
-  const [posts, setPosts] = useState(localBlogPosts);
+  const [posts, setPosts] = useState([]);   // start empty — no local JSON init
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchPosts() {
+      setLoading(true);
       try {
         const fetchedPosts = await blogRepository.getAllBlogPosts();
-        
-        // Filtrar borradores si includeDrafts es false
-        const filtered = includeDrafts 
-          ? fetchedPosts 
+
+        if (cancelled) return;
+
+        const filtered = includeDrafts
+          ? fetchedPosts
           : fetchedPosts.filter(p => p.status !== 'draft');
-        
-        // Ordenar por fecha de publicación descendente
+
         filtered.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
-        
-        if (filtered.length > 0) {
-          setPosts(filtered);
-        }
+        setPosts(filtered);
       } catch (err) {
-        console.error("Error fetching blog posts from Firestore:", err);
-        setError(err);
+        if (!cancelled) {
+          console.error('[useBlogPosts] Error fetching posts from Firestore:', err);
+          setError(err);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    
+
     fetchPosts();
+    return () => { cancelled = true; };
   }, [includeDrafts]);
 
   return { posts, loading, error };

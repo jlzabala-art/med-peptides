@@ -226,6 +226,20 @@ export async function getStaffByDoctor(doctorId) {
 }
 
 /**
+ * Fetch patients assigned to a specific doctor.
+ */
+export async function getPatientsByDoctor(doctorId) {
+  if (!doctorId) return [];
+  const q = query(
+    collection(db, 'users'),
+    where('role', '==', 'patient'),
+    where('assignedPhysicianIds', 'array-contains', doctorId)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map(d => normalizeUser(d.data(), d.id));
+}
+
+/**
  * Creates a new patient user record.
  */
 export async function createPatient(patientData) {
@@ -272,6 +286,7 @@ const userRepository = {
   getDoctorPatientsCount,
   getUsersByRole,
   getStaffByDoctor,
+  getPatientsByDoctor,
   createPatient,
   createDoctorPatientRelationship,
 };

@@ -1,8 +1,5 @@
 "use client";
-
-
 import React, { useEffect } from 'react';
-
 import './ui.css';
 import { X } from '@/lib/icons';
 
@@ -15,7 +12,7 @@ export default function ContextualSidePanel({
 }) {
   // Prevent body scroll when open on mobile
   useEffect(() => {
-    if (isOpen && window.innerWidth < 768) {
+    if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -29,9 +26,9 @@ export default function ContextualSidePanel({
 
   return (
     <>
-      {/* Mobile overlay - non-blocking on desktop if desired, but typically we want at least a subtle backdrop or we can make it purely non-blocking */}
+      {/* Overlay */}
       <div 
-        className="side-panel-overlay mobile-only" 
+        className="side-panel-overlay" 
         style={{
           position: 'fixed',
           top: 0,
@@ -40,9 +37,7 @@ export default function ContextualSidePanel({
           bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.4)',
           zIndex: 999,
-          opacity: isOpen ? 1 : 0,
-          transition: 'opacity 0.3s ease',
-          pointerEvents: isOpen ? 'auto' : 'none'
+          animation: 'drawerFadeIn 0.2s ease-out',
         }}
         onClick={onClose}
       />
@@ -52,19 +47,20 @@ export default function ContextualSidePanel({
         style={{
           position: 'fixed',
           top: 0,
-          right: isOpen ? 0 : `-${width}`,
-          width: window.innerWidth < 768 ? '100%' : width,
+          right: 0,
+          width: width,
+          maxWidth: '100%',
           height: '100vh',
           backgroundColor: 'var(--color-bg-surface)',
           boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.1)',
           zIndex: 1000,
-          transition: 'right 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex',
           flexDirection: 'column',
-          borderLeft: '1px solid var(--border)'
+          borderLeft: '1px solid var(--border)',
+          animation: 'drawerSlideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         role="dialog"
-        aria-modal="false" // non-blocking on desktop
+        aria-modal="true"
         aria-label={title}
       >
         <div 
@@ -72,7 +68,7 @@ export default function ContextualSidePanel({
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'space-between', 
-            padding: '20px 24px',
+            padding: 'max(20px, env(safe-area-inset-top)) 24px 20px 24px',
             borderBottom: '1px solid var(--border)',
             backgroundColor: 'var(--background)'
           }}
@@ -90,7 +86,7 @@ export default function ContextualSidePanel({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '4px',
+              padding: '8px',
               borderRadius: '4px'
             }}
             onMouseOver={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)'}
@@ -103,6 +99,22 @@ export default function ContextualSidePanel({
           {children}
         </div>
       </div>
+      
+      <style>{`
+        @keyframes drawerFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes drawerSlideInFromRight {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        @media (max-width: 768px) {
+          .contextual-side-panel {
+            width: 100vw !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

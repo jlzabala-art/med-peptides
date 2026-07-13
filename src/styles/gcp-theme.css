@@ -1,17 +1,17 @@
 /* ── Comprehensive GCP Style Utilities ─────────────────────── */
 /* Colors & Variables */
 :root {
-  --gcp-blue: #1a73e8;
-  --gcp-blue-hover: #1765cc;
-  --gcp-text-main: #3c4043;
-  --gcp-text-secondary: #5f6368;
-  --gcp-text-muted: #70757a;
-  --gcp-border: #dadce0;
-  --gcp-bg-main: #f8f9fa;
-  --gcp-bg-card: #ffffff;
-  --gcp-danger: #d93025;
-  --gcp-success: #1e8e3e;
-  --gcp-warning: #f29900;
+  --gcp-blue: var(--color-primary, #1a73e8);
+  --gcp-blue-hover: var(--color-primary-hover, #174ea6);
+  --gcp-text-main: var(--color-text-primary, #202124);
+  --gcp-text-secondary: var(--color-text-secondary, #5f6368);
+  --gcp-text-muted: var(--color-text-tertiary, #80868b);
+  --gcp-border: var(--color-border, #dadce0);
+  --gcp-bg-main: var(--color-bg-app, #f8f9fa);
+  --gcp-bg-card: var(--color-bg-surface, #ffffff);
+  --gcp-danger: var(--color-danger, #d93025);
+  --gcp-success: var(--color-success, #1e8e3e);
+  --gcp-warning: var(--color-warning, #f9ab00);
 }
 
 /* Typography */
@@ -36,10 +36,9 @@
 .gcp-card {
   background-color: var(--gcp-bg-card);
   border: 1px solid var(--gcp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md, 8px);
   overflow: hidden;
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
-  box-shadow: none; /* Flatten by default for clean look */
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
 }
 
 .gcp-header {
@@ -61,7 +60,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
-  border-radius: 4px;
+  border-radius: var(--radius-md, 8px);
   border: none;
   background-color: var(--gcp-blue);
   color: #ffffff;
@@ -74,7 +73,7 @@
 
 .gcp-btn-primary:hover:not(:disabled) {
   background-color: var(--gcp-blue-hover);
-  box-shadow: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.1));
 }
 
 .gcp-btn-primary:disabled {
@@ -90,7 +89,7 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
-  border-radius: 4px;
+  border-radius: var(--radius-md, 8px);
   border: 1px solid var(--gcp-border);
   background-color: transparent;
   color: var(--gcp-blue);
@@ -147,8 +146,9 @@
 /* Tables */
 .gcp-table-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--gcp-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md, 8px);
 }
 
 .gcp-table {
@@ -160,14 +160,14 @@
 .gcp-table th {
   background-color: var(--gcp-bg-main);
   color: var(--gcp-text-secondary);
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--gcp-border);
+  padding: 1rem;
+  border-bottom: 2px solid var(--gcp-border);
 }
 
 .gcp-table td {
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   border-bottom: 1px solid var(--gcp-border);
   color: var(--gcp-text-main);
 }
@@ -178,4 +178,71 @@
 
 .gcp-table tbody tr:hover {
   background-color: var(--gcp-bg-main);
+}
+
+/* Mobile Touch Targets & Utilities */
+@media (max-width: 767px) {
+  .gcp-btn-primary, .gcp-btn-secondary, .gcp-btn-danger {
+    min-height: 44px; /* Accessible touch target size */
+  }
+  
+  /* Option B: Full Responsive Cards for Tables */
+  .gcp-table-container table,
+  .gcp-table-container thead,
+  .gcp-table-container tbody,
+  .gcp-table-container th,
+  .gcp-table-container td,
+  .gcp-table-container tr {
+    display: block;
+  }
+
+  /* Hide header row visually but keep for accessibility */
+  .gcp-table-container thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  /* Each row becomes a card */
+  .gcp-table-container tr {
+    background: var(--gcp-bg-card);
+    border: 1px solid var(--gcp-border);
+    border-radius: var(--radius-md, 8px);
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.06));
+  }
+
+  /* Each cell: label left, value right */
+  .gcp-table-container td {
+    position: relative;
+    padding: 7px 8px 7px 45%;
+    border: none;
+    border-bottom: 1px solid var(--gcp-bg-main);
+    min-height: 34px;
+    font-size: 0.875rem;
+    word-break: break-word;
+  }
+
+  .gcp-table-container td:last-child {
+    border-bottom: none;
+    padding-bottom: 2px;
+  }
+
+  /* Auto label from data-label attribute */
+  .gcp-table-container td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 8px;
+    top: 7px;
+    width: 40%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gcp-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

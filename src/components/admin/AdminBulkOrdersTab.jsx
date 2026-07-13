@@ -43,6 +43,8 @@ import {
 import { db, auth } from '../../firebase';
 import { logAction } from '../../services/auditLogger';
 import { useBulkOrders } from '../../hooks/admin/useBulkOrders';
+import { useAlgoliaSearch } from '../../hooks/useAlgoliaSearch';
+import { algoliaConfig } from '../../services/algolia/config';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
@@ -60,7 +62,7 @@ import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
 
 import { BULK_STATUS, BULK_STATUS_META } from '../../config/prescriptionConfig';
-import AdminBulkOrderBuilder from './AdminBulkOrderBuilder';
+import UniversalOrderBuilder from '../shared/order-builder/UniversalOrderBuilder';
 import B2BOrderApprovalsWidget from './gadgets/B2BOrderApprovalsWidget';
 import GlobalLogisticsQueueWidget from './gadgets/GlobalLogisticsQueueWidget';
 import ConversationThread from '../messaging/ConversationThread';
@@ -422,20 +424,33 @@ const sLabel = {
 
 // ── Main Tab ──────────────────────────────────────────────────────────────────
 export default function AdminBulkOrdersTab() {
-  const { bulkOrders: orders, loading, hasMore, loadMore, fetchBulkOrders: refreshOrders, totalCount } = useBulkOrders({ pageSize: 50 });
+  const { bulkOrders: rawOrders, loading, hasMore, loadMore, fetchBulkOrders: refreshOrders, totalCount } = useBulkOrders({ pageSize: 50 });
   const [filterStatus, setFilter] = useState('all');
   const [unreadCount, setUnread] = useState(0);
   const [showBuilder, setShowBuilder] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const location = usePathname();
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
+
+  const { query: searchTerm, setQuery: setSearchTerm, results: searchResults, isSearching } = useAlgoliaSearch({
+    indexName: algoliaConfig.indices.orders,
+    filters: "type:bulk_order",
+    debounceMs: 300,
+    hitsPerPage: 50
+  });
 
   useEffect(() => {
     if (deepLinkSearch) {
       setSearchTerm(deepLinkSearch);
     }
   }, [deepLinkSearch]);
+
+  const orders = useMemo(() => {
+    if (searchTerm && searchResults.length > 0) {
+      return searchResults.map(h => ({ ...h, id: h.objectID, timeline: [] }));
+    }
+    return rawOrders || [];
+  }, [searchTerm, searchResults, rawOrders]);
 
 
   // Real-time listener
@@ -485,10 +500,8 @@ export default function AdminBulkOrdersTab() {
   }
 
   // Filtered
-  const filtered = (orders || []).filter((o) => 
-    (filterStatus === 'all' || o.status === filterStatus) &&
-    (o.wholesalerName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     o.wholesalerEmail?.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filtered = orders.filter((o) => 
+    (filterStatus === 'all' || o.status === filterStatus)
   );
 
   // Stats
@@ -593,7 +606,7 @@ export default function AdminBulkOrdersTab() {
 
   if (showBuilder) {
     return (
-      <AdminBulkOrderBuilder
+      <UniversalOrderBuilder
         onBack={() => setShowBuilder(false)}
         onSuccess={() => setShowBuilder(false)}
       />

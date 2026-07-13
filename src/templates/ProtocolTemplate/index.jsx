@@ -61,7 +61,6 @@ import ProtocolOutcomesSection from '../../components/protocol/ProtocolOutcomesS
 import { useDailyDose } from '../../hooks/useDailyDose';
 import { useProtocolProducts } from '../../hooks/data/useProtocolProducts';
 
-import protocolIndex from "../../data/protocol_search_index.json";
 import { normalizeProtocol, frequencyToInjectionsPerWeek } from '../../utils/protocolSchemaAdapter';
 import ClinicalAssistant from '../../components/shared/ClinicalAssistant';
 

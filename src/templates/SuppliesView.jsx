@@ -1,7 +1,10 @@
 "use client";
 
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useEffect, useMemo, useCallback, memo, useState } from 'react';
+
+import UniversalProductCard from '../components/universal/UniversalProductCard';
+import PaginationControl from '../components/common/PaginationControl';
 
 
 
@@ -22,6 +25,8 @@ const SuppliesView = ({
   EXCHANGE_RATES
 }) => {
   const { tier } = usePricingTier();
+  const [page, setPage] = useState(1);
+  const [hitsPerPage, setHitsPerPage] = useState(25);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -67,7 +72,14 @@ const SuppliesView = ({
       const localPrice = Math.round(priceUSD * config.rate * 1.10);
       return `${formatValue(localPrice)} ${config.currency}`;
     }
-  }, [region, isProfessional, EXCHANGE_RATES]);
+  }, [region, isProfessional, EXCHANGE_RATES, tier]);
+
+  // PHASE 1.2: Pagination Logic
+  const displaySupplies = useMemo(
+    () => supplies.slice(0, page * hitsPerPage),
+    [supplies, page, hitsPerPage]
+  );
+  const hasMore = displaySupplies.length < supplies.length;
 
   return (
     <div className="template-root" style={{ padding: 'clamp(1rem, 5vw, 4rem) 1rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -86,72 +98,37 @@ const SuppliesView = ({
       {/* Mobile-Optimized Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '1.5rem'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
       }}>
-        {supplies.map(item => (
-          <div key={item.name} className="card" style={{
-            padding: '1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            borderTop: '4px solid var(--secondary)',
-            borderRadius: '16px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ color: 'var(--secondary)' }}>
-                {item.name.toLowerCase().includes('water') ? <Droplets size={28} /> : <Syringe size={28} />}
-              </div>
-              <span style={{
-                fontSize: '0.75rem',
-                backgroundColor: 'var(--surface-subtle)',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                fontWeight: 600
-              }}>
-                LAB-GRADE
-              </span>
-            </div>
-
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{item.name}</h2>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
-                {formatPrice(item)}
-              </div>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                {item.dosage} / {item.quantity}
-              </div>
-            </div>
-
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem', flex: 1 }}>
-              {item.desc}
-            </p>
-
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
-              <button
-                onClick={() => onSelectProduct(item.name)}
-                className="btn btn-outline"
-                style={{ flex: 1, fontSize: '0.85rem', padding: '0.6rem' }}
-              >
-                Specs
-              </button>
-              <button
-                onClick={() => {
-                  trackEvent('purchase_intent', {
-                    intent_type: 'add_to_cart',
-                    peptide_name: item.name
-                  });
-                  updateCart(item.name, 1);
-                }}
-                className="btn"
-                style={{ flex: 2, fontSize: '0.85rem', padding: '0.6rem' }}
-              >
-                Add to Order
-              </button>
-            </div>
-          </div>
+        {displaySupplies.map(item => (
+          <UniversalProductCard
+            key={item.id || item.objectID || item.name}
+            product={{
+              ...item,
+              price: formatPrice(item), // Pass the pre-formatted string if UniversalProductCard accepts it, or just use UniversalProductCard's internal resolution
+            }}
+            onAddToCart={updateCart}
+            onClick={() => onSelectProduct(item.name)}
+            viewMode="grid"
+            showImage={true}
+            badge={{ text: 'LAB-GRADE', type: 'info' }}
+          />
         ))}
       </div>
+
+      {supplies.length > 0 && (
+        <PaginationControl 
+          hitsPerPage={hitsPerPage}
+          setHitsPerPage={(val) => { setHitsPerPage(val); setPage(1); }}
+          hasMore={hasMore}
+          onLoadMore={() => setPage(p => p + 1)}
+          totalHits={supplies.length}
+          loadedHits={displaySupplies.length}
+          isLoading={false}
+        />
+      )}
 
       {/* Security Disclaimer Small */}
       <footer style={{ marginTop: '4rem', opacity: 0.7 }}>

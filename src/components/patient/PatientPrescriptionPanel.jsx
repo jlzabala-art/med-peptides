@@ -15,7 +15,7 @@ import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import FileUp from "lucide-react/dist/esm/icons/file-up";
 import FileText from "lucide-react/dist/esm/icons/file-text";
-import ImportPrescriptionModal from "../admin/prescriptions/ImportPrescriptionModal";
+import ImportPrescriptionModal from "../../../features/prescriptions/components/ImportPrescriptionModal";
 import DocumentPreviewModal from "../ui/DocumentPreviewModal";
 /**
  * PatientPrescriptionPanel.jsx

@@ -1,9 +1,9 @@
 export const algoliaConfig = {
   indices: {
     products: 'products',
+    orders: 'orders',
     // Future indices can be added here
     // customers: 'customers',
-    // orders: 'orders',
   },
   defaultSearchOptions: {
     hitsPerPage: 20,

@@ -13,12 +13,15 @@ import { useFirestoreData } from '../hooks/useFirestoreData';
 
 
 
-import MobileProductCard from '../snippets/MobileProductCard';
+import UniversalProductCard from '../components/universal/UniversalProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { getFAQForProduct, searchFAQ } from '../utils/discoveryEngine';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useProductSearch } from '../hooks/useProductSearch';
+import { algoliaConfig } from '../services/algolia/config';
+import PaginationControl from '../components/common/PaginationControl';
 import { ArrowLeft, Info, FlaskConical, Beaker, Zap, Activity, HelpCircle, BookOpen, ChevronRight, Bot } from '@/lib/icons';
 
 export default function CategoryDetailView({ 
@@ -92,9 +95,16 @@ export default function CategoryDetailView({
     setShowPubMedPanel(true);
   };
 
+  const [hitsPerPage, setHitsPerPage] = useState(25);
+  const { results: fetchedResults, totalHits, hasMore, loadMore, isSearching } = useProductSearch({
+    indexName: algoliaConfig.indices.products,
+    hitsPerPage: hitsPerPage,
+    filters: `isActive:true AND category:"${category}"`
+  });
+
   const groupedProducts = useMemo(() => {
     const groups = {};
-    products.filter(p => p.category === category).forEach(p => {
+    fetchedResults.forEach(p => {
       const familyName = p.name;
       if (!groups[familyName]) {
         groups[familyName] = {
@@ -120,7 +130,7 @@ export default function CategoryDetailView({
       }
     });
     return Object.values(groups);
-  }, [products, category]);
+  }, [fetchedResults]);
 
   const getCategoryIcon = () => {
     if (category?.includes('Injectable')) return <Zap size={40} />;
@@ -283,17 +293,25 @@ export default function CategoryDetailView({
           gap: '1rem'
         }}>
           {groupedProducts.map((product, idx) => (
-            <MobileProductCard 
+            <UniversalProductCard 
               key={idx}
               product={product}
-              onSelectProduct={onSelectProduct}
-              isProfessional={isProfessional}
-              products={products}
-              allFaqs={allFaqs}
+              onClick={() => onSelectProduct(product.name)}
+              viewMode="grid"
             />
           ))}
         </div>
       </div>
+      
+      <PaginationControl 
+        hitsPerPage={hitsPerPage}
+        setHitsPerPage={setHitsPerPage}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
+        totalHits={totalHits}
+        loadedHits={fetchedResults.length}
+        isLoading={isSearching}
+      />
 
       <div style={{ 
         marginTop: '4rem', 

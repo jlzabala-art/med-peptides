@@ -1,14 +1,27 @@
  
 import * as fb from '../firebase';
 const db = fb?.db;
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { getActiveSupplements } from '../repositories/supplementRepository';
 import { buildProtocolIndex } from '../utils/searchEngine';
-import localProtocolIndex from '../data/protocol_search_index.json';
 import { useQuery } from '@tanstack/react-query';
 
+// Local JSON is a FALLBACK ONLY — used if Firestore is unreachable.
+// Firestore is the single source of truth per architecture rules.
+let _localProtocolIndexFallback = null;
+async function _getLocalFallback() {
+  if (_localProtocolIndexFallback) return _localProtocolIndexFallback;
+  try {
+    const { default: data } = await import('../data/protocol_search_index.json');
+    _localProtocolIndexFallback = data || [];
+  } catch {
+    _localProtocolIndexFallback = [];
+  }
+  return _localProtocolIndexFallback;
+}
+
 export function useFirestoreData() {
-  // ── FAQs (cached per session via React Query) ─────────────────────────────
+  // ── FAQs (Firestore, cached 24h via React Query) ──────────────────────────
   const { data: allFaqs = [] } = useQuery({
     queryKey: ['faqs'],
     queryFn: async () => {
@@ -27,19 +40,30 @@ export function useFirestoreData() {
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 
-  // ── Protocol Index for Search ─────────────────────────────────────────────
+  // ── Protocol Search Index (Firestore first, local JSON as fallback) ───────
+  // Source of truth: Firestore `protocols` collection.
+  // Fallback: pre-generated local JSON (used only if Firestore unreachable).
   const { data: protocolIndex = [] } = useQuery({
     queryKey: ['protocolIndex'],
     queryFn: async () => {
-      if (localProtocolIndex && localProtocolIndex.length > 0) {
-        return localProtocolIndex;
+      try {
+        const q = query(
+          collection(db, 'protocols'),
+          where('active', '==', true),
+          limit(200)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const templates = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+          return buildProtocolIndex(templates);
+        }
+      } catch (err) {
+        console.warn('[useFirestoreData] Firestore protocol index failed, falling back to local:', err.message);
       }
-      const q = query(collection(db, 'protocols'), where('active', '==', true));
-      const snap = await getDocs(q);
-      const templates = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
-      return buildProtocolIndex(templates);
+      // Fallback to local JSON only if Firestore is unavailable
+      return await _getLocalFallback();
     },
-    staleTime: Infinity, // never stale
+    staleTime: 1000 * 60 * 60, // 1 hour — aligns with protocolRepository cache TTL
   });
 
   // Expose empty products array to not break any legacy code expecting it

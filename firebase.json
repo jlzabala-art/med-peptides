@@ -1,7 +1,7 @@
 {
   "hosting": {
     "target": "production",
-    "public": "dist",
+    "source": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -17,22 +17,9 @@
         "source": "/api/*",
         "function": "clinicalAiAssistant",
         "region": "europe-west1"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
       }
     ],
     "headers": [
-      {
-        "source": "/**/index.html",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
-      },
       {
         "source": "/blueprint/**",
         "headers": [
@@ -57,6 +44,26 @@
     {
       "source": "functions",
       "codebase": "default",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"]
+    },
+    {
+      "source": "functions-ai",
+      "codebase": "ai",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"]
+    },
+    {
+      "source": "functions-cron",
+      "codebase": "cron",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"]
+    },
+    {
+      "source": "functions-finance",
+      "codebase": "finance",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"]
+    },
+    {
+      "source": "functions-triggers",
+      "codebase": "triggers",
       "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"]
     }
   ],

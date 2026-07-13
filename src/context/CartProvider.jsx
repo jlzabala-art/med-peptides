@@ -23,19 +23,59 @@ export function CartProvider({ children }) {
     }
   });
 
-  const [cartMetadata, setCartMetadata] = useState({});
+  const [cartMetadata, setCartMetadata] = useState(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const saved = window.localStorage.getItem('mp_cart_metadata');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
 
-  const [cartOwnership, setCartOwnership] = useState({
-    patientId: null,
-    supervisingPhysicianId: null,
-    supervisingAdminId: null,
-    source: 'patient_selected',
-    recommendationId: null,
-    tenantId: null,
-    ownerType: null,
-    ownerId: null,
-    sourceDomain: null,
-    attributionLocked: false,
+  const [cartOwnership, setCartOwnership] = useState(() => {
+    if (typeof window === 'undefined') {
+      return {
+        patientId: null,
+        supervisingPhysicianId: null,
+        supervisingAdminId: null,
+        source: 'patient_selected',
+        recommendationId: null,
+        tenantId: null,
+        ownerType: null,
+        ownerId: null,
+        sourceDomain: null,
+        attributionLocked: false,
+      };
+    }
+    try {
+      const saved = window.localStorage.getItem('mp_cart_ownership');
+      return saved ? JSON.parse(saved) : {
+        patientId: null,
+        supervisingPhysicianId: null,
+        supervisingAdminId: null,
+        source: 'patient_selected',
+        recommendationId: null,
+        tenantId: null,
+        ownerType: null,
+        ownerId: null,
+        sourceDomain: null,
+        attributionLocked: false,
+      };
+    } catch (e) {
+      return {
+        patientId: null,
+        supervisingPhysicianId: null,
+        supervisingAdminId: null,
+        source: 'patient_selected',
+        recommendationId: null,
+        tenantId: null,
+        ownerType: null,
+        ownerId: null,
+        sourceDomain: null,
+        attributionLocked: false,
+      };
+    }
   });
 
   // Sync tenantId and branding/owner state to cartOwnership
@@ -53,8 +93,10 @@ export function CartProvider({ children }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('mp_cart', JSON.stringify(cart));
+      window.localStorage.setItem('mp_cart_metadata', JSON.stringify(cartMetadata));
+      window.localStorage.setItem('mp_cart_ownership', JSON.stringify(cartOwnership));
     }
-  }, [cart]);
+  }, [cart, cartMetadata, cartOwnership]);
 
   const clearCart = useCallback(() => {
     setCart({});

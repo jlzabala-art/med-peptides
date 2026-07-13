@@ -1,0 +1,13 @@
+{
+  "name": "REPLACE_NAME",
+  "description": "REPLACE_DESC",
+  "dependencies": REPLACE_DEPS,
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "rm -rf src && cp -R ../functions/src ./src && cp -R ../functions/emailTemplates ./emailTemplates",
+    "serve": "npm run build && firebase emulators:start --only functions:REPLACE_CODEBASE",
+    "deploy": "npm run build && firebase deploy --only functions:REPLACE_CODEBASE"
+  }
+}

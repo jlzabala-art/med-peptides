@@ -112,7 +112,7 @@
           "route": "subcutaneous",
           "selected_strength": "5mg",
           "vials_required_for_phase": 12,
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ],
       "end_week": 4,
@@ -138,7 +138,7 @@
           "product_slug": "mots-c",
           "selected_strength": "5mg",
           "vials_required_for_phase": 8,
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ],
       "end_week": 8,
@@ -164,7 +164,7 @@
           "product_slug": "ss-31",
           "selected_strength": "10mg",
           "vials_required_for_phase": 4,
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ],
       "end_week": 12,

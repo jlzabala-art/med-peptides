@@ -85,7 +85,7 @@ export default function StandardDrawer({
         {/* Header */}
         <div
           style={{
-            padding: '1.5rem',
+            padding: 'max(1rem, env(safe-area-inset-top)) 1.5rem 1rem 1.5rem',
             borderBottom: '1px solid var(--border-color, #e5e7eb)',
             display: 'flex',
             justifyContent: 'space-between',
@@ -194,11 +194,10 @@ export default function StandardDrawer({
           }
           .standard-drawer-panel {
             width: 100vw !important;
-            height: 85vh;
-            margin-top: auto;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-            animation: bottomSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            height: 100vh !important;
+            margin-top: 0;
+            border-radius: 0;
+            animation: drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           }
         }
         @keyframes bottomSheetSlideUp {

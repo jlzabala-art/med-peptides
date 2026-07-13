@@ -54,7 +54,7 @@ export function useProducts(allowedCategories = ['All'], options = {}) {
   } = useFirestorePaginatedCollection('products', {
     whereConditions,
     orderByFields: [['name', 'asc']],
-    pageSize: 50,
+    pageSize: options.pageSize || 50,
     initialData: options.initialData,
     onDataLoaded: (newDocs) => {
       // Dispatch context event when new data arrives

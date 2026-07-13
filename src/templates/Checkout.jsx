@@ -51,12 +51,11 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 
 
 
-
-
-
-
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
+import { useCart } from '../context/CartProvider';
+import { useOrderSubmit } from '../hooks/shared/useOrderSubmit';
+// import TermsOfSale from './snippets/TermsOfSale';
 import { useAuth } from '../context/AuthContext';
 import { db, storage, ref, uploadBytes, getDownloadURL } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -145,6 +144,7 @@ const scanCatalogProducts = (text, productsList = []) => {
 
 export default function Checkout({ cart, cartMetadata = {}, updateCart, region, isProfessional, EXCHANGE_RATES, detectedCountry, onBack, onComplete, products, shippingCosts = { standard: 40, express: 80 }, selectedShipping, setSelectedShipping, cartOwnership = {} }) {
   const { user, userProfile, login, register, loginWithGoogle, updateProfileData } = useAuth();
+  const { clearCart } = useCart();
   const { tier: pricingTier, role: pricingRole } = usePricingTier();
   const [finalOrderData, setFinalOrderData] = useState(null);
 
@@ -485,25 +485,45 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     }
   };
 
-  const generateOrderId = () => {
-    const n = new Date();
-    return `ORD-${n.getFullYear()}${String(n.getMonth()+1).padStart(2,'0')}${String(n.getDate()).padStart(2,'0')}-${Math.floor(1000+Math.random()*9000)}`;
-  };
+  const { submitOrder, generateOrderId: generateNewOrderId } = useOrderSubmit({
+    user,
+    register,
+    updateProfileData,
+    activeRegion,
+    cartOwnership,
+    isProfessional: formData.isProfessional,
+    pricingTier,
+    pricingRole,
+    shippingCosts,
+    products
+  });
 
-  const handleCheckoutLogin = async e => {
+  const generateOrderId = generateNewOrderId; // Keep backward compatibility for other places if used
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    setLoginLoading(true);
-    setInlineError(null);
-    try {
-      await login(formData.email, formData.password);
-      setShowLogin(false);
-      setInlineSuccess('Signed in successfully! Your details have been pre-filled.');
-      setTimeout(() => setInlineSuccess(null), 4000);
-    } catch (err) {
-      console.error('Checkout login failed:', err);
-      setInlineError('Incorrect email or password. Please try again.');
-    }
-    setLoginLoading(false);
+    await submitOrder({
+      formData,
+      enrichedCartItems,
+      cartMetadata,
+      protocolGroups,
+      checkoutTotals,
+      selectedShipping,
+      prescriptionFile,
+      prescriptionName,
+      prescriptionSpecs,
+      stateControls: {
+        setIsSubmitting,
+        setShowLogin,
+        setInlineError,
+        setOrderId,
+        setFinalOrderData,
+        setIsDone,
+        onComplete: () => {
+          clearCart();
+        }
+      }
+    });
   };
 
   const getPasswordStrength = (pwd) => {
@@ -515,176 +535,6 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     if (/[0-9]/.test(pwd)) score += 1;
     if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
     return score; // 0 to 5
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Track final submission intent
-    const itemNames = enrichedCartItems.map(i => i.itemKey).join(', ');
-    const protocolIds = Object.keys(protocolGroups).join(', ');
-    trackEvent('purchase_intent', {
-      intent_type: 'final_submission',
-      protocol_id: protocolIds || 'none',
-      peptide_name: itemNames || 'none',
-      order_total: checkoutTotals.display
-    });
-    let currentUid = user?.uid;
-    // ── 1. Auto-register if not logged in ──
-    if (!currentUid) {
-      try {
-        const fullName = `${formData.firstName} ${formData.lastName}`;
-        const userType = formData.isProfessional ? 'researcher' : 'individual';
-        const cred = await register(
-          formData.email, 
-          formData.password, 
-          fullName, 
-          formData.clinic, 
-          userType
-        );
-        currentUid = cred.user.uid;
-      } catch (err) {
-        console.error('Registration failed:', err);
-        // P1 Fix 1.1 — Detect existing account and auto-switch to login tab
-        if (err.code === 'auth/email-already-in-use') {
-          setShowLogin(true);
-          setInlineError('An account with this email already exists. Please sign in below to continue with your order.');
-        } else {
-          setInlineError(err.message || 'Registration failed. If you already have an account, please sign in.');
-        }
-        setIsSubmitting(false);
-        return;
-      }
-    }
-
-    const newId = generateOrderId();
-    setOrderId(newId);
-    const shippingCost = shippingCosts[selectedShipping] ?? 40;
-    try {
-      let fileUrl = null;
-      if (prescriptionFile && currentUid) {
-        try {
-          const storageRef = ref(storage, `prescriptions/${currentUid}/${Date.now()}_${prescriptionFile.name}`);
-          const uploadSnap = await uploadBytes(storageRef, prescriptionFile);
-          fileUrl = await getDownloadURL(uploadSnap.ref);
-        } catch (storageErr) {
-          console.error('Storage upload failed:', storageErr);
-        }
-      }
-
-      const items = enrichedCartItems.map(i => {
-        const meta = cartMetadata[i.itemKey] || {};
-        return { 
-          name: i.itemKey, 
-          variant: i.dosagePart, 
-          quantity: i.qty, 
-          unitPrice: i.unitPrice, 
-          lineTotal: i.lineTotal,
-          productId: meta.productId || null,
-          variantId: meta.variantId || null,
-          supplierId: meta.supplierId || null
-        };
-      });
-      const subtotal = enrichedCartItems.reduce((a, i) => a + i.lineTotal, 0);
-      const total = subtotal + shippingCost;
-      const currency = EXCHANGE_RATES[activeRegion]?.currency || 'USD';
-      const currencySymbol = currency === 'USD' ? '$' : '€';
-      // ── Phase 10: enforce payment & B2B ownership on every order ──────────
-      // paymentOwnerId MUST always equal the authenticated patient's uid.
-      // supervisingPhysicianId / supervisingAdminId come from cartOwnership (set by
-      // the assignment engine in App.jsx) and are optional — null for solo orders.
-      const paymentOwnerId           = currentUid;  // invariant: payment = patient
-      const supervisingPhysicianId   = cartOwnership?.supervisingPhysicianId  ?? null;
-      const supervisingAdminId       = cartOwnership?.supervisingAdminId      ?? null;
-      const orderSource              = cartOwnership?.source                  ?? 'patient_selected';
-      const recommendationId         = cartOwnership?.recommendationId        ?? null;
-      // ── prescriptionId: required by onOrderCreatedForRx Cloud Function ─────
-      // Set when patient buys from a doctor's prescription (PatientPrescriptionPanel)
-      // or from a refill. Without this field the Cloud Function does NOT fire.
-      const prescriptionId           = cartOwnership?.prescriptionId          ?? null;
-
-      await addDoc(collection(db, 'orders'), {
-        source: isProfessional ? 'b2b_portal' : 'b2c_home',
-        customerType: isProfessional ? 'professional' : 'retail',
-        // ── Identity & ownership ──
-        uid: currentUid,
-        paymentOwnerId,           // always === currentUid (invariant)
-        supervisingPhysicianId,   // null when no supervising doctor assigned
-        supervisingAdminId,       // null when no admin supervision
-        source: orderSource,      // 'patient_selected' | 'from_prescription' | 'refill' | 'doctor_recommended'
-        recommendationId,         // links back to recommendations collection when applicable
-        prescriptionId,           // links to prescriptions/{id}; triggers onOrderCreatedForRx CF when set
-        // Tenant attribution B2B franchise
-        tenantId: cartOwnership?.tenantId || null,
-        ownerType: cartOwnership?.ownerType || null,
-        ownerId: cartOwnership?.ownerId || null,
-        sourceDomain: cartOwnership?.sourceDomain || null,
-        attributionLocked: cartOwnership?.attributionLocked || false,
-
-        orderId: newId,
-        customer: { fullName: `${formData.firstName} ${formData.lastName}`, firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone, institution: formData.clinic || null },
-        shippingAddress: { street: formData.address, country: formData.country?.value || null },
-        items, subtotal, shipping: shippingCost, shippingMethod: selectedShipping ?? 'standard', total,
-        totalDisplay: `${currencySymbol}${total.toFixed(0)}`,
-        currency,
-        region: activeRegion, paymentMethod: formData.paymentMethod ?? 'credit_card',
-        orderNotes: formData.orderNotes || null,
-        isProfessional: formData.isProfessional, pricingTier, pricingRole, status: 'pending', createdAt: serverTimestamp(),
-        prescription: prescriptionSpecs ? {
-          fileName: prescriptionName,
-          fileUrl,
-          dosage: prescriptionSpecs.dosage,
-          frequency: prescriptionSpecs.frequency,
-          match: prescriptionSpecs.match,
-          verified: true
-        } : null,
-      });
-
-      if (currentUid && prescriptionSpecs) {
-        try {
-          await addDoc(collection(db, 'users', currentUid, 'prescriptions'), {
-            fileName: prescriptionName,
-            fileUrl,
-            dosage: prescriptionSpecs.dosage,
-            frequency: prescriptionSpecs.frequency,
-            match: prescriptionSpecs.match,
-            orderId: newId,
-            uploadedAt: serverTimestamp()
-          });
-        } catch (dbErr) {
-          console.error('Failed to save prescription document in user space:', dbErr);
-        }
-      }
-      // ── Write back to the unified users/{uid} profile ──
-      if (currentUid) {
-        await updateProfileData({
-          firstName:       formData.firstName,
-          lastName:        formData.lastName,
-          phone:           formData.phone,
-          institution:     formData.clinic || userProfile?.institution || '',
-          shippingStreet:  formData.address,
-          shippingCountry: formData.country?.value || '',
-          shippingCity:    userProfile?.shippingCity || '',
-          shippingZip:     userProfile?.shippingZip  || '',
-        });
-      }
-
-      setFinalOrderData({
-        items: [...enrichedCartItems],
-        totals: { ...checkoutTotals },
-        formData: { ...formData },
-        orderId: newId,
-        selectedShipping
-      });
-      setOrderId(newId);
-      setIsDone(true);
-      if (onComplete) onComplete();
-    } catch (err) { 
-      console.error(err);
-      setInlineError(err.message || 'An error occurred while confirming your request. Please try again.');
-    }
-    setIsSubmitting(false);
   };
 
   const downloadPDF = useCallback(async () => {

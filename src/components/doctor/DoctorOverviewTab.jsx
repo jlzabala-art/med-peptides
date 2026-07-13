@@ -32,7 +32,7 @@ import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActio
 
 
 import { RX_STATUS_META } from '../../config/prescriptionConfig';
-import DoctorPrescriptionBuilder from './DoctorPrescriptionBuilder';
+import UniversalOrderBuilder from '../shared/order-builder/UniversalOrderBuilder';
 import ClinicalCopilotWidget from './ClinicalCopilotWidget';
 import PatientAdherenceWidget from './PatientAdherenceWidget';
 import { Card, MetricCard } from '../ui';
@@ -211,7 +211,7 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
               </div>
               <button onClick={() => setShowBuilder(false)} className="btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)' }}>✕</button>
             </div>
-            <DoctorPrescriptionBuilder doctorId={doctorId} doctorMeta={doctorMeta} patients={patients} onSaved={(isDraft) => { if (isDraft) setShowBuilder(false); }} />
+            <UniversalOrderBuilder mode='prescription' onSaved={() => setShowBuilder(false)} onCanceled={() => setShowBuilder(false)} />
           </Card>
         )}
 

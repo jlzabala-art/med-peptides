@@ -2,11 +2,18 @@ import React from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
+import productRepository from '../../../repositories/productRepository';
 
 export default function ImportCatalogsTab() {
   const handleSave = async (data) => {
     console.log("Saving Catalogs...", data);
-    // TODO: Connect to Firestore
+    try {
+      await productRepository.importCatalogs(data);
+      alert('Catalogs saved successfully!');
+    } catch (error) {
+      console.error('Error saving catalogs:', error);
+      alert('Failed to save catalogs.');
+    }
   };
 
   const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll }) => (

@@ -9,7 +9,7 @@ import { searchCatalogSemantic, askCatalogAssistant } from '../services/catalogA
 import { resolveCatalogContact } from '../utils/contactRouter';
 import UniversalProductCard from '../components/universal/UniversalProductCard';
 import { Search, MessageSquare, Send, X, Phone, Mail, ChevronDown, HelpCircle, Shield, Check, ExternalLink, FileText } from '@/lib/icons';
-
+import { useCart } from '../context/CartProvider';
 
 
 
@@ -25,6 +25,7 @@ import { Search, MessageSquare, Send, X, Phone, Mail, ChevronDown, HelpCircle, S
 export default function PublicCatalogView() {
   const { catalogSlug } = useParams();
   const [searchParams] = useSearchParams();
+  const { addToCart } = useCart();
   // URL Customization hooks
   const urlRecipient = searchParams.get('recipient') || '';
   const urlClinic = searchParams.get('clinic') || '';
@@ -339,7 +340,7 @@ export default function PublicCatalogView() {
                       key={prodId}
                       product={prod}
                       viewMode="grid"
-                      onAddToCart={(p, q) => console.log('Add to cart', p, q)} // TODO: integrate with cart
+                      onAddToCart={(p, q) => addToCart(p, q)}
                       onClick={() => console.log('Navigate to product', p)}
                     />
                   );
@@ -385,9 +386,9 @@ export default function PublicCatalogView() {
                       <UniversalProductCard 
                         key={prodId}
                         product={prod}
-                        viewMode="grid"
-                        onAddToCart={(p, q) => console.log('Add to cart', p, q)}
-                        onClick={() => console.log('Navigate to product', p)}
+                        viewMode={(catalog.pdfTemplate || catalog.publishOptions?.pdfTemplate || 'standard') === 'clinical' ? 'clinical' : 'grid'}
+                        onAddToCart={(p, q) => addToCart(p, q)}
+                        onClick={() => console.log('Navigate to product', prod)}
                       />
                     );
                   }

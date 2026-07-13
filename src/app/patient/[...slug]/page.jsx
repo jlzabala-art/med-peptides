@@ -6,7 +6,7 @@ import { PatientContext } from '../../../templates/PatientHome';
 import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
 
 // ── Dynamic imports ──────────────────────────────────────────────────────────
-const PatientPrescriptionPanel = dynamic(() => import('../../../components/patient/PatientPrescriptionPanel'), { ssr: false });
+const PatientPrescriptionsTab = dynamic(() => import('../../../components/patient/PatientPrescriptionsTab'), { ssr: false });
 const MessagingWidget = dynamic(() => import('../../../components/messaging/MessagingWidget'), { ssr: false });
 const ClinicalAIWidget = dynamic(() => import('../../../components/admin/ClinicalAIWidget'), { ssr: false });
 const PatientAppointments = dynamic(() => import('../../../templates/PatientAppointments'), { ssr: false });
@@ -19,7 +19,7 @@ function PrescriptionsWrapper() {
   const { uid } = useContext(PatientContext) || {};
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
-      <PatientPrescriptionPanel patientUid={uid} />
+      <PatientPrescriptionsTab patientId={uid} />
     </div>
   );
 }

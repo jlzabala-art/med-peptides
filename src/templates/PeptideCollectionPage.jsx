@@ -38,9 +38,24 @@ import CollectionSidebar, { SidebarSection } from '../components/collection/Coll
 import FilterDrawer from '../components/collection/FilterDrawer';
 import SharedChip from '../components/collection/SharedChip';
 import ProductCard, { SkeletonCard } from '../components/collection/ProductCard';
+import { useProductSearch } from '../hooks/useProductSearch';
+import { algoliaConfig } from '../services/algolia/config';
+import PaginationControl from '../components/common/PaginationControl';
 import { LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, FlaskConical, X, Check, Brain, Moon, Activity, Shield, Zap, Sparkles, Droplets, Tag, Weight, Dumbbell } from '@/lib/icons';
 
 const PAGE_SIZE = 20;
+
+function buildAlgoliaFilters(activeFilters) {
+  const parts = ['isActive:true'];
+  if (activeFilters.category) {
+    parts.push(`category:"${activeFilters.category}"`);
+  }
+  if (activeFilters.tags && activeFilters.tags.length > 0) {
+    const tagFilters = activeFilters.tags.map(t => `tags:"${t}"`).join(' AND ');
+    parts.push(`(${tagFilters})`);
+  }
+  return parts.join(' AND ');
+}
 
 /* ── Category → accent color (mirrors KeyPeptides) ───────────────────────── */
 const CATEGORY_COLOR = {
@@ -372,87 +387,34 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
     sort:     'name-asc',
   });
 
-  /* Pre-apply ?category= query param */
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('category');
-    if (cat) {
-      setActiveFilters(prev => ({ ...prev, category: decodeURIComponent(cat) }));
-    }
-  }, [location.search]);
+  // Algolia Search State
+  const [hitsPerPage, setHitsPerPage] = useState(25);
+  const { query: algoliaQuery, setQuery: setAlgoliaQuery, results: fetchedResults, totalHits, hasMore: hasMoreResults, loadMore, isSearching } = useProductSearch({
+    indexName: algoliaConfig.indices.products,
+    hitsPerPage: hitsPerPage,
+    filters: buildAlgoliaFilters(activeFilters)
+  });
 
-  /* Load + consolidate peptides */
+  // Keep debouncing local search input to Algolia query
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    getActiveProducts()
-      .then(docs => {
-        if (cancelled) return;
-        const normalized = docs.map(d => normalizeProduct(d));
-        const consolidated = consolidateByAdminRoute(normalized);
-        setPeptides(consolidated);
-      })
-      .catch(err => console.warn('[PeptideCollectionPage] load error:', err))
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
+    setAlgoliaQuery(activeFilters.search || '');
+  }, [activeFilters.search, setAlgoliaQuery]);
+
+  const displayPeptides = fetchedResults;
 
   const categoryOptions = useMemo(() => {
-    const map = {};
-    peptides.forEach(p => {
-      if (p.category) map[p.category] = (map[p.category] || 0) + 1;
-    });
-    return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [peptides]);
+    return Object.keys(CATEGORY_COLOR).map(cat => [cat, 0]);
+  }, []);
 
   const tagOptions = useMemo(() => {
-    const map = {};
-    peptides.forEach(p => (p.tags || []).forEach(t => {
-      map[t] = (map[t] || 0) + 1;
-    }));
-    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 20);
-  }, [peptides]);
-
-  const filteredPeptides = useMemo(() => {
-    let list = [...peptides];
-
-    if (activeFilters.category)
-      list = list.filter(p => p.category === activeFilters.category);
-
-    if (activeFilters.tags.length)
-      list = list.filter(p => activeFilters.tags.every(t => p.tags.includes(t)));
-
-    if (activeFilters.search) {
-      const q = activeFilters.search.toLowerCase();
-      list = list.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        (p.description || '').toLowerCase().includes(q) ||
-        (p.tags || []).some(t => t.toLowerCase().includes(q))
-      );
-    }
-
-    switch (activeFilters.sort) {
-      case 'name-asc':  list.sort((a, b) => a.name.localeCompare(b.name)); break;
-      case 'name-desc': list.sort((a, b) => b.name.localeCompare(a.name)); break;
-      case 'popular':   list.sort((a, b) => b.analytics_usage_score - a.analytics_usage_score); break;
-      default: break;
-    }
-    return list;
-  }, [peptides, activeFilters]);
-
-  const displayPeptides = useMemo(
-    () => filteredPeptides.slice(0, page * PAGE_SIZE),
-    [filteredPeptides, page]
-  );
-  const hasMore = displayPeptides.length < filteredPeptides.length;
+    return [];
+  }, []);
 
   const toggleCategory = (cat) => {
-    setPage(1);
     setActiveFilters(prev => ({ ...prev, category: prev.category === cat ? null : cat }));
   };
 
   const toggleTag = (tag) => {
-    setPage(1);
     setActiveFilters(prev => ({
       ...prev,
       tags: prev.tags.includes(tag) ? prev.tags.filter(t => t !== tag) : [...prev.tags, tag]
@@ -586,7 +548,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <span className="pc-result-count">
-              {loading ? '...' : `${filteredPeptides.length} peptides`}
+              {loading || isSearching ? '...' : `${totalHits} peptides`}
             </span>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <select
@@ -643,32 +605,28 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
             </AnimatePresence>
           </motion.div>
 
-          {!loading && filteredPeptides.length === 0 && (
+          {!loading && !isSearching && displayPeptides.length === 0 && (
             <div className="pc-empty">
               <FlaskConical size={48} className="pc-empty-icon" />
               <p className="pc-empty-title">No peptides match your filters</p>
               <p className="pc-empty-sub">Try adjusting your search or clearing some filters.</p>
               {hasActiveFilters && (
-                <button className="pc-load-more-btn" onClick={clearAllFilters}>
+                <button className="pc-load-more-btn" onClick={clearFilters}>
                   Clear filters
                 </button>
               )}
             </div>
           )}
 
-          {hasMore && (
-            <div className="pc-load-more-wrap">
-              <p className="pc-progress-text">
-                Showing {displayPeptides.length} of {filteredPeptides.length} peptides
-              </p>
-              <button
-                className="pc-load-more-btn"
-                onClick={() => setPage(p => p + 1)}
-              >
-                Load more peptides <ArrowRight size={16} />
-              </button>
-            </div>
-          )}
+          <PaginationControl 
+            hitsPerPage={hitsPerPage}
+            setHitsPerPage={setHitsPerPage}
+            hasMore={hasMoreResults}
+            onLoadMore={loadMore}
+            totalHits={totalHits}
+            loadedHits={displayPeptides.length}
+            isLoading={isSearching}
+          />
         </main>
       </div>
 
@@ -694,7 +652,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
         )}
         <div className="pc-modal-footer">
           <button className="pc-modal-apply" onClick={() => setShowMobileFilters(false)}>
-            Show {filteredPeptides.length} peptides
+            Show {totalHits} peptides
           </button>
         </div>
       </FilterDrawer>
@@ -708,7 +666,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
           <SlidersHorizontal size={18} />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 800 }}>Explore Research</span>
-            <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>{filteredPeptides.length} Results Active</span>
+            <span style={{ fontSize: '0.65rem', opacity: 0.8 }}>{totalHits} Results Active</span>
           </div>
         </button>
       </div>

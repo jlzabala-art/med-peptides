@@ -5,11 +5,18 @@ import { getStatusColor } from './utils';
 
 import * as XLSX from 'xlsx';
 import { Download } from '@/lib/icons';
+import productRepository from '../../../repositories/productRepository';
 
 export default function ImportCoATab() {
   const handleSave = async (data) => {
     console.log("Saving CoA...", data);
-    // TODO: Connect to Firestore
+    try {
+      await productRepository.importCoAs(data);
+      alert('Certificates saved successfully!');
+    } catch (error) {
+      console.error('Error saving certificates:', error);
+      alert('Failed to save certificates.');
+    }
   };
 
   const renderDiffTable = ({ parsedData, selectedRows, toggleRow, toggleAll, updateRow }) => {
@@ -28,6 +35,7 @@ export default function ImportCoATab() {
             <Download size={14} /> Export Quarantined to Excel
           </button>
         </div>
+        <div className="gcp-table-container">
         <table className="gcp-table" style={{ width: '100%', fontSize: '0.9rem' }}>
           <thead>
             <tr>
@@ -60,10 +68,10 @@ export default function ImportCoATab() {
                   <td style={{ textAlign: 'center' }}>
                     <Checkbox checked={isChecked} onChange={() => toggleRow(idx)} />
                   </td>
-                  <td style={{ fontWeight: 700, color: confColor }}>
+                  <td data-label="AI Confidence" style={{ fontWeight: 700, color: confColor }}>
                     {score}%
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <span style={{ 
                       backgroundColor: colors.bg, color: colors.text, border: `1px solid ${colors.border}`,
                       padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700
@@ -71,7 +79,7 @@ export default function ImportCoATab() {
                       {colors.label}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Batch Number">
                     <input 
                       type="text" 
                       value={item.batch_number || ''} 
@@ -79,7 +87,7 @@ export default function ImportCoATab() {
                       style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', fontWeight: 'bold' }} 
                     />
                   </td>
-                  <td>
+                  <td data-label="Product Tested">
                     <input 
                       type="text" 
                       value={item.peptide_name || ''} 
@@ -87,7 +95,7 @@ export default function ImportCoATab() {
                       style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px' }} 
                     />
                   </td>
-                  <td>
+                  <td data-label="Purity %">
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                       <input 
                         type="number" 
@@ -98,7 +106,7 @@ export default function ImportCoATab() {
                       />%
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Action Required">
                     {isQuarantined ? (
                       <span style={{ color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                         ⚠️ Requires Manager Override
@@ -112,6 +120,7 @@ export default function ImportCoATab() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };

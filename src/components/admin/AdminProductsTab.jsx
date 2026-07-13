@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminProductsTableClient from './AdminProductsTableClient';
+import ProductsTable from '../../features/products/components/ProductsTable';
 import { fetchProductsAction } from '../../actions/productsActions';
 
 /**
@@ -11,7 +11,8 @@ export default async function AdminProductsTab({ readOnly = false }) {
   const initialProducts = await fetchProductsAction({ limitCount: 50 });
   
   return (
-    <AdminProductsTableClient 
+    <ProductsTable 
+      role="admin"
       initialProducts={initialProducts}
       readOnly={readOnly}
     />

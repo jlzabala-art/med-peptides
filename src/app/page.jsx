@@ -1,6 +1,6 @@
 import React from 'react';
 import HomeClientWrapper from './HomeClientWrapper';
-import { getCatalog } from '../repositories/productRepository';
+import { getFeaturedProductsServer } from '../repositories/productRepository';
 
 export const metadata = {
   title: 'Atlas Health | Premium Research Peptides & Research Protocols',
@@ -8,8 +8,8 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  // Fetch data natively on the server, saving the client from having to do it
-  const catalog = await getCatalog();
+  // Fetch a lightweight subset of products natively on the server for the home page
+  const catalog = await getFeaturedProductsServer();
   // Next.js Server Components require absolutely plain JSON objects to pass to Client Components.
   // Using JSON.parse(JSON.stringify()) ensures all prototype methods (like Firestore Timestamp's toJSON)
   // are completely stripped and safely passed.
@@ -20,6 +20,5 @@ export default async function HomePage() {
   );
 }
 
-// Force dynamic if you rely on live Firestore reads, 
-// or remove to allow Static Generation (SSG) with revalidate
-export const dynamic = 'force-dynamic';
+// Use ISR to drastically improve TTFB and reduce Firestore reads
+export const revalidate = 3600;

@@ -80,7 +80,7 @@ export default function Modal({
     >
       <div
         ref={dialogRef}
-        className="gcp-card"
+        className="gcp-card modal-container"
         role="dialog"
         aria-modal="true"
         aria-label={title || 'Dialog'}
@@ -97,7 +97,7 @@ export default function Modal({
       >
         {/* Header */}
         {title && (
-          <div className="gcp-header">
+          <div className="gcp-header" style={{ padding: 'max(1.25rem, env(safe-area-inset-top)) 1.25rem 1.25rem 1.25rem' }}>
             {title}
             <button
               type="button"

@@ -10,6 +10,12 @@ import { lockScroll, unlockScroll } from '../utils/scrollLock';
 import { resolveVariantPrice } from '../utils/resolvePrice';
 import { usePricingTier } from '../hooks/usePricingTier';
 import { trackEvent } from '../hooks/useAnalytics';
+import { useCart } from '../context/CartProvider';
+import { useAuth } from '../context/AuthContext';
+import { useUIStore } from '../stores/uiStore';
+import { useFirestoreData } from '../hooks/useFirestoreData';
+import { useRouter } from 'next/navigation';
+import { EXCHANGE_RATES } from '../utils/currencies';
 
 
 
@@ -150,8 +156,27 @@ function ProtocolBundleCard({ entry, onRemove }) {
 }
 
 
-export default function Cart({ isOpen, onClose, cart, cartMetadata = {}, updateCart, region, isProfessional, EXCHANGE_RATES, onCheckout, products, protocolRequests = [], removeProtocolRequest, shippingCosts = { standard: 40, express: 80 }, deliveryTimes = { standard: '5-7 days', express: '2-3 days' }, selectedShipping, setSelectedShipping }) {
+export default function Cart() {
+  const { cart, cartMetadata = {}, updateCart } = useCart();
   const { tier } = usePricingTier();
+  const { isProfessional, region } = useAuth();
+  const { activeModal, setActiveModal } = useUIStore();
+  const { catalogue: products } = useFirestoreData();
+  const router = useRouter();
+
+  const isOpen = activeModal === 'cart';
+  const onClose = () => setActiveModal(null);
+  const onCheckout = () => {
+    setActiveModal(null);
+    router.push('/checkout');
+  };
+
+  const [selectedShipping, setSelectedShipping] = useState('standard');
+  const shippingCosts = { standard: 40, express: 80 };
+  const deliveryTimes = { standard: '5-7 days', express: '2-3 days' };
+  const protocolRequests = [];
+  const removeProtocolRequest = () => {};
+
   const [activeTab, setActiveTab] = useState('protocols');
 
   // Auto-select first available tab when cart content changes

@@ -1,4 +1,4 @@
-const functions = require("firebase-functions");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { GoogleGenAI } = require("@google/genai");
 
@@ -16,12 +16,12 @@ const ai = new GoogleGenAI({});
  * @param {Object} data - Contains the fileUrl or base64 data.
  * @returns {Object} Extracted prescription lines and patient data.
  */
-exports.parseMedicalDocument = functions.https.onCall(async (data, context) => {
-    if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "User must be logged in.");
+exports.parseMedicalDocument = onCall(async (request) => {
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "User must be logged in.");
     }
 
-    const { fileUrl, fileType, source, base64Data } = data;
+    const { fileUrl, fileType, source, base64Data } = request.data;
     
     try {
         const prompt = `You are a medical document parser. Extract the patient name and prescription lines from the provided document.
@@ -59,19 +59,19 @@ exports.parseMedicalDocument = functions.https.onCall(async (data, context) => {
         };
     } catch (error) {
         console.error("AI Parsing Error:", error);
-        throw new functions.https.HttpsError("internal", "Failed to parse document via AI.");
+        throw new HttpsError("internal", "Failed to parse document via AI.");
     }
 });
 
 /**
  * Generates Protocol AI Insights (Clinical rationale, contraindications)
  */
-exports.generateProtocolInsights = functions.https.onCall(async (data, context) => {
-    if (!context.auth) {
-        throw new functions.https.HttpsError("unauthenticated", "User must be logged in.");
+exports.generateProtocolInsights = onCall(async (request) => {
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "User must be logged in.");
     }
 
-    const { protocolData } = data;
+    const { protocolData } = request.data;
 
     try {
         const prompt = `Analyze this medical protocol: ${JSON.stringify(protocolData)}.
@@ -98,6 +98,6 @@ exports.generateProtocolInsights = functions.https.onCall(async (data, context) 
         };
     } catch (error) {
         console.error("AI Insight Error:", error);
-        throw new functions.https.HttpsError("internal", "Failed to generate insights.");
+        throw new HttpsError("internal", "Failed to generate insights.");
     }
 });

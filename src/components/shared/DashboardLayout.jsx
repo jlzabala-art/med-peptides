@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarGadget from './AppSidebar/SidebarGadget';
 import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
-import ClinicalAssistant from './ClinicalAssistant';
+import AtlasAssistantDrawer from '../../layout/AtlasAssistantDrawer';
 import OnboardingWizard from '../onboarding/OnboardingWizard';
 import { useAuth } from '../../context/AuthContext';
 
@@ -139,13 +139,7 @@ export default function DashboardLayout({
       )}
       
       {showAIButton && (
-        <ClinicalAssistant 
-          embedded={false} 
-          isOpen={isAIOpen} 
-          setIsOpen={setIsAIOpen} 
-          pageContext={pageContext} 
-          contextMode={overrideContextMode || (roleContext === 'admin' ? 'admin' : roleContext === 'doctor' ? 'doctor' : 'patient')}
-        />
+        <AtlasAssistantDrawer isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} />
       )}
     </div>
   );

@@ -8,6 +8,7 @@ import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
 import { useToast } from '../../hooks/useToast';
 import PayoutManagerWidget from './gadgets/PayoutManagerWidget';
+import { useProductSearch } from '../../hooks/useProductSearch';
 
 export default function AdminCostsTab({ readOnly = false }) {
   const { toast } = useToast();
@@ -24,14 +25,7 @@ export default function AdminCostsTab({ readOnly = false }) {
   async function fetchData() {
     setLoading(true);
     try {
-      const [productsSnap, settingsSnap] = await Promise.all([
-        getDocs(query(collection(db, 'products'))),
-        getDocs(query(collection(db, 'settings'))),
-      ]);
-
-      const productsList = productsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setProducts(productsList);
-
+      const settingsSnap = await getDocs(query(collection(db, 'settings')));
       const globalSettings = settingsSnap.docs.find((d) => d.id === 'global');
       if (globalSettings) {
         setSettings(globalSettings.data());
@@ -45,7 +39,7 @@ export default function AdminCostsTab({ readOnly = false }) {
 
   async function handleUpdateProduct(id, updates) {
     try {
-      const product = products.find(p => p.id === id);
+      const product = filteredProducts.find(p => p.objectID === id || p.id === id);
       const oldCost = product ? product.costPrice : 0;
       const productName = product ? product.name : id;
       
@@ -70,14 +64,9 @@ export default function AdminCostsTab({ readOnly = false }) {
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredProducts = products.filter((p) => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      (p.name || '').toLowerCase().includes(term) || (p.dosage || '').toLowerCase().includes(term)
-    );
+  const { query: searchTerm, setQuery: setSearchTerm, results: filteredProducts, isSearching } = useProductSearch({
+    debounceMs: 300,
+    hitsPerPage: 100
   });
 
   const [currentPage, setCurrentPage] = useState(1);

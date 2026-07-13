@@ -8,7 +8,7 @@ const db = fb?.db;
 import StandardDrawer from '../../ui/StandardDrawer';
 import StandardDrawerTabs from '../../common/StandardDrawerTabs';
 import DataTable from '../../ui/DataTable';
-import ImportPrescriptionModal from '../prescriptions/ImportPrescriptionModal';
+import ImportPrescriptionModal from '../../../features/prescriptions/components/ImportPrescriptionModal';
 import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
 import { FileUp, Eye } from 'lucide-react';
 

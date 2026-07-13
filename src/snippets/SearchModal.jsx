@@ -24,8 +24,7 @@ import { useResponsive } from '../hooks/useResponsive';
 import { trackToolUsage } from '../hooks/useAnalytics';
 import { trackSearchEmptyResult, trackSearchRepeated } from '../utils/analytics';
 import { lockScroll, unlockScroll } from '../utils/scrollLock';
-import { useAlgoliaSearch } from '../hooks/useAlgoliaSearch';
-import { algoliaConfig } from '../services/algolia/config';
+import { useProductSearch } from '../hooks/useProductSearch';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 import { useSearchProtocols } from '../hooks/data/useSearchProtocols';
 import { useSearchSupplements } from '../hooks/data/useSearchSupplements';
@@ -143,8 +142,8 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
     setQuery: setAlgoliaQuery,
     results: algoliaProducts,
     isSearching: isAlgoliaSearching
-  } = useAlgoliaSearch({
-    indexName: algoliaConfig.indices.products,
+  } = useProductSearch({
+    debounceMs: 300,
     hitsPerPage: 20
   });
   const [showAll, setShowAll] = useState(false);

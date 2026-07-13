@@ -31,11 +31,21 @@ import {
 import { db } from '../firebase';
 
 
+import { createCacheManager } from '../utils/cacheManager';
+
 // ── Collection helpers ────────────────────────────────────────────────────────
 const supplementsCol  = ()               => collection(db, 'supplements');
 const variantsCol     = (supplementSlug) => collection(db, 'supplements', supplementSlug, 'variants');
 
-// ── Supplement-level queries ──────────────────────────────────────────────────
+// ── Supplement Cache (dual-layer: memory + localStorage) ──────────────────────
+const SUPP_CACHE_KEY = 'regenpept_supplements_cache';
+const SUPP_CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
+
+const cache = createCacheManager(SUPP_CACHE_KEY, SUPP_CACHE_TTL_MS);
+
+export function invalidateSupplementsCache() {
+  cache.invalidate();
+}
 
 /**
  * Fetch ALL supplement documents (no variants). Includes all statuses.
@@ -58,16 +68,23 @@ export async function getAllSupplements() {
  *
  * @returns {Promise<Array>}
  */
-export async function getActiveSupplements() {
+export async function getActiveSupplements({ forceRefresh = false } = {}) {
+  if (!forceRefresh) {
+    const cached = cache.read();
+    if (cached) return cached;
+  }
   try {
     const snap = await getDocs(supplementsCol());
     const all = snap.docs.map((d) => ({ productType: 'supplement', id: d.id, ...d.data() }));
-    return all.filter((s) => !s.status || s.status === 'active');
+    const active = all.filter((s) => !s.status || s.status === 'active');
+    cache.write(active);
+    return active;
   } catch (err) {
     console.error('[supplementRepository] getActiveSupplements:', err);
     throw err;
   }
 }
+
 
 /**
  * Fetch a single supplement by its slug (document ID).

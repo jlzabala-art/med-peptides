@@ -37,7 +37,7 @@ import { prescriptionRepository } from '../repositories/prescriptionRepository';
 
 
 
-import WholesalerBulkOrderBuilder from '../components/wholesaler/WholesalerBulkOrderBuilder';
+import UniversalOrderBuilder from '../components/shared/order-builder/UniversalOrderBuilder';
 import AdminMetricsDashboard from '../components/admin/AdminMetricsDashboard';
 import GeographyAreasTab from '../components/wholesaler/GeographyAreasTab';
 import BrandingTab from '../components/wholesaler/BrandingTab';
@@ -993,7 +993,7 @@ export function WholesalerBulkTab() {
         background: 'var(--color-bg-surface)', borderRadius: '20px', padding: '1.5rem',
         border: '1px solid #f1f5f9', boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
       }}>
-        <WholesalerBulkOrderBuilder />
+        <UniversalOrderBuilder mode="wholesaler" />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
-import AdminUsersTableClient from './AdminUsersTableClient';
+import UsersTable from '../../features/users/components/UsersTable';
+import { Users } from '@/lib/icons';
 import { fetchUsersAction } from '../../actions/usersActions';
 
 /**
@@ -9,18 +10,30 @@ import { fetchUsersAction } from '../../actions/usersActions';
  */
 export default async function AdminUsersTab({ defaultRole = null, readOnly = false, canApprove = true }) {
   // We can fetch initial users here. 
-  // AdminUsersTableClient internally uses a hook `useUsers` for complex pagination and real-time.
-  // Passing initialUsers allows the client to hydrate immediately if the hook is updated to accept it,
-  // or it just serves as a structural Server Component boundary.
+  // UsersTable internally uses a hook `useUsers` for complex pagination and real-time.
   
   const initialUsers = await fetchUsersAction({ limitCount: 20 });
   
   return (
-    <AdminUsersTableClient 
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <Users className="w-6 h-6 text-indigo-600" />
+            Users Management
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">
+            Manage all users across portals, approve access, and assign roles.
+          </p>
+        </div>
+      </div>
+      
+    <UsersTable 
       initialUsers={initialUsers}
       defaultRole={defaultRole}
       readOnly={readOnly}
       canApprove={canApprove}
     />
+    </div>
   );
 }

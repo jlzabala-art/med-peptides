@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminProtocolsTableClient from './AdminProtocolsTableClient';
+import ProtocolsTable from '../../features/protocols/components/ProtocolsTable';
 import { fetchProtocolsAction, fetchProtocolsMetricsAction } from '../../actions/protocolsActions';
 
 /**
@@ -12,7 +12,7 @@ export default async function AdminProtocolsTab() {
   const globalMetrics = await fetchProtocolsMetricsAction();
   
   return (
-    <AdminProtocolsTableClient 
+    <ProtocolsTable 
       initialProtocols={initialProtocols}
       globalMetrics={globalMetrics}
     />

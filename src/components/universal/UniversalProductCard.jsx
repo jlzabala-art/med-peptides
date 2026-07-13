@@ -21,7 +21,9 @@ export default function UniversalProductCard({
   onAddToCart,
   onClick,
   viewMode = 'grid', // 'grid' | 'list'
-  showImage = true
+  showImage = true,
+  badge, // Support custom badge prop (string or object {text, type})
+  tags = [] // Support custom tags array
 }) {
   const { userProfile, isProfessional } = useAuth();
   const { isTenantMode } = useTenant();
@@ -145,18 +147,36 @@ export default function UniversalProductCard({
       onClick={onClick}
     >
       {/* Visual Header (Vial or Icon) */}
-      <div style={{ 
-        background: 'var(--bg-app)', 
-        padding: '1.5rem', 
-        display: 'flex', 
-        justifyContent: 'center', 
+      {/* Image Section */}
+      <div style={{
+        flex: viewMode === 'list' ? '0 0 160px' : '1 0 160px',
+        background: 'rgba(26, 115, 232, 0.05)',
+        display: 'flex',
         alignItems: 'center',
-        borderBottom: viewMode === 'list' ? 'none' : '1px solid var(--border)',
-        borderRight: viewMode === 'list' ? '1px solid var(--border)' : 'none',
-        minWidth: viewMode === 'list' ? '160px' : '100%',
-        flex: viewMode === 'list' ? '1 1 160px' : 'none',
+        justifyContent: 'center',
+        position: 'relative',
+        minHeight: viewMode === 'list' ? 'auto' : '180px'
       }}>
-        {showImage ? (
+        {/* We can overlay badges on the image as well, similar to old cards */}
+        {badgeText && (
+          <div style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            background: badgeType === 'ai' ? 'linear-gradient(135deg, #8B5CF6, #3B82F6)' : badgeType === 'rx' ? '#EF4444' : 'var(--primary)',
+            color: 'white',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '1px'
+          }}>
+            {badgeText}
+          </div>
+        )}
+
+        {showImage && imagePath ? (
           <img 
             src={imagePath} 
             alt={displayTitle} 
@@ -176,6 +196,24 @@ export default function UniversalProductCard({
               {displayTitle}
             </h3>
             {renderMetadata()}
+            
+            {/* Custom Tags */}
+            {tags && tags.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                {tags.slice(0, 3).map((t, i) => (
+                  <span key={i} style={{
+                    fontSize: '0.7rem',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    background: 'rgba(26, 115, 232, 0.1)',
+                    color: 'var(--primary)',
+                    fontWeight: 600
+                  }}>
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           {/* Price (hide for patients unless explicit) */}
           {role !== 'patient' && (

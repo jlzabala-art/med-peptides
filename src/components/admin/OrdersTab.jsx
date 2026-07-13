@@ -1,5 +1,5 @@
 import React from 'react';
-import OrdersTableClient from './OrdersTableClient';
+import OrdersTable from '../../features/orders/components/OrdersTable';
 import { fetchOrdersAction } from '../../actions/ordersActions';
 
 /**
@@ -12,7 +12,7 @@ export default async function OrdersTab({ buyerId = null, accountManagerId = nul
   const initialOrders = await fetchOrdersAction({ limitCount: 50, buyerId, accountManagerId, doctorId });
   
   return (
-    <OrdersTableClient 
+    <OrdersTable
       initialOrders={initialOrders}
       buyerId={buyerId}
       accountManagerId={accountManagerId}

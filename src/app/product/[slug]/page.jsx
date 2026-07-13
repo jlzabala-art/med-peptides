@@ -42,4 +42,4 @@ export default async function NextProductPage({ params }) {
     <ProductClientWrapper serverParams={params} initialProduct={initialProduct} />
   );
 }
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;

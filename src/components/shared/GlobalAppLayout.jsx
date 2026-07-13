@@ -34,7 +34,7 @@ import React, { useState, useEffect } from 'react';
 import AppSidebar from './AppSidebar/index';
 import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
-import ClinicalAssistant from './ClinicalAssistant';
+import AtlasAssistantDrawer from '../../layout/AtlasAssistantDrawer';
 import { useAuth } from '../../context/AuthContext';
 
 const PUBLIC_GROUPS = [
@@ -265,11 +265,7 @@ export default function GlobalAppLayout({
 
           {/* Assistant Drawer Overlay */}
           {showAIButton && (
-            <ClinicalAssistant 
-              embedded={false} 
-              isOpen={isAssistantOpen} 
-              setIsOpen={setIsAssistantOpen} 
-            />
+            <AtlasAssistantDrawer isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
           )}
 
         </div>

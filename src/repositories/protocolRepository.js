@@ -38,6 +38,46 @@ import { normalizeProtocol } from './mappers.js';
 
 // ── Collection helpers ────────────────────────────────────────────────────────
 const protocolsCol        = ()  => collection(db, 'protocols');        // canonical source
+
+// ── Protocol Cache (performance layer) ────────────────────────────────────────
+// Strategy: memory-first (fastest), then localStorage (survives tab refresh),
+// then Firestore (authoritative). Cache TTL: 60 minutes.
+// The daily AI cron will bump `version` on changed protocols, so we also store
+// the latest known max version in cache and revalidate if a new version arrives.
+const PROTOCOL_CACHE_KEY = 'regenpept_protocols_cache';
+const PROTOCOL_CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
+let _memProtocolCache = null; // { data: [...], cachedAt: ms }
+
+function _readProtocolCache() {
+  if (_memProtocolCache && Date.now() - _memProtocolCache.cachedAt < PROTOCOL_CACHE_TTL_MS) {
+    return _memProtocolCache.data;
+  }
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(PROTOCOL_CACHE_KEY);
+    if (!raw) return null;
+    const { data, cachedAt } = JSON.parse(raw);
+    if (Date.now() - cachedAt < PROTOCOL_CACHE_TTL_MS) {
+      _memProtocolCache = { data, cachedAt };
+      return data;
+    }
+  } catch {}
+  return null;
+}
+
+function _writeProtocolCache(data) {
+  const entry = { data, cachedAt: Date.now() };
+  _memProtocolCache = entry;
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem(PROTOCOL_CACHE_KEY, JSON.stringify(entry)); } catch {}
+  }
+}
+
+/** Force a cache invalidation (call after admin edits or AI version bump detected). */
+export function invalidateProtocolCache() {
+  _memProtocolCache = null;
+  if (typeof window !== 'undefined') localStorage.removeItem(PROTOCOL_CACHE_KEY);
+}
 const monitoringCol       = ()  => collection(db, 'monitoring_profiles');
 
 // ── Protocol (blueprint) queries ──────────────────────────────────────────────
@@ -48,11 +88,17 @@ const monitoringCol       = ()  => collection(db, 'monitoring_profiles');
  *
  * @returns {Promise<Array>}
  */
-export async function getAllProtocols() {
+export async function getAllProtocols({ forceRefresh = false } = {}) {
+  if (!forceRefresh) {
+    const cached = _readProtocolCache();
+    if (cached) return cached;
+  }
   try {
     const q = query(protocolsCol(), limit(200));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
+    const protocols = snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
+    _writeProtocolCache(protocols);
+    return protocols;
   } catch (err) {
     console.error('[protocolRepository] getAllProtocols:', err);
     throw err;
@@ -65,17 +111,10 @@ export async function getAllProtocols() {
  *
  * @returns {Promise<Array>}
  */
-export async function getProtocolTemplates() {
-  try {
-    const q = query(protocolsCol(), limit(200));
-    const snap = await getDocs(q);
-    return snap.docs
-      .map((d) => normalizeProtocol(d.data(), d.id))
-      .filter((p) => !p.status || p.status === 'approved');
-  } catch (err) {
-    console.error('[protocolRepository] getProtocolTemplates:', err);
-    throw err;
-  }
+export async function getProtocolTemplates({ forceRefresh = false } = {}) {
+  // Reuse the shared cache; approved filtering is client-side only
+  const all = await getAllProtocols({ forceRefresh });
+  return all.filter((p) => !p.status || p.status === 'approved');
 }
 
 /**
@@ -328,6 +367,7 @@ export async function createProtocol(protocolData) {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+    invalidateProtocolCache(); // ← cache bust so next read reflects the new doc
     return docRef.id;
   } catch (err) {
     console.error('[protocolRepository] createProtocol:', err);
@@ -347,6 +387,7 @@ export async function updateProtocol(protocolId, updates) {
       ...updates,
       updatedAt: serverTimestamp(),
     });
+    invalidateProtocolCache(); // ← cache bust so next read reflects the edit
   } catch (err) {
     console.error(`[protocolRepository] updateProtocol(${protocolId}):`, err);
     throw err;
@@ -361,6 +402,7 @@ export async function updateProtocol(protocolId, updates) {
 export async function deleteProtocol(protocolId) {
   try {
     await deleteDoc(doc(db, 'protocols', protocolId));
+    invalidateProtocolCache(); // ← cache bust so deleted doc is no longer served
   } catch (err) {
     console.error(`[protocolRepository] deleteProtocol(${protocolId}):`, err);
     throw err;

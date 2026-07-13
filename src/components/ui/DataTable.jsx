@@ -60,6 +60,7 @@ export default function DataTable({
   visibleColumns, // array of keys
   onColumnToggle, // (columnKey, isVisible) => void
   tableId,
+  getRowProps, // (row) => ({ style?: {}, className?: string })
 }) {
   const [expandedId, setExpandedId] = useState(null);
   const [hoveredRowId, setHoveredRowId] = useState(null);
@@ -398,7 +399,7 @@ export default function DataTable({
       )}
       <div
         ref={virtualize ? parentRef : null}
-        className={`ui-table-container rsp-table-wrap${virtualize ? '' : ' responsive-stack'}`}
+        className={`gcp-table-container ui-table-container rsp-table-wrap${virtualize ? '' : ' responsive-stack'}`}
         style={{
           overflowX: 'auto',
           overflowY: 'auto',
@@ -410,7 +411,7 @@ export default function DataTable({
         }}
       >
         <table
-          className="ui-table"
+          className="gcp-table ui-table"
           style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}
         >
           <thead
@@ -661,9 +662,12 @@ export default function DataTable({
                   const isIndeterminate = indeterminateIds.includes(rowKey);
                   const isActive = isSelected || isIndeterminate;
 
+                  const customProps = getRowProps ? getRowProps(row) : {};
+
                   return (
                     <React.Fragment key={rowKey}>
                       <tr
+                        className={customProps.className || ''}
                         style={{
                           borderBottom: '1px solid var(--color-border)',
                           borderLeft: isActive ? '4px solid #3b82f6' : '4px solid transparent',
@@ -680,6 +684,7 @@ export default function DataTable({
                           left: 0,
                           width: '100%',
                           transform: virtualize ? `translateY(${virtualRowOrRow.start}px)` : 'none',
+                          ...customProps.style,
                         }}
                         onClick={() => {
                           if (onRowClick) {

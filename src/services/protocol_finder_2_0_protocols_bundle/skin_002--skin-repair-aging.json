@@ -43,7 +43,7 @@
           "faq_ref": "ghkcu_faq",
           "pubmed_ref": "ghkcu_pubmed",
           "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial",
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         },
         {
           "product_slug": "epithalon",
@@ -53,7 +53,7 @@
           "faq_ref": "epithalon_faq",
           "pubmed_ref": "epithalon_pubmed",
           "productId": "Epithalon-10mg-vial",
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ]
     },
@@ -69,7 +69,7 @@
           "dosing_frequency": "3x_week",
           "vials_required_for_phase": 2,
           "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial",
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ]
     }

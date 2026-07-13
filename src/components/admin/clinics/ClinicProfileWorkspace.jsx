@@ -17,7 +17,7 @@ import UniversalTimeline from '../../shared/UniversalTimeline';
 import TasksEngine from '../../shared/TasksEngine';
 import CommunicationHub from '../../shared/CommunicationHub';
 import RevenueWidget from '../../shared/RevenueWidget';
-import ImportPrescriptionModal from '../prescriptions/ImportPrescriptionModal';
+import ImportPrescriptionModal from '../../../features/prescriptions/components/ImportPrescriptionModal';
 import { X, Building2, MapPin, Users, Briefcase, Activity, ShoppingCart, ShieldPlus, ChevronRight, Navigation, FileUp } from '@/lib/icons';
 
 export default function ClinicProfileWorkspace({ clinic, onClose }) {

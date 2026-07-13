@@ -22,7 +22,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 
-import PortalLayout from '../components/ui/PortalLayout';
+import UniversalAppLayout from '../components/layout/UniversalAppLayout';
 
 export default function ClinicalLayout() {
   const { user, isPhysician, logout, loading } = useAuth();
@@ -63,12 +63,12 @@ export default function ClinicalLayout() {
     if (targetItem) {
       router.push(targetItem.path);
     }
-  }, [navigate, pinnedItems]);
+  }, [router, pinnedItems]);
 
   const handleLogout = () => { if (logout) logout(); window.location.href = '/'; };
 
   return (
-    <PortalLayout 
+    <UniversalAppLayout 
       sidebarNavGroups={[]} // No collapsible groups for clinical yet
       sidebarPinnedItems={pinnedItems}
       activeNavId={activeTab}
@@ -93,6 +93,6 @@ export default function ClinicalLayout() {
       <div style={{ padding: '1rem' }}>
         <Outlet />
       </div>
-    </PortalLayout>
+    </UniversalAppLayout>
   );
 }

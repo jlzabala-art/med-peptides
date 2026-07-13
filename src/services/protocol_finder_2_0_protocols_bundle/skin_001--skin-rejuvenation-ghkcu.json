@@ -36,7 +36,7 @@
           "selected_strength": "50mg",
           "vials_required_for_phase": 2,
           "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial",
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ],
       "end_week": 6,
@@ -52,7 +52,7 @@
           "selected_strength": "50mg",
           "vials_required_for_phase": 2,
           "productId": "GHK-Cu_(Copper_Peptide)-5mg-vial",
-          "weekly_dose": "TODO: specify"
+          "weekly_dose": "Consult protocol instructions for dosage"
         }
       ],
       "end_week": 12,

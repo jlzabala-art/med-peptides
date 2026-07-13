@@ -880,3 +880,70 @@
     scroll-behavior: smooth;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   14. BUILDER DRAFT CART RESPONSIVENESS
+   ═══════════════════════════════════════════════════════════════ */
+.draft-cart-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: var(--color-bg-app);
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.draft-cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sticky-bottom-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .draft-cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .draft-cart-item-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+  }
+  
+  .sticky-bottom-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-surface);
+    padding: 1rem;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+    flex-direction: column;
+    margin: 0;
+    border-top: 1px solid var(--border);
+  }
+  
+  .sticky-bottom-actions button {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-bar-wrap,
+  .atlas-search {
+    width: 100% !important;
+  }
+}

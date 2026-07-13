@@ -1,5 +1,7 @@
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import * as fb from '../firebase';
+import { searchClient } from './algolia/client';
+import { algoliaConfig } from './algolia/config';
 const db = fb?.db;
 
 /**
@@ -11,12 +13,11 @@ const capitalize = (str) => {
 };
 
 /**
- * Perform a prefix search on a specific collection and field.
+ * Fallback: Perform a prefix search on a specific collection and field using Firestore.
  */
-const searchCollection = async (collectionName, fieldName, searchText, resultType, pathPrefix, iconName) => {
+const searchCollectionFirestore = async (collectionName, fieldName, searchText, resultType, pathPrefix, iconName) => {
   if (!searchText || searchText.length < 2) return [];
 
-  // Try both exact match and capitalized (since Firestore is case-sensitive)
   const capText = capitalize(searchText);
   
   try {
@@ -32,8 +33,6 @@ const searchCollection = async (collectionName, fieldName, searchText, resultTyp
     
     snapshot.forEach((doc) => {
       const data = doc.data();
-      
-      // Simular "acciones pendientes" según el tipo de entidad (lógica mockeada hasta conectar backend de ClinicAI)
       let pendingAction = null;
       if (resultType === 'User/Patient') {
           pendingAction = Math.random() > 0.5 ? 'Pending Review' : 'Needs Signature';
@@ -63,32 +62,129 @@ const searchCollection = async (collectionName, fieldName, searchText, resultTyp
 };
 
 /**
+ * Algolia Search Implementation. 
+ * Performs parallel multi-index queries extremely fast.
+ */
+const performAlgoliaSearch = async (searchText, activeRole) => {
+  if (!searchText || searchText.length < 2) return [];
+
+  const requests = [];
+
+  // Search Protocols
+  if (['admin', 'clinic', 'doctor'].includes(activeRole)) {
+    requests.push({
+      indexName: 'protocols',
+      query: searchText,
+      hitsPerPage: 5
+    });
+  }
+
+  // Search Products (All roles can search products)
+  const isB2C = ['guest', 'retail', 'patient'].includes(activeRole);
+  requests.push({
+    indexName: algoliaConfig.indices.products || 'products',
+    query: searchText,
+    hitsPerPage: 5,
+    filters: isB2C ? 'isActive:true' : ''
+  });
+
+  // Search Users
+  if (activeRole === 'admin') {
+    requests.push({
+      indexName: 'users',
+      query: searchText,
+      hitsPerPage: 5
+    });
+  }
+
+  if (requests.length === 0) return [];
+
+  try {
+    const response = await searchClient.search({ requests });
+    const results = [];
+
+    response.results.forEach((res, i) => {
+      const req = requests[i];
+      const hits = res.hits || [];
+      
+      hits.forEach(hit => {
+        let resultType, pathPrefix, iconName;
+        
+        if (req.indexName === 'protocols') {
+          resultType = 'Protocol';
+          pathPrefix = '/protocol';
+          iconName = 'flask';
+        } else if (req.indexName.includes('products')) {
+          resultType = 'Product';
+          pathPrefix = activeRole === 'retail' || activeRole === 'patient' 
+            ? `/collection/all` 
+            : '/admin?s=operations&t=products&id=';
+          iconName = 'package';
+        } else if (req.indexName === 'users') {
+          resultType = 'User/Patient';
+          pathPrefix = '/admin/patient';
+          iconName = 'user';
+        }
+
+        // For B2C, the product slug might be better than the objectID, but we'll use objectID and the routing will handle it or we append it.
+        const finalPath = pathPrefix.includes('?') 
+          ? `${pathPrefix}${hit.objectID}` 
+          : `${pathPrefix}/${hit.objectID}`;
+
+        results.push({
+          id: `alg-${req.indexName}-${hit.objectID}`,
+          title: hit.name || hit.firstName || hit.email || 'Unknown',
+          description: hit.description || hit.role || hit.email || `${resultType} record`,
+          category: resultType,
+          path: finalPath,
+          iconName: iconName,
+          isDynamic: true,
+          pendingAction: null
+        });
+      });
+    });
+
+    return results;
+  } catch (err) {
+    console.error('Algolia multi-index search failed:', err);
+    throw err; // throw to fallback to Firestore
+  }
+};
+
+/**
  * Omnibar Search: Searches statically and dynamically across multiple collections.
  */
 export const performDatabaseSearch = async (searchText, activeRole) => {
   if (!searchText || searchText.length < 2) return [];
 
+  // 1. Try Algolia if configured
+  if (searchClient) {
+    try {
+      const results = await performAlgoliaSearch(searchText, activeRole);
+      return results;
+    } catch (err) {
+      console.warn('Falling back to Firestore search due to Algolia error.');
+    }
+  }
+
+  // 2. Fallback to Firestore
   const promises = [];
 
-  // Search Protocols (Accessible to Admin, Clinic, Doctor)
   if (['admin', 'clinic', 'doctor'].includes(activeRole)) {
-    promises.push(searchCollection('protocols', 'name', searchText, 'Protocol', '/protocol', 'flask'));
+    promises.push(searchCollectionFirestore('protocols', 'name', searchText, 'Protocol', '/protocol', 'flask'));
   }
 
-  // Search Products (Accessible to Admin, Wholesaler)
-  if (['admin', 'wholesaler'].includes(activeRole)) {
-    promises.push(searchCollection('products', 'name', searchText, 'Product', '/admin?s=operations&t=products&id=', 'package'));
-  }
+  // All roles can search products. Fallback does not support complex where + prefix filters natively
+  // without composite indexes, so we just do prefix on name. B2C should ideally hit Algolia.
+  const productPathPrefix = ['retail', 'patient', 'guest'].includes(activeRole)
+    ? '/collection/all'
+    : '/admin?s=operations&t=products&id=';
+  promises.push(searchCollectionFirestore('products', 'name', searchText, 'Product', productPathPrefix, 'package'));
 
-  // Search Users / Patients (Admins can search anyone)
   if (activeRole === 'admin') {
-    // We search by email or firstName as an approximation
-    promises.push(searchCollection('users', 'firstName', searchText, 'User/Patient', '/admin/patient', 'user'));
+    promises.push(searchCollectionFirestore('users', 'firstName', searchText, 'User/Patient', '/admin/patient', 'user'));
   }
 
-  // Wait for all database queries to finish
   const resultsArray = await Promise.all(promises);
-  
-  // Flatten the array of arrays
   return resultsArray.flat();
 };

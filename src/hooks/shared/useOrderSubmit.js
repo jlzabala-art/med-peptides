@@ -4,7 +4,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as fb from '../../firebase';
 const db = fb?.db;
 const storage = fb?.storage;
-import { trackEvent } from '../../utils/analytics';
+// import { trackEvent } from '../../utils/analytics';
 import { EXCHANGE_RATES } from '../../utils/currencies';
 import { useTransactionManager } from '../data/useTransactionManager';
 
@@ -58,12 +58,12 @@ export function useOrderSubmit({
       const itemNames = enrichedCartItems.map(i => i.itemKey).join(', ');
       const protocolIds = Object.keys(protocolGroups).join(', ');
       
-      trackEvent('purchase_intent', {
-        intent_type: 'final_submission',
-        protocol_id: protocolIds || 'none',
-        peptide_name: itemNames || 'none',
-        order_total: checkoutTotals.display
-      });
+      // trackEvent('purchase_intent', {
+      //   intent_type: 'final_submission',
+      //   protocol_id: protocolIds || 'none',
+      //   peptide_name: itemNames || 'none',
+      //   order_total: checkoutTotals.display
+      // });
 
       let currentUid = user?.uid;
       
@@ -168,40 +168,34 @@ export function useOrderSubmit({
         // Overwrite newId to be the RFQ ID so it shows nicely on the success screen
         setOrderId(rfqId);
       } else {
-        // Standard B2C Order creation
+        // Standard B2C Order creation (Matched exactly to Checkout.jsx)
         await addDoc(collection(db, 'orders'), {
-          source: 'b2c_home',
-          customerType: 'retail',
+          source: isProfessional ? 'b2b_portal' : 'b2c_home',
+          customerType: isProfessional ? 'professional' : 'retail',
+          // ── Identity & ownership ──
           uid: currentUid,
-          paymentOwnerId,
-          supervisingPhysicianId,
-          supervisingAdminId,
-          source: orderSource,
-          recommendationId,
-          prescriptionId,
+          paymentOwnerId,           // always === currentUid (invariant)
+          supervisingPhysicianId,   // null when no supervising doctor assigned
+          supervisingAdminId,       // null when no admin supervision
+          source: orderSource,      // 'patient_selected' | 'from_prescription' | 'refill' | 'doctor_recommended'
+          recommendationId,         // links back to recommendations collection when applicable
+          prescriptionId,           // links to prescriptions/{id}; triggers onOrderCreatedForRx CF when set
+          // Tenant attribution B2B franchise
           tenantId: cartOwnership?.tenantId || null,
           ownerType: cartOwnership?.ownerType || null,
           ownerId: cartOwnership?.ownerId || null,
           sourceDomain: cartOwnership?.sourceDomain || null,
           attributionLocked: cartOwnership?.attributionLocked || false,
+
           orderId: newId,
           customer: customerData,
           shippingAddress: shippingAddressData,
-          items,
-          subtotal,
-          shipping: shippingCost,
-          shippingMethod: selectedShipping ?? 'standard',
-          total,
+          items, subtotal, shipping: shippingCost, shippingMethod: selectedShipping ?? 'standard', total,
           totalDisplay: `${currencySymbol}${total.toFixed(0)}`,
           currency,
-          region: activeRegion,
-          paymentMethod: formData.paymentMethod ?? 'credit_card',
+          region: activeRegion, paymentMethod: formData.paymentMethod ?? 'credit_card',
           orderNotes: formData.orderNotes || null,
-          isProfessional: false,
-          pricingTier,
-          pricingRole,
-          status: 'pending',
-          createdAt: serverTimestamp(),
+          isProfessional: isProfessional || false, pricingTier, pricingRole, status: 'pending', createdAt: serverTimestamp(),
           prescription: prescriptionSpecs ? {
             fileName: prescriptionName,
             fileUrl,
@@ -229,14 +223,17 @@ export function useOrderSubmit({
         }
       }
 
+      // ── Write back to the unified users/{uid} profile ──
       if (currentUid) {
         await updateProfileData({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          institution: formData.clinic || '',
-          shippingStreet: formData.address,
-          shippingCountry: formData.country?.value || ''
+          firstName:       formData.firstName,
+          lastName:        formData.lastName,
+          phone:           formData.phone,
+          institution:     formData.clinic || user?.institution || '',
+          shippingStreet:  formData.address,
+          shippingCountry: formData.country?.value || '',
+          shippingCity:    user?.shippingCity || '',
+          shippingZip:     user?.shippingZip  || '',
         });
       }
 
