@@ -28,3 +28,14 @@
 }
 
 .overlay { flex: 1; }
+
+/* 
+ * iOS Input Zoom Fix
+ * iOS Safari auto-zooms if inputs are less than 16px.
+ * This rule enforces a 16px font-size on mobile devices to prevent layout breaking on focus.
+ */
+@media (max-width: 768px) {
+  input, select, textarea, .gcp-input {
+    font-size: 16px !important;
+  }
+}
