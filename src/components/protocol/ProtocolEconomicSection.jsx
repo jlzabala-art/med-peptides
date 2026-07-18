@@ -451,7 +451,7 @@ const ProtocolEconomicSection = ({
             <Sparkles size={11} color="#22c55e" /> Protocol Bundle
           </h4>
           <div className="pes-table-container">
-            <table className="pes-table">
+            <table className="gcp-table">
               <thead>
                 <tr>
                   <th>Compound / Item</th>

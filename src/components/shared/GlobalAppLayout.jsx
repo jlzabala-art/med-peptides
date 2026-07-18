@@ -36,6 +36,8 @@ import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
 import AtlasAssistantDrawer from '../../layout/AtlasAssistantDrawer';
 import { useAuth } from '../../context/AuthContext';
+import { useSimulationStore } from '../../hooks/admin/useAdminRoleSimulation';
+import { useRoleAccess } from '../../hooks/useRoleAccess';
 
 const PUBLIC_GROUPS = [
   {

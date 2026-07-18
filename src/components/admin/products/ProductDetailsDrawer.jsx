@@ -52,6 +52,8 @@ import { useToast } from '../../../hooks/useToast';
 import notifier from '../../../services/NotificationService';
 import { X, Save, Edit3, Settings, DollarSign, PackageOpen, Box, Building, ImageIcon, Shield, Share2, Trash2, Copy, Archive, Award, FileText, CheckCircle2, AlertTriangle, Sparkles, UploadCloud, Brain, Globe, Plus, Trash, Eye, Activity, Link, History, Check, RefreshCw, TrendingUp, ChevronDown, ChevronUp, ExternalLink, Info, AlertOctagon, HelpCircle } from '@/lib/icons';
 
+import SupplierDetailDrawer from '../suppliers/SupplierDetailDrawer';
+
 export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave }) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
@@ -59,6 +61,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
   const [aiResult, setAiResult] = useState(null);
   const [showAiAdvisor, setShowAiAdvisor] = useState(true);
   const [timelineEvents, setTimelineEvents] = useState([]);
+  const [linkedSupplier, setLinkedSupplier] = useState(null);
   const scrollContainerRef = React.useRef(null);
   // Mobile detection
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -846,7 +849,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                         <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Eye size={16} /> Overview</span>
                         {expandedAccordions.overview ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
-                      {expandedAccordions.overview && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}><OverviewTab form={form} setForm={setForm} /></div>}
+                      {expandedAccordions.overview && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}><OverviewTab form={form} setForm={setForm} triggerAiAction={triggerAiAction} /></div>}
                     </div>
 
                     {/* ACCORDION 2: VARIANTS */}
@@ -870,7 +873,7 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                         <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><Building size={16} /> Suppliers</span>
                         {expandedAccordions.suppliers ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
-                      {expandedAccordions.suppliers && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}><SuppliersTab form={form} product={product} /></div>}
+                      {expandedAccordions.suppliers && <div style={{ padding: '1rem', backgroundColor: '#090d16' }}><SuppliersTab form={form} product={product} onSupplierClick={(supplier) => setLinkedSupplier(supplier)} /></div>}
                     </div>
 
                     {/* ACCORDION 4: INVENTORY */}
@@ -925,9 +928,9 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                 ) : (
                   /* Desktop Tab Views */
                   <div>
-                    {activeTab === 'overview' && <OverviewTab form={form} setForm={setForm} />}
+                    {activeTab === 'overview' && <OverviewTab form={form} setForm={setForm} triggerAiAction={triggerAiAction} />}
                     {activeTab === 'variants' && <VariantsTab product={product} />}
-                    {activeTab === 'suppliers' && <SuppliersTab product={product} form={form} />}
+                    {activeTab === 'suppliers' && <SuppliersTab product={product} form={form} onSupplierClick={(supplier) => setLinkedSupplier(supplier)} />}
                     {activeTab === 'inventory' && <InventoryTab form={form} setForm={setForm} />}
                     {activeTab === 'regulatory' && <RegulatoryTab form={form} setForm={setForm} />}
                     {activeTab === 'pricing' && <PricingTab form={form} setForm={setForm} />}
@@ -1232,6 +1235,11 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
               </div>
             )}
           </motion.div>
+          <SupplierDetailDrawer 
+            isOpen={!!linkedSupplier} 
+            onClose={() => setLinkedSupplier(null)} 
+            supplier={linkedSupplier} 
+          />
         </>
       )}
     </AnimatePresence>

@@ -23,13 +23,15 @@ import { TextField, Select } from '../../../components/ui';
 import { useDataTable } from '../../../hooks/ui/useDataTable';
 import { useAlgoliaSearch } from '../../../hooks/data/useAlgoliaSearch';
 import { useProducts } from '../../../hooks/admin/useProducts';
+import ProductDetailsDrawer from '../../../components/admin/products/ProductDetailsDrawer';
 import ProtocolHubDashboard from '../../../components/admin/protocols/ProtocolHubDashboard';
 import SmartProductPicker from '../../../components/shared/SmartProductPicker';
 import DataTable from '../../../components/ui/DataTable';
 import DataTableSkeleton from '../../../components/ui/skeletons/DataTableSkeleton';
 import ProtocolFiltersBar from '../../../components/admin/protocols/ProtocolFiltersBar';
-import AdminPageHeader from '../../../components/admin/AdminPageHeader';
+import PageHeader from '../../../components/ui/PageHeader';
 import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
+import StatusBadge from '../../../components/ui/StatusBadge';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_OPTIONS = ['draft', 'active', 'archived'];
@@ -77,6 +79,7 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [], 
 
   const [searchQuery, setSearchQuery] = useState('');
   const [drawerProtocol, setDrawerProtocol] = useState(null);
+  const [selectedProtocol, setSelectedProtocol] = useState(null);
   const [linkedProduct, setLinkedProduct] = useState(null); // secondary: product detail drawer
   const { products: catalogProducts } = useProducts();
 
@@ -397,12 +400,7 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [], 
       sortable: true,
       render: (p) => {
         const e = getEdit(p);
-        const meta = getStatusMeta(e.status);
-        return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.6rem', borderRadius: '20px', background: meta.bg, color: meta.color, fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-            {meta.emoji} {meta.label}
-          </span>
-        );
+        return <StatusBadge status={e.status} />;
       }
     },
     {
@@ -445,7 +443,7 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [], 
 
       {/* Header */}
       {!isSubTab && (
-        <AdminPageHeader
+        <PageHeader
           title="Protocols & Pathways"
           subtitle="Manage clinical pathways, kits, and treatment templates"
           icon={ClipboardList}
@@ -551,23 +549,38 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [], 
           onSelectionChange={(ids) => {
             // handle selection if needed
           }}
-          expandableRender={(row) => (
-            <div style={{ padding: '1rem', background: '#f8fafc', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-              <ProtocolHubDashboard
-                protocol={row}
-                onClose={() => {}}
-                onSave={async (updates) => {
-                  try {
-                    await updateProtocolFull(row.id, updates);
-                    toast.success('Protocol updated successfully');
-                    fetchProtocols();
-                  } catch (err) {
-                    toast.error('Failed to update protocol: ' + err.message);
-                  }
-                }}
-              />
-            </div>
-          )}
+          onRowClick={(row) => setSelectedProtocol(row)}
+        />
+
+        {/* Drawers */}
+        {selectedProtocol && (
+          <StandardDrawer
+            title="Protocol Configuration"
+            isOpen={true}
+            onClose={() => setSelectedProtocol(null)}
+          >
+            <ProtocolHubDashboard
+              protocol={selectedProtocol}
+              onClose={() => setSelectedProtocol(null)}
+              onProductClick={(product) => setLinkedProduct(product)}
+              onSave={async (updates) => {
+                try {
+                  await updateProtocolFull(selectedProtocol.id, updates);
+                  toast.success('Protocol updated successfully');
+                  setSelectedProtocol(prev => ({ ...prev, ...updates }));
+                  fetchProtocols();
+                } catch (err) {
+                  toast.error('Failed to update protocol: ' + err.message);
+                }
+              }}
+            />
+          </StandardDrawer>
+        )}
+
+        <ProductDetailsDrawer 
+          isOpen={!!linkedProduct} 
+          product={linkedProduct} 
+          onClose={() => setLinkedProduct(null)} 
         />
 
         {/* Pagination Load More */}

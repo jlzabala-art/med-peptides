@@ -42,7 +42,7 @@ function TabFallback() {
   );
 }
 
-export default function ProtocolHubDashboard({ protocol, onSave, onClose, hideHeader = false, onChange }) {
+export default function ProtocolHubDashboard({ protocol, onSave, onClose, hideHeader = false, onChange, onProductClick }) {
   const { toast } = useToast();
   const {
     activeTab,
@@ -87,7 +87,7 @@ export default function ProtocolHubDashboard({ protocol, onSave, onClose, hideHe
       case 'clinical':
         return <ProtocolClinicalTab protocol={editedProtocol} onUpdate={handleUpdate} />;
       case 'operations':
-        return <ProtocolOperationsTab protocol={editedProtocol} onUpdate={handleUpdate} />;
+        return <ProtocolOperationsTab protocol={editedProtocol} onUpdate={handleUpdate} onProductClick={onProductClick} />;
       case 'records':
         return <ProtocolRecordsTab protocol={editedProtocol} onUpdate={handleUpdate} />;
       default:

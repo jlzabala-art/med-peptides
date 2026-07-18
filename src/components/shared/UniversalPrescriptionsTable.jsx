@@ -1,16 +1,18 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { FileText, FilePlus } from '@/lib/icons';
 import PrescriptionDetailModal from '../../features/prescriptions/components/PrescriptionDetailModal';
 import ProtocolDrawerContent from '../admin/protocols/ProtocolDrawerContent';
+import ProductDetailsDrawer from '../admin/products/ProductDetailsDrawer';
 import StandardDrawer from '../ui/StandardDrawer';
 import { useFirestorePaginatedCollection } from '../../hooks/data/useFirestorePaginatedCollection';
 import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
-import AdminPageHeader from '../admin/AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import PrescriptionsKPIs from '../admin/prescriptions/PrescriptionsKPIs';
 import UniversalOrderBuilder from './order-builder/UniversalOrderBuilder';
 import ImportPrescriptionModal from '../../features/prescriptions/components/ImportPrescriptionModal';
+import { useProducts } from '../../hooks/admin/useProducts';
 import PrescriptionsFiltersBar from '../admin/prescriptions/PrescriptionsFiltersBar';
 import { getPrescriptionColumns } from '../admin/prescriptions/prescriptionColumns';
 import DataModule from '../ui/DataModule';
@@ -21,8 +23,12 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   
   const [selectedItem, setSelectedItem] = useState(null);
   const [linkedProtocol, setLinkedProtocol] = useState(null);
+  const [linkedProduct, setLinkedProduct] = useState(null);
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
+  
+  // Load a large page size to ensure fuzzy search client-side works for all products
+  const { products } = useProducts(['All'], { pageSize: 1000 });
 
   // Convert chip to whereConditions
   const whereConditions = useMemo(() => {
@@ -53,7 +59,8 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     isLoading: loading, 
     hasMore, 
     loadMore,
-    isFetchingMore 
+    isFetchingMore,
+    refresh
   } = useFirestorePaginatedCollection('prescriptions', {
     whereConditions,
     orderByFields: [['createdAt', 'desc']],
@@ -91,6 +98,17 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     { hitsPerPage: 50 },
     300
   );
+
+  // Sync selectedItem with live data updates
+  useEffect(() => {
+    if (selectedItem) {
+      const activeList = isAlgoliaActive ? algoliaHits : displayPrescriptions;
+      const updatedItem = activeList.find(p => p.id === selectedItem.id);
+      if (updatedItem && JSON.stringify(updatedItem) !== JSON.stringify(selectedItem)) {
+        setSelectedItem(updatedItem);
+      }
+    }
+  }, [displayPrescriptions, algoliaHits, isAlgoliaActive]);
 
   const finalData = isAlgoliaActive && searchTerm.trim() ? algoliaHits : displayPrescriptions;
 
@@ -143,10 +161,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         {/* Drawers and Modals */}
         {selectedItem && (
           <PrescriptionDetailModal
-            prescription={selectedItem}
+            rx={selectedItem}
+            products={products}
             onClose={() => setSelectedItem(null)}
-            onViewProtocol={(proto) => setLinkedProtocol(proto)}
-            onViewProduct={(prod) => setLinkedProduct(prod)}
+            onProtocolClick={(proto) => setLinkedProtocol(proto)}
+            onProductClick={(prod) => setLinkedProduct(prod)}
+            onUpdateRx={(updatedRx) => {
+              setSelectedItem(updatedRx);
+              refresh();
+            }}
           />
         )}
 
@@ -158,6 +181,14 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
           >
             <ProtocolDrawerContent protocol={linkedProtocol} />
           </StandardDrawer>
+        )}
+
+        {linkedProduct && (
+          <ProductDetailsDrawer
+            isOpen={true}
+            onClose={() => setLinkedProduct(null)}
+            product={linkedProduct}
+          />
         )}
 
         {isBuilderOpen && (

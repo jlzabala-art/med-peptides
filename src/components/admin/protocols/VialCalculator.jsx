@@ -2,7 +2,7 @@ import React from 'react';
 import { Package, AlertCircle } from '@/lib/icons';
 import { calculateProtocolRequirements } from '../../../engine/protocolMath';
 
-export default function VialCalculator({ protocol }) {
+export default function VialCalculator({ protocol, onProductClick }) {
   const products = calculateProtocolRequirements(protocol);
 
   if (products.length === 0) {
@@ -27,7 +27,14 @@ export default function VialCalculator({ protocol }) {
           <div key={idx} style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
             <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)' }}>{product.name}</h4>
+                <h4 
+                  onClick={() => {
+                    if (onProductClick) onProductClick({ id: product.product_id, name: product.name });
+                  }}
+                  style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--primary)', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {product.name}
+                </h4>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                   {product.vialStrengthMg}mg Vial • Reconstitute with {product.reconstitutionVolMl}ml BAC
                 </div>

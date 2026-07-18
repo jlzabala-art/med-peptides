@@ -1,5 +1,6 @@
 import Fuse from 'fuse.js';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { liteClient as algoliasearch } from 'algoliasearch/lite';
 
 /**
  * Universal DataTable Search Engine
@@ -129,13 +130,19 @@ export class DataTableSearchEngine {
   // ─── Strategy 3: Algolia (stub — wire up algolia client when ready) ─────────
 
   static async _algoliaSearch(data, query, searchConfig) {
-    // TODO: Replace this stub with your Algolia client call.
-    // Example:
-    //   const algolia = algoliasearch(APP_ID, SEARCH_KEY);
-    //   const index = algolia.initIndex(searchConfig.algoliaIndex);
-    //   const { hits } = await index.search(query, { hitsPerPage: 100 });
-    //   return hits;
-    console.warn('[DataTableSearchEngine] Algolia strategy is not yet configured. Falling back to local search.');
-    return this._localSearch(data, query, [], searchConfig);
+    if (!process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || !process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY) {
+      console.warn('[DataTableSearchEngine] Algolia keys missing. Falling back to local search.');
+      return this._localSearch(data, query, [], searchConfig);
+    }
+    
+    try {
+      const algolia = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY);
+      const index = algolia.initIndex(searchConfig.algoliaIndex);
+      const { hits } = await index.search(query, { hitsPerPage: 100 });
+      return hits;
+    } catch (err) {
+      console.error('[DataTableSearchEngine] Algolia search failed:', err.message);
+      return this._localSearch(data, query, [], searchConfig);
+    }
   }
 }

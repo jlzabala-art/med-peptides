@@ -53,11 +53,11 @@ import dynamic from 'next/dynamic';
 import LeadKanbanBoard from './leads/LeadKanbanBoard';
 import LeadProfileDrawer from './leads/LeadProfileDrawer';
 import { calculateDetailedAIScore } from './leads/LeadUtils';
+import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 
 // Recharts is heavy (~200KB) — loaded only when the chart section renders
 const { BarChart: RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = 
   typeof window !== 'undefined' ? require('recharts') : {};
-
 
 export default function AdminLeadsTab({ isSubTab = false }) {
   const { isAdmin, user } = useAuth();
@@ -426,8 +426,9 @@ export default function AdminLeadsTab({ isSubTab = false }) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', padding: isSubTab ? '0' : '1.5rem' }}>
-      {!isSubTab && (
+    <AdminTabErrorBoundary tabId="leads" tabLabel="Commercial CRM (Leads)">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', padding: isSubTab ? '0' : '1.5rem' }}>
+        {!isSubTab && (
         <PageHeader
           title="Commercial Sourcing CRM (Leads)"
           subtitle="Track wholesaler opportunities, incoming RFQs, and auto-recommend pricing configurations."
@@ -630,5 +631,6 @@ export default function AdminLeadsTab({ isSubTab = false }) {
         />
       )}
     </div>
+    </AdminTabErrorBoundary>
   );
 }

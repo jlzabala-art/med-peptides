@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminPageHeader from '../admin/AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from './GlobalSearchBar';
 import GridSkeleton from './skeletons/GridSkeleton';
 import DataTable from './DataTable';
@@ -13,10 +13,12 @@ export default function DataModule({
   hideHeader = false,
   primaryAction, // { label, icon: ActionIcon, onClick }
   kpis, // ReactNode
-  filtersBar, // ReactNode
+  filtersBar, // Legacy explicit bar, if still needed
   searchPlaceholder = "Search...",
   searchTerm,
   onSearchChange,
+  filters = [],          // array for GlobalSearchBar chips
+  filterOptions = [],    // array for GlobalSearchBar dropdowns
   resultCount,
   searchLoading,
   namespace = "search",
@@ -30,6 +32,7 @@ export default function DataModule({
   selectedIds = [],
   onSelectionChange,
   onRowClick,
+  expandableRender,      // Added expandableRender prop
   emptyState = {},
   bulkActions = [], // { label, icon, onClick, variant }
   children
@@ -38,7 +41,7 @@ export default function DataModule({
     <ErrorBoundary>
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: 'var(--bg-app, #f1f5f9)' }}>
       {!hideHeader && (
-        <AdminPageHeader
+        <PageHeader
           title={title}
           subtitle={subtitle}
           icon={Icon}
@@ -56,6 +59,8 @@ export default function DataModule({
         />
       )}
 
+      {kpis}
+
       {onSearchChange && (
         <GlobalSearchBar
           value={searchTerm}
@@ -65,10 +70,10 @@ export default function DataModule({
           isLoading={searchLoading}
           namespace={namespace}
           size="lg"
+          filters={filters}
+          filterOptions={filterOptions}
         />
       )}
-
-      {kpis}
 
       <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         
@@ -86,6 +91,7 @@ export default function DataModule({
                 onSelectionChange={onSelectionChange}
                 enableExport={false}
                 onRowClick={onRowClick} 
+                expandableRender={expandableRender}
                 emptyTitle={emptyState.title}
                 emptyDescription={emptyState.description}
                 emptyActionLabel={emptyState.actionLabel}

@@ -126,7 +126,7 @@ function OperationsSummary({ protocol }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function ProtocolOperationsTab({ protocol, onUpdate }) {
+export default function ProtocolOperationsTab({ protocol, onUpdate, onProductClick }) {
   const [openSection, setOpenSection] = useState('products');
 
   const handleToggleSection = (id, isOpen) => {
@@ -168,7 +168,7 @@ export default function ProtocolOperationsTab({ protocol, onUpdate }) {
         open={openSection === 'products'}
         onToggle={(val) => handleToggleSection('products', val)}
       >
-        <ProtocolProducts protocol={protocol} onUpdate={onUpdate} />
+        <ProtocolProducts protocol={protocol} onUpdate={onUpdate} onProductClick={onProductClick} />
       </OpsSection>
 
       {/* 2 — Cost & Logistics */}

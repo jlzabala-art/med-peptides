@@ -5,7 +5,7 @@ import { Package, Pill, Box, Zap, ChevronDown } from '@/lib/icons';
 import VialCalculator from '../VialCalculator';
 import AlgoliaProductPicker from './AlgoliaProductPicker';
 
-export default function ProtocolProducts({ protocol, onUpdate }) {
+export default function ProtocolProducts({ protocol, onUpdate, onProductClick }) {
   const [selectedPhaseId, setSelectedPhaseId] = useState(protocol?.phases?.[0]?.id || null);
   
   // Aggregate products/items from phases
@@ -130,7 +130,7 @@ export default function ProtocolProducts({ protocol, onUpdate }) {
           <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
              <Package size={18} color="var(--primary)" /> Smart Vial Calculator
           </h4>
-          <VialCalculator protocol={protocol} onUpdate={onUpdate} />
+          <VialCalculator protocol={protocol} onUpdate={onUpdate} onProductClick={onProductClick} />
         </div>
       </div>
       

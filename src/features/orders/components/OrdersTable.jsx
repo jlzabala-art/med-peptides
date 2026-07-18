@@ -55,9 +55,11 @@ import { httpsCallable } from 'firebase/functions';
 import DataTable from '../../../components/ui/DataTable';
 import AppActionGroup from '../../../components/ui/AppActionGroup';
 import AppFilterBar from '../../../components/ui/AppFilterBar';
-import AdminPageHeader from '../../../components/admin/AdminPageHeader';
+import PageHeader from '../../../components/ui/PageHeader';
 import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
 import DataTableSkeleton from '../../../components/ui/skeletons/DataTableSkeleton';
+import CopyableId from '../../../components/ui/CopyableId';
+import StatusBadge from '../../../components/ui/StatusBadge';
 
 // ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
 function UniformKPIs({ data, globalMetrics }) {
@@ -427,7 +429,7 @@ export default function OrdersTable({
                   }}
                 />
               )}
-              #{orderNum}
+              <CopyableId value={o.orderId || o.id} displayValue={`#${orderNum}`} />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -471,33 +473,7 @@ export default function OrdersTable({
       sortKey: 'status',
       width: '140px',
       render: (o) => (
-        <span
-          style={{
-            display: 'inline-flex',
-            padding: '0.2rem 0.5rem',
-            backgroundColor:
-              o.status === 'Processing'
-                ? 'rgba(59, 130, 246, 0.1)'
-                : o.status === 'Shipped'
-                  ? 'rgba(10, 185, 129, 0.1)'
-                  : o.status === 'Cancelled'
-                    ? 'rgba(239, 68, 68, 0.1)'
-                    : 'rgba(107, 114, 128, 0.1)',
-            color:
-              o.status === 'Processing'
-                ? '#3b82f6'
-                : o.status === 'Shipped'
-                  ? '#10b981'
-                  : o.status === 'Cancelled'
-                    ? '#ef4444'
-                    : '#6b7280',
-            borderRadius: '4px',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-          }}
-        >
-          {o.status || 'Pending'}
-        </span>
+        <StatusBadge status={o.status || 'Pending'} />
       ),
     },
   ];
@@ -699,16 +675,12 @@ export default function OrdersTable({
         </div>
         <div>
           <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Database Order ID</span>
-          <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
-            {o.id}
-          </code>
+          <CopyableId value={o.id} />
         </div>
         {o.trackingNumber && (
           <div>
             <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Tracking Number</span>
-            <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-primary)' }}>
-              {o.trackingNumber}
-            </code>
+            <CopyableId value={o.trackingNumber} />
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -800,7 +772,7 @@ export default function OrdersTable({
       )}
 
       {/* ── Header ── */}
-      <AdminPageHeader
+      <PageHeader
         title="Patient Orders"
         subtitle="Review, confirm, and manage your direct-to-consumer orders."
         icon={ShoppingCart}

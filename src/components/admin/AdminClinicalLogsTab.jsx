@@ -5,6 +5,7 @@ import User from "lucide-react/dist/esm/icons/user";
 import Bot from "lucide-react/dist/esm/icons/bot";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
+import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';

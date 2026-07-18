@@ -106,15 +106,18 @@ const ROLE_PRESETS = {
   },
 };
 
+import { useRoleAccess } from '../../hooks/useRoleAccess';
+
 export default function AdminMetricsDashboardClient({ wholesalerId = null, initialMetricsData = null }) {
   const router = useRouter();
   const { userProfile } = useAuth();
-  const isAdmin = userProfile?.role === 'admin' || userProfile?.roles?.includes('admin');
+  const { is, effectiveRole } = useRoleAccess();
+  const isAdmin = is('admin') || userProfile?.roles?.includes('admin');
 
   // Map user role to dashboard preset
   const getInitialPreset = () => {
-    if (!userProfile) return 'CEO';
-    const r = userProfile.role?.toLowerCase() || '';
+    if (!effectiveRole) return 'CEO';
+    const r = effectiveRole.toLowerCase() || '';
     if (r === 'admin') return 'CEO';
     if (r === 'doctor' || r === 'physician' || r === 'medical') return 'Clinical';
     if (r === 'finance' || r === 'accountant') return 'Finance';

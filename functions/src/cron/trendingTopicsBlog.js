@@ -1,5 +1,6 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { getFirestore } = require("firebase-admin/firestore");
+const { getStorage } = require("firebase-admin/storage");
 const { GoogleGenAI } = require("@google/genai");
 
 const API_KEY = process.env.GEMINI_API_KEY;
@@ -80,12 +81,19 @@ Rules:
       });
       
       if (imageResponse.generatedImages && imageResponse.generatedImages.length > 0) {
-        // Normally you'd upload this base64 string to Firebase Storage.
-        // For simplicity, we can store the base64 or upload it using admin SDK
         const base64Image = imageResponse.generatedImages[0].image.imageBytes;
-        imageUrl = `data:image/jpeg;base64,${base64Image}`;
+        const imageBuffer = Buffer.from(base64Image, 'base64');
         
-        // TODO: Ideally, upload 'base64Image' to Firebase Storage and get a permanent URL.
+        const bucket = getStorage().bucket();
+        const fileName = `blog_images/trending_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
+        const file = bucket.file(fileName);
+        
+        await file.save(imageBuffer, {
+          metadata: { contentType: 'image/jpeg' }
+        });
+        await file.makePublic();
+        
+        imageUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
       }
     } catch (imgError) {
       console.error("Failed to generate image:", imgError);

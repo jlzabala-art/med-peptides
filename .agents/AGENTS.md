@@ -183,3 +183,9 @@
 - **Implementación obligatoria**: Se debe usar un componente de tarjetas de métricas (ej. `MetricCard` o similar) justo debajo del `PageHeader` y antes del `GlobalSearchBar`.
 - **Generación Contextual**: Si una pantalla aún no tiene KPIs definidos, el agente debe analizar el contexto de los datos gestionados en esa pantalla (ej. "Total de pacientes", "Nuevos esta semana", "Tasa de conversión" para pacientes) y generar KPIs útiles de forma automática.
 - Estos KPIs idealmente deben calcularse en el servidor o extraerse de agregaciones pre-calculadas para evitar cargas pesadas en el cliente.
+
+## 23. Mobile-First UX Compatibility (Golden Rule)
+- **Toda interfaz o componente, tanto nuevo como existente, DEBE ser diseñado o adaptado pensando en su compatibilidad con dispositivos móviles.**
+- Nunca diseñes pantallas o tablas que solo funcionen en monitores anchos (desktop). Utiliza enfoques responsivos, `flex-wrap`, media queries (`@media (max-width: 768px)`), y el sistema integrado de `DataTable` (que convierte filas en tarjetas móviles).
+- Antes de implementar cualquier cambio visual o funcional, pregúntate: *¿Cómo se verá y usará esto en un teléfono móvil?*
+- Evita anchos fijos (`width: 800px`), usa anchos fluidos (`width: 100%`, `max-width`) y asegura que los botones y áreas táctiles sean lo suficientemente grandes (mínimo 44x44px).

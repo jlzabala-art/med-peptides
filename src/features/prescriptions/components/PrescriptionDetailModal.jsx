@@ -143,6 +143,7 @@ export default function PrescriptionDetailModal({
   onClose,
   onProtocolClick,
   onProductClick,
+  onUpdateRx,
 }) {
   const [activeTab, setActiveTab] = useState('Overview');
   const [moreOpen, setMoreOpen] = useState(false);
@@ -517,11 +518,11 @@ export default function PrescriptionDetailModal({
 
         {/* ── Tab Content ────────────────────────────────────────────── */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
-          {activeTab === 'Overview' && <OverviewTab rx={rx} />}
+          {activeTab === 'Overview' && <OverviewTab rx={rx} onProtocolClick={onProtocolClick} />}
           {activeTab === 'Items' && (
-            <ItemsTab rx={rx} products={products} onProductClick={onProductClick} protocolMatch={protocolMatch} isMatching={isMatching} />
+            <ItemsTab rx={rx} products={products} onProductClick={onProductClick} onProtocolClick={onProtocolClick} protocolMatch={protocolMatch} isMatching={isMatching} onUpdateRx={onUpdateRx} />
           )}
-          {activeTab === 'Follow-Up' && <FollowUpTab rx={rx} />}
+          {activeTab === 'Follow-Up' && <FollowUpTab rx={rx} onUpdateRx={onUpdateRx} />}
           {activeTab === 'Documents' && <DocumentsTab rx={rx} />}
           {activeTab === 'Timeline' && <TimelineTab rx={rx} />}
         </div>

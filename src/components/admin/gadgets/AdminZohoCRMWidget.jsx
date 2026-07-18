@@ -1475,177 +1475,134 @@ export default function AdminZohoCRMWidget({
                 <div
                   style={{ overflowX: 'auto', border: '1px solid #dadce0', borderRadius: '6px' }}
                 >
-                  <table
-                    style={{
-                      width: '100%',
-                      borderCollapse: 'collapse',
-                      fontSize: '0.78rem',
-                      textAlign: 'left',
-                    }}
-                  >
-                    <thead>
-                      <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dadce0' }}>
-                        <th
-                          style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: '#5f6368' }}
-                        >
-                          Client Name
-                        </th>
-                        <th
-                          style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: '#5f6368' }}
-                        >
-                          Email
-                        </th>
-                        <th
-                          style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: '#5f6368' }}
-                        >
-                          Type
-                        </th>
-                        <th
-                          style={{ padding: '0.6rem 0.85rem', fontWeight: 600, color: '#5f6368' }}
-                        >
-                          Date Notified
-                        </th>
-                        <th
-                          style={{
-                            padding: '0.6rem 0.85rem',
-                            fontWeight: 600,
-                            color: '#5f6368',
-                            textAlign: 'center',
-                          }}
-                        >
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pendingList.map((contact) => (
-                        <React.Fragment key={contact.id}>
-                          <tr
-                            style={{
-                              borderBottom: '1px solid #dadce0',
-                              backgroundColor:
-                                selectedPendingContact?.id === contact.id
-                                  ? '#e8f0fe'
-                                  : 'transparent',
-                              transition: 'background-color 0.15s',
-                            }}
-                          >
-                            <td
-                              style={{
-                                padding: '0.6rem 0.85rem',
-                                fontWeight: 600,
-                                color: '#202124',
-                              }}
-                            >
-                              {contact.name}
-                              {contact.alreadyRegistered && (
-                                <span
-                                  style={{
-                                    marginLeft: '0.4rem',
-                                    padding: '0.05rem 0.3rem',
-                                    borderRadius: '3px',
-                                    fontSize: '0.6rem',
-                                    fontWeight: 700,
-                                    backgroundColor: '#fef7e0',
-                                    color: '#b06000',
-                                  }}
-                                >
-                                  Exists
-                                </span>
-                              )}
-                            </td>
-                            <td style={{ padding: '0.6rem 0.85rem', color: '#5f6368' }}>
-                              {contact.email}
-                            </td>
-                            <td style={{ padding: '0.6rem 0.85rem' }}>
+                  <DataTable
+                    data={pendingList}
+                    columns={[
+                      {
+                        key: 'name',
+                        header: 'Client Name',
+                        render: (contact) => (
+                          <>
+                            {contact.name}
+                            {contact.alreadyRegistered && (
                               <span
                                 style={{
-                                  display: 'inline-block',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: '4px',
-                                  fontSize: '0.65rem',
+                                  marginLeft: '0.4rem',
+                                  padding: '0.05rem 0.3rem',
+                                  borderRadius: '3px',
+                                  fontSize: '0.6rem',
                                   fontWeight: 700,
-                                  textTransform: 'uppercase',
-                                  backgroundColor:
-                                    contact.type === 'corporate' ? '#e8f0fe' : '#e6f4ea',
-                                  color: contact.type === 'corporate' ? '#1a73e8' : '#137333',
+                                  backgroundColor: '#fef7e0',
+                                  color: '#b06000',
                                 }}
                               >
-                                {contact.type}
+                                Exists
                               </span>
-                            </td>
-                            <td style={{ padding: '0.6rem 0.85rem', color: '#5f6368' }}>
-                              {contact.createdAt
-                                ? new Date(contact.createdAt.toMillis()).toLocaleString()
-                                : 'Just now'}
-                            </td>
-                            <td style={{ padding: '0.6rem 0.85rem', textAlign: 'center' }}>
-                              <div
-                                style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}
-                              >
-                                <button
-                                  onClick={() => {
-                                    if (selectedPendingContact?.id === contact.id) {
-                                      setSelectedPendingContact(null);
-                                    } else {
-                                      setSelectedPendingContact(contact);
-                                    }
-                                  }}
-                                  style={{
-                                    padding: '0.3rem 0.75rem',
-                                    border: '1px solid #dadce0',
-                                    backgroundColor: 'var(--color-bg-surface)',
-                                    borderRadius: '4px',
-                                    fontWeight: 600,
-                                    fontSize: '0.72rem',
-                                    color: '#1a73e8',
-                                    cursor: 'pointer',
-                                  }}
-                                >
-                                  {selectedPendingContact?.id === contact.id
-                                    ? 'Cancel'
-                                    : 'Assign / Onboard'}
-                                </button>
-                                <a
-                                  href={contact.zohoLink}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    padding: '0.3rem',
-                                    border: '1px solid #dadce0',
-                                    backgroundColor: 'var(--color-bg-surface)',
-                                    borderRadius: '4px',
-                                    color: '#5f6368',
-                                    textDecoration: 'none',
-                                  }}
-                                  title="Open in Zoho Books"
-                                >
-                                  <ExternalLink size={12} />
-                                </a>
-                              </div>
-                            </td>
-                          </tr>
-
-                          {/* Assignment expansion drawer */}
-                          {selectedPendingContact?.id === contact.id && (
-                            <tr>
-                              <td
-                                colSpan={5}
-                                style={{
-                                  backgroundColor: '#f8f9fa',
-                                  padding: '1rem 1.5rem',
-                                  borderBottom: '1px solid #dadce0',
-                                  animation: 'fadeIn 0.2s ease-out',
-                                }}
-                              >
+                            )}
+                          </>
+                        )
+                      },
+                      {
+                        key: 'email',
+                        header: 'Email',
+                        render: (contact) => <span style={{ color: '#5f6368' }}>{contact.email}</span>
+                      },
+                      {
+                        key: 'type',
+                        header: 'Type',
+                        render: (contact) => (
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              padding: '0.1rem 0.4rem',
+                              borderRadius: '4px',
+                              fontSize: '0.65rem',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                              backgroundColor:
+                                contact.type === 'corporate' ? '#e8f0fe' : '#e6f4ea',
+                              color: contact.type === 'corporate' ? '#1a73e8' : '#137333',
+                            }}
+                          >
+                            {contact.type}
+                          </span>
+                        )
+                      },
+                      {
+                        key: 'createdAt',
+                        header: 'Date Notified',
+                        render: (contact) => (
+                          <span style={{ color: '#5f6368' }}>
+                            {contact.createdAt
+                              ? new Date(contact.createdAt.toMillis()).toLocaleString()
+                              : 'Just now'}
+                          </span>
+                        )
+                      },
+                      {
+                        key: 'actions',
+                        header: 'Actions',
+                        align: 'center',
+                        render: (contact) => (
+                          <div
+                            style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}
+                          >
+                            <button
+                              onClick={() => {
+                                if (selectedPendingContact?.id === contact.id) {
+                                  setSelectedPendingContact(null);
+                                } else {
+                                  setSelectedPendingContact(contact);
+                                }
+                              }}
+                              style={{
+                                padding: '0.3rem 0.75rem',
+                                border: '1px solid #dadce0',
+                                backgroundColor: 'var(--color-bg-surface)',
+                                borderRadius: '4px',
+                                fontWeight: 600,
+                                fontSize: '0.72rem',
+                                color: '#1a73e8',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {selectedPendingContact?.id === contact.id
+                                ? 'Cancel'
+                                : 'Assign / Onboard'}
+                            </button>
+                            <a
+                              href={contact.zohoLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                padding: '0.3rem',
+                                border: '1px solid #dadce0',
+                                backgroundColor: 'var(--color-bg-surface)',
+                                borderRadius: '4px',
+                                color: '#5f6368',
+                                textDecoration: 'none',
+                              }}
+                              title="Open in Zoho Books"
+                            >
+                              <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        )
+                      }
+                    ]}
+                    keyField="id"
+                    expandableRender={(contact) => {
+                      if (selectedPendingContact?.id !== contact.id) return null;
+                      return (
                                 <div
                                   style={{
                                     display: 'grid',
                                     gridTemplateColumns: '1fr 1.5fr',
                                     gap: '2rem',
                                     alignItems: 'start',
+                                    padding: '1rem 1.5rem'
                                   }}
                                 >
                                   {/* Left context description */}
@@ -1833,13 +1790,9 @@ export default function AdminZohoCRMWidget({
                                     </button>
                                   </div>
                                 </div>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </tbody>
-                  </table>
+                      );
+                    }}
+                  />
                 </div>
               </div>
             )}

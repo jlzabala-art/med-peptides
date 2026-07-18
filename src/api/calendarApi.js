@@ -125,9 +125,11 @@ export async function createCalendarEvent(eventData) {
   const uid = auth.currentUser?.uid;
   if (!uid) throw new Error('Not authenticated');
 
+  const mergedOwnerIds = Array.from(new Set([uid, ...(eventData.ownerIds || [])]));
+
   const ref = await addDoc(collection(db, 'calendar_events'), {
     ...eventData,
-    ownerIds: [uid],
+    ownerIds: mergedOwnerIds,
     reminderSent: false,
     createdAt: serverTimestamp(),
   });

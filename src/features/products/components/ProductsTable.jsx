@@ -13,6 +13,7 @@ import DataModule from '../../../components/ui/DataModule';
 import TextField from '../../../components/ui/TextField';
 import Select from '../../../components/ui/Select';
 import PaginationControl from '../../../components/common/PaginationControl';
+import SupplierDetailDrawer from '../../../components/admin/suppliers/SupplierDetailDrawer';
 
 // Admin Components
 import AdminSupplyNotifierWidget from '../../../components/admin/gadgets/AdminSupplyNotifierWidget';
@@ -55,6 +56,8 @@ export default function ProductsTable({
   const [searchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
   const initialNew = searchParams.get('new') === 'true';
+
+  const [linkedSupplier, setLinkedSupplier] = useState(null);
 
   const {
     isCreateProductModalOpen, setIsCreateProductModalOpen,
@@ -366,7 +369,7 @@ export default function ProductsTable({
 
   const suppliersToShow = [...new Set(products.map((p) => p.supplier).filter(Boolean))];
 
-  const columns = getAdminProductsColumns({
+  const baseColumns = useMemo(() => getAdminProductsColumns({
     isAdmin,
     user,
     readOnly,
@@ -389,7 +392,37 @@ export default function ProductsTable({
         toast.error('Error al buscar precios.');
       }
     }
-  });
+  }), [isAdmin, user, readOnly, savingProduct, router, updateProduct, deleteProduct]);
+
+  const columns = useMemo(() => {
+    return baseColumns.map(col => {
+      if (col.key === 'supplier') {
+        return {
+          ...col,
+          render: (row) => {
+            const supplierName = row.supplier || row['Supplier'];
+            if (!supplierName) return '-';
+            return (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLinkedSupplier({ name: supplierName, companyName: supplierName });
+                }}
+                style={{ 
+                  background: 'none', border: 'none', padding: 0, 
+                  color: 'var(--primary)', cursor: 'pointer', 
+                  fontWeight: 600, textDecoration: 'underline' 
+                }}
+              >
+                {supplierName}
+              </button>
+            );
+          }
+        };
+      }
+      return col;
+    });
+  }, [baseColumns]);
 
   const renderExpandedRow = (groupItem) => {
     const targetProduct = groupItem.isGroup && groupItem.variants && groupItem.variants[0]
@@ -587,6 +620,7 @@ export default function ProductsTable({
       {/* Modals */}
       <BulkOrderSelectionModal isOpen={isBulkOrderModalOpen} onClose={() => { setIsBulkOrderModalOpen(false); clearSelection(); }} selectedProducts={productsToBulkOrder} />
       <CreateProductModal isOpen={isCreateProductModalOpen} onClose={() => setIsCreateProductModalOpen(false)} onCreated={() => { setIsCreateProductModalOpen(false); fetchProducts(); }} />
+      <SupplierDetailDrawer isOpen={!!linkedSupplier} onClose={() => setLinkedSupplier(null)} supplier={linkedSupplier} />
     </DataModule>
   );
 }

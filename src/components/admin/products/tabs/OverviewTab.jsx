@@ -1,8 +1,10 @@
 import React from 'react';
 import { Card, StatusChip, Button } from '../../../ui';
-import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers } from '@/lib/icons';
+import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers, Sparkles } from '@/lib/icons';
 
-export default function OverviewTab({ form, setForm }) {
+const categoriesList = ['Peptides', 'Supplements', 'Genetic Tests', 'Medical Services', 'Recovery & Repair', 'Longevity'];
+
+export default function OverviewTab({ form, setForm, triggerAiAction }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* General Info integrated into Overview */}

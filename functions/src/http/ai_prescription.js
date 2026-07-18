@@ -24,6 +24,37 @@ const {
 } = require("./ai_utils");
 const utils = require("./ai_utils");
 const { formatResponse } = require("./ai_formatter");
+const { z } = require("zod");
+
+const prescriptionSchema = z.object({
+  catalog: z.array(z.object({
+    name: z.string().optional(),
+    product: z.object({
+      id: z.string().optional()
+    }).optional(),
+    strength: z.string().optional(),
+    quantity: z.string().optional(),
+    category: z.string().optional(),
+    dosage_instructions: z.string().optional(),
+    duration: z.string().optional(),
+    vials_needed: z.number().optional(),
+    form: z.string().optional()
+  })).optional().default([]),
+  quotation: z.array(z.object({
+    name: z.string().optional(),
+    actives: z.array(z.object({
+      active: z.string().optional(),
+      concentration: z.string().optional()
+    })).optional().default([]),
+    vehicle: z.string().optional(),
+    volume: z.string().optional(),
+    specialInstructions: z.string().optional(),
+    duration: z.string().optional(),
+    vials_needed: z.number().optional(),
+    form: z.string().optional()
+  })).optional().default([]),
+  warnings: z.array(z.string()).optional().default([])
+});
 
 /**
  * Core prescription handler logic.
@@ -110,6 +141,7 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
       "name": "Custom CJC/Ipamorelin Blend",
       "actives": [{"active": "CJC-1295", "concentration": "5mg"}, {"active": "Ipamorelin", "concentration": "5mg"}],
       "vehicle": "Injectable Vial",
+      "form": "Injectable",
       "volume": "10mg total",
       "duration": "12 weeks",
       "vials_needed": 4,
@@ -143,9 +175,10 @@ CRITICAL: For peptide prescriptions, it is fundamental to identify the total num
     // ── Parse JSON response ───────────────────────────────────────────────────
     let parsed;
     try {
-      parsed = JSON.parse(reply);
+      const rawParsed = JSON.parse(reply);
+      parsed = prescriptionSchema.parse(rawParsed);
     } catch (jsonErr) {
-      structuredLogger.error(`[prescriptionAiAssistant] Failed to parse JSON reply:`, reply, jsonErr);
+      structuredLogger.error(`[prescriptionAiAssistant] Failed to parse or validate JSON reply:`, reply, jsonErr);
       parsed = {
         catalog: [],
         quotation: [{

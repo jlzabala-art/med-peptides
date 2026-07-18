@@ -19,6 +19,7 @@ import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import { FileText, Loader2, Plus, Sparkles, CheckCircle, AlertTriangle, Send, Receipt, Download, Activity } from '@/lib/icons';
+import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 
 export default function AdminRFQTab({ isSubTab = false }) {
   const { user } = useAuth();
@@ -480,7 +481,8 @@ export default function AdminRFQTab({ isSubTab = false }) {
   ];
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isSubTab ? '0' : '0 0 3rem 0', width: '100%' }}>
+    <AdminTabErrorBoundary tabId="rfqs" tabLabel="Procurement RFQs">
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isSubTab ? '0' : '0 0 3rem 0', width: '100%' }}>
       {!isSubTab && (
         <PageHeader
           title="Procurement & Sourcing RFQs"
@@ -860,5 +862,6 @@ export default function AdminRFQTab({ isSubTab = false }) {
         @keyframes spin { 100% { transform: rotate(360deg); } }
       `}</style>
     </div>
+    </AdminTabErrorBoundary>
   );
 }

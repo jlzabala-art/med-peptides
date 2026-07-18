@@ -1,55 +1,28 @@
-"use client";
-
-import React, { useState } from 'react';
+import React from 'react';
 import PageHeader from '../ui/PageHeader';
+import { Tabs } from '../ui/Tabs';
 import AdminLeadsTab from './AdminLeadsTab';
 import AdminClinicsTab from './AdminClinicsTab';
 import AdminAgencyDealsTab from './AdminAgencyDealsTab';
 import AdminZohoCRMWidget from './gadgets/AdminZohoCRMWidget';
 
 export default function AdminCrmTab() {
-  const [activeTab, setActiveTab] = useState('crm'); // crm | leads | clinics | agency
+  const tabs = [
+    { id: 'crm', label: 'CRM Master', content: <AdminZohoCRMWidget isSubTab={true} /> },
+    { id: 'leads', label: 'Leads', content: <AdminLeadsTab isSubTab={true} /> },
+    { id: 'clinics', label: 'Clinics', content: <AdminClinicsTab isSubTab={true} /> },
+    { id: 'agency', label: 'Agency Deals', content: <AdminAgencyDealsTab isSubTab={true} /> },
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--color-bg-app)' }}>
       <PageHeader
         title="CRM & Accounts"
         subtitle="Manage leads, clinics, agency deals, and Zoho CRM integration."
-        actions={
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setActiveTab('crm')}
-              className={`btn ${activeTab === 'crm' ? 'btn-primary' : 'btn-outline'}`}
-            >
-              CRM Master
-            </button>
-            <button
-              onClick={() => setActiveTab('leads')}
-              className={`btn ${activeTab === 'leads' ? 'btn-primary' : 'btn-outline'}`}
-            >
-              Leads
-            </button>
-            <button
-              onClick={() => setActiveTab('clinics')}
-              className={`btn ${activeTab === 'clinics' ? 'btn-primary' : 'btn-outline'}`}
-            >
-              Clinics
-            </button>
-            <button
-              onClick={() => setActiveTab('agency')}
-              className={`btn ${activeTab === 'agency' ? 'btn-primary' : 'btn-outline'}`}
-            >
-              Agency Deals
-            </button>
-          </div>
-        }
       />
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-        {activeTab === 'crm' && <AdminZohoCRMWidget isSubTab={true} />}
-        {activeTab === 'leads' && <AdminLeadsTab isSubTab={true} />}
-        {activeTab === 'clinics' && <AdminClinicsTab isSubTab={true} />}
-        {activeTab === 'agency' && <AdminAgencyDealsTab isSubTab={true} />}
+        <Tabs tabs={tabs} defaultTab="crm" />
       </div>
     </div>
   );

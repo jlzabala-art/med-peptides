@@ -1497,7 +1497,7 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
             </div>
 
             <div className={`pse-procurement-body${procurementOpen ? ' pse-procurement-body--open' : ''}`}>
-              <table className="pse-ptable">
+              <table className="gcp-table">
                 <thead>
                   <tr>
                     <th>Compound</th>
@@ -1622,7 +1622,7 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
 
               {/* Accordion body */}
               <div className={`pse-phase-body${isOpen ? ' pse-phase-body--open' : ''}`}>
-                <table className="pse-table">
+                <table className="gcp-table">
                   <thead>
                     <tr>
                       <th>Compound</th>

@@ -4,13 +4,14 @@ import DataTable from '../../../ui/DataTable';
 import EmptyState from '../../../ui/EmptyState';
 import { Building } from '@/lib/icons';
 
-export default function SuppliersTab({ product, form }) {
+export default function SuppliersTab({ product, form, onSupplierClick }) {
     const variants = product?.variants || [];
     const uniqueSuppliersMap = {};
     variants.forEach(v => {
       if (v.supplier && !uniqueSuppliersMap[v.supplier]) {
         uniqueSuppliersMap[v.supplier] = {
           name: v.supplier,
+          companyName: v.supplier,
           leadTime: v.supplierLeadTime || form.supplierLeadTime || 'N/A',
           moq: v.moq || form.moq || 'N/A',
           variantsCount: 1
@@ -43,8 +44,13 @@ export default function SuppliersTab({ product, form }) {
                   key: '_actions',
                   header: 'Actions',
                   align: 'right',
-                  render: () => (
-                    <button style={{ padding: '0.3rem 0.6rem', border: '1px solid #334155', borderRadius: '4px', backgroundColor: 'transparent', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.75rem' }}>
+                  render: (r) => (
+                    <button 
+                      onClick={() => {
+                        if (onSupplierClick) onSupplierClick(r);
+                      }}
+                      style={{ padding: '0.3rem 0.6rem', border: '1px solid #334155', borderRadius: '4px', backgroundColor: 'transparent', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.75rem' }}
+                    >
                       View Details
                     </button>
                   )

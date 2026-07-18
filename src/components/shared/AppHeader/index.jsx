@@ -23,6 +23,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useAuth } from '../../../context/AuthContext';
 import { useHeaderContext } from '../../../context/HeaderContext';
+import { useRoleAccess } from '../../../hooks/useRoleAccess';
 import { useTheme } from '../../../context/ThemeContext';
 import { useNotifications } from '../../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
@@ -49,7 +50,8 @@ export default function AppHeader({
   const { unreadCount } = useNotifications();
   const { t, i18n } = useTranslation();
   const { simulatedRole, exitSimulation } = useSimulationStore();
-  const isAdmin = activeRole === 'admin' || userProfile?.role === 'admin' || userProfile?.roles?.includes('admin');
+  const { is } = useRoleAccess();
+  const isAdmin = is('admin') || userProfile?.roles?.includes('admin');
   const simulatedRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
 
   const toggleLanguage = () => {

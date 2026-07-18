@@ -89,6 +89,7 @@ export default function PhysicianProfileDrawer({ doctor, onClose }) {
       onClose={onClose}
       headerContent={headerContent}
       headerColor="var(--color-bg-surface)"
+      width="800px"
     >
       <StandardDrawerTabs 
         tabs={tabs} 

@@ -7,6 +7,7 @@ import { StatusChip, MetricCard } from '../ui';
 import DataModule from '../ui/DataModule';
 import PatientOnboardingWizard from '../admin/patients/PatientOnboardingWizard';
 import PatientProfileWorkspace from '../admin/patients/PatientProfileWorkspace';
+import StandardDrawer from '../ui/StandardDrawer';
 import { formatAEDtoDual } from '../../utils/currencies';
 import { useSearchParams } from 'next/navigation';
 
@@ -30,8 +31,7 @@ function PatientKPIs() {
     { label: 'Total Patients', value: aggs?.totalPatients || 0, color: 'var(--color-primary)', icon: Users },
     { label: 'Active', value: aggs?.activePatients || 0, color: 'var(--color-success)', icon: Activity },
     { label: 'New This Month', value: aggs?.newPatients || 0, color: '#8b5cf6', icon: UserPlus },
-    { label: 'Awaiting Follow-Up', value: aggs?.awaitingFollowUp || 0, color: 'var(--color-warning)', alert: (aggs?.awaitingFollowUp || 0) > 0, icon: Clock },
-    { label: 'Total Revenue', value: fmtCurrency(aggs?.totalRevenue || 0), color: '#ec4899', icon: DollarSign }
+    { label: 'Awaiting Follow-Up', value: aggs?.awaitingFollowUp || 0, color: 'var(--color-warning)', alert: (aggs?.awaitingFollowUp || 0) > 0, icon: Clock }
   ];
 
   return (
@@ -53,6 +53,7 @@ function PatientKPIs() {
 
 export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.' }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
@@ -197,7 +198,44 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       searchLoading={algoliaLoading}
       namespace="admin-patients"
       kpis={<PatientKPIs />}
-      filtersBar={<PatientFiltersBar filters={filters} setFilters={setFilters} doctors={doctors} />}
+      filterOptions={[
+        {
+          key: 'status',
+          label: 'Status',
+          value: filters.status || '',
+          options: [
+            { label: 'All Statuses', value: '' },
+            { label: 'Active', value: 'Active' },
+            { label: 'Inactive', value: 'Inactive' },
+            { label: 'Archived', value: 'Archived' }
+          ],
+          onChange: (val) => setFilters(prev => ({ ...prev, status: val || undefined }))
+        },
+        {
+          key: 'physicianId',
+          label: 'Physician',
+          value: filters.physicianId || '',
+          options: [
+            { label: 'All Physicians', value: '' },
+            ...(doctors || []).map(d => ({ label: d.name || d.email, value: d.id }))
+          ],
+          onChange: (val) => setFilters(prev => ({ ...prev, physicianId: val || undefined }))
+        }
+      ]}
+      filters={[
+        filters.status && { 
+          key: 'status', 
+          label: 'Status', 
+          value: filters.status, 
+          onRemove: () => setFilters(prev => ({ ...prev, status: undefined })) 
+        },
+        filters.physicianId && { 
+          key: 'physician', 
+          label: 'Physician', 
+          value: (doctors || []).find(d => d.id === filters.physicianId)?.name || 'Unknown', 
+          onRemove: () => setFilters(prev => ({ ...prev, physicianId: undefined })) 
+        }
+      ].filter(Boolean)}
       data={finalFiltered}
       loading={loading}
       hasMore={hasMore}
@@ -209,14 +247,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
          clearSelection();
          newArr.forEach(id => toggleRowSelection(id));
       }}
-      expandableRender={(row) => (
-        <div style={{ padding: '1rem', background: '#f8fafc', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-          <PatientProfileWorkspace 
-            patient={row}
-            onClose={() => {}}
-          />
-        </div>
-      )}
+      onRowClick={(row) => setSelectedPatient(row)}
       emptyState={{
         title: "Welcome to Patient Management",
         description: "Manage patients, programs, clinics, physicians, prescriptions, and follow-ups from one centralized workspace.",
@@ -267,6 +298,19 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             window.location.reload(); 
           }}
         />
+      )}
+      
+      {selectedPatient && (
+        <StandardDrawer
+          title="Patient Profile"
+          isOpen={true}
+          onClose={() => setSelectedPatient(null)}
+        >
+          <PatientProfileWorkspace 
+            patient={selectedPatient}
+            onClose={() => setSelectedPatient(null)}
+          />
+        </StandardDrawer>
       )}
     </DataModule>
   );

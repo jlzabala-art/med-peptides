@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { appointmentRepository } from '../repositories/appointmentRepository';
 import { useAuth } from '../context/AuthContext';
 import { Calendar as CalendarIcon, Clock, Users, Pill, CheckCircle2, ChevronLeft, ChevronRight, Filter, Search, AlertTriangle, FileText, BrainCircuit, Activity, HeartPulse, RefreshCw, Plus } from '@/lib/icons';
-import AdminPageHeader from '../components/admin/AdminPageHeader';
+import PageHeader from '../components/ui/PageHeader';
 
 import { toast } from 'react-hot-toast';
 
@@ -533,7 +533,7 @@ export default function DoctorAppointments() {
 
   return (
     <div style={styles.container}>
-      <AdminPageHeader
+      <PageHeader
         title="Clinical Operations Center"
         subtitle="AI-powered schedule, operational metrics, and protocol timelines."
         icon={CalendarIcon}

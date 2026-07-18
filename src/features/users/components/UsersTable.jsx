@@ -13,7 +13,7 @@ import { logAction } from '../../../services/auditLogger';
 import { useToast } from '../../../hooks/useToast';
 import notifier from '../../../services/NotificationService';
 
-import AdminPageHeader from '../../../components/admin/AdminPageHeader';
+import PageHeader from '../../../components/ui/PageHeader';
 import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
 import DataTable from '../../../components/ui/DataTable';
 import BulkActionsBar from '../../../components/ui/BulkActionsBar';

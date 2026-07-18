@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, ArrowUpRight, Stethoscope } from '@/lib/icons';
 
-export default function OverviewTab({ rx }) {
+export default function OverviewTab({ rx, onProtocolClick }) {
   const patient = rx.patient?.name || rx.patientName || 'Unknown Patient';
   const patEmail = rx.patient?.email || rx.patientEmail || null;
   const patPhone = rx.patient?.phone || rx.patientPhone || null;
@@ -192,17 +192,30 @@ export default function OverviewTab({ rx }) {
                 Protocol
               </div>
               <div
+                onClick={() => {
+                  if (onProtocolClick && rx.protocolId) {
+                    onProtocolClick({ id: rx.protocolId, protocol_title: protocol });
+                  }
+                }}
                 style={{
                   background: 'white',
                   border: '1px solid #e2e8f0',
                   borderRadius: '8px',
                   padding: '0.7rem 1rem',
                   fontSize: '0.9rem',
-                  color: '#6366f1',
+                  color: rx.protocolId && onProtocolClick ? '#2563eb' : '#6366f1',
                   fontWeight: 700,
+                  cursor: rx.protocolId && onProtocolClick ? 'pointer' : 'default',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'background 0.2s',
                 }}
+                onMouseEnter={(e) => { if (rx.protocolId && onProtocolClick) e.currentTarget.style.background = '#f8fafc'; }}
+                onMouseLeave={(e) => { if (rx.protocolId && onProtocolClick) e.currentTarget.style.background = 'white'; }}
               >
                 {protocol}
+                {rx.protocolId && onProtocolClick && <ArrowUpRight size={14} color="#2563eb" />}
               </div>
             </div>
           )}

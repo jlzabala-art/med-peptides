@@ -82,6 +82,12 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   const [comparisonSelection, setComparisonSelection] = useState([]);
   const [isPulsing, setIsPulsing] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!isPulsing) return;
     const handleClick = (e) => {
@@ -723,6 +729,8 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     </div>
   );
 
+
+  if (!mounted) return null;
 
   return (
     <div className="embedded-clinical-assistant" style={{ 

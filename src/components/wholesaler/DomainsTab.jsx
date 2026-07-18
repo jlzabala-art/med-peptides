@@ -13,6 +13,7 @@ import { db } from '../../firebase';
 
 import { useAuth } from '../../context/AuthContext';
 import { Globe, Shield, RefreshCw, Check, AlertTriangle, ArrowRight, Server } from '@/lib/icons';
+import DataTable from '../ui/DataTable';
 
 
 
@@ -230,26 +231,40 @@ export default function DomainsTab() {
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.8125rem', marginBottom: '1rem' }}>
               To complete domain verification and allow our edge network to generate your SSL certificate, please log in to your DNS provider and add the following CNAME record:
             </p>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8125rem', background: 'var(--color-bg-app)', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-              <thead>
-                <tr style={{ textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '8px 12px', color: 'var(--color-text-secondary)' }}>Type</th>
-                  <th style={{ padding: '8px 12px', color: 'var(--color-text-secondary)' }}>Host (Name)</th>
-                  <th style={{ padding: '8px 12px', color: 'var(--color-text-secondary)' }}>Target (Value)</th>
-                  <th style={{ padding: '8px 12px', color: 'var(--color-text-secondary)' }}>TTL</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ padding: '10px 12px', fontFamily: 'monospace', fontWeight: 600 }}>CNAME</td>
-                  <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>
-                    {domainInfo.customDomain.includes('.') ? domainInfo.customDomain.split('.')[0] : '@'}
-                  </td>
-                  <td style={{ padding: '10px 12px', fontFamily: 'monospace' }}>cname.atlas-health.com.</td>
-                  <td style={{ padding: '10px 12px' }}>Automatic (3600)</td>
-                </tr>
-              </tbody>
-            </table>
+            <DataTable
+              data={[
+                {
+                  id: '1',
+                  type: 'CNAME',
+                  host: domainInfo.customDomain.includes('.') ? domainInfo.customDomain.split('.')[0] : '@',
+                  target: 'cname.atlas-health.com.',
+                  ttl: 'Automatic (3600)'
+                }
+              ]}
+              columns={[
+                { 
+                  key: 'type', 
+                  header: 'Type', 
+                  render: (row) => <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{row.type}</span>
+                },
+                { 
+                  key: 'host', 
+                  header: 'Host (Name)', 
+                  render: (row) => <span style={{ fontFamily: 'monospace' }}>{row.host}</span>
+                },
+                { 
+                  key: 'target', 
+                  header: 'Target (Value)', 
+                  render: (row) => <span style={{ fontFamily: 'monospace' }}>{row.target}</span>
+                },
+                { 
+                  key: 'ttl', 
+                  header: 'TTL', 
+                  render: (row) => row.ttl
+                }
+              ]}
+              keyField="id"
+            />
 
             <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.75rem', marginTop: '0.75rem' }}>
               * DNS changes can take up to 24–48 hours to propagate worldwide. Once detected, SSL is generated automatically.
