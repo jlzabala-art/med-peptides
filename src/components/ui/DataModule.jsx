@@ -5,6 +5,7 @@ import GridSkeleton from './skeletons/GridSkeleton';
 import DataTable from './DataTable';
 import BulkActionsBar from './BulkActionsBar';
 import ErrorBoundary from './ErrorBoundary';
+import PageFooter from './PageFooter';
 
 export default function DataModule({
   title,
@@ -35,6 +36,12 @@ export default function DataModule({
   expandableRender,      // Added expandableRender prop
   emptyState = {},
   bulkActions = [], // { label, icon, onClick, variant }
+  // Footer props
+  lastUpdated,
+  onRefresh,
+  onExportCsv,
+  onExportPdf,
+  customFooterActions,
   children
 }) {
   return (
@@ -111,6 +118,17 @@ export default function DataModule({
             </>
           )}
         </div>
+        
+        {/* Page Footer (Sticky inside the table container) */}
+        <PageFooter
+          isSticky={true}
+          selectedCount={selectedIds?.length || 0}
+          lastUpdated={lastUpdated}
+          onRefresh={onRefresh}
+          onExportCsv={onExportCsv}
+          onExportPdf={onExportPdf}
+          customActions={customFooterActions}
+        />
       </div>
 
       <BulkActionsBar
