@@ -15,7 +15,9 @@ export default function AppSidebar({
   activeId,
   onNavigate,
   isMobile,
-  footer
+  footer,
+  isOpen,
+  onClose
 }) {
   const { 
     expandedGroups, toggleGroup, setExpandedGroups,
@@ -109,7 +111,21 @@ export default function AppSidebar({
   };
 
   return (
-    <aside className={`app-sidebar ${!expanded ? 'collapsed' : ''}`}>
+    <>
+      {isMobile && isOpen && (
+        <div 
+          className="sb-mobile-overlay" 
+          onClick={onClose}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.4)',
+            zIndex: 999,
+            backdropFilter: 'blur(2px)'
+          }}
+        />
+      )}
+      <aside className={`app-sidebar ${!expanded ? 'collapsed' : ''} ${isMobile && isOpen ? 'mobile-open' : ''}`}>
       {/* Top Header Section */}
       <div className="sb-header">
         <div className="sb-brand">
@@ -225,5 +241,6 @@ export default function AppSidebar({
         </div>
       )}
     </aside>
+    </>
   );
 }

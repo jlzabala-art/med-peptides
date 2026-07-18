@@ -362,6 +362,16 @@
   .app-sidebar {
     display: none !important;
   }
+  
+  .app-sidebar.mobile-open {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+  }
 
   /* Show Bottom Navigation */
   .mobile-bottom-nav {
