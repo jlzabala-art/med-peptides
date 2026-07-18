@@ -189,3 +189,11 @@
 - Nunca diseñes pantallas o tablas que solo funcionen en monitores anchos (desktop). Utiliza enfoques responsivos, `flex-wrap`, media queries (`@media (max-width: 768px)`), y el sistema integrado de `DataTable` (que convierte filas en tarjetas móviles).
 - Antes de implementar cualquier cambio visual o funcional, pregúntate: *¿Cómo se verá y usará esto en un teléfono móvil?*
 - Evita anchos fijos (`width: 800px`), usa anchos fluidos (`width: 100%`, `max-width`) y asegura que los botones y áreas táctiles sean lo suficientemente grandes (mínimo 44x44px).
+
+## 24. Filtros Activos y Temporales en Tablas (Golden Rule)
+- **Toda tabla o listado de datos debe mostrar explícitamente los filtros que están aplicados actualmente.**
+- **Visibilidad:** Los filtros activos (por ejemplo: "Estado: Pendiente", "Rol: Paciente") deben renderizarse como chips extraíbles debajo del buscador global o de la cabecera.
+- **Filtro Temporal por Defecto:** Siempre debe existir un filtro temporal activo por defecto para limitar la carga inicial (ej. "Últimos 30 días", "Este mes") y para darle contexto al usuario de por qué está viendo esos datos en particular.
+- **Reseteo fácil:** Debe haber un botón claro de "Limpiar filtros" o "Reset" que devuelva la vista al estado por defecto. Nunca el usuario debe sentirse "atrapado" en un listado vacío sin saber cómo quitar los filtros.
+- **Sincronización de URL:** Idealmente, los filtros deben reflejarse en los parámetros de la URL (`?status=pending&range=30d`) para que al recargar o compartir la URL, la vista de la tabla se mantenga.
+

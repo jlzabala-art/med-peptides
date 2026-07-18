@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { HelpCircle } from '@/lib/icons';
+import Breadcrumb from './Breadcrumb';
 
 /**
  * PageHeader - Unified header for all panels (Admin, Doctor, Patient, Wholeseller)
@@ -13,6 +14,7 @@ export default function PageHeader({
   subtitle,
   icon: Icon,
   actions,
+  breadcrumbs,
   panel = 'admin', // admin | doctor | patient | wholeseller
   iconBg,
   iconColor,
@@ -148,6 +150,7 @@ export default function PageHeader({
             </div>
           )}
           <div>
+            {breadcrumbs && <Breadcrumb items={breadcrumbs} />}
             <h2 className="page-header-title">{title}</h2>
             {subtitle && (
               <div className="page-header-subtitle">{subtitle}</div>
