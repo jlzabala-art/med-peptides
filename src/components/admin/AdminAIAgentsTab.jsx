@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
@@ -16,7 +16,8 @@ import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Network from "lucide-react/dist/esm/icons/network";
 import { useAIAgents } from '../../hooks/admin/useAIAgents';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
 // Default agents are now managed in useAIAgents
 
@@ -412,7 +413,7 @@ function SummaryBar({ agents }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function AdminAIAgentsTab() {
+export default function AdminAIAgentsTab({ isSubTab }) {
   const { agents, metrics, loading, refresh, toggleAgent, saveAgentConfig } = useAIAgents();
   const [toast, setToast] = useState(null);
   const [editModal, setEditModal] = useState({ open: false, agentKey: null, data: {} });
@@ -454,19 +455,43 @@ export default function AdminAIAgentsTab() {
     });
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredAgentEntries = useMemo(() => {
+    if (!searchTerm) return Object.entries(agents);
+    const term = searchTerm.toLowerCase();
+    return Object.entries(agents).filter(([key, agent]) =>
+      (agent.name || key).toLowerCase().includes(term) ||
+      (agent.description || '').toLowerCase().includes(term)
+    );
+  }, [agents, searchTerm]);
+
   return (
     <div className="anim-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <AdminPageHeader 
-        title="AI Agents Topology"
-        subtitle="Manage, configure, and monitor all Atlas autonomous agents across the network."
-        icon={Network}
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="AI Agents Topology"
+          subtitle="Manage, configure, and monitor all Atlas autonomous agents across the network."
+          icon={Network}
+        />
+      )}
+
+      <div style={{ marginBottom: '0.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search agents by name or function..."
+          resultCount={filteredAgentEntries.length}
+          namespace="admin-ai-agents"
+          size="lg"
+        />
+      </div>
 
       <AgentsSummaryBar agents={agents} />
 
       {/* Agent Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem' }}>
-        {Object.entries(agents).map(([key, agent]) => (
+        {filteredAgentEntries.map(([key, agent]) => (
           <AgentCard
             key={key}
             agentKey={key}

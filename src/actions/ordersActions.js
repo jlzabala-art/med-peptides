@@ -42,6 +42,51 @@ export async function fetchOrdersAction({ limitCount = 50, buyerId = null, accou
   }
 }
 
+import { AggregateField } from 'firebase-admin/firestore';
+
+export async function fetchOrdersMetricsAction({ buyerId = null, accountManagerId = null, doctorId = null } = {}) {
+  try {
+    if (!adminDb) return { total: 0, pending: 0, shipped: 0, completed: 0, totalRevenue: 0 };
+    
+    let baseQuery = adminDb.collection('orders');
+    
+    if (buyerId) {
+      baseQuery = baseQuery.where('paymentOwnerId', '==', buyerId);
+    }
+    if (accountManagerId) {
+      baseQuery = baseQuery.where('accountManagerId', '==', accountManagerId);
+    }
+    if (doctorId) {
+      baseQuery = baseQuery.where('doctorId', '==', doctorId);
+    }
+
+    const [
+      totalSnap,
+      pendingSnap,
+      shippedSnap,
+      completedSnap,
+      revenueSnap
+    ] = await Promise.all([
+      baseQuery.count().get(),
+      baseQuery.where('status', 'in', ['pending', 'processing']).count().get(),
+      baseQuery.where('status', '==', 'shipped').count().get(),
+      baseQuery.where('status', 'in', ['completed', 'delivered']).count().get(),
+      baseQuery.aggregate({ totalRevenue: AggregateField.sum('total') }).get().catch(() => ({ data: () => ({ totalRevenue: 0 }) }))
+    ]);
+
+    return {
+      total: totalSnap.data().count,
+      pending: pendingSnap.data().count,
+      shipped: shippedSnap.data().count,
+      completed: completedSnap.data().count,
+      totalRevenue: revenueSnap.data().totalRevenue || 0
+    };
+  } catch (error) {
+    console.error("Error fetching orders metrics:", error);
+    return { total: 0, pending: 0, shipped: 0, completed: 0, totalRevenue: 0 };
+  }
+}
+
 import { resolveVariantPrice } from '../utils/resolvePrice';
 import { DEFAULT_SETTINGS } from '../utils/constants';
 
@@ -201,3 +246,33 @@ export async function submitValidatedOrderAction({
   }
 }
 
+
+export async function fetchBulkOrdersAction({ limitCount = 50 } = {}) {
+  try {
+    if (!adminDb) {
+      console.warn("adminDb is null, falling back to empty array");
+      return [];
+    }
+
+    const snapshot = await adminDb.collection('bulk_orders')
+      .orderBy('createdAt', 'desc')
+      .limit(limitCount)
+      .get();
+    
+    const orders = snapshot.docs.map(doc => {
+      const data = doc.data();
+      if (data.createdAt && data.createdAt.toDate) {
+        data.createdAt = data.createdAt.toDate().toISOString();
+      }
+      if (data.updatedAt && data.updatedAt.toDate) {
+        data.updatedAt = data.updatedAt.toDate().toISOString();
+      }
+      return { id: doc.id, ...data };
+    });
+
+    return orders;
+  } catch (error) {
+    console.error("Error fetching bulk orders securely:", error);
+    return [];
+  }
+}

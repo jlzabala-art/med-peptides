@@ -7,17 +7,11 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Save from "lucide-react/dist/esm/icons/save";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import React, { useState } from 'react';
-import { addDoc, updateDoc, doc, collection, serverTimestamp } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
-
-
-
-
-
-
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { Card } from '../ui';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
+import DataTable from '../ui/DataTable';
 
 
 export default function BillForm({ bill, onClose }) {
@@ -148,91 +142,101 @@ export default function BillForm({ bill, onClose }) {
           </div>
 
           <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginBottom: '2rem' }}>
-            <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ backgroundColor: '#f8fafc' }}>
-                <tr>
-                  <th style={{ padding: '0.75rem', textAlign: 'left' }}>Item Description</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right', width: '100px' }}>Qty</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'center', width: '100px' }}>Unit</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right', width: '120px' }}>Unit Price</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right', width: '120px' }}>Total</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'center', width: '50px' }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx} style={{ borderTop: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '0.75rem' }}>
-                      <ProductAutocomplete
-                        value={item.itemName}
-                        onChange={(val) => updateItem(idx, 'itemName', val)}
-                        onSelect={(prod) => {
-                          if (prod) {
-                            const newItems = [...items];
-                            newItems[idx].itemName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
-                            if (prod.unit) newItems[idx].unit = prod.unit;
-                            if (prod.costPrice) newItems[idx].unitPrice = prod.costPrice;
-                            setItems(newItems);
-                          }
-                        }}
-                        placeholder="Search product (min. 3 chars)..."
-                      />
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
+            <DataTable
+              columns={[
+                {
+                  key: 'itemName',
+                  header: 'Item Description',
+                  render: (val, row, idx) => (
+                    <ProductAutocomplete
+                      value={val}
+                      onChange={(newVal) => updateItem(idx, 'itemName', newVal)}
+                      onSelect={(prod) => {
+                        if (prod) {
+                          const newItems = [...items];
+                          newItems[idx].itemName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
+                          if (prod.unit) newItems[idx].unit = prod.unit;
+                          if (prod.costPrice) newItems[idx].unitPrice = prod.costPrice;
+                          setItems(newItems);
+                        }
+                      }}
+                      placeholder="Search product (min. 3 chars)..."
+                    />
+                  ),
+                },
+                {
+                  key: 'quantity',
+                  header: 'Qty',
+                  render: (val, row, idx) => (
+                    <input 
+                      type="number" min="1"
+                      value={val} 
+                      onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
+                      className="gcp-input"
+                      style={{ width: '100%', textAlign: 'right' }}
+                    />
+                  ),
+                },
+                {
+                  key: 'unit',
+                  header: 'Unit',
+                  render: (val, row, idx) => (
+                    <select 
+                      value={val}
+                      onChange={(e) => updateItem(idx, 'unit', e.target.value)}
+                      className="gcp-input"
+                      style={{ width: '100%' }}
+                    >
+                      <option value="vial">vial</option>
+                      <option value="box">box</option>
+                      <option value="kg">kg</option>
+                    </select>
+                  ),
+                },
+                {
+                  key: 'unitPrice',
+                  header: 'Unit Price',
+                  render: (val, row, idx) => (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span>$</span>
                       <input 
-                        type="number" min="1"
-                        value={item.quantity} 
-                        onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
+                        type="number" min="0" step="0.01"
+                        value={val} 
+                        onChange={(e) => updateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
                         className="gcp-input"
                         style={{ width: '100%', textAlign: 'right' }}
                       />
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <select 
-                        value={item.unit}
-                        onChange={(e) => updateItem(idx, 'unit', e.target.value)}
-                        className="gcp-input"
-                        style={{ width: '100%' }}
-                      >
-                        <option value="vial">vial</option>
-                        <option value="box">box</option>
-                        <option value="kg">kg</option>
-                      </select>
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <span>$</span>
-                        <input 
-                          type="number" min="0" step="0.01"
-                          value={item.unitPrice} 
-                          onChange={(e) => updateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className="gcp-input"
-                          style={{ width: '100%', textAlign: 'right' }}
-                        />
-                      </div>
-                    </td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600 }}>
-                      ${(item.quantity * item.unitPrice).toFixed(2)}
-                    </td>
-                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                      <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot style={{ backgroundColor: '#f8fafc', borderTop: '2px solid #e2e8f0' }}>
-                <tr>
-                  <td colSpan="4" style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>Amount Due:</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>
-                    ${totalAmount.toFixed(2)}
-                  </td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'total',
+                  header: 'Total',
+                  render: (val, row) => (
+                    <span style={{ fontWeight: 600 }}>${((row.quantity || 0) * (row.unitPrice || 0)).toFixed(2)}</span>
+                  ),
+                },
+                {
+                  key: 'actions',
+                  header: '',
+                  render: (val, row, idx) => (
+                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                      <Trash2 size={16} />
+                    </button>
+                  ),
+                }
+              ]}
+              data={items}
+              keyField={(row, idx) => idx.toString()}
+            />
             {items.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No items added yet.</div>}
+            {items.length > 0 && (
+              <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderTop: '2px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontWeight: 600 }}>Amount Due:</span>
+                <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#0f172a' }}>${totalAmount.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px' }}>

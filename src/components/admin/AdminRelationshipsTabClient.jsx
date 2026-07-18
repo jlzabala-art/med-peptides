@@ -23,7 +23,7 @@ const CATEGORIES = [
   'Other Research Peptides',
 ];
 
-export default function AdminRelationshipsTabClient({ readOnly = false, initialProducts = null }) {
+export default function AdminRelationshipsTabClient({ readOnly = false, initialProducts = null, isSubTab = false }) {
   const [products, setProducts] = useState(initialProducts || []);
   const [loading, setLoading] = useState(!initialProducts);
   const [savingProduct, setSavingProduct] = useState(null);
@@ -201,29 +201,31 @@ export default function AdminRelationshipsTabClient({ readOnly = false, initialP
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '4rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: '1.25rem',
-              fontWeight: 800,
-              color: 'var(--color-primary)',
-            }}
-          >
-            Product-Category Relationships
-          </h2>
-          <p
-            style={{
-              margin: '0.25rem 0 0',
-              color: 'var(--color-text-secondary)',
-              fontSize: '0.9rem',
-            }}
-          >
-            Manage how products are organized within the catalog and investigational pathways.
-          </p>
+      {!isSubTab && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: '1.25rem',
+                fontWeight: 800,
+                color: 'var(--color-primary)',
+              }}
+            >
+              Product-Category Relationships
+            </h2>
+            <p
+              style={{
+                margin: '0.25rem 0 0',
+                color: 'var(--color-text-secondary)',
+                fontSize: '0.9rem',
+              }}
+            >
+              Map products to B2B and Doctor categories.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div
         style={{

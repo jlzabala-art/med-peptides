@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
-import { ShieldCheck, RefreshCw, AlertCircle, Save } from '@/lib/icons';
+import { ShieldCheck, AlertCircle, Save, RefreshCw } from '@/lib/icons';
+import DataTable from '../ui/DataTable';
 
 
 
@@ -138,52 +139,62 @@ export default function ScreenPermissionsSettings() {
       {error && <div style={{ color: 'var(--error)', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}><AlertCircle size={16}/> {error}</div>}
       {success && <div style={{ color: 'var(--success)', marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}><ShieldCheck size={16}/> {success}</div>}
 
-      <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-          <thead>
-            <tr style={{ backgroundColor: 'var(--background)' }}>
-              <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Tab ID</th>
-              <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>All (*)</th>
-              {AVAILABLE_ROLES.map(role => (
-                <th key={role} style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
-                  {role}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Object.keys(permissions).sort().map(tabId => {
-              const roles = permissions[tabId] || [];
-              const isAll = roles.includes('*');
-              return (
-                <tr key={tabId} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '0.75rem', fontWeight: 600 }}>{tabId}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                    <input 
-                      type="checkbox" 
-                      checked={isAll} 
-                      onChange={() => handleWildcardToggle(tabId)} 
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </td>
-                  {AVAILABLE_ROLES.map(role => (
-                    <td key={role} style={{ padding: '0.75rem', textAlign: 'center' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={roles.includes(role)} 
-                        onChange={() => handleRoleToggle(tabId, role)} 
-                        disabled={isAll || role === 'admin'} // admin always has access, and if * is checked, individual checkboxes are disabled
-                        style={{ cursor: 'pointer' }}
-                        title={role === 'admin' ? "Admin always has access" : ""}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {/* Permissions DataTable */}
+      {(() => {
+        const tableData = Object.keys(permissions).sort().map(tabId => {
+          const roles = permissions[tabId] || [];
+          const isAll = roles.includes('*');
+          return { tabId, roles, isAll };
+        });
+
+        const columns = [
+          {
+            key: 'tabId',
+            header: 'Tab ID',
+            sortKey: 'tabId',
+            render: (r) => <span style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.85rem' }}>{r.tabId}</span>
+          },
+          {
+            key: '_all',
+            header: 'All (*)',
+            align: 'center',
+            render: (r) => (
+              <input
+                type="checkbox"
+                checked={r.isAll}
+                onChange={() => handleWildcardToggle(r.tabId)}
+                style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+              />
+            )
+          },
+          ...AVAILABLE_ROLES.map(role => ({
+            key: `role_${role}`,
+            header: role,
+            align: 'center',
+            render: (r) => (
+              <input
+                type="checkbox"
+                checked={r.roles.includes(role)}
+                onChange={() => handleRoleToggle(r.tabId, role)}
+                disabled={r.isAll || role === 'admin'}
+                style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                title={role === 'admin' ? 'Admin always has access' : ''}
+              />
+            )
+          }))
+        ];
+
+        return (
+          <DataTable
+            data={tableData}
+            columns={columns}
+            keyField="tabId"
+            emptyTitle="No permissions defined"
+            globalSearch
+            searchPlaceholder="Search by tab ID..."
+          />
+        );
+      })()}
     </div>
   );
 }

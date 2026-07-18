@@ -5,7 +5,7 @@ import IntakeDashboardHeader from './prescriptions/IntakeDashboardHeader';
 import PrescriptionIntakeLayout from './prescriptions/PrescriptionIntakeLayout';
 import PrescriptionMobileWizard from './prescriptions/PrescriptionMobileWizard';
 
-export default function AdminPrescriptionIntakeTab() {
+export default function AdminPrescriptionIntakeTab({ isSubTab = false }) {
   const [isMobile, setIsMobile] = useState(false);
   const [activePrescription, setActivePrescription] = useState(null); // null means showing dashboard list
 
@@ -18,7 +18,7 @@ export default function AdminPrescriptionIntakeTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <IntakeDashboardHeader />
+      {!isSubTab && <IntakeDashboardHeader />}
       
       <div style={{ flex: 1, minHeight: 0 }}>
         {isMobile ? (

@@ -12,10 +12,11 @@ const db = fb?.db;
  * @param {number} options.pageSize - Límite de documentos por página (default: 50)
  * @param {boolean} options.realtime - Si es true, usa onSnapshot; si es false, usa getDocs (default: true)
  * @param {boolean} options.orderByDesc - Ordenar por createdAt desc (default: true)
+ * @param {Array} initialData - Datos iniciales precargados por el Server Component
  */
-export default function useOrders(filters = {}, options = {}) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function useOrders(filters = {}, options = {}, initialData = null) {
+  const [data, setData] = useState(initialData || []);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState(null);
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(false);

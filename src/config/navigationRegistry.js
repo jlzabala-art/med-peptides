@@ -1,4 +1,4 @@
-import { LayoutDashboard, Inbox, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Activity, Dna, FlaskConical, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Gift, Users2, LineChart, Anchor, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, SplitSquareHorizontal, PieChart, BrainCircuit, Sparkles, TerminalSquare, ActivitySquare, LayoutTemplate, ShieldAlert, Settings, LayoutGrid, UploadCloud, DownloadCloud, CheckCircle, Factory, CheckSquare } from '@/lib/icons';
+import { LayoutDashboard, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Users2, LineChart, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, PieChart, BrainCircuit, Sparkles, TerminalSquare, LayoutTemplate, ShieldAlert, Settings, Factory, CheckSquare } from '@/lib/icons';
 
 // Helper icons
 const HandshakeIcon = Users2;
@@ -13,80 +13,144 @@ const ALL_INTERNAL = ['admin', 'ceo', 'medical_director', 'doctor', 'clinic_mana
  * IDs are SHORT slugs without leading slash (e.g. 'patients', 'messages').
  * AdminDashboard.jsx builds the final URL as /admin/<id>.
  * AppSidebar also uses these IDs and receives an onNavigate that handles the prefix.
+ *
+ * ── CONSOLIDATION (July 2026) ──────────────────────────────────────────────────
+ * Catalog:   7 items → 2  (Master Catalog + Inventory & Supply)
+ * Sales:     9 items → 4  (Orders, CRM & Accounts, Quotes & Pricing, Revenue)
+ * Purchasing:5 items → 3  (Suppliers, Procurement, Production)
+ * Finance:   7 items → 4  (Transactions, Analytics, Approvals, Zoho Books)
+ * ──────────────────────────────────────────────────────────────────────────────
  */
 export const NAVIGATION_REGISTRY = [
+  // ── DASHBOARD ──────────────────────────────────────────────────────────────
   {
     id: 'dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
     roles: [...ALL_INTERNAL, 'patient'],
     items: [
-      { id: '',             label: 'Overview',      icon: LayoutDashboard, roles: [...ALL_INTERNAL, 'patient'] },
-      // Messages covers both Inbox and messaging
-      { id: 'messages',     label: 'Messages',      icon: MessageSquare,   roles: ['admin', 'doctor', 'medical_director', 'clinic_manager', 'sales', 'supplier', 'patient'] },
-      { id: 'calendar',     label: 'Calendar',      icon: Calendar,        roles: ['admin', 'doctor', 'medical_director', 'clinic_manager', 'sales', 'patient'] },
-      { id: 'notifications',label: 'Notifications', icon: Bell,            roles: ALL_INTERNAL },
+      { id: '',              label: 'Overview',       icon: LayoutDashboard, roles: [...ALL_INTERNAL, 'patient'] },
+      { id: 'messages',      label: 'Messages',       icon: MessageSquare,   roles: ['admin', 'doctor', 'medical_director', 'clinic_manager', 'sales', 'supplier', 'patient'] },
+      { id: 'calendar',      label: 'Calendar',       icon: Calendar,        roles: ['admin', 'doctor', 'medical_director', 'clinic_manager', 'sales', 'patient'] },
+      { id: 'notifications', label: 'Notifications',  icon: Bell,            roles: ALL_INTERNAL },
     ]
   },
+
+  // ── CLINICAL ───────────────────────────────────────────────────────────────
   {
     id: 'clinical',
     label: 'Clinical',
     icon: Stethoscope,
     roles: ['admin', 'medical_director', 'doctor', 'clinic_manager', 'pharmacist'],
     items: [
-      { id: 'patients',       label: 'Patients',           icon: Users,          roles: ['admin', 'medical_director', 'doctor', 'clinic_manager'] },
-      { id: 'doctors',        label: 'Doctors',            icon: Stethoscope,    roles: ['admin', 'medical_director', 'clinic_manager'] },
-      { id: 'protocols',      label: 'Protocols',          icon: ClipboardList,  roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
-      { id: 'prescriptions',  label: 'Prescriptions',      icon: FileText,       roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
-      { id: 'treatments',     label: 'Treatments',         icon: HeartPulse,     roles: ['admin', 'medical_director', 'doctor', 'patient'] },
-      { id: 'appointments',   label: 'Appointments',       icon: Calendar,       roles: ['admin', 'medical_director'] },
+      { id: 'patients',      label: 'Patients',      icon: Users,         roles: ['admin', 'medical_director', 'doctor', 'clinic_manager'] },
+      { id: 'doctors',       label: 'Doctors',       icon: Stethoscope,   roles: ['admin', 'medical_director', 'clinic_manager'] },
+      { id: 'protocols',     label: 'Protocols',     icon: ClipboardList, roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
+      { id: 'prescriptions', label: 'Prescriptions', icon: FileText,      roles: ['admin', 'medical_director', 'doctor', 'pharmacist'] },
+      { id: 'treatments',    label: 'Treatments',    icon: HeartPulse,    roles: ['admin', 'medical_director', 'doctor', 'patient'] },
+      { id: 'appointments',  label: 'Appointments',  icon: Calendar,      roles: ['admin', 'medical_director'] },
     ]
   },
+
+  // ── CATALOG (7 → 2) ────────────────────────────────────────────────────────
+  // Pricing Visibility, Competitors, Alternatives → tabs inside Master Catalog
+  // Certificates & COAs, Catalog Enrichment → tabs inside Inventory & Supply
   {
     id: 'catalog',
     label: 'Catalog',
     icon: Package,
     roles: ['admin', 'pharmacist', 'medical_director', 'doctor', 'sales', 'operations'],
     items: [
-      { id: 'catalog',            label: 'Master Catalog',      icon: Search,               roles: ['admin', 'pharmacist', 'medical_director', 'sales', 'operations'] },
-      { id: 'pricing-visibility', label: 'Pricing Visibility',  icon: Eye,                  roles: ['admin', 'sales'] },
-      { id: 'competitors',        label: 'Competitor Analysis', icon: TrendingUp,            roles: ['admin', 'sales'] },
-      { id: 'catalog-enrichment', label: 'Catalog Enrichment',  icon: Sparkles,             roles: ['admin'] },
-      { id: 'certificates',       label: 'Certificates & COAs', icon: ShieldCheck,          roles: ['admin', 'pharmacist', 'operations'] },
-      { id: 'alternatives',       label: 'Alternatives',        icon: SplitSquareHorizontal,roles: ['admin', 'medical_director'] },
-      { id: 'inventory',          label: 'Inventory',           icon: Database,             roles: ['admin', 'pharmacist', 'operations'] },
+      {
+        id: 'catalog',
+        label: 'Master Catalog',
+        icon: Search,
+        roles: ['admin', 'pharmacist', 'medical_director', 'sales', 'operations'],
+        // Absorbed: pricing-visibility, competitors, alternatives (rendered as tabs within the view)
+      },
+      {
+        id: 'inventory',
+        label: 'Inventory & Supply',
+        icon: Database,
+        roles: ['admin', 'pharmacist', 'operations'],
+        // Absorbed: certificates, catalog-enrichment (rendered as tabs within the view)
+      },
     ]
   },
+
+  // ── SALES (9 → 4) ──────────────────────────────────────────────────────────
+  // Leads + Clinics + Agency Deals → CRM & Accounts
+  // Sales Orders + Patient Orders + My Orders → Orders Hub
+  // Quotations + Discounts → Quotes & Pricing
   {
     id: 'sales',
     label: 'Sales',
     icon: ShoppingBag,
-    roles: ['admin', 'ceo', 'sales', 'operations', 'finance'],
+    roles: ['admin', 'ceo', 'sales', 'operations', 'finance', 'patient'],
     items: [
-      { id: 'leads',          label: 'Leads',          icon: Users2,        roles: ['admin', 'sales'] },
-      { id: 'clinics',        label: 'Clinics',        icon: Building,      roles: ['admin', 'sales'] },
-      { id: 'quotations',     label: 'Quotations',     icon: FileText,      roles: ['admin', 'sales'] },
-      { id: 'sales-orders',   label: 'Sales Orders',   icon: ShoppingBag,   roles: ['admin', 'sales', 'operations', 'finance'] },
-      { id: 'patient-orders', label: 'Patient Orders', icon: ShoppingBag,   roles: ['admin', 'sales', 'operations', 'finance'] },
-      { id: 'my-orders',      label: 'My Orders',      icon: ShoppingBag,   roles: ['patient'] },
-      { id: 'agency-deals',   label: 'Agency Deals',   icon: HandshakeIcon, roles: ['admin', 'sales'] },
-      { id: 'discounts',      label: 'Discounts',      icon: Tags,          roles: ['admin', 'sales', 'finance'] },
-      { id: 'revenue',        label: 'Revenue',        icon: LineChart,     roles: ['admin', 'ceo', 'sales', 'finance'] },
+      {
+        id: 'orders',
+        label: 'Orders',
+        icon: ShoppingBag,
+        roles: ['admin', 'sales', 'operations', 'finance', 'patient'],
+        // Absorbed: sales-orders (B2B), patient-orders (B2C), my-orders (patient)
+        // Filter by type in the view
+      },
+      {
+        id: 'crm',
+        label: 'CRM & Accounts',
+        icon: Users2,
+        roles: ['admin', 'sales'],
+        // Absorbed: leads, clinics, agency-deals (unified with segment tabs)
+      },
+      {
+        id: 'quotations',
+        label: 'Quotes & Pricing',
+        icon: FileText,
+        roles: ['admin', 'sales', 'finance'],
+        // Absorbed: quotations + discounts (tabs within the view)
+      },
+      {
+        id: 'revenue',
+        label: 'Revenue',
+        icon: LineChart,
+        roles: ['admin', 'ceo', 'sales', 'finance'],
+      },
     ]
   },
+
+  // ── PURCHASING (5 → 3) ─────────────────────────────────────────────────────
+  // RFQs + Purchase Orders → Procurement (differentiated by status/type column)
+  // Supplier Bills → moved to Finance > Transactions
   {
     id: 'purchasing',
     label: 'Purchasing',
     icon: ShoppingCartIcon,
     roles: ['admin', 'pharmacist', 'operations', 'supplier', 'finance'],
     items: [
-      { id: 'suppliers',        label: 'Suppliers',        icon: Building,   roles: ['admin', 'operations', 'pharmacist'] },
-      { id: 'rfqs',             label: 'RFQs',             icon: FileText,   roles: ['admin', 'operations', 'supplier'] },
-      { id: 'purchase-orders',  label: 'Purchase Orders',  icon: ShoppingBag,roles: ['admin', 'operations', 'pharmacist', 'supplier'] },
-      { id: 'supplier-bills',   label: 'Supplier Bills',   icon: Receipt,    roles: ['admin', 'finance', 'operations', 'supplier'] },
-      { id: 'production-queue', label: 'Production Queue', icon: Factory,    roles: ['admin', 'operations', 'pharmacist'] },
+      {
+        id: 'suppliers',
+        label: 'Suppliers',
+        icon: Building,
+        roles: ['admin', 'operations', 'pharmacist'],
+      },
+      {
+        id: 'procurement',
+        label: 'Procurement',
+        icon: FileText,
+        roles: ['admin', 'operations', 'pharmacist', 'supplier'],
+        // Absorbed: rfqs + purchase-orders (type column differentiates; status drives workflow)
+      },
+      {
+        id: 'production-queue',
+        label: 'Production Queue',
+        icon: Factory,
+        roles: ['admin', 'operations', 'pharmacist'],
+      },
     ]
   },
+
+  // ── LOGISTICS ──────────────────────────────────────────────────────────────
   {
     id: 'logistics',
     label: 'Logistics',
@@ -100,21 +164,46 @@ export const NAVIGATION_REGISTRY = [
       { id: 'shipment-status',   label: 'Shipment Status',   icon: Truck,               roles: ['admin', 'operations', 'supplier'] },
     ]
   },
+
+  // ── FINANCE (7 → 4) ────────────────────────────────────────────────────────
+  // Invoices + Payments + Supplier Bills → Transactions ledger
+  // Budgets + Unit Economics + Reports → Analytics
   {
     id: 'finance',
     label: 'Finance',
     icon: Receipt,
-    roles: ['admin', 'ceo', 'finance'],
+    roles: ['admin', 'ceo', 'finance', 'patient'],
     items: [
-      { id: 'invoices',       label: 'Invoices',       icon: Receipt,    roles: ['admin', 'finance', 'patient'] },
-      { id: 'payments',       label: 'Payments',       icon: CreditCard, roles: ['admin', 'finance'] },
-      { id: 'budgets',        label: 'Budgets',        icon: LineChart,  roles: ['admin', 'finance'] },
-      { id: 'unit-economics', label: 'Unit Economics', icon: PieChart,   roles: ['admin', 'finance'] },
-      { id: 'reports',        label: 'Reports',        icon: FileText,   roles: ['admin', 'ceo', 'finance'] },
-      { id: 'approvals',      label: 'Approvals',      icon: CheckSquare,roles: ['admin', 'ceo', 'finance'] },
-      { id: 'zoho-books',     label: 'Zoho Books',     icon: Database,   roles: ['admin', 'finance'] },
+      {
+        id: 'transactions',
+        label: 'Transactions',
+        icon: Receipt,
+        roles: ['admin', 'finance', 'patient'],
+        // Absorbed: invoices, payments, supplier-bills (tabbed ledger)
+      },
+      {
+        id: 'analytics',
+        label: 'Analytics',
+        icon: PieChart,
+        roles: ['admin', 'ceo', 'finance'],
+        // Absorbed: budgets, unit-economics, reports
+      },
+      {
+        id: 'approvals',
+        label: 'Approvals',
+        icon: CheckSquare,
+        roles: ['admin', 'ceo', 'finance'],
+      },
+      {
+        id: 'zoho-books',
+        label: 'Zoho Books',
+        icon: Database,
+        roles: ['admin', 'finance'],
+      },
     ]
   },
+
+  // ── MARKETING ──────────────────────────────────────────────────────────────
   {
     id: 'marketing',
     label: 'Marketing',
@@ -130,6 +219,8 @@ export const NAVIGATION_REGISTRY = [
       { id: 'segmentation',         label: 'Segmentation',         icon: PieChart,      roles: ['admin', 'sales'] },
     ]
   },
+
+  // ── AI ──────────────────────────────────────────────────────────────────────
   {
     id: 'ai',
     label: 'AI',
@@ -144,6 +235,8 @@ export const NAVIGATION_REGISTRY = [
       { id: 'ai-logs',        label: 'AI Logs',        icon: TerminalSquare,roles: ['admin'] },
     ]
   },
+
+  // ── ADMINISTRATION ─────────────────────────────────────────────────────────
   {
     id: 'administration',
     label: 'Administration',
@@ -170,4 +263,35 @@ export const getNavigationForRole = (role) => {
     if (filteredItems.length === 0) return null;
     return { ...group, items: filteredItems };
   }).filter(Boolean);
+};
+
+/**
+ * Legacy route aliases — maps old slugs to new unified views.
+ * Used by AdminDashboard to redirect stale bookmarks without 404s.
+ */
+export const ROUTE_ALIASES = {
+  // Catalog
+  'pricing-visibility':  'catalog',
+  'competitors':         'catalog',
+  'alternatives':        'catalog',
+  'certificates':        'inventory',
+  'catalog-enrichment':  'inventory',
+  // Sales
+  'sales-orders':        'orders',
+  'patient-orders':      'orders',
+  'my-orders':           'orders',
+  'leads':               'crm',
+  'clinics':             'crm',
+  'agency-deals':        'crm',
+  'discounts':           'quotations',
+  // Purchasing
+  'rfqs':                'procurement',
+  'purchase-orders':     'procurement',
+  'supplier-bills':      'transactions',
+  // Finance
+  'invoices':            'transactions',
+  'payments':            'transactions',
+  'budgets':             'analytics',
+  'unit-economics':      'analytics',
+  'reports':             'analytics',
 };

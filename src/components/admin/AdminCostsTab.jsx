@@ -1,14 +1,16 @@
 "use client";
 
+import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
-import AppFilterBar from '../ui/AppFilterBar';
-import { useToast } from '../../hooks/useToast';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 import PayoutManagerWidget from './gadgets/PayoutManagerWidget';
 import { useProductSearch } from '../../hooks/useProductSearch';
+import { useToast } from '../../hooks/useToast';
 
 export default function AdminCostsTab({ readOnly = false }) {
   const { toast } = useToast();
@@ -205,58 +207,27 @@ export default function AdminCostsTab({ readOnly = false }) {
 
   return (
     <div className="view-container">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0 }}>Cost Hub (Financials)</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Review and edit product costs in USD or calculate in EUR.
-          </p>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)',
-            overflow: 'hidden',
-            backgroundColor: 'white',
-          }}
-        >
-          <button
-            onClick={() => setCostCurrency('usd')}
-            style={{
-              padding: '0.6rem 1.5rem',
-              border: 'none',
-              backgroundColor: costCurrency === 'usd' ? 'var(--primary)' : 'white',
-              color: costCurrency === 'usd' ? 'white' : 'var(--text-main)',
-              cursor: 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            USD ($)
-          </button>
-          <button
-            onClick={() => setCostCurrency('eur')}
-            style={{
-              padding: '0.6rem 1.5rem',
-              border: 'none',
-              backgroundColor: costCurrency === 'eur' ? 'var(--primary)' : 'white',
-              color: costCurrency === 'eur' ? 'white' : 'var(--text-main)',
-              cursor: 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            EUR (€)
-          </button>
-        </div>
+      <PageHeader
+        title="Cost Hub (Financials)"
+        subtitle="Review and edit product costs in USD or calculate in EUR."
+        icon={DollarSign}
+        actions={
+          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', backgroundColor: 'white' }}>
+            <button onClick={() => setCostCurrency('usd')} style={{ padding: '0.6rem 1.5rem', border: 'none', backgroundColor: costCurrency === 'usd' ? 'var(--primary)' : 'white', color: costCurrency === 'usd' ? 'white' : 'var(--text-main)', cursor: 'pointer', fontWeight: 700 }}>USD ($)</button>
+            <button onClick={() => setCostCurrency('eur')} style={{ padding: '0.6rem 1.5rem', border: 'none', backgroundColor: costCurrency === 'eur' ? 'var(--primary)' : 'white', color: costCurrency === 'eur' ? 'white' : 'var(--text-main)', cursor: 'pointer', fontWeight: 700 }}>EUR (€)</button>
+          </div>
+        }
+      />
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search product by name or dosage..."
+          resultCount={filteredProducts.length}
+          namespace="admin-costs"
+          size="lg"
+        />
       </div>
 
       <div style={{ marginBottom: '2rem' }}>

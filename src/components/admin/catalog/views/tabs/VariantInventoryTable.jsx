@@ -4,29 +4,7 @@ import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
-
-const thStyle = {
-  padding: '12px',
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-  borderBottom: '1px solid var(--color-border)',
-  textAlign: 'left',
-  backgroundColor: '#f1f5f9',
-  cursor: 'pointer',
-  userSelect: 'none'
-};
-const tdStyleMain = {
-  padding: '12px',
-  fontWeight: 500,
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const tdStyle = {
-  padding: '12px',
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const trStyle = { backgroundColor: 'transparent', cursor: 'pointer' };
+import DataTable from '../../../../ui/DataTable';
 
 export default function VariantInventoryTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -38,10 +16,7 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
   };
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
   };
 
@@ -69,7 +44,6 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
       const typeStr = v.formatLabel || v.format || v.productType || '';
       const dosageStr = v.dosage || v.size || '';
       const unitStr = v.kit?.unit || v.dosage_unit || '';
-      
       let displayDosageFormat = '-';
       if (typeStr.toLowerCase().includes('api')) {
         displayDosageFormat = `API (Bulk)`;
@@ -106,7 +80,6 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
   }, [processedVariants, sortConfig]);
 
   const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
-  const someSelected = variants.some(v => selectedIds.includes(v.id)) && !allSelected;
 
   const handleSelectAll = (e) => {
     if (!onSelectionChange) return;
@@ -121,123 +94,95 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
 
   const handleSelectRow = (id, checked) => {
     if (!onSelectionChange) return;
-    if (checked) {
-      onSelectionChange([...selectedIds, id]);
-    } else {
-      onSelectionChange(selectedIds.filter(sid => sid !== id));
-    }
+    if (checked) onSelectionChange([...selectedIds, id]);
+    else onSelectionChange(selectedIds.filter(sid => sid !== id));
   };
 
-  return (
-    <table
-      style={{
-        width: '100%',
-        borderCollapse: 'collapse',
-        fontSize: '0.8rem',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid var(--border)',
-      }}
-    >
-      <thead>
-        <tr>
-          {onSelectionChange && (
-            <th style={{ ...thStyle, width: '48px', textAlign: 'center', cursor: 'default' }}>
-              <input
-                type="checkbox"
-                checked={allSelected}
-                ref={input => { if (input) input.indeterminate = someSelected; }}
-                onChange={handleSelectAll}
-                style={{ cursor: 'pointer' }}
-              />
-            </th>
+  const columns = [
+    ...(onSelectionChange ? [{
+      key: 'select',
+      header: <input type="checkbox" checked={allSelected} onChange={handleSelectAll} style={{ cursor: 'pointer' }} />,
+      render: (val, row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={(e) => handleSelectRow(row.id, e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
+        />
+      )
+    }] : []),
+    {
+      key: 'displayDosageFormat',
+      header: <span onClick={() => handleSort('displayDosageFormat')} style={{ cursor: 'pointer' }}>Dosage / Format{getSortIcon('displayDosageFormat')}</span>,
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {row.warehouses && row.warehouses.length > 0 && (
+            <div onClick={(e) => toggleRow(row.id, e)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+              {expandedRows[row.id] ? <ChevronDown size={16} color="#64748b" /> : <ChevronRight size={16} color="#64748b" />}
+            </div>
           )}
-          <th style={thStyle} onClick={() => handleSort('displayDosageFormat')}>Dosage / Format{getSortIcon('displayDosageFormat')}</th>
-          <th style={thStyle} onClick={() => handleSort('inventory')}>Stock{getSortIcon('inventory')}</th>
+          <span style={{ fontWeight: 500 }}>{val}</span>
+        </div>
+      )
+    },
+    {
+      key: 'inventory',
+      header: <span onClick={() => handleSort('inventory')} style={{ cursor: 'pointer' }}>Stock{getSortIcon('inventory')}</span>,
+      render: (val, row) => (
+        <span style={{ color: val < row.reorderPoint ? '#ef4444' : 'inherit', fontWeight: row.warehouses?.length > 0 ? 600 : 400 }}>
+          {val} units {row.warehouses?.length > 0 && <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '4px' }}>({row.warehouses.length} locations)</span>}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+          <AppActionGroup
+            maxVisible={3}
+            actions={[{ type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'inventory') }]}
+          />
+        </div>
+      )
+    }
+  ];
 
-          <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedVariants.map((v, i) => {
-          const isSelected = selectedIds.includes(v.id);
-          return (
-            <tr 
-              key={v.id || i} 
-              style={{
-                ...trStyle,
-                backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
-                borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
-              }}
-              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'inventory')}
-            >
-              {onSelectionChange && (
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => handleSelectRow(v.id, e.target.checked)}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
-              )}
-              <td style={tdStyleMain}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {v.warehouses && v.warehouses.length > 0 && (
-                    <div onClick={(e) => toggleRow(v.id, e)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                      {expandedRows[v.id] ? <ChevronDown size={16} color="#64748b" /> : <ChevronRight size={16} color="#64748b" />}
-                    </div>
-                  )}
-                  {v.displayDosageFormat}
-                </div>
-              </td>
-              <td style={tdStyle}>
-                <span style={{ color: v.inventory < v.reorderPoint ? '#ef4444' : 'inherit', fontWeight: v.warehouses?.length > 0 ? 600 : 400 }}>
-                  {v.inventory} units {v.warehouses?.length > 0 && <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '4px' }}>({v.warehouses.length} locations)</span>}
-                </span>
-              </td>
-
-              <td style={{ ...tdStyle, textAlign: 'right' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <AppActionGroup
-                    maxVisible={3}
-                    actions={[
-                      {
-                        type: 'edit',
-                        onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'inventory'),
-                      }
-                    ]}
-                  />
-                </div>
-              </td>
-            </tr>
-          );
+  return (
+    <div className="gcp-table-container">
+      <DataTable
+        columns={columns}
+        data={sortedVariants}
+        keyField={(row, idx) => row.id || idx.toString()}
+        onRowClick={(row) => onAction && onAction('edit_variant', parentProduct, row, 'inventory')}
+        rowStyle={(row) => ({
+          backgroundColor: selectedIds.includes(row.id) ? 'var(--color-bg-selected)' : 'transparent',
+          borderLeft: selectedIds.includes(row.id) ? '4px solid #3b82f6' : '4px solid transparent',
+          cursor: 'pointer',
         })}
-        {sortedVariants.map((v, i) => {
-          if (!expandedRows[v.id] || !v.warehouses || v.warehouses.length === 0) return null;
-          return v.warehouses.map((wh, wIdx) => (
-            <tr key={`${v.id}-wh-${wIdx}`} style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              {onSelectionChange && <td style={tdStyle}></td>}
-              <td style={{ ...tdStyleMain, paddingLeft: '48px', fontSize: '0.75rem', color: '#475569' }}>
-                ↳ {wh.location || 'Unknown Location'}
-              </td>
-              <td style={{ ...tdStyle, fontSize: '0.75rem', color: wh.stock === 0 ? '#ef4444' : '#475569' }}>
-                {wh.stock || 0} units
-              </td>
-              <td style={tdStyle}></td>
-            </tr>
-          ));
-        })}
-      </tbody>
-    </table>
+        emptyMessage="No variants found."
+      />
+      {Object.keys(expandedRows).length > 0 && (
+        <div style={{ padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px', marginTop: '0.5rem' }}>
+          <h4 style={{ fontSize: '0.85rem', marginBottom: '0.5rem', color: '#475569' }}>Warehouse Stock</h4>
+          {sortedVariants.map((v) => {
+            if (!expandedRows[v.id] || !v.warehouses || v.warehouses.length === 0) return null;
+            return (
+              <div key={v.id} style={{ marginBottom: '0.5rem' }}>
+                <strong style={{ fontSize: '0.8rem', color: '#334155' }}>{v.displayDosageFormat}:</strong>
+                <ul style={{ margin: '4px 0 0 16px', padding: 0, fontSize: '0.8rem', color: '#64748b' }}>
+                  {v.warehouses.map((wh, wIdx) => (
+                    <li key={wIdx}>
+                      {wh.location || 'Unknown Location'}: <span style={{ color: wh.stock === 0 ? '#ef4444' : 'inherit' }}>{wh.stock || 0} units</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

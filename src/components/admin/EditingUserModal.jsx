@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from '@/lib/icons';
+import DataTable from '../ui/DataTable';
 
 export default function EditingUserModal({
   editingUser,
@@ -456,82 +457,35 @@ export default function EditingUserModal({
                               No users assigned currently.
                             </div>
                           ) : (
-                            <table
-                              style={{
-                                width: '100%',
-                                borderCollapse: 'collapse',
-                                fontSize: '0.85rem',
-                              }}
-                            >
-                              <tbody>
-                                {currentAssignments.map((r) => {
-                                  const peer = users.find((usr) => usr.id === r.patientId);
-                                  if (!peer) return null;
-                                  const isDoc =
-                                    peer.role === 'doctor' ||
-                                    (peer.roles && peer.roles.includes('doctor'));
+                            <DataTable
+                              data={currentAssignments.map((r, i) => {
+                                const peer = users.find((usr) => usr.id === r.patientId);
+                                return { ...r, _idx: i, peer };
+                              }).filter(item => item.peer)}
+                              keyField="_idx"
+                              columns={[
+                                { key: 'name', header: 'Name', render: (r) => (
+                                  <button type="button" onClick={() => setDetailsUser(r.peer)} style={{ background: 'none', border: 'none', padding: 0, color: '#1a73e8', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', textAlign: 'left' }}>
+                                    {r.peer.fullName || r.peer.displayName || r.peer.email}
+                                  </button>
+                                )},
+                                { key: 'role', header: 'Role', render: (r) => {
+                                  const isDoc = r.peer.role === 'doctor' || (r.peer.roles && r.peer.roles.includes('doctor'));
                                   return (
-                                    <tr
-                                      key={r.id}
-                                      style={{ borderBottom: '1px solid var(--border)' }}
-                                    >
-                                      <td style={{ padding: '0.4rem 0.75rem' }}>
-                                        <button
-                                          type="button"
-                                          onClick={() => setDetailsUser(peer)}
-                                          style={{
-                                            background: 'none',
-                                            border: 'none',
-                                            padding: 0,
-                                            color: '#1a73e8',
-                                            textDecoration: 'underline',
-                                            cursor: 'pointer',
-                                            fontWeight: 600,
-                                            fontSize: '0.85rem',
-                                            textAlign: 'left',
-                                          }}
-                                        >
-                                          {peer.fullName || peer.displayName || peer.email}
-                                        </button>
-                                      </td>
-                                      <td style={{ padding: '0.4rem 0.75rem' }}>
-                                        <span
-                                          style={{
-                                            fontSize: '0.7rem',
-                                            padding: '0.1rem 0.4rem',
-                                            borderRadius: '10px',
-                                            backgroundColor: isDoc
-                                              ? 'rgba(26, 115, 232, 0.1)'
-                                              : 'rgba(245, 158, 11, 0.1)',
-                                            color: isDoc ? '#1a73e8' : '#b45309',
-                                            textTransform: 'capitalize',
-                                            fontWeight: 600,
-                                          }}
-                                        >
-                                          {isDoc ? 'physician' : 'patient'}
-                                        </span>
-                                      </td>
-                                      <td style={{ padding: '0.4rem 0.75rem', textAlign: 'right' }}>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRevokeAssignment(r.id)}
-                                          style={{
-                                            color: '#d93025',
-                                            background: 'none',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 600,
-                                          }}
-                                        >
-                                          Unlink
-                                        </button>
-                                      </td>
-                                    </tr>
+                                    <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '10px', backgroundColor: isDoc ? 'rgba(26, 115, 232, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: isDoc ? '#1a73e8' : '#b45309', textTransform: 'capitalize', fontWeight: 600 }}>
+                                      {isDoc ? 'physician' : 'patient'}
+                                    </span>
                                   );
-                                })}
-                              </tbody>
-                            </table>
+                                }},
+                                { key: 'action', header: '', render: (r) => (
+                                  <div style={{ textAlign: 'right' }}>
+                                    <button type="button" onClick={() => handleRevokeAssignment(r.id)} style={{ color: '#d93025', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                                      Unlink
+                                    </button>
+                                  </div>
+                                )}
+                              ]}
+                            />
                           )}
                         </div>
 

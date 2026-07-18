@@ -26,7 +26,7 @@ const db = fb?.db;
 
 import { useAuth } from '../context/AuthContext';
 
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 
 import AdminUsersTab from '../components/admin/AdminUsersTab';
 import AdminProductsTab from '../components/admin/AdminProductsTab';
@@ -99,7 +99,7 @@ function WorkplaceLoadingFallback() {
 }
 
 export default function RoleDashboard({ onBack, defaultTab = '' }) {
-  const { isProfessional, loading: authLoading, user, userProfile } = useAuth();
+  const { isProfessional, loading: authLoading, user, userProfile, activeRole } = useAuth();
   const router = useRouter();
   const [viewConfig, setViewConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
@@ -108,7 +108,7 @@ export default function RoleDashboard({ onBack, defaultTab = '' }) {
   const [internalTab, setInternalTab] = useState('');
   const activeTab = defaultTab || internalTab;
 
-  const roleKey = userProfile?.role?.toLowerCase() || 'guest';
+  const roleKey = activeRole || 'guest';
 
   // Map of ALL possible tabs and their components/icons
   const TAB_REGISTRY = {
@@ -252,7 +252,7 @@ export default function RoleDashboard({ onBack, defaultTab = '' }) {
   ];
 
   return (
-    <AppPortalLayout
+    <PanelShell
       allowedRoles={[
         'admin',
         'manager',
@@ -263,6 +263,14 @@ export default function RoleDashboard({ onBack, defaultTab = '' }) {
         'patient',
         'doctor',
       ]}
+      sidebarNavGroups={sidebarNavGroups}
+      activeNavId={activeTab}
+      onNavigate={(id) => {
+        setInternalTab(id);
+      }}
+      portalTitle="Workplace"
+      roleContext={roleKey}
+      pageContext={{ activeTab }}
     >
       <div style={{ padding: '2rem' }}>
         <React.Suspense fallback={<WorkplaceLoadingFallback />}>
@@ -298,6 +306,6 @@ export default function RoleDashboard({ onBack, defaultTab = '' }) {
           )}
         </React.Suspense>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

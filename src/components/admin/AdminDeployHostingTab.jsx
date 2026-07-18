@@ -12,25 +12,20 @@ import Server from "lucide-react/dist/esm/icons/server";
 import CalendarIcon from "lucide-react/dist/esm/icons/calendar";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
-import React, { useState, useEffect } from 'react';
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-
-
-
-
-
-
-
-
-
-
-
-
 import { db, functions } from '../../firebase';
 import { collection, query, orderBy, getDocs, limit, where } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import AppFilterBar from '../ui/AppFilterBar';
 import toast from 'react-hot-toast';
+
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
 
 export default function AdminDeployHostingTab() {
   const [isDeploying, setIsDeploying] = useState(false);
@@ -39,6 +34,8 @@ export default function AdminDeployHostingTab() {
   const [backups, setBackups] = useState([]);
   const [loadingBackups, setLoadingBackups] = useState(true);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const fetchBackups = async () => {
     setLoadingBackups(true);
@@ -108,19 +105,106 @@ export default function AdminDeployHostingTab() {
     setTimeout(() => setIsDeploying(false), 3000); // Simulate deployment
   };
 
-  return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto', color: 'var(--text-primary)' }}>
-      <div style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Server size={28} color="var(--color-primary)" />
-          Deploy & Hosting
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
-          Manage your Git repository, monitor automated backups, and trigger new deployments.
-        </p>
-      </div>
+  // ── DataTable Configuration ──────────────────────────────────────────────────
+  const columns = useMemo(() => [
+    {
+      key: 'id',
+      header: 'ID',
+      render: (val, row) => <CopyableId value={row.id} />
+    },
+    {
+      key: 'timestamp',
+      header: 'Date & Time',
+      render: (val, row) => row.timestamp ? new Date(row.timestamp.seconds * 1000).toLocaleString() : 'Just now'
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (val) => <span style={{ fontWeight: 500, color: 'var(--text-main)' }}>{val}</span>
+    },
+    {
+      key: 'source',
+      header: 'Source'
+    },
+    {
+      key: 'triggeredBy',
+      header: 'Triggered By'
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (val) => <StatusBadge status={val} />
+    },
+    {
+      key: 'details',
+      header: 'Details',
+      render: (val) => (
+        <span 
+          style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '250px', display: 'inline-block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
+          title={val}
+        >
+          {val}
+        </span>
+      )
+    }
+  ], []);
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+  // Filter integration
+  const activeFilters = [];
+  if (statusFilter) {
+    activeFilters.push({
+      key: 'status',
+      label: 'Status',
+      value: statusFilter,
+      onRemove: () => setStatusFilter('')
+    });
+  }
+
+  const filterOptions = [
+    {
+      key: 'status',
+      label: 'Estado',
+      options: [
+        { label: 'Todos', value: '' },
+        { label: 'Success', value: 'Success' },
+        { label: 'Failed', value: 'Failed' },
+      ],
+      value: statusFilter,
+      onChange: setStatusFilter
+    }
+  ];
+
+  const filteredBackups = useMemo(() => {
+    let result = backups;
+    if (statusFilter) {
+      result = result.filter(b => b.status === statusFilter);
+    }
+    return result;
+  }, [backups, statusFilter]);
+
+
+  return (
+    <div style={{ padding: '0 2rem 2rem 2rem' }}>
+      
+      {/* Header (Golden Rule #9) */}
+      <PageHeader 
+        title="Deploy & Hosting"
+        subtitle="Manage your Git repository, monitor automated backups, and trigger new deployments."
+        icon={Server}
+        actions={
+          <button
+            onClick={fetchBackups}
+            className="gcp-btn gcp-btn--secondary"
+            disabled={loadingBackups}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <RefreshCw size={16} className={loadingBackups ? "spin" : ""} />
+            {loadingBackups ? 'Refreshing...' : 'Refresh'}
+          </button>
+        }
+      />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         {/* GIT REPOSITORY CARD */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -170,9 +254,9 @@ export default function AdminDeployHostingTab() {
         {/* NIGHTLY BACKUPS CARD */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          style={{ backgroundColor: 'white', borderRadius: '12px', padding: 0, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--border-light)', overflow: 'hidden' }}
+          style={{ backgroundColor: 'white', borderRadius: '12px', padding: 0, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--border-light)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
         >
-          <div style={{ padding: '1.5rem' }}>
+          <div style={{ padding: '1.5rem', flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
               <div style={{ padding: '8px', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: '8px', color: '#10b981' }}>
                 <Database size={20} />
@@ -230,76 +314,43 @@ export default function AdminDeployHostingTab() {
             </button>
           </div>
         </motion.div>
-
       </div>
 
-      {/* BACKUP HISTORY TABLE */}
-      <div style={{ marginTop: '2.5rem', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border-light)', overflow: 'hidden' }}>
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <CalendarIcon size={18} /> Backup History Registry
-          </h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button onClick={fetchBackups} style={{ background: 'none', border: '1px solid var(--border-light)', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>
-              Refresh
-            </button>
-          </div>
-        </div>
-        <div style={{ padding: '1rem 1.5rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-light)' }}>
+      {/* Global Search & Filters (Golden Rule #7) */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <GlobalSearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Buscar backups por tipo, origen o detalles..."
+          resultCount={filteredBackups.length}
+          namespace="admin-backups"
+          size="lg"
+          filters={activeFilters}
+          filterOptions={filterOptions}
+        />
+        {/* We keep the Date Range filter below the search bar as a specialized filter */}
+        <div style={{ marginTop: '0.75rem' }}>
           <AppFilterBar 
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
         </div>
+      </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc', color: '#64748b' }}>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Date & Time</th>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Type</th>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Source</th>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Triggered By</th>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Status</th>
-                <th style={{ padding: '0.75rem 1.5rem', fontWeight: 600 }}>Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loadingBackups ? (
-                <tr>
-                  <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading backup history...</td>
-                </tr>
-              ) : backups.length === 0 ? (
-                <tr>
-                  <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No backups registered yet. Click "Run Backup Now" to test.</td>
-                </tr>
-              ) : backups.map(b => (
-                <tr key={b.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '0.75rem 1.5rem', color: '#475569', whiteSpace: 'nowrap' }}>
-                    {b.timestamp ? new Date(b.timestamp.seconds * 1000).toLocaleString() : 'Just now'}
-                  </td>
-                  <td style={{ padding: '0.75rem 1.5rem', fontWeight: 500, color: '#334155' }}>{b.type}</td>
-                  <td style={{ padding: '0.75rem 1.5rem', color: '#64748b' }}>{b.source}</td>
-                  <td style={{ padding: '0.75rem 1.5rem', color: '#64748b' }}>{b.triggeredBy}</td>
-                  <td style={{ padding: '0.75rem 1.5rem' }}>
-                    <span style={{ 
-                      display: 'inline-flex', alignItems: 'center', gap: '4px',
-                      padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600,
-                      backgroundColor: b.status === 'Success' ? '#dcfce7' : '#fee2e2',
-                      color: b.status === 'Success' ? '#166534' : '#991b1b'
-                    }}>
-                      {b.status === 'Success' ? <CheckCircle size={12}/> : <XCircle size={12}/>}
-                      {b.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '0.75rem 1.5rem', color: '#64748b', fontSize: '0.8rem', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={b.details}>
-                    {b.details}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* BACKUP HISTORY TABLE (Golden Rule #3) */}
+      <div className="gcp-table-container">
+        {loadingBackups ? (
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading backup history...</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={filteredBackups}
+            keyField={(row) => row.id}
+            emptyMessage="No backups registered yet. Click 'DB' or 'Code' to test."
+            globalSearch={true}
+            searchQuery={searchQuery}
+          />
+        )}
       </div>
     </div>
   );

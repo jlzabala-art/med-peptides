@@ -1,21 +1,15 @@
 "use client";
 
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
-import { TextField, Checkbox } from '../../../components/ui';
-
-
-
-
-
-
-
+import React, { useState, useEffect, useMemo } from 'react';
+import { TextField, Checkbox, MetricCard } from '../../../components/ui';
 
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
 import { findMatchingProduct, getFuzzySuggestions, slugify } from './LeadUtils';
-import {  Edit2, Plus, Check, X, Trash2, ArrowUpRight, AlertTriangle } from '@/lib/icons';
+import { Edit2, Plus, Check, X, Trash2, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import DataTable from '../../ui/DataTable';
 
 function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUpdated }) {
   const match = findMatchingProduct(item.peptide_name, catalogProducts);
@@ -127,7 +121,7 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
     const deficitCount = hasDeficit ? item.quantity - (match.stock || 0) : 0;
 
     return (
-      <div style={{ padding: '1rem', border: '1px solid #cbd5e1', borderRadius: '12px', backgroundColor: '#ffffff' }}>
+      <div style={{ padding: '1rem', border: '1px solid #cbd5e1', borderRadius: '12px', backgroundColor: '#ffffff', margin: '0.5rem 1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
@@ -164,7 +158,7 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
   }
 
   return (
-    <div style={{ padding: '1rem', border: '1px solid #fed7aa', borderRadius: '12px', backgroundColor: '#fffbeb', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+    <div style={{ padding: '1rem', border: '1px solid #fed7aa', borderRadius: '12px', backgroundColor: '#fffbeb', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', margin: '0.5rem 1rem' }}>
       <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
         <AlertTriangle size={18} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
         <div>
@@ -221,18 +215,15 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
 }
 
 export default function RFQItemsTab({ rfqId, items: initialItems, onSaveItems, supplierName, catalogProducts, onProductCreated, onStockUpdated }) {
-  const [items, setItems] = useState(initialItems);
-  const [filterText, setFilterText] = useState('');
+  const [items, setItems] = useState(() => initialItems.map(i => ({ ...i, _id: i._id || Math.random().toString(36) })));
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [expandedIndex, setExpandedIndex] = useState(null);
 
   useEffect(() => {
-    setItems(initialItems);
+    setItems(initialItems.map(i => ({ ...i, _id: i._id || Math.random().toString(36) })));
   }, [initialItems]);
 
   const handleToggleEdit = () => {
-    if (isEditing) setItems(initialItems);
+    if (isEditing) setItems(initialItems.map(i => ({ ...i, _id: i._id || Math.random().toString(36) })));
     setIsEditing(!isEditing);
   };
 
@@ -243,15 +234,115 @@ export default function RFQItemsTab({ rfqId, items: initialItems, onSaveItems, s
   const handleDeleteItem = (idx) => setItems(prev => prev.filter((_, i) => i !== idx));
 
   const handleAddItem = () => {
-    setItems(prev => [...prev, { peptide_name: 'New Material', dosage: '', quantity: 10, units: 'vials', supplierUnitCost: 0, marginPercent: 20, clientUnitPrice: 0 }]);
+    setItems(prev => [...prev, { _id: Math.random().toString(36), peptide_name: 'New Material', dosage: '', quantity: 10, units: 'vials', supplierUnitCost: 0, marginPercent: 20, clientUnitPrice: 0 }]);
   };
 
   const handleSaveChanges = () => {
-    onSaveItems(items);
+    // Remove _id before saving to parent
+    const itemsToSave = items.map(({ _id, ...rest }) => rest);
+    onSaveItems(itemsToSave);
     setIsEditing(false);
   };
 
-  const filtered = items.filter(item => (item.peptide_name || '').toLowerCase().includes(filterText.toLowerCase()));
+  const columns = useMemo(() => {
+    const cols = [
+      {
+        key: 'peptide_name',
+        header: 'Item Description',
+        sortKey: 'peptide_name',
+        render: (val, row) => {
+          const originalIndex = items.findIndex(x => x._id === row._id);
+          return isEditing ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }} onClick={e => e.stopPropagation()}>
+              <TextField type="text" value={row.peptide_name || ''} onChange={e => handleItemChange(originalIndex, 'peptide_name', e.target.value)} />
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Cost $</span>
+                <TextField type="number" step="0.01" value={row.supplierUnitCost || 0} onChange={e => handleItemChange(originalIndex, 'supplierUnitCost', parseFloat(e.target.value) || 0)} />
+                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Margin %</span>
+                <TextField type="number" value={row.marginPercent || 20} onChange={e => handleItemChange(originalIndex, 'marginPercent', parseFloat(e.target.value) || 0)} />
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: 600, color: '#1e293b' }}>{row.peptide_name}</span>
+              {(() => {
+                const m = findMatchingProduct(row.peptide_name, catalogProducts);
+                if (!m) return <span style={{ fontSize: '0.65rem', backgroundColor: '#f3f4f6', color: '#4b5563', padding: '2px 6px', borderRadius: '4px' }}>Unregistered</span>;
+                if ((m.stock || 0) <= 0) return <span style={{ fontSize: '0.65rem', backgroundColor: '#fef2f2', color: '#ef4444', padding: '2px 6px', borderRadius: '4px' }}>Out of Stock</span>;
+                if ((m.stock || 0) < 20) return <span style={{ fontSize: '0.65rem', backgroundColor: '#fffbeb', color: '#d97706', padding: '2px 6px', borderRadius: '4px' }}>Low Stock</span>;
+                return <span style={{ fontSize: '0.65rem', backgroundColor: '#f0fdf4', color: '#16a34a', padding: '2px 6px', borderRadius: '4px' }}>In Stock</span>;
+              })()}
+            </div>
+          );
+        }
+      },
+      {
+        key: 'quantity',
+        header: 'Qty',
+        sortKey: 'quantity',
+        align: 'right',
+        render: (val, row) => {
+          const originalIndex = items.findIndex(x => x._id === row._id);
+          return isEditing ? (
+            <div onClick={e => e.stopPropagation()}>
+              <TextField type="number" value={row.quantity} onChange={e => handleItemChange(originalIndex, 'quantity', parseFloat(e.target.value) || 0)} />
+            </div>
+          ) : (
+            <span style={{ fontWeight: 600 }}>{row.quantity}</span>
+          );
+        }
+      },
+      {
+        key: 'clientUnitPrice',
+        header: 'Unit Price',
+        sortKey: 'clientUnitPrice',
+        align: 'right',
+        render: (val, row) => {
+          const originalIndex = items.findIndex(x => x._id === row._id);
+          const price = row.clientUnitPrice || 0;
+          return isEditing ? (
+            <div onClick={e => e.stopPropagation()}>
+              <TextField type="number" step="0.01" value={row.clientUnitPrice || 0} onChange={e => handleItemChange(originalIndex, 'clientUnitPrice', parseFloat(e.target.value) || 0)} />
+            </div>
+          ) : (
+            <span style={{ color: price > 0 ? '#0f766e' : '#64748b' }}>{price > 0 ? `$${price.toFixed(2)}` : 'Pricing'}</span>
+          );
+        }
+      },
+      {
+        key: 'total',
+        header: 'Total',
+        align: 'right',
+        render: (val, row) => {
+          const price = row.clientUnitPrice || 0;
+          const total = price * (row.quantity || 0);
+          return (
+            <span style={{ fontWeight: 600, color: total > 0 ? '#0f766e' : '#64748b' }}>
+              {total > 0 ? `$${total.toFixed(2)}` : '-'}
+            </span>
+          );
+        }
+      }
+    ];
+
+    if (isEditing) {
+      cols.push({
+        key: 'actions',
+        header: 'Actions',
+        align: 'center',
+        render: (val, row) => {
+          const originalIndex = items.findIndex(x => x._id === row._id);
+          return (
+            <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(originalIndex); }} style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}>
+              <Trash2 size={16} />
+            </button>
+          );
+        }
+      });
+    }
+
+    return cols;
+  }, [items, isEditing, catalogProducts]);
 
   // Stats
   const totalItems = items.length;
@@ -266,31 +357,37 @@ export default function RFQItemsTab({ rfqId, items: initialItems, onSaveItems, s
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
       {/* KPI Row for RFQ */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '8px', padding: '1rem', border: '1px solid var(--border)', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>{totalItems}</div>
-          <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Total Requested</div>
-        </div>
-        <div style={{ backgroundColor: '#f0fdf4', borderRadius: '8px', padding: '1rem', border: '1px solid #bbf7d0', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#15803d' }}>{matchedCount}</div>
-          <div style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 600 }}>Matched</div>
-        </div>
-        <div style={{ backgroundColor: '#fffbeb', borderRadius: '8px', padding: '1rem', border: '1px solid #fcd34d', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#b45309' }}>{outOfStockCount}</div>
-          <div style={{ fontSize: '0.7rem', color: '#d97706', fontWeight: 600 }}>Out of Stock</div>
-        </div>
-        <div style={{ backgroundColor: '#fef2f2', borderRadius: '8px', padding: '1rem', border: '1px solid #fca5a5', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#b91c1c' }}>{unregisteredCount}</div>
-          <div style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600 }}>Unregistered</div>
-        </div>
-        <div style={{ backgroundColor: '#eff6ff', borderRadius: '8px', padding: '1rem', border: '1px solid #bfdbfe', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d4ed8' }}>${potentialRevenue.toLocaleString()}</div>
-          <div style={{ fontSize: '0.7rem', color: '#2563eb', fontWeight: 600 }}>Potential Rev.</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+        <MetricCard
+          title="Total Requested"
+          value={totalItems}
+          color="var(--color-primary)"
+        />
+        <MetricCard
+          title="Matched"
+          value={matchedCount}
+          color="var(--color-success)"
+        />
+        <MetricCard
+          title="Out of Stock"
+          value={outOfStockCount}
+          color="var(--color-warning)"
+          alert={outOfStockCount > 0}
+        />
+        <MetricCard
+          title="Unregistered"
+          value={unregisteredCount}
+          color="var(--color-danger)"
+          alert={unregisteredCount > 0}
+        />
+        <MetricCard
+          title="Potential Rev."
+          value={`$${potentialRevenue.toLocaleString()}`}
+          color="var(--color-primary)"
+        />
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextField type="text" placeholder="Filter items..." value={filterText} onChange={(e) => setFilterText(e.target.value)} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {!isEditing ? (
             <button onClick={handleToggleEdit} style={{ padding: '6px 12px', fontSize: '0.8rem', borderRadius: '16px', backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -306,82 +403,18 @@ export default function RFQItemsTab({ rfqId, items: initialItems, onSaveItems, s
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: '#ffffff' }}>
-        <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f8fafc', zIndex: 1 }}>
-            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-              <th style={{ padding: '10px', fontWeight: 600, color: '#475569' }}>Item Description</th>
-              <th style={{ padding: '10px', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Qty</th>
-              <th style={{ padding: '10px', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Unit Price</th>
-              <th style={{ padding: '10px', fontWeight: 600, color: '#475569', textAlign: 'right' }}>Total</th>
-              {isEditing && <th style={{ padding: '10px', textAlign: 'center' }}>Actions</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((item, idx) => {
-              const originalIndex = items.findIndex(x => x === item);
-              const price = item.clientUnitPrice || 0;
-              const total = price * (item.quantity || 0);
-              const isExpanded = expandedIndex === idx;
-
-              return (
-                <React.Fragment key={idx}>
-                  <tr 
-                    onClick={(e) => { if(!isEditing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') setExpandedIndex(prev => prev === idx ? null : idx); }}
-                    style={{ borderBottom: '1px solid #f1f5f9', cursor: isEditing ? 'default' : 'pointer', backgroundColor: isExpanded ? '#f8fafc' : 'transparent' }}
-                  >
-                    <td style={{ padding: '10px' }}>
-                      {isEditing ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <TextField type="text" value={item.peptide_name || ''} onChange={e => handleItemChange(originalIndex, 'peptide_name', e.target.value)} />
-                          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Cost $</span>
-                            <TextField type="number" step="0.01" value={item.supplierUnitCost || 0} onChange={e => handleItemChange(originalIndex, 'supplierUnitCost', parseFloat(e.target.value) || 0)} />
-                            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Margin %</span>
-                            <TextField type="number" value={item.marginPercent || 20} onChange={e => handleItemChange(originalIndex, 'marginPercent', parseFloat(e.target.value) || 0)} />
-                          </div>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{isExpanded ? '▼' : '▶'}</span>
-                          <span style={{ fontWeight: 600, color: '#1e293b' }}>{item.peptide_name}</span>
-                          {(() => {
-                            const m = findMatchingProduct(item.peptide_name, catalogProducts);
-                            if (!m) return <span style={{ fontSize: '0.65rem', backgroundColor: '#f3f4f6', color: '#4b5563', padding: '2px 6px', borderRadius: '4px' }}>Unregistered</span>;
-                            if ((m.stock || 0) <= 0) return <span style={{ fontSize: '0.65rem', backgroundColor: '#fef2f2', color: '#ef4444', padding: '2px 6px', borderRadius: '4px' }}>Out of Stock</span>;
-                            if ((m.stock || 0) < 20) return <span style={{ fontSize: '0.65rem', backgroundColor: '#fffbeb', color: '#d97706', padding: '2px 6px', borderRadius: '4px' }}>Low Stock</span>;
-                            return <span style={{ fontSize: '0.65rem', backgroundColor: '#f0fdf4', color: '#16a34a', padding: '2px 6px', borderRadius: '4px' }}>In Stock</span>;
-                          })()}
-                        </div>
-                      )}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '10px' }}>
-                      {isEditing ? <TextField type="number" value={item.quantity} onChange={e => handleItemChange(originalIndex, 'quantity', parseFloat(e.target.value) || 0)} /> : <span style={{ fontWeight: 600 }}>{item.quantity}</span>}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '10px', color: price > 0 ? '#0f766e' : '#64748b' }}>
-                      {isEditing ? <TextField type="number" step="0.01" value={item.clientUnitPrice || 0} onChange={e => handleItemChange(originalIndex, 'clientUnitPrice', parseFloat(e.target.value) || 0)} /> : (price > 0 ? `$${price.toFixed(2)}` : 'Pricing')}
-                    </td>
-                    <td style={{ textAlign: 'right', padding: '10px', fontWeight: 600, color: total > 0 ? '#0f766e' : '#64748b' }}>
-                      {total > 0 ? `$${total.toFixed(2)}` : '-'}
-                    </td>
-                    {isEditing && (
-                      <td style={{ textAlign: 'center', padding: '10px' }}>
-                        <button onClick={() => handleDeleteItem(originalIndex)} style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
-                      </td>
-                    )}
-                  </tr>
-                  {isExpanded && !isEditing && (
-                    <tr>
-                      <td colSpan={5} style={{ padding: '1rem', backgroundColor: '#fafbfd', borderBottom: '1px solid #e2e8f0' }}>
-                        <ProductDetailsPane item={item} catalogProducts={catalogProducts} onProductCreated={onProductCreated} onStockUpdated={onStockUpdated} />
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="gcp-table-container">
+        <DataTable
+          columns={columns}
+          data={items}
+          keyField="_id"
+          expandableRender={!isEditing ? (row) => (
+            <ProductDetailsPane item={row} catalogProducts={catalogProducts} onProductCreated={onProductCreated} onStockUpdated={onStockUpdated} />
+          ) : undefined}
+          globalSearch={true}
+          searchPlaceholder="Filter items..."
+          emptyMessage="No items found."
+        />
       </div>
     </div>
   );

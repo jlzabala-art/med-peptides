@@ -12,8 +12,10 @@ import FileText from "lucide-react/dist/esm/icons/file-text";
 import Download from "lucide-react/dist/esm/icons/download";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import X from "lucide-react/dist/esm/icons/x";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { storage } from '../../firebase';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 
 import {
   ref,
@@ -24,18 +26,6 @@ import {
   uploadString,
 } from 'firebase/storage';
 
-
-
-
-
-
-
-
-
-
-
-
-
 const ROOT_FOLDER = 'knowledge_base';
 
 export default function AdminStorageTab() {
@@ -43,19 +33,14 @@ export default function AdminStorageTab() {
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Inline error state for fetch failures
-
+  const [error, setError] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-
   const [toast, setToast] = useState(null);
-
-  // Custom modals state
   const [showFolderDialog, setShowFolderDialog] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
-
   const [confirmDelete, setConfirmDelete] = useState(null);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef(null);
 
   const showToast = (msg, type = 'success') => {
@@ -185,95 +170,41 @@ export default function AdminStorageTab() {
   });
 
   return (
-    <div
-      style={{
-        padding: '0.5rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        position: 'relative',
-      }}
-    >
-      {/* Header & Controls */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: 'var(--text-main)',
-              margin: '0 0 0.5rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Database size={24} style={{ color: 'var(--primary)' }} />
-            Knowledge Base
-          </h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Manage RAG files and PDFs for AI Agents. Restricted to <strong>{ROOT_FOLDER}</strong>.
-          </p>
-        </div>
+    <div style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1000px', margin: '0 auto', position: 'relative' }}>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            onClick={() => setShowFolderDialog(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.6rem 1rem',
-              background: 'var(--bg-light)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--text-main)',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-            }}
-          >
-            <FolderPlus size={16} /> New Folder
-          </button>
+      <PageHeader
+        title="Knowledge Base"
+        subtitle={`Manage RAG files and PDFs for AI Agents. Restricted to ${ROOT_FOLDER}.`}
+        icon={Database}
+        actions={
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={() => setShowFolderDialog(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'var(--bg-light)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-main)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+            >
+              <FolderPlus size={16} /> New Folder
+            </button>
+            <button
+              onClick={() => fileInputRef.current && fileInputRef.current.click()}
+              disabled={uploading}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'var(--primary)', border: 'none', borderRadius: 'var(--radius-md)', color: 'white', fontWeight: 600, fontSize: '0.85rem', cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.7 : 1 }}
+            >
+              <UploadCloud size={16} /> {uploading ? 'Uploading...' : 'Upload File'}
+            </button>
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} multiple={false} />
+          </div>
+        }
+      />
 
-          <button
-            onClick={() => fileInputRef.current && fileInputRef.current.click()}
-            disabled={uploading}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.6rem 1rem',
-              background: 'var(--primary)',
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              opacity: uploading ? 0.7 : 1,
-            }}
-          >
-            <UploadCloud size={16} /> {uploading ? 'Uploading...' : 'Upload File'}
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            style={{ display: 'none' }}
-            multiple={false}
-          />
-        </div>
+      <div style={{ marginBottom: '0.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search files and folders..."
+          resultCount={files.filter(f => f.name.toLowerCase().includes(searchTerm.toLowerCase())).length + folders.filter(f => f.name.toLowerCase().includes(searchTerm.toLowerCase())).length}
+          namespace="admin-storage"
+          size="lg"
+        />
       </div>
 
       {uploading && (

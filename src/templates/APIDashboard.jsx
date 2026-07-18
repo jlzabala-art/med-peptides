@@ -13,6 +13,7 @@ import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import * as fb from '../firebase';
 const db = fb?.db;
 import { ArrowLeft, FlaskConical, Lock, Loader2, AlertCircle, ChevronDown, ChevronRight, Package } from '@/lib/icons';
+import DataTable from '../components/ui/DataTable';
 
 /* ── Helper: derive peptideId from a product name string ──
    e.g. "TB-500 2mg Vial" → "tb-500"
@@ -151,128 +152,100 @@ export default function APIDashboard({ onBack, isProfessional }) {
       {/* ── Table ── */}
       {!loading && !error && (
         <div style={{ ...card, padding: 0, overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.87rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', textAlign: 'left' }}>
-                <th style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>Material</th>
-                <th style={{ padding: '0.85rem 1rem', fontWeight: 600, textAlign: 'center' }}>Products</th>
-                <th style={{ padding: '0.85rem 1rem', fontWeight: 600, textAlign: 'right' }}>Ref. Qty (g)</th>
-                <th style={{ padding: '0.85rem 1rem', fontWeight: 600, textAlign: 'right' }}>Price / g (USD)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No materials match your search.
-                  </td>
-                </tr>
-              ) : filtered.map(m => {
-                const isExpanded = expandedId === m.id;
-                const hasProducts = m.linkedProducts?.length > 0;
-                return (
-                  <>
-                    {/* ── Main material row ── */}
-                    <tr
-                      key={m.id}
-                      onClick={() => hasProducts && toggleExpand(m.id)}
-                      style={{
-                        borderBottom: isExpanded ? 'none' : '1px solid var(--border)',
-                        transition: 'background 0.12s',
-                        cursor: hasProducts ? 'pointer' : 'default',
-                        background: isExpanded ? 'rgba(99,102,241,0.06)' : 'transparent',
-                      }}
-                      onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-                      onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      {/* chevron + name */}
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                          {hasProducts
-                            ? (isExpanded
-                                ? <ChevronDown size={14} style={{ color: '#818cf8', flexShrink: 0 }} />
-                                : <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />)
-                            : <span style={{ width: 14 }} />
+          <DataTable
+            columns={[
+              {
+                key: 'name',
+                header: 'Material',
+                render: (val, row) => (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
+                    {row.linkedProducts?.length > 0 ? (
+                      expandedId === row.id ? <ChevronDown size={14} style={{ color: '#818cf8', flexShrink: 0 }} /> : <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                    ) : <span style={{ width: 14 }} />}
+                    {val}
+                  </span>
+                )
+              },
+              {
+                key: 'linkedProducts',
+                header: 'Products',
+                render: (val, row) => val?.length > 0 ? (
+                  <span style={{
+                    display: 'inline-block',
+                    background: expandedId === row.id ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.15)',
+                    color: '#818cf8',
+                    border: '1px solid rgba(99,102,241,0.3)',
+                    borderRadius: '99px',
+                    padding: '0.15rem 0.6rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                  }}>
+                    {val.length} SKU{val.length !== 1 ? 's' : ''}
+                  </span>
+                ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
+              },
+              {
+                key: 'quantity_g',
+                header: 'Ref. Qty (g)',
+                render: (val) => <span style={{ color: 'var(--text-muted)' }}>{val}</span>
+              },
+              {
+                key: 'price_per_g_usd',
+                header: 'Price / g (USD)',
+                render: (val) => (
+                  <span style={{ fontWeight: 600 }}>
+                    {isProfessional
+                      ? `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>—</span>
+                    }
+                  </span>
+                )
+              }
+            ]}
+            data={filtered}
+            keyField="id"
+            onRowClick={(row) => {
+              if (row.linkedProducts?.length > 0) {
+                toggleExpand(row.id);
+              }
+            }}
+            getRowProps={(row) => ({
+              style: {
+                background: expandedId === row.id ? 'rgba(99,102,241,0.06)' : 'transparent',
+                cursor: row.linkedProducts?.length > 0 ? 'pointer' : 'default'
+              }
+            })}
+            expandableRender={(row) => {
+              if (expandedId !== row.id || !row.linkedProducts?.length) return null;
+              return (
+                <div style={{ padding: '1rem', paddingLeft: '2.5rem', background: 'rgba(99,102,241,0.04)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0 0.6rem', color: '#818cf8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                    <Package size={12} />
+                    Finished products linked to {row.name}
+                  </div>
+                  <DataTable
+                    columns={[
+                      { key: 'name', header: 'SKU / Name', render: (val, r) => val || r.id },
+                      { key: 'dose', header: 'Dose', render: (val, r) => <span style={{ color: 'var(--text-muted)' }}>{val || r.quantity || '—'}</span> },
+                      { key: 'price', header: 'Unit Price', render: (val) => (
+                        <span style={{ fontWeight: 600 }}>
+                          {isProfessional
+                            ? (val != null ? `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>N/A</span>)
+                            : <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>—</span>
                           }
-                          {m.name}
                         </span>
-                      </td>
-
-                      {/* SKU count badge */}
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                        {hasProducts ? (
-                          <span style={{
-                            display: 'inline-block',
-                            background: isExpanded ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.15)',
-                            color: '#818cf8',
-                            border: '1px solid rgba(99,102,241,0.3)',
-                            borderRadius: '99px',
-                            padding: '0.15rem 0.6rem',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            letterSpacing: '0.02em',
-                          }}>
-                            {m.linkedProducts.length} SKU{m.linkedProducts.length !== 1 ? 's' : ''}
-                          </span>
-                        ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
-                        )}
-                      </td>
-
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: 'var(--text-muted)' }}>
-                        {m.quantity_g}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 600 }}>
-                        {isProfessional
-                          ? `$${Number(m.price_per_g_usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                          : <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>—</span>
-                        }
-                      </td>
-                    </tr>
-
-                    {/* ── Expanded SKU panel ── */}
-                    {isExpanded && (
-                      <tr key={`${m.id}-expand`} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td colSpan={4} style={{ padding: '0 1rem 1rem 2.5rem', background: 'rgba(99,102,241,0.04)' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0 0.6rem', color: '#818cf8', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                            <Package size={12} />
-                            Finished products linked to {m.name}
-                          </div>
-                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                            <thead>
-                              <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>
-                                <th style={{ padding: '0.4rem 0.5rem', fontWeight: 600, textAlign: 'left' }}>SKU / Name</th>
-                                <th style={{ padding: '0.4rem 0.5rem', fontWeight: 600, textAlign: 'right' }}>Dose</th>
-                                <th style={{ padding: '0.4rem 0.5rem', fontWeight: 600, textAlign: 'right' }}>Unit Price</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {m.linkedProducts.map(p => (
-                                <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                  <td style={{ padding: '0.45rem 0.5rem', color: 'var(--text)' }}>{p.name || p.id}</td>
-                                  <td style={{ padding: '0.45rem 0.5rem', textAlign: 'right', color: 'var(--text-muted)' }}>
-                                    {p.dose || p.quantity || '—'}
-                                  </td>
-                                  <td style={{ padding: '0.45rem 0.5rem', textAlign: 'right', fontWeight: 600 }}>
-                                    {isProfessional
-                                      ? (p.price != null
-                                          ? `$${Number(p.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                          : <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>N/A</span>)
-                                      : <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>—</span>
-                                    }
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </td>
-                      </tr>
-                    )}
-                  </>
-                );
-              })}
-            </tbody>
-          </table>
+                      )}
+                    ]}
+                    data={row.linkedProducts}
+                    keyField="id"
+                  />
+                </div>
+              );
+            }}
+            emptyTitle="No materials found"
+            emptyDescription="No materials match your search."
+          />
         </div>
       )}
 

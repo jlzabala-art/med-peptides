@@ -7,7 +7,7 @@ import { fetchInvitationsAction } from '../../actions/invitationsActions';
  * Pre-fetches the initial page of invitations securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
-export default async function AdminInvitationsTab({ restrictedRoles = null, readOnly = false, tenantId = null }) {
+export default async function AdminInvitationsTab({ restrictedRoles = null, readOnly = false, tenantId = null, isSubTab = false }) {
   const initialInvitations = await fetchInvitationsAction({ 
     limitCount: 50,
     tenantId
@@ -19,6 +19,7 @@ export default async function AdminInvitationsTab({ restrictedRoles = null, read
       restrictedRoles={restrictedRoles}
       readOnly={readOnly}
       tenantId={tenantId}
+      isSubTab={isSubTab}
     />
   );
 }

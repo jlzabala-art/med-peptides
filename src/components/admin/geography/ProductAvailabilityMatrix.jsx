@@ -1,11 +1,10 @@
 "use client";
 
-import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
 import React, { useState } from 'react';
-import { Card } from '../../ui';
-
-
+import { Card } from '../../ui/Card';
+import DataTable from '../../ui/DataTable';
+import { Check, X } from 'lucide-react';
+import { useGlobalData } from '../../../hooks/useGlobalData';
 
 export default function ProductAvailabilityMatrix({ markets, products }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,50 +37,33 @@ export default function ProductAvailabilityMatrix({ markets, products }) {
         />
       </div>
 
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '800px' }}>
-          <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--color-bg-surface)', zIndex: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-            <tr>
-              <th style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--border)', minWidth: '200px', color: 'var(--text-main)' }}>Product</th>
-              {relevantMarkets.map(m => (
-                <th key={m.id} style={{ padding: '1rem', fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-                    <span style={{ fontSize: '1.2rem' }}>{m.flag || '🏳️'}</span>
-                    <span>{m.name}</span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProducts.map((p, i) => (
-              <tr key={p.id} style={{ borderBottom: '1px solid var(--border)', backgroundColor: i % 2 === 0 ? 'transparent' : 'var(--color-bg-surface)' }}>
-                <td style={{ padding: '1rem', textAlign: 'left', borderRight: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-main)' }}>
-                  {p.name}
-                </td>
-                {relevantMarkets.map(m => {
-                  const available = isAvailable(p, m.name);
-                  return (
-                    <td key={m.id} style={{ padding: '1rem' }}>
-                      {available ? (
-                        <Check size={20} color="var(--color-success)" style={{ margin: '0 auto' }} />
-                      ) : (
-                        <X size={20} color="var(--border)" style={{ margin: '0 auto' }} />
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-            {filteredProducts.length === 0 && (
-              <tr>
-                <td colSpan={relevantMarkets.length + 1} style={{ padding: '2rem', color: 'var(--text-muted)' }}>
-                  No products found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="gcp-table-container">
+        <DataTable
+          columns={[
+            {
+              key: 'product',
+              header: 'Product',
+              render: (val, p) => <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{p.name}</span>
+            },
+            ...relevantMarkets.map(m => ({
+              key: m.id,
+              header: (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ fontSize: '1.2rem' }}>{m.flag || '🏳️'}</span>
+                  <span>{m.name}</span>
+                </div>
+              ),
+              render: (val, p) => isAvailable(p, m.name) ? (
+                <Check size={20} color="var(--color-success)" style={{ margin: '0 auto' }} />
+              ) : (
+                <X size={20} color="var(--border)" style={{ margin: '0 auto' }} />
+              )
+            }))
+          ]}
+          data={filteredProducts}
+          keyField="id"
+          emptyMessage="No products found."
+        />
       </div>
     </Card>
   );

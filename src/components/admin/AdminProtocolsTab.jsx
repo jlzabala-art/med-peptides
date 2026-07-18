@@ -7,7 +7,7 @@ import { fetchProtocolsAction, fetchProtocolsMetricsAction } from '../../actions
  * Pre-fetches the initial page of protocols securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
-export default async function AdminProtocolsTab() {
+export default async function AdminProtocolsTab({ isSubTab = false }) {
   const initialProtocols = await fetchProtocolsAction({ limitCount: 50 });
   const globalMetrics = await fetchProtocolsMetricsAction();
   
@@ -15,6 +15,7 @@ export default async function AdminProtocolsTab() {
     <ProtocolsTable 
       initialProtocols={initialProtocols}
       globalMetrics={globalMetrics}
+      isSubTab={isSubTab}
     />
   );
 }

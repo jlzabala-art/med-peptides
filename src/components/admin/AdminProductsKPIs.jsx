@@ -6,12 +6,12 @@ import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 
-export function UniformKPIs({ products }) {
-  const total = products.length;
-  const active = products.filter((p) => p.status === 'active').length;
-  const draft = products.filter((p) => p.status === 'draft').length;
-  const outOfStock = products.filter((p) => p.stock <= 0).length;
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= (p.minStock || 5)).length;
+export function UniformKPIs({ products, globalMetrics }) {
+  const total = globalMetrics?.total ?? products.length;
+  const active = globalMetrics?.active ?? products.filter((p) => p.status === 'active').length;
+  const draft = globalMetrics?.drafts ?? products.filter((p) => p.status === 'draft').length;
+  const outOfStock = globalMetrics?.outOfStock ?? products.filter((p) => p.stock <= 0).length;
+  const lowStock = globalMetrics?.lowStock ?? products.filter((p) => p.stock > 0 && p.stock <= (p.minStock || 5)).length;
 
   const stats = [
     { label: 'Total Products', value: total, color: '#3b82f6', icon: <Package size={16} /> },

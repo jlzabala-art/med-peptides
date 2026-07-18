@@ -14,25 +14,17 @@ import Settings from "lucide-react/dist/esm/icons/settings";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-
-
-
-
-
-
-
-
-
-
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 import { useToast } from '../../hooks/useToast';
 import CompetitorAnalysisWidget from './CompetitorAnalysisWidget';
 
-export default function AdminCompetitorsTab() {
+export default function AdminCompetitorsTab({ isSubTab = false }) {
   const [cacheData, setCacheData] = useState({ matches: [], lastUpdated: null });
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [selectedTier, setSelectedTier] = useState('retail');
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   // Settings State
@@ -169,11 +161,29 @@ export default function AdminCompetitorsTab() {
 
   return (
     <div style={{ marginBottom: '2rem', animation: 'fadeIn 0.3s ease-in-out' }}>
-      <AdminPageHeader 
-        title="Market & Competitor Analysis" 
+      <PageHeader
+        title="Market & Competitor Analysis"
         subtitle="Monitor competitor pricing for Vials and Peptides to maintain strategic advantage."
         icon={Activity}
+        actions={
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', background: 'var(--bg-light)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+          >
+            <Settings size={16} /> Settings
+          </button>
+        }
       />
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search competitors, products, or price comparisons..."
+          namespace="admin-competitors"
+          size="lg"
+        />
+      </div>
 
       {/* KPI Dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>

@@ -21,6 +21,7 @@ import ProductContextSwitcher from '../../../components/admin/ProductContextSwit
 import { useAdminProductsUIStore } from '../../../stores/adminProductsUIStore';
 import { getAdminProductsColumns } from '../../../components/admin/AdminProductsColumns';
 import VariantRow from '../../../components/admin/VariantRow';
+import MetricCard from '../../../components/ui/MetricCard';
 
 // Hooks
 import { useCatalogSelectionStore } from '../../../stores/useCatalogSelectionStore';
@@ -496,6 +497,14 @@ export default function ProductsTable({
       }}
       kpis={
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1rem' }}>
+          {globalMetrics && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <MetricCard title="Total Products" value={globalMetrics.total} color="blue" />
+              <MetricCard title="Active" value={globalMetrics.active} color="green" />
+              <MetricCard title="Drafts" value={globalMetrics.drafts} color="amber" />
+              <MetricCard title="Out of Stock" value={globalMetrics.outOfStock} color={globalMetrics.outOfStock > 0 ? "red" : "slate"} alert={globalMetrics.outOfStock > 0} />
+            </div>
+          )}
           <ProductContextSwitcher searchTerm={searchTerm} currentTab="products" onClear={() => setSearchTerm('')} />
           {isAdmin && !readOnly && (
             <>

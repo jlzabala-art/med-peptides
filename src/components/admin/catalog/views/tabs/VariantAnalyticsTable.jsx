@@ -2,38 +2,13 @@
 
 import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
-
-const thStyle = {
-  padding: '12px',
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-  borderBottom: '1px solid var(--color-border)',
-  textAlign: 'left',
-  backgroundColor: '#f1f5f9',
-  cursor: 'pointer',
-  userSelect: 'none'
-};
-const tdStyleMain = {
-  padding: '12px',
-  fontWeight: 500,
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const tdStyle = {
-  padding: '12px',
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const trStyle = { backgroundColor: 'transparent', cursor: 'pointer' };
+import DataTable from '../../../../ui/DataTable';
 
 export default function VariantAnalyticsTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
   };
 
@@ -51,11 +26,7 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
         const size = (v.size || v.dosage || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         return ['SKU', safeName, format, size].filter(Boolean).join('-');
       };
-
-      return {
-        ...v,
-        displaySku: v.sku || generateFallbackSku(),
-      };
+      return { ...v, displaySku: v.sku || generateFallbackSku() };
     });
   }, [variants, parentProduct]);
 
@@ -72,7 +43,6 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
   }, [processedVariants, sortConfig]);
 
   const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
-  const someSelected = variants.some(v => selectedIds.includes(v.id)) && !allSelected;
 
   const handleSelectAll = (e) => {
     if (!onSelectionChange) return;
@@ -87,100 +57,67 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
 
   const handleSelectRow = (id, checked) => {
     if (!onSelectionChange) return;
-    if (checked) {
-      onSelectionChange([...selectedIds, id]);
-    } else {
-      onSelectionChange(selectedIds.filter(sid => sid !== id));
-    }
+    if (checked) onSelectionChange([...selectedIds, id]);
+    else onSelectionChange(selectedIds.filter(sid => sid !== id));
   };
 
+  const columns = [
+    ...(onSelectionChange ? [{
+      key: 'select',
+      header: (
+        <input type="checkbox" checked={allSelected} onChange={handleSelectAll} style={{ cursor: 'pointer' }} />
+      ),
+      render: (val, row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={(e) => handleSelectRow(row.id, e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
+        />
+      )
+    }] : []),
+    {
+      key: 'displaySku',
+      header: <span onClick={() => handleSort('displaySku')} style={{ cursor: 'pointer' }}>SKU{getSortIcon('displaySku')}</span>,
+      render: (val) => <span style={{ fontWeight: 500 }}>{val}</span>
+    },
+    { key: 'sales', header: 'Sales', render: () => <span style={{ fontStyle: 'italic', color: '#94a3b8' }}>Analytics coming soon</span> },
+    { key: 'revenue', header: 'Revenue', render: () => null },
+    { key: 'orders', header: 'Orders', render: () => null },
+    { key: 'aov', header: 'Avg Order Value', render: () => null },
+    { key: 'velocity', header: 'Velocity', render: () => null },
+    { key: 'forecast', header: 'Forecast', render: () => null },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+          <AppActionGroup
+            maxVisible={3}
+            actions={[
+              { type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'analytics') }
+            ]}
+          />
+        </div>
+      )
+    }
+  ];
+
   return (
-    <table
-      style={{
-        width: '100%',
-        borderCollapse: 'collapse',
-        fontSize: '0.8rem',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid var(--border)',
-      }}
-    >
-      <thead>
-        <tr>
-          {onSelectionChange && (
-            <th style={{ ...thStyle, width: '48px', textAlign: 'center', cursor: 'default' }}>
-              <input
-                type="checkbox"
-                checked={allSelected}
-                ref={input => { if (input) input.indeterminate = someSelected; }}
-                onChange={handleSelectAll}
-                style={{ cursor: 'pointer' }}
-              />
-            </th>
-          )}
-          <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
-          <th style={thStyle}>Sales</th>
-          <th style={thStyle}>Revenue</th>
-          <th style={thStyle}>Orders</th>
-          <th style={thStyle}>Avg Order Value</th>
-          <th style={thStyle}>Velocity</th>
-          <th style={thStyle}>Forecast</th>
-          <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedVariants.map((v, i) => {
-          const isSelected = selectedIds.includes(v.id);
-          return (
-            <tr 
-              key={v.id || i} 
-              style={{
-                ...trStyle,
-                backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
-                borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
-              }}
-              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'analytics')}
-            >
-              {onSelectionChange && (
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => handleSelectRow(v.id, e.target.checked)}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
-              )}
-              <td style={tdStyleMain}>{v.displaySku}</td>
-              <td colSpan={6} style={{ ...tdStyle, textAlign: 'center', padding: '24px', fontStyle: 'italic', color: '#94a3b8' }}>
-                Analytics data coming soon
-              </td>
-              <td style={{ ...tdStyle, textAlign: 'right' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <AppActionGroup
-                    maxVisible={3}
-                    actions={[
-                      {
-                        type: 'edit',
-                        onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'analytics'),
-                      }
-                    ]}
-                  />
-                </div>
-              </td>
-            </tr>
-          );
+    <div className="gcp-table-container">
+      <DataTable
+        columns={columns}
+        data={sortedVariants}
+        keyField={(row, idx) => row.id || idx.toString()}
+        onRowClick={(row) => onAction && onAction('edit_variant', parentProduct, row, 'analytics')}
+        rowStyle={(row) => ({
+          backgroundColor: selectedIds.includes(row.id) ? 'var(--color-bg-selected)' : 'transparent',
+          borderLeft: selectedIds.includes(row.id) ? '4px solid #3b82f6' : '4px solid transparent',
+          cursor: 'pointer',
         })}
-      </tbody>
-    </table>
+        emptyMessage="No variants found."
+      />
+    </div>
   );
 }

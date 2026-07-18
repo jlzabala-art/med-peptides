@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import StandardDrawer from '../ui/StandardDrawer';
+import DataTable from '../ui/DataTable';
 import {
   collection,
   query,
@@ -543,125 +544,65 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
                   </div>
                 ) : (
                   <div style={{ overflowX: 'auto' }}>
-                    <table
-                      className="gcp-table"
-                      style={{ width: '100%', borderCollapse: 'collapse' }}
-                    >
-                      <thead>
-                        <tr
-                          style={{
-                            borderBottom: '1px solid var(--border)',
-                            backgroundColor: 'var(--color-bg-app)',
-                          }}
-                        >
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Date
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Order ID
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Status
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'right',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Total
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orders.map((o) => (
-                          <tr key={o.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td
-                              style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                color: 'var(--text-main)',
-                              }}
-                            >
+                    <DataTable
+                      data={orders}
+                      keyField="id"
+                      columns={[
+                        {
+                          key: 'date',
+                          header: 'Date',
+                          render: (o) => (
+                            <div style={{ color: 'var(--text-main)' }}>
                               {o.createdAt?.toDate
                                 ? o.createdAt.toDate().toLocaleDateString()
                                 : o.createdAt
                                   ? new Date(o.createdAt).toLocaleDateString()
                                   : '-'}
-                            </td>
-                            <td
-                              style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                fontFamily: 'monospace',
-                                color: 'var(--text-muted)',
-                              }}
-                            >
+                            </div>
+                          )
+                        },
+                        {
+                          key: 'orderId',
+                          header: 'Order ID',
+                          render: (o) => (
+                            <div style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                               {o.id.substring(0, 8)}...
-                            </td>
-                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}>
-                              <span
-                                style={{
-                                  backgroundColor:
-                                    o.status === 'completed'
-                                      ? 'rgba(16,185,129,0.1)'
-                                      : 'rgba(245,158,11,0.1)',
-                                  color: o.status === 'completed' ? 'var(--success)' : '#f59e0b',
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: '12px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                  textTransform: 'capitalize',
-                                }}
-                              >
-                                {o.status || 'pending'}
-                              </span>
-                            </td>
-                            <td
+                            </div>
+                          )
+                        },
+                        {
+                          key: 'status',
+                          header: 'Status',
+                          render: (o) => (
+                            <span
                               style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                textAlign: 'right',
+                                backgroundColor:
+                                  o.status === 'completed'
+                                    ? 'rgba(16,185,129,0.1)'
+                                    : 'rgba(245,158,11,0.1)',
+                                color: o.status === 'completed' ? 'var(--success)' : '#f59e0b',
+                                padding: '0.2rem 0.5rem',
+                                borderRadius: '12px',
+                                fontSize: '0.75rem',
                                 fontWeight: 600,
+                                textTransform: 'capitalize',
                               }}
                             >
+                              {o.status || 'pending'}
+                            </span>
+                          )
+                        },
+                        {
+                          key: 'total',
+                          header: <div style={{ textAlign: 'right' }}>Total</div>,
+                          render: (o) => (
+                            <div style={{ textAlign: 'right', fontWeight: 600 }}>
                               ${parseFloat(o.total || 0).toFixed(2)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                          )
+                        }
+                      ]}
+                    />
                   </div>
                 )}
               </div>
@@ -754,108 +695,60 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
                   </div>
                 ) : (
                   <div style={{ overflowX: 'auto' }}>
-                    <table
-                      className="gcp-table"
-                      style={{ width: '100%', borderCollapse: 'collapse' }}
-                    >
-                      <thead>
-                        <tr
-                          style={{
-                            borderBottom: '1px solid var(--border)',
-                            backgroundColor: 'var(--color-bg-app)',
-                          }}
-                        >
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Date
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Intent / Query Type
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Query Excerpt
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {logs.map((l) => (
-                          <tr key={l.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td
-                              style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                whiteSpace: 'nowrap',
-                                color: 'var(--text-muted)',
-                              }}
-                            >
+                    <DataTable
+                      data={logs}
+                      keyField="id"
+                      columns={[
+                        {
+                          key: 'date',
+                          header: 'Date',
+                          render: (l) => (
+                            <div style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
                               {l.timestamp?.toDate
                                 ? l.timestamp.toDate().toLocaleString()
                                 : l.timestamp
                                   ? new Date(l.timestamp).toLocaleString()
                                   : '-'}
-                            </td>
-                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}>
-                              <span
-                                style={{
-                                  backgroundColor: 'var(--border)',
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: '4px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                  color: 'var(--text-main)',
-                                }}
-                              >
-                                {l.intent || 'general'}
-                              </span>
-                            </td>
-                            <td
+                            </div>
+                          )
+                        },
+                        {
+                          key: 'intent',
+                          header: 'Intent / Query Type',
+                          render: (l) => (
+                            <span
                               style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                maxWidth: '400px',
+                                backgroundColor: 'var(--border)',
+                                padding: '0.2rem 0.5rem',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                color: 'var(--text-main)',
                               }}
                             >
-                              <div
-                                style={{
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  color: 'var(--text-main)',
-                                }}
-                              >
-                                "{l.query}"
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              {l.intent || 'general'}
+                            </span>
+                          )
+                        },
+                        {
+                          key: 'query',
+                          header: 'Query Excerpt',
+                          render: (l) => (
+                            <div
+                              style={{
+                                maxWidth: '400px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                color: 'var(--text-main)',
+                              }}
+                            >
+                              "{l.query}"
+                            </div>
+                          )
+                        }
+                      ]}
+                    />
                   </div>
                 )}
               </div>
@@ -1064,115 +957,55 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
                   </div>
                 ) : (
                   <div style={{ overflowX: 'auto' }}>
-                    <table
-                      className="gcp-table"
-                      style={{ width: '100%', borderCollapse: 'collapse' }}
-                    >
-                      <thead>
-                        <tr
-                          style={{
-                            borderBottom: '1px solid var(--border)',
-                            backgroundColor: 'var(--color-bg-app)',
-                          }}
-                        >
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Assigned To
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Status
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'left',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Initiated By
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.75rem 1rem',
-                              textAlign: 'right',
-                              fontSize: '0.8rem',
-                              textTransform: 'uppercase',
-                              color: 'var(--text-muted)',
-                              fontWeight: 600,
-                            }}
-                          >
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {relationships.map((r) => (
-                          <tr key={r.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td
-                              style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                fontWeight: 600,
-                                color: 'var(--primary)',
-                              }}
-                            >
+                    <DataTable
+                      data={relationships}
+                      keyField="id"
+                      columns={[
+                        {
+                          key: 'assignedTo',
+                          header: 'Assigned To',
+                          render: (r) => (
+                            <div style={{ fontWeight: 600, color: 'var(--primary)' }}>
                               {r.otherName}
-                            </td>
-                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}>
-                              <span
-                                style={{
-                                  backgroundColor:
-                                    r.status === 'active'
-                                      ? 'rgba(16,185,129,0.1)'
-                                      : 'rgba(239,68,68,0.1)',
-                                  color: r.status === 'active' ? 'var(--success)' : 'var(--error)',
-                                  padding: '0.2rem 0.5rem',
-                                  borderRadius: '12px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 600,
-                                  textTransform: 'capitalize',
-                                }}
-                              >
-                                {r.status}
-                              </span>
-                            </td>
-                            <td
+                            </div>
+                          )
+                        },
+                        {
+                          key: 'status',
+                          header: 'Status',
+                          render: (r) => (
+                            <span
                               style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                color: 'var(--text-muted)',
+                                backgroundColor:
+                                  r.status === 'active'
+                                    ? 'rgba(16,185,129,0.1)'
+                                    : 'rgba(239,68,68,0.1)',
+                                color: r.status === 'active' ? 'var(--success)' : 'var(--error)',
+                                padding: '0.2rem 0.5rem',
+                                borderRadius: '12px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
                                 textTransform: 'capitalize',
                               }}
                             >
+                              {r.status}
+                            </span>
+                          )
+                        },
+                        {
+                          key: 'initiatedBy',
+                          header: 'Initiated By',
+                          render: (r) => (
+                            <div style={{ color: 'var(--text-muted)', textTransform: 'capitalize' }}>
                               {r.initiatedByRole || 'unknown'}
-                            </td>
-                            <td
-                              style={{
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.85rem',
-                                textAlign: 'right',
-                              }}
-                            >
+                            </div>
+                          )
+                        },
+                        {
+                          key: 'actions',
+                          header: <div style={{ textAlign: 'right' }}>Actions</div>,
+                          render: (r) => (
+                            <div style={{ textAlign: 'right' }}>
                               {r.status !== 'revoked' && (
                                 <button
                                   onClick={() => handleRevokeRelationship(r.id)}
@@ -1190,11 +1023,11 @@ export default function UserDetailsModal({ isOpen, onClose, user, onUserUpdate }
                                   Revoke
                                 </button>
                               )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                          )
+                        }
+                      ]}
+                    />
                   </div>
                 )}
               </div>

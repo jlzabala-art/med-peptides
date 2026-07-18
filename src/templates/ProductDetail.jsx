@@ -57,6 +57,7 @@ import { resolveVariantPrice, formatPrice } from '../services/pricingService';
 import { usePricingTier } from '../hooks/usePricingTier';
 import { formatDose } from '../data/dosageUnits';
 import { useAuth } from '../context/AuthContext';
+import { useRoleAccess } from '../hooks/useRoleAccess';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import app from '../firebase';
 import { DetailSkeleton } from '../components/shared/SkeletonLoader';
@@ -66,7 +67,6 @@ export default function ProductDetail({
   product,
   region,
   isProfessional,
-  isAdmin,
   onBack,
   onAddToCart,
   cart,
@@ -83,6 +83,8 @@ export default function ProductDetail({
   const router = useRouter();
   const pathname = usePathname();
   const { loading: authLoading, userRole } = useAuth();
+  const { can, is } = useRoleAccess();
+  const isAdmin = is('admin'); // Legacy alias for quick refactoring
 
   const isWholesaler = userRole === 'wholesaler' || userRole === 'admin';
 

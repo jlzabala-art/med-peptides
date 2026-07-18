@@ -1,31 +1,12 @@
 "use client";
 
-import Settings from "lucide-react/dist/esm/icons/settings";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Users from "lucide-react/dist/esm/icons/users";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import ArrowRightLeft from "lucide-react/dist/esm/icons/arrow-right-left";
-import Database from "lucide-react/dist/esm/icons/database";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Check from "lucide-react/dist/esm/icons/check";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import Layers from "lucide-react/dist/esm/icons/layers";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React, { useState } from 'react';
-
-
-
-
-
-
-
-
-
-
-
 import DataTable from '../ui/DataTable';
-import AppFilterBar from '../ui/AppFilterBar';
 import AppEntityCell from '../ui/AppEntityCell';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 import { useToast } from '../../hooks/useToast';
 
 // Dynamic gadget fetch
@@ -145,40 +126,28 @@ export default function AdminGadgetRepositoryTab() {
   ];
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem',
-        width: '100%',
-        maxWidth: '1400px',
-      }}
-    >
-      {/* ── HEADER ── */}
-      <div>
-        <h2
-          style={{
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            color: 'var(--text-main)',
-            margin: '0 0 0.5rem 0',
-          }}
-        >
-          Gadget Repository
-        </h2>
-        <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-          Central repository for all operational platform widgets. The Admin gadgets below act as
-          the architectural base class parameterizations for Doctor, Wholesaler, and Patient
-          variations.
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1400px' }}>
+      <PageHeader
+        title="Gadget Repository"
+        subtitle="Central repository for all operational platform widgets. Admin gadgets act as the architectural base class for Doctor, Wholesaler, and Patient variations."
+        icon={Layers}
+      />
 
-      <AppFilterBar searchPlaceholder="Search gadgets or functions..." onSearch={setSearchTerm} />
+      <div style={{ marginBottom: '0.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search gadgets, functions, or categories..."
+          resultCount={loading ? undefined : filteredGadgets.length}
+          namespace="admin-gadgets"
+          size="lg"
+        />
+      </div>
 
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading gadgets catalog...</div>
       ) : (
-        <DataTable data={filteredGadgets} columns={columns} defaultSortKey="category" />
+        <DataTable data={filteredGadgets} columns={columns} defaultSortKey="category" keyField="id" />
       )}
 
       <div

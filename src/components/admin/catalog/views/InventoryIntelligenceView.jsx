@@ -21,6 +21,8 @@ import PackagePlus from 'lucide-react/dist/esm/icons/package-plus';
 import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import Send from 'lucide-react/dist/esm/icons/send';
 import React from 'react';
+import DataTable from '../../../ui/DataTable';
+import EmptyState from '../../../ui/EmptyState';
 
 const mockData = [
   {
@@ -647,163 +649,68 @@ export default function InventoryIntelligenceView({ variants = [], onAction }) {
           <PackagePlus size={24} color="#2563eb" />
           Reorder Recommendations
         </h2>
-        <div className="table-container">
-          <table className="modern-table desktop-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Supplier / Stock</th>
-                <th>Forecast & Days Left</th>
-                <th>Risk & AI Conf.</th>
-                <th>Recommended Qty</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reorderRecommendations.map((item) => {
-                const daysLeft = item.stock === 0 ? 0 : Math.max(1, Math.floor(item.stock / (item.price > 100 ? 2 : 5)));
-                const confidence = daysLeft < 7 ? '95%' : '82%';
-                return (
-                  <tr 
-                    key={item.id}
-                    onClick={() => {
-                      if (onAction) onAction('edit', item.originalProduct || item);
-                    }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name || item.productName}</td>
-                    <td>
-                      <div style={{ color: '#475569', fontSize: '0.85rem' }}>{item.supplier}</div>
-                      <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`} style={{ marginTop: '4px' }}>
-                        {item.stock} / {item.reorderPoint}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>{daysLeft}</span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>days<br/>remaining</span>
-                      </div>
-                      <div className="forecast-bar-container" style={{ width: '80px', height: '4px', marginTop: '4px' }}>
-                        <div className="forecast-bar" style={{ width: `${Math.min(100, Math.max(5, (daysLeft/30)*100))}%`, background: daysLeft < 7 ? '#ef4444' : daysLeft < 14 ? '#f59e0b' : '#22c55e' }} />
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: daysLeft < 7 ? '#ef4444' : '#f59e0b' }}>
-                          {daysLeft === 0 ? 'Critical (Stock-out)' : 'High Risk'}
-                        </span>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}><Sparkles size={10} color="#8b5cf6" /> {confidence} AI Confidence</span>
-                      </div>
-                    </td>
-                    <td style={{ fontWeight: 700, color: '#0f172a', fontSize: '1.1rem' }}>
-                      {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}
-                    </td>
-                    <td>
-                      <div className="action-group">
-                        <button className="action-btn primary" style={{ padding: '0.4rem 0.8rem' }}>
-                          <Send size={14} /> PO
-                        </button>
-                        <button className="action-btn ai" style={{ padding: '0.4rem 0.8rem' }}>
-                          <Sparkles size={14} /> AI
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {reorderRecommendations.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="7"
-                    style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}
-                  >
-                    <PackageOpen
-                      size={48}
-                      style={{ opacity: 0.2, margin: '0 auto 1rem auto', display: 'block' }}
-                    />
-                    No products currently require reordering.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="mobile-card-container">
-            {reorderRecommendations.map((item) => (
-              <div 
-                key={item.id} 
-                className="mobile-card"
-                onClick={() => {
-                  if (onAction) onAction('edit', item.originalProduct || item);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name || item.productName}</h4>
-                  <span className={`status-badge ${item.stock === 0 ? 'critical' : 'warning'}`}>
-                    {item.stock} / {item.reorderPoint}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '0.5rem',
-                    fontSize: '0.85rem',
-                    color: '#475569',
-                    marginBottom: '1rem',
-                  }}
-                >
+        {reorderRecommendations.length === 0 ? (
+          <EmptyState icon={PackageOpen} title="No reorders needed" subtitle="All products are well-stocked right now." />
+        ) : (
+          <DataTable
+            data={reorderRecommendations.map(item => {
+              const daysLeft = item.stock === 0 ? 0 : Math.max(1, Math.floor(item.stock / (item.price > 100 ? 2 : 5)));
+              const confidence = daysLeft < 7 ? '95%' : '82%';
+              return { ...item, _daysLeft: daysLeft, _confidence: confidence };
+            })}
+            keyField="id"
+            onRowClick={(item) => { if (onAction) onAction('edit', item.originalProduct || item); }}
+            emptyTitle="No reorder items"
+            columns={[
+              { key: 'name', header: 'Product', sortKey: 'name', render: (r) => <span style={{ fontWeight: 600 }}>{r.name || r.productName}</span> },
+              {
+                key: '_supplier',
+                header: 'Supplier / Stock',
+                render: (r) => (
                   <div>
-                    <strong>Supplier:</strong> {item.supplier}
+                    <div style={{ color: '#475569', fontSize: '0.85rem' }}>{r.supplier}</div>
+                    <span className={`status-badge ${r.stock === 0 ? 'critical' : 'warning'}`} style={{ marginTop: '4px' }}>{r.stock} / {r.reorderPoint}</span>
                   </div>
-                  <div>
-                    <strong>MOQ:</strong> {item.moq}
+                )
+              },
+              {
+                key: '_daysLeft',
+                header: 'Days Left',
+                sortValue: (r) => r._daysLeft,
+                render: (r) => (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>{r._daysLeft}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>days<br/>remaining</span>
                   </div>
-                  <div>
-                    <strong>Lead Time:</strong> {item.leadTime}
+                )
+              },
+              {
+                key: '_risk',
+                header: 'Risk & AI Conf.',
+                render: (r) => (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: r._daysLeft < 7 ? '#ef4444' : '#f59e0b' }}>{r._daysLeft === 0 ? 'Critical (Stock-out)' : 'High Risk'}</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}><Sparkles size={10} color="#8b5cf6" /> {r._confidence} AI Confidence</span>
                   </div>
-                  <div>
-                    <strong style={{ color: '#0f172a' }}>Reorder:</strong>{' '}
-                    {Math.max(item.moq, item.reorderPoint * 2 - item.stock)}
+                )
+              },
+              { key: '_qty', header: 'Recommended Qty', align: 'right', render: (r) => <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{Math.max(r.moq, r.reorderPoint * 2 - r.stock)}</span> },
+              {
+                key: '_actions',
+                header: 'Actions',
+                render: () => (
+                  <div className="action-group">
+                    <button className="action-btn primary" style={{ padding: '0.4rem 0.8rem' }}><Send size={14} /> PO</button>
+                    <button className="action-btn ai" style={{ padding: '0.4rem 0.8rem' }}><Sparkles size={14} /> AI</button>
                   </div>
-                </div>
-                <div
-                  className="action-group"
-                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                >
-                  <button
-                    className="action-btn primary"
-                    style={{ flex: 1, justifyContent: 'center' }}
-                  >
-                    <Send size={14} /> PO
-                  </button>
-                  <button
-                    className="action-btn outline"
-                    style={{ flex: 1, justifyContent: 'center' }}
-                  >
-                    RFQ
-                  </button>
-                </div>
-              </div>
-            ))}
-            {reorderRecommendations.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                <PackageOpen
-                  size={32}
-                  style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }}
-                />
-                No products currently require reordering.
-              </div>
-            )}
-          </div>
-        </div>
+                )
+              }
+            ]}
+          />
+        )}
       </div>
+
+
 
       <div className="grid-2">
         {/* Stock Forecast */}
@@ -904,166 +811,45 @@ export default function InventoryIntelligenceView({ variants = [], onAction }) {
         <h2 className="section-title">
           <PackageMinus size={24} color="#64748b" /> Dead Stock Analysis
         </h2>
-        <div className="table-container">
-          <table className="modern-table desktop-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Days W/O Sales</th>
-                <th>Tied Capital</th>
-                <th>Current Stock</th>
-                <th>AI Suggestion</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deadStockItems.map((item) => (
-                <tr key={item.id}>
-                  <td style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</td>
-                  <td>
-                    <span
-                      style={{
-                        color: '#ef4444',
-                        fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                      }}
-                    >
-                      <Activity size={16} /> {item.noSalesDays} days
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: 600 }}>${(item.stock * item.price).toLocaleString()}</td>
-                  <td>{item.stock}</td>
-                  <td>
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        background: '#f3e8ff',
-                        color: '#7e22ce',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      <Sparkles size={12} />{' '}
-                      {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-group">
-                      <button className="action-btn outline">
-                        <Tag size={14} /> Discount
-                      </button>
-                      <button className="action-btn outline">
-                        <PackagePlus size={14} /> Bundle
-                      </button>
-                      <button className="action-btn danger">
-                        <ArchiveX size={14} /> Remove
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {deadStockItems.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="6"
-                    style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}
-                  >
-                    <Activity
-                      size={48}
-                      style={{ opacity: 0.2, margin: '0 auto 1rem auto', display: 'block' }}
-                    />
-                    Excellent! You have no dead stock right now.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="mobile-card-container">
-            {deadStockItems.map((item) => (
-              <div key={item.id} className="mobile-card">
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  <h4 style={{ margin: 0, fontWeight: 600, color: '#0f172a' }}>{item.name}</h4>
-                  <span style={{ color: '#ef4444', fontWeight: 600 }}>
-                    {item.noSalesDays} days W/O
+        {deadStockItems.length === 0 ? (
+          <EmptyState icon={Activity} title="No dead stock" subtitle="Excellent! You have no dead stock right now." />
+        ) : (
+          <DataTable
+            data={deadStockItems}
+            keyField="id"
+            emptyTitle="No dead stock items"
+            columns={[
+              { key: 'name', header: 'Product', sortKey: 'name', render: (r) => <span style={{ fontWeight: 600 }}>{r.name}</span> },
+              {
+                key: 'noSalesDays',
+                header: 'Days W/O Sales',
+                sortValue: (r) => r.noSalesDays,
+                render: (r) => <span style={{ color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={16} /> {r.noSalesDays} days</span>
+              },
+              { key: '_capital', header: 'Tied Capital', align: 'right', sortValue: (r) => r.stock * r.price, render: (r) => <span style={{ fontWeight: 600 }}>${(r.stock * r.price).toLocaleString()}</span> },
+              { key: 'stock', header: 'Current Stock', align: 'right', sortValue: (r) => r.stock, render: (r) => r.stock },
+              {
+                key: '_suggestion',
+                header: 'AI Suggestion',
+                render: (r) => (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: '#f3e8ff', color: '#7e22ce', padding: '0.25rem 0.5rem', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500 }}>
+                    <Sparkles size={12} />{r.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
                   </span>
-                </div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '0.5rem',
-                    fontSize: '0.85rem',
-                    color: '#475569',
-                    marginBottom: '1rem',
-                  }}
-                >
-                  <div>
-                    <strong>Tied Capital:</strong> ${(item.stock * item.price).toLocaleString()}
+                )
+              },
+              {
+                key: '_actions',
+                header: 'Actions',
+                render: () => (
+                  <div className="action-group">
+                    <button className="action-btn outline"><Tag size={14} /> Discount</button>
+                    <button className="action-btn outline"><PackagePlus size={14} /> Bundle</button>
+                    <button className="action-btn danger"><ArchiveX size={14} /> Remove</button>
                   </div>
-                  <div>
-                    <strong>Current Stock:</strong> {item.stock}
-                  </div>
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        background: '#f3e8ff',
-                        color: '#7e22ce',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      <Sparkles size={12} />{' '}
-                      {item.stock > 200 ? 'Bundle & Discount 20%' : 'Promote via Email'}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className="action-group"
-                  style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}
-                >
-                  <button
-                    className="action-btn outline"
-                    style={{ flex: 1, justifyContent: 'center' }}
-                  >
-                    <Tag size={14} /> Discount
-                  </button>
-                  <button
-                    className="action-btn danger"
-                    style={{ flex: 1, justifyContent: 'center' }}
-                  >
-                    <ArchiveX size={14} /> Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-            {deadStockItems.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                <Activity
-                  size={32}
-                  style={{ opacity: 0.2, margin: '0 auto 0.5rem auto', display: 'block' }}
-                />
-                Excellent! You have no dead stock right now.
-              </div>
-            )}
-          </div>
-        </div>
+                )
+              }
+            ]}
+          />
       </div>
     </div>
   );

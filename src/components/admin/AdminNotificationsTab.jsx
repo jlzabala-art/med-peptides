@@ -3,11 +3,21 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNotifications } from '../../context/NotificationContext';
-import {
-  Bell, Package, AlertCircle, ShieldAlert, CheckCircle2,
-  FlaskConical, FileText, Check, Trash2, Filter, RefreshCw,
-  ArrowRight, Clock, ChevronRight, Inbox
-} from '@/lib/icons';
+import Bell from "lucide-react/dist/esm/icons/bell";
+import Package from "lucide-react/dist/esm/icons/package";
+import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
+import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import Check from "lucide-react/dist/esm/icons/check";
+import Trash2 from "lucide-react/dist/esm/icons/trash-2";
+import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
+import Inbox from "lucide-react/dist/esm/icons/inbox";
+import PageHeader from '../ui/PageHeader';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -162,30 +172,21 @@ export default function AdminNotificationsTab() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#1e293b' }}>
-            Notifications
-          </h1>
-          <p style={{ margin: '0.25rem 0 0', color: '#64748b', fontSize: '0.875rem' }}>
-            {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
-          </p>
-        </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={markAllAsRead}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.5rem 1rem', borderRadius: 8,
-              background: '#003666', color: 'white', border: 'none',
-              fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
-            }}
-          >
-            <Check size={14} /> Mark all read
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Notifications"
+        subtitle={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}
+        icon={Bell}
+        actions={
+          unreadCount > 0 ? (
+            <button
+              onClick={markAllAsRead}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', color: '#334155', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}
+            >
+              <Check size={14} /> Mark all read
+            </button>
+          ) : null
+        }
+      />
 
       {/* Filter tabs */}
       <div style={{

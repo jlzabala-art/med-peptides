@@ -45,7 +45,7 @@ import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 
 
 
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
 
 
@@ -120,7 +120,18 @@ export default function PatientHome({ children }) {
   const name = userProfile?.firstName || userProfile?.name?.split(' ')[0] || 'Patient';
 
   return (
-    <AppPortalLayout allowedRoles={['patient', 'admin']}>
+    <PanelShell 
+      allowedRoles={['patient', 'admin']}
+      sidebarNavGroups={PATIENT_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => {
+        // Assume routing logic handled at higher level or fallback
+        window.location.href = `/patient/${id}`;
+      }}
+      portalTitle="Patient Portal"
+      roleContext="patient"
+      pageContext={{ activeTab }}
+    >
       <div style={{ padding: '1.5rem', backgroundColor: '#f8f9fa', minHeight: '100%' }}>
         <h1 style={{ margin: '0 0 0.25rem 0', fontSize: '1.4rem', fontWeight: 600, color: '#0f172a' }}>
           {activeTab === 'prescriptions' ? 'My Prescriptions' : `Welcome back, ${name}`}
@@ -132,6 +143,6 @@ export default function PatientHome({ children }) {
           {children}
         </PatientContext.Provider>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

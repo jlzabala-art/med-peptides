@@ -32,6 +32,7 @@ import { db, auth, functions } from '../../../firebase';
 import notifier from '../../../services/NotificationService';
 import { logAction } from '../../../services/auditLogger';
 import { fetchOrdersAction } from '../../../actions/ordersActions';
+import useOrders from '../../../hooks/data/useOrders';
 
 
 
@@ -59,13 +60,13 @@ import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
 import DataTableSkeleton from '../../../components/ui/skeletons/DataTableSkeleton';
 
 // ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
-function UniformKPIs({ data }) {
-  const total = data.length;
-  const pending = data.filter(d => ['Pending', 'Processing'].includes(d.status)).length;
-  const shipped = data.filter(d => ['Shipped'].includes(d.status)).length;
-  const completed = data.filter(d => ['Completed', 'Delivered'].includes(d.status)).length;
+function UniformKPIs({ data, globalMetrics }) {
+  const total = globalMetrics?.total ?? data.length;
+  const pending = globalMetrics?.pending ?? data.filter(d => ['Pending', 'Processing'].includes(d.status)).length;
+  const shipped = globalMetrics?.shipped ?? data.filter(d => ['Shipped'].includes(d.status)).length;
+  const completed = globalMetrics?.completed ?? data.filter(d => ['Completed', 'Delivered'].includes(d.status)).length;
   
-  const totalRevenue = data.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
+  const totalRevenue = globalMetrics?.totalRevenue ?? data.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
 
   const stats = [
     { label: 'Total Orders', value: total, color: '#3b82f6', icon: <ShoppingCart size={16} /> },
@@ -131,6 +132,7 @@ const EMAILJS_CONFIRM_TEMPLATE = 'template_7unfks8';
 export default function OrdersTable({ 
   role = 'admin', 
   initialOrders = [], 
+  globalMetrics = null,
   buyerId = null, 
   accountManagerId = null, 
   doctorId = null, 
@@ -138,8 +140,6 @@ export default function OrdersTable({
   viewMode = 'admin' 
 }) {
   const router = useRouter();
-  const [orders, setOrders] = useState(initialOrders);
-  const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterSource, setFilterSource] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -167,47 +167,33 @@ export default function OrdersTable({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetId]);
 
-  /* ── Fetch ──────────────────────────────────────────────────────────── */
-  useEffect(() => {
-    // Skip fetching on initial mount if initialOrders were provided
-    if (orders.length === 0) {
-      fetchOrders();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buyerId, accountManagerId, doctorId]);
+  /* ── Fetch (Reactivity via useOrders) ───────────────────────────────── */
+  const filters = {};
+  if (buyerId) filters.buyerId = buyerId;
+  if (accountManagerId) filters.accountManagerId = accountManagerId;
+  if (doctorId) filters.doctorId = doctorId;
 
-  const [limitCount, setLimitCount] = useState(50);
-  const [hasMore, setHasMore] = useState(true);
-
-  async function fetchOrders() {
-    try {
-      setLoading(true);
-      const newOrders = await fetchOrdersAction({ limitCount, buyerId, accountManagerId, doctorId });
-      setOrders(newOrders);
-      setHasMore(newOrders.length === limitCount);
-      
-      const pendingOrders = newOrders.filter(o => o.status === 'Pending' || o.status === 'Processing');
-      const highValueOrders = newOrders.filter(o => o.total > 500);
-      window.dispatchEvent(new CustomEvent('admin-context-update', {
-        detail: {
-          page: 'orders',
-          totalOrders: newOrders.length,
-          pendingCount: pendingOrders.length,
-          highValueCount: highValueOrders.length,
-          recentPending: pendingOrders.slice(0, 5).map(o => ({ id: o.id, customer: o.customerName || o.customerEmail, total: o.total, status: o.status })),
-          summary: `Orders dashboard: ${newOrders.length} total orders loaded.`
-        }
-      }));
-    } catch (err) {
-      console.error('Error fetching orders:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: orders, loading, error, loadMore: fetchMoreOrders, hasMore } = useOrders(
+    filters,
+    { pageSize: 50, realtime: true, orderByDesc: true },
+    initialOrders
+  );
 
   useEffect(() => {
-    fetchOrders();
-  }, [limitCount]);
+    if (!orders || orders.length === 0) return;
+    const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Processing');
+    const highValueOrders = orders.filter(o => o.total > 500);
+    window.dispatchEvent(new CustomEvent('admin-context-update', {
+      detail: {
+        page: 'orders',
+        totalOrders: orders.length,
+        pendingCount: pendingOrders.length,
+        highValueCount: highValueOrders.length,
+        recentPending: pendingOrders.slice(0, 5).map(o => ({ id: o.id, customer: o.customerName || o.customerEmail, total: o.total, status: o.status })),
+        summary: `Orders dashboard: ${orders.length} total orders loaded.`
+      }
+    }));
+  }, [orders]);
 
   /* ── Auto-scroll to deep-linked order ───────────────────────────────── */
   useEffect(() => {
@@ -290,10 +276,7 @@ export default function OrdersTable({
         });
       }
 
-      // 3. Update local state
-      setOrders((prev) =>
-        prev.map((o) => (o.id === confirmModal.id ? { ...o, status: 'Confirmed' } : o))
-      );
+      // 3. Update local state (Handled by onSnapshot)
       setSendResult(
         recipients.length > 0
           ? `✅ Order confirmed. Email sent to: ${recipients.map((r) => r.to).join(', ')}`
@@ -318,7 +301,6 @@ export default function OrdersTable({
       async () => {
         try {
           await orderRepository.archiveOrder(order.id);
-          setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'Archived' } : o));
           notifier.success('Order archived.');
         } catch (err) {
           console.error('Archive error:', err);
@@ -334,7 +316,6 @@ export default function OrdersTable({
       async () => {
         try {
           await orderRepository.deleteOrder(order.id);
-          setOrders(orders.filter(o => o.id !== order.id));
           notifier.success('Order deleted.');
         } catch (err) {
           console.error('Delete error:', err);
@@ -740,7 +721,6 @@ export default function OrdersTable({
                 const isSub = e.target.checked;
                 try {
                   await orderRepository.updateOrder(o.id, { isSubscription: isSub });
-                  setOrders(prev => prev.map(order => order.id === o.id ? { ...order, isSubscription: isSub } : order));
                 } catch (err) {
                   console.error('Error toggling subscription:', err);
                 }
@@ -839,7 +819,7 @@ export default function OrdersTable({
       </div>
 
       {/* Uniform KPI Summary Bar */}
-      {!loading && <UniformKPIs data={orders} />}
+      {!loading && <UniformKPIs data={orders} globalMetrics={globalMetrics} />}
 
       {/* ── Table ── */}
       {loading ? (
@@ -901,7 +881,6 @@ export default function OrdersTable({
                       try {
                         const promises = selectedOrderIds.map(id => orderRepository.archiveOrder(id));
                         await Promise.all(promises);
-                        setOrders(orders.map(o => selectedOrderIds.includes(o.id) ? { ...o, status: 'Archived' } : o));
                         setSelectedOrderIds([]);
                         notifier.success('Orders archived.');
                       } catch (err) {
@@ -932,7 +911,6 @@ export default function OrdersTable({
                       try {
                         const promises = selectedOrderIds.map(id => orderRepository.deleteOrder(id));
                         await Promise.all(promises);
-                        setOrders(orders.filter(o => !selectedOrderIds.includes(o.id)));
                         setSelectedOrderIds([]);
                         notifier.success('Orders deleted.');
                       } catch (err) {

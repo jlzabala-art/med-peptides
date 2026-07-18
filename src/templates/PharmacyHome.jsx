@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
@@ -110,12 +110,20 @@ export default function PharmacyHome({ children }) {
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   return (
-    <AppPortalLayout allowedRoles={['compounding_pharmacy', 'admin']}>
+    <PanelShell 
+      allowedRoles={['compounding_pharmacy', 'admin']}
+      sidebarNavGroups={PHARMACY_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => { window.location.href = `/pharmacy/${id}`; }}
+      portalTitle="Pharmacy Portal"
+      roleContext="compounding_pharmacy"
+      pageContext={{ activeTab }}
+    >
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <PharmacyHomeContext.Provider value={{ userProfile }}>{children}</PharmacyHomeContext.Provider>
         </AdminTabErrorBoundary>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

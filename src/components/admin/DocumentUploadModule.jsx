@@ -18,6 +18,8 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import Download from "lucide-react/dist/esm/icons/download";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import DataTable from '../ui/DataTable';
 import Edit2 from "lucide-react/dist/esm/icons/edit-2";
 import Archive from "lucide-react/dist/esm/icons/archive";
 import ArchiveRestore from "lucide-react/dist/esm/icons/archive-restore";
@@ -876,42 +878,47 @@ export default function DocumentUploadModule() {
                       {isApplyingPrices ? 'Aplicando...' : 'Aplicar al Sistema'}
                     </button>
                   </div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
-                        <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Texto Original (Imagen)</th>
-                        <th style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>Producto Asociado</th>
-                        <th style={{ padding: '0.75rem', color: 'var(--text-muted)', textAlign: 'right' }}>Nuevo Coste</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {drawerDoc.extractedData.map((item, idx) => {
-                        const matchedProduct = item.productId ? products.find(p => p.id === item.productId) : null;
-                        return (
-                          <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '0.75rem' }}>
-                              <div style={{ fontWeight: 600 }}>{item.peptide_name || 'Desconocido'}</div>
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.original_text || '-'}</div>
-                            </td>
-                            <td style={{ padding: '0.75rem' }}>
-                              {matchedProduct ? (
-                                <span style={{ color: 'var(--color-success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                  <CheckCircle size={14} /> {matchedProduct.name}
-                                </span>
-                              ) : (
-                                <span style={{ color: '#f59e0b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                  <AlertCircle size={14} /> Requiere Creación
-                                </span>
-                              )}
-                            </td>
-                            <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 800, color: 'var(--text-main)' }}>
-                              ${item.new_cost || '0.00'}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <DataTable
+                    data={drawerDoc.extractedData.map((item, idx) => ({ ...item, _idx: idx }))}
+                    keyField="_idx"
+                    columns={[
+                      {
+                        key: 'original',
+                        header: 'Texto Original (Imagen)',
+                        render: (r) => (
+                          <div>
+                            <div style={{ fontWeight: 600 }}>{r.peptide_name || 'Desconocido'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.original_text || '-'}</div>
+                          </div>
+                        )
+                      },
+                      {
+                        key: 'product',
+                        header: 'Producto Asociado',
+                        render: (r) => {
+                          const matchedProduct = r.productId ? products.find(p => p.id === r.productId) : null;
+                          return matchedProduct ? (
+                            <span style={{ color: 'var(--color-success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                              <CheckCircle size={14} /> {matchedProduct.name}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#f59e0b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                              <AlertCircle size={14} /> Requiere Creación
+                            </span>
+                          );
+                        }
+                      },
+                      {
+                        key: 'cost',
+                        header: <div style={{ textAlign: 'right' }}>Nuevo Coste</div>,
+                        render: (r) => (
+                          <div style={{ textAlign: 'right', fontWeight: 800, color: 'var(--text-main)' }}>
+                            ${r.new_cost || '0.00'}
+                          </div>
+                        )
+                      }
+                    ]}
+                  />
                 </div>
               ) : (
                 <>

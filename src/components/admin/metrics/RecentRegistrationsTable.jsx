@@ -2,126 +2,88 @@
 
 import Users from "lucide-react/dist/esm/icons/users";
 import React, { useState } from 'react';
-
+import DataTable from '../../ui/DataTable';
 
 export default function RecentRegistrationsTable({ recentUsers, wholesalerId, navigateToUserTab, formatDate }) {
   const [expanded, setExpanded] = useState({});
-
-  const toggle = (id) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  const toggle = (id) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
   return (
     <div className="amd-table-section">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1rem',
-        }}
-      >
-        <h3
-          className="amd-title"
-          style={{
-            margin: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: '#202124',
-          }}
-        >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 className="amd-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#202124' }}>
           <Users size={16} color="#1a73e8" />
           Recent Registrations
         </h3>
-        <span className="amd-caption" style={{ color: '#5f6368' }}>
-          Latest platform signups
-        </span>
+        <span className="amd-caption" style={{ color: '#5f6368' }}>Latest platform signups</span>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%' }}>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th style={{ textAlign: 'center' }}>Role</th>
-              <th style={{ textAlign: 'center' }}>Status</th>
-              <th style={{ width: '2rem' }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentUsers.map((user) => (
-              <React.Fragment key={user.id}>
-                <tr style={{ cursor: 'pointer' }} onClick={() => navigateToUserTab(user.role)}>
-                  <td style={{ fontWeight: 600, color: '#1a73e8' }}>
-                    {user.fullName || user.displayName || user.email || 'N/A'}
-                  </td>
-                  <td
-                    style={{
-                      textAlign: 'center',
-                      textTransform: 'capitalize',
-                      color: '#5f6368',
-                    }}
-                  >
-                    {user.role || 'patient'}
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span
-                      className="amd-badge"
-                      style={{
-                        backgroundColor: user.status === 'active' ? '#e6f4ea' : '#fef7e0',
-                        color: user.status === 'active' ? '#137333' : '#b06000',
-                      }}
-                    >
-                      {user.status || 'pending'}
-                    </span>
-                  </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <button
-                      className="amd-expand-btn"
-                      onClick={() => toggle(user.id)}
-                      title="More details"
-                    >
-                      {expanded[user.id] ? '▲' : '▼'}
-                    </button>
-                  </td>
-                </tr>
-                {expanded[user.id] && (
-                  <tr className="amd-expanded-row" onClick={(e) => e.stopPropagation()}>
-                    <td colSpan={4}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <div>
-                          <strong>Email:</strong> {user.email || 'N/A'}
-                        </div>
-                        <div>
-                          <strong>Geographical Zone:</strong> {user.geographicalZone || user.zone || 'N/A'}
-                        </div>
-                        <div>
-                          <strong>Created At:</strong> {formatDate(user.createdAt)}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-            {recentUsers.length === 0 && (
-              <tr>
-                <td
-                  colSpan={4}
+      <div className="gcp-table-container">
+        <DataTable
+          columns={[
+            {
+              key: 'fullName',
+              header: 'Name',
+              render: (val, row) => (
+                <span
+                  style={{ fontWeight: 600, color: '#1a73e8', cursor: 'pointer' }}
+                  onClick={() => navigateToUserTab(row.role)}
+                >
+                  {row.fullName || row.displayName || row.email || 'N/A'}
+                </span>
+              )
+            },
+            {
+              key: 'role',
+              header: 'Role',
+              render: (val) => (
+                <span style={{ textAlign: 'center', textTransform: 'capitalize', color: '#5f6368', display: 'block' }}>
+                  {val || 'patient'}
+                </span>
+              )
+            },
+            {
+              key: 'status',
+              header: 'Status',
+              render: (val) => (
+                <span
+                  className="amd-badge"
                   style={{
+                    backgroundColor: val === 'active' ? '#e6f4ea' : '#fef7e0',
+                    color: val === 'active' ? '#137333' : '#b06000',
+                    display: 'block',
                     textAlign: 'center',
-                    padding: '2rem',
-                    color: '#9aa0a6',
-                    fontStyle: 'italic',
                   }}
                 >
-                  No recent registrations found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  {val || 'pending'}
+                </span>
+              )
+            },
+            {
+              key: 'id',
+              header: '',
+              render: (val, row) => (
+                <button
+                  className="amd-expand-btn"
+                  onClick={(e) => { e.stopPropagation(); toggle(row.id); }}
+                  title="More details"
+                >
+                  {expanded[row.id] ? '▲' : '▼'}
+                </button>
+              )
+            }
+          ]}
+          data={recentUsers}
+          keyField="id"
+          renderExpanded={(row) => expanded[row.id] ? (
+            <div style={{ padding: '0.75rem 1rem', background: 'var(--surface)', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div><strong>Email:</strong> {row.email || 'N/A'}</div>
+              <div><strong>Geographical Zone:</strong> {row.geographicalZone || row.zone || 'N/A'}</div>
+              <div><strong>Created At:</strong> {formatDate(row.createdAt)}</div>
+            </div>
+          ) : null}
+          emptyMessage="No recent registrations found."
+        />
       </div>
     </div>
   );

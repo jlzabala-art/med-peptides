@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
@@ -112,12 +112,20 @@ export default function SupplierHome({ children }) {
   };
 
   return (
-    <AppPortalLayout allowedRoles={['supplier', 'admin']}>
+    <PanelShell 
+      allowedRoles={['supplier', 'admin']}
+      sidebarNavGroups={SUPPLIER_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => router.push(`/supplier/${id}`)}
+      portalTitle="Supplier Portal"
+      roleContext="supplier"
+      pageContext={{ activeTab }}
+    >
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <SupplierHomeContext.Provider value={{ userProfile }}>{children}</SupplierHomeContext.Provider>
         </AdminTabErrorBoundary>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

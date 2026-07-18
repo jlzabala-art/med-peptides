@@ -6,14 +6,14 @@ import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Dna from "lucide-react/dist/esm/icons/dna";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
-
-
-
-
-
-import { StatusChip } from '../ui';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTable from '../ui/DataTable';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
+import MetricCard from '../ui/MetricCard';
 
 const MOCK_PROGRAMS = [
   { id: 'prg_1', name: 'Longevity Base Protocol', type: 'Anti-Aging', patients: 1250, revenue: 1250000, status: 'active', trend: '+12%' },
@@ -22,90 +22,150 @@ const MOCK_PROGRAMS = [
   { id: 'prg_4', name: 'Hair Restoration', type: 'Aesthetics', patients: 65, revenue: 45000, status: 'beta', trend: '+45%' }
 ];
 
-export default function AdminProgramsTab() {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function AdminProgramsTab({ isSubTab = false }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
 
-  const filtered = MOCK_PROGRAMS.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.type.toLowerCase().includes(searchTerm.toLowerCase()));
+  const activeFilters = [];
+  if (typeFilter) {
+    activeFilters.push({
+      key: 'type',
+      label: 'Type',
+      value: typeFilter,
+      onRemove: () => setTypeFilter('')
+    });
+  }
+
+  const filterOptions = [
+    {
+      key: 'type',
+      label: 'Program Type',
+      options: [
+        { label: 'All', value: '' },
+        { label: 'Anti-Aging', value: 'Anti-Aging' },
+        { label: 'Weight Loss', value: 'Weight Loss' },
+        { label: 'Performance', value: 'Performance' },
+        { label: 'Aesthetics', value: 'Aesthetics' }
+      ],
+      value: typeFilter,
+      onChange: setTypeFilter
+    }
+  ];
+
+  const filtered = useMemo(() => {
+    let result = MOCK_PROGRAMS;
+    if (typeFilter) {
+      result = result.filter(p => p.type === typeFilter);
+    }
+    return result;
+  }, [typeFilter]);
+
+  const columns = useMemo(() => [
+    {
+      key: 'id',
+      header: 'ID',
+      render: (val, row) => <CopyableId value={val} />
+    },
+    {
+      key: 'name',
+      header: 'Program Name',
+      render: (val) => <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{val}</span>
+    },
+    {
+      key: 'type',
+      header: 'Type'
+    },
+    {
+      key: 'patients',
+      header: 'Enrolled Patients',
+      render: (val) => val.toLocaleString()
+    },
+    {
+      key: 'revenue',
+      header: 'Total Revenue',
+      render: (val, row) => (
+        <span>
+          ${val.toLocaleString()}
+          <span style={{ fontSize: '0.75rem', color: '#16a34a', marginLeft: '0.5rem' }}>{row.trend}</span>
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (val) => <StatusBadge status={val} />
+    }
+  ], []);
+
+  // Master-Detail Pattern implementation (Golden Rule #4)
+  const expandableRender = (row) => (
+    <div style={{ padding: '1.5rem', backgroundColor: '#f8fafc', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+      <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)' }}>Program Configuration: {row.name}</h4>
+      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+        Detailed insights and protocol phases for this program would be configured here, avoiding the need for a separate modal.
+      </p>
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <button className="gcp-btn gcp-btn--secondary">View Enrolled Patients</button>
+        <button className="gcp-btn gcp-btn--secondary">Edit Financials</button>
+      </div>
+    </div>
+  );
 
   return (
-    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1.5rem', backgroundColor: '#f1f5f9' }}>
-      {/* Header */}
-      <div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Activity size={24} color="#1a73e8" /> Healthcare Program Engine
-        </h1>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
-          Manage structured clinical protocols, track patient enrollment, and measure program economics.
-        </p>
-      </div>
+    <div style={{ padding: '0 2rem 2rem 2rem' }}>
+      {/* Header (Golden Rule #9) */}
+      <PageHeader
+        title="Programas"
+        subtitle="Gestión de programas de salud"
+      />
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '50%', color: '#1d4ed8' }}><Dna size={24} /></div>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Active Programs</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{MOCK_PROGRAMS.filter(p => p.status === 'active').length}</div>
-          </div>
-        </div>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '12px', background: '#f0fdf4', borderRadius: '50%', color: '#15803d' }}><Users size={24} /></div>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Enrolled Patients</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{MOCK_PROGRAMS.reduce((acc, p) => acc + p.patients, 0).toLocaleString()}</div>
-          </div>
-        </div>
-        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '12px', background: '#fefce8', borderRadius: '50%', color: '#a16207' }}><DollarSign size={24} /></div>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Program Revenue</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>${(MOCK_PROGRAMS.reduce((acc, p) => acc + p.revenue, 0) / 1000000).toFixed(1)}M</div>
-          </div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <MetricCard
+          title="Active Programs"
+          value={MOCK_PROGRAMS.filter(p => p.status === 'active').length}
+          icon={Dna}
+          color="var(--color-primary)"
+        />
+        <MetricCard
+          title="Enrolled Patients"
+          value={MOCK_PROGRAMS.reduce((acc, p) => acc + p.patients, 0).toLocaleString()}
+          icon={Users}
+          color="var(--color-success)"
+        />
+        <MetricCard
+          title="Program Revenue"
+          value={`$${(MOCK_PROGRAMS.reduce((acc, p) => acc + p.revenue, 0) / 1000000).toFixed(1)}M`}
+          icon={DollarSign}
+          color="var(--color-warning)"
+        />
       </div>
 
-      {/* Program List */}
-      <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <input 
-            type="text" 
-            placeholder="Search programs..." 
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            style={{ width: '300px', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }}
-          />
-          <button className="gcp-btn-primary">Create Program</button>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
-              <tr>
-                <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Program Name</th>
-                <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Type</th>
-                <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Enrolled Patients</th>
-                <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Total Revenue</th>
-                <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(p => (
-                <tr key={p.id} style={{ borderBottom: '1px solid var(--border)' }} className="hover-bg">
-                  <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--text-main)' }}>{p.name}</td>
-                  <td style={{ padding: '1rem 1.5rem', color: 'var(--text-muted)' }}>{p.type}</td>
-                  <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>{p.patients.toLocaleString()}</td>
-                  <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>${p.revenue.toLocaleString()} <span style={{ fontSize: '0.75rem', color: '#16a34a', marginLeft: '0.5rem' }}>{p.trend}</span></td>
-                  <td style={{ padding: '1rem 1.5rem' }}><StatusChip status={p.status} /></td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <button style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><ArrowRight size={18} /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Global Search & Filters (Golden Rule #7) */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <GlobalSearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search programs..."
+          resultCount={filtered.length}
+          namespace="admin-programs"
+          size="lg"
+          filters={activeFilters}
+          filterOptions={filterOptions}
+        />
       </div>
-      <style>{`.hover-bg:hover { background-color: #f8fafc; }`}</style>
+
+      {/* Program List (Golden Rule #3) */}
+      <div className="gcp-table-container">
+        <DataTable
+          columns={columns}
+          data={filtered}
+          keyField={(row) => row.id}
+          globalSearch={true}
+          searchQuery={searchQuery}
+          expandableRender={expandableRender}
+        />
+      </div>
     </div>
   );
 }

@@ -42,3 +42,10 @@ const timelineTriggers = require("./src/triggers/timelineTriggers");
 exports.onOrderCreatedForTimeline = timelineTriggers.onOrderCreated;
 exports.onPatientCreatedForTimeline = timelineTriggers.onPatientCreated;
 exports.onTaskCompletedForTimeline = timelineTriggers.onTaskCompleted;
+const { searchZohoItem } = require('./src/zoho/searchZohoItem');
+const { searchZohoContact } = require('./src/zoho/searchZohoContact');
+const { createZohoEntity } = require('./src/zoho/createZohoEntity');
+
+exports.searchZohoItem = searchZohoItem;
+exports.searchZohoContact = searchZohoContact;
+exports.createZohoEntity = createZohoEntity;

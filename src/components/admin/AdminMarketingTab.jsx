@@ -25,7 +25,7 @@ import AppStatusToggle from '../ui/AppStatusToggle';
 import AppActionGroup from '../ui/AppActionGroup';
 import notifier from '../../services/NotificationService';
 
-export default function AdminMarketingTab() {
+export default function AdminMarketingTab({ isSubTab }) {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterText, setFilterText] = useState('');
@@ -252,86 +252,88 @@ export default function AdminMarketingTab() {
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-        <div>
-          <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Globe size={24} color="var(--color-primary)" /> Content & Marketing
-          </h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)' }}>
-            Manage blog articles and social media automation parameters.
-          </p>
-        </div>
-        {/* LinkedIn Connection Widget */}
-        <div style={{ 
-          padding: '1.25rem', 
-          backgroundColor: '#eff6ff', 
-          border: '1px solid #bfdbfe', 
-          borderRadius: '12px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: '0.5rem',
-          minWidth: '250px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#1e40af', width: '100%', justifyContent: 'space-between' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Share2 size={16} /> LinkedIn Auto-Poster</span>
+      {!isSubTab && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+          <div>
+            <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Globe size={24} color="var(--color-primary)" /> Content & Marketing
+            </h2>
+            <p style={{ margin: 0, color: 'var(--text-muted)' }}>
+              Manage blog articles and social media automation parameters.
+            </p>
           </div>
-          {linkedInStatus.connected ? (
-             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
-                <div style={{ fontSize: '0.85rem', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckCircle size={14} /> Connected & Verified
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span><strong>Last verification:</strong> {linkedInStatus.updatedAt ? linkedInStatus.updatedAt.toLocaleString() : 'Recent'}</span>
-                  <span><strong>Token Status:</strong> Valid ({getDaysUntilExpiry()} days remaining)</span>
-                  <span><strong>Auto-renewal:</strong> Active (1st & 15th)</span>
-                </div>
-                {getDaysUntilExpiry() < 5 && (
-                  <button 
-                    onClick={handleConnectLinkedIn}
-                    disabled={authLoading}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#f59e0b',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.7rem',
-                      cursor: 'pointer',
-                      marginTop: '4px'
-                    }}
-                  >
-                    Manually Renew Token
-                  </button>
-                )}
-             </div>
-          ) : (
-             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
-               <p style={{ fontSize: '0.8rem', color: '#475569', margin: 0 }}>
-                 Connect LinkedIn to automatically publish articles when they change to "Published" status.
-               </p>
-               <button 
-                 onClick={handleConnectLinkedIn}
-                 disabled={authLoading}
-                 style={{
-                   padding: '8px 16px',
-                   backgroundColor: '#0a66c2', // LinkedIn blue
-                   color: '#fff',
-                   border: 'none',
-                   borderRadius: '6px',
-                   fontSize: '0.85rem',
-                   fontWeight: 600,
-                   cursor: authLoading ? 'not-allowed' : 'pointer',
-                   opacity: authLoading ? 0.7 : 1,
-                   alignSelf: 'stretch'
-                 }}
-               >
-                 {authLoading ? 'Connecting...' : 'Connect with LinkedIn'}
-               </button>
-             </div>
-          )}
+          {/* LinkedIn Connection Widget */}
+          <div style={{ 
+            padding: '1.25rem', 
+            backgroundColor: '#eff6ff', 
+            border: '1px solid #bfdbfe', 
+            borderRadius: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '0.5rem',
+            minWidth: '250px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#1e40af', width: '100%', justifyContent: 'space-between' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Share2 size={16} /> LinkedIn Auto-Poster</span>
+            </div>
+            {linkedInStatus.connected ? (
+               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                  <div style={{ fontSize: '0.85rem', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle size={14} /> Connected & Verified
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span><strong>Last verification:</strong> {linkedInStatus.updatedAt ? linkedInStatus.updatedAt.toLocaleString() : 'Recent'}</span>
+                    <span><strong>Token Status:</strong> Valid ({getDaysUntilExpiry()} days remaining)</span>
+                    <span><strong>Auto-renewal:</strong> Active (1st & 15th)</span>
+                  </div>
+                  {getDaysUntilExpiry() < 5 && (
+                    <button 
+                      onClick={handleConnectLinkedIn}
+                      disabled={authLoading}
+                      style={{
+                        padding: '4px 8px',
+                        backgroundColor: '#f59e0b',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        fontSize: '0.7rem',
+                        cursor: 'pointer',
+                        marginTop: '4px'
+                      }}
+                    >
+                      Manually Renew Token
+                    </button>
+                  )}
+               </div>
+            ) : (
+               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start' }}>
+                 <p style={{ fontSize: '0.8rem', color: '#475569', margin: 0 }}>
+                   Connect LinkedIn to automatically publish articles when they change to "Published" status.
+                 </p>
+                 <button 
+                   onClick={handleConnectLinkedIn}
+                   disabled={authLoading}
+                   style={{
+                     padding: '8px 16px',
+                     backgroundColor: '#0a66c2', // LinkedIn blue
+                     color: '#fff',
+                     border: 'none',
+                     borderRadius: '6px',
+                     fontSize: '0.85rem',
+                     fontWeight: 600,
+                     cursor: authLoading ? 'not-allowed' : 'pointer',
+                     opacity: authLoading ? 0.7 : 1,
+                     alignSelf: 'stretch'
+                   }}
+                 >
+                   {authLoading ? 'Connecting...' : 'Connect with LinkedIn'}
+                 </button>
+               </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

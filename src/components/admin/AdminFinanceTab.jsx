@@ -17,22 +17,17 @@ import FinanceApprovals from './finance/FinanceApprovals';
 import FinanceEconomics from './finance/FinanceEconomics';
 import FinanceReporting from './finance/FinanceReporting';
 import UploadInvoiceModal from './finance/UploadInvoiceModal';
-
-
-
-
-
-
+import PageHeader from '../ui/PageHeader';
 import SkeletonLoader from '../ui/SkeletonLoader';
 
-export default function AdminFinanceTab({ activeSubTab }) {
+export default function AdminFinanceTab({ isSubTab = false, activeSubTab }) {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState(activeSubTab || 'budget');
   const { setPageContext, clearPageContext } = useAIContext();
   const { data, loading, forceRefresh, error } = useFinanceData();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [dateRange, setDateRange] = useState('YTD');
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const activeTab = activeSubTab || 'budget';
 
   // We unpack the cached data or default to empty values to prevent crashes while loading
   const dashboardData = data?.dashboardData || null;
@@ -114,60 +109,33 @@ export default function AdminFinanceTab({ activeSubTab }) {
   };
 
   return (
-    <div className="admin-finance-root anim-fade-up">
-      {/* Premium Glassmorphism Header */}
-      <div className="glass-card-premium" style={{ marginBottom: '1.5rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ 
-              padding: '0.75rem', 
-              background: 'rgba(255, 255, 255, 0.1)', 
-              borderRadius: '12px', 
-              border: '1px solid var(--glass-border)' 
-            }}>
-              <TrendingUp style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-            </div>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, color: 'var(--primary)' }}>CFO Intelligence Hub</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0.25rem 0 0 0' }}>Real-time financial synchronization and predictive modeling</p>
-            </div>
-          </div>
+    <div className="admin-finance-root anim-fade-up" style={{ padding: isSubTab ? '0' : undefined }}>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>System Status</div>
-              <div style={{ fontSize: '0.875rem', color: 'var(--success)', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span className="admin-pill-status-dot admin-pill-status-dot--pulse" />
-                Zoho Books Synced
+      {!isSubTab && (
+        <PageHeader
+          title="CFO Intelligence Hub"
+          subtitle="Real-time financial synchronization and predictive modeling."
+          icon={TrendingUp}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-raised)', borderRadius: '8px', padding: '0.25rem 0.5rem', border: '1px solid var(--border)' }}>
+                <Calendar style={{ width: '16px', height: '16px', color: 'var(--text-muted)', marginRight: '0.5rem' }} />
+                <select value={dateRange} onChange={(e) => setDateRange(e.target.value)} className="admin-premium-select" style={{ border: 'none', background: 'transparent', padding: '0', cursor: 'pointer' }}>
+                  <option value="THIS_MONTH">This Month</option>
+                  <option value="Q1">Q1 2026</option>
+                  <option value="Q2">Q2 2026</option>
+                  <option value="YTD">Year to Date (YTD)</option>
+                  <option value="LAST_12">Last 12 Months</option>
+                </select>
               </div>
+              <button onClick={handleRefresh} disabled={loading || isRefreshing} className="admin-quick-btn">
+                <RefreshCw style={{ width: '16px', height: '16px' }} className={isRefreshing ? 'spinner-icon' : ''} />
+                <span>{isRefreshing ? 'Syncing...' : 'Force Sync'}</span>
+              </button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--surface-raised)', borderRadius: '8px', padding: '0.25rem 0.5rem', border: '1px solid var(--border)' }}>
-              <Calendar style={{ width: '16px', height: '16px', color: 'var(--text-muted)', marginRight: '0.5rem' }} />
-              <select 
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className="admin-premium-select"
-                style={{ border: 'none', background: 'transparent', padding: '0', cursor: 'pointer' }}
-              >
-                <option value="THIS_MONTH">This Month</option>
-                <option value="Q1">Q1 2026</option>
-                <option value="Q2">Q2 2026</option>
-                <option value="YTD">Year to Date (YTD)</option>
-                <option value="LAST_12">Last 12 Months</option>
-              </select>
-            </div>
-
-            <button 
-              onClick={handleRefresh}
-              disabled={loading || isRefreshing}
-              className="admin-quick-btn"
-            >
-              <RefreshCw style={{ width: '16px', height: '16px' }} className={isRefreshing ? 'spinner-icon' : ''} />
-              <span>{isRefreshing ? 'Syncing...' : 'Force Sync'}</span>
-            </button>
-          </div>
-        </div>
-      </div>
+          }
+        />
+      )}
 
       {/* Financial Quick Action Bar */}
       <div className="glass-card-premium" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', padding: '1rem', marginBottom: '2rem' }}>

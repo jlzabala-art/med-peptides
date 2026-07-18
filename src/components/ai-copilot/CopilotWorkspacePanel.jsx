@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCopilot } from '../../context/CopilotContext';
 import { toast } from 'react-hot-toast';
 import { askCatalogAssistant } from '../../services/catalogAIService';
+import { useCatalogStore } from '../../store/useCatalogStore';
+import { usePatientStore } from '../../store/usePatientStore';
+import { useOrderStore } from '../../store/useOrderStore';
+import { useLeadStore } from '../../store/useLeadStore';
 
 import { X, Command, Activity, HeartPulse, Target, Briefcase, User, MessageSquare, Mic, ChevronRight, AlertTriangle, CheckCircle2, Zap, DollarSign, Package, ChevronDown, Clock, BrainCircuit, ShieldAlert, ArrowRight, ActivitySquare } from '@/lib/icons';
 
@@ -137,19 +141,19 @@ function generateAtlasContext(role, screen, record) {
   const currentContext = baseContexts[role] || baseContexts['ceo'];
 
   // Override logic based on context (screen/record)
-  if (screen === 'customer' || (record && record.type === 'customer')) {
-    if (role === 'commercial') {
-      currentContext.recommendation.what = 'Customer shows high engagement on Peptide X.';
-      currentContext.recommendation.why = 'Upsell opportunity based on viewing history.';
-      currentContext.recommendation.action = 'Send targeted offer for Bulk Peptide X.';
-    } else if (role === 'finance') {
-      currentContext.recommendation.what = 'Customer has AED 45,000 in outstanding invoices.';
-      currentContext.recommendation.why = 'Credit limit reached. New orders blocked.';
-      currentContext.recommendation.action = 'Send immediate payment reminder.';
-    } else if (role === 'operations') {
-      currentContext.recommendation.what = 'Customer has 2 pending deliveries delayed.';
-      currentContext.recommendation.why = 'SLA breach imminent.';
-      currentContext.recommendation.action = 'Reroute shipment via priority courier.';
+  // Dynamic Override based on actual Store Data
+  const { storeData } = record || {};
+  if (storeData) {
+    if (storeData.pendingOrders > 0 && role === 'operations') {
+      currentContext.recommendation.what = `${storeData.pendingOrders} orders are currently pending review.`;
+      currentContext.recommendation.action = 'Review and approve pending orders to maintain SLA.';
+      currentContext.recommendation.impact = 'Prevents delivery delays';
+      currentContext.alerts = [{ id: 1, icon: '📦', label: `${storeData.pendingOrders} Pending Orders`, bg: '#fffbeb', color: '#b45309', border: '#fde68a', details: ['Action required'] }];
+    }
+    if (storeData.activeLeads > 0 && role === 'commercial') {
+      currentContext.recommendation.what = `${storeData.activeLeads} active leads require follow-up.`;
+      currentContext.recommendation.action = 'Engage with top priority leads in your pipeline.';
+      currentContext.alerts = [{ id: 1, icon: '💰', label: `${storeData.activeLeads} Active Leads`, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', details: ['High priority'] }];
     }
   }
 
@@ -161,6 +165,12 @@ export default function CopilotWorkspacePanel() {
   const [query, setQuery] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
+
+  // Inject real context from Zustand Stores
+  const { products } = useCatalogStore();
+  const { patients } = usePatientStore();
+  const { orders } = useOrderStore();
+  const { leads } = useLeadStore();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   useEffect(() => {
@@ -183,16 +193,30 @@ export default function CopilotWorkspacePanel() {
   const [memoryOpen, setMemoryOpen] = useState(false);
   const [feedOpen, setFeedOpen] = useState(false);
 
-  // Generate Data from Engine
-  const data = generateAtlasContext(mode, contextData?.screen, contextData?.record);
+    const richContext = {
+      ...contextData,
+      storeData: {
+        totalProducts: products?.length || 0,
+        totalPatients: patients?.length || 0,
+        totalOrders: orders?.length || 0,
+        totalLeads: leads?.length || 0,
+        // Calculate dynamic KPIs for the prompt
+        pendingOrders: orders?.filter(o => o.status === 'pending')?.length || 0,
+        activeLeads: leads?.filter(l => l.status === 'new' || l.status === 'contacted')?.length || 0
+      }
+    };
+
+  // Generate Data from Engine with dynamic storeData
+  const data = generateAtlasContext(mode, contextData?.screen, { ...contextData?.record, storeData: richContext.storeData });
 
   const handleExecute = async (overrideQuery) => {
     const text = overrideQuery || query;
     if (!text.trim()) return;
     setIsProcessing(true);
+
     const toastId = toast.loading('Atlas AI processing command...', { icon: '⚡' });
     try {
-      await askCatalogAssistant({ message: text, catalogContext: contextData, history: [] });
+      await askCatalogAssistant({ message: text, catalogContext: richContext, history: [] });
       toast.success('Command Executed', { id: toastId });
       setQuery('');
     } catch (e) {

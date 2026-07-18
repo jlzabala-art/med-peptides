@@ -1,5 +1,7 @@
 import React from 'react';
-import { BrainCircuit, FlaskConical, AlertTriangle, CheckCircle, Info, TestTube } from '@/lib/icons';
+import { BrainCircuit, FlaskConical, AlertTriangle, CheckCircle, Info, TestTube, FileText } from '@/lib/icons';
+import DataTable from '../../ui/DataTable';
+import EmptyState from '../../ui/EmptyState';
 
 export default function AILabInsights({ protocol }) {
   const rationale = protocol?.overview_summary || protocol?.clinical_rationale || 'No clinical rationale provided for this protocol.';
@@ -109,40 +111,34 @@ export default function AILabInsights({ protocol }) {
 
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
             {labMonitoring.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                No lab monitoring scheduled.
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="No lab monitoring"
+                subtitle="No lab monitoring scheduled."
+              />
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead style={{ background: 'var(--background-alt, #f8fafc)' }}>
-                  <tr>
-                    <th style={{ textAlign: 'left', padding: '1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Timing</th>
-                    <th style={{ textAlign: 'left', padding: '1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</th>
-                    <th style={{ textAlign: 'left', padding: '1rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Panel / Tests</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {labMonitoring.map((lab, index) => (
-                    <tr key={index} style={{ borderBottom: index < labMonitoring.length - 1 ? '1px solid var(--border-light, #f1f5f9)' : 'none' }}>
-                      <td style={{ padding: '1rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>{lab.week}</td>
-                      <td style={{ padding: '1rem', fontSize: '0.85rem' }}>
-                        <span style={{ 
-                          padding: '0.3rem 0.6rem', 
-                          borderRadius: '6px', 
-                          background: lab.type === 'Required' ? '#fee2e2' : lab.type === 'Recommended' ? '#fef3c7' : '#f3f4f6', 
-                          color: lab.type === 'Required' ? '#991b1b' : lab.type === 'Recommended' ? '#92400e' : '#374151',
-                          fontWeight: 700,
-                          fontSize: '0.75rem',
-                          textTransform: 'uppercase'
-                        }}>
-                          {lab.type}
-                        </span>
-                      </td>
-                      <td style={{ padding: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{lab.tests}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                data={labMonitoring}
+                keyField="id"
+                columns={[
+                  { key: 'week', header: 'Timing', render: (r) => <span style={{ fontWeight: 600 }}>{r.week}</span> },
+                  { key: 'type', header: 'Type', render: (r) => (
+                      <span style={{ 
+                        padding: '0.3rem 0.6rem', 
+                        borderRadius: '6px', 
+                        background: r.type === 'Required' ? '#fee2e2' : r.type === 'Recommended' ? '#fef3c7' : '#f3f4f6', 
+                        color: r.type === 'Required' ? '#991b1b' : r.type === 'Recommended' ? '#92400e' : '#374151',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        textTransform: 'uppercase'
+                      }}>
+                        {r.type}
+                      </span>
+                    ) 
+                  },
+                  { key: 'tests', header: 'Panel / Tests', render: (r) => <span style={{ color: 'var(--text-secondary)' }}>{r.tests}</span> }
+                ]}
+              />
             )}
           </div>
         </div>

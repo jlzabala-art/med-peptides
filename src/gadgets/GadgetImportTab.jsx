@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Checkbox } from '../components/ui';
-
-
-
-
+import DataTable from '../components/ui/DataTable';
 import * as XLSX from 'xlsx';
 import { UploadCloud, FileText, Loader2, CheckCircle } from '@/lib/icons';
 
@@ -329,39 +326,48 @@ export default function GadgetImportTab({ title, description, context, apiUrl, a
           </div>
 
           <div style={{ overflowX: 'auto', backgroundColor: 'white', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-            <table style={gadgetStyles.table}>
-              <thead>
-                <tr>
-                  <th style={{ ...gadgetStyles.th, width: '40px', textAlign: 'center' }}>
-                    <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
-                  </th>
-                  <th style={gadgetStyles.th}>Confidence</th>
-                  <th style={gadgetStyles.th}>Item Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {parsedData.map((item, idx) => {
-                  const score = item.confidence_score || 0;
-                  let confColor = '#10b981';
-                  if (score < 50) confColor = '#ef4444';
-                  else if (score < 80) confColor = '#f59e0b';
-
-                  return (
-                    <tr key={idx} style={{ opacity: selectedRows.has(idx) ? 1 : 0.5, backgroundColor: score < 50 && selectedRows.has(idx) ? '#fef2f2' : 'transparent' }}>
-                      <td style={{ ...gadgetStyles.td, textAlign: 'center' }}>
-                        <Checkbox checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
-                      </td>
-                      <td style={{ ...gadgetStyles.td, fontWeight: 'bold', color: confColor }}>{score}%</td>
-                      <td style={gadgetStyles.td}>
-                        <pre style={{ margin: 0, fontSize: '0.8rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                          {JSON.stringify(item, null, 2)}
-                        </pre>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <DataTable
+              columns={[
+                {
+                  key: 'select',
+                  header: <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />,
+                  render: (val, row, idx) => (
+                    <Checkbox checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} />
+                  ),
+                },
+                {
+                  key: 'confidence',
+                  header: 'Confidence',
+                  render: (val, row) => {
+                    const score = row.confidence_score || 0;
+                    let confColor = '#10b981';
+                    if (score < 50) confColor = '#ef4444';
+                    else if (score < 80) confColor = '#f59e0b';
+                    return <span style={{ fontWeight: 'bold', color: confColor }}>{score}%</span>;
+                  },
+                },
+                {
+                  key: 'data',
+                  header: 'Item Data',
+                  render: (val, row) => (
+                    <pre style={{ margin: 0, fontSize: '0.8rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                      {JSON.stringify(row, null, 2)}
+                    </pre>
+                  ),
+                }
+              ]}
+              data={parsedData}
+              keyField={(row, idx) => idx.toString()}
+              getRowProps={(row, idx) => {
+                const score = row.confidence_score || 0;
+                return {
+                  style: {
+                    opacity: selectedRows.has(idx) ? 1 : 0.5,
+                    backgroundColor: score < 50 && selectedRows.has(idx) ? '#fef2f2' : 'transparent'
+                  }
+                };
+              }}
+            />
           </div>
         </div>
       )}

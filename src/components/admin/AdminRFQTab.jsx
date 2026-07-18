@@ -15,12 +15,13 @@ import { Card } from '../ui';
 import notifier from '../../services/NotificationService';
 import SupplierPriceListUpdater from './gadgets/SupplierPriceListUpdater';
 import DataTable from '../ui/DataTable';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
-import { FileText, Loader2, Plus, Sparkles, CheckCircle, AlertTriangle, Send, Receipt, Download } from '@/lib/icons';
+import { FileText, Loader2, Plus, Sparkles, CheckCircle, AlertTriangle, Send, Receipt, Download, Activity } from '@/lib/icons';
 
-export default function AdminRFQTab() {
+export default function AdminRFQTab({ isSubTab = false }) {
+  const { user } = useAuth();
   const [rfqs, setRfqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -65,6 +66,10 @@ export default function AdminRFQTab() {
       console.error("Error loading rfqs:", err);
     }
     setLoading(false);
+  };
+
+  const handleCreateNewRFQ = () => {
+    setShowUploadModal(true);
   };
 
   const handleFileUpload = async (e) => {
@@ -475,21 +480,24 @@ export default function AdminRFQTab() {
   ];
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
-      <AdminPageHeader
-        title="B2B RFQ Workflow"
-        subtitle="Process Excel Quotes, request supplier costs, and calculate margins."
-        icon={FileText}
-        actions={
-          <button 
-            onClick={() => setShowUploadModal(true)}
-            className="btn btn-primary"
-            style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
-          >
-            <Plus size={16} /> Upload Excel RFQ
-          </button>
-        }
-      />
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isSubTab ? '0' : '0 0 3rem 0', width: '100%' }}>
+      {!isSubTab && (
+        <PageHeader
+          title="Procurement & Sourcing RFQs"
+          subtitle="Generate, track, and convert request-for-quotes for B2B supplier orders."
+          icon={FileText}
+          actions={
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Activity size={16} /> Audit Log
+              </button>
+              <button className="btn btn-primary" onClick={handleCreateNewRFQ} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Plus size={16} /> New RFQ
+              </button>
+            </div>
+          }
+        />
+      )}
 
       {/* GlobalSearchBar — prominent, above card */}
       <div style={{ marginBottom: '1rem' }}>
@@ -542,49 +550,50 @@ export default function AdminRFQTab() {
                 </p>
               </div>
 
-              <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left', padding: '0.75rem' }}>Item Description</th>
-                    <th style={{ textAlign: 'right', padding: '0.75rem', width: '90px' }}>Quantity</th>
-                    <th style={{ textAlign: 'center', padding: '0.75rem', width: '90px' }}>Units</th>
-                    <th style={{ textAlign: 'right', padding: '0.75rem' }}>
-                      {previewType === 'supplier' ? 'Your Unit Cost ($)' : 'Unit Price ($)'}
-                    </th>
-                    <th style={{ textAlign: 'right', padding: '0.75rem' }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {previewData.items.map((item, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '0.75rem' }}>
-                        <strong>{item.peptide_name}</strong>
-                        {item.dosage && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.dosage}</div>}
-                      </td>
-                      <td style={{ textAlign: 'right', padding: '0.75rem' }}>{item.quantity}</td>
-                      <td style={{ textAlign: 'center', padding: '0.75rem', color: 'var(--text-muted)' }}>{item.units || 'vials'}</td>
-                      <td style={{ textAlign: 'right', padding: '0.75rem' }}>
-                        {previewType === 'supplier' ? (
-                          <input 
-                            type="number" disabled
-                            value={item.supplierUnitCost}
-                            style={{ width: '80px', padding: '0.25rem', textAlign: 'right', background: '#f1f5f9', border: '1px solid #cbd5e1' }}
-                          />
-                        ) : (
-                          <span style={{ fontWeight: 600 }}>${item.clientUnitPrice?.toFixed(2)}</span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'right', padding: '0.75rem', fontWeight: 700 }}>
-                        {previewType === 'supplier' ? (
-                          `$${((item.supplierUnitCost || 0) * item.quantity).toFixed(2)}`
-                        ) : (
-                          `$${((item.clientUnitPrice || 0) * item.quantity).toFixed(2)}`
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Preview table — read-only DataTable */}
+              {(() => {
+                const previewColumns = previewType === 'supplier'
+                  ? [
+                      { key: 'peptide_name', header: 'Item Description', render: (item) => (
+                        <div>
+                          <strong>{item.peptide_name}</strong>
+                          {item.dosage && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.dosage}</div>}
+                        </div>
+                      )},
+                      { key: 'quantity', header: 'Quantity', align: 'right' },
+                      { key: 'units', header: 'Units', align: 'center', render: (item) => item.units || 'vials' },
+                      { key: 'supplierUnitCost', header: 'Your Unit Cost ($)', align: 'right', render: (item) => (
+                        <input type="number" disabled value={item.supplierUnitCost}
+                          style={{ width: '80px', padding: '0.25rem', textAlign: 'right', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                        />
+                      )},
+                      { key: 'total', header: 'Total', align: 'right', render: (item) => `$${((item.supplierUnitCost || 0) * item.quantity).toFixed(2)}` },
+                    ]
+                  : [
+                      { key: 'peptide_name', header: 'Item Description', render: (item) => (
+                        <div>
+                          <strong>{item.peptide_name}</strong>
+                          {item.dosage && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.dosage}</div>}
+                        </div>
+                      )},
+                      { key: 'quantity', header: 'Quantity', align: 'right' },
+                      { key: 'units', header: 'Units', align: 'center', render: (item) => item.units || 'vials' },
+                      { key: 'clientUnitPrice', header: 'Unit Price ($)', align: 'right', render: (item) => <span style={{ fontWeight: 600 }}>${item.clientUnitPrice?.toFixed(2)}</span> },
+                      { key: 'total', header: 'Total', align: 'right', render: (item) => `$${((item.clientUnitPrice || 0) * item.quantity).toFixed(2)}` },
+                    ];
+
+                return (
+                  <div className="gcp-table-container">
+                    <DataTable
+                      columns={previewColumns}
+                      data={previewData.items || []}
+                      keyField="peptide_name"
+                      emptyTitle="No items"
+                      searchStrategy="local"
+                    />
+                  </div>
+                );
+              })()}
 
               <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
                 <button disabled className="gcp-btn gcp-btn--primary" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
@@ -612,30 +621,28 @@ export default function AdminRFQTab() {
               <strong>Total Invoice Amount: </strong> ${reconciliationResult.total_invoice_amount?.toFixed(2)}
             </div>
 
-            <table className="gcp-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-              <thead>
-                <tr>
-                  <th>Invoice Item</th>
-                  <th>RFQ Expected</th>
-                  <th>Qty Match</th>
-                  <th>Price Match</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reconciliationResult.items?.map((item, idx) => (
-                  <tr key={idx} style={{ backgroundColor: (!item.qty_match || !item.price_match) ? '#fef2f2' : 'transparent' }}>
-                    <td>{item.invoice_name}</td>
-                    <td>{item.rfq_name || <span style={{color: '#ea580c'}}>Not in RFQ</span>}</td>
-                    <td>
-                      {item.qty_match ? <span style={{color: '#16a34a'}}>Match ({item.invoice_qty})</span> : <strong style={{color: '#dc2626'}}>Mismatch: {item.invoice_qty} vs {item.rfq_qty}</strong>}
-                    </td>
-                    <td>
-                      {item.price_match ? <span style={{color: '#16a34a'}}>Match (${item.invoice_unit_cost})</span> : <strong style={{color: '#dc2626'}}>Mismatch: ${item.invoice_unit_cost} vs ${item.rfq_unit_cost}</strong>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="gcp-table-container">
+              <DataTable
+                columns={[
+                  { key: 'invoice_name', header: 'Invoice Item' },
+                  { key: 'rfq_name', header: 'RFQ Expected', render: (item) => item.rfq_name || <span style={{color: '#ea580c'}}>Not in RFQ</span> },
+                  { key: 'qty_match', header: 'Qty Match', render: (item) => item.qty_match
+                    ? <span style={{color: '#16a34a'}}>Match ({item.invoice_qty})</span>
+                    : <strong style={{color: '#dc2626'}}>Mismatch: {item.invoice_qty} vs {item.rfq_qty}</strong>
+                  },
+                  { key: 'price_match', header: 'Price Match', render: (item) => item.price_match
+                    ? <span style={{color: '#16a34a'}}>Match (${item.invoice_unit_cost})</span>
+                    : <strong style={{color: '#dc2626'}}>Mismatch: ${item.invoice_unit_cost} vs ${item.rfq_unit_cost}</strong>
+                  },
+                ]}
+                data={reconciliationResult.items || []}
+                keyField="invoice_name"
+                emptyTitle="No items to reconcile"
+                getRowProps={(item) => ({
+                  style: { backgroundColor: (!item.qty_match || !item.price_match) ? 'rgba(254,242,242,0.5)' : 'transparent' }
+                })}
+              />
+            </div>
 
             {reconciliationResult.missing_from_invoice?.length > 0 && (
               <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fff7ed', borderRadius: '8px', color: '#9a3412', fontSize: '0.9rem' }}>
@@ -754,76 +761,85 @@ export default function AdminRFQTab() {
                   )}
                 </div>
 
-                <table className="gcp-table" style={{ width: '100%', fontSize: '0.9rem' }}>
-                  <thead>
-                    <tr>
-                      <th>Product / Peptide</th>
-                      <th style={{ textAlign: 'right', width: '90px' }}>Quantity</th>
-                      <th style={{ textAlign: 'center', width: '90px' }}>Units</th>
-                      <th>Catalog Match</th>
-                      <th>Supplier Cost ($)</th>
-                      {marginType === 'per-item' && <th>Margin (%)</th>}
-                      <th>Client Price ($)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentRFQ.items.map((item, idx) => (
-                      <tr key={idx}>
-                        <td>
+                {/* RFQ Draft inline-editor — DataTable with inline inputs (Golden Rule #5) */}
+                {(() => {
+                  const draftColumns = [
+                    {
+                      key: 'peptide_name', header: 'Product / Peptide',
+                      render: (item, _col, idx) => (
+                        <div>
                           <strong>{item.peptide_name}</strong>
                           {item.dosage && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.dosage}</div>}
                           <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Original: {item.original_text}</div>
-                        </td>
-                        <td>
-                          <input 
-                            type="number" min="1"
-                            value={item.quantity}
-                            onChange={(e) => handleItemQtyChange(idx, e.target.value)}
-                            style={{ width: '70px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right', fontWeight: '600' }}
-                          />
-                        </td>
-                        <td>
-                          <input 
-                            type="text"
-                            value={item.units || 'vials'}
-                            onChange={(e) => handleItemUnitsChange(idx, e.target.value)}
-                            style={{ width: '75px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'center' }}
-                          />
-                        </td>
-                        <td>
-                          {item.requires_creation ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#ea580c', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#ffedd5', padding: '2px 6px', borderRadius: '10px' }}>
-                              <AlertTriangle size={12} /> Missing
-                            </span>
-                          ) : (
-                            <span style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: 600 }}>Found</span>
-                          )}
-                        </td>
-                        <td>
-                          <input 
-                            type="number" min="0" step="0.01"
-                            value={item.supplierUnitCost}
-                            onChange={(e) => handleItemCostChange(idx, e.target.value)}
-                            style={{ width: '80px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                          />
-                        </td>
-                        {marginType === 'per-item' && (
-                          <td>
-                            <input 
-                              type="number" min="0" step="1"
-                              value={item.marginPercent}
-                              onChange={(e) => handleItemMarginChange(idx, e.target.value)}
-                              style={{ width: '60px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                            />
-                          </td>
-                        )}
-                        <td style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
-                          ${item.clientUnitPrice?.toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      )
+                    },
+                    {
+                      key: 'quantity', header: 'Quantity', align: 'right',
+                      render: (item, _col, idx) => (
+                        <input type="number" min="1" value={item.quantity}
+                          onChange={(e) => handleItemQtyChange(idx, e.target.value)}
+                          style={{ width: '70px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right', fontWeight: '600' }}
+                        />
+                      )
+                    },
+                    {
+                      key: 'units', header: 'Units', align: 'center',
+                      render: (item, _col, idx) => (
+                        <input type="text" value={item.units || 'vials'}
+                          onChange={(e) => handleItemUnitsChange(idx, e.target.value)}
+                          style={{ width: '75px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'center' }}
+                        />
+                      )
+                    },
+                    {
+                      key: 'requires_creation', header: 'Catalog Match',
+                      render: (item) => item.requires_creation
+                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: '#ea580c', fontSize: '0.8rem', fontWeight: 600, backgroundColor: '#ffedd5', padding: '2px 6px', borderRadius: '10px' }}>
+                            <AlertTriangle size={12} /> Missing
+                          </span>
+                        : <span style={{ color: '#16a34a', fontSize: '0.8rem', fontWeight: 600 }}>Found</span>
+                    },
+                    {
+                      key: 'supplierUnitCost', header: 'Supplier Cost ($)',
+                      render: (item, _col, idx) => (
+                        <input type="number" min="0" step="0.01" value={item.supplierUnitCost}
+                          onChange={(e) => handleItemCostChange(idx, e.target.value)}
+                          style={{ width: '80px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                        />
+                      )
+                    },
+                    ...(marginType === 'per-item' ? [{
+                      key: 'marginPercent', header: 'Margin (%)',
+                      render: (item, _col, idx) => (
+                        <input type="number" min="0" step="1" value={item.marginPercent}
+                          onChange={(e) => handleItemMarginChange(idx, e.target.value)}
+                          style={{ width: '60px', padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                        />
+                      )
+                    }] : []),
+                    {
+                      key: 'clientUnitPrice', header: 'Client Price ($)', align: 'right',
+                      render: (item) => <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>${item.clientUnitPrice?.toFixed(2)}</span>
+                    },
+                  ];
+
+                  return (
+                    <div className="gcp-table-container">
+                      <DataTable
+                        columns={draftColumns}
+                        data={currentRFQ.items.map((item, idx) => ({ ...item, _idx: idx }))}
+                        keyField="_idx"
+                        emptyTitle="No items parsed"
+                        searchStrategy="local"
+                        searchConfig={{ keys: ['peptide_name', 'dosage', 'original_text'] }}
+                        searchPlaceholder="Filter items..."
+                        onSearchChange={() => {}}
+                        searchQuery=""
+                      />
+                    </div>
+                  );
+                })()}
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
                   <button className="gcp-btn gcp-btn--secondary" onClick={() => setCurrentRFQ(null)}>Reset</button>

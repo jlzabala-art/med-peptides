@@ -1,6 +1,8 @@
 import React from 'react';
-import { Card, StatusChip, Button } from '../../../ui';
-import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers } from '@/lib/icons';
+import { Card } from '../../../ui';
+import DataTable from '../../../ui/DataTable';
+import { Sparkles } from '@/lib/icons';
+
 
 export default function PricingTab({ form, setForm }) {
     const pricesList = [
@@ -92,59 +94,40 @@ export default function PricingTab({ form, setForm }) {
             </button>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', color: '#cbd5e1' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #374151', textAlign: 'left', color: '#94a3b8' }}>
-                  <th style={{ padding: '0.5rem' }}>MOQ Tier Quantity</th>
-                  <th style={{ padding: '0.5rem' }}>Unit Selling Price ($)</th>
-                  <th style={{ padding: '0.5rem' }}>Calculated Profit Margin (%)</th>
-                  <th style={{ padding: '0.5rem' }}>Discount (vs Retail)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { qty: 1, key: 'moq_1' },
-                  { qty: 10, key: 'moq_10' },
-                  { qty: 50, key: 'moq_50' },
-                  { qty: 100, key: 'moq_100' },
-                  { qty: 500, key: 'moq_500' },
-                  { qty: 1000, key: 'moq_1000' }
-                ].map((tier, idx) => {
-                  const val = form[tier.key] || 0;
-                  const unitMargin = val > 0 ? ((val - cost) / val) * 100 : 0;
-                  const discountPercent = retail > 0 ? ((retail - val) / retail) * 100 : 0;
-                  return (
-                    <tr key={idx} style={{ borderBottom: '1px solid #1f2937' }}>
-                      <td style={{ padding: '0.6rem 0.5rem', fontWeight: 600 }}>{tier.qty} Unit{tier.qty > 1 && 's'}</td>
-                      <td style={{ padding: '0.4rem 0.5rem' }}>
-                        <input
-                          type="number"
-                          value={val}
-                          onChange={e => setForm({ ...form, [tier.key]: parseFloat(e.target.value) || 0 })}
-                          style={{
-                            width: '90px',
-                            padding: '4px 8px',
-                            border: '1px solid #334155',
-                            borderRadius: '4px',
-                            backgroundColor: '#0f172a',
-                            color: '#fff',
-                            fontSize: '0.8rem'
-                          }}
-                        />
-                      </td>
-                      <td style={{ padding: '0.6rem 0.5rem', color: getMarginColor(unitMargin), fontWeight: 700 }}>
-                        {unitMargin.toFixed(1)}%
-                      </td>
-                      <td style={{ padding: '0.6rem 0.5rem', color: discountPercent > 0 ? '#60a5fa' : '#64748b' }}>
-                        {discountPercent > 0 ? `${discountPercent.toFixed(0)}% Off` : 'Base Price'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={[
+              { qty: 1, key: 'moq_1' },
+              { qty: 10, key: 'moq_10' },
+              { qty: 50, key: 'moq_50' },
+              { qty: 100, key: 'moq_100' },
+              { qty: 500, key: 'moq_500' },
+              { qty: 1000, key: 'moq_1000' }
+            ].map(tier => {
+              const val = form[tier.key] || 0;
+              const unitMargin = val > 0 ? ((val - cost) / val) * 100 : 0;
+              const discountPercent = retail > 0 ? ((retail - val) / retail) * 100 : 0;
+              return { ...tier, val, unitMargin, discountPercent };
+            })}
+            keyField="key"
+            emptyTitle="No tiers"
+            columns={[
+              { key: 'qty', header: 'MOQ Tier Quantity', sortValue: (r) => r.qty, render: (r) => <span style={{ fontWeight: 600 }}>{r.qty} Unit{r.qty > 1 && 's'}</span> },
+              {
+                key: 'val',
+                header: 'Unit Selling Price ($)',
+                render: (r) => (
+                  <input
+                    type="number"
+                    value={r.val}
+                    onChange={e => setForm({ ...form, [r.key]: parseFloat(e.target.value) || 0 })}
+                    style={{ width: '90px', padding: '4px 8px', border: '1px solid #334155', borderRadius: '4px', backgroundColor: '#0f172a', color: '#fff', fontSize: '0.8rem' }}
+                  />
+                )
+              },
+              { key: 'unitMargin', header: 'Calculated Profit Margin (%)', sortValue: (r) => r.unitMargin, render: (r) => <span style={{ color: getMarginColor(r.unitMargin), fontWeight: 700 }}>{r.unitMargin.toFixed(1)}%</span> },
+              { key: 'discountPercent', header: 'Discount (vs Retail)', sortValue: (r) => r.discountPercent, render: (r) => <span style={{ color: r.discountPercent > 0 ? '#60a5fa' : '#64748b' }}>{r.discountPercent > 0 ? `${r.discountPercent.toFixed(0)}% Off` : 'Base Price'}</span> }
+            ]}
+          />
         </Card>
       </div>
     );

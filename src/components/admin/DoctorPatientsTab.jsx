@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
 
@@ -81,7 +81,7 @@ export default function PhysicianPatientsTab({ doctorId }) {
   return (
     <div style={{ marginBottom: '2rem' }}>
       {/* Header — normalised */}
-      <AdminPageHeader
+      <PageHeader
         title="My Patients"
         subtitle="Manage your clinically supervised patients and review their assigned protocols."
         icon={Users}

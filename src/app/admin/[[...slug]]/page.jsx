@@ -73,6 +73,7 @@ const getTabComponent = async (tabId) => {
     case 'inventory':          return (await import('../../../components/admin/AdminStorageTab')).default;
 
     // Sales
+    case 'crm':                return (await import('../../../components/admin/AdminCrmTab')).default;
     case 'leads':              return (await import('../../../components/admin/AdminLeadsTab')).default;
     case 'clinics':            return (await import('../../../components/admin/AdminClinicsTab')).default;
     case 'quotations':         return (await import('../../../components/admin/AdminBulkOrdersTab')).default;
@@ -84,6 +85,7 @@ const getTabComponent = async (tabId) => {
     case 'revenue':            return (await import('../../../components/admin/AdminFinanceTab')).default;
 
     // Purchasing
+    case 'procurement':        return (await import('../../../components/admin/AdminProcurementTab')).default;
     case 'suppliers':          return (await import('../../../components/admin/AdminWholesellersTab')).default;
     case 'rfqs':               return (await import('../../../components/admin/AdminRFQTab')).default;
     case 'purchase-orders':    return (await import('../../../components/admin/AdminBulkOrdersTab')).default;
@@ -93,10 +95,11 @@ const getTabComponent = async (tabId) => {
     case 'logistics-tracker':  return (await import('../../../components/admin/AdminLogisticsTab')).default;
 
     // Finance
+    case 'transactions':
     case 'invoices':
     case 'my-invoices':
     case 'payments':
-    case 'payments-received':  return (await import('../../../components/admin/AdminFinanceTab')).default;
+    case 'payments-received':  return (await import('../../../components/admin/AdminTransactionsTab')).default;
     case 'approvals':          return (await import('../../../components/admin/AdminApprovalsTab')).default;
 
     // Marketing
@@ -112,7 +115,12 @@ const getTabComponent = async (tabId) => {
     case 'ai-insights':        return (await import('../../../components/admin/AdminAnalyticsTab')).default;
     case 'ai-logs':            return (await import('../../../components/admin/AdminAuditLogsTab')).default;
 
-    // Administration
+    // Hubs
+    case 'system':             return (await import('../../../components/admin/AdminSystemHub')).default;
+    case 'clinical':           return (await import('../../../components/admin/AdminClinicalHub')).default;
+    case 'data-hub':           return (await import('../../../components/admin/AdminDataHub')).default;
+
+    // Administration (Legacy individual links, eventually redirect or remove)
     case 'users':              return (await import('../../../components/admin/AdminUsersTab')).default;
     case 'invitations':        return (await import('../../../components/admin/AdminInvitationsTab')).default;
     case 'settings':           return (await import('../../../components/admin/AdminSettingsTab')).default;

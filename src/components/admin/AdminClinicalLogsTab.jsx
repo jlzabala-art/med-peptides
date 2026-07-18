@@ -10,11 +10,11 @@ import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 
-export default function AdminClinicalLogsTab() {
+export default function AdminClinicalLogsTab({ isSubTab = false }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -209,11 +209,13 @@ export default function AdminClinicalLogsTab() {
   return (
     <div style={{ padding: '0.5rem' }}>
       {/* Page Header */}
-      <AdminPageHeader
-        title="Clinical AI Logs"
-        subtitle="AI-assisted clinical interactions, session logs, and safety audit trail."
-        icon={MessageSquare}
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="Clinical Logs"
+          subtitle="View and manage medical observations, treatments, and patient interactions."
+          icon={ClipboardList}
+        />
+      )}
 
       {/* Prominent search */}
       <div style={{ marginBottom: '1rem' }}>

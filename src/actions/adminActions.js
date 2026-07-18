@@ -8,7 +8,7 @@
  */
 
 // import { getAuth } from 'firebase-admin/auth';
-// import { initAdmin } from '../lib/firebase-admin'; // You'd create this helper
+import { adminDb } from '../lib/firebaseAdmin';
 
 /**
  * Approves a user and assigns them a specific role (e.g., 'wholesaler', 'clinic').
@@ -43,5 +43,25 @@ export async function approveUserRoleAction(userId, role) {
   } catch (error) {
     console.error("Admin Server Action failed:", error);
     return { success: false, message: error.message };
+  }
+}
+
+
+export async function fetchAuditLogsAction({ limitCount = 100 } = {}) {
+  try {
+    if (!adminDb) return [];
+    const snapshot = await adminDb.collection('audit_log')
+      .orderBy('executed_at', 'desc')
+      .limit(limitCount)
+      .get();
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      if (data.executed_at?.toDate) data.executed_at = data.executed_at.toDate().toISOString();
+      if (data.createdAt?.toDate) data.createdAt = data.createdAt.toDate().toISOString();
+      return { id: doc.id, ...data };
+    });
+  } catch (e) {
+    console.error('fetchAuditLogsAction error:', e);
+    return [];
   }
 }

@@ -1,10 +1,6 @@
 import React from 'react';
 import { ShieldAlert, CheckCircle2, Clock, XCircle, AlertTriangle } from '@/lib/icons';
-
-
-
-
-
+import DataTable from '../../ui/DataTable';
 
 const MATRIX = [
   { product: 'Tirzepatide 15mg', uae: 'Approved', ksa: 'Approved', eu: 'Pending', usa: 'Restricted' },
@@ -49,29 +45,19 @@ export default function RegulatoryAccessTab() {
       </div>
 
       {/* Matrix */}
-      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-              <th style={{ padding: '16px', fontWeight: 600, color: '#64748b' }}>Product</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: '#64748b' }}>UAE</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: '#64748b' }}>KSA</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: '#64748b' }}>EU</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: '#64748b' }}>USA</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MATRIX.map((row, idx) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '16px', fontWeight: 600 }}>{row.product}</td>
-                <td style={{ padding: '16px', fontSize: '14px', fontWeight: 500 }}>{renderStatus(row.uae)}</td>
-                <td style={{ padding: '16px', fontSize: '14px', fontWeight: 500 }}>{renderStatus(row.ksa)}</td>
-                <td style={{ padding: '16px', fontSize: '14px', fontWeight: 500 }}>{renderStatus(row.eu)}</td>
-                <td style={{ padding: '16px', fontSize: '14px', fontWeight: 500 }}>{renderStatus(row.usa)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
+        <DataTable
+          data={MATRIX.map((r, i) => ({ ...r, _idx: i }))}
+          keyField="_idx"
+          emptyTitle="No products"
+          columns={[
+            { key: 'product', header: 'Product', sortKey: 'product', render: (r) => <span style={{ fontWeight: 600 }}>{r.product}</span> },
+            { key: 'uae', header: 'UAE', render: (r) => renderStatus(r.uae) },
+            { key: 'ksa', header: 'KSA', render: (r) => renderStatus(r.ksa) },
+            { key: 'eu', header: 'EU', render: (r) => renderStatus(r.eu) },
+            { key: 'usa', header: 'USA', render: (r) => renderStatus(r.usa) }
+          ]}
+        />
       </div>
     </div>
   );

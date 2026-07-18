@@ -6,29 +6,7 @@ import React, { useState, useMemo } from 'react';
 import { calculateVariantHealthScore } from '../../useVariantHealthScore';
 import AppActionGroup from '../../../../ui/AppActionGroup';
 import { Sparkles } from '@/lib/icons';
-
-const thStyle = {
-  padding: '12px',
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-  borderBottom: '1px solid var(--color-border)',
-  textAlign: 'left',
-  backgroundColor: '#f1f5f9',
-  cursor: 'pointer',
-  userSelect: 'none'
-};
-const tdStyleMain = {
-  padding: '12px',
-  fontWeight: 500,
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const tdStyle = {
-  padding: '12px',
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const trStyle = { backgroundColor: 'transparent', cursor: 'pointer' };
+import DataTable from '../../../../ui/DataTable';
 
 const badgeStyle = (isValid) => ({
   padding: '2px 8px',
@@ -43,14 +21,10 @@ const badgeStyle = (isValid) => ({
 
 export default function VariantOverviewTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const router = useRouter();
-  const [touchTimer, setTouchTimer] = React.useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
   };
 
@@ -62,7 +36,6 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
   const processedVariants = useMemo(() => {
     return variants.map((v) => {
       const health = calculateVariantHealthScore(v);
-
       const generateFallbackSku = () => {
         const prodName = parentProduct?.name || parentProduct?.displayName || 'UNK';
         const safeName = prodName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 5).toUpperCase();
@@ -70,13 +43,11 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
         const size = (v.size || v.dosage || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
         return ['SKU', safeName, format, size].filter(Boolean).join('-');
       };
-
       const displaySku = v.sku || generateFallbackSku();
       const supplierName = v.supplier || parentProduct?.supplier || 'Unassigned';
       const typeStr = v.formatLabel || v.format || v.productType || '';
       const dosageStr = v.dosage || v.size || '';
       const unitStr = v.kit?.unit || v.dosage_unit || '';
-      
       let formatSize = '-';
       if (typeStr.toLowerCase().includes('api')) {
         formatSize = `API (Bulk)`;
@@ -88,16 +59,7 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
       }
       const inventory = typeof v.stock === 'object' ? v.stock?.available || 0 : v.stock || 0;
       const regStatus = v.registrationStatus || v.registration || 'Unregistered';
-
-      return {
-        ...v,
-        displaySku,
-        supplierName,
-        formatSize,
-        health,
-        inventory,
-        regStatus
-      };
+      return { ...v, displaySku, supplierName, formatSize, health, inventory, regStatus };
     });
   }, [variants, parentProduct]);
 
@@ -105,27 +67,18 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
     let sortableItems = [...processedVariants];
     if (sortConfig.key !== null) {
       sortableItems.sort((a, b) => {
-        let valA = a[sortConfig.key];
-        let valB = b[sortConfig.key];
-        
-        if (sortConfig.key === 'health') {
-          valA = a.health.score;
-          valB = b.health.score;
-        }
-
+        let valA = sortConfig.key === 'health' ? a.health.score : a[sortConfig.key];
+        let valB = sortConfig.key === 'health' ? b.health.score : b[sortConfig.key];
         if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
         if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     } else {
-      // Default Sort: API first, then Lyophilized, sorted by dosage lowest to highest
       sortableItems.sort((a, b) => {
         const isApiA = (a.productType || a.formatLabel || '').toLowerCase().includes('api');
         const isApiB = (b.productType || b.formatLabel || '').toLowerCase().includes('api');
-        
         if (isApiA && !isApiB) return -1;
         if (!isApiA && isApiB) return 1;
-
         const getDosageNum = (v) => parseFloat((v.dosage || v.size || '0').toString().replace(/[^0-9.]/g, '')) || 0;
         return getDosageNum(a) - getDosageNum(b);
       });
@@ -134,7 +87,6 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
   }, [processedVariants, sortConfig]);
 
   const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
-  const someSelected = variants.some(v => selectedIds.includes(v.id)) && !allSelected;
 
   const handleSelectAll = (e) => {
     if (!onSelectionChange) return;
@@ -149,167 +101,100 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
 
   const handleSelectRow = (id, checked) => {
     if (!onSelectionChange) return;
-    if (checked) {
-      onSelectionChange([...selectedIds, id]);
-    } else {
-      onSelectionChange(selectedIds.filter(sid => sid !== id));
-    }
+    if (checked) onSelectionChange([...selectedIds, id]);
+    else onSelectionChange(selectedIds.filter(sid => sid !== id));
   };
 
-  const handleTouchStart = (id) => {
-    if (!onSelectionChange) return;
-    const timer = setTimeout(() => {
-      const isSelected = selectedIds.includes(id);
-      handleSelectRow(id, !isSelected);
-    }, 500);
-    setTouchTimer(timer);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchTimer) {
-      clearTimeout(touchTimer);
-      setTouchTimer(null);
+  const columns = [
+    ...(onSelectionChange ? [{
+      key: 'select',
+      header: (
+        <input
+          type="checkbox"
+          checked={allSelected}
+          onChange={handleSelectAll}
+          style={{ cursor: 'pointer' }}
+        />
+      ),
+      render: (val, row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={(e) => handleSelectRow(row.id, e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
+        />
+      )
+    }] : []),
+    {
+      key: 'displaySku',
+      header: <span onClick={() => handleSort('displaySku')} style={{ cursor: 'pointer' }}>SKU{getSortIcon('displaySku')}</span>,
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {row.image ? <img src={row.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} /> : <span style={{ fontSize: '10px', color: '#94a3b8' }}>Img</span>}
+          </div>
+          <span style={{ fontWeight: 500 }}>{val}</span>
+        </div>
+      )
+    },
+    {
+      key: 'supplierName',
+      header: <span onClick={() => handleSort('supplierName')} style={{ cursor: 'pointer' }}>Supplier{getSortIcon('supplierName')}</span>,
+      render: (val, row) => (
+        <span
+          onClick={(e) => { e.stopPropagation(); router.push(`/admin/wholesellers?search=${encodeURIComponent(val)}&openVariant=${row.id}`); }}
+          style={{ cursor: 'pointer', color: 'var(--color-primary, #3b82f6)', fontWeight: 500 }}
+          title="View Supplier Profile"
+        >
+          {val}
+        </span>
+      )
+    },
+    {
+      key: 'formatSize',
+      header: <span onClick={() => handleSort('formatSize')} style={{ cursor: 'pointer' }}>Dosage / Format{getSortIcon('formatSize')}</span>,
+      render: (val) => <span>{val}</span>
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); if (onAction) onAction('ai_variant', parentProduct, row); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px', background: 'rgba(99,102,241,0.1)', border: 'none', borderRadius: '4px', cursor: 'pointer', color: '#6366f1', fontSize: '0.75rem', fontWeight: 600 }}
+            title="Atlas AI"
+          >
+            <Sparkles size={12} /> Atlas
+          </button>
+          <AppActionGroup
+            maxVisible={3}
+            actions={[
+              { type: 'clone', onClick: () => onAction && onAction('clone_variant', parentProduct, row) },
+              { type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'overview') },
+              { type: 'delete', onClick: () => onAction && onAction('delete_variant', parentProduct, row) },
+            ]}
+          />
+        </div>
+      )
     }
-  };
+  ];
 
   return (
-    <table
-      style={{
-        width: '100%',
-        borderCollapse: 'collapse',
-        fontSize: '0.8rem',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid var(--border)',
-      }}
-    >
-      <thead>
-        <tr>
-          {onSelectionChange && (
-            <th style={{ ...thStyle, width: '48px', textAlign: 'center', cursor: 'default' }}>
-              <input
-                type="checkbox"
-                checked={allSelected}
-                ref={input => { if (input) input.indeterminate = someSelected; }}
-                onChange={handleSelectAll}
-                style={{ cursor: 'pointer' }}
-              />
-            </th>
-          )}
-          <th style={thStyle} onClick={() => handleSort('displaySku')}>SKU{getSortIcon('displaySku')}</th>
-          <th style={thStyle} onClick={() => handleSort('supplierName')}>Supplier{getSortIcon('supplierName')}</th>
-          <th style={thStyle} onClick={() => handleSort('formatSize')}>Dosage / Format{getSortIcon('formatSize')}</th>
-          <th style={{ ...thStyle, textAlign: 'center', cursor: 'default' }}>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedVariants.map((v, i) => {
-          const isSelected = selectedIds.includes(v.id);
-
-          return (
-            <tr 
-              key={v.id || i} 
-              style={{ 
-                ...trStyle, 
-                backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
-                borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
-              }}
-              onTouchStart={() => handleTouchStart(v.id)}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={handleTouchEnd}
-              onClick={() => onAction && onAction('view_variant', parentProduct, v)}
-            >
-              {onSelectionChange && (
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => handleSelectRow(v.id, e.target.checked)}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
-              )}
-              <td style={tdStyleMain}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {v.image ? <img src={v.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} /> : <span style={{ fontSize: '10px', color: '#94a3b8' }}>Img</span>}
-                  </div>
-                  <span>{v.displaySku}</span>
-                </div>
-              </td>
-              <td style={tdStyle}>
-                <span 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(`/admin/wholesellers?search=${encodeURIComponent(v.supplierName)}&openVariant=${v.id}`);
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    color: 'var(--color-primary, #3b82f6)',
-                    fontWeight: 500,
-                  }}
-                  title="View Supplier Profile"
-                >
-                  {v.supplierName}
-                </span>
-              </td>
-              <td style={tdStyle}>{v.formatSize}</td>
-              <td style={{ ...tdStyle, textAlign: 'center' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onAction) onAction('ai_variant', parentProduct, v);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '4px 8px',
-                      background: 'rgba(99, 102, 241, 0.1)',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      color: '#6366f1',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                    }}
-                    title="Atlas AI"
-                  >
-                    <Sparkles size={12} /> Atlas
-                  </button>
-                  <AppActionGroup
-                    maxVisible={3}
-                    actions={[
-                      {
-                        type: 'clone',
-                        onClick: () => onAction && onAction('clone_variant', parentProduct, v),
-                      },
-                      {
-                        type: 'edit',
-                        onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'overview'),
-                      },
-                      {
-                        type: 'delete',
-                        onClick: () => onAction && onAction('delete_variant', parentProduct, v),
-                      },
-                    ]}
-                  />
-                </div>
-              </td>
-            </tr>
-          );
+    <div className="gcp-table-container">
+      <DataTable
+        columns={columns}
+        data={sortedVariants}
+        keyField={(row, idx) => row.id || idx.toString()}
+        onRowClick={(row) => onAction && onAction('view_variant', parentProduct, row)}
+        rowStyle={(row) => ({
+          backgroundColor: selectedIds.includes(row.id) ? 'var(--color-bg-selected)' : 'transparent',
+          borderLeft: selectedIds.includes(row.id) ? '4px solid #3b82f6' : '4px solid transparent',
+          cursor: 'pointer',
         })}
-      </tbody>
-    </table>
+        emptyMessage="No variants found."
+      />
+    </div>
   );
 }

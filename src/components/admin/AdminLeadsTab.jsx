@@ -30,8 +30,9 @@ import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/fi
 import { db } from '../../firebase';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { useToast } from '../../hooks/useToast';
-import { useLeads } from '../../hooks/admin/useLeads';
-import AdminPageHeader from './AdminPageHeader';
+import { useLeadStore } from '../../store/useLeadStore';
+import { useLeadAggregates } from '../../hooks/data/useLeadAggregates';
+import PageHeader from '../ui/PageHeader';
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
@@ -58,7 +59,7 @@ const { BarChart: RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
   typeof window !== 'undefined' ? require('recharts') : {};
 
 
-export default function AdminLeadsTab() {
+export default function AdminLeadsTab({ isSubTab = false }) {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -66,15 +67,18 @@ export default function AdminLeadsTab() {
   const params = new URLSearchParams(location.search);
   const deepLinkSearch = params.get('search');
 
-  const { leads: paginatedLeads, loading: loadingLeads, hasMore, loadMore, fetchLeads: refreshLeads, totalCount } = useLeads({ pageSize: 50 });
+  const { leads: storeLeads, loading: loadingLeads, fetchLeads: refreshLeads } = useLeadStore();
   const [agencyRfqs, setAgencyRfqs] = useState([]);
   const [catalogProducts, setCatalogProducts] = useState([]);
   const [loadingMetadata, setLoadingMetadata] = useState(true);
   
   const loading = loadingLeads || loadingMetadata;
 
+  const hasMore = false;
+  const loadMore = () => {};
+
   const leads = useMemo(() => {
-    const combined = [...(paginatedLeads || []), ...agencyRfqs].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    const combined = [...(storeLeads || []), ...agencyRfqs].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     return combined.map(l => {
         let st = l.status;
         if(st === 'completed') st = 'won';
@@ -88,7 +92,7 @@ export default function AdminLeadsTab() {
           assignedOwner: l.assignedOwner || 'Jose'
         };
       });
-  }, [paginatedLeads, agencyRfqs]);
+  }, [storeLeads, agencyRfqs]);
 
   // View State
   const [currentView, setCurrentView] = useState('kanban'); // 'kanban', 'table'
@@ -102,11 +106,12 @@ export default function AdminLeadsTab() {
   const [selectedLeadIds, setSelectedLeadIds] = useState([]);
 
   useEffect(() => {
+    refreshLeads();
     fetchMetadata();
-  }, []);
+  }, [refreshLeads]);
 
-  async function fetchLeads() {
-    setLoading(true);
+  async function fetchMetadata() {
+    setLoadingMetadata(true);
     try {
       const [leadsData, rfqsSnap, productsSnap] = await Promise.all([
         isAdmin ? catalogRepository.getAllLeads() : catalogRepository.getLeadsByOwner(user?.uid),
@@ -144,28 +149,12 @@ export default function AdminLeadsTab() {
         };
       });
 
-      // Add a couple of high fidelity B2C/distributor mock leads if none exist
-      const combined = [...(leadsData || []), ...rfqs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      const mapped = combined.map(l => {
-        let st = l.status;
-        if(st === 'completed') st = 'won';
-        if(st === 'draft') st = 'pricing';
-        if(st === 'contacted') st = 'qualified';
-        return { 
-          ...l, 
-          status: st,
-          country: l.country || (l.type === 'rfq' ? 'Spain' : 'UAE'),
-          leadType: l.leadType || (l.type === 'rfq' ? 'Compounding Pharmacy' : 'Distributor'),
-          assignedOwner: l.assignedOwner || 'Jose'
-        };
-      });
-
-      setLeads(mapped);
+      setAgencyRfqs(rfqs);
     } catch (err) {
-      console.error('Error fetching leads:', err);
-      toast.error('Failed to load leads.');
+      console.error('Error fetching metadata:', err);
+      toast.error('Failed to load metadata.');
     } finally {
-      setLoading(false);
+      setLoadingMetadata(false);
     }
   }
 
@@ -265,27 +254,7 @@ export default function AdminLeadsTab() {
   ];
 
   // Calculated values for header KPIs
-  const kpiCounts = useMemo(() => {
-    const totalCount = leads.length;
-    const newCount = leads.filter(l => l.status === 'new').length;
-    const activeOpps = leads.filter(l => l.status !== 'won' && l.status !== 'lost').length;
-    const rfqsCount = leads.filter(l => l.type === 'rfq').length;
-    const quotesCount = leads.filter(l => l.status === 'quoted' || l.status === 'pricing').length;
-    const revenue = leads.reduce((acc, lead) => {
-      if (lead.status === 'lost') return acc;
-      const items = lead.originalData?.items || [];
-      const val = items.reduce((sum, it) => sum + ((it.clientUnitPrice || 250) * (it.quantity || 1)), 0);
-      return acc + (val || 500);
-    }, 0);
-
-    const avgScore = Math.round(leads.reduce((sum, l) => sum + calculateDetailedAIScore(l).score, 0) / (leads.length || 1));
-    const reqAttention = leads.filter(l => {
-      const days = Math.max(0, Math.floor((new Date() - new Date(l.createdAt)) / (1000 * 60 * 60 * 24)));
-      return days > 7 && l.status !== 'won' && l.status !== 'lost';
-    }).length;
-
-    return { totalCount, newCount, activeOpps, rfqsCount, quotesCount, revenue, avgScore, reqAttention };
-  }, [leads]);
+  const { aggregates: kpiCounts } = useLeadAggregates();
 
   const kpis = [
     { id: 'all', title: 'Total Leads', value: kpiCounts.totalCount, icon: Users, color: '#3b82f6', bg: '#eff6ff' },
@@ -311,6 +280,11 @@ export default function AdminLeadsTab() {
           style={{ cursor: 'pointer' }}
         />
       )
+    },
+    {
+      key: 'id',
+      header: 'ID',
+      render: (l) => <CopyableId value={l.id} />
     },
     {
       key: 'contact',
@@ -427,27 +401,48 @@ export default function AdminLeadsTab() {
     }
   ];
 
+  const activeFilters = [];
+  if (selectedTypeTab !== 'All') {
+    activeFilters.push({
+      key: 'type',
+      label: 'Type',
+      value: selectedTypeTab,
+      onRemove: () => setSelectedTypeTab('All')
+    });
+  }
+
+  const filterOptions = [
+    {
+      key: 'type',
+      label: 'Lead Type',
+      options: [
+        { label: 'All', value: 'All' },
+        { label: 'B2C', value: 'B2C' },
+        { label: 'B2B', value: 'B2B' }
+      ],
+      value: selectedTypeTab,
+      onChange: setSelectedTypeTab
+    }
+  ];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', paddingBottom: '3rem' }}>
-      {/* Page Header */}
-      <AdminPageHeader
-        title="Commercial Sourcing CRM (Leads)"
-        subtitle="Track wholesaler opportunities, incoming RFQs, and auto-recommend pricing configurations."
-        icon={Target}
-        rightContent={
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => toast.info('Initiating CSV CRM Import')} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}><ArrowUpRight size={14} /> Import Leads</button>
-            <button onClick={() => toast.info('Quick RFQ Creator Opened')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}><FileText size={14} /> Create RFQ</button>
-          </div>
-        }
-      />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', maxWidth: '1280px', margin: '0 auto', padding: isSubTab ? '0' : '1.5rem' }}>
+      {!isSubTab && (
+        <PageHeader
+          title="Commercial Sourcing CRM (Leads)"
+          subtitle="Track wholesaler opportunities, incoming RFQs, and auto-recommend pricing configurations."
+          icon={Target}
+          rightContent={
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => toast.info('Initiating CSV CRM Import')} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}><ArrowUpRight size={14} /> Import Leads</button>
+              <button onClick={() => toast.info('Quick RFQ Creator Opened')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}><FileText size={14} /> Create RFQ</button>
+            </div>
+          }
+        />
+      )}
 
       {/* 1. EXECUTIVE CRM KPI SUMMARY STRIP */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
-        gap: '0.75rem' 
-      }}>
+      <div className="kpi-scroll-row" style={{ paddingBottom: '0.5rem' }}>
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           const isSelected = activeKpiFilter === kpi.id;
@@ -537,6 +532,8 @@ export default function AdminLeadsTab() {
           resultCount={loading ? undefined : filteredLeads.length}
           namespace="admin-leads"
           size="lg"
+          filters={activeFilters}
+          filterOptions={filterOptions}
         />
       </div>
 
@@ -555,18 +552,6 @@ export default function AdminLeadsTab() {
           >
             <List size={14} /> Directory List
           </button>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--surface-raised, #f1f5f9)', padding: '4px', borderRadius: '20px', border: '1px solid var(--border)' }}>
-          {['All', 'B2C', 'B2B'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setSelectedTypeTab(tab)}
-              style={{ padding: '4px 16px', fontSize: '0.75rem', borderRadius: '16px', border: 'none', cursor: 'pointer', fontWeight: 700, backgroundColor: selectedTypeTab === tab ? 'var(--primary, #1e3a8a)' : 'transparent', color: selectedTypeTab === tab ? '#ffffff' : 'var(--text-muted)' }}
-            >
-              {tab}
-            </button>
-          ))}
         </div>
       </div>
 

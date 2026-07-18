@@ -19,7 +19,7 @@ import notifier from '../../services/NotificationService';
 import { useStaticData } from '../../hooks/useStaticData';
 import styles from './AdminViewsConfigTab.module.css';
 
-export default function AdminViewsConfigTabClient({ initialConfigs = null }) {
+export default function AdminViewsConfigTabClient({ initialConfigs = null, isSubTab = false }) {
   const { productCategories } = useStaticData();
   const [configs, setConfigs] = useState(initialConfigs || []);
   const [loading, setLoading] = useState(!initialConfigs);

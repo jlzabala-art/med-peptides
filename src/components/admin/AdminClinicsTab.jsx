@@ -21,7 +21,7 @@ import { Tabs, StatusChip } from '../ui';
 import ClinicOnboardingWizard from './clinics/ClinicOnboardingWizard';
 import ClinicProfileWorkspace from './clinics/ClinicProfileWorkspace';
 import TerritoryFilter from './clinics/TerritoryFilter';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 
 // --- MOCK DATA LAYER ---
@@ -132,7 +132,7 @@ function ClinicKPIs({ data }) {
 // ── Detail Drawer (Replaced by ClinicProfileWorkspace) ───────────────
 
 // ── Main Tab ───────────────
-export default function AdminClinicsTab() {
+export default function AdminClinicsTab({ isSubTab = false }) {
   const [clinics, setClinics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -177,18 +177,20 @@ export default function AdminClinicsTab() {
   );
 
   return (
-    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: '#f1f5f9' }}>
+    <div style={{ padding: isSubTab ? '0' : '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: '#f1f5f9' }}>
       {/* Header — normalised */}
-      <AdminPageHeader
-        title="Clinic Network Management"
-        subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
-        icon={Building2}
-        actions={
-          <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '13px', padding: '0.4rem 1rem' }}>
-            <Plus size={16} /> Add Clinic
-          </button>
-        }
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="Clinic Network Management"
+          subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
+          icon={Building2}
+          actions={
+            <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '13px', padding: '0.4rem 1rem' }}>
+              <Plus size={16} /> Add Clinic
+            </button>
+          }
+        />
+      )}
 
       {/* GlobalSearchBar — prominent position */}
       <GlobalSearchBar

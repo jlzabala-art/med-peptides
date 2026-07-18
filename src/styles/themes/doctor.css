@@ -1,0 +1,6 @@
+/* src/styles/themes/doctor.css */
+.theme-doctor {
+  --color-primary: #0d9488; /* Medical Teal */
+  --color-bg-app: #f0fdfa; /* Slight teal tint */
+  --color-sidebar-bg: #ffffff;
+}

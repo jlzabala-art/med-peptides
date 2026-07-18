@@ -2,29 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
-
-const thStyle = {
-  padding: '12px',
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-  borderBottom: '1px solid var(--color-border)',
-  textAlign: 'left',
-  backgroundColor: '#f1f5f9',
-  cursor: 'pointer',
-  userSelect: 'none'
-};
-const tdStyleMain = {
-  padding: '12px',
-  fontWeight: 500,
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const tdStyle = {
-  padding: '12px',
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const trStyle = { backgroundColor: 'transparent', cursor: 'pointer' };
+import DataTable from '../../../../ui/DataTable';
 
 const badgeStyle = (isValid) => ({
   padding: '2px 8px',
@@ -59,10 +37,7 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
   const [pdfUrl, setPdfUrl] = useState(null);
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
   };
 
@@ -81,12 +56,9 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
         return ['SKU', safeName, format, size].filter(Boolean).join('-');
       };
 
-      const regStatus = v.registrationStatus || v.registration || 'Unregistered';
-
       const typeStr = v.formatLabel || v.format || v.productType || '';
       const dosageStr = v.dosage || v.size || '';
       const unitStr = v.kit?.unit || v.dosage_unit || '';
-      
       let displayDosageFormat = '-';
       if (typeStr.toLowerCase().includes('api')) {
         displayDosageFormat = `API (Bulk)`;
@@ -121,7 +93,6 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
   }, [processedVariants, sortConfig]);
 
   const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
-  const someSelected = variants.some(v => selectedIds.includes(v.id)) && !allSelected;
 
   const handleSelectAll = (e) => {
     if (!onSelectionChange) return;
@@ -136,109 +107,81 @@ export default function VariantRegulatoryTable({ variants, parentProduct, onActi
 
   const handleSelectRow = (id, checked) => {
     if (!onSelectionChange) return;
-    if (checked) {
-      onSelectionChange([...selectedIds, id]);
-    } else {
-      onSelectionChange(selectedIds.filter(sid => sid !== id));
-    }
+    if (checked) onSelectionChange([...selectedIds, id]);
+    else onSelectionChange(selectedIds.filter(sid => sid !== id));
   };
+
+  const columns = [
+    ...(onSelectionChange ? [{
+      key: 'select',
+      header: <input type="checkbox" checked={allSelected} onChange={handleSelectAll} style={{ cursor: 'pointer' }} />,
+      render: (val, row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={(e) => handleSelectRow(row.id, e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
+        />
+      )
+    }] : []),
+    {
+      key: 'displayDosageFormat',
+      header: <span onClick={() => handleSort('displayDosageFormat')} style={{ cursor: 'pointer' }}>Dosage / Format{getSortIcon('displayDosageFormat')}</span>,
+      render: (val) => <span style={{ fontWeight: 500 }}>{val}</span>
+    },
+    {
+      key: 'supplierName',
+      header: <span onClick={() => handleSort('supplierName')} style={{ cursor: 'pointer' }}>Supplier{getSortIcon('supplierName')}</span>,
+      render: (val) => <span>{val}</span>
+    },
+    {
+      key: 'coa',
+      header: <span onClick={() => handleSort('coa')} style={{ cursor: 'pointer' }}>COA{getSortIcon('coa')}</span>,
+      render: (val, row) => (
+        row.coaFileUrl ? (
+          <span
+            onClick={(e) => { e.stopPropagation(); setPdfUrl(row.coaFileUrl); }}
+            style={{ ...badgeStyle('Valid'), cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            View COA
+          </span>
+        ) : (
+          <span style={badgeStyle('Missing')}>Missing</span>
+        )
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (val, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+          <AppActionGroup
+            maxVisible={3}
+            actions={[{ type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'regulatory') }]}
+          />
+        </div>
+      )
+    }
+  ];
 
   return (
     <>
-    <table
-      style={{
-        width: '100%',
-        borderCollapse: 'collapse',
-        fontSize: '0.8rem',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid var(--border)',
-      }}
-    >
-      <thead>
-        <tr>
-          {onSelectionChange && (
-            <th style={{ ...thStyle, width: '48px', textAlign: 'center', cursor: 'default' }}>
-              <input
-                type="checkbox"
-                checked={allSelected}
-                ref={input => { if (input) input.indeterminate = someSelected; }}
-                onChange={handleSelectAll}
-                style={{ cursor: 'pointer' }}
-              />
-            </th>
-          )}
-          <th style={thStyle} onClick={() => handleSort('displayDosageFormat')}>Dosage / Format{getSortIcon('displayDosageFormat')}</th>
-          <th style={thStyle} onClick={() => handleSort('supplierName')}>Supplier{getSortIcon('supplierName')}</th>
-          <th style={thStyle} onClick={() => handleSort('coa')}>COA{getSortIcon('coa')}</th>
-          <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedVariants.map((v, i) => {
-          const isSelected = selectedIds.includes(v.id);
-          return (
-            <tr 
-              key={v.id || i} 
-              style={{
-                ...trStyle,
-                backgroundColor: isSelected ? 'var(--color-bg-selected)' : 'transparent',
-                borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent',
-              }}
-              onClick={() => onAction && onAction('edit_variant', parentProduct, v, 'regulatory')}
-            >
-              {onSelectionChange && (
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => handleSelectRow(v.id, e.target.checked)}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
-              )}
-              <td style={tdStyleMain}>{v.displayDosageFormat}</td>
-              <td style={tdStyle}>{v.supplierName}</td>
-              <td style={tdStyle}>
-                {v.coaFileUrl ? (
-                  <span 
-                    onClick={(e) => { e.stopPropagation(); setPdfUrl(v.coaFileUrl); }} 
-                    style={{ ...badgeStyle('Valid'), cursor: 'pointer', textDecoration: 'underline' }}
-                  >
-                    View COA
-                  </span>
-                ) : (
-                  <span style={badgeStyle('Missing')}>Missing</span>
-                )}
-              </td>
-              <td style={{ ...tdStyle, textAlign: 'right' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <AppActionGroup
-                    maxVisible={3}
-                    actions={[
-                      {
-                        type: 'edit',
-                        onClick: () => onAction && onAction('edit_variant', parentProduct, v, 'regulatory'),
-                      }
-                    ]}
-                  />
-                </div>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-    <PdfModal url={pdfUrl} onClose={() => setPdfUrl(null)} />
+      <div className="gcp-table-container">
+        <DataTable
+          columns={columns}
+          data={sortedVariants}
+          keyField={(row, idx) => row.id || idx.toString()}
+          onRowClick={(row) => onAction && onAction('edit_variant', parentProduct, row, 'regulatory')}
+          rowStyle={(row) => ({
+            backgroundColor: selectedIds.includes(row.id) ? 'var(--color-bg-selected)' : 'transparent',
+            borderLeft: selectedIds.includes(row.id) ? '4px solid #3b82f6' : '4px solid transparent',
+            cursor: 'pointer',
+          })}
+          emptyMessage="No variants found."
+        />
+      </div>
+      <PdfModal url={pdfUrl} onClose={() => setPdfUrl(null)} />
     </>
   );
 }

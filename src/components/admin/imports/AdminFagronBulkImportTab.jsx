@@ -28,7 +28,8 @@ import {
   UploadCloud, FileText, Loader2, Save, X, CheckCircle, AlertTriangle,
   ShieldCheck, ShieldAlert, Users, ClipboardList
 } from '@/lib/icons';
-import AdminPageHeader from '../AdminPageHeader';
+import PageHeader from '../../ui/PageHeader';
+import DataTable from '../../ui/DataTable';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -312,7 +313,7 @@ export default function AdminFagronBulkImportTab() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <AdminPageHeader
+      <PageHeader
         title="Importación Fagron Genomics"
         subtitle="Importación masiva de prescripciones desde informes Fagron. El sistema detecta duplicados automáticamente."
         icon={<ClipboardList size={20} />}
@@ -454,67 +455,39 @@ export default function AdminFagronBulkImportTab() {
               </div>
             </div>
 
-            <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                <thead>
-                  <tr style={{ backgroundColor: 'var(--color-bg-surface)', borderBottom: '2px solid var(--color-border)' }}>
-                    <th style={{ width: 40, padding: '0.75rem 1rem', textAlign: 'center' }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.size === parsedRows.length && parsedRows.length > 0}
-                        onChange={e => toggleAll(e.target.checked)}
-                      />
-                    </th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>Estado</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>Paciente</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>Médico</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>Fecha Informe</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>BOX ID</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>Productos</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.72rem' }}>Archivo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {parsedRows.map((row, idx) => (
-                    <tr
-                      key={idx}
-                      onClick={() => toggleRow(idx)}
-                      style={{
-                        cursor: 'pointer',
-                        backgroundColor: selectedRows.has(idx) ? 'rgba(16,185,129,0.04)' : 'white',
-                        opacity: row._dupStatus === 'duplicate' ? 0.65 : 1,
-                        borderBottom: '1px solid var(--color-border)',
-                        transition: 'background 0.15s'
-                      }}
-                    >
-                      <td style={{ textAlign: 'center', padding: '0.75rem 1rem' }}>
-                        <input type="checkbox" checked={selectedRows.has(idx)} onChange={() => toggleRow(idx)} onClick={e => e.stopPropagation()} />
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <StatusBadge status={row._dupStatus} />
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <div style={{ fontWeight: 600 }}>{row.patientName || '—'}</div>
-                        {row.patientEmail && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{row.patientEmail}</div>}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{row.doctorName || '—'}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{row.reportDate || '—'}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.8rem' }}>{row.boxId || '—'}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>
-                        {Array.isArray(row.items) ? row.items.length : '—'}
-                        {Array.isArray(row.items) && row.items.length > 0 && (
+            <div style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <DataTable
+                data={parsedRows.map((r, i) => ({ ...r, _idx: i }))}
+                keyField="_idx"
+                selectedIds={Array.from(selectedRows)}
+                onSelectionChange={(ids) => setSelectedRows(new Set(ids))}
+                emptyTitle="No data available"
+                columns={[
+                  { key: '_dupStatus', header: 'Estado', render: (r) => <StatusBadge status={r._dupStatus} /> },
+                  { key: 'patientName', header: 'Paciente', render: (r) => (
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{r.patientName || '—'}</div>
+                        {r.patientEmail && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.patientEmail}</div>}
+                      </div>
+                    ) 
+                  },
+                  { key: 'doctorName', header: 'Médico', render: (r) => <span style={{ color: 'var(--text-muted)' }}>{r.doctorName || '—'}</span> },
+                  { key: 'reportDate', header: 'Fecha Informe', render: (r) => <span style={{ color: 'var(--text-muted)' }}>{r.reportDate || '—'}</span> },
+                  { key: 'boxId', header: 'BOX ID', render: (r) => <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.boxId || '—'}</span> },
+                  { key: '_items', header: 'Productos', render: (r) => (
+                      <span style={{ color: 'var(--text-muted)' }}>
+                        {Array.isArray(r.items) ? r.items.length : '—'}
+                        {Array.isArray(r.items) && r.items.length > 0 && (
                           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                            {row.items.slice(0, 2).map(it => it.name).join(', ')}{row.items.length > 2 ? '…' : ''}
+                            {r.items.slice(0, 2).map(it => it.name).join(', ')}{r.items.length > 2 ? '…' : ''}
                           </div>
                         )}
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        {row._sourceFile}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </span>
+                    ) 
+                  },
+                  { key: '_sourceFile', header: 'Archivo', render: (r) => <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r._sourceFile}</span> }
+                ]}
+              />
             </div>
           </div>
         )}

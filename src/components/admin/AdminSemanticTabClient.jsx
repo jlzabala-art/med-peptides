@@ -15,7 +15,7 @@ import { db } from '../../firebase';
 
 import { useAuth } from '../../context/AuthContext';
 import DataTable from '../ui/DataTable';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import { useSemanticProducts } from '../../hooks/admin/useSemanticProducts';
@@ -40,7 +40,7 @@ const GOAL_LABELS = {
   sleep_circadian: 'Sleep & Circadian',
 };
 
-export default function AdminSemanticTabClient({ readOnly = false, initialProducts = null }) {
+export default function AdminSemanticTabClient({ readOnly = false, initialProducts = null, isSubTab = false }) {
   const { user } = useAuth();
 
   // Use the semantic products hook for data fetching
@@ -549,13 +549,15 @@ export default function AdminSemanticTabClient({ readOnly = false, initialProduc
 
   return (
     <div style={{ padding: '24px', background: 'var(--color-bg-surface)' }}>
-      <AdminPageHeader
-        title="AI Semantic Intelligence Sync"
-        subtitle="Enrich Firestore product catalogs for medical/clinical natural language search queries."
-        icon={Sparkles}
-        iconBg="linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))"
-        iconColor="var(--color-bg-surface)"
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="AI Semantic Intelligence Sync"
+          subtitle="Enrich Firestore product catalogs for medical/clinical natural language search queries."
+          icon={Sparkles}
+          iconBg="linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))"
+          iconColor="var(--color-bg-surface)"
+        />
+      )}
 
       <div
         style={{

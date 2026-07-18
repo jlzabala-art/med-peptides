@@ -26,3 +26,26 @@ export async function fetchUsersAction({ limitCount = 50 } = {}) {
     return [];
   }
 }
+
+export async function fetchUsersAggregatesAction() {
+  try {
+    if (!adminDb) return { total: 0, patients: 0, doctors: 0, new: 0 };
+    
+    const [totalSnap, patientsSnap, doctorsSnap, newSnap] = await Promise.all([
+      adminDb.collection('users').count().get(),
+      adminDb.collection('users').where('role', '==', 'patient').count().get(),
+      adminDb.collection('users').where('role', '==', 'doctor').count().get(),
+      adminDb.collection('users').where('status', '==', 'pending').count().get(),
+    ]);
+
+    return {
+      total: totalSnap.data().count,
+      patients: patientsSnap.data().count,
+      doctors: doctorsSnap.data().count,
+      pending: newSnap.data().count
+    };
+  } catch (error) {
+    console.error("Error fetching user aggregates:", error);
+    return { total: 0, patients: 0, doctors: 0, pending: 0 };
+  }
+}

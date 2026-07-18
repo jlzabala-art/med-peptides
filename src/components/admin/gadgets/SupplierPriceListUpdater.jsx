@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
 
 import { Card } from '../../ui';
 import { Upload, Loader2, Sparkles, CheckCircle, AlertTriangle } from '@/lib/icons';
+import DataTable from '../../ui/DataTable';
 
 export default function SupplierPriceListUpdater() {
   const [isParsing, setIsParsing] = useState(false);
@@ -116,35 +117,37 @@ export default function SupplierPriceListUpdater() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ backgroundColor: 'var(--color-bg-secondary)', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-            <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left', borderCollapse: 'collapse' }}>
-              <thead style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', backgroundColor: 'var(--color-bg-tertiary)' }}>
-                <tr>
-                  <th style={{ padding: '1rem 1.5rem' }}>Original Text</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Extracted Name</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Matched Catalog ID</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>New Base Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {parsedItems.map((item, i) => (
-                  <tr key={i} style={{ borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-                    <td style={{ padding: '1rem 1.5rem', fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{item.original_text}</td>
-                    <td style={{ padding: '1rem 1.5rem', fontWeight: '500' }}>{item.peptide_name} {item.dosage}</td>
-                    <td style={{ padding: '1rem 1.5rem' }}>
-                      {item.productId ? (
-                        <span style={{ color: 'var(--color-success, #4ade80)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle style={{ width: '0.75rem', height: '0.75rem' }}/> {item.productId}</span>
-                      ) : (
-                        <span style={{ color: 'var(--color-warning, #facc15)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }}/> Requires Creation</span>
-                      )}
-                    </td>
-                    <td style={{ padding: '1rem 1.5rem', fontWeight: '500', color: 'var(--color-primary)' }}>
-                      ${Number(item.new_cost).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="gcp-table-container">
+            <DataTable
+              columns={[
+                {
+                  key: 'original_text',
+                  header: 'Original Text',
+                  render: (val) => <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{val}</span>
+                },
+                {
+                  key: 'extracted',
+                  header: 'Extracted Name',
+                  render: (val, item) => <span style={{ fontWeight: '500' }}>{item.peptide_name} {item.dosage}</span>
+                },
+                {
+                  key: 'productId',
+                  header: 'Matched Catalog ID',
+                  render: (val) => val ? (
+                    <span style={{ color: 'var(--color-success, #4ade80)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle style={{ width: '0.75rem', height: '0.75rem' }}/> {val}</span>
+                  ) : (
+                    <span style={{ color: 'var(--color-warning, #facc15)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }}/> Requires Creation</span>
+                  )
+                },
+                {
+                  key: 'new_cost',
+                  header: 'New Base Cost',
+                  render: (val) => <span style={{ fontWeight: '500', color: 'var(--color-primary)' }}>${Number(val).toFixed(2)}</span>
+                }
+              ]}
+              data={parsedItems}
+              keyField={(row, idx) => idx.toString()}
+            />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'flex-end' }}>

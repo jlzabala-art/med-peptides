@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+
+import { useRoleAccess } from '../hooks/useRoleAccess';
 import { triggerHaptic } from '../utils/haptics';
 import PullToRefreshWrapper from '../components/ui/PullToRefreshWrapper';
 import Skeleton from '../components/ui/Skeleton';
@@ -101,13 +103,15 @@ const DOCTOR_NAV_GROUPS = [
 ];
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import { LayoutDashboard, Users, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker } from '@/lib/icons';
 
 export const DoctorContext = React.createContext({});
 
 export default function DoctorDashboard({ children }) {
   const { user, userProfile, baseRole } = useAuth();
+  const { can, is } = useRoleAccess();
+  const isAdmin = is('admin');
   const pathname = usePathname();
   const router = useRouter();
   // Derive active tab from URL (e.g. /doctor/patients -> patients)
@@ -137,8 +141,6 @@ export default function DoctorDashboard({ children }) {
     };
     fetchStaffDoctor();
   }, [staffDoctorId]);
-
-  const isAdmin = baseRole === 'admin';
 
   // Fetch all doctors for admin impersonation list
   useEffect(() => {
@@ -181,7 +183,15 @@ export default function DoctorDashboard({ children }) {
 
   return (
     <PullToRefreshWrapper onRefresh={handleRefresh}>
-      <AppPortalLayout allowedRoles={['doctor', 'admin', 'staff']}>
+      <PanelShell 
+        allowedRoles={['doctor', 'admin', 'staff']}
+        sidebarNavGroups={DOCTOR_NAV_GROUPS}
+        activeNavId={activeTab}
+        onNavigate={(id) => router.push(`/doctor/${id}`)}
+        portalTitle="Clinical Portal"
+        roleContext="doctor"
+        pageContext={{ activeTab }}
+      >
       {isAdmin && (
         <div style={{
           background: '#fff7e6',
@@ -242,7 +252,7 @@ export default function DoctorDashboard({ children }) {
           </DoctorContext.Provider>
         </AdminTabErrorBoundary>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
     </PullToRefreshWrapper>
   );
 }

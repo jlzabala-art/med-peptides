@@ -15,9 +15,10 @@ import { db } from '../../firebase';
 
 import DataTable from '../ui/DataTable';
 import ScreenPermissionsSettings from './ScreenPermissionsSettings';
+import AccessGovernanceCenter from './access-control/AccessGovernanceCenter';
 import notifier from '../../services/NotificationService';
 
-export default function AdminSettingsTabClient({ readOnly = false, initialSettings = null }) {
+export default function AdminSettingsTabClient({ readOnly = false, initialSettings = null, isSubTab }) {
   const [settings, setSettings] = useState(initialSettings || {
     exchangeRates: { uae: 3.67, qatar: 3.64, kuwait: 0.31, saudi: 3.75, euro: 0.92, row: 1 },
     eurExchangeRates: { uae: 4.0, qatar: 3.95, kuwait: 0.34, saudi: 4.08, usd: 1.09, row: 1.09 },
@@ -480,6 +481,7 @@ export default function AdminSettingsTabClient({ readOnly = false, initialSettin
       </div>
       {/* Dynamic Role Permissions */}
       <ScreenPermissionsSettings />
+      <AccessGovernanceCenter />
       <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
         Widget: AdminSettingsTabClient | Props: none
       </div>

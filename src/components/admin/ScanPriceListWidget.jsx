@@ -10,17 +10,11 @@ import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 
-
-
-
-
-
-
-import { getFunctions, httpsCallable } from 'firebase/firestore';
-import { db, functions } from '../../../firebase';
-
-
-import { doc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
+import { db, functions, storage } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { ref, uploadBytes } from 'firebase/storage';
+import DataTable from '../ui/DataTable';
 
 export default function ScanPriceListWidget({ onClose, onScanComplete }) {
   const [file, setFile] = useState(null);
@@ -170,48 +164,29 @@ export default function ScanPriceListWidget({ onClose, onScanComplete }) {
               {matchedItems.length > 0 && (
                 <div style={styles.resultSection}>
                   <h4 style={styles.sectionTitle}>Ready to Update</h4>
-                  <table style={styles.table}>
-                    <thead>
-                      <tr>
-                        <th style={styles.th}>Product (Firebase)</th>
-                        <th style={styles.th}>Detected Value</th>
-                        <th style={styles.th}>New Guest Price</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {matchedItems.map((item, idx) => (
-                        <tr key={idx} style={styles.tr}>
-                          <td style={styles.td}><strong>{item.peptide_name}</strong> {item.dosage && <span style={styles.mutedText}>({item.dosage})</span>}</td>
-                          <td style={styles.td}><span style={styles.mutedText}>"{item.original_text}"</span></td>
-                          <td style={styles.td}>
-                            <span style={styles.newPrice}>${parseFloat(item.new_cost).toFixed(2)}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <DataTable
+                    data={matchedItems.map((it, i) => ({ ...it, _idx: i }))}
+                    keyField="_idx"
+                    columns={[
+                      { key: 'product', header: 'Product (Firebase)', render: (r) => <span><strong>{r.peptide_name}</strong> {r.dosage && <span style={styles.mutedText}>({r.dosage})</span>}</span> },
+                      { key: 'detected', header: 'Detected Value', render: (r) => <span style={styles.mutedText}>"{r.original_text}"</span> },
+                      { key: 'price', header: 'New Guest Price', render: (r) => <span style={styles.newPrice}>${parseFloat(r.new_cost).toFixed(2)}</span> }
+                    ]}
+                  />
                 </div>
               )}
 
               {unmatchedItems.length > 0 && (
                 <div style={styles.resultSection}>
                   <h4 style={{ ...styles.sectionTitle, color: 'var(--warning)' }}>Unmatched Items (Will be ignored)</h4>
-                  <table style={styles.table}>
-                    <thead>
-                      <tr>
-                        <th style={styles.th}>Detected Text</th>
-                        <th style={styles.th}>Cost</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {unmatchedItems.map((item, idx) => (
-                        <tr key={idx} style={styles.tr}>
-                          <td style={styles.td}>{item.original_text}</td>
-                          <td style={styles.td}>${parseFloat(item.new_cost || 0).toFixed(2)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <DataTable
+                    data={unmatchedItems.map((it, i) => ({ ...it, _idx: i }))}
+                    keyField="_idx"
+                    columns={[
+                      { key: 'text', header: 'Detected Text', render: (r) => r.original_text },
+                      { key: 'cost', header: 'Cost', render: (r) => `$${parseFloat(r.new_cost || 0).toFixed(2)}` }
+                    ]}
+                  />
                 </div>
               )}
 

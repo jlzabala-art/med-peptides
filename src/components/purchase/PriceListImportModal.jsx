@@ -12,6 +12,7 @@ import { collection, query, where, getDocs, addDoc, updateDoc, doc } from 'fireb
 import * as fb from '../../firebase';
 const db = fb?.db;
 import { extractApiPeptidesFromImage } from '../../services/atlasAiService';
+import DataTable from '../ui/DataTable';
 
 
 
@@ -250,51 +251,57 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
                 Extracted API Peptides ({extractedData.length})
               </h3>
               <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
-                    <tr>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>Peptide Name</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>Qty</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>Unit</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 600 }}>Price/g (USD)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {extractedData.map((item, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', color: '#1e293b', fontWeight: 500 }}>{item.peptideName}</td>
-                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
-                          <input
-                            type="number" min="1" step="0.001"
-                            value={item.quantity}
-                            onChange={(e) => {
-                              const updated = [...extractedData];
-                              updated[idx] = { ...updated[idx], quantity: parseFloat(e.target.value) || 1 };
-                              setExtractedData(updated);
-                            }}
-                            style={{ width: '70px', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right' }}
-                          />
-                        </td>
-                        <td style={{ padding: '0.5rem 1rem', textAlign: 'center' }}>
-                          <select
-                            value={item.unit}
-                            onChange={(e) => {
-                              const updated = [...extractedData];
-                              updated[idx] = { ...updated[idx], unit: e.target.value };
-                              setExtractedData(updated);
-                            }}
-                            style={{ padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                          >
-                            <option value="g">g</option>
-                            <option value="kg">kg</option>
-                            <option value="vial">vial</option>
-                          </select>
-                        </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#64748b' }}>${item.pricePerGram?.toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <DataTable
+                  columns={[
+                    {
+                      key: 'peptideName',
+                      header: 'Peptide Name',
+                      render: (val) => <span style={{ color: '#1e293b', fontWeight: 500 }}>{val}</span>
+                    },
+                    {
+                      key: 'quantity',
+                      header: 'Qty',
+                      render: (val, row, idx) => (
+                        <input
+                          type="number" min="1" step="0.001"
+                          value={val}
+                          onChange={(e) => {
+                            const updated = [...extractedData];
+                            updated[idx] = { ...updated[idx], quantity: parseFloat(e.target.value) || 1 };
+                            setExtractedData(updated);
+                          }}
+                          style={{ width: '70px', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', textAlign: 'right' }}
+                        />
+                      )
+                    },
+                    {
+                      key: 'unit',
+                      header: 'Unit',
+                      render: (val, row, idx) => (
+                        <select
+                          value={val}
+                          onChange={(e) => {
+                            const updated = [...extractedData];
+                            updated[idx] = { ...updated[idx], unit: e.target.value };
+                            setExtractedData(updated);
+                          }}
+                          style={{ padding: '0.25rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                        >
+                          <option value="g">g</option>
+                          <option value="kg">kg</option>
+                          <option value="vial">vial</option>
+                        </select>
+                      )
+                    },
+                    {
+                      key: 'pricePerGram',
+                      header: 'Price/g (USD)',
+                      render: (val) => <span style={{ color: '#64748b' }}>${val?.toFixed(2)}</span>
+                    }
+                  ]}
+                  data={extractedData}
+                  keyField={(row, idx) => idx.toString()}
+                />
               </div>
             </div>
           )}

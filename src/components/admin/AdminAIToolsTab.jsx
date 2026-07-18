@@ -1,41 +1,13 @@
 "use client";
 
 import Wrench from "lucide-react/dist/esm/icons/wrench";
-import Database from "lucide-react/dist/esm/icons/database";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Search from "lucide-react/dist/esm/icons/search";
-import Truck from "lucide-react/dist/esm/icons/truck";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import User from "lucide-react/dist/esm/icons/user";
 import Save from "lucide-react/dist/esm/icons/save";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import GitMerge from "lucide-react/dist/esm/icons/git-merge";
-import GraduationCap from "lucide-react/dist/esm/icons/graduation-cap";
-import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
-import FileOutput from "lucide-react/dist/esm/icons/file-output";
+import Search from "lucide-react/dist/esm/icons/search";
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import DataTable from '../ui/DataTable';
-import AppFilterBar from '../ui/AppFilterBar';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
 import AppActionGroup from '../ui/AppActionGroup';
 
 const MASTER_TOOLS = [
@@ -218,88 +190,34 @@ export default function AdminAIToolsTab() {
   }
 
   return (
-    <div
-      style={{
-        padding: '0.5rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2rem',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        position: 'relative',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: 'var(--text-main)',
-              margin: '0 0 0.5rem 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
+    <div style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
+      <PageHeader
+        title="AI Toolkit & Skills"
+        subtitle="Assign specific capabilities to each AI agent. When an agent has a tool enabled, it can autonomously use it during conversations to fetch data or perform actions."
+        icon={Wrench}
+        actions={
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.9rem', cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}
           >
-            <Wrench size={24} style={{ color: 'var(--primary)' }} />
-            AI Toolkit & Skills
-          </h2>
-          <p
-            style={{
-              margin: 0,
-              color: 'var(--text-muted)',
-              fontSize: '0.9rem',
-              maxWidth: '600px',
-              lineHeight: 1.5,
-            }}
-          >
-            Assign specific capabilities to each AI agent. When an agent has a tool enabled, it can
-            autonomously use it during conversations to fetch data or perform actions.
-          </p>
-        </div>
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.5rem',
-            background: 'var(--primary)',
-            color: 'white',
-            border: 'none',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-            cursor: saving ? 'wait' : 'pointer',
-            opacity: saving ? 0.7 : 1,
-            boxShadow: 'var(--shadow-sm)',
-            transition: 'all 0.2s',
-          }}
-        >
-          <Save size={18} />
-          {saving ? 'Saving...' : 'Save Configuration'}
-        </button>
-      </div>
+            <Save size={18} />{saving ? 'Saving...' : 'Save Configuration'}
+          </button>
+        }
+      />
 
       {/* Dictionary Section */}
       <div>
-        <AppFilterBar
-          searchQuery={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search tools by name, ID, or description..."
-        />
+        <div style={{ marginBottom: '1rem' }}>
+          <GlobalSearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search tools by name, ID, or description..."
+            resultCount={filteredTools?.length}
+            namespace="admin-ai-tools"
+            size="lg"
+          />
+        </div>
         <div
           className="card"
           style={{ padding: 0, overflowX: 'auto', border: '1px solid var(--border)' }}

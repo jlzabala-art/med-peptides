@@ -1,13 +1,14 @@
 "use client";
 
  
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useProductBySlug } from '../hooks/data/useProductBySlug';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import ProductDetail from './ProductDetail';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import Skeleton from '../components/common/Skeleton';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useRoleAccess } from '../hooks/useRoleAccess';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import app from '../firebase';
 
@@ -22,7 +23,6 @@ export default function ProductTemplate({
   initialProduct,
   region, 
   isProfessional, 
-  isAdmin, 
   cart, 
   onAddToCart,
   toggleCompare,
@@ -36,6 +36,10 @@ export default function ProductTemplate({
   const slug = propSlug || params?.slug; 
   const router = useRouter();
   const pathname = usePathname();
+
+  const [activeProduct, setActiveProduct] = useState(initialProduct || null);
+  const { is } = useRoleAccess();
+  const isAdmin = is('admin');
 
   const { product: fetchedProduct, isLoading: productLoadingFetch, error } = useProductBySlug(slug);
   
@@ -148,7 +152,6 @@ export default function ProductTemplate({
         products={products}
         region={region}
         isProfessional={isProfessional}
-        isAdmin={isAdmin}
         cart={cart}
         onAddToCart={onAddToCart}
         toggleCompare={toggleCompare}

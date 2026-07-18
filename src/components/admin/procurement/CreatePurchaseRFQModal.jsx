@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, StandardDrawer } from '../../ui';
+import { Card, StandardDrawer, DataTable } from '../../ui';
 import { useAuth } from '../../../context/AuthContext';
 import { useProcurementManager } from '../../../hooks/data/useProcurementManager';
 import toast from 'react-hot-toast';
@@ -108,69 +108,80 @@ export default function CreatePurchaseRFQModal({ supplierName, selectedVariantId
             </div>
           </div>
 
-          <table className="gcp-table" style={{ width: '100%', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '35%' }}>Product / Variant</th>
-                <th style={{ width: '15%', textAlign: 'right' }}>Current Cost</th>
-                <th style={{ width: '15%', textAlign: 'right' }}>Target Cost</th>
-                <th style={{ width: '15%', textAlign: 'right' }}>Req. Qty</th>
-                <th style={{ width: '15%', textAlign: 'right' }}>Total Target Value</th>
-                <th style={{ width: '5%' }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rfqItems.map((item, idx) => (
-                <tr key={idx}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{item.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.dosage} | SKU: {item.sku}</div>
-                  </td>
-                  <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>
-                    ${parseFloat(item.currentCost).toFixed(2)}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                      <span style={{ marginRight: '4px', color: 'var(--text-muted)' }}>$</span>
-                      <input 
-                        type="number"
-                        min="0" step="0.01"
-                        value={item.targetCost}
-                        onChange={(e) => handleUpdateItem(idx, 'targetCost', e.target.value)}
-                        style={{ width: '70px', padding: '0.3rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', fontWeight: 600, color: item.targetCost < item.currentCost ? '#16a34a' : 'inherit' }}
-                      />
-                    </div>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
+          <DataTable
+            data={rfqItems.map((item, idx) => ({ ...item, _idx: idx }))}
+            keyField="_idx"
+            columns={[
+              {
+                key: 'product',
+                header: 'Product / Variant',
+                render: (r) => (
+                  <>
+                    <div style={{ fontWeight: 600 }}>{r.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.dosage} | SKU: {r.sku}</div>
+                  </>
+                )
+              },
+              {
+                key: 'currentCost',
+                header: 'Current Cost',
+                render: (r) => <div style={{ textAlign: 'right', color: 'var(--text-muted)' }}>${parseFloat(r.currentCost).toFixed(2)}</div>
+              },
+              {
+                key: 'targetCost',
+                header: 'Target Cost',
+                render: (r) => (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <span style={{ marginRight: '4px', color: 'var(--text-muted)' }}>$</span>
+                    <input 
+                      type="number"
+                      min="0" step="0.01"
+                      value={r.targetCost}
+                      onChange={(e) => handleUpdateItem(r._idx, 'targetCost', e.target.value)}
+                      style={{ width: '70px', padding: '0.3rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', fontWeight: 600, color: r.targetCost < r.currentCost ? '#16a34a' : 'inherit' }}
+                    />
+                  </div>
+                )
+              },
+              {
+                key: 'quantity',
+                header: 'Req. Qty',
+                render: (r) => (
+                  <div style={{ textAlign: 'right' }}>
                     <input 
                       type="number"
                       min="1"
-                      value={item.quantity}
-                      onChange={(e) => handleUpdateItem(idx, 'quantity', e.target.value)}
+                      value={r.quantity}
+                      onChange={(e) => handleUpdateItem(r._idx, 'quantity', e.target.value)}
                       style={{ width: '70px', padding: '0.3rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right' }}
                     />
-                  </td>
-                  <td style={{ textAlign: 'right', fontWeight: 700 }}>
-                    ${((parseFloat(item.targetCost) || 0) * (parseInt(item.quantity, 10) || 0)).toFixed(2)}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button onClick={() => handleRemoveItem(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+                  </div>
+                )
+              },
+              {
+                key: 'totalValue',
+                header: 'Total Target Value',
+                render: (r) => <div style={{ textAlign: 'right', fontWeight: 700 }}>${((parseFloat(r.targetCost) || 0) * (parseInt(r.quantity, 10) || 0)).toFixed(2)}</div>
+              },
+              {
+                key: 'actions',
+                header: '',
+                render: (r) => (
+                  <div style={{ textAlign: 'right' }}>
+                    <button onClick={() => handleRemoveItem(r._idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
                       <X size={16} />
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan="4" style={{ textAlign: 'right', fontWeight: 600 }}>Total Est. RFQ Value:</td>
-                <td style={{ textAlign: 'right', fontWeight: 800, fontSize: '1rem', color: 'var(--primary)' }}>
-                  ${rfqItems.reduce((acc, item) => acc + ((parseFloat(item.targetCost) || 0) * (parseInt(item.quantity, 10) || 0)), 0).toFixed(2)}
-                </td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+                  </div>
+                )
+              }
+            ]}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '1rem 0.5rem', borderTop: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+            <span style={{ fontWeight: 600, marginRight: '1rem' }}>Total Est. RFQ Value:</span>
+            <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--primary)' }}>
+              ${rfqItems.reduce((acc, item) => acc + ((parseFloat(item.targetCost) || 0) * (parseInt(item.quantity, 10) || 0)), 0).toFixed(2)}
+            </span>
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>Notes to Supplier (Optional)</label>

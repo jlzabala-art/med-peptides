@@ -7,12 +7,13 @@ import { fetchSemanticProductsAction } from '../../actions/semanticActions';
  * Pre-fetches the initial page of products securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
-export default async function AdminSemanticTab({ readOnly = false }) {
+export default async function AdminSemanticTab({ isSubTab = false, readOnly = false }) {
   const initialProducts = await fetchSemanticProductsAction({ limitCount: 20 });
   
   return (
     <AdminSemanticTabClient 
       initialProducts={initialProducts}
+      isSubTab={isSubTab}
       readOnly={readOnly}
     />
   );

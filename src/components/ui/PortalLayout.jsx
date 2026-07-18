@@ -15,6 +15,7 @@ import React, { useState, useEffect } from 'react';
 
 import ClinicalAssistant from '../shared/ClinicalAssistant';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
+import MobileBottomNav from '../shared/MobileBottomNav';
 import { db } from '../../firebase';
 
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -31,6 +32,7 @@ import useAdminNotifications from '../../hooks/useAdminNotifications';
 import { useCopilot } from '../../context/CopilotContext';
 import CopilotWorkspacePanel from '../ai-copilot/CopilotWorkspacePanel';
 import ContextualFAB from '../common/ContextualFAB';
+import HelpDrawer from './HelpDrawer';
 import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List } from '@/lib/icons';
 
 // ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
@@ -119,13 +121,21 @@ export default function PortalLayout({
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   // Command Palette
   const [isPaletteOpen, setPaletteOpen] = useState(false);
+  // Help Drawer
+  const [isHelpOpen, setHelpOpen] = useState(false);
 
-  // Listen for Cmd+K / Ctrl+K
+  // Listen for Cmd+K / Ctrl+K and ?
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Cmd+K or Ctrl+K for Palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setPaletteOpen((prev) => !prev);
+      }
+      // Shift + / (?) for Help Drawer (only if not typing in an input)
+      if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+        e.preventDefault();
+        setHelpOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -685,7 +695,7 @@ export default function PortalLayout({
 
       {/* MAIN LAYOUT WRAPPER */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* LEFT SIDEBAR GADGET */}
+        {/* LEFT SIDEBAR GADGET (Acts as Drawer on Mobile when isSidebarOpen is true) */}
         <SidebarGadget
           groups={sidebarNavGroups}
           pinnedItems={sidebarPinnedItems}
@@ -794,7 +804,15 @@ export default function PortalLayout({
         }}
       />
       <CopilotWorkspacePanel />
+      <HelpDrawer isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
       <ContextualFAB />
+      {isMobile && (
+        <MobileBottomNav 
+          activeId={activeNavId} 
+          onNavigate={onNavigate} 
+          navGroups={sidebarNavGroups} 
+        />
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import GlobalSearchBar from './GlobalSearchBar';
 import GridSkeleton from './skeletons/GridSkeleton';
 import DataTable from './DataTable';
 import BulkActionsBar from './BulkActionsBar';
+import ErrorBoundary from './ErrorBoundary';
 
 export default function DataModule({
   title,
@@ -34,7 +35,8 @@ export default function DataModule({
   children
 }) {
   return (
-    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: 'var(--bg-app, #f1f5f9)' }}>
+    <ErrorBoundary>
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: 'var(--bg-app, #f1f5f9)' }}>
       {!hideHeader && (
         <AdminPageHeader
           title={title}
@@ -113,5 +115,6 @@ export default function DataModule({
 
       {children}
     </div>
+    </ErrorBoundary>
   );
 }

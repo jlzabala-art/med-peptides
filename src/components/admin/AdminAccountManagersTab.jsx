@@ -33,7 +33,7 @@ import AppFilterBar from '../ui/AppFilterBar';
 import { useAccountManagers } from '../../hooks/admin/useAccountManagers';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 
 
 
@@ -268,7 +268,7 @@ export default function AdminAccountManagersTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%', position: 'relative' }}>
       {/* SECTION 1 & 2: Header + KPI Strip */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
-        <AdminPageHeader
+        <PageHeader
           title="Account Managers"
           subtitle="Manage commercial representatives, territories, clinics, and assignments."
           icon={Users}

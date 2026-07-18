@@ -23,7 +23,7 @@ import CouponsManager from '../components/marketing/CouponsManager';
 import ReferralTracking from '../components/marketing/ReferralTracking';
 import CoBranding from '../components/marketing/CoBranding';
 import DripMarketing from '../components/marketing/DripMarketing';
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import { useAuth } from '../context/AuthContext';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import styles from './AccountManagerDashboard.module.css';
@@ -85,7 +85,15 @@ export default function AccountManagerDashboard() {
   const currentLabel = NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Overview';
 
   return (
-    <AppPortalLayout allowedRoles={['manager', 'admin']}>
+    <PanelShell 
+      allowedRoles={['manager', 'admin']}
+      sidebarNavGroups={NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => router.push(`/account-manager/${id}`)}
+      portalTitle="Manager Portal"
+      roleContext="manager"
+      pageContext={{ activeTab }}
+    >
       <div className={styles.dashboardContent}>
         <Routes>
           <Route path="/" element={<Navigate to="overview" replace />} />
@@ -115,6 +123,6 @@ export default function AccountManagerDashboard() {
           <Route path="settings" element={<AdminTabErrorBoundary tabId="settings"><UserSettings onBack={() => router.push('/account-manager')} /></AdminTabErrorBoundary>} />
         </Routes>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

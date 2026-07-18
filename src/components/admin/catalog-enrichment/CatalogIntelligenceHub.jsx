@@ -23,7 +23,7 @@ const TABS = [
   { id: 'zoho', label: 'Zoho Preparation' }
 ];
 
-export default function CatalogIntelligenceHub() {
+export default function CatalogIntelligenceHub({ isSubTab = false }) {
   const [loading, setLoading] = useState(true);
   const [auditResults, setAuditResults] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
@@ -111,12 +111,14 @@ export default function CatalogIntelligenceHub() {
     <div style={{ paddingBottom: '4rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       
       {/* Header */}
-      <div>
-        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)' }}>Catalog Intelligence & Enrichment</h2>
-        <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Import → Match → Review → Enrich → Validate → Sync to Zoho
-        </p>
-      </div>
+      {!isSubTab && (
+        <div>
+          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)' }}>Catalog Intelligence & Enrichment</h2>
+          <p style={{ margin: '0.2rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            Import → Match → Review → Enrich → Validate → Sync to Zoho
+          </p>
+        </div>
+      )}
 
       {/* KPIs */}
       <TopKPIBar auditResults={auditResults} />

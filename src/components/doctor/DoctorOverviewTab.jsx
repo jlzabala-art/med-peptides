@@ -17,6 +17,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { db } from '../../firebase';
 import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActions';
+import { fetchKPIsAction } from '../../actions/kpiActions';
 
 
 
@@ -110,7 +111,7 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
 
   useEffect(() => { setPatientCount(patients.length); }, [patients]);
 
-  const { data: prescriptions = [], isLoading } = useQuery({
+  const { data: prescriptions = [], isLoading: isLoadingPrescriptions } = useQuery({
     queryKey: ['prescriptions', doctorId],
     queryFn: async () => {
       if (!doctorId) return [];
@@ -119,10 +120,24 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
     enabled: !!doctorId
   });
 
-  const drafts = prescriptions.filter(r => r.status === 'draft').length;
-  const active = prescriptions.filter(r => ['sent', 'viewed_by_patient', 'assigned_to_wholesaler', 'added_to_bulk'].includes(r.status)).length;
-  const fulfilled = prescriptions.filter(r => r.status === 'fulfilled').length;
+  const { data: kpis, isLoading: isLoadingKPIs } = useQuery({
+    queryKey: ['kpis', 'doctor', doctorId],
+    queryFn: async () => {
+      if (!doctorId) return null;
+      return await fetchKPIsAction('doctor', doctorId);
+    },
+    enabled: !!doctorId
+  });
+
   const recent = prescriptions.slice(0, 5);
+  
+  // Use server-side KPIs if available, fallback to client-side arrays if not.
+  const drafts = kpis?.pendingPrescriptions ?? prescriptions.filter(r => r.status === 'draft').length;
+  const active = kpis?.activePrescriptions ?? prescriptions.filter(r => ['sent', 'viewed_by_patient', 'assigned_to_wholesaler', 'added_to_bulk'].includes(r.status)).length;
+  const fulfilled = kpis?.activeOrders ?? prescriptions.filter(r => r.status === 'fulfilled').length; // fulfilled maps to activeOrders conceptually for a doctor
+  const totalPatients = kpis?.activePatients ?? patientCount;
+  
+  const isLoading = isLoadingPrescriptions || isLoadingKPIs;
 
   const initialWidgetLayout = [
     { id: 'widget-1', type: 'PatientRoster', props: { role: 'doctor' } },
@@ -168,7 +183,7 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
           <MetricCard title={t('doctor.overview.stats_active')} value={isLoading ? '…' : active} subtitle={t('doctor.overview.stats_active_sub')} icon={Send} color="var(--color-primary)" onClick={() => onNavigate?.('prescriptions')} />
           <MetricCard title={t('doctor.overview.stats_drafts')} value={isLoading ? '…' : drafts} subtitle={t('doctor.overview.stats_drafts_sub')} icon={Clock} color="#f59e0b" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
           <MetricCard title={t('doctor.overview.stats_fulfilled')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub')} icon={CheckCircle2} color="var(--color-success)" onClick={() => onNavigate?.('prescriptions')} />
-          <MetricCard title={t('doctor.overview.stats_patients')} value={patientCount || '—'} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
+          <MetricCard title={t('doctor.overview.stats_patients')} value={isLoading ? '…' : (totalPatients || '—')} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#8b5cf6" onClick={() => onNavigate?.('patients')} />
         </div>
 
         <ClinicalCopilotWidget onDraftGenerated={(draft) => { setShowBuilder(true); window.dispatchEvent(new CustomEvent('nav:ai-draft', { detail: draft })); }} />

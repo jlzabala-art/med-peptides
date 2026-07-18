@@ -3,16 +3,16 @@
 import Users from "lucide-react/dist/esm/icons/users";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import React, { useState, useEffect, useMemo } from 'react';
-import { StatusChip } from '../ui';
+import { StatusChip, MetricCard } from '../ui';
 import DataModule from '../ui/DataModule';
 import PatientOnboardingWizard from '../admin/patients/PatientOnboardingWizard';
 import PatientProfileWorkspace from '../admin/patients/PatientProfileWorkspace';
 import { formatAEDtoDual } from '../../utils/currencies';
 import { useSearchParams } from 'next/navigation';
 
-import { useFirestorePaginatedCollection } from '../../hooks/data/useFirestorePaginatedCollection';
 import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
 import { usePatientAggregates } from '../../hooks/data/usePatientAggregates';
+import { usePatientStore } from '../../store/usePatientStore';
 import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
 import { useDataTable } from '../../hooks/ui/useDataTable';
 import BulkActionsBar from '../ui/BulkActionsBar';
@@ -20,31 +20,32 @@ import PatientFiltersBar from '../admin/patients/PatientFiltersBar';
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useToast } from '../../hooks/useToast';
-import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert } from '@/lib/icons';
+import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign } from '@/lib/icons';
 
 function PatientKPIs() {
   const { data: aggs, isLoading } = usePatientAggregates();
   const fmtCurrency = (val) => formatAEDtoDual(val);
 
-  if (isLoading) {
-    return <GridSkeleton count={5} cols={5} />;
-  }
-
   const kpis = [
-    { label: 'Total Patients', value: aggs?.totalPatients || 0, color: '#3b82f6', bg: '#eff6ff' },
-    { label: 'Active', value: aggs?.activePatients || 0, color: '#10b981', bg: '#ecfdf5' },
-    { label: 'New This Month', value: aggs?.newPatients || 0, color: '#8b5cf6', bg: '#f5f3ff' },
-    { label: 'Awaiting Follow-Up', value: aggs?.awaitingFollowUp || 0, color: '#f59e0b', bg: '#fffbeb' },
-    { label: 'Total Revenue', value: fmtCurrency(aggs?.totalRevenue || 0), color: '#ec4899', bg: '#fdf2f8' }
+    { label: 'Total Patients', value: aggs?.totalPatients || 0, color: 'var(--color-primary)', icon: Users },
+    { label: 'Active', value: aggs?.activePatients || 0, color: 'var(--color-success)', icon: Activity },
+    { label: 'New This Month', value: aggs?.newPatients || 0, color: '#8b5cf6', icon: UserPlus },
+    { label: 'Awaiting Follow-Up', value: aggs?.awaitingFollowUp || 0, color: 'var(--color-warning)', alert: (aggs?.awaitingFollowUp || 0) > 0, icon: Clock },
+    { label: 'Total Revenue', value: fmtCurrency(aggs?.totalRevenue || 0), color: '#ec4899', icon: DollarSign }
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem', flexShrink: 0 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem', flexShrink: 0 }}>
       {kpis.map((kpi, idx) => (
-        <div key={idx} style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.2s ease' }} className="hover-card-subtle">
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>{kpi.label}</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: kpi.color }}>{kpi.value}</div>
-        </div>
+        <MetricCard
+          key={idx}
+          title={kpi.label}
+          value={kpi.value}
+          color={kpi.color}
+          icon={kpi.icon}
+          alert={kpi.alert}
+          loading={isLoading}
+        />
       ))}
     </div>
   );
@@ -52,7 +53,6 @@ function PatientKPIs() {
 
 export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.' }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
@@ -71,31 +71,40 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     return conditions;
   }, [filters]);
 
-  const { 
-    data: paginatedPatients, 
-    isLoading: loading, 
-    hasMore, 
-    loadMore,
-    isFetchingMore
-  } = useFirestorePaginatedCollection('patients', {
-    whereConditions,
-    orderByFields: [['createdAt', 'desc']],
-    pageSize: 50
-  });
+  const { patients, fetchPatients, loading } = usePatientStore();
+
+  useEffect(() => {
+    fetchPatients();
+  }, [fetchPatients]);
+
+  // Apply whereConditions locally
+  const filteredPatients = useMemo(() => {
+    return patients.filter(p => {
+      let match = true;
+      if (filters.status && p.status !== filters.status) match = false;
+      if (filters.physicianId && p.physicianId !== filters.physicianId) match = false;
+      return match;
+    });
+  }, [patients, filters]);
+
+  // Fallbacks since we are now doing local pagination
+  const hasMore = false; 
+  const isFetchingMore = false;
+  const loadMore = () => {};
 
   useEffect(() => {
     const patientId = searchParams.get('patientId');
-    if (patientId && paginatedPatients && paginatedPatients.length > 0 && !selectedPatient) {
-      const p = paginatedPatients.find(p => p.id === patientId);
+    if (patientId && filteredPatients && filteredPatients.length > 0) {
+      // With Master-Detail, we'd ideally expand the row instead of opening a modal.
+      // But for simplicity, we just clear the param.
+      const p = filteredPatients.find(p => p.id === patientId);
       if (p) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelectedPatient(p);
         const url = new URL(window.location.href);
         url.searchParams.delete('patientId');
         window.history.replaceState({}, '', url.toString());
       }
     }
-  }, [searchParams, paginatedPatients, selectedPatient]);
+  }, [searchParams, filteredPatients]);
 
   const {
     selectedIds,
@@ -104,7 +113,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     search: searchTerm,
     setSearch: setSearchTerm,
     toggleRowSelection,
-  } = useDataTable(paginatedPatients, {
+  } = useDataTable(filteredPatients, {
     idField: 'id',
     initialPageSize: 50,
   });
@@ -116,9 +125,9 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     300
   );
 
-  const filtered = isAlgoliaActive && searchTerm.trim()
-    ? algoliaHits.map(h => paginatedPatients.find(p => p.id === h.objectID) || { ...h, id: h.objectID }).filter(Boolean)
-    : paginatedPatients;
+  const finalFiltered = isAlgoliaActive && searchTerm.trim()
+    ? algoliaHits.map(h => filteredPatients.find(p => p.id === h.objectID) || { ...h, id: h.objectID }).filter(Boolean)
+    : filteredPatients;
 
   async function handleBulkStatusChange(newStatus) {
     const ids = [...selectedIds];
@@ -184,12 +193,12 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       searchPlaceholder="Search patients by name, email, clinic, physician (Algolia)..."
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
-      resultCount={loading && !algoliaLoading ? undefined : filtered.length}
+      resultCount={loading && !algoliaLoading ? undefined : finalFiltered.length}
       searchLoading={algoliaLoading}
       namespace="admin-patients"
       kpis={<PatientKPIs />}
       filtersBar={<PatientFiltersBar filters={filters} setFilters={setFilters} doctors={doctors} />}
-      data={filtered}
+      data={finalFiltered}
       loading={loading}
       hasMore={hasMore}
       loadMore={loadMore}
@@ -200,7 +209,14 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
          clearSelection();
          newArr.forEach(id => toggleRowSelection(id));
       }}
-      onRowClick={setSelectedPatient}
+      expandableRender={(row) => (
+        <div style={{ padding: '1rem', background: '#f8fafc', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+          <PatientProfileWorkspace 
+            patient={row}
+            onClose={() => {}}
+          />
+        </div>
+      )}
       emptyState={{
         title: "Welcome to Patient Management",
         description: "Manage patients, programs, clinics, physicians, prescriptions, and follow-ups from one centralized workspace.",
@@ -250,13 +266,6 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             setIsWizardOpen(false);
             window.location.reload(); 
           }}
-        />
-      )}
-
-      {selectedPatient && (
-        <PatientProfileWorkspace 
-          patient={selectedPatient}
-          onClose={() => setSelectedPatient(null)}
         />
       )}
     </DataModule>

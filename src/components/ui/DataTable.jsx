@@ -3,8 +3,10 @@
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from '@/lib/icons';
 import React, { useState, useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { DataTableSearchEngine } from '@/utils/DataTableSearchEngine';
 
 import Skeleton from './Skeleton';
+import EmptyState from './EmptyState';
 
 export default function DataTable({
   columns,
@@ -46,6 +48,8 @@ export default function DataTable({
   searchQuery = '',
   onSearchChange,
   searchPlaceholder = 'Search...',
+  searchStrategy = 'local', // 'local', 'semantic', 'algolia'
+  searchConfig = {}, // { keys: [], fuseOptions: {} }
   dateRange = { start: '', end: '' },
   onDateRangeChange,
   filters = [],
@@ -67,9 +71,67 @@ export default function DataTable({
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [showColMenu, setShowColMenu] = useState(false);
 
-  // Long-press state
   const [touchTimer, setTouchTimer] = useState(null);
   const parentRef = useRef(null);
+
+  const [internalPage, setInternalPage] = useState(1);
+  const [internalRowsPerPage, setInternalRowsPerPage] = useState(25);
+  
+  // Search state
+  const [filteredData, setFilteredData] = useState(data || []);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Run search when dependencies change
+  React.useEffect(() => {
+    let isMounted = true;
+    
+    if (!searchQuery || !searchQuery.trim()) {
+      setFilteredData(data || []);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    
+    const result = DataTableSearchEngine.execute(
+      data || [], 
+      searchQuery, 
+      columns, 
+      searchStrategy, 
+      searchConfig
+    );
+    
+    if (result instanceof Promise) {
+      result.then((res) => {
+        if (isMounted) {
+          setFilteredData(res);
+          setIsSearching(false);
+        }
+      });
+    } else {
+      setFilteredData(result);
+      setIsSearching(false);
+    }
+
+    return () => { isMounted = false; };
+  }, [data, searchQuery, columns, searchStrategy, JSON.stringify(searchConfig)]);
+
+  const activePage = onPageChange ? currentPage : internalPage;
+  const activeRowsPerPage = onRowsPerPageChange ? rowsPerPage : internalRowsPerPage;
+
+  const handlePageChange = (newPage) => {
+    if (onPageChange) onPageChange(newPage);
+    else setInternalPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (newRows) => {
+    if (onRowsPerPageChange) onRowsPerPageChange(newRows);
+    else {
+      setInternalRowsPerPage(newRows);
+      setInternalPage(1); // reset to page 1
+    }
+  };
+
 
   // Use visibleColumns prop if provided, otherwise assume all visible
   const activeColumns = useMemo(() => {
@@ -78,7 +140,7 @@ export default function DataTable({
   }, [columns, visibleColumns]);
 
   const sortedData = useMemo(() => {
-    const safeData = data || [];
+    const safeData = filteredData || [];
     if (!sortConfig.key) return safeData;
     let sortableItems = [...safeData];
     sortableItems.sort((a, b) => {
@@ -86,8 +148,23 @@ export default function DataTable({
       let aVal = col && col.sortValue ? col.sortValue(a) : a[sortConfig.key];
       let bVal = col && col.sortValue ? col.sortValue(b) : b[sortConfig.key];
 
-      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+      const getComparable = (val) => {
+        if (val === null || val === undefined) return '';
+        if (val.toMillis && typeof val.toMillis === 'function') return val.toMillis();
+        if (val.seconds !== undefined && val.nanoseconds !== undefined) return val.seconds;
+        if (val instanceof Date) return val.getTime();
+        if (typeof val === 'string') {
+          if (/^\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(val)) {
+            const parsed = Date.parse(val);
+            if (!isNaN(parsed)) return parsed;
+          }
+          return val.toLowerCase();
+        }
+        return val;
+      };
+
+      aVal = getComparable(aVal);
+      bVal = getComparable(bVal);
 
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -96,8 +173,16 @@ export default function DataTable({
     return sortableItems;
   }, [data, sortConfig, columns]);
 
+  const paginatedData = useMemo(() => {
+    if (onPageChange || onRowsPerPageChange) {
+      return sortedData; // Controlled mode
+    }
+    const start = (activePage - 1) * activeRowsPerPage;
+    return sortedData.slice(start, start + activeRowsPerPage);
+  }, [sortedData, activePage, activeRowsPerPage, onPageChange, onRowsPerPageChange]);
+
   const rowVirtualizer = useVirtualizer({
-    count: sortedData.length,
+    count: paginatedData.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 64, // Default row height in CSS
     overscan: 5,
@@ -399,7 +484,7 @@ export default function DataTable({
       )}
       <div
         ref={virtualize ? parentRef : null}
-        className={`gcp-table-container ui-table-container rsp-table-wrap${virtualize ? '' : ' responsive-stack'}`}
+        className={`gcp-table-container ui-table-container content-visibility-auto rsp-table-wrap${virtualize ? '' : ' responsive-stack'}`}
         style={{
           overflowX: 'auto',
           overflowY: 'auto',
@@ -552,7 +637,7 @@ export default function DataTable({
                 : {}
             }
           >
-            {isLoading ? (
+            {isLoading || isSearching ? (
               Array.from({ length: 5 }).map((_, rowIndex) => (
                 <tr
                   key={`skeleton-${rowIndex}`}
@@ -578,81 +663,28 @@ export default function DataTable({
                   ))}
                 </tr>
               ))
-            ) : !data || data.length === 0 ? (
+            ) : !filteredData || filteredData.length === 0 ? (
               <tr>
                 <td
                   colSpan={
                     columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)
                   }
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '64px 24px',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '64px',
-                        height: '64px',
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--color-bg-hover)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--color-text-tertiary)',
-                        marginBottom: '16px',
-                      }}
-                    >
-                      <Inbox size={32} />
-                    </div>
-                    <h3
-                      style={{
-                        margin: '0 0 8px 0',
-                        fontSize: '16px',
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
-                      {emptyMessage || emptyTitle}
-                    </h3>
-                    {!emptyMessage && (
-                      <p
-                        style={{
-                          margin: '0 0 24px 0',
-                          fontSize: '14px',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        {emptyDescription}
-                      </p>
-                    )}
-                    {emptyActionLabel && onEmptyAction && (
-                      <button
-                        onClick={onEmptyAction}
-                        style={{
-                          padding: '8px 16px',
-                          backgroundColor: 'var(--color-primary)',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: 'var(--radius-sm)',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {emptyActionLabel}
-                      </button>
-                    )}
-                  </div>
+                    <EmptyState
+                      icon={Inbox}
+                      title={emptyMessage || emptyTitle}
+                      subtitle={!emptyMessage ? emptyDescription : undefined}
+                      action={emptyActionLabel && onEmptyAction ? {
+                        label: emptyActionLabel,
+                        onClick: onEmptyAction
+                      } : undefined}
+                    />
                 </td>
               </tr>
             ) : (
-              (virtualize ? rowVirtualizer.getVirtualItems() : sortedData).map(
+              (virtualize ? rowVirtualizer.getVirtualItems() : paginatedData).map(
                 (virtualRowOrRow, rowIndex) => {
-                  const row = virtualize ? sortedData[virtualRowOrRow.index] : virtualRowOrRow;
+                  const row = virtualize ? paginatedData[virtualRowOrRow.index] : virtualRowOrRow;
                   const rowKey =
                     row && row[keyField] !== undefined && row[keyField] !== null
                       ? row[keyField]
@@ -833,126 +865,125 @@ export default function DataTable({
       </div>
 
       {/* Pagination Footer (Google Cloud Style) */}
-      {(onPageChange || onNextPage || onPrevPage) && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            padding: '8px 24px',
-            borderTop: '1px solid var(--color-border)',
-            backgroundColor: 'var(--color-bg-app)',
-            gap: '24px',
-            minHeight: '48px',
-          }}
-        >
-          {/* Rows per page selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rows per page:</span>
-            {onRowsPerPageChange ? (
-              <select
-                value={rowsPerPage}
-                onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  fontSize: '12px',
-                  color: 'var(--color-text-primary)',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  outline: 'none',
-                }}
-              >
-                {[20, 50, 100, 250].map((val) => (
-                  <option key={`rpp-${val}`} value={val}>
-                    {val}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                style={{ fontSize: '12px', color: 'var(--color-text-primary)', fontWeight: 600 }}
-              >
-                {rowsPerPage || 20}
-              </span>
-            )}
-          </div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          padding: '8px 24px',
+          borderTop: '1px solid var(--color-border)',
+          backgroundColor: 'var(--color-bg-app)',
+          gap: '24px',
+          minHeight: '48px',
+        }}
+      >
+        {/* Rows per page selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rows per page:</span>
+          <select
+            value={activeRowsPerPage}
+            onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              fontSize: '12px',
+              color: 'var(--color-text-primary)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            {[25, 50, 100].map((val) => (
+              <option key={`rpp-${val}`} value={val}>
+                {val}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {/* Item count (e.g. 1-20 of 152) */}
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            {paginationText ||
-              (totalItems > 0
-                ? `${(currentPage - 1) * (rowsPerPage || 20) + 1}-${Math.min(currentPage * (rowsPerPage || 20), totalItems)} of ${totalItems}`
-                : '0-0 of 0')}
-          </span>
+        {/* Item count (e.g. 1-20 of 152) */}
+        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+          {paginationText || (() => {
+            const total = onPageChange ? totalItems : sortedData.length;
+            if (total === 0) return '0-0 of 0';
+            const start = (activePage - 1) * activeRowsPerPage + 1;
+            const end = Math.min(activePage * activeRowsPerPage, total);
+            return `${start}-${end} of ${total}`;
+          })()}
+        </span>
 
-          {/* Pagination controls */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={() => (onPrevPage ? onPrevPage() : onPageChange(currentPage - 1))}
-              disabled={hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                borderRadius: '4px',
-                border: 'none',
-                background: 'transparent',
-                color: (hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1)
-                  ? 'var(--color-border)'
-                  : 'var(--color-text-primary)',
-                cursor: (hasPrevPage !== undefined ? !hasPrevPage : currentPage <= 1)
-                  ? 'not-allowed'
-                  : 'pointer',
-              }}
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={() => (onNextPage ? onNextPage() : onPageChange(currentPage + 1))}
-              disabled={
+        {/* Pagination controls */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => (onPrevPage ? onPrevPage() : handlePageChange(activePage - 1))}
+            disabled={hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '4px',
+              border: 'none',
+              background: 'transparent',
+              color: (hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)
+                ? 'var(--color-border)'
+                : 'var(--color-text-primary)',
+              cursor: (hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)
+                ? 'not-allowed'
+                : 'pointer',
+            }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={() => (onNextPage ? onNextPage() : handlePageChange(activePage + 1))}
+            disabled={
+              hasNextPage !== undefined
+                ? !hasNextPage
+                : onPageChange && totalPages
+                  ? activePage >= totalPages
+                  : !onPageChange
+                    ? activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
+                    : true
+            }
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '4px',
+              border: 'none',
+              background: 'transparent',
+              color: (
                 hasNextPage !== undefined
                   ? !hasNextPage
-                  : totalPages
-                    ? currentPage >= totalPages
-                    : true
-              }
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '32px',
-                height: '32px',
-                borderRadius: '4px',
-                border: 'none',
-                background: 'transparent',
-                color: (
-                  hasNextPage !== undefined
-                    ? !hasNextPage
-                    : totalPages
-                      ? currentPage >= totalPages
+                  : onPageChange && totalPages
+                    ? activePage >= totalPages
+                    : !onPageChange
+                      ? activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
                       : true
-                )
-                  ? 'var(--color-border)'
-                  : 'var(--color-text-primary)',
-                cursor: (
-                  hasNextPage !== undefined
-                    ? !hasNextPage
-                    : totalPages
-                      ? currentPage >= totalPages
+              )
+                ? 'var(--color-border)'
+                : 'var(--color-text-primary)',
+              cursor: (
+                hasNextPage !== undefined
+                  ? !hasNextPage
+                  : onPageChange && totalPages
+                    ? activePage >= totalPages
+                    : !onPageChange
+                      ? activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
                       : true
-                )
-                  ? 'not-allowed'
-                  : 'pointer',
-              }}
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
+              )
+                ? 'not-allowed'
+                : 'pointer',
+            }}
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
-      )}
+      </div>
       {/* Floating Batch Actions */}
       {selectedIds.length > 0 && renderBatchActions && (
         <div

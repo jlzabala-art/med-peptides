@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { AlertTriangle, FileWarning, DollarSign, ImageOff, Building, ArrowRight, Search, Settings2 } from '@/lib/icons';
+import { AlertTriangle, FileWarning, DollarSign, ImageOff, Building, ArrowRight, CheckCircle } from '@/lib/icons';
+import DataTable from '../../../ui/DataTable';
+import EmptyState from '../../../ui/EmptyState';
+
 
 export default function MissingDataCenterView({ variants = [], onAction }) {
   const missingDataItems = useMemo(() => {
@@ -265,173 +268,73 @@ export default function MissingDataCenterView({ variants = [], onAction }) {
             </button>
           </div>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <th
-                  style={{
-                    padding: '16px 24px',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Variant / Item
-                </th>
-                <th
-                  style={{
-                    padding: '16px 24px',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Missing Data Tags
-                </th>
-                <th
-                  style={{
-                    padding: '16px 24px',
-                    fontWeight: 500,
-                    fontSize: '0.85rem',
-                    color: '#64748b',
-                    textTransform: 'uppercase',
-                    textAlign: 'right',
-                  }}
-                >
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {missingDataItems.map((item) => (
-                <tr
-                  key={item.id}
-                  style={{ borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }}
-                >
-                  <td style={{ padding: '16px 24px', fontWeight: 600, color: '#0f172a' }}>
-                    {item.name}
-                  </td>
-                  <td style={{ padding: '16px 24px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {item.missing.price && (
-                        <span
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            backgroundColor: '#fef3c7',
-                            color: '#b45309',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          <DollarSign size={12} /> Pricing
-                        </span>
-                      )}
-                      {item.missing.supplier && (
-                        <span
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            backgroundColor: '#f3e8ff',
-                            color: '#7e22ce',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          <Building size={12} /> Supplier
-                        </span>
-                      )}
-                      {item.missing.coa && (
-                        <span
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            backgroundColor: '#e0f2fe',
-                            color: '#0369a1',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          <FileWarning size={12} /> COA
-                        </span>
-                      )}
-                      {item.missing.image && (
-                        <span
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            backgroundColor: '#f1f5f9',
-                            color: '#475569',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          <ImageOff size={12} /> Image
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    <button
-                      onClick={() => handleFixNow(item)}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        backgroundColor: '#3b82f6',
-                        color: '#fff',
-                        border: 'none',
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        transition: 'background-color 0.2s',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#3b82f6')}
-                    >
-                      Fix Now <ArrowRight size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {missingDataItems.length === 0 && (
-                <tr>
-                  <td
-                    colSpan="3"
-                    style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}
+        {missingDataItems.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle}
+            title="All items are fully configured!"
+            subtitle="No missing data detected across your entire catalog."
+          />
+        ) : (
+          <DataTable
+            data={missingDataItems}
+            keyField="id"
+            globalSearch
+            searchPlaceholder="Search by product name..."
+            emptyTitle="No missing data found"
+            columns={[
+              {
+                key: 'name',
+                header: 'Variant / Item',
+                sortKey: 'name',
+                render: (item) => <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</span>
+              },
+              {
+                key: '_tags',
+                header: 'Missing Data Tags',
+                render: (item) => (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {item.missing.price && (
+                      <span style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#fef3c7', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <DollarSign size={12} /> Pricing
+                      </span>
+                    )}
+                    {item.missing.supplier && (
+                      <span style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#f3e8ff', color: '#7e22ce', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Building size={12} /> Supplier
+                      </span>
+                    )}
+                    {item.missing.coa && (
+                      <span style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e0f2fe', color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <FileWarning size={12} /> COA
+                      </span>
+                    )}
+                    {item.missing.image && (
+                      <span style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#f1f5f9', color: '#475569', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <ImageOff size={12} /> Image
+                      </span>
+                    )}
+                  </div>
+                )
+              },
+              {
+                key: '_action',
+                header: 'Action',
+                align: 'right',
+                render: (item) => (
+                  <button
+                    onClick={() => handleFixNow(item)}
+                    className="gcp-btn gcp-btn--primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '6px 12px' }}
                   >
-                    <CheckCircle
-                      size={48}
-                      color="#10b981"
-                      style={{ opacity: 0.5, margin: '0 auto 16px auto', display: 'block' }}
-                    />
-                    <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 500 }}>
-                      All items are fully configured!
-                    </p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    Fix Now <ArrowRight size={14} />
+                  </button>
+                )
+              }
+            ]}
+          />
+        )}
       </div>
     </div>
+
   );
 }

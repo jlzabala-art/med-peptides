@@ -2,14 +2,13 @@ import React from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
-
 import * as XLSX from 'xlsx';
 import { Download } from '@/lib/icons';
 import productRepository from '../../../repositories/productRepository';
+import DataTable from '../../ui/DataTable';
 
 export default function ImportCoATab() {
   const handleSave = async (data) => {
-    console.log("Saving CoA...", data);
     try {
       await productRepository.importCoAs(data);
       alert('Certificates saved successfully!');
@@ -28,6 +27,96 @@ export default function ImportCoATab() {
       XLSX.writeFile(workbook, "Quarantined_Batches.xlsx");
     };
 
+    const tableData = parsedData.map((item, idx) => {
+      const purity = parseFloat(item.purity_percentage);
+      const isQuarantined = purity < 98;
+      const status = isQuarantined ? 'ALERT' : 'UNCHANGED';
+      const colors = getStatusColor(status);
+      const score = item.confidence_score || 0;
+      let confColor = '#10b981';
+      if (score < 50) confColor = '#ef4444';
+      else if (score < 80) confColor = '#f59e0b';
+      return { ...item, _idx: idx, _isQuarantined: isQuarantined, _colors: colors, _score: score, _confColor: confColor };
+    });
+
+    const columns = [
+      {
+        key: '_select',
+        header: (
+          <Checkbox
+            checked={selectedRows.size === parsedData.length}
+            onChange={(e) => toggleAll(e.target.checked)}
+          />
+        ),
+        render: (r) => <Checkbox checked={selectedRows.has(r._idx)} onChange={() => toggleRow(r._idx)} />
+      },
+      {
+        key: '_score',
+        header: 'AI Confidence',
+        sortValue: (r) => r._score,
+        render: (r) => <span style={{ fontWeight: 700, color: r._confColor }}>{r._score}%</span>
+      },
+      {
+        key: '_status',
+        header: 'Status',
+        render: (r) => (
+          <span style={{
+            backgroundColor: r._colors.bg, color: r._colors.text, border: `1px solid ${r._colors.border}`,
+            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700
+          }}>
+            {r._colors.label}
+          </span>
+        )
+      },
+      {
+        key: 'batch_number',
+        header: 'Batch Number',
+        render: (r) => (
+          <input
+            type="text"
+            value={r.batch_number || ''}
+            onChange={(e) => updateRow(r._idx, 'batch_number', e.target.value)}
+            style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', fontWeight: 'bold' }}
+          />
+        )
+      },
+      {
+        key: 'peptide_name',
+        header: 'Product Tested',
+        render: (r) => (
+          <input
+            type="text"
+            value={r.peptide_name || ''}
+            onChange={(e) => updateRow(r._idx, 'peptide_name', e.target.value)}
+            style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px' }}
+          />
+        )
+      },
+      {
+        key: 'purity_percentage',
+        header: 'Purity %',
+        align: 'right',
+        render: (r) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <input
+              type="number"
+              step="0.1"
+              value={r.purity_percentage || ''}
+              onChange={(e) => updateRow(r._idx, 'purity_percentage', parseFloat(e.target.value))}
+              style={{ width: '60px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', fontWeight: 'bold', color: r._isQuarantined ? '#ef4444' : '#10b981' }}
+            />%
+          </div>
+        )
+      },
+      {
+        key: '_action',
+        header: 'Action Required',
+        render: (r) => r._isQuarantined
+          ? <span style={{ color: '#ef4444', fontWeight: 600 }}>⚠️ Manager Override Required</span>
+          : <span style={{ color: '#10b981' }}>Clear for Inventory</span>
+      }
+    ];
+
     return (
       <div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
@@ -35,98 +124,23 @@ export default function ImportCoATab() {
             <Download size={14} /> Export Quarantined to Excel
           </button>
         </div>
-        <div className="gcp-table-container">
-        <table className="gcp-table" style={{ width: '100%', fontSize: '0.9rem' }}>
-          <thead>
-            <tr>
-              <th style={{ width: '40px', textAlign: 'center' }}>
-                <Checkbox checked={selectedRows.size === parsedData.length} onChange={(e) => toggleAll(e.target.checked)} />
-              </th>
-              <th>AI Confidence</th>
-              <th>Status</th>
-              <th>Batch Number</th>
-              <th>Product Tested</th>
-              <th>Purity %</th>
-              <th>Action Required</th>
-            </tr>
-          </thead>
-          <tbody>
-            {parsedData.map((item, idx) => {
-              const purity = parseFloat(item.purity_percentage);
-              const isQuarantined = purity < 98;
-              const status = isQuarantined ? 'ALERT' : 'UNCHANGED';
-              const colors = getStatusColor(status);
-              const score = item.confidence_score || 0;
-              let confColor = '#10b981'; // Green
-              if (score < 50) confColor = '#ef4444'; // Red
-              else if (score < 80) confColor = '#f59e0b'; // Yellow
-
-              const isChecked = selectedRows.has(idx);
-
-              return (
-                <tr key={idx} style={{ backgroundColor: score < 50 && isChecked ? '#fef2f2' : (isQuarantined ? '#fef2f2' : 'transparent'), opacity: isChecked ? 1 : 0.5 }}>
-                  <td style={{ textAlign: 'center' }}>
-                    <Checkbox checked={isChecked} onChange={() => toggleRow(idx)} />
-                  </td>
-                  <td data-label="AI Confidence" style={{ fontWeight: 700, color: confColor }}>
-                    {score}%
-                  </td>
-                  <td data-label="Status">
-                    <span style={{ 
-                      backgroundColor: colors.bg, color: colors.text, border: `1px solid ${colors.border}`,
-                      padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700
-                    }}>
-                      {colors.label}
-                    </span>
-                  </td>
-                  <td data-label="Batch Number">
-                    <input 
-                      type="text" 
-                      value={item.batch_number || ''} 
-                      onChange={(e) => updateRow(idx, 'batch_number', e.target.value)}
-                      style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', fontWeight: 'bold' }} 
-                    />
-                  </td>
-                  <td data-label="Product Tested">
-                    <input 
-                      type="text" 
-                      value={item.peptide_name || ''} 
-                      onChange={(e) => updateRow(idx, 'peptide_name', e.target.value)}
-                      style={{ width: '100%', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px' }} 
-                    />
-                  </td>
-                  <td data-label="Purity %">
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        value={item.purity_percentage || ''} 
-                        onChange={(e) => updateRow(idx, 'purity_percentage', parseFloat(e.target.value))}
-                        style={{ width: '60px', padding: '0.25rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'right', fontWeight: 'bold', color: isQuarantined ? '#ef4444' : '#10b981' }} 
-                      />%
-                    </div>
-                  </td>
-                  <td data-label="Action Required">
-                    {isQuarantined ? (
-                      <span style={{ color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        ⚠️ Requires Manager Override
-                      </span>
-                    ) : (
-                      <span style={{ color: '#10b981' }}>Clear for Inventory</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        </div>
+        <DataTable
+          data={tableData}
+          columns={columns}
+          keyField="_idx"
+          emptyTitle="No CoA data"
+          emptyDescription="Upload a Certificate of Analysis file to see parsed items."
+          rowStyle={(r) => ({
+            backgroundColor: r._score < 50 && selectedRows.has(r._idx) ? '#fef2f2' : (r._isQuarantined ? '#fef2f2' : 'transparent'),
+            opacity: selectedRows.has(r._idx) ? 1 : 0.5
+          })}
+        />
       </div>
     );
   };
 
   return (
-    <BaseImportTab 
+    <BaseImportTab
       title="Import Certificates (Auto-Quarantine)"
       description="Upload Certificates of Analysis (PDF/Images). The AI will extract purity levels and automatically flag batches under 98% purity for managerial review."
       context="COA"

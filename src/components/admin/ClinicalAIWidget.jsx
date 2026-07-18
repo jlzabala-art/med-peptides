@@ -10,6 +10,7 @@ import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Clock from "lucide-react/dist/esm/icons/clock";
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect, useMemo } from 'react';
+import DataTable from '../ui/DataTable';
 
 
 
@@ -323,79 +324,87 @@ function ActivityFeed({ logs, compProducts, compSupplements, compProtocols }) {
 
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table className="gcp-table">
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Agent</th>
-            <th>User Query</th>
-            <th>Matched Data</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {recent.map((log) => {
-            const lang = (log.language || '').toUpperCase() || '?';
-            const agent = log.agentId || 'Clinical AI';
-            const matchedItems = getLogMatches(log, compProducts, compSupplements, compProtocols);
-
-            return (
-              <tr key={log.id}>
-                <td style={{ whiteSpace: 'nowrap' }}>{formatRelative(log.timestamp)}</td>
-                <td style={{ whiteSpace: 'nowrap', fontWeight: 600 }}>{agent}</td>
-                <td
-                  style={{
-                    maxWidth: '300px',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {log.userQuery || <em style={{ color: 'var(--text-muted)' }}>No query text</em>}
-                </td>
-                <td>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                    {matchedItems.slice(0, 3).map((item, idx) => (
-                      <span
-                        key={`${item.name}-${idx}`}
-                        style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 600,
-                          padding: '0.1rem 0.45rem',
-                          borderRadius: 'var(--radius-sm)',
-                          background: item.bg,
-                          color: item.color,
-                        }}
-                      >
-                        {item.name}
-                      </span>
-                    ))}
-                    {matchedItems.length > 3 && (
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                        +{matchedItems.length - 3}
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <button
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--primary)',
-                      cursor: 'pointer',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <DataTable
+        data={recent.map((log, idx) => ({ ...log, _idx: idx }))}
+        keyField="_idx"
+        columns={[
+          {
+            key: 'timestamp',
+            header: 'Timestamp',
+            render: (r) => <div style={{ whiteSpace: 'nowrap' }}>{formatRelative(r.timestamp)}</div>
+          },
+          {
+            key: 'agent',
+            header: 'Agent',
+            render: (r) => <div style={{ whiteSpace: 'nowrap', fontWeight: 600 }}>{r.agentId || 'Clinical AI'}</div>
+          },
+          {
+            key: 'query',
+            header: 'User Query',
+            render: (r) => (
+              <div
+                style={{
+                  maxWidth: '300px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {r.userQuery || <em style={{ color: 'var(--text-muted)' }}>No query text</em>}
+              </div>
+            )
+          },
+          {
+            key: 'matchedData',
+            header: 'Matched Data',
+            render: (r) => {
+              const matchedItems = getLogMatches(r, compProducts, compSupplements, compProtocols);
+              return (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  {matchedItems.slice(0, 3).map((item, idx) => (
+                    <span
+                      key={`${item.name}-${idx}`}
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 600,
+                        padding: '0.1rem 0.45rem',
+                        borderRadius: 'var(--radius-sm)',
+                        background: item.bg,
+                        color: item.color,
+                      }}
+                    >
+                      {item.name}
+                    </span>
+                  ))}
+                  {matchedItems.length > 3 && (
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                      +{matchedItems.length - 3}
+                    </span>
+                  )}
+                </div>
+              );
+            }
+          },
+          {
+            key: 'action',
+            header: 'Action',
+            render: (r) => (
+              <button
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                }}
+              >
+                View
+              </button>
+            )
+          }
+        ]}
+      />
     </div>
   );
 }

@@ -25,6 +25,7 @@ import { useAlgoliaSearch } from '../../../hooks/data/useAlgoliaSearch';
 import { useProducts } from '../../../hooks/admin/useProducts';
 import ProtocolHubDashboard from '../../../components/admin/protocols/ProtocolHubDashboard';
 import SmartProductPicker from '../../../components/shared/SmartProductPicker';
+import DataTable from '../../../components/ui/DataTable';
 import DataTableSkeleton from '../../../components/ui/skeletons/DataTableSkeleton';
 import ProtocolFiltersBar from '../../../components/admin/protocols/ProtocolFiltersBar';
 import AdminPageHeader from '../../../components/admin/AdminPageHeader';
@@ -54,7 +55,7 @@ function getStatusMeta(status) {
   return STATUS_META[status] || STATUS_META.draft;
 }
 
-export default function ProtocolsTable({ role = 'admin', initialProtocols = [] }) {
+export default function ProtocolsTable({ role = 'admin', initialProtocols = [], globalMetrics = null, isSubTab = false }) {
   const { toast } = useToast();
   const router = useRouter();
   const [protocols, setProtocols] = useState(initialProtocols);
@@ -341,96 +342,140 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [] }
   if (loading)
     return <DataTableSkeleton rows={10} columns={5} />;
 
-  if (error)
-    return (
-      <div
-        style={{
-          padding: '2rem',
-          backgroundColor: 'rgba(239,68,68,0.05)',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid rgba(239,68,68,0.2)',
-          color: 'var(--error)',
-          display: 'flex',
-          gap: '0.75rem',
-          alignItems: 'center',
-        }}
-      >
-        <AlertTriangle size={20} />
-        <span style={{ fontWeight: 600 }}>{error}</span>
-        <button
-          onClick={fetchProtocols}
-          style={{
-            marginLeft: 'auto',
-            border: '1px solid var(--error)',
-            background: 'transparent',
-            color: 'var(--error)',
-            cursor: 'pointer',
-            fontWeight: 700,
-            padding: '0.5rem 1rem',
-            borderRadius: 'var(--radius-md, 8px)',
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
+  // Define DataTable columns
+  const columns = [
+    {
+      key: 'protocol_name',
+      label: 'Protocol Name',
+      sortable: true,
+      render: (p) => {
+        const e = getEdit(p);
+        const isDirty = !!edits[p.id];
+        if (isDirty) {
+          return (
+            <input
+              value={e.protocol_name}
+              onChange={(ev) => setEditField(p.id, 'protocol_name', ev.target.value)}
+              style={{ padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: '4px', fontSize: '0.85rem', width: '100%', minWidth: '180px' }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          );
+        }
+        return (
+          <div style={{ fontWeight: 600, color: '#202124' }}>
+            {e.protocol_name || 'Unnamed Protocol'}
+            <div style={{ fontSize: '0.7rem', color: '#5f6368', marginTop: '2px', fontWeight: 400 }}>
+              v{p.version_number ?? 1} • {formatDate(p.created_at)}
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'therapeutic_category',
+      label: 'Category',
+      sortable: true,
+      render: (p) => {
+        const e = getEdit(p);
+        const isDirty = !!edits[p.id];
+        if (isDirty) {
+          return (
+            <input
+              value={e.therapeutic_category}
+              onChange={(ev) => setEditField(p.id, 'therapeutic_category', ev.target.value)}
+              style={{ padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: '4px', fontSize: '0.85rem', width: '100%' }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          );
+        }
+        return e.therapeutic_category || '—';
+      }
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      render: (p) => {
+        const e = getEdit(p);
+        const meta = getStatusMeta(e.status);
+        return (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.6rem', borderRadius: '20px', background: meta.bg, color: meta.color, fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+            {meta.emoji} {meta.label}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'phases',
+      label: 'Phases',
+      render: (p) => {
+        const e = getEdit(p);
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, color: '#334155' }}>
+            <FlaskConical size={14} /> {(e.phases ?? []).length}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      align: 'right',
+      render: (p) => {
+        const e = getEdit(p);
+        return (
+          <div style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}>
+            <button onClick={(ev) => { ev.stopPropagation(); router.push(`/admin/protocols/${p.id}/edit`); }} className="admin-tooltip-target" data-tooltip="Edit Protocol" style={{ background: 'transparent', border: 'none', color: '#1a73e8', cursor: 'pointer', padding: '4px' }}><Edit3 size={16} /></button>
+            <button onClick={(ev) => { ev.stopPropagation(); router.push(`/prescriptions/new?source=Protocol&protocol=${p.id}`); }} className="admin-tooltip-target" data-tooltip="Generate Prescription" style={{ background: 'transparent', border: 'none', color: '#8b5cf6', cursor: 'pointer', padding: '4px' }}><ClipboardList size={16} /></button>
+            <button onClick={(ev) => { ev.stopPropagation(); setEditField(p.id, 'status', e.status === 'active' ? 'draft' : 'active'); handleSave(p.id); }} className="admin-tooltip-target" data-tooltip={e.status === 'active' ? 'Deactivate' : 'Activate'} style={{ background: 'transparent', border: 'none', color: e.status === 'active' ? '#b06000' : '#137333', cursor: 'pointer', padding: '4px' }}>{e.status === 'active' ? <Pause size={16} /> : <Play size={16} />}</button>
+            <button onClick={(ev) => { ev.stopPropagation(); setEditField(p.id, 'status', 'archived'); handleSave(p.id); }} className="admin-tooltip-target" data-tooltip="Archive" style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '4px' }}><Archive size={16} /></button>
+            <button onClick={(ev) => { ev.stopPropagation(); handleDelete(p.id); }} className="admin-tooltip-target" data-tooltip="Delete" disabled={!!deleting} style={{ background: 'transparent', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '4px', opacity: deleting === p.id ? 0.5 : 1 }}><Trash2 size={16} /></button>
+          </div>
+        );
+      }
+    }
+  ];
 
-  if (drawerProtocol) {
-    return (
-      <div style={{ height: '100%', overflow: 'hidden' }}>
-        <ProtocolHubDashboard
-          protocol={drawerProtocol}
-          onClose={() => setDrawerProtocol(null)}
-          onSave={async (updates) => {
-            try {
-              await updateProtocolFull(drawerProtocol.id, updates);
-              toast.success('Protocol updated successfully');
-              setDrawerProtocol(null);
-              fetchProtocols();
-            } catch (err) {
-              toast.error('Failed to update protocol: ' + err.message);
-            }
-          }}
-        />
-      </div>
-    );
-  }
+  if (error)
+  // Render detail in Master-Detail instead of full screen drawer
 
   return (
     <div style={{ paddingBottom: '2rem', minHeight: '100%' }}>
       
 
       {/* Header */}
-      <AdminPageHeader
-        title="Protocols & Pathways"
-        subtitle="Manage clinical pathways, kits, and treatment templates"
-        icon={ClipboardList}
-        rightContent={
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={fetchProtocols}
-              className="btn btn-outline"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
-            >
-              <RefreshCw size={16} /> Refresh
-            </button>
-            <button
-              onClick={() => setShowPathwayWizard(true)}
-              className="btn btn-secondary"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
-            >
-              <Plus size={16} /> Create Pathway
-            </button>
-            <button
-              onClick={() => router.push('/admin/protocols/new/edit')}
-              className="btn btn-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
-            >
-              <Package size={16} /> Build Custom Kit
-            </button>
-          </div>
-        }
-      />
+      {!isSubTab && (
+        <AdminPageHeader
+          title="Protocols & Pathways"
+          subtitle="Manage clinical pathways, kits, and treatment templates"
+          icon={ClipboardList}
+          rightContent={
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={fetchProtocols}
+                className="btn btn-outline"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+              >
+                <RefreshCw size={16} /> Refresh
+              </button>
+              <button
+                onClick={() => setShowPathwayWizard(true)}
+                className="btn btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+              >
+                <Plus size={16} /> Create Pathway
+              </button>
+              <button
+                onClick={() => router.push('/admin/protocols/new/edit')}
+                className="btn btn-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+              >
+                <Package size={16} /> Build Custom Kit
+              </button>
+            </div>
+          }
+        />
+      )}
 
 
       {/* Unified GlobalSearchBar */}
@@ -446,7 +491,7 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [] }
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
-        <UniformKPIs data={protocols} />
+        <UniformKPIs data={protocols} globalMetrics={globalMetrics} />
       </div>
 
       {/* Bulk Category Picker modal */}
@@ -498,264 +543,32 @@ export default function ProtocolsTable({ role = 'admin', initialProtocols = [] }
       )}
 
         {/* Protocol Table */}
-        <div className="responsive-table-container">
-          <table className="flexible-table">
-            <thead>
-              <tr>
-                {/* Bulk checkbox */}
-                <th style={{ width: '40px', textAlign: 'center' }}>
-                  <input
-                    type="checkbox"
-                    checked={isAllCurrentPageSelected}
-                    ref={(el) => {
-                      if (el) el.indeterminate = isIndeterminate;
-                    }}
-                    onChange={toggleSelectAllCurrentPage}
-                    aria-label="Select all visible protocols"
-                  />
-                </th>
-                <th>Protocol Name</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Phases</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedProtocols.map((p, i) => {
-                const e = getEdit(p);
-                const isDirty = !!edits[p.id];
-                const isSaving = !!saving[p.id];
-                const isSaved = !!saved[p.id];
-                const isLast = i === paginatedProtocols.length - 1;
-                const rowSelected = isSelected(p.id);
-
-                const toggleActive = () => {
-                  const newStatus = e.status === 'active' ? 'draft' : 'active';
-                  setEditField(p.id, 'status', newStatus);
-                  handleSave(p.id);
-                };
-
-                const archiveProtocol = () => {
-                  setEditField(p.id, 'status', 'archived');
-                  handleSave(p.id);
-                };
-
-                const meta = getStatusMeta(e.status);
-
-                return (
-                  <tr
-                    key={p.id}
-                    className="flexible-row"
-                    style={{
-                      background: rowSelected ? 'rgba(99,102,241,0.06)' : undefined,
-                      transition: 'background 0.15s',
-                    }}
-                  >
-                    {/* Bulk checkbox */}
-                    <td style={{ width: '40px', textAlign: 'center' }}>
-                      <input
-                        type="checkbox"
-                        checked={rowSelected}
-                        onChange={() => toggleRowSelection(p.id)}
-                        aria-label={`Select protocol ${e.protocol_name}`}
-                      />
-                    </td>
-                    {/* Name — click opens Drawer */}
-                    <td
-                      data-label="Protocol Name"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setDrawerProtocol(p)}
-                    >
-                      {isDirty ? (
-                        <input
-                          value={e.protocol_name}
-                          onChange={(ev) => setEditField(p.id, 'protocol_name', ev.target.value)}
-                          style={{
-                            padding: '4px 8px',
-                            border: '1px solid #1a73e8',
-                            borderRadius: '4px',
-                            fontSize: '0.85rem',
-                            width: '100%',
-                            minWidth: '180px',
-                          }}
-                        />
-                      ) : (
-                        <div style={{ fontWeight: 600, color: '#202124' }}>
-                          {e.protocol_name || 'Unnamed Protocol'}
-                          <div
-                            style={{
-                              fontSize: '0.7rem',
-                              color: '#5f6368',
-                              marginTop: '2px',
-                              fontWeight: 400,
-                            }}
-                          >
-                            v{p.version_number ?? 1} • {formatDate(p.created_at)}
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                    <td data-label="Category">
-                      {isDirty ? (
-                        <input
-                          value={e.therapeutic_category}
-                          onChange={(ev) =>
-                            setEditField(p.id, 'therapeutic_category', ev.target.value)
-                          }
-                          style={{
-                            padding: '4px 8px',
-                            border: '1px solid #1a73e8',
-                            borderRadius: '4px',
-                            fontSize: '0.85rem',
-                            width: '100%',
-                          }}
-                        />
-                      ) : (
-                        e.therapeutic_category || '—'
-                      )}
-                    </td>
-                    <td data-label="Status">
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.3rem',
-                          padding: '0.25rem 0.6rem',
-                          borderRadius: '20px',
-                          background: meta.bg,
-                          color: meta.color,
-                          border: `1px solid ${meta.border}`,
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {meta.emoji} {meta.label}
-                      </span>
-                    </td>
-                    <td data-label="Phases">
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontWeight: 600,
-                          color: '#334155',
-                        }}
-                      >
-                        <FlaskConical size={14} /> {(e.phases ?? []).length}
-                      </div>
-                    </td>
-                    <td data-label="Actions" style={{ textAlign: 'right' }}>
-                      <div
-                        style={{
-                          display: 'inline-flex',
-                          gap: '0.5rem',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          width: '100%',
-                        }}
-                      >
-                        <button
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            router.push(`/admin/protocols/${p.id}/edit`);
-                          }}
-                          className="admin-tooltip-target"
-                          data-tooltip="Edit Protocol"
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#1a73e8',
-                            cursor: 'pointer',
-                            padding: '4px',
-                          }}
-                        >
-                          <Edit3 size={16} />
-                        </button>
-
-                        <button
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            router.push(`/prescriptions/new?source=Protocol&protocol=${p.id}`);
-                          }}
-                          className="admin-tooltip-target"
-                          data-tooltip="Generate Prescription"
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#8b5cf6',
-                            cursor: 'pointer',
-                            padding: '4px',
-                          }}
-                        >
-                          <ClipboardList size={16} />
-                        </button>
-
-                        <button
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            toggleActive();
-                          }}
-                          className="admin-tooltip-target"
-                          data-tooltip={e.status === 'active' ? 'Deactivate' : 'Activate'}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: e.status === 'active' ? '#b06000' : '#137333',
-                            cursor: 'pointer',
-                            padding: '4px',
-                          }}
-                        >
-                          {e.status === 'active' ? <Pause size={16} /> : <Play size={16} />}
-                        </button>
-
-                        <button
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            archiveProtocol();
-                          }}
-                          className="admin-tooltip-target"
-                          data-tooltip="Archive"
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#6b7280',
-                            cursor: 'pointer',
-                            padding: '4px',
-                          }}
-                        >
-                          <Archive size={16} />
-                        </button>
-
-                        <button
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            handleDelete(p.id);
-                          }}
-                          className="admin-tooltip-target"
-                          data-tooltip="Delete"
-                          disabled={!!deleting}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#dc2626',
-                            cursor: 'pointer',
-                            padding: '4px',
-                            opacity: deleting === p.id ? 0.5 : 1,
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={columns}
+          data={paginatedProtocols}
+          keyField="id"
+          selectedIds={selectedIds}
+          onSelectionChange={(ids) => {
+            // handle selection if needed
+          }}
+          expandableRender={(row) => (
+            <div style={{ padding: '1rem', background: '#f8fafc', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+              <ProtocolHubDashboard
+                protocol={row}
+                onClose={() => {}}
+                onSave={async (updates) => {
+                  try {
+                    await updateProtocolFull(row.id, updates);
+                    toast.success('Protocol updated successfully');
+                    fetchProtocols();
+                  } catch (err) {
+                    toast.error('Failed to update protocol: ' + err.message);
+                  }
+                }}
+              />
+            </div>
+          )}
+        />
 
         {/* Pagination Load More */}
         {hasMore && (

@@ -6,19 +6,19 @@ import Truck from "lucide-react/dist/esm/icons/truck";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Package from "lucide-react/dist/esm/icons/package";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, doc, updateDoc, limit, startAfter, getCountFromServer, orderBy, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card, CardContent } from '../ui/Card';
-
-
-
-
-
+import MetricCard from '../ui/MetricCard';
 
 import DataTable from '../ui/DataTable';
 import KittingRiskAnalysis from './KittingRiskAnalysis';
 import notifier from '../../services/NotificationService';
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
 
 export default function AdminLogisticsTab() {
   const [activeTab, setActiveTab] = useState('supplier_shipments'); // 'supplier_shipments' or 'agency_rfqs'
@@ -27,7 +27,8 @@ export default function AdminLogisticsTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageCursors, setPageCursors] = useState({});
-  const PAGE_SIZE = 20;
+  const [searchTerm, setSearchTerm] = useState('');
+  const PAGE_SIZE = 50;
 
   const [editingItem, setEditingItem] = useState(null);
   // Real-time KPIs
@@ -97,90 +98,99 @@ export default function AdminLogisticsTab() {
     }
   };
 
-  const getStatusStyle = (status) => {
-    const s = status?.toUpperCase();
-    if (['DELIVERED', 'COMPLETED'].includes(s)) {
-      return { background: 'var(--color-success-bg, #dcfce7)', color: 'var(--color-success, #166534)' };
-    }
-    if (['SHIPPED', 'IN_TRANSIT'].includes(s)) {
-      return { background: 'var(--color-info-bg, #dbeafe)', color: 'var(--color-info, #1e40af)' };
-    }
-    return { background: 'var(--color-warning-bg, #ffedd5)', color: 'var(--color-warning, #9a3412)' };
-  };
-
-  const columns = [
-    { key: 'id', label: 'ID', render: (val) => val.slice(0, 8).toUpperCase() },
+  const columns = useMemo(() => [
+    { 
+      key: 'id', 
+      header: 'ID', 
+      render: (val) => <CopyableId value={val} /> 
+    },
     { 
       key: activeTab === 'agency_rfqs' ? 'clientName' : 'supplierId', 
-      label: activeTab === 'agency_rfqs' ? 'Client' : 'Supplier',
-      render: (val, item) => val || item.supplierName || 'Unknown'
+      header: activeTab === 'agency_rfqs' ? 'Client' : 'Supplier',
+      render: (val, item) => <span style={{ fontWeight: 600 }}>{val || item.supplierName || 'Unknown'}</span>
     },
-    { key: 'status', label: 'Status', render: (val) => {
-      const style = getStatusStyle(val);
-      return (
-        <span style={{ ...style, padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>
-          {val?.replace('_', ' ') || 'PENDING'}
-        </span>
-      );
-    }},
+    { 
+      key: 'status', 
+      header: 'Status', 
+      render: (val) => <StatusBadge status={val} />
+    },
     ...(activeTab === 'supplier_shipments' ? [
-      { key: 'trackingNumber', label: 'Tracking' },
-      { key: 'carrier', label: 'Carrier' }
+      { key: 'trackingNumber', header: 'Tracking' },
+      { key: 'carrier', header: 'Carrier' }
     ] : []),
-    { key: 'createdAt', label: 'Created', render: (val) => val ? new Date(val.seconds ? val.seconds * 1000 : val).toLocaleDateString() : 'N/A' },
-    { key: 'actions', label: 'Actions', render: (_, item) => (
+    { 
+      key: 'createdAt', 
+      header: 'Created', 
+      render: (val) => val ? new Date(val.seconds ? val.seconds * 1000 : val).toLocaleDateString() : 'N/A' 
+    },
+    { 
+      key: 'actions', 
+      header: 'Actions', 
+      render: (_, item) => (
       <button 
         onClick={() => setEditingItem(item)}
-        style={{ color: 'var(--color-primary, #4f46e5)', fontWeight: '500', fontSize: '0.875rem', background: 'none', border: 'none', cursor: 'pointer' }}
+        style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
       >
         Manage
       </button>
     )}
+  ], [activeTab]);
+
+  const activeFilters = [];
+  activeFilters.push({
+    key: 'type',
+    label: 'Logistics Type',
+    value: activeTab === 'supplier_shipments' ? 'Supplier Shipments' : 'Agency RFQs',
+    onRemove: () => setActiveTab('supplier_shipments')
+  });
+
+  const filterOptions = [
+    {
+      key: 'type',
+      label: 'Logistics Type',
+      options: [
+        { label: 'Supplier Shipments', value: 'supplier_shipments' },
+        { label: 'Agency RFQs', value: 'agency_rfqs' }
+      ],
+      value: activeTab,
+      onChange: setActiveTab
+    }
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary, #111827)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-            <Truck style={{ color: 'var(--color-primary, #4f46e5)' }} />
-            Admin Logistics & Shipping
-          </h1>
-          <p style={{ color: 'var(--color-text-secondary, #6b7280)', margin: '0.25rem 0 0' }}>Global control center for tracking and managing operations.</p>
-        </div>
-      </div>
+    <div style={{ padding: '0 2rem 2rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <PageHeader
+        title="Logistics & Shipping"
+        subtitle="Global control center for tracking and managing operations."
+        icon={Truck}
+      />
 
-      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--color-border, #e5e7eb)' }}>
-        <button
-          style={{ padding: '0.5rem 1rem', fontWeight: 'bold', borderBottom: activeTab === 'supplier_shipments' ? '2px solid var(--color-primary, #4f46e5)' : '2px solid transparent', color: activeTab === 'supplier_shipments' ? 'var(--color-primary, #4f46e5)' : 'var(--color-text-secondary, #6b7280)', background: 'none', cursor: 'pointer', transition: 'colors 0.2s' }}
-          onClick={() => setActiveTab('supplier_shipments')}
-        >
-          Supplier Shipments
-        </button>
-        <button
-          style={{ padding: '0.5rem 1rem', fontWeight: 'bold', borderBottom: activeTab === 'agency_rfqs' ? '2px solid var(--color-primary, #4f46e5)' : '2px solid transparent', color: activeTab === 'agency_rfqs' ? 'var(--color-primary, #4f46e5)' : 'var(--color-text-secondary, #6b7280)', background: 'none', cursor: 'pointer', transition: 'colors 0.2s' }}
-          onClick={() => setActiveTab('agency_rfqs')}
-        >
-          Agency RFQs
-        </button>
+      <div style={{ marginBottom: '0.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search shipments, clients, tracking..."
+          resultCount={loading ? undefined : dataList.length}
+          namespace="admin-logistics"
+          size="lg"
+          filters={activeFilters}
+          filterOptions={filterOptions}
+        />
       </div>
 
       <KittingRiskAnalysis />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <Card style={{ borderLeft: '4px solid var(--color-primary, #4f46e5)', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
-          <CardContent style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary, #6b7280)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>Total Records</p>
-              <p style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--color-text-primary, #111827)', margin: 0 }}>{kpiStats.total}</p>
-            </div>
-            <Package style={{ width: '2rem', height: '2rem', color: 'var(--color-border, #e5e7eb)' }} />
-          </CardContent>
-        </Card>
+      <div className="kpi-scroll-row" style={{ paddingBottom: '0.5rem' }}>
+        <MetricCard
+          title="Total Records"
+          value={kpiStats.total}
+          icon={Package}
+          accentColor="var(--color-primary, #4f46e5)"
+        />
       </div>
 
-      <Card style={{ boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border, #f3f4f6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="gcp-table-container">
+        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface)' }}>
           <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', margin: 0 }}>{activeTab === 'supplier_shipments' ? 'Supplier Logistics' : 'RFQ Logistics'}</h3>
           <button onClick={() => loadData(1)} style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--color-primary, #4f46e5)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'none' }}>
             Refresh Data
@@ -189,15 +199,45 @@ export default function AdminLogisticsTab() {
         <DataTable
           columns={columns}
           data={dataList}
-          loading={loading}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(page) => {
-            setCurrentPage(page);
-            loadData(page);
-          }}
+          keyField="id"
+          globalSearch={true}
+          searchQuery={searchTerm}
+          emptyMessage="No logistics records found matching your criteria."
         />
-      </Card>
+        
+        {/* Pagination Controls */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', backgroundColor: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
+          <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => {
+                const prevPage = currentPage - 1;
+                setCurrentPage(prevPage);
+                loadData(prevPage);
+              }}
+              disabled={currentPage === 1 || loading}
+              className="gcp-btn gcp-btn--secondary"
+              style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => {
+                const nxtPage = currentPage + 1;
+                setCurrentPage(nxtPage);
+                loadData(nxtPage);
+              }}
+              disabled={currentPage === totalPages || loading}
+              className="gcp-btn gcp-btn--secondary"
+              style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Edit Modal */}
       {editingItem && (

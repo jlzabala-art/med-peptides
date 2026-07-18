@@ -3,17 +3,23 @@
 import React, { useEffect } from 'react';
 import PortalLayout from '../ui/PortalLayout';
 import { useAuth } from '../../context/AuthContext';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
 
 /**
- * UniversalAppLayout
+ * PanelShell
  * 
  * Centralized layout component that wraps the powerful PortalLayout (formerly Admin-only)
  * to bring a unified, GCP-style responsive experience to ALL roles (B2B and B2C).
  * 
- * It dynamically injects CSS variables for role-based theming.
+ * It dynamically injects CSS variables for role-based theming via classes.
  */
-export default function UniversalAppLayout({
+import '../../styles/themes/admin.css';
+import '../../styles/themes/doctor.css';
+import '../../styles/themes/patient.css';
+import '../../styles/themes/wholeseller.css';
+
+export default function PanelShell({
   children,
   sidebarNavGroups = [],
   sidebarPinnedItems = [],
@@ -22,10 +28,23 @@ export default function UniversalAppLayout({
   portalTitle,
   roleContext = 'patient',
   pageContext,
-  headerActions
+  headerActions,
+  allowedRoles = []
 }) {
-  const { user, activeRole } = useAuth();
+  const { user, activeRole, loading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Handle route protection
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.replace('/login');
+      } else if (allowedRoles.length > 0 && !allowedRoles.includes(activeRole)) {
+        router.replace('/');
+      }
+    }
+  }, [user, activeRole, loading, allowedRoles, router]);
 
   // Determine the effective role for theming (fallback to the passed roleContext)
   const themeRole = activeRole || roleContext;
@@ -42,35 +61,15 @@ export default function UniversalAppLayout({
     };
   }, [themeRole]);
 
+  if (loading || !user || (allowedRoles.length > 0 && !allowedRoles.includes(activeRole))) {
+    return <AtlasLoadingScreen />;
+  }
+
   return (
     <div className={`universal-layout-wrapper theme-${themeRole}`}>
       <style>{`
         /* 
-          Role-Based Theming System 
-          Overrides global CSS variables based on the active role.
-        */
-        
-        .theme-patient {
-          --color-primary: #10b981; /* Emerald green for wellness */
-          --color-bg-app: #f8fafc;
-          --color-sidebar-bg: #ffffff;
-        }
-
-        .theme-doctor, .theme-physician, .theme-medical_director {
-          --color-primary: #0ea5e9; /* Medical Blue */
-          --color-bg-app: #f0fdfa; /* Slight teal tint */
-        }
-
-        .theme-admin {
-          --color-primary: #003666; /* Deep Corporate Blue */
-        }
-
-        .theme-wholesaler, .theme-supplier {
-          --color-primary: #f97316; /* Orange for B2B/Logistics */
-        }
-
-        /* 
-          Ensure the UniversalAppLayout completely fills the viewport 
+          Ensure the PanelShell completely fills the viewport 
           so PortalLayout renders correctly within it.
         */
         .universal-layout-wrapper {

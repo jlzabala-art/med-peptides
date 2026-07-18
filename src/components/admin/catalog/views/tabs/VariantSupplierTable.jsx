@@ -2,39 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import AppActionGroup from '../../../../ui/AppActionGroup';
+import DataTable from '../../../../ui/DataTable';
 import { UserPlus, Send } from '@/lib/icons';
-
-const thStyle = {
-  padding: '12px',
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-  borderBottom: '1px solid var(--color-border)',
-  textAlign: 'left',
-  backgroundColor: '#f1f5f9',
-  cursor: 'pointer',
-  userSelect: 'none'
-};
-const tdStyleMain = {
-  padding: '12px',
-  fontWeight: 500,
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const tdStyle = {
-  padding: '12px',
-  color: 'var(--text-main)',
-  borderBottom: '1px solid var(--color-border)',
-};
-const trStyle = { backgroundColor: 'transparent', cursor: 'pointer' };
 
 export default function VariantSupplierTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
     setSortConfig({ key, direction });
   };
 
@@ -80,7 +55,6 @@ export default function VariantSupplierTable({ variants, parentProduct, onAction
   }, [processedVariants, sortConfig]);
 
   const allSelected = variants.length > 0 && variants.every(v => selectedIds.includes(v.id));
-  const someSelected = variants.some(v => selectedIds.includes(v.id)) && !allSelected;
 
   const handleSelectAll = (e) => {
     if (!onSelectionChange) return;
@@ -95,129 +69,115 @@ export default function VariantSupplierTable({ variants, parentProduct, onAction
 
   const handleSelectRow = (id, checked) => {
     if (!onSelectionChange) return;
-    if (checked) {
-      onSelectionChange([...selectedIds, id]);
-    } else {
-      onSelectionChange(selectedIds.filter(sid => sid !== id));
-    }
+    if (checked) onSelectionChange([...selectedIds, id]);
+    else onSelectionChange(selectedIds.filter(sid => sid !== id));
   };
+
+  const columns = [
+    ...(onSelectionChange ? [{
+      key: 'select',
+      header: <input type="checkbox" checked={allSelected} onChange={handleSelectAll} style={{ cursor: 'pointer' }} />,
+      render: (val, row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={(e) => handleSelectRow(row.id, e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
+        />
+      )
+    }] : []),
+    {
+      key: 'displaySku',
+      header: <span onClick={() => handleSort('displaySku')} style={{ cursor: 'pointer' }}>Variant SKU{getSortIcon('displaySku')}</span>,
+      render: (val, row) => (
+        <div>
+          <div style={{ fontWeight: 600 }}>{row.name || row.displaySku}</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{row.displaySku}</div>
+        </div>
+      )
+    },
+    {
+      key: 'primarySupplierName',
+      header: <span onClick={() => handleSort('primarySupplierName')} style={{ cursor: 'pointer' }}>Primary Supplier{getSortIcon('primarySupplierName')}</span>,
+      render: (val, row) => (
+        val ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <span style={{ fontWeight: 600, color: '#334155' }}>{val}</span>
+            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Health: {row.primarySupplier?.healthScore || 'N/A'}</span>
+          </div>
+        ) : (
+          <span style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>Not Assigned</span>
+        )
+      )
+    },
+    {
+      key: 'backupSupplierName',
+      header: <span onClick={() => handleSort('backupSupplierName')} style={{ cursor: 'pointer' }}>Backup Supplier{getSortIcon('backupSupplierName')}</span>,
+      render: (val) => (
+        val ? (
+          <span style={{ color: '#334155', fontSize: '0.85rem' }}>{val}</span>
+        ) : (
+          <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>None</span>
+        )
+      )
+    },
+    {
+      key: 'leadTimeDays',
+      header: <span onClick={() => handleSort('leadTimeDays')} style={{ cursor: 'pointer' }}>Lead Time{getSortIcon('leadTimeDays')}</span>,
+      render: (val) => <span style={{ fontSize: '0.85rem' }}>{val ? `${val} days` : '—'}</span>
+    },
+    {
+      key: 'moqUnits',
+      header: <span onClick={() => handleSort('moqUnits')} style={{ cursor: 'pointer' }}>MOQ{getSortIcon('moqUnits')}</span>,
+      render: (val) => <span style={{ fontSize: '0.85rem' }}>{val || '—'}</span>
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (val, row) => (
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAction('assignSupplier', row); }}
+            style={{ padding: '0.3rem 0.6rem', border: '1px solid #e2e8f0', borderRadius: '4px', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}
+          >
+            <UserPlus size={12} /> Assign
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onAction('createRfq', row); }}
+            style={{ padding: '0.3rem 0.6rem', border: '1px solid #bfdbfe', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}
+          >
+            <Send size={12} /> RFQ
+          </button>
+          <AppActionGroup
+            maxVisible={3}
+            actions={[
+              { type: 'view', onClick: () => onAction && onAction('view_variant', parentProduct, row) },
+              { type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'supplier') },
+              { type: 'delete', onClick: () => onAction && onAction('delete_variant', parentProduct, row) },
+            ]}
+          />
+        </div>
+      )
+    }
+  ];
 
   if (!variants || variants.length === 0) return null;
 
   return (
-    <div style={{ width: '100%', overflowX: 'auto', background: '#fff', borderRadius: '6px', border: '1px solid var(--border)' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
-        <thead style={{ background: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
-          <tr>
-            {onSelectionChange && (
-              <th style={{ ...thStyle, width: '48px', textAlign: 'center', cursor: 'default' }}>
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  ref={input => { if (input) input.indeterminate = someSelected; }}
-                  onChange={handleSelectAll}
-                  style={{ cursor: 'pointer' }}
-                />
-              </th>
-            )}
-            <th style={thStyle} onClick={() => handleSort('displaySku')}>Variant SKU{getSortIcon('displaySku')}</th>
-            <th style={thStyle} onClick={() => handleSort('primarySupplierName')}>Primary Supplier{getSortIcon('primarySupplierName')}</th>
-            <th style={thStyle} onClick={() => handleSort('backupSupplierName')}>Backup Supplier{getSortIcon('backupSupplierName')}</th>
-            <th style={thStyle} onClick={() => handleSort('leadTimeDays')}>Lead Time{getSortIcon('leadTimeDays')}</th>
-            <th style={thStyle} onClick={() => handleSort('moqUnits')}>MOQ{getSortIcon('moqUnits')}</th>
-            <th style={{ ...thStyle, textAlign: 'right', cursor: 'default' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedVariants.map((variant, i) => {
-            const isSelected = selectedIds?.includes(variant.id);
-            return (
-              <tr 
-                key={variant.id || i} 
-                style={{ 
-                  ...trStyle,
-                  borderBottom: '1px solid #f1f5f9', 
-                  background: isSelected ? '#eff6ff' : 'transparent',
-                  borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent'
-                }}
-                onClick={() => onAction && onAction('view_variant', parentProduct, variant)}
-              >
-                {onSelectionChange && (
-                  <td style={{ ...tdStyle, textAlign: 'center' }}>
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => handleSelectRow(variant.id, e.target.checked)}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </td>
-                )}
-                <td style={tdStyleMain}>
-                  <div style={{ fontWeight: 600 }}>{variant.name || variant.displaySku}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{variant.displaySku}</div>
-                </td>
-                <td style={tdStyle}>
-                  {variant.primarySupplierName ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <span style={{ fontWeight: 600, color: '#334155' }}>{variant.primarySupplierName}</span>
-                      <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Health: {variant.primarySupplier?.healthScore || 'N/A'}</span>
-                    </div>
-                  ) : (
-                    <span style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 600 }}>Not Assigned</span>
-                  )}
-                </td>
-                <td style={tdStyle}>
-                  {variant.backupSupplierName ? (
-                    <span style={{ color: '#334155', fontSize: '0.85rem' }}>{variant.backupSupplierName}</span>
-                  ) : (
-                    <span style={{ color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>None</span>
-                  )}
-                </td>
-                <td style={tdStyle}>
-                  <span style={{ fontSize: '0.85rem' }}>{variant.leadTimeDays ? `${variant.leadTimeDays} days` : '—'}</span>
-                </td>
-                <td style={tdStyle}>
-                  <span style={{ fontSize: '0.85rem' }}>{variant.moqUnits || '—'}</span>
-                </td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onAction('assignSupplier', variant); }}
-                      style={{ padding: '0.3rem 0.6rem', border: '1px solid #e2e8f0', borderRadius: '4px', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}
-                    >
-                      <UserPlus size={12} /> Assign
-                    </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onAction('createRfq', variant); }}
-                      style={{ padding: '0.3rem 0.6rem', border: '1px solid #bfdbfe', borderRadius: '4px', background: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}
-                    >
-                      <Send size={12} /> RFQ
-                    </button>
-                    <AppActionGroup
-                      maxVisible={3}
-                      actions={[
-                        {
-                          type: 'view',
-                          onClick: () => onAction && onAction('view_variant', parentProduct, variant),
-                        },
-                        {
-                          type: 'edit',
-                          onClick: () => onAction && onAction('edit_variant', parentProduct, variant, 'supplier'),
-                        },
-                        {
-                          type: 'delete',
-                          onClick: () => onAction && onAction('delete_variant', parentProduct, variant),
-                        },
-                      ]}
-                    />
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="gcp-table-container">
+      <DataTable
+        columns={columns}
+        data={sortedVariants}
+        keyField={(row, idx) => row.id || idx.toString()}
+        onRowClick={(row) => onAction && onAction('view_variant', parentProduct, row)}
+        rowStyle={(row) => ({
+          backgroundColor: selectedIds.includes(row.id) ? 'var(--color-bg-selected)' : 'transparent',
+          borderLeft: selectedIds.includes(row.id) ? '4px solid #3b82f6' : '4px solid transparent',
+          cursor: 'pointer',
+        })}
+        emptyMessage="No variants found."
+      />
     </div>
   );
 }

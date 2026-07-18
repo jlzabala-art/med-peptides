@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, DollarSign } from '@/lib/icons';
+import DataTable from '../ui/DataTable';
 
 export default function FinancialWholesalerModal({
   financialWholesaler,
@@ -323,89 +324,15 @@ export default function FinancialWholesalerModal({
                               No revenue recorded via associated physicians.
                             </div>
                           ) : (
-                            <table
-                              style={{
-                                width: '100%',
-                                borderCollapse: 'collapse',
-                                fontSize: '0.85rem',
-                              }}
-                            >
-                              <thead>
-                                <tr
-                                  style={{
-                                    borderBottom: '2px solid var(--border)',
-                                    textAlign: 'left',
-                                  }}
-                                >
-                                  <th
-                                    style={{
-                                      padding: '0.4rem 0.5rem',
-                                      color: 'var(--text-muted)',
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Physician / Clinic
-                                  </th>
-                                  <th
-                                    style={{
-                                      padding: '0.4rem 0.5rem',
-                                      color: 'var(--text-muted)',
-                                      fontWeight: 600,
-                                      textAlign: 'center',
-                                    }}
-                                  >
-                                    Orders
-                                  </th>
-                                  <th
-                                    style={{
-                                      padding: '0.4rem 0.5rem',
-                                      color: 'var(--text-muted)',
-                                      fontWeight: 600,
-                                      textAlign: 'right',
-                                    }}
-                                  >
-                                    Total
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {docList.map((doc, idx) => (
-                                  <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td
-                                      style={{
-                                        padding: '0.5rem',
-                                        fontWeight: 600,
-                                        color: 'var(--text-main)',
-                                      }}
-                                    >
-                                      {doc.name}
-                                    </td>
-                                    <td
-                                      style={{
-                                        padding: '0.5rem',
-                                        textAlign: 'center',
-                                        color: 'var(--text-muted)',
-                                      }}
-                                    >
-                                      {doc.orderCount}
-                                    </td>
-                                    <td
-                                      style={{
-                                        padding: '0.5rem',
-                                        textAlign: 'right',
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      $
-                                      {doc.total.toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      })}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            <DataTable
+                              data={docList.map((d, i) => ({ ...d, _idx: i }))}
+                              keyField="_idx"
+                              columns={[
+                                { key: 'name', header: 'Physician / Clinic', render: (r) => <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{r.name}</span> },
+                                { key: 'orders', header: 'Orders', render: (r) => <span style={{ color: 'var(--text-muted)' }}>{r.orderCount}</span> },
+                                { key: 'total', header: 'Total', render: (r) => <span style={{ fontWeight: 700 }}>${r.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> }
+                              ]}
+                            />
                           )}
                         </div>
 
@@ -434,89 +361,15 @@ export default function FinancialWholesalerModal({
                               No revenue recorded from direct patients.
                             </div>
                           ) : (
-                            <table
-                              style={{
-                                width: '100%',
-                                borderCollapse: 'collapse',
-                                fontSize: '0.85rem',
-                              }}
-                            >
-                              <thead>
-                                <tr
-                                  style={{
-                                    borderBottom: '2px solid var(--border)',
-                                    textAlign: 'left',
-                                  }}
-                                >
-                                  <th
-                                    style={{
-                                      padding: '0.4rem 0.5rem',
-                                      color: 'var(--text-muted)',
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Patient
-                                  </th>
-                                  <th
-                                    style={{
-                                      padding: '0.4rem 0.5rem',
-                                      color: 'var(--text-muted)',
-                                      fontWeight: 600,
-                                      textAlign: 'center',
-                                    }}
-                                  >
-                                    Orders
-                                  </th>
-                                  <th
-                                    style={{
-                                      padding: '0.4rem 0.5rem',
-                                      color: 'var(--text-muted)',
-                                      fontWeight: 600,
-                                      textAlign: 'right',
-                                    }}
-                                  >
-                                    Total
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {patList.map((pat, idx) => (
-                                  <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td
-                                      style={{
-                                        padding: '0.5rem',
-                                        fontWeight: 600,
-                                        color: 'var(--text-main)',
-                                      }}
-                                    >
-                                      {pat.name}
-                                    </td>
-                                    <td
-                                      style={{
-                                        padding: '0.5rem',
-                                        textAlign: 'center',
-                                        color: 'var(--text-muted)',
-                                      }}
-                                    >
-                                      {pat.orderCount}
-                                    </td>
-                                    <td
-                                      style={{
-                                        padding: '0.5rem',
-                                        textAlign: 'right',
-                                        fontWeight: 700,
-                                      }}
-                                    >
-                                      $
-                                      {pat.total.toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      })}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            <DataTable
+                              data={patList.map((p, i) => ({ ...p, _idx: i }))}
+                              keyField="_idx"
+                              columns={[
+                                { key: 'name', header: 'Patient', render: (r) => <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{r.name}</span> },
+                                { key: 'orders', header: 'Orders', render: (r) => <span style={{ color: 'var(--text-muted)' }}>{r.orderCount}</span> },
+                                { key: 'total', header: 'Total', render: (r) => <span style={{ fontWeight: 700 }}>${r.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> }
+                              ]}
+                            />
                           )}
                         </div>
                       </div>
@@ -714,124 +567,16 @@ export default function FinancialWholesalerModal({
                                   borderRadius: '6px',
                                 }}
                               >
-                                <table
-                                  style={{
-                                    width: '100%',
-                                    borderCollapse: 'collapse',
-                                    fontSize: '0.85rem',
-                                  }}
-                                >
-                                  <thead>
-                                    <tr
-                                      style={{
-                                        borderBottom: '2px solid var(--border)',
-                                        textAlign: 'left',
-                                        backgroundColor: 'var(--color-bg-app)',
-                                        position: 'sticky',
-                                        top: 0,
-                                      }}
-                                    >
-                                      <th
-                                        style={{
-                                          padding: '0.5rem 0.75rem',
-                                          color: 'var(--text-muted)',
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        Invoice #
-                                      </th>
-                                      <th
-                                        style={{
-                                          padding: '0.5rem 0.75rem',
-                                          color: 'var(--text-muted)',
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        Date
-                                      </th>
-                                      <th
-                                        style={{
-                                          padding: '0.5rem 0.75rem',
-                                          color: 'var(--text-muted)',
-                                          fontWeight: 600,
-                                          textAlign: 'center',
-                                        }}
-                                      >
-                                        Status
-                                      </th>
-                                      <th
-                                        style={{
-                                          padding: '0.5rem 0.75rem',
-                                          color: 'var(--text-muted)',
-                                          fontWeight: 600,
-                                          textAlign: 'right',
-                                        }}
-                                      >
-                                        Total (AED)
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {zohoFinancialData.invoices.map((inv, idx) => (
-                                      <tr
-                                        key={idx}
-                                        style={{ borderBottom: '1px solid var(--border)' }}
-                                      >
-                                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>
-                                          <a
-                                            href={`https://erp.mediluxeme.com/app/662274409#/invoices/${inv.invoiceId}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                              color: '#1a73e8',
-                                              textDecoration: 'underline',
-                                            }}
-                                          >
-                                            {inv.invoiceNumber}
-                                          </a>
-                                        </td>
-                                        <td
-                                          style={{
-                                            padding: '0.5rem 0.75rem',
-                                            color: 'var(--text-muted)',
-                                          }}
-                                        >
-                                          {inv.date}
-                                        </td>
-                                        <td
-                                          style={{ padding: '0.5rem 0.75rem', textAlign: 'center' }}
-                                        >
-                                          <span
-                                            style={{
-                                              fontSize: '0.7rem',
-                                              padding: '0.1rem 0.4rem',
-                                              borderRadius: '10px',
-                                              backgroundColor:
-                                                inv.status === 'paid' ? '#e6f4ea' : '#fef3c7',
-                                              color: inv.status === 'paid' ? '#137333' : '#b45309',
-                                              textTransform: 'capitalize',
-                                              fontWeight: 600,
-                                            }}
-                                          >
-                                            {inv.status}
-                                          </span>
-                                        </td>
-                                        <td
-                                          style={{
-                                            padding: '0.5rem 0.75rem',
-                                            textAlign: 'right',
-                                            fontWeight: 700,
-                                          }}
-                                        >
-                                          {inv.total.toLocaleString(undefined, {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                          })}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                                <DataTable
+                                  data={zohoFinancialData.invoices.map((inv, i) => ({ ...inv, _idx: i }))}
+                                  keyField="_idx"
+                                  columns={[
+                                    { key: 'invoice', header: 'Invoice #', render: (r) => <a href={`https://erp.mediluxeme.com/app/662274409#/invoices/${r.invoiceId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1a73e8', textDecoration: 'underline' }}>{r.invoiceNumber}</a> },
+                                    { key: 'date', header: 'Date', render: (r) => <span style={{ color: 'var(--text-muted)' }}>{r.date}</span> },
+                                    { key: 'status', header: 'Status', render: (r) => <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '10px', backgroundColor: r.status === 'paid' ? '#e6f4ea' : '#fef3c7', color: r.status === 'paid' ? '#137333' : '#b45309', textTransform: 'capitalize', fontWeight: 600 }}>{r.status}</span> },
+                                    { key: 'total', header: 'Total (AED)', render: (r) => <span style={{ fontWeight: 700 }}>{r.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> }
+                                  ]}
+                                />
                               </div>
                             )}
                           </div>

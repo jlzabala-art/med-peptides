@@ -12,8 +12,8 @@ import FileText from "lucide-react/dist/esm/icons/file-text";
 import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
 import Search from "lucide-react/dist/esm/icons/search";
 import Clock from "lucide-react/dist/esm/icons/clock";
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
+import DataTable from '../components/ui/DataTable';
 
 
 
@@ -34,7 +34,7 @@ export default function ValidationDashboard({ products }) {
   const [progress, setProgress] = useState({ current: 0, total: 0, lastId: '' });
   const [results, setResults] = useState(null);
   const [filter, setFilter] = useState('all'); // all, passed, failed
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleRunTests = async () => {
     if (!products || products.length === 0) {
@@ -59,7 +59,6 @@ export default function ValidationDashboard({ products }) {
   const filteredResults = results?.caseResults.filter(res => {
     if (filter === 'passed' && res.isFailed) return false;
     if (filter === 'failed' && !res.isFailed) return false;
-    if (searchTerm && !res.testCaseId.toLowerCase().includes(searchTerm.toLowerCase()) && !res.patientCategory.toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
   }) || [];
 
@@ -123,96 +122,77 @@ export default function ValidationDashboard({ products }) {
                 <FilterButton active={filter === 'passed'} onClick={() => setFilter('passed')} label="Passed" count={results.passed} />
                 <FilterButton active={filter === 'failed'} onClick={() => setFilter('failed')} label="Failed" count={results.failed} />
               </div>
-              <div style={{ position: 'relative' }}>
-                <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type="text" 
-                  placeholder="Search by ID or Category..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ 
-                    padding: '0.8rem 1rem 0.8rem 3rem', 
-                    borderRadius: '1rem', 
-                    border: '1px solid var(--border)', 
-                    backgroundColor: 'var(--background)',
-                    width: '300px'
-                  }}
-                />
-              </div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    <th style={{ padding: '1.2rem 1.5rem' }}>TEST CASE ID</th>
-                    <th style={{ padding: '1.2rem 1.5rem' }}>CATEGORY</th>
-                    <th style={{ padding: '1.2rem 1.5rem' }}>AVG SCORE</th>
-                    <th style={{ padding: '1.2rem 1.5rem' }}>DIMENSIONS</th>
-                    <th style={{ padding: '1.2rem 1.5rem' }}>STATUS</th>
-                    <th style={{ padding: '1.2rem 1.5rem' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredResults.map((res, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid var(--border)', transition: 'background 0.2s ease' }} className="hover-row">
-                      <td style={{ padding: '1.2rem 1.5rem', fontWeight: 600 }}>{res.testCaseId}</td>
-                      <td style={{ padding: '1.2rem 1.5rem' }}>
-                        <span style={{ padding: '0.2rem 0.6rem', borderRadius: '0.5rem', backgroundColor: 'var(--background)', fontSize: '0.85rem' }}>
-                          {res.patientCategory}
-                        </span>
-                      </td>
-                      <td style={{ padding: '1.2rem 1.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <div style={{ width: '60px', height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
-                            <div style={{ 
-                              height: '100%', 
-                              width: `${(res.averageScore / 5) * 100}%`,
-                              backgroundColor: res.averageScore >= 4 ? 'var(--color-success)' : res.averageScore >= 3 ? '#f59e0b' : 'var(--color-danger)'
-                            }}></div>
-                          </div>
-                          <span style={{ fontWeight: 600 }}>{res.averageScore}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '1.2rem 1.5rem' }}>
-                        <div style={{ display: 'flex', gap: '0.3rem' }}>
-                          {Object.values(res.dimensions).map((val, i) => (
-                            <div key={i} title={`D${i+1}: ${val}`} style={{ 
-                              width: '12px', 
-                              height: '12px', 
-                              borderRadius: '2px', 
-                              backgroundColor: val >= 4 ? 'var(--color-success)' : val >= 3 ? '#f59e0b' : 'var(--color-danger)',
-                              opacity: 0.8
-                            }}></div>
-                          ))}
-                        </div>
-                      </td>
-                      <td style={{ padding: '1.2rem 1.5rem' }}>
-                        {res.isFailed ? (
-                          <span style={{ color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
-                            <AlertTriangle size={16} /> FAILED
-                          </span>
-                        ) : (
-                          <span style={{ color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
-                            <CheckCircle2 size={16} /> PASSED
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: '1.2rem 1.5rem', textAlign: 'right' }}>
-                        <button style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                          <ChevronRight size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredResults.length === 0 && (
-                <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  No results found matching your criteria.
-                </div>
-              )}
-            </div>
+            <DataTable
+              columns={[
+                {
+                  key: 'testCaseId',
+                  header: 'Test Case ID',
+                  render: (val) => <span style={{ fontWeight: 600 }}>{val}</span>,
+                },
+                {
+                  key: 'patientCategory',
+                  header: 'Category',
+                  render: (val) => (
+                    <span style={{ padding: '0.2rem 0.6rem', borderRadius: '0.5rem', backgroundColor: 'var(--background)', fontSize: '0.85rem' }}>
+                      {val}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'averageScore',
+                  header: 'Avg Score',
+                  render: (val) => (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ width: '60px', height: '6px', backgroundColor: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${(val / 5) * 100}%`,
+                          backgroundColor: val >= 4 ? 'var(--color-success)' : val >= 3 ? '#f59e0b' : 'var(--color-danger)'
+                        }} />
+                      </div>
+                      <span style={{ fontWeight: 600 }}>{val}</span>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'dimensions',
+                  header: 'Dimensions',
+                  render: (val) => (
+                    <div style={{ display: 'flex', gap: '0.3rem' }}>
+                      {Object.values(val || {}).map((v, i) => (
+                        <div key={i} title={`D${i+1}: ${v}`} style={{
+                          width: '12px', height: '12px', borderRadius: '2px',
+                          backgroundColor: v >= 4 ? 'var(--color-success)' : v >= 3 ? '#f59e0b' : 'var(--color-danger)',
+                          opacity: 0.8
+                        }} />
+                      ))}
+                    </div>
+                  ),
+                },
+                {
+                  key: 'isFailed',
+                  header: 'Status',
+                  render: (val) => val ? (
+                    <span style={{ color: 'var(--color-danger)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                      <AlertTriangle size={16} /> FAILED
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                      <CheckCircle2 size={16} /> PASSED
+                    </span>
+                  ),
+                },
+              ]}
+              data={filteredResults}
+              keyField="testCaseId"
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Search by ID or Category..."
+              emptyTitle="No results found"
+              emptyDescription="No results match your current filter."
+            />
           </div>
         )}
 

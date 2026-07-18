@@ -8,8 +8,6 @@ import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/f
 
 
 
-
-
 import { usePreferences } from '../../../context/PreferencesContext';
 import { exportToCSV } from '../../../utils/exportUtils';
 import SkeletonLoader from '../../ui/SkeletonLoader';
@@ -161,42 +159,51 @@ export default function FinancePayables({ dashboardData }) {
                 <p style={{ fontSize: '0.875rem', fontWeight: '600', margin: 0 }}>No recent bills found for NPLAB.</p>
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Bill #</th>
-                      <th>Date</th>
-                      <th style={{ textAlign: 'right' }}>Total</th>
-                      <th style={{ textAlign: 'center' }}>Status</th>
-                      <th style={{ width: '33%' }}>Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bills.map((bill, i) => (
-                      <tr key={i}>
-                        <td style={{ fontWeight: '800', color: 'var(--primary)' }}>{bill.bill_number}</td>
-                        <td style={{ color: 'var(--text-muted)' }}>{bill.date}</td>
-                        <td style={{ fontWeight: '800', textAlign: 'right', color: 'var(--primary)' }}>{formatCurrency(bill.total)}</td>
-                        <td style={{ textAlign: 'center' }}>
-                          <span className={`admin-badge ${bill.status === 'paid' ? 'admin-badge--success' : 'admin-badge--warning'}`}>
-                            {bill.status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td>
-                          <input 
-                            type="text" 
-                            value={billNotes[bill.bill_number] || ''}
-                            onChange={(e) => handleNoteChange(bill.bill_number, e.target.value)}
-                            placeholder="Add note..."
-                            className="admin-premium-input"
-                            style={{ width: '100%' }}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="gcp-table-container">
+                <DataTable
+                  columns={[
+                    {
+                      key: 'bill_number',
+                      header: 'Bill #',
+                      render: (val) => <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{val}</span>
+                    },
+                    {
+                      key: 'date',
+                      header: 'Date',
+                      render: (val) => <span style={{ color: 'var(--text-muted)' }}>{val}</span>
+                    },
+                    {
+                      key: 'total',
+                      header: 'Total',
+                      render: (val) => <span style={{ fontWeight: 800, display: 'block', textAlign: 'right', color: 'var(--primary)' }}>{formatCurrency(val)}</span>
+                    },
+                    {
+                      key: 'status',
+                      header: 'Status',
+                      render: (val) => (
+                        <span className={`admin-badge ${val === 'paid' ? 'admin-badge--success' : 'admin-badge--warning'}`} style={{ display: 'block', textAlign: 'center' }}>
+                          {val.toUpperCase()}
+                        </span>
+                      )
+                    },
+                    {
+                      key: 'bill_number',
+                      header: 'Notes',
+                      render: (val) => (
+                        <input
+                          type="text"
+                          value={billNotes[val] || ''}
+                          onChange={(e) => handleNoteChange(val, e.target.value)}
+                          placeholder="Add note..."
+                          className="admin-premium-input"
+                          style={{ width: '100%' }}
+                        />
+                      )
+                    }
+                  ]}
+                  data={bills}
+                  keyField={(row, idx) => idx.toString()}
+                />
               </div>
             )}
           </div>

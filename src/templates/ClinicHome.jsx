@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
@@ -93,12 +93,20 @@ export default function ClinicHome({ children }) {
   const activeTab = pathParts.length > 1 ? pathParts[pathParts.length - 1] : 'dashboard';
 
   return (
-    <AppPortalLayout allowedRoles={['clinic', 'admin']}>
+    <PanelShell 
+      allowedRoles={['clinic', 'admin']}
+      sidebarNavGroups={CLINIC_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => { window.location.href = `/clinic/${id}`; }}
+      portalTitle="Clinic Portal"
+      roleContext="clinic"
+      pageContext={{ activeTab }}
+    >
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <ClinicHomeContext.Provider value={{ userProfile }}>{children}</ClinicHomeContext.Provider>
         </AdminTabErrorBoundary>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

@@ -1,19 +1,22 @@
 import React from 'react';
-import ProductsTable from '../../features/products/components/ProductsTable';
-import { fetchProductsAction } from '../../actions/productsActions';
+import AdminCatalogTabClient from './AdminCatalogTabClient';
+import { fetchProductsAction, fetchProductsMetricsAction } from '../../actions/productsActions';
 
 /**
- * Server Component Container for Admin Products
+ * Server Component Container for Master Catalog Hub
  * Pre-fetches the initial page of products securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
 export default async function AdminProductsTab({ readOnly = false }) {
-  const initialProducts = await fetchProductsAction({ limitCount: 50 });
+  const [initialProducts, globalMetrics] = await Promise.all([
+    fetchProductsAction({ limitCount: 50 }),
+    fetchProductsMetricsAction()
+  ]);
   
   return (
-    <ProductsTable 
-      role="admin"
+    <AdminCatalogTabClient 
       initialProducts={initialProducts}
+      globalMetrics={globalMetrics}
       readOnly={readOnly}
     />
   );

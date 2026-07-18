@@ -9,10 +9,10 @@ import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { conversationRepository } from '../repositories/conversationRepository';
 import { useAuth } from '../context/AuthContext';
 
-import UniversalAppLayout from '../components/layout/UniversalAppLayout';
+import PanelShell from '../components/shell/PanelShell';
 import PageTransition from '../components/PageTransition';
 import Omnibar from '../components/admin/Omnibar';
-import { useAdminRoleSimulation } from '../hooks/admin/useAdminRoleSimulation';
+import { useRoleAccess } from '../hooks/useRoleAccess';
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
 import MarketIntelligenceHub from '../components/admin/market/MarketIntelligenceHub';
@@ -24,7 +24,7 @@ function MailPlus2(props) {
 }
 
 
-import { NAVIGATION_REGISTRY, getNavigationForRole } from '../config/navigationRegistry';
+import { NAVIGATION_REGISTRY, getNavigationForRole, ROUTE_ALIASES } from '../config/navigationRegistry';
 import { ShieldCheck, ArrowLeft, Settings, Users, Database, Layers, PackageSearch, LayoutDashboard, Bot, Link2, BarChart3, ChevronRight, ChevronDown, ClipboardList, Zap, Globe, Wrench, ShoppingCart, Receipt, FlaskConical, Box, Tag, DollarSign, FileText, Eye, EyeOff, Mail, Activity, BookOpen, Cpu, LogOut, Menu, X, Building2, TrendingUp, Truck, Search, Building, Stethoscope, HeartPulse, UserPlus, Lock, Briefcase, LayoutTemplate, Network, ScrollText, MessageSquare, Calendar, UploadCloud, Settings2, CheckCircle, PieChart, CreditCard, ShieldAlert, Pill, FilePlus, ArrowLeftRight, UserCog, BarChart4, Workflow, GraduationCap, PackageOpen, Package, Inbox } from '../lib/icons';
 
 // ── Always-visible pinned items (not inside accordion groups) ─────────────────
@@ -37,16 +37,17 @@ const PINNED_ITEMS = [
 
 // ── Hooks ──────────────────────────────────────────────────────────────────────
 function useUnreadMessagesCount() {
-  const { user, isAdmin, userRole } = useAuth();
+  const { user } = useAuth();
+  const { is } = useRoleAccess();
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     return conversationRepository.subscribeToUnreadMessages(
-      { userId: user.uid, isAdmin: isAdmin || userRole === 'admin' },
+      { userId: user.uid, isAdmin: is('admin') },
       setUnread
     );
-  }, [user, isAdmin, userRole]);
+  }, [user, is]);
 
   return unread;
 }
@@ -119,8 +120,9 @@ function AdminLoadingFallback() {
 export default function AdminDashboard({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
-  const { isAdmin, loading: authLoading, logout, userProfile } = useAuth();
-  const { simulatedRole, allowedAdminTabs, isSimulating } = useAdminRoleSimulation();
+  const { loading: authLoading, logout, userProfile } = useAuth();
+  const { is, can } = useRoleAccess();
+  const isAdmin = is('admin');
   const router = useRouter();
   const pathname = usePathname();
   const unreadMessages = useUnreadMessagesCount();
@@ -168,7 +170,7 @@ export default function AdminDashboard({ children }) {
 
   const filteredNavGroups = React.useMemo(() => {
     // 1. Determine which role to use for navigation (simulated or real)
-    const roleToUse = isSimulating ? simulatedRole : (userProfile?.role || 'admin');
+    const roleToUse = userProfile?.role || 'admin';
 
     // 2. Fetch the proper navigation structure for that role from the registry
     const baseNavGroups = getNavigationForRole(roleToUse).map(group => ({
@@ -179,8 +181,8 @@ export default function AdminDashboard({ children }) {
       }))
     }));
 
-    // 3. Role simulation or Admin overrides filtering
-    if (isSimulating || isAdmin || userProfile?.role === 'admin') {
+    // 3. Admin overrides filtering
+    if (isAdmin) {
       return baseNavGroups.filter(group => group.items.length > 0);
     }
 
@@ -194,12 +196,21 @@ export default function AdminDashboard({ children }) {
       ...group,
       items: group.items.filter((item) => userProfile.allowedAdminTabs.includes(item.id)),
     })).filter((group) => group.items.length > 0);
-  }, [userProfile, isAdmin, isSimulating, simulatedRole]);
+  }, [userProfile, isAdmin]);
 
   // Derive active tab from the URL path instead of query params.
   // E.g., /admin/users -> 'users', /admin -> 'dashboard'
   const pathParts = pathname.split('/').filter(Boolean);
-  const activeTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
+  const rawTab = pathParts.length > 1 ? pathParts[1] : 'dashboard';
+
+  // Redirect stale bookmarks (old slugs → new consolidated routes)
+  React.useEffect(() => {
+    if (ROUTE_ALIASES[rawTab]) {
+      router.replace(`/admin/${ROUTE_ALIASES[rawTab]}`);
+    }
+  }, [rawTab, router]);
+
+  const activeTab = ROUTE_ALIASES[rawTab] ?? rawTab;
 
   // Flatten allowed tab IDs from the filtered groups
   const allowedNavIds = React.useMemo(() => {
@@ -207,8 +218,8 @@ export default function AdminDashboard({ children }) {
   }, [filteredNavGroups]);
 
   React.useEffect(() => {
-    // Let admins bypass restrictions if they are not simulating
-    if (!isSimulating && (isAdmin || userProfile?.role === 'admin')) return;
+    // Let admins bypass restrictions
+    if (isAdmin) return;
 
     if (allowedNavIds.length > 0) {
       if (
@@ -225,9 +236,7 @@ export default function AdminDashboard({ children }) {
     allowedNavIds,
     activeTab,
     router,
-    isAdmin,
-    userProfile?.role,
-    isSimulating,
+    isAdmin
   ]);
 
   const navToTab = useCallback(
@@ -252,7 +261,7 @@ export default function AdminDashboard({ children }) {
     PINNED_ITEMS.find((i) => i.id === activeTab);
 
   return (
-    <UniversalAppLayout
+    <PanelShell
       sidebarNavGroups={filteredNavGroups}
       sidebarPinnedItems={dynamicPinnedItems}
       activeNavId={activeTab}
@@ -290,6 +299,6 @@ export default function AdminDashboard({ children }) {
         </React.Suspense>
       </div>
       <Omnibar isOpen={isOmnibarOpen} onClose={() => setIsOmnibarOpen(false)} />
-    </UniversalAppLayout>
+    </PanelShell>
   );
 }

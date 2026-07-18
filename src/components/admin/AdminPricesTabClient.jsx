@@ -31,7 +31,7 @@ import AppEntityCell from '../ui/AppEntityCell';
 import ProductContextSwitcher from './ProductContextSwitcher';
 import VariantPricingEditor from './VariantPricingEditor';
 
-export default function AdminPricesTabClient({ initialProducts = null, initialDiscounts = null }) {
+export default function AdminPricesTabClient({ isSubTab = false, initialProducts = null, initialDiscounts = null }) {
   const router = useRouter();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState(initialProducts || []);
@@ -280,35 +280,37 @@ export default function AdminPricesTabClient({ initialProducts = null, initialDi
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
       {/* Description header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          marginBottom: '2.5rem',
-        }}
-      >
-        <div>
-          <h2
-            style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}
-          >
-            Pricing Matrix Control
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-            Set category B2B discounts and adjust individual peptide guest pricing. Tier
-            calculations update instantly.
-          </p>
-        </div>
-        <button
-          onClick={fetchPricingData}
-          className="admin-quick-btn"
-          style={{ padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+      {!isSubTab && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            marginBottom: '2.5rem',
+          }}
         >
-          <RefreshCw size={14} /> Refresh Data
-        </button>
-      </div>
+          <div>
+            <h2
+              style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}
+            >
+              Pricing Matrix Control
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
+              Set category B2B discounts and adjust individual peptide guest pricing. Tier
+              calculations update instantly.
+            </p>
+          </div>
+          <button
+            onClick={fetchPricingData}
+            className="admin-quick-btn"
+            style={{ padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <RefreshCw size={14} /> Refresh Data
+          </button>
+        </div>
+      )}
 
       <ProductContextSwitcher 
         searchTerm={searchTerm} 

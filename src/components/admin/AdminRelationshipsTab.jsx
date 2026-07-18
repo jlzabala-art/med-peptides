@@ -7,7 +7,7 @@ import { fetchProductsAction } from '../../actions/productsActions';
  * Pre-fetches the products securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
-export default async function AdminRelationshipsTab({ readOnly = false }) {
+export default async function AdminRelationshipsTab({ readOnly = false, isSubTab = false }) {
   // Fetch up to 500 products to ensure filtering works correctly on initial load
   const initialProducts = await fetchProductsAction({ limitCount: 500 });
   
@@ -15,6 +15,7 @@ export default async function AdminRelationshipsTab({ readOnly = false }) {
     <AdminRelationshipsTabClient 
       initialProducts={initialProducts}
       readOnly={readOnly}
+      isSubTab={isSubTab}
     />
   );
 }

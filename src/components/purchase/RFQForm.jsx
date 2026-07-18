@@ -12,9 +12,10 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import CreditCard from "lucide-react/dist/esm/icons/credit-card";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect, useRef } from 'react';
-import { addDoc, updateDoc, doc, collection, serverTimestamp, getDocs } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../firebase';
+import ProductAutocomplete from './ProductAutocomplete';
+import DataTable from '../ui/DataTable';
 
 
 
@@ -299,79 +300,94 @@ export default function RFQForm({ rfq, onClose }) {
           </div>
 
           <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginBottom: '2rem' }}>
-            <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ backgroundColor: '#f8fafc' }}>
-                <tr>
-                  <th style={{ padding: '0.75rem', textAlign: 'left' }}>Item Description</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right', width: '100px' }}>Qty</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'center', width: '100px' }}>Unit</th>
-                  {(status === 'PRICING_SUBMITTED' || status === 'approved') && (
-                    <>
-                      <th style={{ padding: '0.75rem', textAlign: 'right', color: '#16a34a' }}>Supplier Cost</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'right', color: '#16a34a' }}>Item Discount</th>
-                      <th style={{ padding: '0.75rem', textAlign: 'right', color: '#16a34a' }}>Net Cost</th>
-                    </>
-                  )}
-                  <th style={{ padding: '0.75rem', textAlign: 'center', width: '50px' }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx} style={{ borderTop: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '0.75rem' }}>
-                      <ProductAutocomplete
-                        value={item.itemName}
-                        onChange={(val) => updateItem(idx, 'itemName', val)}
-                        onSelect={(prod) => {
-                          if (prod) {
-                            const newItems = [...items];
-                            newItems[idx].itemName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
-                            if (prod.unit) newItems[idx].unit = prod.unit;
-                            if (prod.costPrice) newItems[idx].expectedCost = prod.costPrice;
-                            setItems(newItems);
-                          }
-                        }}
-                        placeholder="Search product (min. 3 chars)..."
-                      />
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <input
-                        type="number" min="1"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
-                        className="gcp-input"
-                        style={{ width: '100%', textAlign: 'right' }}
-                      />
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>
-                      <select
-                        value={item.unit}
-                        onChange={(e) => updateItem(idx, 'unit', e.target.value)}
-                        className="gcp-input"
-                        style={{ width: '100%' }}
-                      >
-                        <option value="vial">vial</option>
-                        <option value="box">box</option>
-                        <option value="g">g</option>
-                        <option value="kg">kg</option>
-                      </select>
-                    </td>
-                    {(status === 'PRICING_SUBMITTED' || status === 'approved') && (
-                      <>
-                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600 }}>${parseFloat(item.supplierUnitCost || 0).toFixed(2)}</td>
-                        <td style={{ padding: '0.75rem', textAlign: 'right', color: '#16a34a' }}>-${parseFloat(item.itemDiscount || 0).toFixed(2)}</td>
-                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: '#1d4ed8' }}>${(parseFloat(item.supplierUnitCost || 0) - parseFloat(item.itemDiscount || 0)).toFixed(2)}</td>
-                      </>
-                    )}
-                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                      <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={[
+                {
+                  key: 'itemName',
+                  header: 'Item Description',
+                  render: (val, row, idx) => (
+                    <ProductAutocomplete
+                      value={val}
+                      onChange={(newVal) => updateItem(idx, 'itemName', newVal)}
+                      onSelect={(prod) => {
+                        if (prod) {
+                          const newItems = [...items];
+                          newItems[idx].itemName = prod.dosage ? `${prod.name} (${prod.dosage})` : prod.name;
+                          if (prod.unit) newItems[idx].unit = prod.unit;
+                          if (prod.costPrice) newItems[idx].expectedCost = prod.costPrice;
+                          setItems(newItems);
+                        }
+                      }}
+                      placeholder="Search product (min. 3 chars)..."
+                    />
+                  ),
+                },
+                {
+                  key: 'quantity',
+                  header: 'Qty',
+                  render: (val, row, idx) => (
+                    <input
+                      type="number" min="1"
+                      value={val}
+                      onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
+                      className="gcp-input"
+                      style={{ width: '100%', textAlign: 'right' }}
+                    />
+                  ),
+                },
+                {
+                  key: 'unit',
+                  header: 'Unit',
+                  render: (val, row, idx) => (
+                    <select
+                      value={val}
+                      onChange={(e) => updateItem(idx, 'unit', e.target.value)}
+                      className="gcp-input"
+                      style={{ width: '100%' }}
+                    >
+                      <option value="vial">vial</option>
+                      <option value="box">box</option>
+                      <option value="g">g</option>
+                      <option value="kg">kg</option>
+                    </select>
+                  ),
+                },
+                ...(status === 'PRICING_SUBMITTED' || status === 'approved' ? [
+                  {
+                    key: 'supplierUnitCost',
+                    header: 'Supplier Cost',
+                    render: (val, row) => (
+                      <span style={{ fontWeight: 600 }}>${parseFloat(val || 0).toFixed(2)}</span>
+                    )
+                  },
+                  {
+                    key: 'itemDiscount',
+                    header: 'Item Discount',
+                    render: (val, row) => (
+                      <span style={{ color: '#16a34a' }}>-${parseFloat(val || 0).toFixed(2)}</span>
+                    )
+                  },
+                  {
+                    key: 'netCost',
+                    header: 'Net Cost',
+                    render: (val, row) => (
+                      <span style={{ fontWeight: 700, color: '#1d4ed8' }}>${(parseFloat(row.supplierUnitCost || 0) - parseFloat(row.itemDiscount || 0)).toFixed(2)}</span>
+                    )
+                  }
+                ] : []),
+                {
+                  key: 'actions',
+                  header: '',
+                  render: (val, row, idx) => (
+                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                      <Trash2 size={16} />
+                    </button>
+                  ),
+                }
+              ]}
+              data={items}
+              keyField={(row, idx) => idx.toString()}
+            />
             {items.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No items added yet.</div>}
           </div>
 

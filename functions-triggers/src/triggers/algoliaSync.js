@@ -14,6 +14,7 @@ const PATIENTS_INDEX    = "atlas_patients";
 const CLINICS_INDEX     = "atlas_clinics";
 const PHYSICIANS_INDEX  = "atlas_physicians";
 const PRESCRIPTIONS_INDEX = "prescriptions";
+const ORDERS_INDEX      = "orders";
 
 exports.syncProductToAlgolia = onDocumentWritten("products/{productId}", async (event) => {
     if (!client) {
@@ -179,5 +180,91 @@ exports.syncPrescriptionToAlgolia = onDocumentWritten("prescriptions/{prescripti
         await client.saveObject({ indexName: PRESCRIPTIONS_INDEX, body: algoliaRecord });
     } catch (error) {
         console.error("Error syncing prescription to Algolia:", error);
+    }
+});
+
+// --- Phase 6: Order Sync ---
+exports.syncOrderToAlgolia = onDocumentWritten("orders/{orderId}", async (event) => {
+    if (!client) {
+        console.warn("Algolia credentials missing. Skipping order sync.");
+        return;
+    }
+
+    const snapshot = event.data;
+    const orderId = event.params.orderId;
+
+    // Handle delete
+    if (!snapshot.after.exists) {
+        await client.deleteObject({ indexName: ORDERS_INDEX, objectID: orderId });
+        return;
+    }
+
+    const data = snapshot.after.data();
+
+    const algoliaRecord = {
+        objectID: orderId,
+        orderId: data.orderId || orderId,
+        status: data.status || 'pending',
+        total: data.total || 0,
+        source: data.source || '',
+        customerType: data.customerType || '',
+        
+        // Customer details for searching
+        customerName: data.customer?.fullName || data.customer?.firstName || '',
+        customerEmail: data.customer?.email || '',
+        customerPhone: data.customer?.phone || '',
+        
+        // Wholesaler details for searching (Bulk Orders)
+        wholesalerName: data.wholesalerName || '',
+        wholesalerEmail: data.wholesalerEmail || '',
+        wholesalerId: data.wholesalerId || '',
+        
+        // Item details (array of names for text search)
+        items: Array.isArray(data.items) ? data.items.map(i => i.name || i.productName) : [],
+        
+        createdAt: data.createdAt ? (data.createdAt.toMillis ? data.createdAt.toMillis() : new Date(data.createdAt).getTime()) : Date.now(),
+    };
+
+    try {
+        await client.saveObject({ indexName: ORDERS_INDEX, body: algoliaRecord });
+    } catch (error) {
+        console.error("Error syncing order to Algolia:", error);
+    }
+});
+
+exports.syncBulkOrderToAlgolia = onDocumentWritten("bulk_orders/{orderId}", async (event) => {
+    if (!client) {
+        return;
+    }
+
+    const snapshot = event.data;
+    const orderId = event.params.orderId;
+
+    if (!snapshot.after.exists) {
+        await client.deleteObject({ indexName: ORDERS_INDEX, objectID: orderId });
+        return;
+    }
+
+    const data = snapshot.after.data();
+
+    const algoliaRecord = {
+        objectID: orderId,
+        orderId: data.orderId || orderId,
+        type: 'bulk_order',
+        status: data.status || 'pending',
+        total: data.total || data.totalValue || 0,
+        
+        // Wholesaler details
+        wholesalerName: data.wholesalerName || data.userName || '',
+        wholesalerEmail: data.wholesalerEmail || data.userEmail || '',
+        wholesalerId: data.wholesalerId || data.userId || '',
+        
+        createdAt: data.createdAt ? (data.createdAt.toMillis ? data.createdAt.toMillis() : new Date(data.createdAt).getTime()) : Date.now(),
+    };
+
+    try {
+        await client.saveObject({ indexName: ORDERS_INDEX, body: algoliaRecord });
+    } catch (error) {
+        console.error("Error syncing bulk order to Algolia:", error);
     }
 });

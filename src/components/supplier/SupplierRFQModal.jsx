@@ -5,6 +5,7 @@ import X from "lucide-react/dist/esm/icons/x";
 import Send from "lucide-react/dist/esm/icons/send";
 import { useProcurementManager } from '../../hooks/data/useProcurementManager';
 import StandardDrawer from '../ui/StandardDrawer';
+import DataTable from '../ui/DataTable';
 
 export default function SupplierRFQModal({ rfq, onClose, onSuccess }) {
   const { respondToPurchaseRFQ, loading } = useProcurementManager();
@@ -74,49 +75,58 @@ export default function SupplierRFQModal({ rfq, onClose, onSuccess }) {
           {/* Items Table */}
           <div>
             <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 1rem 0' }}>Requested Items</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ background: 'var(--bg-subtle)' }}>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>Product</th>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>Qty</th>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>Admin Proposed</th>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>Your Final Price</th>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem' }}>Line Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '0.75rem' }}>
-                      <div style={{ fontWeight: 600 }}>{item.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.variantName}</div>
-                    </td>
-                    <td style={{ padding: '0.75rem' }}>{item.qty}</td>
-                    <td style={{ padding: '0.75rem', color: 'var(--text-muted)' }}>${(item.proposedUnitPrice || item.price || 0).toFixed(2)}</td>
-                    <td style={{ padding: '0.75rem' }}>
-                      {isPending ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          $ <input 
-                            type="number" 
-                            className="input" 
-                            style={{ width: '80px', padding: '0.25rem 0.5rem' }} 
-                            value={item.finalUnitPrice}
-                            onChange={(e) => handlePriceChange(idx, e.target.value)}
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                      ) : (
-                        <div style={{ fontWeight: 600 }}>${(item.finalUnitPrice || item.proposedUnitPrice || 0).toFixed(2)}</div>
-                      )}
-                    </td>
-                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>
-                      ${(item.finalUnitPrice * item.qty).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTable
+              columns={[
+                {
+                  key: 'name',
+                  header: 'Product',
+                  render: (val, row) => (
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{val}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{row.variantName}</div>
+                    </div>
+                  ),
+                },
+                { key: 'qty', header: 'Qty' },
+                {
+                  key: 'proposedUnitPrice',
+                  header: 'Admin Proposed',
+                  render: (val, row) => <span style={{ color: 'var(--text-muted)' }}>${(val || row.price || 0).toFixed(2)}</span>,
+                },
+                {
+                  key: 'finalUnitPrice',
+                  header: 'Your Final Price',
+                  render: (val, row) => {
+                    const idx = items.findIndex(i => i === row || i.name === row.name);
+                    return isPending ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        $ <input
+                          type="number"
+                          className="input"
+                          style={{ width: '80px', padding: '0.25rem 0.5rem' }}
+                          value={items[idx]?.finalUnitPrice ?? val}
+                          onChange={(e) => handlePriceChange(idx, e.target.value)}
+                          min="0" step="0.01"
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ fontWeight: 600 }}>${(val || row.proposedUnitPrice || 0).toFixed(2)}</div>
+                    );
+                  },
+                },
+                {
+                  key: '_lineTotal',
+                  header: 'Line Total',
+                  render: (_, row) => {
+                    const idx = items.findIndex(i => i === row || i.name === row.name);
+                    const price = items[idx]?.finalUnitPrice ?? row.finalUnitPrice ?? 0;
+                    return <span style={{ fontWeight: 600 }}>${(price * row.qty).toFixed(2)}</span>;
+                  },
+                },
+              ]}
+              data={items}
+              keyField="name"
+            />
           </div>
 
           {/* Admin Notes */}

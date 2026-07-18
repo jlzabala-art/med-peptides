@@ -5,7 +5,7 @@ import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
 import { Card, DataTable, StatusChip, StandardDrawer } from '../../ui';
-import AdminPageHeader from '../AdminPageHeader';
+import PageHeader from '../../ui/PageHeader';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import DataTableSkeleton from '../../ui/skeletons/DataTableSkeleton';
 import { useProcurementManager } from '../../../hooks/data/useProcurementManager';
@@ -104,7 +104,7 @@ export default function AdminProcurementRFQsTab() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
-      <AdminPageHeader
+      <PageHeader
         title="Procurement RFQs (Sent to Suppliers)"
         subtitle="Manage Requests for Quotation sent to suppliers to negotiate bulk pricing."
         icon={FileText}
@@ -176,35 +176,42 @@ export default function AdminProcurementRFQsTab() {
                 </div>
               )}
 
-              <table className="gcp-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: '40%' }}>Product</th>
-                    <th style={{ textAlign: 'right' }}>Req. Qty</th>
-                    <th style={{ textAlign: 'right' }}>Your Target</th>
-                    <th style={{ textAlign: 'right' }}>Supplier Offer</th>
-                    <th style={{ textAlign: 'right' }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedRfq.items?.map((item, idx) => (
-                    <tr key={idx}>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{item.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.dosage} | SKU: {item.sku}</div>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>{item.quantity} {item.units}</td>
-                      <td style={{ textAlign: 'right', color: 'var(--text-muted)' }}>${parseFloat(item.targetCost).toFixed(2)}</td>
-                      <td style={{ textAlign: 'right', fontWeight: item.finalCost ? 700 : 400, color: item.finalCost ? 'var(--primary)' : 'inherit' }}>
-                        {item.finalCost ? `$${parseFloat(item.finalCost).toFixed(2)}` : 'Awaiting'}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700 }}>
-                        {item.finalCost ? `$${(parseFloat(item.finalCost) * item.quantity).toFixed(2)}` : '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <DataTable
+                data={selectedRfq.items?.map((item, idx) => ({ ...item, _idx: idx })) || []}
+                keyField="_idx"
+                columns={[
+                  {
+                    key: 'product',
+                    header: 'Product',
+                    render: (r) => (
+                      <>
+                        <div style={{ fontWeight: 600 }}>{r.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.dosage} | SKU: {r.sku}</div>
+                      </>
+                    )
+                  },
+                  {
+                    key: 'qty',
+                    header: 'Req. Qty',
+                    render: (r) => <div style={{ textAlign: 'right' }}>{r.quantity} {r.units}</div>
+                  },
+                  {
+                    key: 'target',
+                    header: 'Your Target',
+                    render: (r) => <div style={{ textAlign: 'right', color: 'var(--text-muted)' }}>${parseFloat(r.targetCost).toFixed(2)}</div>
+                  },
+                  {
+                    key: 'offer',
+                    header: 'Supplier Offer',
+                    render: (r) => <div style={{ textAlign: 'right', fontWeight: r.finalCost ? 700 : 400, color: r.finalCost ? 'var(--primary)' : 'inherit' }}>{r.finalCost ? `$${parseFloat(r.finalCost).toFixed(2)}` : 'Awaiting'}</div>
+                  },
+                  {
+                    key: 'total',
+                    header: 'Total',
+                    render: (r) => <div style={{ textAlign: 'right', fontWeight: 700 }}>{r.finalCost ? `$${(parseFloat(r.finalCost) * r.quantity).toFixed(2)}` : '—'}</div>
+                  }
+                ]}
+              />
           </div>
         </StandardDrawer>
       )}

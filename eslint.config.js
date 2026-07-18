@@ -26,6 +26,13 @@ export default defineConfig([
       'no-unused-vars': ['warn', { varsIgnorePattern: '^[A-Z_]' }],
       'no-undef': 'warn',
       'no-duplicate-imports': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXElement[openingElement.name.name='table']",
+          message: "Raw HTML tables are strictly forbidden. Use DataTable from src/components/ui/DataTable.jsx instead. If this is an email template or the DataTable implementation itself, disable this rule using // eslint-disable-next-line no-restricted-syntax"
+        }
+      ],
     },
   },
 ])

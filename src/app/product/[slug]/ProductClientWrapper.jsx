@@ -12,7 +12,7 @@ export default function ProductClientWrapper({ serverParams, initialProduct }) {
   const params = useParams();
   const slug = serverParams?.slug || params?.slug;
 
-  const { isProfessional, isAdmin } = useAuth();
+  const { isProfessional } = useAuth();
   const { region, compareList, setCompareList } = useShop();
   const { cart, updateCart } = useCart();
   const { setActiveModal } = useUIStore();
@@ -41,7 +41,6 @@ export default function ProductClientWrapper({ serverParams, initialProduct }) {
       initialProduct={initialProduct}
       region={region}
       isProfessional={isProfessional}
-      isAdmin={isAdmin}
       cart={cart}
       onAddToCart={updateCart}
       toggleCompare={toggleCompare}

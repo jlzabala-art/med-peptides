@@ -1,0 +1,6 @@
+/* src/styles/themes/wholeseller.css */
+.theme-wholeseller {
+  --color-primary: #c2410c; /* B2B Logistics Orange */
+  --color-bg-app: #fff7ed; /* Slight orange tint */
+  --color-sidebar-bg: #ffffff;
+}

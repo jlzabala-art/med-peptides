@@ -40,7 +40,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 
 
 import { Card, MetricCard, Button } from '../components/ui';
-import AppPortalLayout from '../layout/AppPortalLayout';
+import PanelShell from '../components/shell/PanelShell';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 
 
@@ -462,12 +462,20 @@ export default function DoctorHome() {
   };
 
   return (
-    <AppPortalLayout allowedRoles={['doctor', 'admin']}>
+    <PanelShell 
+      allowedRoles={['doctor', 'admin']}
+      sidebarNavGroups={DOCTOR_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => setActiveTab(id)}
+      portalTitle="Clinical Portal"
+      roleContext="doctor"
+      pageContext={{ activeTab }}
+    >
       <div style={{ padding: '2rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           {renderTab()}
         </AdminTabErrorBoundary>
       </div>
-    </AppPortalLayout>
+    </PanelShell>
   );
 }

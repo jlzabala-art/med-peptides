@@ -5,6 +5,7 @@ import OperationalKPICard from '../../shared/widgets/OperationalKPICard';
 
 import { TrendingUp, ArrowRight, Sparkles, AlertTriangle, Briefcase, Server, DollarSign, Users, Send, RefreshCw, MoreHorizontal, ChevronRight, FileText } from '../../../lib/icons';
 import { formatAEDtoDual } from '../../../utils/currencies';
+import DataTable from '../../ui/DataTable';
 import dynamic from 'next/dynamic';
 
 const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
@@ -1064,66 +1065,34 @@ export function WholesalersLeaderboard({ wholesalersData = [], onSelect }) {
 
       {/* DESKTOP TABLE VIEW */}
       <div className="cc-wl-desktop">
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            fontSize: '0.8rem',
-            textAlign: 'left',
-          }}
-        >
-          <thead>
-            <tr style={{ borderBottom: '1px solid #cbd5e1' }}>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>Wholesaler</th>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>Revenue</th>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>Patients</th>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>Orders</th>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>Growth</th>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>Margin</th>
-              <th style={{ padding: '0.5rem', color: '#64748b' }}>AI Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((ws, i) => (
-              <tr
-                key={i}
-                style={{
-                  borderBottom: '1px solid #f1f5f9',
-                  cursor: onSelect ? 'pointer' : 'default',
-                }}
-                onClick={() => onSelect && onSelect(ws)}
-              >
-                <td style={{ padding: '0.65rem 0.5rem', fontWeight: 600 }}>{ws.name}</td>
-                <td style={{ padding: '0.65rem 0.5rem' }}>{ws.revenue}</td>
-                <td style={{ padding: '0.65rem 0.5rem' }}>{ws.patients}</td>
-                <td style={{ padding: '0.65rem 0.5rem' }}>{ws.orders}</td>
-                <td
-                  style={{
-                    padding: '0.65rem 0.5rem',
-                    color: ws.growth?.startsWith('+') ? '#10b981' : '#ef4444',
-                    fontWeight: 600,
-                  }}
-                >
-                  {ws.growth}
-                </td>
-                <td style={{ padding: '0.65rem 0.5rem' }}>{ws.margin}</td>
-                <td style={{ padding: '0.65rem 0.5rem' }}>
-                  <span
-                    style={{
-                      padding: '0.2rem 0.4rem',
-                      borderRadius: '4px',
-                      fontWeight: 700,
-                      backgroundColor: ws.score > 90 ? '#ecfdf5' : '#fffbeb',
-                      color: ws.score > 90 ? '#047857' : '#b45309',
-                    }}
-                  >
-                    {ws.score}%
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataTable
+          data={list.map((ws, i) => ({ ...ws, _idx: i }))}
+          keyField="_idx"
+          onRowClick={(row) => onSelect && onSelect(row)}
+          columns={[
+            { key: 'name', header: 'Wholesaler', render: (r) => <span style={{ fontWeight: 600 }}>{r.name}</span> },
+            { key: 'revenue', header: 'Revenue', render: (r) => r.revenue },
+            { key: 'patients', header: 'Patients', render: (r) => r.patients },
+            { key: 'orders', header: 'Orders', render: (r) => r.orders },
+            { key: 'growth', header: 'Growth', render: (r) => (
+              <span style={{ color: r.growth?.startsWith('+') ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                {r.growth}
+              </span>
+            )},
+            { key: 'margin', header: 'Margin', render: (r) => r.margin },
+            { key: 'score', header: 'AI Score', render: (r) => (
+              <span style={{
+                padding: '0.2rem 0.4rem',
+                borderRadius: '4px',
+                fontWeight: 700,
+                backgroundColor: r.score > 90 ? '#ecfdf5' : '#fffbeb',
+                color: r.score > 90 ? '#047857' : '#b45309',
+              }}>
+                {r.score}%
+              </span>
+            )}
+          ]}
+        />
       </div>
     </div>
   );

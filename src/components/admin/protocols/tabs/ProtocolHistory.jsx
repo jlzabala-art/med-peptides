@@ -12,6 +12,7 @@ import Tag from 'lucide-react/dist/esm/icons/tag';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up';
 import GlobalSearchBar from '../../../ui/GlobalSearchBar';
+import DataTable from '../../../ui/DataTable';
 
 // ── Event type config ─────────────────────────────────────────────────────────
 const EVENT_TYPES = {
@@ -130,16 +131,14 @@ function EventRow({ event }) {
       {/* Details */}
       {expanded && hasDetails && (
         <div style={{ margin: '0.3rem 0 0 0', padding: '0.75rem', background: 'var(--surface-raised, #f8fafc)', borderRadius: '8px', border: '1px solid var(--border)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
-            <tbody>
-              {Object.entries(event.details).map(([k, v]) => (
-                <tr key={k} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                  <td style={{ padding: '0.3rem 0.5rem 0.3rem 0', color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap', width: '40%' }}>{k.replace(/_/g, ' ')}</td>
-                  <td style={{ padding: '0.3rem 0 0.3rem 0.5rem', color: 'var(--text-main)' }}>{String(v)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            data={Object.entries(event.details).map(([k, v]) => ({ key: k, value: String(v) }))}
+            keyField="key"
+            columns={[
+              { key: 'key', header: 'Property', render: (r) => <span style={{ color: 'var(--text-muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>{r.key.replace(/_/g, ' ')}</span> },
+              { key: 'value', header: 'Value', render: (r) => <span style={{ color: 'var(--text-main)' }}>{r.value}</span> }
+            ]}
+          />
         </div>
       )}
     </div>

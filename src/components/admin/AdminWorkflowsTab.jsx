@@ -12,8 +12,8 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-
 import { Card } from '../ui';
+import PageHeader from '../ui/PageHeader';
 
 
 
@@ -70,7 +70,7 @@ const DEFAULT_WORKFLOWS = {
   }
 };
 
-export default function AdminWorkflowsTab() {
+export default function AdminWorkflowsTab({ isSubTab }) {
   const [workflows, setWorkflows] = useState(DEFAULT_WORKFLOWS);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
@@ -136,15 +136,13 @@ export default function AdminWorkflowsTab() {
 
   return (
     <div style={{ paddingBottom: '5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-        <div style={{ padding: '0.75rem', backgroundColor: 'rgba(139, 92, 246, 0.1)', color: 'var(--color-primary)', borderRadius: '12px' }}>
-          <Settings2 size={24} />
-        </div>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--color-text-primary)', margin: 0 }}>Automation Engine</h1>
-          <p style={{ color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>Global settings for B2B brokerage and compounding autonomous agents.</p>
-        </div>
-      </div>
+      {!isSubTab && (
+        <PageHeader
+          title="Automation Engine"
+          subtitle="Global settings for B2B brokerage and compounding autonomous agents."
+          icon={Settings2}
+        />
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {Object.values(workflows).map(wf => (

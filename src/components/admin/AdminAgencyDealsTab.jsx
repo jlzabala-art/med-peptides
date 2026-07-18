@@ -7,19 +7,22 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import User from "lucide-react/dist/esm/icons/user";
 import Building from "lucide-react/dist/esm/icons/building";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../../firebase';
 import { Card, TextField, Select } from '../ui';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import DataTable from '../ui/DataTable';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
 import { useAgencyDeals } from '../../hooks/admin/useAgencyDeals';
 
-export default function AdminAgencyDealsTab() {
+export default function AdminAgencyDealsTab({ isSubTab = false }) {
   const { agencyDeals: paginatedDeals, loading: loadingDeals, hasMore, loadMore, fetchAgencyDeals } = useAgencyDeals({ pageSize: 50 });
   const deals = paginatedDeals || [];
   const loading = loadingDeals;
@@ -28,6 +31,7 @@ export default function AdminAgencyDealsTab() {
   const [saving, setSaving] = useState(false);
   // Contacts from Zoho/Firebase
   const [contacts, setContacts] = useState([]);
+  const [statusFilter, setStatusFilter] = useState('');
 
   const [formData, setFormData] = useState({
     supplierId: '',
@@ -111,99 +115,146 @@ export default function AdminAgencyDealsTab() {
     });
   };
 
-  return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Header — normalised */}
-      <AdminPageHeader
-        title="Agency Deals"
-        subtitle="Manage B2B Brokerage Deals and Commissions."
-        icon={Briefcase}
-        actions={
-          <button onClick={() => setShowModal(true)} className="gcp-btn gcp-btn--primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Plus size={16} /> New Agency Deal
+  const columns = useMemo(() => [
+    {
+      key: 'id',
+      header: 'Deal ID',
+      render: (val) => <CopyableId value={val} />
+    },
+    {
+      key: 'createdAt',
+      header: 'Date',
+      render: (val) => val?.toDate ? val.toDate().toLocaleDateString() : 'N/A'
+    },
+    {
+      key: 'supplierName',
+      header: 'Supplier (Pays Comm.)',
+      render: (val) => <span style={{ fontWeight: 600 }}>{val}</span>
+    },
+    {
+      key: 'customerName',
+      header: 'End Customer'
+    },
+    {
+      key: 'totalVolume',
+      header: 'Total Volume',
+      render: (val) => `$${val?.toLocaleString()}`
+    },
+    {
+      key: 'commissionTotal',
+      header: 'Commission',
+      render: (val, row) => (
+        <span style={{ fontWeight: 600, color: 'var(--color-success)' }}>
+          ${val?.toLocaleString()} 
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '4px' }}>
+            ({row.commissionType === 'percentage' ? `${row.commissionRate}%` : 'Fixed'})
+          </span>
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (val) => <StatusBadge status={val} />
+    },
+    {
+      key: 'actions',
+      header: 'Action',
+      render: (_, row) => (
+        row.status === 'DRAFT' && (
+          <button 
+            onClick={() => handleInvoiceDeal(row.id)}
+            style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
+          >
+            Mark Invoiced
           </button>
-        }
-      />
+        )
+      )
+    }
+  ], []);
 
-      <div style={{ marginBottom: '1rem' }}>
+  const activeFilters = [];
+  if (statusFilter) {
+    activeFilters.push({
+      key: 'status',
+      label: 'Status',
+      value: statusFilter,
+      onRemove: () => setStatusFilter('')
+    });
+  }
+
+  const filterOptions = [
+    {
+      key: 'status',
+      label: 'Deal Status',
+      options: [
+        { label: 'All', value: '' },
+        { label: 'DRAFT', value: 'DRAFT' },
+        { label: 'INVOICED', value: 'INVOICED' }
+      ],
+      value: statusFilter,
+      onChange: setStatusFilter
+    }
+  ];
+
+  const filteredDeals = useMemo(() => {
+    let result = deals;
+    if (statusFilter) {
+      result = result.filter(d => d.status === statusFilter);
+    }
+    return result;
+  }, [deals, statusFilter]);
+
+  return (
+    <div style={{ padding: isSubTab ? '0' : '0 2rem 2rem 2rem' }}>
+      {/* Header — normalised */}
+      {!isSubTab && (
+        <PageHeader
+          title="Agency Deals"
+          subtitle="Manage B2B Brokerage Deals and Commissions."
+          icon={Briefcase}
+          actions={
+            <button onClick={() => setShowModal(true)} className="gcp-btn gcp-btn--primary" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <Plus size={16} /> New Agency Deal
+            </button>
+          }
+        />
+      )}
+
+      <div style={{ marginBottom: '1.5rem' }}>
         <GlobalSearchBar
-          value={searchTerm || ''}
+          value={searchTerm}
           onChange={setSearchTerm}
           placeholder="Search deals by supplier, customer, status..."
-          resultCount={loading ? undefined : deals.length}
+          resultCount={loading ? undefined : filteredDeals.length}
           namespace="admin-agency-deals"
           size="lg"
+          filters={activeFilters}
+          filterOptions={filterOptions}
         />
       </div>
 
-      <Card style={{ overflow: 'hidden' }}>
-        {loading ? (
+      <div className="gcp-table-container">
+        {loading && deals.length === 0 ? (
           <DataTableSkeleton rows={6} columns={7} />
-        ) : deals.length === 0 ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            No Agency Deals found. Create one to get started.
-          </div>
         ) : (
-          <table className="gcp-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Supplier (Pays Comm.)</th>
-                <th>End Customer</th>
-                <th>Total Volume</th>
-                <th>Commission</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deals.map(deal => (
-                <tr key={deal.id}>
-                  <td>{deal.createdAt?.toDate ? deal.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
-                  <td style={{ fontWeight: 600 }}>{deal.supplierName}</td>
-                  <td>{deal.customerName}</td>
-                  <td>${deal.totalVolume?.toLocaleString()}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--color-success)' }}>
-                    ${deal.commissionTotal?.toLocaleString()} 
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '4px' }}>
-                      ({deal.commissionType === 'percentage' ? `${deal.commissionRate}%` : 'Fixed'})
-                    </span>
-                  </td>
-                  <td>
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '12px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      backgroundColor: deal.status === 'INVOICED' ? 'rgba(59,130,246,0.1)' : 'rgba(245,158,11,0.1)',
-                      color: deal.status === 'INVOICED' ? '#2563eb' : '#d97706'
-                    }}>
-                      {deal.status}
-                    </span>
-                  </td>
-                  <td>
-                    {deal.status === 'DRAFT' && (
-                      <button 
-                        onClick={() => handleInvoiceDeal(deal.id)}
-                        style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
-                      >
-                        Mark Invoiced
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTable
+            columns={columns}
+            data={filteredDeals}
+            keyField={(row) => row.id}
+            emptyMessage="No Agency Deals found. Create one to get started."
+            globalSearch={true}
+            searchQuery={searchTerm}
+          />
         )}
         {hasMore && !loading && (
           <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
-            <button className="gcp-btn-secondary" onClick={loadMore} disabled={loadingDeals}>
+            <button className="gcp-btn gcp-btn--secondary" onClick={loadMore} disabled={loadingDeals}>
               {loadingDeals ? 'Loading...' : 'Load More'}
             </button>
           </div>
         )}
-      </Card>
+      </div>
 
       {/* Modal Overlay */}
       {showModal && (

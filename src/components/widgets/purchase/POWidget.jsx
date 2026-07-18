@@ -9,21 +9,11 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Package from "lucide-react/dist/esm/icons/package";
 import Link from "lucide-react/dist/esm/icons/link";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-/**
- * POWidget – Reusable Purchase Order widget.
- * Can be embedded in any portal (admin, wholesaler, supplier, etc.)
- *
- * Props:
- *  - collectionName   {string}  Firestore collection (default: 'purchaseOrders')
- *  - readOnly         {boolean} Disable create/edit (default: false)
- *  - compact          {boolean} Compact card layout (default: false)
- *  - filterFn         {fn}      Optional fn(doc) => bool to filter rows
- *  - onSelect         {fn}      Optional callback when a row is clicked
- */
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
+import DataTable from '../../ui/DataTable';
 
 
 
@@ -75,6 +65,46 @@ export default function POWidget({
 
   const st = (s) => STATUS_STYLE[s] || { bg: '#f1f5f9', color: '#475569' };
 
+  const columns = [
+    {
+      key: 'createdAt',
+      header: 'Date',
+      render: (val) => val?.toDate ? val.toDate().toLocaleDateString() : '—',
+    },
+    {
+      key: 'poNumber',
+      header: 'PO Number',
+      render: (val) => <span style={{ fontWeight: 600, color: '#0f172a' }}>{val}</span>,
+    },
+    {
+      key: 'supplierName',
+      header: 'Supplier',
+      render: (val) => <span style={{ color: '#3b82f6' }}>{val}</span>,
+    },
+    ...(!compact ? [{
+      key: 'totalAmount',
+      header: 'Total',
+      render: (val) => <span style={{ fontWeight: 600 }}>${Number(val || 0).toFixed(2)}</span>,
+    }] : []),
+    {
+      key: 'status',
+      header: 'Status',
+      render: (val, row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-start' }}>
+          <span style={{ padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: st(val).bg, color: st(val).color }}>
+            {(val || 'open').toUpperCase()}
+          </span>
+          {row.approvalStatus === 'pending_approval' && (
+            <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca' }}>PENDING APPROVAL</span>
+          )}
+          {row.approvalStatus === 'approved' && (
+            <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>APPROVED</span>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       {!compact && !readOnly && (
@@ -88,62 +118,15 @@ export default function POWidget({
         </div>
       )}
 
-      <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading…</div>
-        ) : (
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: compact ? '0.8rem' : '0.9rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-                <th style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', fontWeight: 600, color: '#64748b' }}>Date</th>
-                <th style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', fontWeight: 600, color: '#64748b' }}>PO Number</th>
-                <th style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', fontWeight: 600, color: '#64748b' }}>Supplier</th>
-                {!compact && <th style={{ padding: '0.75rem', fontWeight: 600, color: '#64748b' }}>Total</th>}
-                <th style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', fontWeight: 600, color: '#64748b' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pos.length === 0 ? (
-                <tr><td colSpan={compact ? 4 : 5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No Purchase Orders found.</td></tr>
-              ) : pos.map(p => (
-                <tr
-                  key={p.id}
-                  style={{ borderBottom: '1px solid #f1f5f9', cursor: (readOnly && !onSelect) ? 'default' : 'pointer', transition: 'background 150ms' }}
-                  onClick={() => openEdit(p)}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <td style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', color: '#64748b' }}>
-                    {p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString() : '—'}
-                  </td>
-                  <td style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', fontWeight: 600, color: '#0f172a' }}>{p.poNumber}</td>
-                  <td style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem', color: '#3b82f6' }}>{p.supplierName}</td>
-                  {!compact && (
-                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>${Number(p.totalAmount || 0).toFixed(2)}</td>
-                  )}
-                  <td style={{ padding: compact ? '0.5rem 0.75rem' : '0.75rem' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-start' }}>
-                      <span style={{ padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: st(p.status).bg, color: st(p.status).color }}>
-                        {(p.status || 'open').toUpperCase()}
-                      </span>
-                      {p.approvalStatus === 'pending_approval' && (
-                        <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca' }}>
-                          PENDING APPROVAL
-                        </span>
-                      )}
-                      {p.approvalStatus === 'approved' && (
-                        <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>
-                          APPROVED
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <DataTable
+        columns={columns}
+        data={pos}
+        keyField="id"
+        isLoading={loading}
+        onRowClick={(row) => openEdit(row)}
+        emptyTitle="No Purchase Orders found"
+        emptyDescription="Create your first PO using the button above."
+      />
 
       {showForm && (
         <POForm
@@ -293,54 +276,65 @@ function POForm({ po, collectionName, onClose }) {
           </div>
 
           <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginBottom: '1.5rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-              <thead style={{ backgroundColor: '#f8fafc' }}>
-                <tr>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'left', fontWeight: 600, color: '#64748b' }}>Item Description</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', width: '80px', fontWeight: 600, color: '#64748b' }}>Qty</th>
-                  <th style={{ padding: '0.6rem 0.75rem', width: '90px', fontWeight: 600, color: '#64748b' }}>Unit</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', width: '110px', fontWeight: 600, color: '#64748b' }}>Unit Price</th>
-                  <th style={{ padding: '0.6rem 0.75rem', textAlign: 'right', width: '100px', fontWeight: 600, color: '#64748b' }}>Total</th>
-                  <th style={{ width: '36px' }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={idx} style={{ borderTop: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '0.5rem 0.75rem' }}>
-                      <input value={item.itemName} onChange={e => updateItem(idx, 'itemName', e.target.value)} placeholder="e.g. Tirzepatide 10mg" className="gcp-input" style={{ width: '100%' }} />
-                    </td>
-                    <td style={{ padding: '0.5rem 0.75rem' }}>
-                      <input type="number" min="1" value={item.quantity} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} className="gcp-input" style={{ width: '100%', textAlign: 'right' }} />
-                    </td>
-                    <td style={{ padding: '0.5rem 0.75rem' }}>
-                      <select value={item.unit} onChange={e => updateItem(idx, 'unit', e.target.value)} className="gcp-input" style={{ width: '100%' }}>
-                        <option value="vial">vial</option>
-                        <option value="box">box</option>
-                        <option value="kg">kg</option>
-                        <option value="mg">mg</option>
-                      </select>
-                    </td>
-                    <td style={{ padding: '0.5rem 0.75rem' }}>
-                      <input type="number" min="0" step="0.01" value={item.unitPrice} onChange={e => updateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)} className="gcp-input" style={{ width: '100%', textAlign: 'right' }} />
-                    </td>
-                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
-                      ${(item.quantity * item.unitPrice).toFixed(2)}
-                    </td>
-                    <td style={{ padding: '0.5rem 0.4rem', textAlign: 'center' }}>
-                      <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}><Trash2 size={14} /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot style={{ backgroundColor: '#f8fafc', borderTop: '2px solid #e2e8f0' }}>
-                <tr>
-                  <td colSpan={4} style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: '#64748b' }}>Total Amount:</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>${totalAmount.toFixed(2)}</td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
+            <DataTable
+              columns={[
+                {
+                  key: 'itemName',
+                  header: 'Item Description',
+                  render: (val, row, idx) => (
+                    <input value={val} onChange={e => updateItem(idx, 'itemName', e.target.value)} placeholder="e.g. Tirzepatide 10mg" className="gcp-input" style={{ width: '100%' }} />
+                  ),
+                },
+                {
+                  key: 'quantity',
+                  header: 'Qty',
+                  render: (val, row, idx) => (
+                    <input type="number" min="1" value={val} onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)} className="gcp-input" style={{ width: '100%', textAlign: 'right' }} />
+                  ),
+                },
+                {
+                  key: 'unit',
+                  header: 'Unit',
+                  render: (val, row, idx) => (
+                    <select value={val} onChange={e => updateItem(idx, 'unit', e.target.value)} className="gcp-input" style={{ width: '100%' }}>
+                      <option value="vial">vial</option>
+                      <option value="box">box</option>
+                      <option value="kg">kg</option>
+                      <option value="mg">mg</option>
+                    </select>
+                  ),
+                },
+                {
+                  key: 'unitPrice',
+                  header: 'Unit Price',
+                  render: (val, row, idx) => (
+                    <input type="number" min="0" step="0.01" value={val} onChange={e => updateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)} className="gcp-input" style={{ width: '100%', textAlign: 'right' }} />
+                  ),
+                },
+                {
+                  key: 'total',
+                  header: 'Total',
+                  render: (val, row) => (
+                    <span style={{ fontWeight: 600, color: '#0f172a' }}>${((row.quantity || 0) * (row.unitPrice || 0)).toFixed(2)}</span>
+                  ),
+                },
+                {
+                  key: 'actions',
+                  header: '',
+                  render: (val, row, idx) => (
+                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trash2 size={16} />
+                    </button>
+                  ),
+                },
+              ]}
+              data={items}
+              keyField={(row, idx) => idx.toString()}
+            />
+            <div style={{ padding: '0.75rem', backgroundColor: '#f8fafc', borderTop: '2px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+              <span style={{ fontWeight: 600, color: '#64748b' }}>Total Amount:</span>
+              <span style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>${totalAmount.toFixed(2)}</span>
+            </div>
           </div>
 
           {/* Status chips */}

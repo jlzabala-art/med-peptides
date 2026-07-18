@@ -15,7 +15,7 @@ import PhysiciansAnalyticsHeader from './PhysiciansAnalyticsHeader';
 import PhysiciansDirectory from './PhysiciansDirectory';
 import PhysicianProfileDrawer from './PhysicianProfileDrawer';
 import PhysicianOnboardingWizard from './PhysicianOnboardingWizard';
-import AdminPageHeader from '../AdminPageHeader';
+import PageHeader from '../../ui/PageHeader';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import { useAlgoliaSearch } from '../../../hooks/data/useAlgoliaSearch';
 import PhysicianFiltersBar from './PhysicianFiltersBar';
@@ -139,7 +139,7 @@ export default function AdminPhysiciansTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '1.5rem', backgroundColor: 'var(--background)' }}>
       {/* Page Header */}
-      <AdminPageHeader
+      <PageHeader
         title="Physicians Management"
         subtitle="Enterprise directory and performance tracking"
         icon={Users}

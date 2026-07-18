@@ -7,6 +7,7 @@ import { db } from '../../firebase';
 
 import EditablePriceCell from './EditablePriceCell';
 import BulkPriceAdjust from './BulkPriceAdjust';
+import DataTable from '../ui/DataTable';
 import './PriceTable.module.css';
 import notifier from '../../services/NotificationService';
 
@@ -49,45 +50,63 @@ export default function PriceTable({ products, onRefresh }) {
   return (
     <div className="price-table-wrapper">
       <BulkPriceAdjust products={localProducts} onRefresh={onRefresh} />
-      <table className="gcp-table">
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Retail</th>
-            <th>Wholesale</th>
-            <th>Clinic</th>
-          </tr>
-        </thead>
-        <tbody>
-          {localProducts.map((p) => (
-            <tr key={p.id}>
-              <td className="mono-data">{p.sku}</td>
-              <td style={{ fontWeight: 600 }}>{p.name}</td>
-              <td style={{ color: 'var(--text-muted)' }}>{p.category}</td>
+      <DataTable
+        data={localProducts}
+        keyField="id"
+        columns={[
+          {
+            key: 'sku',
+            header: 'SKU',
+            render: (p) => <div className="mono-data">{p.sku}</div>
+          },
+          {
+            key: 'name',
+            header: 'Name',
+            render: (p) => <div style={{ fontWeight: 600 }}>{p.name}</div>
+          },
+          {
+            key: 'category',
+            header: 'Category',
+            render: (p) => <div style={{ color: 'var(--text-muted)' }}>{p.category}</div>
+          },
+          {
+            key: 'retail',
+            header: 'Retail',
+            render: (p) => (
               <EditablePriceCell
                 productId={p.id}
                 field="retail"
                 value={p.pricing?.retail?.perUnit}
                 onSave={handleCellUpdate}
               />
+            )
+          },
+          {
+            key: 'wholesale',
+            header: 'Wholesale',
+            render: (p) => (
               <EditablePriceCell
                 productId={p.id}
                 field="wholesale"
                 value={p.pricing?.wholesale?.perUnit}
                 onSave={handleCellUpdate}
               />
+            )
+          },
+          {
+            key: 'clinic',
+            header: 'Clinic',
+            render: (p) => (
               <EditablePriceCell
                 productId={p.id}
                 field="clinic"
                 value={p.pricing?.clinic?.perUnit}
                 onSave={handleCellUpdate}
               />
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            )
+          }
+        ]}
+      />
     </div>
   );
 }

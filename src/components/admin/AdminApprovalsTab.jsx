@@ -5,24 +5,23 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import Bot from "lucide-react/dist/esm/icons/bot";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import AdminPageHeader from './AdminPageHeader';
-
-
-
-
-
+import PageHeader from '../ui/PageHeader';
+import GlobalSearchBar from '../ui/GlobalSearchBar';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
 import DataTable from '../ui/DataTable';
 import { Card } from '../ui/Card';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
 
-export default function AdminApprovalsTab() {
+export default function AdminApprovalsTab({ isSubTab }) {
   const [pendingDocs, setPendingDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [runningAiId, setRunningAiId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Escuchar POs y Bills pendientes de aprobación
@@ -125,6 +124,16 @@ export default function AdminApprovalsTab() {
     setRunningAiId(null);
   };
 
+  const filteredDocs = useMemo(() => {
+    if (!searchTerm) return pendingDocs;
+    const term = searchTerm.toLowerCase();
+    return pendingDocs.filter(r =>
+      (r.displayNumber || '').toLowerCase().includes(term) ||
+      (r.supplierName || '').toLowerCase().includes(term) ||
+      (r.docType || '').toLowerCase().includes(term)
+    );
+  }, [pendingDocs, searchTerm]);
+
   const columns = [
     {
       key: 'createdAt',
@@ -134,16 +143,12 @@ export default function AdminApprovalsTab() {
     {
       key: 'poNumber',
       header: 'ID Documento',
-      render: (r) => <span style={{ fontWeight: 600 }}>{r.displayNumber}</span>
+      render: (r) => <CopyableId value={r.displayNumber || r.id} />
     },
     {
       key: 'docType',
       header: 'Tipo',
-      render: (r) => (
-        <span style={{ padding: '0.2rem 0.5rem', background: '#eff6ff', color: '#2563eb', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
-          {r.docType}
-        </span>
-      )
+      render: (r) => <StatusBadge status={r.docType === 'Purchase Order' ? 'po_created' : 'pending'} label={r.docType} />
     },
     {
       key: 'supplierName',
@@ -201,18 +206,34 @@ export default function AdminApprovalsTab() {
   return (
     <>
     <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '3rem' }}>
-      <AdminPageHeader
-        title="Centro de Aprobaciones"
-        subtitle="Aprueba transacciones de alto valor antes de que sean procesadas."
-        icon={ShieldCheck}
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="Centro de Aprobaciones"
+          subtitle="Aprueba transacciones de alto valor antes de que sean procesadas."
+          icon={ShieldCheck}
+        />
+      )}
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <GlobalSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar por proveedor, número de documento..."
+          resultCount={loading ? undefined : filteredDocs.length}
+          namespace="admin-approvals"
+          size="lg"
+        />
+      </div>
+
       <Card style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Cargando documentos pendientes...</div>
         ) : (
           <DataTable
             columns={columns}
-            data={pendingDocs}
+            data={filteredDocs}
+            keyField="id"
+            emptyMessage="No hay documentos pendientes de aprobación."
           />
         )}
       </Card>

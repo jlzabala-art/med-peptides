@@ -21,6 +21,8 @@ import Building from 'lucide-react/dist/esm/icons/building';
 import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DataTable from '../../../ui/DataTable';
+
 
 const MOCK_SUPPLIERS = [
   {
@@ -613,55 +615,41 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
           <Award size={24} color="#3b82f6" />
           Supplier Rankings
         </h3>
-        <div className="si-table-container si-desktop-table">
-          <table className="si-table">
-            <thead>
-              <tr>
-                <th>Supplier</th>
-                <th>MOQ</th>
-                <th>Lead Time</th>
-                <th>Price (Avg)</th>
-                <th>Quality Score</th>
-                <th>Reliability</th>
-                <th>Health Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {suppliers.map((s) => (
-                <tr key={s.id} onClick={() => setSelectedSupplier(s)}>
-                  <td style={{ fontWeight: 600 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span
-                        className={getStatusBadge(s.status)}
-                        style={{ width: 8, height: 8, padding: 0, borderRadius: '50%' }}
-                      ></span>
-                      {s.name}
-                    </div>
-                  </td>
-                  <td>{s.moqDisplay || s.moq}</td>
-                  <td>{s.avgLeadTime} days</td>
-                  <td>{s.priceDisplay || 'Varies'}</td>
-                  <td>{s.qualityScore}/100</td>
-                  <td>{s.reliability}%</td>
-                  <td>
-                    <div
-                      className="si-score-ring"
-                      style={{
-                        border: `3px solid ${getHealthColor(s.healthScore)}`,
-                        color: getHealthColor(s.healthScore),
-                        width: '40px',
-                        height: '40px',
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      {s.healthScore}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          data={suppliers}
+          columns={[
+            {
+              key: 'name',
+              header: 'Supplier',
+              sortKey: 'name',
+              render: (s) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                  <span className={getStatusBadge(s.status)} style={{ width: 8, height: 8, padding: 0, borderRadius: '50%' }}></span>
+                  {s.name}
+                </div>
+              )
+            },
+            { key: 'moq', header: 'MOQ', render: (s) => s.moqDisplay || s.moq },
+            { key: 'avgLeadTime', header: 'Lead Time', sortValue: (s) => s.avgLeadTime, render: (s) => `${s.avgLeadTime} days` },
+            { key: 'price', header: 'Price (Avg)', render: (s) => s.priceDisplay || 'Varies' },
+            { key: 'qualityScore', header: 'Quality Score', align: 'right', sortValue: (s) => s.qualityScore, render: (s) => `${s.qualityScore}/100` },
+            { key: 'reliability', header: 'Reliability', align: 'right', sortValue: (s) => s.reliability, render: (s) => `${s.reliability}%` },
+            {
+              key: 'healthScore',
+              header: 'Health Score',
+              align: 'center',
+              sortValue: (s) => s.healthScore,
+              render: (s) => (
+                <div className="si-score-ring" style={{ border: `3px solid ${getHealthColor(s.healthScore)}`, color: getHealthColor(s.healthScore), width: '40px', height: '40px', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', margin: '0 auto' }}>
+                  {s.healthScore}
+                </div>
+              )
+            }
+          ]}
+          keyField="id"
+          onRowClick={setSelectedSupplier}
+          emptyTitle="No suppliers found"
+        />
 
         <div className="si-mobile-card-container">
           {suppliers.map((s) => (

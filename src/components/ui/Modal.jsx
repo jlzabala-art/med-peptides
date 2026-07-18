@@ -61,17 +61,7 @@ export default function Modal({
 
   return createPortal(
     <div
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(32,33,36,0.6)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-        padding: '1rem',
-        animation: 'fadeIn 0.2s ease-out'
-      }}
+      className="modal-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}
@@ -85,28 +75,17 @@ export default function Modal({
         aria-modal="true"
         aria-label={title || 'Dialog'}
         tabIndex={-1}
-        style={{ 
-          width: '100%', 
-          maxWidth: mw, 
-          backgroundColor: '#fff',
-          display: 'flex', 
-          flexDirection: 'column',
-          maxHeight: '90vh',
-          boxShadow: '0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2)'
-        }}
+        style={{ maxWidth: mw }}
       >
         {/* Header */}
         {title && (
-          <div className="gcp-header" style={{ padding: 'max(1.25rem, env(safe-area-inset-top)) 1.25rem 1.25rem 1.25rem' }}>
+          <div className="gcp-header modal-header">
             {title}
             <button
               type="button"
               onClick={onClose}
               aria-label="Close dialog"
-              style={{ 
-                background: 'none', border: 'none', cursor: 'pointer', 
-                color: 'var(--gcp-text-muted)', display: 'flex', alignItems: 'center' 
-              }}
+              className="modal-close-btn"
             >
               <X size={20} />
             </button>
@@ -114,15 +93,68 @@ export default function Modal({
         )}
 
         {/* Body */}
-        <div style={{ padding: '1.25rem', overflowY: 'auto' }}>
+        <div className="modal-body">
           {children}
         </div>
 
         {/* Footer */}
-        {footer && <div style={{ padding: '1.25rem', borderTop: '1px solid var(--gcp-border)' }}>{footer}</div>}
+        {footer && <div className="modal-footer">{footer}</div>}
       </div>
       <style>{`
+        .modal-overlay {
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background-color: rgba(32,33,36,0.6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 1rem;
+          animation: fadeIn 0.2s ease-out;
+        }
+        .modal-container {
+          width: 100%;
+          background-color: #fff;
+          display: flex;
+          flex-direction: column;
+          max-height: 90vh;
+          box-shadow: 0 24px 38px 3px rgba(0,0,0,0.14), 0 9px 46px 8px rgba(0,0,0,0.12), 0 11px 15px -7px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+          padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 1.25rem 1.25rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .modal-close-btn {
+          background: none; border: none; cursor: pointer; 
+          color: var(--gcp-text-muted); display: flex; align-items: center;
+        }
+        .modal-body {
+          padding: 1.25rem;
+          overflow-y: auto;
+        }
+        .modal-footer {
+          padding: 1.25rem;
+          border-top: 1px solid var(--gcp-border);
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Mobile specific styles (Bottom Sheet) */
+        @media (max-width: 768px) {
+          .modal-overlay {
+            padding: 0;
+            align-items: flex-end;
+          }
+          .modal-container {
+            max-width: 100% !important;
+            max-height: 95vh;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
       `}</style>
     </div>,
     document.body,

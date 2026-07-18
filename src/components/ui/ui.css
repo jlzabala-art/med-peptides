@@ -3,6 +3,14 @@
    Uses design tokens from styles/theme.css
    ============================================================ */
 
+/* Base UI styles - mostly defining utility classes and reset styles */
+
+/* Performance optimization for large lists/tables */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1000px; /* Estimates size to avoid layout shift */
+}
+
 /* ─── Shared Tokens ──────────────────────────────────────────── */
 :root {
   --ui-font: var(--font-main, 'Roboto', 'Inter', system-ui, sans-serif);
@@ -757,6 +765,16 @@
   .kpi-scroll-row > * {
     flex: unset;
     min-width: unset;
+  }
+}
+
+/* Responsive padding for DataModule container */
+.data-module-container {
+  padding: 1.5rem;
+}
+@media (max-width: 768px) {
+  .data-module-container {
+    padding: 0.75rem;
   }
 }
 

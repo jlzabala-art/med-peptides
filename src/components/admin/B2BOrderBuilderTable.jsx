@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import UniversalItemPicker from '../shared/ItemPicker/UniversalItemPicker';
-import { Trash2, Plus, ShoppingBag } from '@/lib/icons';
+import { Trash2, Plus, ShoppingBag } from 'lucide-react';
+import DataTable from '../ui/DataTable';
 
 export default function B2BOrderBuilderTable({ items, onChange }) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -37,95 +38,110 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
 
   const totalAmount = items.reduce((sum, item) => sum + ((parseFloat(item.rate) || 0) * (parseInt(item.quantity) || 0)), 0);
 
+  const columns = useMemo(() => [
+    {
+      key: 'name',
+      header: 'Detalle del Artículo',
+      render: (val, row) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#0f172a' }}>{row.name || 'Sin nombre'}</div>
+          {row.sku && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SKU: {row.sku}</div>}
+        </div>
+      )
+    },
+    {
+      key: 'type',
+      header: 'Tipo',
+      render: (val) => (
+        <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.4rem', background: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 600 }}>
+          {val ? val.toUpperCase() : 'N/A'}
+        </span>
+      )
+    },
+    {
+      key: 'quantity',
+      header: 'Cantidad',
+      render: (val, row) => {
+        const index = items.findIndex((i) => i.id === row.id);
+        const overStock = row.stock !== undefined && row.quantity > row.stock;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <input 
+              type="number" 
+              min="1" 
+              value={row.quantity} 
+              onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+              style={{ ...inputStyle, borderColor: overStock ? '#ef4444' : 'var(--border)' }} 
+            />
+            {overStock && (
+              <span style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: 600 }}>Stock insuf. ({row.stock} disp.)</span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'rate',
+      header: 'Tarifa (€)',
+      render: (val, row) => {
+        const index = items.findIndex((i) => i.id === row.id);
+        return row.isApiWithScore ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <input 
+              type="number" 
+              value={row.rate} 
+              onChange={(e) => updateItem(index, 'rate', e.target.value)}
+              placeholder="Fórmula"
+              style={{ ...inputStyle, borderColor: 'var(--color-primary)', background: 'rgba(0,54,102,0.02)' }} 
+            />
+            <span style={{ fontSize: '0.6rem', color: 'var(--color-primary)', fontWeight: 600 }}>Cálculo Manual</span>
+          </div>
+        ) : (
+          <input 
+            type="number" 
+            value={row.rate} 
+            onChange={(e) => updateItem(index, 'rate', e.target.value)}
+            style={inputStyle} 
+          />
+        );
+      }
+    },
+    {
+      key: 'amount',
+      header: 'Importe (€)',
+      render: (val, row) => {
+        const amount = ((parseFloat(row.rate) || 0) * (parseInt(row.quantity) || 0)).toFixed(2);
+        return <strong style={{ color: 'var(--color-text-primary)' }}>{amount}</strong>;
+      }
+    },
+    {
+      key: 'actions',
+      header: '',
+      align: 'center',
+      render: (val, row) => {
+        const index = items.findIndex((i) => i.id === row.id);
+        return (
+          <button onClick={() => removeItem(index)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.4rem', borderRadius: '4px' }}>
+            <Trash2 size={16} />
+          </button>
+        );
+      }
+    }
+  ], [items, onChange]);
+
   return (
     <div style={{ width: '100%', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden', background: '#fff', position: 'relative' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-        <thead style={{ background: 'var(--color-bg-app)', borderBottom: '1px solid var(--border)' }}>
-          <tr>
-            <th style={thStyle}>Detalle del Artículo</th>
-            <th style={thStyle}>Tipo</th>
-            <th style={thStyle}>Cantidad</th>
-            <th style={thStyle}>Tarifa (€)</th>
-            <th style={thStyle}>Importe (€)</th>
-            <th style={thStyle}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.length === 0 && (
-            <tr>
-              <td colSpan="6" style={{ padding: '3rem 1rem', textAlign: 'center', color: '#64748b' }}>
-                <ShoppingBag size={32} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-                <p>No hay artículos en este pedido.</p>
-                <button 
-                  onClick={() => setIsPickerOpen(true)}
-                  style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
-                >
-                  <Plus size={16} /> Buscar y Añadir Artículos
-                </button>
-              </td>
-            </tr>
-          )}
-          {items.map((item, index) => {
-            const amount = ((parseFloat(item.rate) || 0) * (parseInt(item.quantity) || 0)).toFixed(2);
-            return (
-              <tr key={item.id || index} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={tdStyle}>
-                  <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.name || 'Sin nombre'}</div>
-                  {item.sku && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SKU: {item.sku}</div>}
-                </td>
-                <td style={tdStyle}>
-                  <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.4rem', background: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0', color: '#64748b', fontWeight: 600 }}>
-                    {item.type ? item.type.toUpperCase() : 'N/A'}
-                  </span>
-                </td>
-                <td style={tdStyle}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      value={item.quantity} 
-                      onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                      style={{ ...inputStyle, borderColor: item.stock !== undefined && item.quantity > item.stock ? '#ef4444' : 'var(--border)' }} 
-                    />
-                    {item.stock !== undefined && item.quantity > item.stock && (
-                      <span style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: 600 }}>Stock insuf. ({item.stock} disp.)</span>
-                    )}
-                  </div>
-                </td>
-                <td style={tdStyle}>
-                  {item.isApiWithScore ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                      <input 
-                        type="number" 
-                        value={item.rate} 
-                        onChange={(e) => updateItem(index, 'rate', e.target.value)}
-                        placeholder="Fórmula"
-                        style={{ ...inputStyle, borderColor: 'var(--color-primary)', background: 'rgba(0,54,102,0.02)' }} 
-                      />
-                      <span style={{ fontSize: '0.6rem', color: 'var(--color-primary)', fontWeight: 600 }}>Cálculo Manual</span>
-                    </div>
-                  ) : (
-                    <input 
-                      type="number" 
-                      value={item.rate} 
-                      onChange={(e) => updateItem(index, 'rate', e.target.value)}
-                      style={inputStyle} 
-                    />
-                  )}
-                </td>
-                <td style={{ ...tdStyle, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                  {amount}
-                </td>
-                <td style={{ ...tdStyle, textAlign: 'center' }}>
-                  <button onClick={() => removeItem(index)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.4rem', borderRadius: '4px' }}>
-                    <Trash2 size={16} />
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="gcp-table-container">
+        <DataTable
+          columns={columns}
+          data={items}
+          keyField="id"
+          emptyTitle="No hay artículos en este pedido."
+          emptyDescription="Busca y añade artículos al pedido."
+          emptyActionLabel={<><Plus size={16} /> Añadir Artículos</>}
+          onEmptyAction={() => setIsPickerOpen(true)}
+        />
+      </div>
       
       {items.length > 0 && (
         <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafbfc' }}>
@@ -194,20 +210,6 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
     </div>
   );
 }
-
-const thStyle = {
-  padding: '0.75rem 1rem',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  color: 'var(--color-text-secondary)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em'
-};
-
-const tdStyle = {
-  padding: '1rem',
-  verticalAlign: 'middle'
-};
 
 const inputStyle = {
   width: '90px',

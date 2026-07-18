@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldAlert, TrendingDown, ShoppingCart, CheckCircle, Package } from '@/lib/icons';
 import { calculateProtocolRequirements, calculateInventoryImpact } from '../../../engine/protocolMath';
 import { useGlobalStore } from '../../../stores/globalStore';
+import DataTable from '../../ui/DataTable';
 
 export default function InventoryImpact({ protocol }) {
   const [inventory, setInventory] = useState([]);
@@ -94,52 +95,65 @@ export default function InventoryImpact({ protocol }) {
         )}
       </div>
 
-      <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Product</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Required Vials</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Current Stock</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Status</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventory.map(item => (
-              <tr key={item.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="gcp-table-container">
+        <DataTable
+          columns={[
+            {
+              key: 'name',
+              header: 'Product',
+              render: (val) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>
                   <Package size={18} color="var(--text-muted)" />
-                  {item.name}
-                </td>
-                <td style={{ padding: '1rem', fontSize: '0.95rem' }}>{item.requiredVials}</td>
-                <td style={{ padding: '1rem', fontSize: '0.95rem' }}>{item.currentStock}</td>
-                <td style={{ padding: '1rem' }}>
-                  {item.status === 'Critical' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--danger-light, #fee2e2)', color: 'var(--danger, #dc2626)', padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <ShieldAlert size={14} /> Shortage: {item.shortage}
-                    </span>
-                  ) : item.status === 'Low' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--warning-light, #fef3c7)', color: 'var(--warning, #d97706)', padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <TrendingDown size={14} /> Low Stock
-                    </span>
-                  ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--success-light, #dcfce7)', color: 'var(--success, #16a34a)', padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <CheckCircle size={14} /> Sufficient
-                    </span>
-                  )}
-                </td>
-                <td style={{ padding: '1rem', textAlign: 'right' }}>
-                  {item.shortage > 0 && (
+                  {val}
+                </div>
+              )
+            },
+            {
+              key: 'requiredVials',
+              header: 'Required Vials',
+              render: (val) => <span style={{ fontSize: '0.95rem' }}>{val}</span>
+            },
+            {
+              key: 'currentStock',
+              header: 'Current Stock',
+              render: (val) => <span style={{ fontSize: '0.95rem' }}>{val}</span>
+            },
+            {
+              key: 'status',
+              header: 'Status',
+              render: (val, item) => (
+                val === 'Critical' ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--danger-light, #fee2e2)', color: 'var(--danger, #dc2626)', padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
+                    <ShieldAlert size={14} /> Shortage: {item.shortage}
+                  </span>
+                ) : val === 'Low' ? (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--warning-light, #fef3c7)', color: 'var(--warning, #d97706)', padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
+                    <TrendingDown size={14} /> Low Stock
+                  </span>
+                ) : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--success-light, #dcfce7)', color: 'var(--success, #16a34a)', padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
+                    <CheckCircle size={14} /> Sufficient
+                  </span>
+                )
+              )
+            },
+            {
+              key: 'action',
+              header: 'Action',
+              render: (val, item) => (
+                <div style={{ textAlign: 'right' }}>
+                  {item.status === 'Critical' && (
                     <span style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer' }}>
                       Order {item.shortage} Vials
                     </span>
                   )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              )
+            }
+          ]}
+          data={inventory}
+          keyField={(row, idx) => idx.toString()}
+        />
       </div>
     </div>
   );

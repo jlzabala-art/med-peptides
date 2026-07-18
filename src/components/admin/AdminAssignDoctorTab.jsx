@@ -9,7 +9,7 @@ import Clock from "lucide-react/dist/esm/icons/clock";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import {
@@ -19,8 +19,10 @@ import {
 } from '../../services/assignmentService';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
-import AdminPageHeader from './AdminPageHeader';
+import PageHeader from '../ui/PageHeader';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import DataTable from '../ui/DataTable';
+import MetricCard from '../ui/MetricCard';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const displayName = (u) =>
@@ -51,7 +53,7 @@ const statusBadge = (status) => {
 };
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export default function AdminAssignPhysicianTab({ adminUid }) {
+export default function AdminAssignPhysicianTab({ adminUid, isSubTab = false }) {
   const [users, setUsers] = useState([]);
   const [relationships, setRelationships] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -150,6 +152,67 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
     return u ? displayName(u) : uid;
   };
 
+  const columns = useMemo(() => [
+    {
+      key: 'patient',
+      header: 'Patient',
+      render: (val, row) => <span style={{ fontWeight: 700 }}>{userName(row.patientId)}</span>
+    },
+    {
+      key: 'physician',
+      header: 'Physician',
+      render: (val, row) => <span>{userName(row.doctorId)}</span>
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (val, row) => statusBadge(row.status)
+    },
+    {
+      key: 'initiatedByRole',
+      header: 'Initiated By',
+      render: (val) => <span style={{ color: 'var(--text-muted)' }}>{val}</span>
+    },
+    {
+      key: 'date',
+      header: 'Date',
+      render: (val, row) => <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '—'}</span>
+    },
+    {
+      key: 'notes',
+      header: 'Notes',
+      render: (val) => (
+        <span style={{ color: 'var(--text-muted)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
+          {val || '—'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: '',
+      render: (val, row) => (
+        row.status !== 'revoked' ? (
+          <button
+            onClick={() => handleRevoke(row.id)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--color-danger)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+            }}
+          >
+            <XCircle size={14} /> Revoke
+          </button>
+        ) : null
+      )
+    }
+  ], [users]);
+
   // ─────────────────────────────────────────────────────────────────────────
   return (
     <div
@@ -157,11 +220,36 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
       style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
     >
       {/* Header — normalised */}
-      <AdminPageHeader
-        title="Physician ↔ Patient Assignments"
-        subtitle="Create and manage doctor-patient relationships. All changes take effect immediately."
-        icon={Link2}
-      />
+      {!isSubTab && (
+        <PageHeader
+          title="Physician ↔ Patient Assignments"
+          subtitle="Create and manage doctor-patient relationships. All changes take effect immediately."
+          icon={Link2}
+        />
+      )}
+
+      {/* KPI Cards (Rule #22) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <MetricCard
+          title="Total Assignments"
+          value={relationships.length}
+          icon={Link2}
+          color="var(--color-primary)"
+        />
+        <MetricCard
+          title="Active Assignments"
+          value={relationships.filter(r => r.status === 'active').length}
+          icon={CheckCircle2}
+          color="var(--color-success)"
+        />
+        <MetricCard
+          title="Pending Assignments"
+          value={relationships.filter(r => r.status === 'pending').length}
+          icon={Clock}
+          color="var(--color-warning)"
+          alert={relationships.filter(r => r.status === 'pending').length > 0}
+        />
+      </div>
 
       {/* ── Assign form ── */}
       <div className="card" style={{ padding: '1.75rem' }}>
@@ -366,88 +454,14 @@ export default function AdminAssignPhysicianTab({ adminUid }) {
 
         {loadingRels ? (
           <DataTableSkeleton rows={6} columns={6} />
-        ) : relationships.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No assignments yet.</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="gcp-table">
-              <thead>
-                <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                  {['Patient', 'Physician', 'Status', 'Initiated By', 'Date', 'Notes', ''].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          textAlign: 'left',
-                          padding: '0.5rem 0.75rem',
-                          fontSize: '0.7rem',
-                          fontWeight: 800,
-                          color: 'var(--text-muted)',
-                          textTransform: 'uppercase',
-                        }}
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {relationships.map((rel) => (
-                  <tr key={rel.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                    <td style={{ padding: '0.65rem 0.75rem', fontWeight: 700 }}>
-                      {userName(rel.patientId)}
-                    </td>
-                    <td style={{ padding: '0.65rem 0.75rem' }}>{userName(rel.doctorId)}</td>
-                    <td style={{ padding: '0.65rem 0.75rem' }}>{statusBadge(rel.status)}</td>
-                    <td style={{ padding: '0.65rem 0.75rem', color: 'var(--text-muted)' }}>
-                      {rel.initiatedByRole}
-                    </td>
-                    <td
-                      style={{
-                        padding: '0.65rem 0.75rem',
-                        color: 'var(--text-muted)',
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      {rel.createdAt ? new Date(rel.createdAt).toLocaleDateString() : '—'}
-                    </td>
-                    <td
-                      style={{
-                        padding: '0.65rem 0.75rem',
-                        color: 'var(--text-muted)',
-                        maxWidth: 180,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {rel.notes || '—'}
-                    </td>
-                    <td style={{ padding: '0.65rem 0.75rem' }}>
-                      {rel.status !== 'revoked' && (
-                        <button
-                          onClick={() => handleRevoke(rel.id)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: 'var(--color-danger)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.3rem',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                          }}
-                        >
-                          <XCircle size={14} /> Revoke
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="gcp-table-container">
+            <DataTable
+              columns={columns}
+              data={relationships}
+              keyField={(row) => row.id}
+              emptyMessage="No assignments yet."
+            />
           </div>
         )}
       </div>

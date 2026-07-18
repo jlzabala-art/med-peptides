@@ -1,6 +1,6 @@
 import React from 'react';
 import OrdersTable from '../../features/orders/components/OrdersTable';
-import { fetchOrdersAction } from '../../actions/ordersActions';
+import { fetchOrdersAction, fetchOrdersMetricsAction } from '../../actions/ordersActions';
 
 /**
  * Server Component Container for Orders
@@ -9,11 +9,15 @@ import { fetchOrdersAction } from '../../actions/ordersActions';
  */
 export default async function OrdersTab({ buyerId = null, accountManagerId = null, doctorId = null, readOnly = false, viewMode = 'admin' }) {
   // Fetch initial data securely on the server
-  const initialOrders = await fetchOrdersAction({ limitCount: 50, buyerId, accountManagerId, doctorId });
+  const [initialOrders, globalMetrics] = await Promise.all([
+    fetchOrdersAction({ limitCount: 50, buyerId, accountManagerId, doctorId }),
+    fetchOrdersMetricsAction({ buyerId, accountManagerId, doctorId })
+  ]);
   
   return (
     <OrdersTable
       initialOrders={initialOrders}
+      globalMetrics={globalMetrics}
       buyerId={buyerId}
       accountManagerId={accountManagerId}
       doctorId={doctorId}

@@ -7,12 +7,13 @@ import { fetchViewsConfigAction } from '../../actions/viewsConfigActions';
  * Pre-fetches the initial page of view configurations securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
-export default async function AdminViewsConfigTab() {
+export default async function AdminViewsConfigTab({ isSubTab = false }) {
   const initialConfigs = await fetchViewsConfigAction();
   
   return (
     <AdminViewsConfigTabClient 
       initialConfigs={initialConfigs}
+      isSubTab={isSubTab}
     />
   );
 }

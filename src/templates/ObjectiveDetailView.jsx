@@ -16,6 +16,7 @@ import MobileProductCard from '../snippets/MobileProductCard';
 import FAQModal from '../components/discovery/FAQModal';
 import PubMedPreviewPanel from '../components/discovery/PubMedPreviewPanel';
 import Breadcrumbs from '../components/common/Breadcrumbs';
+import DataTable from '../components/ui/DataTable';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { getFAQForProduct } from '../utils/discoveryEngine';
 import { Info, HelpCircle, BookOpen, ChevronRight, Beaker, Zap, Activity, FlaskConical, Bot } from '@/lib/icons';
@@ -120,48 +121,53 @@ export default function ObjectiveDetailView({
       <div className="card" style={{ padding: 0, overflow: 'hidden', border: 'none', boxShadow: 'var(--shadow-lg)', borderRadius: '24px' }}>
         <div style={{ overflowX: 'auto' }}>
           {/* Desktop View */}
-          <table className="desktop-only" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '950px' }}>
-            <thead style={{ backgroundColor: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-              <tr>
-                <th style={{ padding: '1.25rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Research Peptide</th>
-                <th style={{ padding: '1.25rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', width: '35%' }}>Description</th>
-                <th style={{ padding: '1.25rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Format</th>
-                <th style={{ padding: '1.25rem 1.5rem', textAlign: 'center', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scientific Tools</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groupedProducts.map((product, idx) => (
-                <tr key={idx} style={{ 
-                  borderBottom: '1px solid var(--border)',
-                  backgroundColor: idx % 2 === 0 ? 'white' : 'var(--background)'
-                }}>
-                  <td style={{ padding: '1.5rem' }}>
+          <div className="desktop-only">
+            <DataTable
+              columns={[
+                {
+                  key: 'product',
+                  header: 'Research Peptide',
+                  render: (val, row) => (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <img 
-                        src={product.image || '/peptide-placeholder.png'} 
-                        alt={product.name}
+                        src={row.image || '/peptide-placeholder.png'} 
+                        alt={row.name}
                         style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '10px', border: '1px solid var(--border)' }}
                         onError={(e) => { e.target.src = '/peptide-placeholder.png'; }}
                       />
                       <div>
-                        <div onClick={() => onSelectProduct(product.name)} style={{ fontWeight: 800, color: 'var(--primary)', cursor: 'pointer', fontSize: '1.1rem' }}>{product.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>CAS: {product.cas || 'Not Listed'}</div>
+                        <div onClick={() => onSelectProduct(row.name)} style={{ fontWeight: 800, color: 'var(--primary)', cursor: 'pointer', fontSize: '1.1rem' }}>{row.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>CAS: {row.cas || 'Not Listed'}</div>
                       </div>
                     </div>
-                  </td>
-                  <td style={{ padding: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                    {product.desc}
-                  </td>
-                  <td style={{ padding: '1.5rem' }}>
+                  )
+                },
+                {
+                  key: 'desc',
+                  header: 'Description',
+                  render: (val, row) => (
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                      {row.desc}
+                    </div>
+                  )
+                },
+                {
+                  key: 'format',
+                  header: 'Format',
+                  render: (val, row) => (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                      {product.allStrengths.map((s, sIdx) => (
+                      {row.allStrengths.map((s, sIdx) => (
                         <span key={sIdx} style={{ padding: '0.25rem 0.6rem', backgroundColor: '#f1f5f9', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                           {s}
                         </span>
                       ))}
                     </div>
-                  </td>
-                  <td style={{ padding: '1.5rem', textAlign: 'center' }}>
+                  )
+                },
+                {
+                  key: 'tools',
+                  header: 'Scientific Tools',
+                  render: (val, row) => (
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem' }}>
                       <button 
                         onClick={() => {
@@ -172,7 +178,7 @@ export default function ObjectiveDetailView({
                           window.dispatchEvent(new CustomEvent('open-clinical-ai', {
                             detail: {
                               action: 'ask_about_entity',
-                              entityName: product.name || '',
+                              entityName: row.name || '',
                               section: 'ObjectiveDetailView.Row',
                               autoSend: true
                             }
@@ -205,24 +211,28 @@ export default function ObjectiveDetailView({
                         <Bot size={14} /> ClinicAI
                       </button>
                       <button 
-                        onClick={() => handleOpenPubMed(product)}
+                        onClick={() => handleOpenPubMed(row)}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 0.9rem', fontSize: '0.8rem', borderRadius: '10px', border: '1px solid var(--border)', background: 'white', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
                       >
                         <BookOpen size={14} /> PubMed
                       </button>
                       <button 
-                        onClick={() => onSelectProduct(product.name)}
+                        onClick={() => onSelectProduct(row.name)}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', fontSize: '0.8rem', borderRadius: '10px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 700, cursor: 'pointer' }}
                       >
                         View Profile <ChevronRight size={14} />
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  )
+                }
+              ]}
+              data={groupedProducts}
+              keyField={(row) => row.id || row.name}
+              getRowProps={(row, idx) => ({
+                style: { backgroundColor: idx % 2 === 0 ? 'white' : 'var(--background)' }
+              })}
+            />
+          </div>
 
         {/* Mobile View */}
         <div className="mobile-only" style={{ padding: '1.25rem' }}>

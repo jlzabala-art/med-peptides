@@ -35,6 +35,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 
 
 import { getProtocolTemplate } from '../repositories/protocolRepository';
+import DataTable from '../components/ui/DataTable';
 import '../styles/architect.css';
 
 /* ─── constants ─────────────────────────────────────────────────── */
@@ -271,25 +272,43 @@ function SupplyPanel({ phases, durationWeeks, proto }) {
     <section className="arch-supply">
       <div className="arch-supply__header"><Package size={16}/> Logistics & Supply Summary</div>
       <div className="arch-supply__grid">
-        <table className="arch-vial-table">
-          <thead>
-            <tr><th>Compound</th><th>Total mg</th><th>Vial size</th><th>Vials needed</th></tr>
-          </thead>
-          <tbody>
-            {vials.map((v,i)=>(
-              <tr key={i}>
-                <td><span className="arch-compound-dot" style={{background: DRUG_COLORS[v.name.toLowerCase().replace('-','').replace(' ','').replace('mots','mots-c').replace('aod9604','aod-9604')] ?? 'var(--color-text-secondary)'}}/>{v.name}</td>
-                <td>{v.totalMg} mg</td>
-                <td>{v.vialSize} mg</td>
-                <td><strong>{v.vials}</strong></td>
-              </tr>
-            ))}
-            <tr className="arch-vial-table__kit">
-              <td colSpan={3}>Reconstitution Kit (BAC water, syringes)</td>
-              <td><strong>1 kit / 4 wk</strong></td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="arch-vial-table-wrapper" style={{ overflowX: 'auto', backgroundColor: 'white', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <DataTable
+            columns={[
+              {
+                key: 'name',
+                header: 'Compound',
+                render: (val, row) => (
+                  val === 'Reconstitution Kit (BAC water, syringes)' ? (
+                    <span>{val}</span>
+                  ) : (
+                    <><span className="arch-compound-dot" style={{background: DRUG_COLORS[val.toLowerCase().replace('-','').replace(' ','').replace('mots','mots-c').replace('aod9604','aod-9604')] ?? 'var(--color-text-secondary)'}}/>{val}</>
+                  )
+                )
+              },
+              {
+                key: 'totalMg',
+                header: 'Total mg',
+                render: (val, row) => val ? `${val} mg` : ''
+              },
+              {
+                key: 'vialSize',
+                header: 'Vial size',
+                render: (val, row) => val ? `${val} mg` : ''
+              },
+              {
+                key: 'vials',
+                header: 'Vials needed',
+                render: (val) => <strong>{val}</strong>
+              }
+            ]}
+            data={[
+              ...vials,
+              { name: 'Reconstitution Kit (BAC water, syringes)', vials: '1 kit / 4 wk' }
+            ]}
+            keyField={(row, idx) => idx.toString()}
+          />
+        </div>
 
         <div className="arch-cost-card">
           <div className="arch-cost-card__label"><DollarSign size={13}/> Estimated Cycle Budget</div>

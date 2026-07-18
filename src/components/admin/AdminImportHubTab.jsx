@@ -1,220 +1,189 @@
+"use strict";
 "use client";
 
 import Database from "lucide-react/dist/esm/icons/database";
 import FileUp from "lucide-react/dist/esm/icons/file-up";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import Fuse from 'fuse.js';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, writeBatch, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
-
-
-
-
-import ImportControlsPanel from './imports/ImportControlsPanel';
-import ImportAnalysisPanel from './imports/ImportAnalysisPanel';
+import { useCatalogStore } from '../../store/useCatalogStore';
+import { AtlasImportAgent } from '../../services/AtlasImportAgent';
 import toast from 'react-hot-toast';
 
-export default function AdminImportHubTab() {
+export default function AdminImportHubTab({ isSubTab = false }) {
+  const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState(null);
-  // Catalog Data
-  const [existingProducts, setExistingProducts] = useState([]);
-  // Controls State
-  const [source, setSource] = useState('Supplier Catalog');
-  const [profile, setProfile] = useState('Peptide Supplier');
-  const [rules, setRules] = useState({
-    match: true,
-    create: true,
-    updatePrice: true,
-    updateStock: true,
-    extractCoa: false,
-    generateImages: false,
-    syncZoho: true
-  });
+  const [file, setFile] = useState(null);
+  
+  // Connect to Zustand Cache
+  const { products: existingProducts, fetchCatalog } = useCatalogStore();
 
-  // Load existing products on mount for real-time matching
   useEffect(() => {
-    async function loadCatalog() {
-      try {
-        const snap = await getDocs(collection(db, 'products'));
-        const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setExistingProducts(products);
-      } catch (err) {
-        console.error("Failed to load catalog for matching:", err);
-      }
-    }
-    loadCatalog();
-  }, []);
+    fetchCatalog();
+  }, [fetchCatalog]);
 
-  const handleFileUpload = async (file) => {
+  const handleFileUpload = async (e) => {
+    const uploadedFile = e.target.files[0];
+    if (!uploadedFile) return;
+    setFile(uploadedFile);
+    setStep(2);
     setIsAnalyzing(true);
-    setAnalysisResults(null);
 
     try {
       // 1. Parse Excel/CSV File
-      const data = await file.arrayBuffer();
+      const data = await uploadedFile.arrayBuffer();
       const workbook = XLSX.read(data, { type: 'array' });
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(firstSheet);
 
-      if (rows.length === 0) {
-        throw new Error("File is empty or could not be parsed.");
-      }
+      if (rows.length === 0) throw new Error("File is empty.");
 
-      // 2. Setup Fuse for fuzzy matching existing products
-      const fuse = new Fuse(existingProducts, {
-        keys: ['name', 'sku', 'search_name'],
-        threshold: 0.3, // Lower is stricter
-        includeScore: true
-      });
-
-      const matched = [];
-      const newProds = [];
-      const priceChanges = [];
-
-      // 3. Process each row
-      rows.forEach(row => {
-        // Attempt to find product name/price in generic row keys
-        const rowName = row['Product Name'] || row['Name'] || row['Item'] || row['Description'] || Object.values(row)[0];
-        let rowPrice = row['Price'] || row['Cost'] || row['Unit Price'] || row['MSRP'] || null;
-        if (typeof rowPrice === 'string') rowPrice = parseFloat(rowPrice.replace(/[^0-9.]/g, ''));
-
-        if (!rowName) return;
-
-        const results = fuse.search(String(rowName));
-        if (results.length > 0) {
-          const match = results[0];
-          const confidence = Math.round((1 - match.score) * 100);
-          matched.push({
-            supplierName: rowName,
-            atlasName: match.item.name,
-            confidence
-          });
-
-          // Price change detection
-          if (rowPrice && match.item.price && rowPrice !== match.item.price) {
-            priceChanges.push({
-              productName: match.item.name,
-              sku: match.item.sku || 'N/A',
-              oldPrice: match.item.price,
-              newPrice: rowPrice
-            });
-          }
-        } else {
-          newProds.push({
-            name: rowName,
-            price: rowPrice || 0
-          });
-        }
-      });
-
-      // 4. Simulate small delay to let user see "AI Analyzing" spinner
-      setTimeout(() => {
-        setAnalysisResults({
-          summary: {
-            totalRows: rows.length,
-            matched: matched.length,
-            newProducts: newProds.length,
-            priceChanges: priceChanges.length,
-            detectedSupplier: file.name.split('.')[0] || 'Unknown',
-            confidence: 96
-          },
-          matchedProducts: matched.slice(0, 50), // Cap preview
-          newProducts: newProds.slice(0, 50),
-          priceChanges: priceChanges
-        });
-        setIsAnalyzing(false);
-      }, 1500);
+      // Real AI Analysis via Gemini
+      const analysisResult = await AtlasImportAgent.analyzeImportData(rows, existingProducts);
+      setAnalysisResults(analysisResult);
+      setIsAnalyzing(false);
+      setStep(3);
 
     } catch (err) {
-      console.error(err);
       toast.error(err.message || "Failed to process file.");
       setIsAnalyzing(false);
+      setStep(1);
     }
   };
 
-  const handleApproveAll = () => {
-    toast.success("AI Import approved! Changes are being synced to database and Zoho.");
-    // Real implementation would write the diffs to Firestore here.
-    setTimeout(() => {
-      setAnalysisResults(null);
-    }, 2000);
+  const handleApproveAll = async () => {
+    toast.loading("Writing to database...", { id: "import" });
+    try {
+      const batch = writeBatch(db);
+      
+      // Batch update prices
+      analysisResults.priceChanges.forEach(change => {
+        const ref = doc(db, 'products', change.id);
+        batch.update(ref, { price: change.newPrice });
+      });
+
+      // Batch create products
+      analysisResults.newProducts.forEach(prod => {
+        const ref = doc(collection(db, 'products'));
+        batch.set(ref, {
+          ...prod,
+          createdAt: new Date(),
+          status: 'active'
+        });
+      });
+
+      await batch.commit();
+      toast.success("AI Import complete! Changes synced to Firestore.", { id: "import" });
+      
+      // Invalidate cache so other tabs reflect changes instantly
+      useCatalogStore.getState().invalidateCache();
+      
+      setStep(4);
+    } catch (e) {
+      toast.error("Error during import: " + e.message, { id: "import" });
+    }
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto' }}>
-      {/* Top Header & KPIs */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <Database size={28} color="var(--primary)" />
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>Import Center 2.0</h1>
-          <span style={{ backgroundColor: '#e0e7ff', color: '#4f46e5', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700, marginLeft: '1rem' }}>
-            AI Powered
-          </span>
-        </div>
+    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+        <Sparkles size={28} color="#8b5cf6" />
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>AI Data Importer</h1>
+      </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-          <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>Total Catalogs Imported</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#3b82f6' }}>14</div>
+      {/* Wizard Steps */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem' }}>
+        {[1, 2, 3, 4].map(s => (
+          <div key={s} style={{ 
+            flex: 1, 
+            height: '4px', 
+            background: step >= s ? '#8b5cf6' : '#e2e8f0', 
+            borderRadius: '2px',
+            transition: 'background 0.3s ease'
+          }} />
+        ))}
+      </div>
+
+      {step === 1 && (
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+          <FileUp size={48} color="#94a3b8" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Upload Supplier Catalog</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Upload a CSV or Excel file. Atlas AI will automatically map the columns.</p>
+          <label style={{ 
+            cursor: 'pointer', 
+            background: 'var(--primary)', 
+            color: 'white', 
+            padding: '0.75rem 2rem', 
+            borderRadius: '8px', 
+            fontWeight: 600,
+            display: 'inline-block'
+          }}>
+            Select File
+            <input type="file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style={{ display: 'none' }} onChange={handleFileUpload} />
+          </label>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '1rem' }}>
+            <Sparkles size={48} color="#8b5cf6" />
           </div>
-          <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>Products Processed</div>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981' }}>18,452</div>
-          </div>
-          <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem' }}>Zoho Sync Status</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <CheckCircle2 size={24} color="#10b981" />
-              <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>Fully Synced</span>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Atlas AI is analyzing {file?.name}...</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Mapping columns, checking existing products, and detecting price changes.</p>
+        </div>
+      )}
+
+      {step === 3 && analysisResults && (
+        <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <CheckCircle2 color="#10b981" /> Analysis Complete
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '8px' }}>
+              <div style={{ fontWeight: 600, color: '#475569', marginBottom: '1rem' }}>Identified Mappings</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#334155', fontSize: '0.9rem', lineHeight: '1.8' }}>
+                <li><strong>Product Name:</strong> Column "{analysisResults.mapping.nameCol}"</li>
+                <li><strong>Price:</strong> Column "{analysisResults.mapping.priceCol}"</li>
+                <li><strong>SKU:</strong> Column "{analysisResults.mapping.skuCol}"</li>
+              </ul>
+            </div>
+            
+            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '8px' }}>
+              <div style={{ fontWeight: 600, color: '#475569', marginBottom: '1rem' }}>Summary</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#334155', fontSize: '0.9rem', lineHeight: '1.8' }}>
+                <li><strong>Rows Read:</strong> {analysisResults.summary.totalRows}</li>
+                <li><strong style={{ color: '#10b981' }}>New Products:</strong> {analysisResults.summary.newProducts}</li>
+                <li><strong style={{ color: '#f59e0b' }}>Price Updates:</strong> {analysisResults.summary.priceChanges}</li>
+              </ul>
             </div>
           </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+            <button onClick={() => setStep(1)} style={{ padding: '0.75rem 1.5rem', background: '#e2e8f0', color: '#475569', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={handleApproveAll} style={{ padding: '0.75rem 1.5rem', background: '#8b5cf6', color: 'white', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              Confirm & Import <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      <style>{`
-        .import-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 2rem;
-          min-height: 600px;
-        }
-        @media (min-width: 1024px) {
-          .import-grid {
-            grid-template-columns: 1fr 2fr;
-          }
-        }
-      `}</style>
-      {/* Split Screen Workspace */}
-      <div className="import-grid">
-        {/* Left: Controls */}
-        <div>
-          <ImportControlsPanel 
-            onFileUpload={handleFileUpload}
-            isAnalyzing={isAnalyzing}
-            source={source}
-            setSource={setSource}
-            profile={profile}
-            setProfile={setProfile}
-            rules={rules}
-            setRules={setRules}
-          />
+      {step === 4 && (
+        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '12px' }}>
+          <CheckCircle2 size={64} color="#10b981" style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Import Successful</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>All products and price updates have been synced to Firestore.</p>
+          <button onClick={() => { setStep(1); setFile(null); }} style={{ padding: '0.75rem 2rem', background: 'var(--primary)', color: 'white', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer' }}>
+            Import Another File
+          </button>
         </div>
-
-        {/* Right: Analysis & Results */}
-        <div>
-          <ImportAnalysisPanel 
-            isAnalyzing={isAnalyzing}
-            analysisResults={analysisResults}
-            onApproveAll={handleApproveAll}
-          />
-        </div>
-
-      </div>
-
+      )}
     </div>
   );
 }

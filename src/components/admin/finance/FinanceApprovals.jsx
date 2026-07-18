@@ -19,6 +19,7 @@ import AtlasAIFinanceInsights from './AtlasAIFinanceInsights';
 import { exportToCSV } from '../../../utils/exportUtils';
 import { usePreferences } from '../../../context/PreferencesContext';
 import notifier from '../../../services/NotificationService';
+import DataTable from '../../ui/DataTable';
 import { FileText, ClipboardList, Clock, BellRing, Receipt, Download, ExternalLink, ArrowRight, ChevronLeft, ChevronRight, Search, CheckCircle, Check } from '@/lib/icons';
 
 export default function FinanceApprovals({ dashboardData }) {
@@ -121,70 +122,87 @@ export default function FinanceApprovals({ dashboardData }) {
             </div>
           ) : (
             <>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
-                <thead>
-                  <tr style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border)' }}>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Customer / Clinic</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Invoice Number</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Due Date</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Balance</th>
-                    <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentInvoices.map((inv, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.03)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                      <td style={{ padding: '1.25rem 1.5rem', fontWeight: '700', color: 'var(--primary)' }}>
-                        {inv.customer_name}
-                      </td>
-                      <td style={{ padding: '1.25rem 1.5rem', fontFamily: 'monospace', fontWeight: '600', color: 'var(--text-muted)' }}>
-                        <a href={`https://books.zoho.com/app#/invoices/${inv.invoice_id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          {inv.invoice_number} <ExternalLink style={{ width: '12px', height: '12px' }} />
+              <div className="gcp-table-container">
+                <DataTable
+                  columns={[
+                    {
+                      key: 'customer_name',
+                      header: 'Customer / Clinic',
+                      render: (val) => <span style={{ fontWeight: 700, color: 'var(--primary)' }}>{val}</span>
+                    },
+                    {
+                      key: 'invoice_number',
+                      header: 'Invoice Number',
+                      render: (val, row) => (
+                        <a
+                          href={`https://books.zoho.com/app#/invoices/${row.invoice_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ textDecoration: 'none', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'monospace', fontWeight: 600 }}
+                        >
+                          {val} <ExternalLink style={{ width: '12px', height: '12px' }} />
                         </a>
-                      </td>
-                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '800', background: 'rgba(245, 158, 11, 0.1)', padding: '0.35rem 0.6rem', borderRadius: '4px', whiteSpace: 'nowrap' }}>
-                          {inv.due_date}
+                      )
+                    },
+                    {
+                      key: 'due_date',
+                      header: 'Due Date',
+                      render: (val) => (
+                        <span style={{ display: 'block', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800, background: 'rgba(245,158,11,0.1)', padding: '0.35rem 0.6rem', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                          {val}
                         </span>
-                      </td>
-                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right', fontWeight: '800', fontSize: '0.8rem', color: 'var(--warning)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
-                        {formatCurrency(typeof inv.balance === 'string' ? parseFloat(inv.balance.replace(/[^0-9.-]+/g,"")) : inv.balance)}
-                      </td>
-                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                      )
+                    },
+                    {
+                      key: 'balance',
+                      header: 'Balance',
+                      render: (val) => (
+                        <span style={{ display: 'block', textAlign: 'right', fontWeight: 800, fontSize: '0.8rem', color: 'var(--warning)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                          {formatCurrency(typeof val === 'string' ? parseFloat(val.replace(/[^0-9.-]+/g, '')) : val)}
+                        </span>
+                      )
+                    },
+                    {
+                      key: 'invoice_id',
+                      header: 'Actions',
+                      render: (val, row) => (
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-                          <button 
-                            onClick={() => handleSendReminder(inv.invoice_id)}
-                            disabled={processingId === `remind-${inv.invoice_id}`}
-                            className="gcp-btn-secondary" 
-                            style={{ padding: '0.4rem 0.5rem', opacity: processingId === `remind-${inv.invoice_id}` ? 0.5 : 1, cursor: processingId === `remind-${inv.invoice_id}` ? 'wait' : 'pointer' }} 
+                          <button
+                            onClick={() => handleSendReminder(val)}
+                            disabled={processingId === `remind-${val}`}
+                            className="gcp-btn-secondary"
+                            style={{ padding: '0.4rem 0.5rem', opacity: processingId === `remind-${val}` ? 0.5 : 1 }}
                             title="Send Reminder"
                           >
-                            {processingId === `remind-${inv.invoice_id}` ? <Check style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : <BellRing style={{ width: '16px', height: '16px', color: 'var(--warning)' }} />}
+                            {processingId === `remind-${val}` ? <Check style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : <BellRing style={{ width: '16px', height: '16px', color: 'var(--warning)' }} />}
                           </button>
-                          <button 
-                            onClick={() => handleMarkAsPaid(inv.invoice_id)}
-                            disabled={processingId === `paid-${inv.invoice_id}`}
-                            className="gcp-btn-secondary" 
-                            style={{ padding: '0.4rem 0.5rem', color: 'var(--success)', borderColor: 'var(--success)', opacity: processingId === `paid-${inv.invoice_id}` ? 0.5 : 1, cursor: processingId === `paid-${inv.invoice_id}` ? 'wait' : 'pointer' }} 
+                          <button
+                            onClick={() => handleMarkAsPaid(val)}
+                            disabled={processingId === `paid-${val}`}
+                            className="gcp-btn-secondary"
+                            style={{ padding: '0.4rem 0.5rem', color: 'var(--success)', borderColor: 'var(--success)', opacity: processingId === `paid-${val}` ? 0.5 : 1 }}
                             title="Mark as Paid"
                           >
-                            {processingId === `paid-${inv.invoice_id}` ? <Check style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : <CheckCircle style={{ width: '16px', height: '16px', color: 'var(--success)' }} />}
+                            {processingId === `paid-${val}` ? <Check style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : <CheckCircle style={{ width: '16px', height: '16px', color: 'var(--success)' }} />}
                           </button>
-                          <a 
-                            href={`https://books.zoho.com/app#/invoices/${inv.invoice_id}`} 
-                            target="_blank" 
+                          <a
+                            href={`https://books.zoho.com/app#/invoices/${val}`}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="gcp-btn-primary"
-                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: '700', background: 'var(--warning)', color: '#fff', border: 'none', borderRadius: '6px' }}
+                            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', fontSize: '0.75rem', fontWeight: 700, background: 'var(--warning)', color: '#fff', border: 'none', borderRadius: '6px' }}
                           >
                             Open Zoho <ExternalLink style={{ width: '14px', height: '14px' }} />
                           </a>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      )
+                    }
+                  ]}
+                  data={currentInvoices}
+                  keyField={(row, idx) => idx.toString()}
+                />
+              </div>
+
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderTop: '1px solid var(--border)', background: 'var(--surface-raised)' }}>
                   <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: '500' }}>

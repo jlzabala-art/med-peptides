@@ -7,13 +7,14 @@ import { fetchSettingsAction } from '../../actions/settingsActions';
  * Pre-fetches the initial global settings securely via Firebase Admin
  * and passes the data to the interactive Client Component.
  */
-export default async function AdminSettingsTab({ readOnly = false }) {
+export default async function AdminSettingsTab({ readOnly = false, isSubTab = false }) {
   const initialSettings = await fetchSettingsAction();
   
   return (
     <AdminSettingsTabClient 
       initialSettings={initialSettings}
       readOnly={readOnly}
+      isSubTab={isSubTab}
     />
   );
 }

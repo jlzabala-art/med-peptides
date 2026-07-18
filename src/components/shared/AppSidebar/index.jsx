@@ -9,42 +9,6 @@ import { usePathname } from 'next/navigation';
 import QuickCreateDropdown from './QuickCreateDropdown';
 import './AppSidebar.css';
 
-// ── Mobile Bottom Nav ────────────────────────────────────────────────────────
-function MobileBottomNav({ activeId, onNavigate }) {
-  const primaryModules = [
-    { id: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { id: '/patients', label: 'Patients', icon: Users },
-    { id: '/tasks', label: 'Tasks', icon: CheckSquare },
-    { id: '/clinics', label: 'Clinics', icon: Building },
-    { id: '/more', label: 'More', icon: MoreHorizontal }
-  ];
-
-  return (
-    <>
-      <button className="mobile-fab" aria-label="Quick Action">
-        <Plus size={24} strokeWidth={2.5} />
-      </button>
-
-      <nav className="mobile-bottom-nav">
-        {primaryModules.map(mod => {
-          const Icon = mod.icon;
-          const isActive = activeId === mod.id || (mod.id === '/more' && activeId === 'more');
-          return (
-            <button 
-              key={mod.id} 
-              className={`bottom-nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => onNavigate(mod.id)}
-            >
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="bottom-nav-label">{mod.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-    </>
-  );
-}
-
 // ── Main AppSidebar ───────────────────────────────────────────────────────────
 export default function AppSidebar({
   groups = [],
@@ -94,10 +58,6 @@ export default function AppSidebar({
 
   // Local visual expand/collapse
   const [expanded, setExpanded] = React.useState(true);
-
-  if (isMobile) {
-    return <MobileBottomNav activeId={activeId} onNavigate={onNavigate} />;
-  }
 
   // Helper to extract an item by ID from the global registry (so we can render favs/recents)
   const getItemById = (id) => {

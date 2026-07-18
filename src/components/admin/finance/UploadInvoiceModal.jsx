@@ -1,5 +1,5 @@
 import React from 'react';
-
+import DataTable from '../../ui/DataTable';
 
 
 
@@ -8,6 +8,7 @@ import React from 'react';
 
 import { useInvoiceUpload } from '../../../hooks/useInvoiceUpload';
 import { useAuth } from '../../../context/AuthContext';
+
 import { FileUp, X, CheckCircle, Loader2, AlertTriangle, FileText, Sparkles } from '@/lib/icons';
 
 export default function UploadInvoiceModal({ onClose, onComplete }) {
@@ -191,26 +192,17 @@ export default function UploadInvoiceModal({ onClose, onComplete }) {
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Extracted Line Items</label>
                 <div style={{ border: '1px solid var(--color-border)', borderRadius: '0.5rem', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', fontSize: '0.875rem', textAlign: 'left', borderCollapse: 'collapse' }}>
-                    <thead style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', textTransform: 'uppercase', fontWeight: 'bold', fontSize: '0.75rem' }}>
-                      <tr>
-                        <th style={{ padding: '0.5rem 1rem' }}>Description</th>
-                        <th style={{ padding: '0.5rem 1rem', textAlign: 'right' }}>Qty</th>
-                        <th style={{ padding: '0.5rem 1rem', textAlign: 'right' }}>Rate</th>
-                        <th style={{ padding: '0.5rem 1rem', textAlign: 'right' }}>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody style={{ borderTop: '1px solid var(--color-border)' }}>
-                      {(parsedData.line_items || []).map((item, idx) => (
-                         <tr key={idx} style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
-                          <td style={{ padding: '0.5rem 1rem', fontWeight: '500', color: 'var(--color-text-primary)' }}>{item.description}</td>
-                          <td style={{ padding: '0.5rem 1rem', textAlign: 'right', color: 'var(--color-text-secondary)' }}>{item.quantity}</td>
-                          <td style={{ padding: '0.5rem 1rem', textAlign: 'right', color: 'var(--color-text-secondary)' }}>{item.rate}</td>
-                          <td style={{ padding: '0.5rem 1rem', textAlign: 'right', fontWeight: '500', color: 'var(--color-text-primary)' }}>{item.amount}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <DataTable
+                  data={(parsedData.line_items || []).map((item, idx) => ({ ...item, _idx: idx }))}
+                  keyField="_idx"
+                  emptyTitle="No line items extracted"
+                  columns={[
+                    { key: 'description', header: 'Description', render: (r) => <span style={{ fontWeight: 500 }}>{r.description}</span> },
+                    { key: 'quantity', header: 'Qty', align: 'right', render: (r) => r.quantity },
+                    { key: 'rate', header: 'Rate', align: 'right', render: (r) => r.rate },
+                    { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span style={{ fontWeight: 500 }}>{r.amount}</span> }
+                  ]}
+                />
                 </div>
               </div>
             </div>

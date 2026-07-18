@@ -5,8 +5,9 @@ service cloud.firestore {
     function isAuthenticated() { return request.auth != null; }
 
     function isAdmin() {
-      // Temporarily allowing all authenticated users to act as admin to resolve the crash.
-      return isAuthenticated();
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // ── B2B Portal Role Helpers ──────────────────────────────────────────────

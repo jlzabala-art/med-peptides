@@ -8,6 +8,8 @@ import SupplierTableView from './suppliers/SupplierTableView';
 import SupplierDirectoryView from './suppliers/SupplierDirectoryView';
 import SupplierPagination from './suppliers/SupplierPagination';
 import SupplierDetail from './suppliers/SupplierDetail';
+import PageHeader from '../ui/PageHeader';
+import Building2 from "lucide-react/dist/esm/icons/building-2";
 import toast from 'react-hot-toast';
 
 export default function AdminWholesellersTab({ isMobile }) {
@@ -93,6 +95,12 @@ export default function AdminWholesellersTab({ isMobile }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1.25rem', backgroundColor: 'var(--background)' }}>
+
+      <PageHeader
+        title="Wholesalers & Suppliers"
+        subtitle="Enterprise supplier directory — manage relationships, contracts, and sourcing."
+        icon={Building2}
+      />
       
       {/* 1. KPIs Layer */}
       <SupplierKPIs 

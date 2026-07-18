@@ -630,142 +630,43 @@ function DosageTab({ protocol, products, onProductClick }) {
                 </div>
 
                 {items.length === 0 ? (
-                  <p
-                    style={{
-                      color: '#94a3b8',
-                      fontStyle: 'italic',
-                      fontSize: '0.82rem',
-                      padding: '0.75rem 1rem',
-                      margin: 0,
-                    }}
-                  >
-                    No products in this phase.
-                  </p>
+                  <EmptyState
+                    icon={Activity}
+                    title="No products"
+                    subtitle="No products in this phase."
+                  />
                 ) : (
-                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                    <table
-                      style={{
-                        minWidth: 460,
-                        width: '100%',
-                        borderCollapse: 'collapse',
-                        fontSize: '0.82rem',
+                  <div style={{ borderRadius: '8px', overflow: 'hidden' }}>
+                    <DataTable
+                      data={items.map((it, i) => ({ ...it, _idx: i }))}
+                      keyField="_idx"
+                      onRowClick={(row) => {
+                        const product = getProductDetails(row.productId, row.productName || row.product_name);
+                        if (onProductClick && row.productId) onProductClick(product);
                       }}
-                    >
-                      <thead>
-                        <tr style={{ background: '#f8fafc' }}>
-                          <th
-                            style={{
-                              padding: '0.5rem 1rem',
-                              textAlign: 'left',
-                              color: '#64748b',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            Compound
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.5rem 0.5rem',
-                              textAlign: 'left',
-                              color: '#64748b',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            Dosage
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.5rem 0.5rem',
-                              textAlign: 'left',
-                              color: '#64748b',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            Frequency
-                          </th>
-                          <th
-                            style={{
-                              padding: '0.5rem 0.5rem',
-                              textAlign: 'left',
-                              color: '#64748b',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            Route
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {items.map((item, j) => {
-                          const product = getProductDetails(
-                            item.productId,
-                            item.productName || item.product_name
-                          );
-                          const clickable = onProductClick && item.productId;
-                          return (
-                            <tr
-                              key={j}
-                              style={{
-                                borderTop: '1px solid #f1f5f9',
-                                cursor: clickable ? 'pointer' : 'default',
-                                transition: 'background 0.1s',
-                              }}
-                              onClick={() => clickable && onProductClick(product)}
-                              onMouseEnter={(e) => {
-                                if (clickable) e.currentTarget.style.background = '#f8fafc';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '';
-                              }}
-                            >
-                              <td
-                                style={{
-                                  padding: '0.7rem 1rem',
-                                  fontWeight: 500,
-                                  color: '#0f172a',
-                                }}
-                              >
+                      columns={[
+                        { key: 'compound', header: 'Compound', render: (r) => {
+                            const product = getProductDetails(r.productId, r.productName || r.product_name);
+                            return (
+                              <span style={{ fontWeight: 500, color: '#0f172a' }}>
                                 {product.name}
-                                {!item.productId && (
-                                  <span
-                                    style={{
-                                      marginLeft: 6,
-                                      fontSize: '0.65rem',
-                                      padding: '1px 4px',
-                                      background: '#fef08a',
-                                      color: '#854d0e',
-                                      borderRadius: 4,
-                                    }}
-                                  >
+                                {!r.productId && (
+                                  <span style={{ marginLeft: 6, fontSize: '0.65rem', padding: '1px 4px', background: '#fef08a', color: '#854d0e', borderRadius: 4 }}>
                                     Legacy
                                   </span>
                                 )}
-                                {clickable && (
-                                  <ExternalLink
-                                    size={10}
-                                    color="#94a3b8"
-                                    style={{ marginLeft: 4 }}
-                                  />
+                                {onProductClick && r.productId && (
+                                  <ExternalLink size={10} color="#94a3b8" style={{ marginLeft: 4 }} />
                                 )}
-                              </td>
-                              <td style={{ padding: '0.7rem 0.5rem', color: '#475569' }}>
-                                {item.dosage || '—'}
-                              </td>
-                              <td style={{ padding: '0.7rem 0.5rem', color: '#475569' }}>
-                                {item.frequency || item.schedule || '—'}
-                              </td>
-                              <td style={{ padding: '0.7rem 0.5rem', color: '#475569' }}>
-                                {item.route || item.administration_route || '—'}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                              </span>
+                            );
+                          } 
+                        },
+                        { key: 'dosage', header: 'Dosage', render: (r) => <span style={{ color: '#475569' }}>{r.dosage || '—'}</span> },
+                        { key: 'frequency', header: 'Frequency', render: (r) => <span style={{ color: '#475569' }}>{r.frequency || r.schedule || '—'}</span> },
+                        { key: 'route', header: 'Route', render: (r) => <span style={{ color: '#475569' }}>{r.route || r.administration_route || '—'}</span> }
+                      ]}
+                    />
                   </div>
                 )}
 

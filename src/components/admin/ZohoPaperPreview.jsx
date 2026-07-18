@@ -1,4 +1,6 @@
 import React from 'react';
+import { FileText, Download } from '@/lib/icons';
+import DataTable from '../ui/DataTable';
 
 // Base style for the A4-proportioned preview card
 const paperStyle = {
@@ -120,47 +122,58 @@ export default function ZohoPaperPreview({
 
         {/* Items Table */}
         <div style={{ marginTop: '2.5rem' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.82rem' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #0f172a' }}>
-                <th style={{ padding: '0.75rem', width: '50%', color: '#475569', fontWeight: 700 }}>Item & Description</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', color: '#475569', fontWeight: 700 }}>Qty</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', color: '#475569', fontWeight: 700 }}>Price</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', color: '#475569', fontWeight: 700 }}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length === 0 ? (
-                <tr>
-                  <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No items in this document.</td>
-                </tr>
-              ) : items.map((item, i) => {
-                const cost = parseFloat(item.supplierUnitCost || item.expectedCost || item.rate || item.unitPrice || 0);
-                const disc = parseFloat(item.itemDiscount || 0);
-                const rate = Math.max(0, cost - disc);
-                const qty = parseInt(item.quantity || 1);
-                
-                return (
-                  <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '0.75rem' }}>
-                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.itemName || item.name}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
-                        {item.unit && `Unit: ${item.unit}`} {item.sku ? `• SKU: ${item.sku}` : ''}
-                      </div>
-                    </td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', color: '#475569' }}>{qty}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', color: '#475569' }}>
+          <DataTable
+            data={items.map((item, i) => ({ ...item, _idx: i }))}
+            keyField="_idx"
+            columns={[
+              {
+                key: 'item',
+                header: 'Item & Description',
+                render: (r) => (
+                  <div>
+                    <div style={{ fontWeight: 600, color: '#0f172a' }}>{r.itemName || r.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>
+                      {r.unit && `Unit: ${r.unit}`} {r.sku ? `• SKU: ${r.sku}` : ''}
+                    </div>
+                  </div>
+                )
+              },
+              {
+                key: 'qty',
+                header: <div style={{ textAlign: 'right' }}>Qty</div>,
+                render: (r) => <div style={{ textAlign: 'right', color: '#475569' }}>{parseInt(r.quantity || 1)}</div>
+              },
+              {
+                key: 'price',
+                header: <div style={{ textAlign: 'right' }}>Price</div>,
+                render: (r) => {
+                  const cost = parseFloat(r.supplierUnitCost || r.expectedCost || r.rate || r.unitPrice || 0);
+                  const disc = parseFloat(r.itemDiscount || 0);
+                  return (
+                    <div style={{ textAlign: 'right', color: '#475569' }}>
                       {fmtCurrency(cost)}
                       {disc > 0 && <span style={{ display: 'block', fontSize: '0.7rem', color: '#16a34a' }}>-{fmtCurrency(disc)} disc.</span>}
-                    </td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
+                    </div>
+                  );
+                }
+              },
+              {
+                key: 'total',
+                header: <div style={{ textAlign: 'right' }}>Total</div>,
+                render: (r) => {
+                  const cost = parseFloat(r.supplierUnitCost || r.expectedCost || r.rate || r.unitPrice || 0);
+                  const disc = parseFloat(r.itemDiscount || 0);
+                  const rate = Math.max(0, cost - disc);
+                  const qty = parseInt(r.quantity || 1);
+                  return (
+                    <div style={{ textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
                       {fmtCurrency(rate * qty)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  );
+                }
+              }
+            ]}
+          />
         </div>
 
         {/* Totals Summary */}

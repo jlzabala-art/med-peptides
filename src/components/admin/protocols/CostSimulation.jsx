@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, Download, PieChart } from '@/lib/icons';
+import DataTable from '@/components/ui/DataTable';
 
 export default function CostSimulation({ protocol }) {
   const [costs, setCosts] = useState([]);
@@ -120,31 +121,43 @@ export default function CostSimulation({ protocol }) {
         </div>
       </div>
 
-      <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Product Breakdown</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Vials</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Unit Cost</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Total Cost</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Unit Retail</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Total Retail</th>
-            </tr>
-          </thead>
-          <tbody>
-            {costs.map((item, idx) => (
-              <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.95rem' }}>{item.name}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontSize: '0.95rem' }}>{item.vialsRequired}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontSize: '0.95rem', color: 'var(--text-muted)' }}>AED {item.pharmacyCostPerVial}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600 }}>AED {item.totalCost}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontSize: '0.95rem', color: 'var(--text-muted)' }}>AED {item.recommendedRetailPerVial}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>AED {item.totalRetail}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="gcp-table-container">
+        <DataTable
+          columns={[
+            {
+              key: 'name',
+              header: 'Product Breakdown',
+              render: (val) => <span style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.95rem' }}>{val}</span>
+            },
+            {
+              key: 'vialsRequired',
+              header: 'Vials',
+              render: (val) => <div style={{ textAlign: 'right', fontSize: '0.95rem' }}>{val}</div>
+            },
+            {
+              key: 'pharmacyCostPerVial',
+              header: 'Unit Cost',
+              render: (val) => <div style={{ textAlign: 'right', fontSize: '0.95rem', color: 'var(--text-muted)' }}>AED {val}</div>
+            },
+            {
+              key: 'totalCost',
+              header: 'Total Cost',
+              render: (val) => <div style={{ textAlign: 'right', fontWeight: 600 }}>AED {val}</div>
+            },
+            {
+              key: 'recommendedRetailPerVial',
+              header: 'Unit Retail',
+              render: (val) => <div style={{ textAlign: 'right', fontSize: '0.95rem', color: 'var(--text-muted)' }}>AED {val}</div>
+            },
+            {
+              key: 'totalRetail',
+              header: 'Total Retail',
+              render: (val) => <div style={{ textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>AED {val}</div>
+            }
+          ]}
+          data={costs}
+          keyField={(row, idx) => idx.toString()}
+        />
       </div>
     </div>
   );
