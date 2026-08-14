@@ -40,7 +40,14 @@ export function createCacheManager(key, ttlMs) {
       _memCache = entry;
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem(key, JSON.stringify(entry));
+          const stringified = JSON.stringify(entry);
+          // Browsers typically limit localStorage to ~5MB. We leave some headroom.
+          // If the payload is > 3MB (approx 3,000,000 characters), we skip localStorage and rely on RAM only.
+          if (stringified.length > 3000000) {
+            console.warn(`[cacheManager] Payload for ${key} is too large (${Math.round(stringified.length / 1024)}KB). Skipping localStorage to prevent QuotaExceededError.`);
+          } else {
+            localStorage.setItem(key, stringified);
+          }
         } catch (err) {
           console.warn(`[cacheManager] Error writing ${key} to localStorage:`, err);
         }

@@ -57,7 +57,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   const [products, setProducts] = useState(() => {
     try {
       if (typeof window === 'undefined') return [];
-      const saved = localStorage.getItem('regenpept_products_cache');
+      const saved = localStorage.getItem('regenpept_products_cache_v4');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -129,10 +129,10 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
         const [prodData, protData] = await Promise.all([getActiveProducts(), getAllProtocols()]);
         setProducts(prodData);
         setProtocols(protData);
-        localStorage.setItem('regenpept_products_cache', JSON.stringify(prodData));
-        localStorage.setItem('regenpept_protocols_cache', JSON.stringify(protData));
+        // We do not manually set localStorage here because getActiveProducts and getAllProtocols
+        // should handle their own Layer 2 caching via cacheManager.
       } catch (err) {
-        console.warn("Failed to refresh catalog data, relying on local cache:", err);
+        console.warn("Failed to load catalog data for Clinical Assistant:", err);
       }
     };
     loadData();
@@ -565,23 +565,38 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           isRegistered={!!user}
           role={userProfile?.role}
           contextMode={contextMode}
+          pageContext={pageContext}
         />
-        {pageContext && (
-          <div style={{
-            padding: '0.4rem 1rem',
-            backgroundColor: 'var(--surface-raised, #f8fafc)',
-            borderBottom: '1px solid var(--border-light, #e2e8f0)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted, #64748b)',
-            fontWeight: 500
-          }}>
-            <PanelLeft size={14} style={{ opacity: 0.7 }} />
-            <span>Context: <strong>{pageContext.label || pageContext.activeTab}</strong></span>
-          </div>
-        )}
+        {pageContext && (() => {
+          const isProductContext = pageContext?.isProductPage || 
+            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
+            messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content));
+
+          const entityTitle = pageContext?.name || pageContext?.productName || pageContext?.entityName || (messages[0]?.content?.match(/about\s+([A-Za-z0-9\-]+)/i)?.[1]) || 'Product Research';
+
+          return (
+            <div style={{
+              padding: '0.4rem 1rem',
+              backgroundColor: isProductContext ? 'rgba(124, 58, 237, 0.04)' : 'var(--surface-raised, #f8fafc)',
+              borderBottom: `1px solid ${isProductContext ? 'rgba(124, 58, 237, 0.15)' : 'var(--border-light, #e2e8f0)'}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.75rem',
+              color: isProductContext ? '#7c3aed' : 'var(--text-muted, #64748b)',
+              fontWeight: 600
+            }}>
+              <PanelLeft size={14} style={{ opacity: 0.8 }} />
+              <span>
+                {isProductContext ? (
+                  <>🔬 Product Intelligence — <strong>{entityTitle}</strong></>
+                ) : (
+                  <>Context: <strong>{pageContext.label || pageContext.activeTab}</strong></>
+                )}
+              </span>
+            </div>
+          );
+        })()}
         {isMobile && (
           <SessionHistoryDrawer 
             isOpen={isHistoryOpen}
@@ -598,46 +613,64 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
         )}
 
         {/* Role-specific starter prompts (shown only when chat is empty) */}
-        {messages.length === 0 && suggestedPrompts.length > 0 && !isLoading && (
-          <div style={{ padding: '1rem 1.25rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem', opacity: 0.7 }}>
-              Suggested Actions
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-              {suggestedPrompts.map((p, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(p.prompt || p.label)}
-                  style={{
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '999px',
-                    backgroundColor: 'rgba(0,0,0,0.03)',
-                    border: `1.5px solid ${themeAccent}33`,
-                    color: themeAccent,
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.18s',
-                    whiteSpace: 'nowrap',
-                    lineHeight: 1.3
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = `${themeAccent}15`;
-                    e.currentTarget.style.borderColor = themeAccent;
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
-                    e.currentTarget.style.borderColor = `${themeAccent}33`;
-                  }}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {messages.length === 0 && !isLoading && (() => {
+          const isProductContext = pageContext?.isProductPage || 
+            Boolean(pageContext?.name || pageContext?.productName || pageContext?.entityName) ||
+            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
+            messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content));
 
-        <ContextActionCards cards={contextActions} onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
+          const displayPrompts = isProductContext ? [
+            { label: '🔬 Scientific Mechanism of Action', prompt: 'Tell me about the molecular mechanism of action for this product.' },
+            { label: '💊 Recommended Research Dosage', prompt: 'What are the studied clinical research dosages and protocols?' },
+            { label: '✨ Is this right for me?', prompt: 'Can you ask me 3 simple questions about my health goals to evaluate if this peptide fits my needs?' },
+            { label: '🧊 Reconstitution & Storage Guide', prompt: 'How do I reconstitute and store this product properly?' }
+          ] : suggestedPrompts;
+
+          if (!displayPrompts || displayPrompts.length === 0) return null;
+
+          return (
+            <div style={{ padding: '1rem 1.25rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem', opacity: 0.7 }}>
+                {isProductContext ? 'Product Inquiry Starters' : 'Suggested Actions'}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                {displayPrompts.map((p, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(p.prompt || p.label)}
+                    style={{
+                      padding: '0.4rem 0.8rem',
+                      borderRadius: '999px',
+                      backgroundColor: 'rgba(0,0,0,0.03)',
+                      border: `1.5px solid ${themeAccent}33`,
+                      color: themeAccent,
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.18s',
+                      whiteSpace: 'nowrap',
+                      lineHeight: 1.3
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = `${themeAccent}15`;
+                      e.currentTarget.style.borderColor = themeAccent;
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                      e.currentTarget.style.borderColor = `${themeAccent}33`;
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {messages.length <= 1 && !pageContext?.isProductPage && !Boolean(pageContext?.name || pageContext?.productName || pageContext?.entityName) && !(typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) && !messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)) && (
+          <ContextActionCards cards={contextActions} onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
+        )}
 
         <ChatMessageList 
           messages={messages}
@@ -732,15 +765,87 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
 
   if (!mounted) return null;
 
+  if (embedded) {
+    return (
+      <div className="embedded-clinical-assistant" style={{ 
+        height: '100%', 
+        border: '1px solid var(--border)', 
+        borderRadius: '12px', 
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        {renderChatContent()}
+        <SupportEscalationCard 
+          showSupportCard={showSupportCard}
+          isOpen={isOpen}
+          dismissSupportCard={() => setShowSupportCard(false)}
+          buildWhatsAppUrl={() => `https://wa.me/medpeptides?text=${getSessionSummary()}`}
+          trackSupportEvent={() => {}}
+          trackAIToWhatsApp={() => {}}
+          sessionId={sessionId}
+          messagesSent={messages.length}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="embedded-clinical-assistant" style={{ 
-      height: '100%', 
-      border: '1px solid var(--border)', 
-      borderRadius: '12px', 
-      overflow: 'hidden',
-      boxShadow: 'var(--shadow-sm)'
-    }}>
-      {renderChatContent()}
+    <>
+      <style>{`
+        @keyframes siriPulseEdge {
+          0% { box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.3); border: 2px solid rgba(79, 70, 229, 0.5); }
+          50% { box-shadow: 0 0 40px rgba(79, 70, 229, 0.9), inset 0 0 20px rgba(79, 70, 229, 0.6); border: 2px solid rgba(79, 70, 229, 1); }
+          100% { box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.3); border: 2px solid rgba(79, 70, 229, 0.5); }
+        }
+        .pulse-active {
+          animation: siriPulseEdge 2s infinite ease-in-out;
+        }
+      `}</style>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(15, 23, 42, 0.4)',
+                backdropFilter: 'blur(4px)',
+                zIndex: 9990,
+              }}
+            />
+            {/* Right-aligned Drawer Container */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: isMobile ? '100vw' : '520px',
+                backgroundColor: 'white',
+                boxShadow: '-10px 0 30px rgba(0,0,0,0.15)',
+                display: 'flex',
+                flexDirection: 'column',
+                zIndex: 9995,
+                overflow: 'hidden',
+                borderLeft: '1px solid rgba(0,0,0,0.08)'
+              }}
+              className={isPulsing ? 'pulse-active' : ''}
+            >
+              {renderChatContent()}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <SupportEscalationCard 
         showSupportCard={showSupportCard}
         isOpen={isOpen}
@@ -751,6 +856,6 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
         sessionId={sessionId}
         messagesSent={messages.length}
       />
-    </div>
+    </>
   );
 }

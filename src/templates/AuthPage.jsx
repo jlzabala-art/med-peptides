@@ -144,7 +144,7 @@ export default function AuthPage({ onBack }) {
         if (redirectTo) {
           router.push(redirectTo, { replace: true });
         } else if (isAdminUser) {
-          router.push('/admin', { replace: true });
+          window.location.assign('/admin');
         } else if (isPhysicianUser) {
           router.push('/doctor', { replace: true });
         } else if (role === 'wholesaler') {
@@ -172,7 +172,7 @@ export default function AuthPage({ onBack }) {
         if (redirectTo) {
           router.push(redirectTo, { replace: true });
         } else if (isAdminUser) {
-          router.push('/admin', { replace: true });
+          window.location.assign('/admin');
         } else if (isPhysicianUser) {
           router.push('/doctor', { replace: true });
         } else if (role === 'wholesaler') {
@@ -365,7 +365,7 @@ export default function AuthPage({ onBack }) {
         if (redirectTo) {
           router.push(redirectTo, { replace: true });
         } else if (isAdminUser) {
-          router.push('/admin', { replace: true });
+          window.location.assign('/admin');
         } else if (isPhysicianUser) {
           router.push('/doctor', { replace: true });
         } else if (role === 'wholesaler') {
@@ -384,26 +384,35 @@ export default function AuthPage({ onBack }) {
 
   // Immediate redirect for Admin users to avoid rendering issues
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
       if (isAdminNow) {
         const target = redirectTo || '/admin';
-        router.push(target);
+        // Use window.location.assign instead of router.push to force a hard reload
+        // This ensures the freshly synced session cookie is sent to the server
+        // and bypasses the Next.js client-side router cache which might have cached a 307 redirect
+        window.location.assign(target);
       }
     }
-  }, [user, isAdmin, isAdminByEmail, userProfile, redirectTo, router]);
+  }, [user, loading, isAdmin, isAdminByEmail, userProfile, redirectTo]);
 
   // If user is logged in, show profile status (Centered layout)
   if (user) {
-    // Admin users: render nothing while redirecting
-    const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
-    if (isAdminNow) {
-      return null;
-    }
     if (loading) {
       return (
         <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <div style={{ color: 'var(--text-muted)' }}>Loading account details...</div>
+        </div>
+      );
+    }
+
+    // Admin users: render a loading state while redirecting
+    const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
+    if (isAdminNow) {
+      return (
+        <div className="template-root" style={{ paddingTop: 'clamp(2rem, 8vw, 6rem)', minHeight: '100vh', backgroundColor: 'var(--surface)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '1rem' }}>
+          <div className="global-spinner" style={{ width: '32px', height: '32px' }}></div>
+          <div style={{ color: 'var(--text-muted)' }}>Redirigiendo al panel de administración...</div>
         </div>
       );
     }

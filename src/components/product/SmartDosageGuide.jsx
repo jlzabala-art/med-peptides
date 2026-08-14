@@ -25,7 +25,7 @@ import { Clock, Zap, AlertTriangle, ChevronDown, ChevronUp, Info, GraduationCap 
 export default function SmartDosageGuide({ product, selectedVariant }) {
   const [expanded, setExpanded] = useState(false);
 
-  const pk = product?.pharmacokinetics;
+  const pk = product?.pharmacokinetics || {};
   const scientificPK = useMemo(() => getPeptidePK(product?.slug), [product?.slug]);
 
   // ── Parse half-life string → numeric hours ──────────────────────────────
@@ -61,36 +61,36 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
 
     if (halfLifeHours < 1) {
       return {
-        label: 'Múltiples veces al día',
-        detail: 'Vida media muy corta (< 1 hora). Los protocolos de investigación suelen estudiar infusiones continuas o dosis divididas.',
+        label: 'Multiple times a day',
+        detail: 'Very short half-life (< 1 hour). Research protocols typically study continuous infusions or divided doses.',
         icon: '⚡',
         severity: 'caution',
       };
     } else if (halfLifeHours < 6) {
       return {
-        label: 'Dos a tres veces al día (BID/TID)',
-        detail: `Con una vida media de ~${halfLifeHours.toFixed(1)}h, la mayoría de los protocolos de investigación dividen las dosis para mantener concentraciones estables.`,
+        label: 'Two to three times a day (BID/TID)',
+        detail: `With a half-life of ~${halfLifeHours.toFixed(1)}h, most research protocols divide doses to maintain stable concentrations.`,
         icon: '⏱',
         severity: 'info',
       };
     } else if (halfLifeHours < 24) {
       return {
-        label: 'Una vez al día (QD)',
-        detail: `La vida media de ~${halfLifeHours.toFixed(1)}h sugiere una única administración diaria para oscilaciones fisiológicas típicas.`,
+        label: 'Once a day (QD)',
+        detail: `The half-life of ~${halfLifeHours.toFixed(1)}h suggests a single daily administration for typical physiological oscillations.`,
         icon: '🌅',
         severity: 'good',
       };
     } else if (halfLifeHours < 72) {
       return {
-        label: 'Días alternos o espaciado',
-        detail: `La vida media prolongada (~${halfLifeHours.toFixed(0)}h) permite la dosificación en días alternos minimizando picos plasmáticos excesivos.`,
+        label: 'Every other day or spaced',
+        detail: `The prolonged half-life (~${halfLifeHours.toFixed(0)}h) allows dosing every other day, minimizing excessive plasma peaks.`,
         icon: '📅',
         severity: 'good',
       };
     } else {
       return {
-        label: 'Semanal o Bisemanal',
-        detail: `La vida media supera las 72h. Las administraciones semanales o bisemanales son el estándar en la literatura clínica.`,
+        label: 'Weekly or Bi-weekly',
+        detail: `The half-life exceeds 72h. Weekly or bi-weekly administrations are standard in clinical literature.`,
         icon: '🗓',
         severity: 'good',
       };
@@ -218,7 +218,7 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
               boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)'
             }}>
               <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
-                Curva Estimada de Aclaramiento Plasmático (Vida Media)
+                Estimated Plasma Clearance Curve (Half-life)
               </h5>
               <div style={{ width: '100%', height: 140 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -226,8 +226,8 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
                     <XAxis dataKey="timeLabel" stroke="var(--text-muted)" fontSize={9} tickLine={false} />
                     <YAxis stroke="var(--text-muted)" fontSize={9} domain={[0, 100]} unit="%" tickLine={false} />
                     <Tooltip 
-                      formatter={(value) => [`${value}%`, 'Concentración']}
-                      labelFormatter={(label) => `Tiempo: ${label}`}
+                      formatter={(value) => [`${value}%`, 'Concentration']}
+                      labelFormatter={(label) => `Time: ${label}`}
                       contentStyle={{ background: '#0A1626', border: 'none', borderRadius: '8px', color: '#FFF', fontSize: '0.75rem' }}
                     />
                     <Area 
@@ -252,10 +252,10 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
             overflow: 'hidden',
           }}>
             {[
-              { label: 'Vida Media (Half-life)', value: scientificPK?.halfLife || pk.half_life, scientific: !!scientificPK },
-              { label: 'Estado Estacionario (Steady State)', value: scientificPK?.steadyState || 'N/A', scientific: !!scientificPK },
-              pk.route && { label: 'Vía de Administración', value: Array.isArray(pk.route) ? pk.route.join(', ') : pk.route },
-              pk.bioavailability && { label: 'Biodisponibilidad', value: pk.bioavailability },
+              { label: 'Half-life', value: scientificPK?.halfLife || pk.half_life, scientific: !!scientificPK },
+              { label: 'Steady State', value: scientificPK?.steadyState || 'N/A', scientific: !!scientificPK },
+              pk.route && { label: 'Route of Administration', value: Array.isArray(pk.route) ? pk.route.join(', ') : pk.route },
+              pk.bioavailability && { label: 'Bioavailability', value: pk.bioavailability },
             ].filter(Boolean).map((row, i, arr) => (
               <div key={i} style={{
                 display: 'flex',
@@ -290,7 +290,7 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
             }}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.3rem' }}>
                  <GraduationCap size={12} color="var(--secondary)" />
-                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--secondary)', textTransform: 'uppercase' }}>Notas Científicas</span>
+                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--secondary)', textTransform: 'uppercase' }}>Scientific Notes</span>
                </div>
                <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
                  {scientificPK.notes}
@@ -307,7 +307,7 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
           }}>
             <Info size={11} color="var(--text-muted)" style={{ flexShrink: 0, marginTop: '2px' }} />
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-              Recomendaciones derivadas de literatura científica. Únicamente para uso de investigación in-vitro.
+              Recommendations derived from scientific literature. Strictly for in-vitro research use only.
             </span>
           </div>
         </div>
