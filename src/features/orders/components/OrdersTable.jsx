@@ -470,6 +470,7 @@ export default function OrdersTable({
     {
       key: 'order',
       header: 'Order Details',
+      width: readOnly ? '75%' : '60%',
       sortKey: 'orderDateForSort',
       sortValue: (o) =>
         o.createdAt?.seconds ? o.createdAt.seconds : new Date(o.createdAt).getTime(),
@@ -541,7 +542,7 @@ export default function OrdersTable({
       key: 'status',
       header: 'Status',
       sortKey: 'status',
-      width: '140px',
+      width: readOnly ? '25%' : '22%',
       render: (o) => (
         <InlineEditableCell
           value={o.status || 'Pending'}
@@ -576,7 +577,7 @@ export default function OrdersTable({
       key: 'actions',
       header: 'Actions',
       align: 'right',
-      width: '120px',
+      width: '18%',
       render: (o) => {
         const actions = [];
         const isConfirmed = ['confirmed', 'shipped', 'delivered'].includes(o.status?.toLowerCase());

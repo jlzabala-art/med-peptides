@@ -93,15 +93,19 @@ const columns = [
       <button
         onClick={(e) => { e.stopPropagation(); onOpen(row); }}
         style={{
-          padding: '0.35rem 0.85rem',
+          minHeight: '40px',
+          padding: '0 14px',
           background: row.status === 'pending_supplier' ? 'var(--color-primary)' : 'var(--color-bg-app)',
           color: row.status === 'pending_supplier' ? 'white' : 'var(--color-text-secondary)',
           border: '1px solid var(--border)',
-          borderRadius: '6px',
+          borderRadius: '8px',
           fontWeight: 600,
-          fontSize: '0.78rem',
+          fontSize: '0.8rem',
           cursor: 'pointer',
           whiteSpace: 'nowrap',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         {row.status === 'pending_supplier' ? 'Revisar y Responder' : 'Ver Detalles'}

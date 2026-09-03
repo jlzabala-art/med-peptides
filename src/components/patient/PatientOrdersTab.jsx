@@ -28,16 +28,19 @@ export default function PatientOrdersTab({ userId }) {
     {
       header: 'Order ID',
       key: 'orderId',
+      width: '20%',
       render: (row) => <CopyableId value={row.orderId || row.id} displayValue={row.orderId || row.id.slice(0, 8)} />
     },
     {
       header: 'Date',
       key: 'createdAt',
+      width: '16%',
       render: (row) => row.createdAt?.toDate ? row.createdAt.toDate().toLocaleDateString() : 'N/A'
     },
     {
       header: 'Items',
       key: 'items',
+      width: '30%',
       render: (row) => (
         <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '0.25rem' }}>
           {row.items?.slice(0, 2).map((item, i) => (
@@ -56,11 +59,13 @@ export default function PatientOrdersTab({ userId }) {
     {
       header: 'Total',
       key: 'total',
+      width: '14%',
       render: (row) => <span style={{ fontWeight: 600 }}>${(row.total || 0).toFixed(2)}</span>
     },
     {
       header: 'Status',
       key: 'status',
+      width: '10%',
       render: (row) => {
         return <StatusChip status={row.status || 'Pending'} />;
       }
@@ -68,6 +73,7 @@ export default function PatientOrdersTab({ userId }) {
     {
       header: 'Actions',
       key: 'actions',
+      width: '10%',
       align: 'right',
       render: (row) => (
         <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>

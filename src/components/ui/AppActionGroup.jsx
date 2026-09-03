@@ -81,11 +81,21 @@ const ACTION_THEMES = {
   archive: { color: '#d97706', bg: '#fffbeb', border: '#fde68a', hoverBg: '#fef3c7', hoverBorder: '#fcd34d' },
 };
 
-export default function AppActionGroup({ actions, maxVisible = 3 }) {
+export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuCoords, setMenuCoords] = useState({ top: 0, left: 0 });
+  const [isCompactScreen, setIsCompactScreen] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 1280px)');
+    setIsCompactScreen(mql.matches);
+    const handleResize = (e) => setIsCompactScreen(e.matches);
+    mql.addEventListener('change', handleResize);
+    return () => mql.removeEventListener('change', handleResize);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -104,9 +114,11 @@ export default function AppActionGroup({ actions, maxVisible = 3 }) {
     }
   }, [menuOpen]);
 
-  const validActions = actions.filter(Boolean);
-  const visibleActions = validActions.slice(0, maxVisible);
-  const hiddenActions = validActions.slice(maxVisible);
+  const validActions = (actions || []).filter(Boolean);
+  // Auto-adapt to avoid laptop/mobile wrap: on <=1280px screen, never exceed 2 visible actions
+  const effectiveMaxVisible = isCompactScreen ? Math.min(maxVisible, 2) : maxVisible;
+  const visibleActions = validActions.slice(0, effectiveMaxVisible);
+  const hiddenActions = validActions.slice(effectiveMaxVisible);
 
   const toggleMenu = (e) => {
     e.stopPropagation();
