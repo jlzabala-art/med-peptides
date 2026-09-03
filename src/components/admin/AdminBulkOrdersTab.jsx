@@ -20,13 +20,13 @@ export default function AdminBulkOrdersTab({ isSubTab = false }) {
     {
       key: 'id',
       label: 'PO Number',
-      width: '150px',
+      width: '18%',
       render: (row) => <CopyableId value={row.id} />
     },
     {
       key: 'supplierName',
       label: 'Supplier',
-      width: '20%'
+      width: '25%'
     },
     {
       key: 'createdAt',
@@ -49,10 +49,10 @@ export default function AdminBulkOrdersTab({ isSubTab = false }) {
     {
       key: 'actions',
       label: 'Actions',
-      width: '100px',
+      width: '12%',
       render: (row) => (
         <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
-          <AppActionGroup actions={[
+          <AppActionGroup maxVisible={2} actions={[
             { type: 'view', onClick: (e) => { e.stopPropagation(); /* Action logic */ }, label: 'View' }
           ]} />
         </div>

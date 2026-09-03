@@ -92,35 +92,36 @@ export default function MobileSupplierCard({
       aria-label={`${name}${country ? `, ${country}` : ''}`}
       aria-pressed={selectionMode ? isSelected : undefined}
     >
-      {/* Selection checkbox (always visible) */}
-      <div
-        className="msc-checkbox-container"
-        onClick={(e) => {
-          if (!selectionMode) {
-            e.stopPropagation();
-            onToggleSelect?.();
-          }
-        }}
+      {/* Icon / Selection Thumb */}
+      <div 
+        className={`msc-icon ${isSelected ? 'msc-icon--selected' : ''}`} 
         aria-hidden="true"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleSelect?.();
+        }}
         style={{
-          position: 'absolute',
-          top: '0.75rem',
-          left: '0.75rem',
-          zIndex: 2,
+          cursor: 'pointer',
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '32px',
-          height: '32px',
-          color: isSelected ? 'var(--color-primary, #003666)' : 'var(--color-text-tertiary)',
+          borderRadius: '10px',
+          width: '44px',
+          height: '44px',
+          backgroundColor: isSelected ? 'var(--color-primary, #003666)' : 'rgba(0, 54, 102, 0.06)',
+          color: isSelected ? '#ffffff' : 'var(--color-primary, #003666)',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          flexShrink: 0
         }}
       >
-        {isSelected ? <CheckSquare size={20} strokeWidth={2} /> : <Square size={20} strokeWidth={2} />}
-      </div>
-
-      {/* Icon column */}
-      <div className="msc-icon" aria-hidden="true">
-        <Building2 size={26} strokeWidth={1.5} />
+        {isSelected ? (
+          <Check size={22} strokeWidth={2.5} />
+        ) : selectionMode ? (
+          <Square size={20} strokeWidth={1.75} style={{ opacity: 0.6 }} />
+        ) : (
+          <Building2 size={24} strokeWidth={1.5} />
+        )}
       </div>
 
       {/* Body */}

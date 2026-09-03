@@ -101,7 +101,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'patient',
       header: 'Patient & Doctor',
-      width: '35%',
+      width: '32%',
       render: (rx) => {
         const patient  = rx.patient?.name || rx.patientName || 'Unknown Patient';
         const doctor   = rx.doctor?.name  || rx.doctorName  || '—';
@@ -126,7 +126,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'source',
       header: 'Source & Items',
-      width: '15%',
+      width: '14%',
       render: (rx) => {
         const sourceMap = {
           fagron:    { label: 'Fagron',    color: '#db2777', bg: '#fdf2f8' },
@@ -180,7 +180,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'status',
       header: 'Status',
-      width: '15%',
+      width: '16%',
       // Rule #8: always use <StatusBadge>; normalizeRxStatus maps legacy values
       render: (rx) => {
         if (rx._isSessionGroup) {
@@ -234,7 +234,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'dates',
       header: 'Dates',
-      width: '20%',
+      width: '18%',
       render: (rx) => {
         const formatAnyDate = (val) => {
           if (!val) return null;
@@ -280,7 +280,7 @@ export const getPrescriptionColumns = (options = {}) => {
     {
       key: 'action',
       header: 'Actions',
-      width: '15%',
+      width: '20%',
       align: 'right',
       sortable: false,
       render: (rx) => {
@@ -430,7 +430,7 @@ export const getPrescriptionColumns = (options = {}) => {
 
           return (
             <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-              <AppActionGroup maxVisible={3} actions={actions} />
+              <AppActionGroup maxVisible={2} actions={actions} />
             </div>
           );
         },

@@ -205,7 +205,7 @@ export const getSupplierColumns = ({
   return [
     {
       key: 'companyName',
-      width: '28%',
+      width: '26%',
       header: (
         <span onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
           Supplier {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
@@ -233,7 +233,7 @@ export const getSupplierColumns = ({
 
     {
       key: 'country',
-      width: '13%',
+      width: '11%',
       header: (
         <span onClick={() => handleSort('country')} style={{ cursor: 'pointer' }}>
           Country {sortConfig.key === 'country' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
@@ -301,7 +301,7 @@ export const getSupplierColumns = ({
 
     {
       key: 'variantsSupplied',
-      width: '13%',
+      width: '11%',
       header: (
         <span onClick={() => handleSort('variantsSupplied')} style={{ cursor: 'pointer' }}>
           Items {sortConfig.key === 'variantsSupplied' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
@@ -349,7 +349,7 @@ export const getSupplierColumns = ({
 
     {
       key: 'actions',
-      width: '160px',
+      width: '16%',
       header: 'Actions',
       render: (supplier) => (
         <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%', gap: '8px' }}>
@@ -398,6 +398,7 @@ export const getSupplierColumns = ({
             AI
           </button>
           <AppActionGroup
+            maxVisible={2}
             actions={[
               {
                 label: 'View Catalog',

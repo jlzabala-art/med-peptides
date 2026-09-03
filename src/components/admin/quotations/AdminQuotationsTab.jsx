@@ -537,8 +537,7 @@ export default function AdminQuotationsTab() {
     {
       key: 'quotationNumber',
       header: 'Quote #',
-
-      width: '25%',
+      width: '22%',
       render: (row) => {
         const days = row.daysRemaining !== undefined ? row.daysRemaining : 28;
         const isExp = days <= 0;
@@ -574,7 +573,7 @@ export default function AdminQuotationsTab() {
     {
       key: 'recipient',
       header: 'Client / Recipient',
-      width: '36%',
+      width: '34%',
       render: (row) => {
         const isWholesaler = row.category === 'wholesaler';
         const isClinic = row.category === 'clinic';
@@ -630,7 +629,7 @@ export default function AdminQuotationsTab() {
     {
       key: 'grandTotal',
       header: 'Grand Total',
-      width: '18%',
+      width: '16%',
       render: (row) => {
         const total = Number(row.grandTotal || 0);
         return (
@@ -648,7 +647,7 @@ export default function AdminQuotationsTab() {
     {
       key: 'status',
       header: 'Status & Quick Actions',
-      width: '22%',
+      width: '28%',
       render: (row) => {
         const rawStatus = String(row.status || 'draft').toLowerCase();
         let badgeStatus = 'pending';

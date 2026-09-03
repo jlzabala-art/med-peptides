@@ -440,7 +440,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         {
           key: 'physician',
           header: 'Doctor & Clinic',
-          width: '30%',
+          width: '26%',
           render: (row) => {
             const docName = (doctors || []).find(d => d.id === row.physicianId)?.name || row.physician || 'Direct Medical Desk';
             return (
@@ -458,7 +458,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         { 
           key: 'prescriptionCount', 
           header: 'Active Program', 
-          width: '22%', 
+          width: '16%', 
           render: (row) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#eff6ff', color: '#1d4ed8', fontWeight: 700, border: '1px solid #bfdbfe' }}>
@@ -469,12 +469,23 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         },
         { 
           key: 'status', 
-          header: 'Status & Actions', 
-          width: '18%', 
+          header: 'Status', 
+          width: '14%', 
+          align: 'center',
           render: (row) => (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-              <StatusBadge status={row.status === 'Active' || row.status === 'active' ? 'active' : 'pending'} label={row.status || 'Active'} />
+            <StatusBadge status={row.status === 'Active' || row.status === 'active' ? 'active' : 'pending'} label={row.status || 'Active'} />
+          )
+        },
+        {
+          key: 'actions',
+          header: 'Actions',
+          width: '14%',
+          align: 'right',
+          isAction: true,
+          render: (row) => (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
               <AppActionGroup
+                maxVisible={2}
                 actions={[
                   {
                     type: 'view',

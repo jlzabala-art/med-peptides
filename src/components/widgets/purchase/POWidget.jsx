@@ -75,11 +75,13 @@ export default function POWidget({
     {
       key: 'createdAt',
       header: 'Date',
+      width: compact ? '20%' : '15%',
       render: (val) => val?.toDate ? val.toDate().toLocaleDateString() : '—',
     },
     {
       key: 'poNumber',
       header: 'PO Number',
+      width: compact ? '30%' : '25%',
       render: (val, row) => (
         <span style={{ fontWeight: 600, color: '#0f172a' }}>
           {readOnly ? val : (
@@ -96,16 +98,19 @@ export default function POWidget({
     {
       key: 'supplierName',
       header: 'Supplier',
+      width: compact ? '30%' : '25%',
       render: (val) => <span style={{ color: '#3b82f6' }}>{val}</span>,
     },
     ...(!compact ? [{
       key: 'totalAmount',
       header: 'Total',
+      width: '15%',
       render: (val) => <span style={{ fontWeight: 600 }}>${Number(val || 0).toFixed(2)}</span>,
     }] : []),
     {
       key: 'status',
       header: 'Status',
+      width: compact ? '20%' : '20%',
       render: (val, row) => (
         <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-start' }}>
           {readOnly ? (
