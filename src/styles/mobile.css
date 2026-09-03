@@ -1381,8 +1381,7 @@
   .mpc-meta-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
   .mpc-tag { background: #f1f5f9; color: #475569; font-size: 0.68rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; }
   .mpc-physician { font-size: 0.7rem; color: #64748b; }
-  .mpc-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 2px; }
-  .mpc-quick-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.7; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
+  .mpc-quick-btn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.85; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
   .mpc-quick-btn:active { background: #e2e8f0; opacity: 1; }
 }
 
@@ -1411,8 +1410,7 @@
   .mrxc-doctor { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: #64748b; }
   .mrxc-meta-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
   .mrxc-items, .mrxc-date { display: flex; align-items: center; gap: 3px; font-size: 0.7rem; color: #64748b; }
-  .mrxc-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 2px; }
-  .mrxc-quick-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.7; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
+  .mrxc-quick-btn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.85; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
   .mrxc-quick-btn:active { background: #e2e8f0; opacity: 1; }
 }
 
@@ -1495,8 +1493,7 @@
   .mptc-tag--more { background: #e2e8f0; color: #64748b; }
   .mptc-stats { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
   .mptc-stat { display: flex; align-items: center; gap: 3px; font-size: 0.7rem; color: #64748b; }
-  .mptc-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 2px; }
-  .mptc-quick-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.7; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
+  .mptc-quick-btn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.85; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
   .mptc-quick-btn:active { background: #e2e8f0; opacity: 1; }
 }
 
@@ -1540,8 +1537,7 @@
   .mdc-email { display: flex; align-items: center; gap: 4px; font-size: 0.68rem; color: #94a3b8; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mdc-stats { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
   .mdc-stat { display: flex; align-items: center; gap: 3px; font-size: 0.7rem; color: #64748b; }
-  .mdc-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 2px; }
-  .mdc-quick-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.7; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
+  .mdc-quick-btn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; opacity: 0.85; -webkit-tap-highlight-color: transparent; transition: background 0.1s ease; }
   .mdc-quick-btn:active { background: #e2e8f0; opacity: 1; }
 }
 

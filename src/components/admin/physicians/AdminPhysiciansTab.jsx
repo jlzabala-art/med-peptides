@@ -442,7 +442,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'physician',
       header: 'Physician',
-      width: '40%',
+      width: '36%',
       render: (d) => {
         const name = getDoctorName(d);
         const clinicInfo = [d.specialty || 'General', d.clinicName].filter(Boolean).join(' • ');
@@ -465,7 +465,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'status',
       header: 'Status',
-      width: '120px',
+      width: '14%',
       render: (d) => {
         const statusStr = d.isArchived ? 'archived' : (d.status || 'active');
         return <StatusChip status={statusStr} />;
@@ -474,7 +474,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'patients',
       header: 'Patients',
-      width: '18%',
+      width: '15%',
       align: 'center',
       render: (d) => {
         const pts = getPatientsCount(d);
@@ -514,7 +514,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'prescriptions',
       header: 'Rx Count',
-      width: '18%',
+      width: '15%',
       align: 'center',
       render: (d) => {
         const count = d.prescriptionCount ?? 0;
@@ -555,7 +555,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'actions',
       header: 'Actions',
-      width: '200px',
+      width: '20%',
       align: 'right',
       render: (d) => {
         const actions = [
@@ -587,7 +587,7 @@ export default function AdminPhysiciansTab() {
         ];
         return (
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', whiteSpace: 'nowrap' }}>
-            <AppActionGroup actions={actions} maxVisible={3} />
+            <AppActionGroup actions={actions} maxVisible={2} />
           </div>
         );
       }

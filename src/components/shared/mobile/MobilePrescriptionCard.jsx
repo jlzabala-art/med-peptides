@@ -96,36 +96,36 @@ export default function MobilePrescriptionCard({
       aria-label={`Prescription ${rxCode}, ${patient}`}
       aria-pressed={selectionMode ? isSelected : undefined}
     >
-      {/* Selection checkbox (always visible) */}
-      <div
-        className="mrxc-checkbox-container"
-        onClick={(e) => {
-          if (!selectionMode) {
+      {/* Rx icon / Selection thumb & source badge column */}
+      <div className="mrxc-icon-col" aria-hidden="true">
+        <div 
+          className={`mrxc-icon ${isSelected ? 'mrxc-icon--selected' : ''}`}
+          onClick={(e) => {
             e.stopPropagation();
             onToggleSelect?.();
-          }
-        }}
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '0.75rem',
-          left: '0.75rem',
-          zIndex: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '32px',
-          height: '32px',
-          color: isSelected ? 'var(--color-primary, #003666)' : 'var(--color-text-tertiary)',
-        }}
-      >
-        {isSelected ? <CheckSquare size={20} strokeWidth={2} /> : <Square size={20} strokeWidth={2} />}
-      </div>
-
-      {/* Rx icon / source badge column */}
-      <div className="mrxc-icon-col" aria-hidden="true">
-        <div className="mrxc-icon">
-          <FileText size={24} strokeWidth={1.5} />
+          }}
+          style={{
+            cursor: 'pointer',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '10px',
+            width: '44px',
+            height: '44px',
+            backgroundColor: isSelected ? 'var(--color-primary, #003666)' : '#eff6ff',
+            color: isSelected ? '#ffffff' : '#2563eb',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            flexShrink: 0
+          }}
+        >
+          {isSelected ? (
+            <Check size={22} strokeWidth={2.5} />
+          ) : selectionMode ? (
+            <Square size={20} strokeWidth={1.75} style={{ opacity: 0.6 }} />
+          ) : (
+            <FileText size={24} strokeWidth={1.5} />
+          )}
         </div>
         <span
           className="mrxc-source"

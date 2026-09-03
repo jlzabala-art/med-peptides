@@ -97,39 +97,33 @@ export default function MobilePatientCard({
       aria-label={`${name}${program ? `, ${program}` : ''}`}
       aria-pressed={selectionMode ? isSelected : undefined}
     >
-      {/* Selection checkbox (always visible) */}
+      {/* Avatar / Selection Thumb */}
       <div
-        className="mpc-checkbox-container"
-        onClick={(e) => {
-          if (!selectionMode) {
-            e.stopPropagation();
-            onToggleSelect?.();
-          }
-        }}
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '0.75rem',
-          left: '0.75rem',
-          zIndex: 2,
+        className={`mpc-avatar ${isSelected ? 'mpc-avatar--selected' : ''}`}
+        style={{ 
+          background: isSelected ? 'var(--color-primary, #003666)' : bg, 
+          color: isSelected ? '#ffffff' : fg,
+          cursor: 'pointer',
+          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: '32px',
-          height: '32px',
-          color: isSelected ? 'var(--color-primary, #003666)' : 'var(--color-text-tertiary)',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          flexShrink: 0
         }}
-      >
-        {isSelected ? <CheckSquare size={20} strokeWidth={2} /> : <Square size={20} strokeWidth={2} />}
-      </div>
-
-      {/* Avatar */}
-      <div
-        className="mpc-avatar"
-        style={{ background: bg, color: fg }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleSelect?.();
+        }}
         aria-hidden="true"
       >
-        {initials}
+        {isSelected ? (
+          <Check size={20} strokeWidth={2.5} />
+        ) : selectionMode ? (
+          <Square size={18} strokeWidth={2} style={{ opacity: 0.7 }} />
+        ) : (
+          initials
+        )}
       </div>
 
       {/* Body */}

@@ -90,7 +90,7 @@ export default function MobileQuotationCard({
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -106,9 +106,9 @@ export default function MobileQuotationCard({
             }}
             className="gcp-btn-secondary"
             title="Share via WhatsApp"
-            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#16a34a', borderColor: '#bbf7d0', backgroundColor: '#f0fdf4' }}
+            style={{ minHeight: '44px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#16a34a', borderColor: '#bbf7d0', backgroundColor: '#f0fdf4', borderRadius: '8px' }}
           >
-            <Share2 size={13} />
+            <Share2 size={15} />
             Share
           </button>
           <button
@@ -117,9 +117,9 @@ export default function MobileQuotationCard({
               window.dispatchEvent(new CustomEvent('open-quotation-drawer', { detail: quote }));
             }}
             className="gcp-btn-secondary"
-            style={{ padding: '5px 8px', fontSize: '0.74rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            style={{ minHeight: '44px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
           >
-            <Eye size={13} />
+            <Eye size={15} />
             Details
           </button>
         </div>

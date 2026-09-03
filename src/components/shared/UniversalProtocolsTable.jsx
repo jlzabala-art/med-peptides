@@ -498,7 +498,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           key: 'protocol_name',
           header: 'Protocol Name & Category',
           sortable: true,
-          width: '50%',
+          width: '42%',
           render: (p) => {
             return (
               <div style={{ fontWeight: 600, color: '#202124' }}>
@@ -541,7 +541,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
         {
           key: 'duration',
           header: 'Duration',
-          width: '12%',
+          width: '11%',
           render: (p) => {
             const calculatedDuration = p.phases?.reduce((acc, phase) => acc + (phase.durationWeeks || phase.duration_weeks || phase.durationInWeeks || 0), 0) || 0;
             const duration = p.protocol_duration_weeks || p.duration_weeks || p.durationWeeks || calculatedDuration || 0;
@@ -562,7 +562,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           key: 'status',
           header: 'Status',
           sortable: true,
-          width: '8%',
+          width: '11%',
           align: 'center',
           render: (p) => {
             if (p.status === 'paused' || p.status === 'inactive') {
@@ -576,7 +576,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           header: 'Clinical Data',
           sortable: true,
           sortValue: (p) => calculateClinicalCompleteness(p).pct,
-          width: '12%',
+          width: '10%',
           align: 'center',
           render: (p) => {
             const { pct, color } = calculateClinicalCompleteness(p);
@@ -598,7 +598,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
         {
           key: 'phases',
           header: 'Phases',
-          width: '10%',
+          width: '8%',
           sortable: true,
           sortValue: (p) => (p.phases ?? []).length,
           render: (p) => {
@@ -614,7 +614,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
           key: 'actions',
           header: 'Actions',
           align: 'right',
-          width: '140px',
+          width: '18%',
           render: (p) => {
             const handleCloneProtocol = async (protocol, formatOverride) => {
               try {
@@ -788,7 +788,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
                 {deleting === p.id ? (
                   <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Deleting...</span>
                 ) : (
-                  <AppActionGroup maxVisible={3} actions={actions} />
+                  <AppActionGroup maxVisible={2} actions={actions} />
                 )}
               </div>
             );

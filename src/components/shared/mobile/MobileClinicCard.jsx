@@ -88,13 +88,13 @@ export default function MobileClinicCard({ row: clinic, onRowClick }) {
         <button
           onClick={(e) => { e.stopPropagation(); onRowClick && onRowClick(clinic); }}
           style={{
-            display: 'inline-flex', alignItems: 'center', gap: '4px',
-            padding: '4px 10px', borderRadius: '6px', border: '1px solid #cbd5e1',
-            backgroundColor: '#f8fafc', fontSize: '0.72rem', fontWeight: 700,
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            minHeight: '44px', padding: '0 14px', borderRadius: '8px', border: '1px solid #cbd5e1',
+            backgroundColor: '#f8fafc', fontSize: '0.78rem', fontWeight: 700,
             color: '#003666', cursor: 'pointer'
           }}
         >
-          <Eye size={12} />
+          <Eye size={14} />
           Profile
         </button>
       </div>
