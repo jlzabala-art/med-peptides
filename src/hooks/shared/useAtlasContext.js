@@ -12,7 +12,7 @@ export function useAtlasContext() {
     let themeBgActive = 'rgba(66, 133, 244, 0.08)';
     let agentType = 'default';
     let assistantName = 'Atlas AI';
-    let suggestedPrompts = [{ label: '👋 ¿Cómo puedes ayudarme?' }];
+    let suggestedPrompts = [{ label: '👋 How can I assist you today?' }];
     let contextActions = [];
 
     // Role and Path based logic
@@ -24,22 +24,22 @@ export function useAtlasContext() {
         
         if (pathname.includes('/prescriptions')) {
           suggestedPrompts = [
-            { label: '📋 Analizar recetas pendientes' },
-            { label: '💊 Dosis recomendada BPC-157' }
+            { label: '📋 Review pending prescriptions' },
+            { label: '💊 Recommended BPC-157 dosage' }
           ];
           contextActions = [
-            { id: 'doc_sugerir_protocolo', icon: Sparkles, label: 'Suggest Protocols', desc: 'Based on BMI', color: 'purple', prompt: 'Suggest medical protocols based on patient metrics.' },
-            { id: 'doc_interacciones', icon: ShieldAlert, label: 'Interaction Check', desc: 'Cross-reference supplements', color: 'red', prompt: 'Check for potential interactions between these supplements.' }
+            { id: 'doc_sugerir_protocolo', icon: Sparkles, label: 'Suggest Protocols', desc: 'Based on patient biomarkers', color: 'purple', prompt: 'Suggest evidence-based medical protocols tailored to the patient metrics.' },
+            { id: 'doc_interacciones', icon: ShieldAlert, label: 'Interaction Check', desc: 'Cross-reference compounds', color: 'red', prompt: 'Check for potential contraindications or drug-peptide interactions.' }
           ];
         } else {
           suggestedPrompts = [
-            { label: '💉 Protocolo para pérdida de peso' },
-            { label: '🔬 Evidencia clínica de péptidos' },
-            { label: '📋 Redactar nota clínica' }
+            { label: '💉 GLP-1 Weight Management Protocol' },
+            { label: '🔬 Peptide Clinical Trial Evidence' },
+            { label: '📋 Draft Clinical Consultation Note' }
           ];
           contextActions = [
-            { id: 'doc_citas_hoy', icon: Calendar, label: 'Today\'s Appointments', desc: 'Daily schedule', color: 'blue', prompt: 'Show me my appointments for today.' },
-            { id: 'doc_seguimiento', icon: AlertCircle, label: 'Follow-up Alerts', desc: 'Inactive patients', color: 'orange', prompt: 'List patients who need follow-ups.' }
+            { id: 'doc_citas_hoy', icon: Calendar, label: "Today's Schedule", desc: 'Consultations & intakes', color: 'blue', prompt: 'Show my scheduled patient consultations for today.' },
+            { id: 'doc_seguimiento', icon: AlertCircle, label: 'Follow-up Alerts', desc: 'Check-ins required', color: 'orange', prompt: 'List active patients who are due for biomarker follow-up.' }
           ];
         }
         break;
@@ -51,21 +51,21 @@ export function useAtlasContext() {
         
         if (pathname.includes('/prescriptions') || pathname.includes('/orders')) {
           suggestedPrompts = [
-            { label: '📦 ¿Cuándo llega mi pedido?' },
-            { label: '🔄 ¿Cómo solicitar una recarga?' }
+            { label: '📦 Track my order shipment' },
+            { label: '🔄 Request prescription refill' }
           ];
           contextActions = [
-            { id: 'pat_refill', icon: ShoppingCart, label: 'Request Refill', desc: 'Add to cart', color: 'orange', prompt: 'I want to request a refill for my active prescriptions.' },
-            { id: 'pat_guide', icon: BookOpen, label: 'Reconstitution Guide', desc: 'Video instructions', color: 'purple', prompt: 'Show me the reconstitution guide for my products.' }
+            { id: 'pat_refill', icon: ShoppingCart, label: 'Request Refill', desc: 'Submit intake', color: 'orange', prompt: 'I want to request a refill for my active prescriptions.' },
+            { id: 'pat_guide', icon: BookOpen, label: 'Reconstitution Guide', desc: 'Step-by-step instructions', color: 'purple', prompt: 'Show me the step-by-step reconstitution guide for my products.' }
           ];
         } else {
           suggestedPrompts = [
-            { label: '💬 Explícame mi protocolo actual' },
-            { label: '📅 ¿Qué esperar en semana 2?' }
+            { label: '💬 Explain my current protocol' },
+            { label: '📅 What to expect in Week 2?' }
           ];
           contextActions = [
-            { id: 'pat_next_dose', icon: Calendar, label: 'My Next Dose', desc: "Today's plan", color: 'green', prompt: 'When is my next dose scheduled?' },
-            { id: 'pat_goals', icon: TrendingUp, label: 'Goal Progress', desc: 'Mass / Longevity', color: 'blue', prompt: 'Show my progress against my health goals.' }
+            { id: 'pat_next_dose', icon: Calendar, label: 'My Next Dose', desc: "Today's schedule", color: 'green', prompt: 'When is my next protocol dose scheduled?' },
+            { id: 'pat_goals', icon: TrendingUp, label: 'Goal Progress', desc: 'Health markers', color: 'blue', prompt: 'Show my progress against my personal health objectives.' }
           ];
         }
         break;
@@ -76,8 +76,12 @@ export function useAtlasContext() {
         agentType = 'b2b_optimizer';
         
         suggestedPrompts = [
-          { label: '📦 ¿Qué péptidos tienen más demanda?' },
-          { label: '💰 Optimizar márgenes de compra' }
+          { label: '📦 High-demand peptide trends' },
+          { label: '💰 Optimize purchase volume margins' }
+        ];
+        contextActions = [
+          { id: 'ws_inventory', icon: Database, label: 'Stock Alerts', desc: 'Low stock supplier items', color: 'orange', prompt: 'Which catalog items are running low across verified suppliers?' },
+          { id: 'ws_margins', icon: TrendingUp, label: 'Tier Margins', desc: 'Wholesale vs Retail', color: 'purple', prompt: 'Analyze current gross margins across 10x and 50x volume tiers.' }
         ];
         break;
 
@@ -88,27 +92,27 @@ export function useAtlasContext() {
         
         if (pathname.includes('/deploy')) {
           contextActions = [
-            { id: 'deploy_trigger', icon: Terminal, label: 'Trigger Deploy', desc: 'Deploy to Prod', color: 'blue', prompt: 'Trigger a new manual deployment to production.' },
-            { id: 'deploy_backup', icon: Database, label: 'Run Backup', desc: 'DB Snapshot', color: 'green', prompt: 'Trigger a manual database backup right now.' }
+            { id: 'deploy_trigger', icon: Terminal, label: 'Trigger Deploy', desc: 'Deploy to Production', color: 'blue', prompt: 'Trigger a new manual deployment to production.' },
+            { id: 'deploy_backup', icon: Database, label: 'Run Backup', desc: 'Database Snapshot', color: 'green', prompt: 'Trigger a manual database snapshot right now.' }
           ];
         } else if (pathname.includes('/finance') || pathname.includes('/analytics')) {
           contextActions = [
             { id: 'fin_pnl', icon: TrendingUp, label: 'Analyze P&L (AI)', desc: 'Expenses vs Revenue', color: 'purple', prompt: 'Analyze P&L by listing products sorted by highest margin and retrieving the top selling products.' },
-            { id: 'fin_sync', icon: RefreshCw, label: 'Sync Zoho', desc: 'Force update', color: 'blue', prompt: 'Sync Zoho data for recent users.' }
+            { id: 'fin_sync', icon: RefreshCw, label: 'Sync Zoho Books', desc: 'Reconcile invoices', color: 'blue', prompt: 'Sync and verify Zoho financial records for recent transactions.' }
           ];
         } else if (pathname.includes('/sales') || pathname.includes('/orders')) {
           contextActions = [
-            { id: 'sales_approve', icon: UserCheck, label: 'Approve Pending', desc: 'Verified → Processing', color: 'green', prompt: 'List all pending orders.' },
-            { id: 'sales_delays', icon: AlertCircle, label: 'Detect Delays', desc: 'Analyze shipping', color: 'orange', prompt: 'Check for pending orders to detect any delays.' }
+            { id: 'sales_approve', icon: UserCheck, label: 'Pending Orders', desc: 'Awaiting dispatch', color: 'green', prompt: 'List all pending orders awaiting payment or dispatch.' },
+            { id: 'sales_delays', icon: AlertCircle, label: 'Transit Delays', desc: 'Carrier monitoring', color: 'orange', prompt: 'Check in-transit shipments to detect any carrier delays.' }
           ];
         } else {
           suggestedPrompts = [
-            { label: '⚙️ Revisar logs del sistema' },
-            { label: '📊 Resumen financiero de hoy' }
+            { label: '⚙️ Inspect system audit logs' },
+            { label: '📊 Today\'s revenue & order summary' }
           ];
           contextActions = [
-            { id: 'admin_report', icon: FileText, label: 'Monthly Report', desc: 'PDF summary of metrics', color: 'blue', prompt: 'Generate a monthly sales and operations report.' },
-            { id: 'admin_alerts', icon: AlertCircle, label: 'System Alerts', desc: 'Critical notifications', color: 'red', prompt: 'Check for pending user approvals and system alerts.' }
+            { id: 'admin_report', icon: FileText, label: 'Executive Report', desc: 'Operations & KPI summary', color: 'blue', prompt: 'Generate an executive summary of platform metrics and catalog coverage.' },
+            { id: 'admin_alerts', icon: AlertCircle, label: 'System Alerts', desc: 'Critical notifications', color: 'red', prompt: 'Check for pending user approvals, supplier RFQs, and data completeness alerts.' }
           ];
         }
         break;

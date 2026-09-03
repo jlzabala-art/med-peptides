@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 
 
@@ -17,6 +17,23 @@ import { User, Users, Search, Plus, Filter, MessageSquare, Briefcase, Stethoscop
 export default function ConversationsList({ conversations, activeConversation, onSelect, currentUserId }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+
+  useEffect(() => {
+    try {
+      const preferred = sessionStorage.getItem('preferred_chat_recipient');
+      if (preferred) {
+        setSearchTerm(preferred);
+        sessionStorage.removeItem('preferred_chat_recipient');
+        const match = conversations.find(c => {
+          const title = c.title || (c.participants && c.participantNames ? Object.values(c.participantNames).join(' ') : '');
+          return title.toLowerCase().includes(preferred.toLowerCase());
+        });
+        if (match && onSelect) {
+          onSelect(match);
+        }
+      }
+    } catch(e) {}
+  }, [conversations, onSelect]);
 
   const filters = ['All', 'Unread', 'Patients', 'Doctors', 'Clinics', 'Distributors', 'Internal Team'];
 

@@ -38,23 +38,56 @@ export default function ChatMessageList({
     }
   }, [hasSeenIntro]);
   const [thinkingStep, setThinkingStep] = useState(0);
-  const thinkingSteps = [
-    'Searching clinical literature...',
-    'Crossing interactions data...',
-    'Generating clinical report...'
-  ];
+  const thinkingSteps = useMemo(() => {
+    if (pageContext?.isProductPage || pageContext?.productName || pageContext?.entityName) {
+      return [
+        'Searching clinical literature & peptide registries...',
+        'Analyzing amino acid sequencing & molecular receptors...',
+        'Cross-referencing PubMed pharmacokinetics & half-life...',
+        'Evaluating reconstitution ratios & dosage guidelines...',
+        'Synthesizing evidence-based clinical intelligence...'
+      ];
+    }
+    if (contextMode === 'doctor') {
+      return [
+        'Accessing clinical decision support engine...',
+        'Checking patient biomarker baseline & history...',
+        'Screening contraindications & synergistic peptides...',
+        'Drafting structured consultation guidelines...'
+      ];
+    }
+    if (contextMode === 'wholesaler') {
+      return [
+        'Analyzing live catalog inventory & supply chain...',
+        'Evaluating volume tiers, landed costs & margins...',
+        'Generating commercial recommendation...'
+      ];
+    }
+    if (contextMode === 'patient') {
+      return [
+        'Reviewing active wellness protocols...',
+        'Checking administration timing & storage guide...',
+        'Formulating simple, patient-friendly guidance...'
+      ];
+    }
+    return [
+      'Querying clinical knowledge base...',
+      'Cross-referencing scientific pharmacology data...',
+      'Synthesizing clinical response...'
+    ];
+  }, [pageContext, contextMode]);
 
   useEffect(() => {
     let interval;
     if (isLoading || isTyping) {
       interval = setInterval(() => {
         setThinkingStep(prev => (prev + 1) % thinkingSteps.length);
-      }, 2500);
+      }, 1400);
     } else {
       setThinkingStep(0);
     }
     return () => clearInterval(interval);
-  }, [isLoading, isTyping]);
+  }, [isLoading, isTyping, thinkingSteps.length]);
 
   return (
     <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

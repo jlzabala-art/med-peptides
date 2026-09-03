@@ -1,19 +1,28 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { appointmentRepository } from '../repositories/appointmentRepository';
 import { useAuth } from '../context/AuthContext';
-import { Calendar as CalendarIcon, Clock, Users, Pill, CheckCircle2, ChevronLeft, ChevronRight, Filter, Search, AlertTriangle, FileText, BrainCircuit, Activity, HeartPulse, RefreshCw, Plus } from '@/lib/icons';
+import { Calendar as CalendarIcon, Clock, Users, Pill, CheckCircle2, ChevronLeft, ChevronRight, Filter, Search, AlertTriangle, FileText, BrainCircuit, Activity, HeartPulse, RefreshCw, Plus, MessageSquare } from '@/lib/icons';
 import PageHeader from '../components/ui/PageHeader';
 
 import { toast } from 'react-hot-toast';
 
 export default function DoctorAppointments() {
+  const router = useRouter();
   const { user, baseRole } = useAuth();
   // Impersonation
   const isAdmin = baseRole === 'admin';
   const storedImpersonatedId = sessionStorage.getItem('impersonatedDoctorId');
   const activeDoctorId = isAdmin && storedImpersonatedId ? storedImpersonatedId : user?.uid;
+
+  const handleMessagePatient = (title = '') => {
+    const cleanName = title.replace(/^(Prescription:\s*|Consult:\s*|Refill:\s*|Peptide Protocol Review:\s*)/i, '').trim();
+    try { sessionStorage.setItem('preferred_chat_recipient', cleanName); } catch(e) {}
+    toast.success(`Opening conversation with ${cleanName}`);
+    router.push('/admin?s=operations&t=messages');
+  };
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [loading, setLoading] = useState(true);
@@ -461,7 +470,30 @@ export default function DoctorAppointments() {
               }}
             />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{ev.title}</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{ev.title}</div>
+                <button
+                  type="button"
+                  onClick={() => handleMessagePatient(ev.title)}
+                  style={{
+                    background: '#f0fdfa',
+                    border: '1px solid #ccfbf1',
+                    borderRadius: '6px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: '#0d9488',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                  title="Open Chat with Patient"
+                >
+                  <MessageSquare size={11} />
+                  <span>Chat</span>
+                </button>
+              </div>
               <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
                 {ev.time} • {ev.type}
               </div>
@@ -486,10 +518,33 @@ export default function DoctorAppointments() {
             color: '#475569',
             display: 'flex',
             justifyContent: 'space-between',
+            alignItems: 'center'
           }}
         >
           <span>Review Lab Panel for Bruce Banner</span>
-          <span style={{ color: '#ef4444', fontWeight: 600 }}>Due</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '11px' }}>Due</span>
+            <button
+              type="button"
+              onClick={() => handleMessagePatient('Bruce Banner')}
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                padding: '2px 6px',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}
+            >
+              <MessageSquare size={10} />
+              <span>Chat</span>
+            </button>
+          </div>
         </div>
         <div
           style={{
@@ -498,11 +553,34 @@ export default function DoctorAppointments() {
             color: '#475569',
             display: 'flex',
             justifyContent: 'space-between',
+            alignItems: 'center',
             borderTop: '1px solid #f1f5f9',
           }}
         >
           <span>Patient check-in: Magenta Medical</span>
-          <span style={{ color: '#f59e0b', fontWeight: 600 }}>Tomorrow</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#f59e0b', fontWeight: 600, fontSize: '11px' }}>Tomorrow</span>
+            <button
+              type="button"
+              onClick={() => handleMessagePatient('Magenta Medical')}
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                padding: '2px 6px',
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}
+            >
+              <MessageSquare size={10} />
+              <span>Chat</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

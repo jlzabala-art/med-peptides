@@ -1,26 +1,26 @@
 
 
-
-
-
-
-
 import React from 'react';
-
-
-
-
-
-
+import { useRouter } from 'next/navigation';
 
 import './CalendarCloud.css';
-import { User, Activity, ShoppingBag, ClipboardList, Clock, CalendarIcon, FileText } from '@/lib/icons';
+import { User, Activity, ShoppingBag, ClipboardList, Clock, CalendarIcon, FileText, MessageSquare } from '@/lib/icons';
 
 export default function CalendarContextDrawer({ event, isOpen, onClose }) {
+  const router = useRouter();
   if (!isOpen || !event) return null;
 
-  const patientName = event.extendedProps?.patientName || event.title.split('-')[0].trim() || 'John Doe';
+  const patientName = event.extendedProps?.patientName || event.title.split('-')[0].trim() || 'Patient';
   const eventType = event.extendedProps?.type || 'prescription';
+
+  const handleOpenChat = () => {
+    try {
+      sessionStorage.setItem('preferred_chat_recipient', patientName);
+    } catch(e) {}
+    router.push('/admin?s=operations&t=messages');
+    if (onClose) onClose();
+  };
+
   return (
     <>
       {/* Drawer Overlay */}
@@ -119,11 +119,23 @@ export default function CalendarContextDrawer({ event, isOpen, onClose }) {
 
         </div>
 
-        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--cal-border)', display: 'flex', gap: '0.5rem' }}>
-          <button style={{ flex: 1, padding: '0.75rem', backgroundColor: 'var(--cal-bg-surface)', border: '1px solid var(--cal-border)', borderRadius: 'var(--cal-radius-sm)', cursor: 'pointer', fontWeight: 500 }}>
-            View Full Chart
+        <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid var(--cal-border)', display: 'flex', gap: '0.5rem' }}>
+          <button 
+            type="button"
+            onClick={handleOpenChat}
+            style={{ 
+              flex: 1, padding: '0.65rem', backgroundColor: '#f0fdfa', border: '1.5px solid #0d9488', 
+              borderRadius: 'var(--cal-radius-sm, 8px)', cursor: 'pointer', fontWeight: 600, color: '#0d9488',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '0.85rem'
+            }}
+          >
+            <MessageSquare size={16} />
+            <span>Chat Patient</span>
           </button>
-          <button style={{ flex: 1, padding: '0.75rem', backgroundColor: 'var(--cal-color-primary)', color: 'white', border: 'none', borderRadius: 'var(--cal-radius-sm)', cursor: 'pointer', fontWeight: 500 }}>
+          <button 
+            type="button"
+            style={{ flex: 1, padding: '0.65rem', backgroundColor: 'var(--cal-color-primary, #003666)', color: 'white', border: 'none', borderRadius: 'var(--cal-radius-sm, 8px)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+          >
             Edit Event
           </button>
         </div>
@@ -132,6 +144,22 @@ export default function CalendarContextDrawer({ event, isOpen, onClose }) {
         @keyframes slideInRight {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
+        }
+        @keyframes slideUpCal {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+          .cal-drawer-panel {
+            top: auto !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            max-height: 85vh !important;
+            border-radius: 20px 20px 0 0 !important;
+            animation: slideUpCal 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          }
         }
       `}</style>
     </>

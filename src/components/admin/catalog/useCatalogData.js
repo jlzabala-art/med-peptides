@@ -59,7 +59,9 @@ export function useCatalogData(options = {}) {
   const getInitialState = () => {
     if (isDefaultQuery && typeof window !== 'undefined') {
       try {
-        const cached = localStorage.getItem('__rg_catalog_cache');
+        localStorage.removeItem('__rg_catalog_cache');
+        localStorage.removeItem('__rg_catalog_cache_v2');
+        const cached = localStorage.getItem('__rg_catalog_cache_v3');
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && (Date.now() - parsed.ts) < CACHE_TTL_MS * 6) {
@@ -643,7 +645,7 @@ export function useCatalogData(options = {}) {
         const cachePayload = { products: trimmedProducts, variants: trimmedVariants, ts: Date.now() };
         const serialized = JSON.stringify(cachePayload);
         if (serialized.length < 150000) {
-          localStorage.setItem('__rg_catalog_cache', serialized);
+          localStorage.setItem('__rg_catalog_cache_v3', serialized);
         }
       } catch (e) {
          // Ignore quota errors

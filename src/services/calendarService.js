@@ -138,6 +138,55 @@ export const getWebcalUrl = (protocolId) => {
 };
 
 /**
+ * Generates and downloads an .ics file for an individual appointment/consultation
+ */
+export const downloadSingleAppointmentICS = (appt) => {
+  if (typeof window === 'undefined') return;
+  const { title = 'Clinical Appointment', date, durationMinutes = 30, doctorName = '', patientName = '', notes = '' } = appt || {};
+  const startDate = new Date(date || Date.now());
+  const endDate = new Date(startDate.getTime() + (Number(durationMinutes) || 30) * 60000);
+
+  const startStr = formatICSDate(startDate);
+  const endStr = formatICSDate(endDate);
+  const stamp = formatICSDate(new Date());
+  const uid = `appt-${Date.now()}@atlashealth.com`;
+
+  const icsLines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Atlas Health//Clinical Appointments//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART:${startStr}`,
+    `DTEND:${endStr}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:Clinical appointment between ${doctorName || 'Doctor'} and ${patientName || 'Patient'}.\\n${notes}`,
+    'STATUS:CONFIRMED',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT15M',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Appointment in 15 minutes',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsLines], { type: 'text/calendar;charset=utf-8' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  const safeName = (title || 'Appointment').replace(/[^a-zA-Z0-9]/g, '_');
+  link.setAttribute('download', `${safeName}_${startStr.slice(0, 8)}.ics`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+/**
  * Returns a link to import into Google Calendar
  */
 export const getGoogleCalendarImportUrl = () => {

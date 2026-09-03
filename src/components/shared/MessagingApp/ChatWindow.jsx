@@ -12,7 +12,8 @@ import { messagingService } from '../../../services/messagingService';
 import RichMessageCard from './RichMessageCard';
 import ChatAIAssistant from './ChatAIAssistant';
 import './MessagingApp.css';
-import { Send, Paperclip, FileText, ImageIcon, LinkIcon, DollarSign, Sparkles } from '@/lib/icons';
+import { Send, Paperclip, FileText, ImageIcon, LinkIcon, DollarSign, Sparkles, Calendar } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function ChatWindow({ conversation, currentUserId, currentUserRole, onBack, onToggleContext }) {
   const [messages, setMessages] = useState([]);
@@ -22,8 +23,19 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
   const messagesEndRef = useRef(null);
   const [showRichMenu, setShowRichMenu] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
-
   const [isInternal, setIsInternal] = useState(false);
+
+  // Calendar Appointment Scheduling State
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleType, setScheduleType] = useState('Clinical Consultation');
+  const [scheduleDateTime, setScheduleDateTime] = useState(() => {
+    const tmrw = new Date();
+    tmrw.setDate(tmrw.getDate() + 1);
+    tmrw.setHours(10, 0, 0, 0);
+    return tmrw.toISOString().slice(0, 16);
+  });
+  const [scheduleDuration, setScheduleDuration] = useState(30);
+  const [scheduleNote, setScheduleNote] = useState('');
 
   useEffect(() => {
     if (!conversation) return;
@@ -87,6 +99,36 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
     }
     setSending(false);
     setShowRichMenu(false);
+  };
+
+  const handleSendScheduleInvite = async () => {
+    if (!scheduleDateTime) return;
+    setSending(true);
+    try {
+      const invitePayload = {
+        title: scheduleType,
+        dateTime: scheduleDateTime,
+        duration: scheduleDuration,
+        notes: scheduleNote,
+        doctorName: currentUserRole === 'doctor' ? 'Your Attending Physician' : '',
+        patientName: getConvoTitle(conversation)
+      };
+      await messagingService.sendMessage(
+        conversation.id,
+        currentUserId,
+        `Proposed Appointment: ${scheduleType}`,
+        'calendar_invite',
+        JSON.stringify(invitePayload)
+      );
+      setShowScheduleModal(false);
+      setScheduleNote('');
+      toast.success('Appointment invite sent in chat!');
+    } catch (err) {
+      console.error('Failed to send appointment invite:', err);
+      toast.error('Could not send appointment invite');
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -224,33 +266,58 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
           <Paperclip size={20} />
         </label>
 
-        {/* Account Managers / Admins only: Rich Message Menu */}
-        {(currentUserRole === 'admin' || currentUserRole === 'account_manager' || currentUserRole === 'wholesaler') && (
-          <div style={{ position: 'relative' }}>
-            <button 
-              className="chat-attach-btn" 
-              onClick={() => setShowRichMenu(!showRichMenu)}
-              title="Attach Rich Content"
-            >
-              <LinkIcon size={20} />
-            </button>
-            {showRichMenu && (
-              <div style={{ 
-                position: 'absolute', bottom: '100%', left: 0, marginBottom: '0.5rem', 
-                backgroundColor: 'var(--color-bg-surface)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                border: '1px solid #dadce0', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem',
-                minWidth: '150px'
-              }}>
-                <button style={{ border: 'none', background: 'none', textAlign: 'left', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }} onClick={() => handleSendRich('payment_link')}>
-                  <DollarSign size={16} color="var(--color-success)" /> Send Payment Link
-                </button>
-                <button style={{ border: 'none', background: 'none', textAlign: 'left', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }} onClick={() => handleSendRich('link_product')}>
-                  <ImageIcon size={16} color="#1a73e8" /> Link Product
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Universal Rich Message Menu */}
+        <div style={{ position: 'relative' }}>
+          <button 
+            className="chat-attach-btn" 
+            onClick={() => setShowRichMenu(!showRichMenu)}
+            title="Attach Consultation or Reference"
+            type="button"
+          >
+            <LinkIcon size={20} />
+          </button>
+          {showRichMenu && (
+            <div style={{ 
+              position: 'absolute', bottom: '100%', left: 0, marginBottom: '0.5rem', 
+              backgroundColor: '#ffffff', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              border: '1px solid #cbd5e1', padding: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.25rem',
+              minWidth: '200px', zIndex: 100
+            }}>
+              <button 
+                type="button"
+                style={{ border: 'none', background: 'none', textAlign: 'left', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', borderRadius: '6px', color: '#0f172a' }} 
+                onClick={() => { setShowRichMenu(false); setShowScheduleModal(true); }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <Calendar size={16} color="#0d9488" /> Schedule Consultation
+              </button>
+
+              {(currentUserRole === 'admin' || currentUserRole === 'account_manager' || currentUserRole === 'wholesaler') && (
+                <>
+                  <button 
+                    type="button"
+                    style={{ border: 'none', background: 'none', textAlign: 'left', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', borderRadius: '6px', color: '#0f172a' }} 
+                    onClick={() => handleSendRich('payment_link')}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <DollarSign size={16} color="#16a34a" /> Send Payment Link
+                  </button>
+                  <button 
+                    type="button"
+                    style={{ border: 'none', background: 'none', textAlign: 'left', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.82rem', borderRadius: '6px', color: '#0f172a' }} 
+                    onClick={() => handleSendRich('link_product')}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <ImageIcon size={16} color="#1a73e8" /> Link Product
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
           <input 
@@ -280,6 +347,116 @@ export default function ChatWindow({ conversation, currentUserId, currentUserRol
           {sending ? <div className="spinner" style={{ width: 16, height: 16, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /> : <Send size={18} />}
         </button>
       </div>
+
+      {/* Schedule Consultation Modal */}
+      {showScheduleModal && (
+        <div style={{
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.55)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '1rem'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '420px',
+            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={18} color="#0d9488" /> Schedule Consultation
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setShowScheduleModal(false)} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#64748b' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '4px' }}>
+                  Consultation Type
+                </label>
+                <select 
+                  value={scheduleType} 
+                  onChange={e => setScheduleType(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }}
+                >
+                  <option value="Clinical Consultation">Clinical Consultation</option>
+                  <option value="Protocol Follow-Up">Protocol Follow-Up</option>
+                  <option value="Lab & Biomarker Review">Lab & Biomarker Review</option>
+                  <option value="Reconstitution & Dosing Coaching">Reconstitution & Dosing Coaching</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '4px' }}>
+                  Date & Time
+                </label>
+                <input 
+                  type="datetime-local" 
+                  value={scheduleDateTime}
+                  onChange={e => setScheduleDateTime(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '4px' }}>
+                  Duration
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[15, 30, 45, 60].map(mins => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setScheduleDuration(mins)}
+                      style={{
+                        flex: 1, padding: '0.4rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
+                        border: `1.5px solid ${scheduleDuration === mins ? '#0d9488' : '#cbd5e1'}`,
+                        backgroundColor: scheduleDuration === mins ? '#f0fdfa' : '#ffffff',
+                        color: scheduleDuration === mins ? '#0d9488' : '#475569'
+                      }}
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#475569', display: 'block', marginBottom: '4px' }}>
+                  Notes / Preparation (Optional)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Please bring recent blood test panel"
+                  value={scheduleNote}
+                  onChange={e => setScheduleNote(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.85rem', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendScheduleInvite}
+                  disabled={!scheduleDateTime}
+                  style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: 'none', background: '#0d9488', color: '#ffffff', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', opacity: scheduleDateTime ? 1 : 0.5 }}
+                >
+                  Send Invite
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

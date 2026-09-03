@@ -15,7 +15,6 @@ import React, { useState, useEffect } from 'react';
 
 import ClinicalAssistant from '../shared/ClinicalAssistant';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
-import MobileBottomNav from '../shared/MobileBottomNav';
 import { db } from '../../firebase';
 
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -38,6 +37,7 @@ import PullToRefreshContainer from '../mobile/PullToRefreshContainer';
 import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List, Briefcase } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { useCart } from '../../context/CartProvider';
+import MobileBottomNav from '../mobile/MobileBottomNav';
 
 // ── Atlas AI — Suggested Prompts per Role (100% English) ──────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
@@ -492,6 +492,11 @@ export default function PortalLayout({
       .portal-header-search-bar { display: none; }
       .portal-header-search-btn { display: flex; }
       .portal-header { padding: 0 1rem; }
+    }
+    @media (max-width: 768px) {
+      .portal-main-content {
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 8px)) !important;
+      }
     }
   `;
 
@@ -1035,9 +1040,10 @@ export default function PortalLayout({
         suggestedPrompts={ROLE_SUGGESTED_PROMPTS[roleContext] || []}
       />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
-      <ContextualFAB />
-      {/* MobileBottomNav removed — was covering MobileFiltersSheet footer (Apply button)
-          and cluttering every admin mobile screen. Navigation via hamburger TopBar. */}
+      <MobileBottomNav 
+        onOpenSidebar={() => setSidebarOpen(true)}
+        onOpenAi={() => setAiOpen(true)}
+      />
     </div>
   );
 }
