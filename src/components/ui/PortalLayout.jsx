@@ -498,6 +498,14 @@ export default function PortalLayout({
         padding-bottom: calc(64px + env(safe-area-inset-bottom, 8px)) !important;
       }
     }
+    @keyframes sheetSlideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   `;
 
   return (
@@ -617,6 +625,7 @@ export default function PortalLayout({
           </span>
 
           {/* Notifications Dropdown (GCP Attention Style) */}
+          {/* Notifications Dropdown (GCP Attention Style - Dual Responsive) */}
           <div style={{ position: 'relative' }} className="portal-header-bell-wrap">
             <button
               className="portal-header-bell-btn"
@@ -629,7 +638,7 @@ export default function PortalLayout({
                   : 'rgba(255,255,255,0.5)',
                 borderColor: isNotificationsOpen ? 'var(--color-primary)' : 'rgba(0,0,0,0.05)',
               }}
-              title="Alertas de Atención"
+              title="Notifications"
             >
               <Bell
                 size={20}
@@ -664,14 +673,14 @@ export default function PortalLayout({
               )}
             </button>
 
-            {isNotificationsOpen && (
+            {/* Laptop Popover */}
+            {isNotificationsOpen && !isMobile && (
               <div
                 style={{
                   position: 'absolute',
                   top: 'calc(100% + 8px)',
                   right: 0,
-                  width: 'min(340px, 92vw)',
-                  maxWidth: '92vw',
+                  width: '380px',
                   backgroundColor: 'white',
                   borderRadius: '12px',
                   boxShadow:
@@ -691,15 +700,15 @@ export default function PortalLayout({
                     backgroundColor: '#f8fafc',
                   }}
                 >
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>
-                    Attention Items
+                  <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1e293b' }}>
+                    Attention & Activity
                   </span>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <span
                       style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--color-primary)',
-                        fontWeight: 500,
+                        fontSize: '0.72rem',
+                        color: 'var(--color-primary, #003666)',
+                        fontWeight: 600,
                       }}
                     >
                       {visibleNotifications.length} pending
@@ -721,7 +730,7 @@ export default function PortalLayout({
                     )}
                   </div>
                 </div>
-                <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                   {visibleNotifications.length === 0 ? (
                     <div
                       style={{
@@ -731,7 +740,7 @@ export default function PortalLayout({
                         fontSize: '0.8rem',
                       }}
                     >
-                      ✨ No items require attention.
+                      ✨ All caught up! No items require attention.
                     </div>
                   ) : (
                     visibleNotifications.slice(0, 15).map((n, idx) => (
@@ -739,7 +748,6 @@ export default function PortalLayout({
                         key={idx}
                         onClick={() => {
                           if (n.actionPath) {
-                            // If path contains query string, navigate to /admin/<tab>?query
                             const [tabPart, queryPart] = n.actionPath.split('?');
                             const fullPath = `/admin/${tabPart}${queryPart ? '?' + queryPart : ''}`;
                             routerNavigate.push(fullPath);
@@ -753,7 +761,7 @@ export default function PortalLayout({
                               ? '1px solid rgba(0,0,0,0.04)'
                               : 'none',
                           cursor: 'pointer',
-                          transition: 'background 0.2s',
+                          transition: 'background 0.15s ease',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '2px',
@@ -792,13 +800,13 @@ export default function PortalLayout({
                           style={{
                             fontSize: '0.8rem',
                             color: '#334155',
-                            fontWeight: 500,
+                            fontWeight: 600,
                             marginTop: '3px',
                           }}
                         >
                           {n.title}
                         </span>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
                           {n.description}
                         </span>
                       </div>
@@ -806,6 +814,150 @@ export default function PortalLayout({
                   )}
                 </div>
               </div>
+            )}
+
+            {/* Mobile Native Bottom Sheet */}
+            {isNotificationsOpen && isMobile && (
+              <>
+                <div
+                  onClick={() => setNotificationsOpen(false)}
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+                    backdropFilter: 'blur(4px)',
+                    zIndex: 10001,
+                    animation: 'fadeIn 0.15s ease-out'
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    maxHeight: '82vh',
+                    backgroundColor: '#ffffff',
+                    borderTopLeftRadius: '20px',
+                    borderTopRightRadius: '20px',
+                    zIndex: 10002,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.15)',
+                    paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 8px))',
+                    animation: 'sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                >
+                  <div style={{ padding: '8px 0 4px', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: '#cbd5e1' }} />
+                  </div>
+                  <div
+                    style={{
+                      padding: '0.75rem 1.25rem',
+                      borderBottom: '1px solid rgba(0,0,0,0.06)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>
+                        Notifications
+                      </span>
+                      {visibleNotifications.length > 0 && (
+                        <span style={{ fontSize: '0.72rem', backgroundColor: '#ef4444', color: '#fff', padding: '1px 7px', borderRadius: '999px', fontWeight: 700 }}>
+                          {visibleNotifications.length}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                      {visibleNotifications.length > 0 && (
+                        <button
+                          onClick={handleMarkAllAsRead}
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--color-primary, #003666)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setNotificationsOpen(false)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '1.2rem',
+                          color: '#64748b'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 1rem' }}>
+                    {visibleNotifications.length === 0 ? (
+                      <div style={{ padding: '3rem 1rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+                        ✨ All caught up! No notifications.
+                      </div>
+                    ) : (
+                      visibleNotifications.map((n, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            if (n.actionPath) {
+                              const [tabPart, queryPart] = n.actionPath.split('?');
+                              const fullPath = `/admin/${tabPart}${queryPart ? '?' + queryPart : ''}`;
+                              routerNavigate.push(fullPath);
+                            }
+                            setNotificationsOpen(false);
+                          }}
+                          style={{
+                            padding: '0.85rem 1rem',
+                            minHeight: '48px',
+                            borderBottom: idx < visibleNotifications.length - 1 ? '1px solid #f1f5f9' : 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '3px',
+                            textAlign: 'left'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                color: n.severity === 'critical' ? '#ef4444' : '#f59e0b',
+                                backgroundColor: n.severity === 'critical' ? '#fee2e2' : '#fef3c7',
+                                padding: '1px 6px',
+                                borderRadius: '4px'
+                              }}
+                            >
+                              {n.type}
+                            </span>
+                            <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+                              {n.timeLabel}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.88rem', color: '#0f172a', fontWeight: 600, marginTop: '2px' }}>
+                            {n.title}
+                          </span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.3 }}>
+                            {n.description}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
@@ -818,7 +970,7 @@ export default function PortalLayout({
               borderColor: 'rgba(0,0,0,0.05)',
               marginLeft: '0.25rem'
             }}
-            title={`Espacios de Trabajo (${activeWs?.name || 'Workspace'} - ${workspaceItemCount} items)`}
+            title={`Workspaces (${activeWs?.name || 'Workspace'} - ${workspaceItemCount} items)`}
           >
             <Briefcase
               size={20}

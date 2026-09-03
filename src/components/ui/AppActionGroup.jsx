@@ -85,16 +85,29 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuCoords, setMenuCoords] = useState({ top: 0, left: 0 });
   const [isCompactScreen, setIsCompactScreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const mql = window.matchMedia('(max-width: 1280px)');
-    setIsCompactScreen(mql.matches);
-    const handleResize = (e) => setIsCompactScreen(e.matches);
-    mql.addEventListener('change', handleResize);
-    return () => mql.removeEventListener('change', handleResize);
+    const mqlCompact = window.matchMedia('(max-width: 1280px)');
+    const mqlMobile = window.matchMedia('(max-width: 768px)');
+    
+    setIsCompactScreen(mqlCompact.matches);
+    setIsMobile(mqlMobile.matches);
+
+    const handleResize = () => {
+      setIsCompactScreen(mqlCompact.matches);
+      setIsMobile(mqlMobile.matches);
+    };
+
+    mqlCompact.addEventListener('change', handleResize);
+    mqlMobile.addEventListener('change', handleResize);
+    return () => {
+      mqlCompact.removeEventListener('change', handleResize);
+      mqlMobile.removeEventListener('change', handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -105,14 +118,16 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
     }
     if (menuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      const handleScroll = () => setMenuOpen(false);
+      const handleScroll = () => {
+        if (!isMobile) setMenuOpen(false);
+      };
       window.addEventListener("scroll", handleScroll, true);
       return () => {
         document.removeEventListener("mousedown", handleClickOutside);
         window.removeEventListener("scroll", handleScroll, true);
       };
     }
-  }, [menuOpen]);
+  }, [menuOpen, isMobile]);
 
   const validActions = (actions || []).filter(Boolean);
   // Auto-adapt to avoid laptop/mobile wrap: on <=1280px screen, never exceed 2 visible actions
@@ -127,18 +142,34 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
       const MENU_HEIGHT_ESTIMATE = hiddenActions.length * 40 + 12;
       const spaceBelow = window.innerHeight - rect.bottom;
       const openUpward = spaceBelow < MENU_HEIGHT_ESTIMATE + 8;
+      const MENU_WIDTH_ESTIMATE = 240;
+
+      // Smart boundary detection: if button is near left edge, anchor to left so it never overflows offscreen
+      const wouldOverflowLeft = rect.right < MENU_WIDTH_ESTIMATE + 16;
+      let horizontalCoords = {};
+      if (wouldOverflowLeft) {
+        horizontalCoords = {
+          left: Math.max(8, rect.left),
+          right: 'auto',
+        };
+      } else {
+        horizontalCoords = {
+          right: Math.max(8, window.innerWidth - rect.right),
+          left: 'auto',
+        };
+      }
 
       if (openUpward) {
         setMenuCoords({
           bottom: window.innerHeight - rect.top + 4,
-          right: window.innerWidth - rect.right,
           top: 'auto',
+          ...horizontalCoords
         });
       } else {
         setMenuCoords({
           top: rect.bottom + 4,
-          right: window.innerWidth - rect.right,
           bottom: 'auto',
+          ...horizontalCoords
         });
       }
     }
@@ -261,7 +292,8 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
             <MoreHorizontal size={16} strokeWidth={2.2} />
           </button>
 
-          {menuOpen && createPortal(
+          {/* Desktop Popover */}
+          {menuOpen && !isMobile && createPortal(
             <div 
               ref={menuRef}
               style={{
@@ -272,7 +304,8 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
                 borderRadius: '10px',
                 boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
                 zIndex: 99999,
-                minWidth: '180px',
+                minWidth: '200px',
+                maxWidth: '320px',
                 display: 'flex',
                 flexDirection: 'column',
                 padding: '4px',
@@ -327,6 +360,118 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
             </div>,
             document.body
           )}
+
+          {/* Mobile Native Bottom Action Sheet */}
+          {menuOpen && isMobile && createPortal(
+            <>
+              <div 
+                onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
+                style={{
+                  position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.55)',
+                  backdropFilter: 'blur(4px)', zIndex: 999998,
+                  animation: 'appActionFadeIn 0.15s ease-out'
+                }}
+              />
+              <div
+                ref={menuRef}
+                style={{
+                  position: 'fixed', bottom: 0, left: 0, right: 0,
+                  backgroundColor: '#ffffff', borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
+                  zIndex: 999999, display: 'flex', flexDirection: 'column',
+                  boxShadow: '0 -10px 30px rgba(0,0,0,0.15)',
+                  padding: '12px 16px calc(16px + env(safe-area-inset-bottom, 8px))',
+                  maxHeight: '80vh',
+                  animation: 'appActionSheetSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              >
+                <div style={{ padding: '0 0 10px', display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: '#cbd5e1' }} />
+                </div>
+                
+                <div style={{ padding: '0 4px 8px', fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Actions & Options
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', overflowY: 'auto', maxHeight: '60vh', paddingRight: '2px' }}>
+                  {hiddenActions.map((action, idx) => {
+                    const config = ACTION_CONFIG[action.type] || {};
+                    const Icon = action.icon || config.icon;
+                    const label = action.label || config.label || 'Action';
+                    const isDestructive = action.type === 'delete' || action.type === 'archive' || action.type === 'reject';
+                    const iconColor = isDestructive ? '#dc2626' : (action.color || config.color || '#003666');
+                    if (!Icon) return null;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          action.onClick(e);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          width: '100%',
+                          padding: '10px 14px',
+                          minHeight: '48px',
+                          background: isDestructive ? '#fef2f2' : '#f8fafc',
+                          border: `1px solid ${isDestructive ? '#fecaca' : '#f1f5f9'}`,
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          fontWeight: 600,
+                          color: isDestructive ? '#dc2626' : '#0f172a',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <div style={{
+                          width: '32px', height: '32px', borderRadius: '8px',
+                          backgroundColor: isDestructive ? '#fee2e2' : '#ffffff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: `1px solid ${isDestructive ? '#fca5a5' : '#e2e8f0'}`,
+                          flexShrink: 0
+                        }}>
+                          <Icon size={17} color={iconColor} strokeWidth={2.2} />
+                        </div>
+                        <span style={{ flex: 1, whiteSpace: 'normal', lineHeight: 1.3 }}>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }}
+                  style={{
+                    marginTop: '12px',
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#475569',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    textAlign: 'center'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+              <style>{`
+                @keyframes appActionSheetSlideUp {
+                  from { transform: translateY(100%); }
+                  to { transform: translateY(0); }
+                }
+                @keyframes appActionFadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
+              `}</style>
+            </>
+          , document.body)}
         </div>
       )}
     </div>
