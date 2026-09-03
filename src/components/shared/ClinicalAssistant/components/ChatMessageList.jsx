@@ -25,7 +25,8 @@ export default function ChatMessageList({
   onRate,
   onDeepDive,
   contextMode = 'patient',
-  onConfirmAction
+  onConfirmAction,
+  pageContext
 }) {
   const [hasSeenIntro, setHasSeenIntro] = useState(() => {
     return typeof window !== 'undefined' && localStorage.getItem('clinicalAI_hasSeenIntro') === 'true';
@@ -36,6 +37,25 @@ export default function ChatMessageList({
       localStorage.setItem('clinicalAI_hasSeenIntro', 'true');
     }
   }, [hasSeenIntro]);
+  const [thinkingStep, setThinkingStep] = useState(0);
+  const thinkingSteps = [
+    'Searching clinical literature...',
+    'Crossing interactions data...',
+    'Generating clinical report...'
+  ];
+
+  useEffect(() => {
+    let interval;
+    if (isLoading || isTyping) {
+      interval = setInterval(() => {
+        setThinkingStep(prev => (prev + 1) % thinkingSteps.length);
+      }, 2500);
+    } else {
+      setThinkingStep(0);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading, isTyping]);
+
   return (
     <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <AnimatePresence>
@@ -97,25 +117,49 @@ export default function ChatMessageList({
           />
         ))}
 
-
         {(isLoading || isTyping) && (
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.85rem', width: '100%', maxWidth: '820px' }}>
             <div style={{
               width: '36px', height: '36px', borderRadius: '12px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backgroundColor: 'white', color: 'var(--primary)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)'
+              backgroundColor: 'white', color: 'var(--primary, #003666)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.05)',
+              flexShrink: 0
             }}>
               <Bot size={18} />
             </div>
             <div style={{
-              padding: '0.75rem 1.25rem', borderRadius: '16px',
-              backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.05)',
-              display: 'flex', gap: '4px'
+              flex: 1,
+              padding: '0.85rem 1.15rem', borderRadius: '14px',
+              backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.06)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
             }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-border)', animation: 'ca-typing 1s infinite' }} />
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-border)', animation: 'ca-typing 1s infinite 0.2s' }} />
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-border)', animation: 'ca-typing 1s infinite 0.4s' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary, #003666)', animation: 'ca-typing 1s infinite' }} />
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary, #003666)', animation: 'ca-typing 1s infinite 0.2s' }} />
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary, #003666)', animation: 'ca-typing 1s infinite 0.4s' }} />
+                </div>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary, #003666)' }}>
+                  {thinkingSteps[thinkingStep]}
+                </span>
+              </div>
+              <div style={{
+                height: '4px',
+                width: '100%',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(0, 54, 102, 0.08)',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: '45%',
+                  borderRadius: '4px',
+                  background: 'linear-gradient(90deg, #003666 0%, #0d9488 100%)',
+                  animation: 'shimmer 1.5s infinite ease-in-out'
+                }} />
+              </div>
             </div>
           </div>
         )}

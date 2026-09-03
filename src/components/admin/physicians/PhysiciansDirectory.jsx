@@ -10,6 +10,8 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import notifier from '../../../services/NotificationService';
 import { useToast } from '../../../hooks/useToast';
+import InlineEditableCell from '../../ui/InlineEditableCell';
+import StatusBadge from '../../ui/StatusBadge';
 
 export default function PhysiciansDirectory({ doctors = [], isLoading = false, onSelectDoctor, patientMap = {}, orderMap = {}, onAddPhysician, onRefresh, filters = {} }) {
   const { toast } = useToast();
@@ -51,6 +53,18 @@ export default function PhysiciansDirectory({ doctors = [], isLoading = false, o
     return { count: docOrders.length, revenue: rev };
   };
 
+  const handleFieldUpdate = async (doctorId, field, value) => {
+    try {
+      await updateDoc(doc(db, 'users', doctorId), { [field]: value });
+      toast.success(`Updated successfully`);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to update');
+      throw err;
+    }
+  };
+
   const columns = [
     {
       key: 'physician',
@@ -58,13 +72,26 @@ export default function PhysiciansDirectory({ doctors = [], isLoading = false, o
       render: (d) => {
         const name = getDoctorName(d);
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, flexShrink: 0 }}>
               {name.charAt(0).toUpperCase()}
             </div>
             <div style={{ minWidth: 0, overflow: 'hidden' }}>
               <div style={{ fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{name}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{d.email}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <InlineEditableCell 
+                  value={d.email || ''} 
+                  type="email" 
+                  placeholder="Email" 
+                  onSave={(v) => handleFieldUpdate(d.id, 'email', v)} 
+                />
+                <InlineEditableCell 
+                  value={d.phone || ''} 
+                  type="tel" 
+                  placeholder="Phone" 
+                  onSave={(v) => handleFieldUpdate(d.id, 'phone', v)} 
+                />
+              </div>
             </div>
           </div>
         );
@@ -84,19 +111,21 @@ export default function PhysiciansDirectory({ doctors = [], isLoading = false, o
       key: 'status',
       header: 'Status',
       render: (d) => {
-        const statusStr = d.isArchived ? 'Archived' : (d.status || 'Active');
-        const isError = statusStr === 'Archived' || statusStr === 'Pending';
+        const rawStatus = d.isArchived ? 'archived' : (d.status || 'active').toLowerCase();
         return (
-          <span style={{ 
-            padding: '0.25rem 0.75rem', 
-            borderRadius: '1rem', 
-            fontSize: '0.75rem', 
-            fontWeight: 600,
-            backgroundColor: isError ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
-            color: isError ? 'var(--color-danger)' : 'var(--color-success)'
-          }}>
-            {statusStr}
-          </span>
+          <InlineEditableCell
+            value={rawStatus}
+            type="select"
+            options={[
+              { label: 'Active', value: 'active' },
+              { label: 'Pending', value: 'pending' },
+              { label: 'Rejected', value: 'rejected' },
+              { label: 'Archived', value: 'archived' },
+              { label: 'Inactive', value: 'inactive' }
+            ]}
+            format={(val) => <StatusBadge status={val} />}
+            onSave={(v) => handleFieldUpdate(d.id, v === 'archived' ? 'isArchived' : 'status', v === 'archived' ? true : v)}
+          />
         );
       }
     },
@@ -132,7 +161,7 @@ export default function PhysiciansDirectory({ doctors = [], isLoading = false, o
         <UserPlus size={14} />
       </button>
       <button 
-        title="Create Prescription"
+        title="New Prescription"
         onClick={(e) => { e.stopPropagation(); toast.info('Prescription creator coming soon'); }}
         style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--background)', cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-main)' }}>
         <FilePlus size={14} />

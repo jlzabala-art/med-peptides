@@ -1,9 +1,14 @@
 "use client";
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, test, vi, expect } from 'vitest';
-import { MemoryRouter } from 'next/navigation';
 import AdminUsersTab from '../AdminUsersTab.jsx';
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/admin/users',
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 
 vi.mock('firebase/firestore', () => {
   const collection = (db, name) => ({ _collectionName: name });
@@ -71,21 +76,38 @@ vi.mock('firebase/firestore', () => {
   };
 });
 
+vi.mock('../../../actions/usersActions', () => ({
+  fetchUsersAction: vi.fn(() => Promise.resolve([
+    { id: 'u1', fullName: 'Patient One', role: 'patient', approved: true, createdAt: '2026-05-26T13:00:00Z' },
+  ])),
+  fetchUsersAggregatesAction: vi.fn(() => Promise.resolve({ totalUsers: 1, activePatients: 1 })),
+}));
+
 // Mock db and auth context
 vi.mock('../../../firebase', () => ({ db: {} }));
 vi.mock('../../../context/AuthContext', () => ({
   useAuth: () => ({ user: { uid: 'test-admin' } }),
 }));
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 describe('AdminUsersTab', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
   test('renders without crashing with defaultRole="patient" and mock data', async () => {
+    const ResolvedComponent = await AdminUsersTab({ defaultRole: 'patient' });
     render(
-      <MemoryRouter>
-        <AdminUsersTab defaultRole="patient" />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        {ResolvedComponent}
+      </QueryClientProvider>
     );
     await waitFor(() => {
       expect(screen.getByText('Patient One')).toBeInTheDocument();
     });
   });
 });
+
+
+

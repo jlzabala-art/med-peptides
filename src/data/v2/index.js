@@ -29,7 +29,7 @@ export function initializeData(data) {
 
   _byName = new Map(catalog.map((p) => [(p.name ?? '').toLowerCase().trim(), p]));
   _bySlug = new Map(catalog.map((p) => [p.slug ?? '', p]));
-  categories = [...new Set(catalog.map((p) => p.category).filter(Boolean))].sort();
+  categories = [...new Set(catalog.map((p) => p.categoryId || p.category).filter(Boolean))].sort();
 }
 
 /** Find a v2 product by its canonical name (case-insensitive). */

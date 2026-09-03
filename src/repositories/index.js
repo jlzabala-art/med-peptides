@@ -18,4 +18,10 @@ export { default as faqRepository } from './faqRepository';
 export { default as emailCampaignRepository } from './emailCampaignRepository';
 export { default as userRepository } from './userRepository';
 export { default as orderRepository } from './orderRepository';
+export { default as patientRepository } from './patientRepository';
+export { default as inventoryRepository } from './inventoryRepository';
+export { default as wholesalerRepository } from './wholesalerRepository';
+export { default as appointmentRepository } from './appointmentRepository';
+export { default as biomarkersRepository } from './biomarkersRepository';
+
 

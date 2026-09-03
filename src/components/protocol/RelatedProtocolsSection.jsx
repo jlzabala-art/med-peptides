@@ -181,9 +181,9 @@ export function RelatedCard({ id, protocol, matchReason, onClick }) {
             lineHeight: 1.3,
             letterSpacing: '-0.01em',
           }}>
-            {protocol.title || protocol.name}
+            {protocol.title || protocol.protocol_title || protocol.name || protocol.protocol_name || 'Unnamed Protocol'}
           </h3>
-          {(protocol.summary?.goal || protocol.shortDescription) && (
+          {(protocol.summary?.goal || protocol.shortDescription || protocol.description) && (
             <p style={{
               margin: '0.3rem 0 0',
               fontSize: '0.75rem',
@@ -194,7 +194,7 @@ export function RelatedCard({ id, protocol, matchReason, onClick }) {
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}>
-              {protocol.summary?.goal || protocol.shortDescription}
+              {protocol.summary?.goal || protocol.shortDescription || protocol.description}
             </p>
           )}
         </div>
@@ -229,10 +229,20 @@ export function RelatedCard({ id, protocol, matchReason, onClick }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
             <Clock size={12} />
-            <span style={{ fontWeight: 600 }}>{meta.duration_weeks || protocol.phases?.reduce((s, p) => s + (p.weeks || 0), 0) || '?'} wks</span>
+            <span style={{ fontWeight: 600 }}>
+              {
+                protocol.protocol_duration_weeks 
+                || protocol.duration_weeks 
+                || protocol.timeline?.total_duration_weeks
+                || (protocol.phase_blueprints || []).reduce((s, ph) => s + (ph.duration_weeks || ph.default_duration_weeks || 0), 0) 
+                || '?'
+              } wks
+            </span>
             <span style={{ opacity: 0.4 }}>·</span>
             <Layers size={12} />
-            <span style={{ fontWeight: 600 }}>{protocol.phases?.length || 1} phase{protocol.phases?.length !== 1 ? 's' : ''}</span>
+            <span style={{ fontWeight: 600 }}>
+              {protocol.phase_blueprints?.length || protocol.phases?.length || 1} phase{(protocol.phase_blueprints?.length || protocol.phases?.length) !== 1 ? 's' : ''}
+            </span>
           </div>
           <div style={{
             width: '28px', height: '28px', borderRadius: '50%',
@@ -321,25 +331,19 @@ export default function RelatedProtocolsSection({ protocolId }) {
         </p>
       </div>
 
-      {/* Phase 8 — Mobile-friendly swipe scroll, 4-col desktop */}
+      {/* Desktop wrap grid, mobile friendly */}
       <div style={{
         display: 'flex',
-        gap: '1rem',
-        overflowX: 'auto',
-        scrollSnapType: 'x mandatory',
-        WebkitOverflowScrolling: 'touch',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '1.25rem',
         paddingBottom: '0.75rem',
-        /* Hide scrollbar visually */
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
       }}>
-        {related.map(({ id, protocol, matchReason }) => (
+        {related.slice(0, 4).map(({ id, protocol, matchReason }) => (
           <div
             key={id}
             style={{
-              scrollSnapAlign: 'start',
-              flexShrink: 0,
-              width: 'clamp(260px, 80vw, 320px)',
+              display: 'flex'
             }}
           >
             <RelatedCard

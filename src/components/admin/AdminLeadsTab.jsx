@@ -21,8 +21,8 @@ import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import BarChart3 from "lucide-react/dist/esm/icons/bar-chart-3";
 import Globe from "lucide-react/dist/esm/icons/globe";
 import Phone from "lucide-react/dist/esm/icons/phone";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import X from "lucide-react/dist/esm/icons/x";
+import AppActionGroup from '../ui/AppActionGroup';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
@@ -37,6 +37,9 @@ import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import MetricCard from '../ui/MetricCard';
+import CopyableId from '../ui/CopyableId';
+import InlineEditableCell from '../ui/InlineEditableCell';
 
 
 
@@ -54,12 +57,13 @@ import LeadKanbanBoard from './leads/LeadKanbanBoard';
 import LeadProfileDrawer from './leads/LeadProfileDrawer';
 import { calculateDetailedAIScore } from './leads/LeadUtils';
 import AdminTabErrorBoundary from './AdminTabErrorBoundary';
+import MobileLeadCard from '../shared/mobile/MobileLeadCard';
 
 // Recharts is heavy (~200KB) — loaded only when the chart section renders
 const { BarChart: RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = 
   typeof window !== 'undefined' ? require('recharts') : {};
 
-export default function AdminLeadsTab({ isSubTab = false }) {
+export default function AdminLeadsTab({ isSubTab = false, initialLeads = null, serverKPIs = null }) {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -68,10 +72,16 @@ export default function AdminLeadsTab({ isSubTab = false }) {
   const deepLinkSearch = params.get('search');
 
   const { leads: storeLeads, loading: loadingLeads, fetchLeads: refreshLeads } = useLeadStore();
-  const [agencyRfqs, setAgencyRfqs] = useState([]);
+
+  // If server pre-fetched leads, split them into the two state buckets immediately.
+  // This avoids the getDocs() waterfall on first load.
+  const [agencyRfqs, setAgencyRfqs] = useState(
+    initialLeads ? initialLeads.filter(l => l._source === 'rfq') : []
+  );
   const [catalogProducts, setCatalogProducts] = useState([]);
-  const [loadingMetadata, setLoadingMetadata] = useState(true);
-  
+  // Skip the metadata loading state when server already provided the initial data
+  const [loadingMetadata, setLoadingMetadata] = useState(!initialLeads);
+
   const loading = loadingLeads || loadingMetadata;
 
   const hasMore = false;
@@ -157,6 +167,25 @@ export default function AdminLeadsTab({ isSubTab = false }) {
       setLoadingMetadata(false);
     }
   }
+
+  const handleFieldUpdate = async (leadId, field, value) => {
+    try {
+      const leadToUpdate = leads.find(l => l.id === leadId);
+      if (!leadToUpdate) return;
+      if (leadToUpdate.type === 'rfq') {
+         await updateDoc(doc(db, 'agency_rfqs', leadId), { [field]: value });
+      } else {
+         const updatedLead = { ...leadToUpdate, [field]: value };
+         await catalogRepository.saveLeadRequest(updatedLead);
+      }
+      refreshLeads();
+      setAgencyRfqs(prev => prev.map(l => l.id === leadId ? { ...l, [field]: value } : l));
+      toast.success(`Updated successfully`);
+    } catch (err) {
+      console.error('Error updating field:', err);
+      toast.error('Failed to update.');
+    }
+  };
 
   const handleStatusChange = async (leadId, newStatus) => {
     try {
@@ -291,12 +320,22 @@ export default function AdminLeadsTab({ isSubTab = false }) {
       header: 'Company / Contact',
       render: (l) => (
         <AppEntityCell
-          title={l.name || 'Unknown Contact'}
+          title={
+            <div style={{ fontWeight: 600 }}>
+              <InlineEditableCell value={l.name || ''} placeholder="Name" type="text" onSave={(v) => handleFieldUpdate(l.id, 'name', v)} />
+            </div>
+          }
           subtitle={
-            <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}><Mail size={10} /> {l.email}</span>
+            <div style={{ display: 'inline-flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Mail size={10} />
+                <InlineEditableCell value={l.email || ''} placeholder="Email" type="email" onSave={(v) => handleFieldUpdate(l.id, 'email', v)} />
+              </span>
               <span>•</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}><Phone size={10} /> {l.phone}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Phone size={10} />
+                <InlineEditableCell value={l.phone || ''} placeholder="Phone" type="tel" onSave={(v) => handleFieldUpdate(l.id, 'phone', v)} />
+              </span>
             </div>
           }
         />
@@ -306,7 +345,7 @@ export default function AdminLeadsTab({ isSubTab = false }) {
       key: 'type',
       header: 'Type',
       render: (l) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px' }}>
           <span style={{ 
             fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', 
             backgroundColor: l.type === 'rfq' ? '#f5f3ff' : '#f0fdf4', 
@@ -327,7 +366,7 @@ export default function AdminLeadsTab({ isSubTab = false }) {
       render: (l) => {
         const details = calculateDetailedAIScore(l);
         return (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: details.score >= 80 ? '#10b981' : details.score >= 50 ? '#f59e0b' : '#ef4444', fontWeight: 800, fontSize: '0.85rem' }}>
               <Target size={14} /> {details.score}/100
             </div>
@@ -368,23 +407,44 @@ export default function AdminLeadsTab({ isSubTab = false }) {
       key: 'status',
       header: 'Stage',
       render: (l) => (
-        <select 
-          value={l.status || 'new'} 
-          onChange={(e) => handleStatusChange(l.id, e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          className="admin-premium-select"
-          style={{ padding: '4px 8px', fontSize: '0.75rem', width: 'auto' }}
-        >
-          <option value="new">New</option>
-          <option value="qualified">Qualified</option>
-          <option value="pricing">RFQ Requested</option>
-          <option value="quoted">Quotation Sent</option>
-          <option value="negotiation">Negotiation</option>
-          <option value="awaiting">Awaiting Decision</option>
-          <option value="won">Won</option>
-          <option value="lost">Lost</option>
-        </select>
+        <InlineEditableCell
+          value={l.status || 'new'}
+          type="select"
+          options={[
+            { value: 'new', label: 'New' },
+            { value: 'qualified', label: 'Qualified' },
+            { value: 'pricing', label: 'RFQ Requested' },
+            { value: 'quoted', label: 'Quotation Sent' },
+            { value: 'negotiation', label: 'Negotiation' },
+            { value: 'awaiting', label: 'Awaiting Decision' },
+            { value: 'won', label: 'Won' },
+            { value: 'lost', label: 'Lost' }
+          ]}
+          onSave={(v) => handleStatusChange(l.id, v)}
+        />
       ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'right',
+      render: (l) => {
+        if (l.type === 'rfq') return null;
+        return (
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={[
+              {
+                type: 'convert_to_patient',
+                onClick: (e) => { 
+                  e.stopPropagation(); 
+                  toast.success('Lead converted to Patient successfully!'); 
+                  handleStatusChange(l.id, 'won'); 
+                }
+              }
+            ]} />
+          </div>
+        );
+      }
     },
     {
       key: 'date',
@@ -434,113 +494,14 @@ export default function AdminLeadsTab({ isSubTab = false }) {
           subtitle="Track wholesaler opportunities, incoming RFQs, and auto-recommend pricing configurations."
           icon={Target}
           rightContent={
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <button onClick={() => toast.info('Initiating CSV CRM Import')} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}><ArrowUpRight size={14} /> Import Leads</button>
               <button onClick={() => toast.info('Quick RFQ Creator Opened')} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem' }}><FileText size={14} /> Create RFQ</button>
             </div>
           }
         />
-      )}
-
-      {/* 1. EXECUTIVE CRM KPI SUMMARY STRIP */}
-      <div className="kpi-scroll-row" style={{ paddingBottom: '0.5rem' }}>
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          const isSelected = activeKpiFilter === kpi.id;
-          return (
-            <div 
-              key={kpi.id} 
-              onClick={() => setActiveKpiFilter(isSelected ? 'all' : kpi.id)}
-              style={{ 
-                backgroundColor: 'var(--surface, #ffffff)', 
-                borderRadius: '10px', 
-                border: isSelected ? `2.5px solid ${kpi.color}` : '1px solid var(--border)', 
-                padding: '0.8rem 1rem', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '0.2rem',
-                boxShadow: isSelected ? '0 4px 10px rgba(0,0,0,0.06)' : '0 1px 3px rgba(0,0,0,0.02)',
-                cursor: 'pointer',
-                transform: isSelected ? 'translateY(-2px)' : 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase' }}>{kpi.title}</span>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main, #1e293b)' }}>{kpi.value}</span>
-                <div style={{ padding: '0.25rem', backgroundColor: kpi.bg, color: kpi.color, borderRadius: '6px' }}>
-                  <Icon size={12} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Side-by-Side Content: Forecasting & Filter Switcher */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
-        {/* Revenue Forecasting Chart Widget */}
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>Lead Revenue Forecasting</h3>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Comparison of total vs weighted expected pipeline values.</span>
-            </div>
-            <select className="admin-premium-select" style={{ fontSize: '0.75rem', padding: '2px 8px' }}>
-              <option>Quarterly (Q2 2026)</option>
-              <option>Monthly</option>
-              <option>Yearly</option>
-            </select>
-          </div>
-          <div style={{ height: '180px', width: '100%' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsBarChart data={forecastData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" fontSize={10} />
-                <YAxis fontSize={10} />
-                <Tooltip />
-                <Legend iconSize={8} wrapperStyle={{ fontSize: '10px' }} />
-                <Bar dataKey="Pipeline" fill="var(--primary, #3b82f6)" />
-                <Bar dataKey="Weighted" fill="#8b5cf6" />
-                <Bar dataKey="Won" fill="#10b981" />
-              </RechartsBarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Sync Status Info & Quick Help */}
-        <div style={{ backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', height: '100%', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ShieldAlert size={18} color="var(--primary)" />
-            <strong style={{ fontSize: '0.85rem' }}>Commercial Sourcing Intelligence</strong>
-          </div>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
-            Atlas AI automatically parses incoming RFQs and scores opportunity values based on items size, compounding margins, and supplier availability.
-          </p>
-          <div style={{ padding: '0.5rem', backgroundColor: '#f5f3ff', border: '1px solid #d8b4fe', borderRadius: '8px', fontSize: '0.72rem', color: '#6d28d9' }}>
-            <strong>💡 Hot Cross-Sell Target Detected:</strong> Magenta Compounding has a high probability of BPC-157 demand based on historical procurement orders.
-          </div>
-        </div>
-
-      </div>
-
-      {/* GlobalSearchBar — above main content, prominent position */}
-      <div style={{ marginBottom: '0.5rem' }}>
-        <GlobalSearchBar
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Search by company, country, account manager, score..."
-          resultCount={loading ? undefined : filteredLeads.length}
-          namespace="admin-leads"
-          size="lg"
-          filters={activeFilters}
-          filterOptions={filterOptions}
-        />
-      </div>
-
-      {/* View Switcher & Segment Selectors */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'var(--surface-raised, #f1f5f9)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+        )}
+        <div style={{ display: 'flex', backgroundColor: 'var(--background)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)', width: 'fit-content' }}>
           <button 
             onClick={() => setCurrentView('kanban')}
             style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '6px', border: 'none', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', backgroundColor: currentView === 'kanban' ? 'var(--surface)' : 'transparent', color: currentView === 'kanban' ? 'var(--text-main)' : 'var(--text-muted)', boxShadow: currentView === 'kanban' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
@@ -554,6 +515,20 @@ export default function AdminLeadsTab({ isSubTab = false }) {
             <List size={14} /> Directory List
           </button>
         </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="kpi-grid-4" style={{ padding: isSubTab ? '0' : '0 1.5rem', maxWidth: '1280px', margin: '0 auto 1rem' }}>
+        {kpis.map(kpi => (
+          <div key={kpi.id} onClick={() => setActiveKpiFilter(activeKpiFilter === kpi.id ? 'all' : kpi.id)} style={{ cursor: 'pointer', opacity: activeKpiFilter === 'all' || activeKpiFilter === kpi.id ? 1 : 0.5, transition: 'all 0.2s', minWidth: 0 }}>
+            <MetricCard 
+              title={kpi.title} 
+              value={kpi.value} 
+              icon={kpi.icon} 
+              color={kpi.color}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Main Content Area */}
@@ -575,6 +550,13 @@ export default function AdminLeadsTab({ isSubTab = false }) {
                 keyField="id"
                 onRowClick={setSelectedLead}
                 emptyTitle="No commercial leads matching active filters"
+                mobileCardComponent={MobileLeadCard}
+                mobileCardProps={{
+                  onConvertToPatient: (lead) => {
+                    toast.success(`Lead ${lead.name || ''} converted to Patient!`);
+                    handleStatusChange(lead.id, 'won');
+                  },
+                }}
               />
               {hasMore && (
                 <div style={{ padding: '1rem', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
@@ -630,7 +612,6 @@ export default function AdminLeadsTab({ isSubTab = false }) {
           onUpdateRFQItems={handleUpdateRFQItems}
         />
       )}
-    </div>
     </AdminTabErrorBoundary>
   );
 }

@@ -6,16 +6,9 @@ import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import Settings from "lucide-react/dist/esm/icons/settings";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { getViewConfigs, saveViewConfig, deleteViewConfig } from '../../repositories/configRepository';
 
 import notifier from '../../services/NotificationService';
-
-
-
-
-
-
 import { useStaticData } from '../../hooks/useStaticData';
 import styles from './AdminViewsConfigTab.module.css';
 
@@ -51,9 +44,7 @@ export default function AdminViewsConfigTabClient({ initialConfigs = null, isSub
       if (!initialConfigs) {
         setLoading(true);
       }
-      const q = query(collection(db, 'viewConfigs'));
-      const snap = await getDocs(q);
-      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const list = await getViewConfigs();
       setConfigs(list);
     } catch (err) {
       console.error('Error fetching configs:', err);
@@ -84,12 +75,10 @@ export default function AdminViewsConfigTabClient({ initialConfigs = null, isSub
 
     try {
       const idToSave = editingId === 'new' ? editForm.roleKey : editingId;
-      const ref = doc(db, 'viewConfigs', idToSave);
-      await setDoc(ref, {
+      await saveViewConfig(idToSave, {
         name: editForm.name,
         roleKey: editForm.roleKey,
         tabs: editForm.tabs || {},
-        updatedAt: new Date().toISOString(),
       });
 
       notifier.info('View Configuration Saved!');
@@ -104,7 +93,7 @@ export default function AdminViewsConfigTabClient({ initialConfigs = null, isSub
   async function handleDelete(id) {
     notifier.confirmCritical('Are you sure you want to delete this view configuration?', async () => {
       try {
-        await deleteDoc(doc(db, 'viewConfigs', id));
+        await deleteViewConfig(id);
         fetchConfigs();
       } catch (err) {
         console.error('Error deleting config:', err);

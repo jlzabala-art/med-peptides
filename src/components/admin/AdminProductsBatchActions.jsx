@@ -25,7 +25,7 @@ export default function AdminProductsBatchActions({
         onClick={() => onCreatePrescription(selectedIds)}
         className="flex items-center gap-2 py-1.5 px-3 bg-[var(--bg-main)] text-[var(--text-main)] border border-[var(--border-color)] rounded-md text-xs cursor-pointer transition-all duration-200 font-medium shrink-0 hover:bg-gray-50"
       >
-        <ClipboardList size={14} /> Create Prescription
+        <ClipboardList size={14} /> New Prescription
       </button>
       
       <button

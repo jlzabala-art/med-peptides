@@ -151,7 +151,7 @@ export default function AdminMarketingTab({ isSubTab }) {
         <AppEntityCell
           title={b.title || 'Untitled'}
           subtitle={
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'center' }}>
               <span>By {b.author || 'Admin'}</span>
               <span>• {new Date(b.createdAt?.seconds ? b.createdAt.seconds * 1000 : b.createdAt).toLocaleDateString()}</span>
             </div>
@@ -164,7 +164,7 @@ export default function AdminMarketingTab({ isSubTab }) {
       header: 'Publication Channels',
       width: '280px',
       render: (b) => (
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'inline-flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Blog</span>
             <AppStatusToggle

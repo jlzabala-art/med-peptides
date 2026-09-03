@@ -1,0 +1,566 @@
+{
+  "import_version": "1.0",
+  "import_mode": "preflight_check_then_upsert",
+  "import_type": "supplier_product_pricing",
+  "duplicate_policy": {
+    "check_before_insert": true,
+    "search_active_records": true,
+    "search_inactive_records": true,
+    "search_archived_records": true,
+    "search_hidden_records": true,
+    "search_soft_deleted_records": true,
+    "restore_existing_records_when_found": true,
+    "repair_missing_supplier_links": true,
+    "reindex_search_after_import": true,
+    "never_create_exact_duplicate": true,
+    "preserve_price_history": true
+  },
+  "supplier": {
+    "supplier_name": "POD Poland",
+    "supplier_aliases": [
+      "POD",
+      "POD Polska",
+      "Peptide POD Poland",
+      "Poland POD",
+      "POD Poland Dubai"
+    ],
+    "supplier_type": "Peptide Supplier",
+    "country_of_origin": "Poland",
+    "commercial_market": "Dubai, United Arab Emirates",
+    "default_source_currency": "AED",
+    "status": "active",
+    "visible_in_supplier_list": true,
+    "searchable": true,
+    "upsert_supplier": true
+  },
+  "source": {
+    "document_name": "Peptide Product Profile Price List - POD Poland",
+    "document_type": "supplier_price_list",
+    "effective_from": "2026-06-01",
+    "source_location": "Dubai, UAE",
+    "source_currency": "AED",
+    "prices_include_vat": true,
+    "vat_rate": 0.05,
+    "source_note": "All items are supplied as prefilled pens."
+  },
+  "currency_conversion": {
+    "source_currency": "AED",
+    "canonical_comparison_currency": "USD",
+    "aed_per_usd": 3.6725,
+    "net_aed_formula": "gross_price_aed / 1.05",
+    "net_usd_formula": "net_price_aed / 3.6725",
+    "display_rounding_decimals": 2
+  },
+  "default_product_attributes": {
+    "dosage_form": "injectable",
+    "presentation": "prefilled_pen",
+    "device_type": "pen",
+    "supply_state": "ready_to_use",
+    "container_volume_ml": null,
+    "pen_configuration": null,
+    "number_of_doses": null,
+    "requires_device_specification_confirmation": true
+  },
+  "matching_rules": {
+    "exact_match_fields": [
+      "supplier",
+      "normalized_components",
+      "component_strengths",
+      "dosage_form",
+      "presentation"
+    ],
+    "ignore_for_exact_match_when_source_missing": [
+      "container_volume_ml",
+      "number_of_doses",
+      "dose_per_click"
+    ],
+    "related_product_when": [
+      "same active ingredient but different strength",
+      "same active ingredient but different presentation",
+      "same active ingredient but different component combination"
+    ]
+  },
+  "products": [
+    {
+      "supplier_sku": "POD-PEN-AOD9604-15MG",
+      "product_name": "AOD-9604",
+      "source_product_name": "AOD-9604",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "AOD-9604",
+          "amount": 15,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 15,
+      "gross_price_aed": 1400,
+      "vat_rate": 0.05,
+      "net_price_aed": 1333.33,
+      "net_price_usd": 363.06
+    },
+    {
+      "supplier_sku": "POD-PEN-BPC157-15MG",
+      "product_name": "BPC-157",
+      "source_product_name": "BPC-157",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "BPC-157",
+          "amount": 15,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 15,
+      "gross_price_aed": 900,
+      "vat_rate": 0.05,
+      "net_price_aed": 857.14,
+      "net_price_usd": 233.39
+    },
+    {
+      "supplier_sku": "POD-PEN-BPC157-15MG-TB500-15MG",
+      "product_name": "BPC-157 + TB-500",
+      "source_product_name": "BPC-157 / TB-500 Blend",
+      "format": "combination_blend",
+      "components": [
+        {
+          "name": "BPC-157",
+          "amount": 15,
+          "unit": "mg"
+        },
+        {
+          "name": "TB-500",
+          "amount": 15,
+          "unit": "mg"
+        }
+      ],
+      "total_combined_active_mg": 30,
+      "gross_price_aed": 1600,
+      "vat_rate": 0.05,
+      "net_price_aed": 1523.81,
+      "net_price_usd": 414.92
+    },
+    {
+      "supplier_sku": "POD-PEN-CJC1295-5MG",
+      "product_name": "CJC-1295",
+      "source_product_name": "CJC-1295",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "CJC-1295",
+          "amount": 5,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 5,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33,
+      "requires_variant_confirmation": true,
+      "verification_note": "Confirm whether the product is CJC-1295 with DAC or No DAC before exact comparison."
+    },
+    {
+      "supplier_sku": "POD-PEN-CJC1295-5MG-IPAMORELIN-10MG",
+      "product_name": "CJC-1295 + Ipamorelin",
+      "source_product_name": "CJC-1295 / Ipamorelin Blend",
+      "format": "combination_blend",
+      "components": [
+        {
+          "name": "CJC-1295",
+          "amount": 5,
+          "unit": "mg"
+        },
+        {
+          "name": "Ipamorelin",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "total_combined_active_mg": 15,
+      "gross_price_aed": 1600,
+      "vat_rate": 0.05,
+      "net_price_aed": 1523.81,
+      "net_price_usd": 414.92,
+      "requires_variant_confirmation": true,
+      "verification_note": "Confirm whether CJC-1295 is with DAC or No DAC before exact comparison."
+    },
+    {
+      "supplier_sku": "POD-PEN-DSIP-5MG",
+      "product_name": "DSIP",
+      "source_product_name": "DSIP",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "DSIP",
+          "amount": 5,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 5,
+      "gross_price_aed": 900,
+      "vat_rate": 0.05,
+      "net_price_aed": 857.14,
+      "net_price_usd": 233.39
+    },
+    {
+      "supplier_sku": "POD-PEN-EPITALON-50MG",
+      "product_name": "Epitalon",
+      "source_product_name": "Epitalon",
+      "search_aliases": [
+        "Epithalon"
+      ],
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Epitalon",
+          "amount": 50,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 50,
+      "gross_price_aed": 1500,
+      "vat_rate": 0.05,
+      "net_price_aed": 1428.57,
+      "net_price_usd": 388.99
+    },
+    {
+      "supplier_sku": "POD-PEN-GHKCU-60MG",
+      "product_name": "GHK-Cu",
+      "source_product_name": "GHK-Cu",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "GHK-Cu",
+          "amount": 60,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 60,
+      "gross_price_aed": 800,
+      "vat_rate": 0.05,
+      "net_price_aed": 761.90,
+      "net_price_usd": 207.46
+    },
+    {
+      "supplier_sku": "POD-PEN-GLOW-GHKCU60-BPC15715-TB50015",
+      "product_name": "GLOW",
+      "source_product_name": "GLOW (GHK-Cu / BPC-157 / TB-500)",
+      "format": "combination_blend",
+      "components": [
+        {
+          "name": "GHK-Cu",
+          "amount": 60,
+          "unit": "mg"
+        },
+        {
+          "name": "BPC-157",
+          "amount": 15,
+          "unit": "mg"
+        },
+        {
+          "name": "TB-500",
+          "amount": 15,
+          "unit": "mg"
+        }
+      ],
+      "total_combined_active_mg": 90,
+      "gross_price_aed": 2000,
+      "vat_rate": 0.05,
+      "net_price_aed": 1904.76,
+      "net_price_usd": 518.66
+    },
+    {
+      "supplier_sku": "POD-PEN-HGHFRAGMENT-5MG",
+      "product_name": "HGH Fragment",
+      "source_product_name": "HGH Fragment",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "HGH Fragment",
+          "amount": 5,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 5,
+      "gross_price_aed": 2700,
+      "vat_rate": 0.05,
+      "net_price_aed": 2571.43,
+      "net_price_usd": 700.18,
+      "requires_variant_confirmation": true,
+      "verification_note": "Confirm whether this is HGH Fragment 176-191 before exact cross-supplier comparison."
+    },
+    {
+      "supplier_sku": "POD-PEN-IPAMORELIN-5MG",
+      "product_name": "Ipamorelin",
+      "source_product_name": "Ipamorelin",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Ipamorelin",
+          "amount": 5,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 5,
+      "gross_price_aed": 800,
+      "vat_rate": 0.05,
+      "net_price_aed": 761.90,
+      "net_price_usd": 207.46
+    },
+    {
+      "supplier_sku": "POD-PEN-KISSPEPTIN10-6MG",
+      "product_name": "Kisspeptin-10",
+      "source_product_name": "Kisspeptin-10",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Kisspeptin-10",
+          "amount": 6,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 6,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33
+    },
+    {
+      "supplier_sku": "POD-PEN-KPV-10MG",
+      "product_name": "KPV",
+      "source_product_name": "KPV",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "KPV",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 10,
+      "gross_price_aed": 1200,
+      "vat_rate": 0.05,
+      "net_price_aed": 1142.86,
+      "net_price_usd": 311.19
+    },
+    {
+      "supplier_sku": "POD-PEN-MOTSC-30MG",
+      "product_name": "MOTS-C",
+      "source_product_name": "MOTS-C",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "MOTS-C",
+          "amount": 30,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 30,
+      "gross_price_aed": 1300,
+      "vat_rate": 0.05,
+      "net_price_aed": 1238.10,
+      "net_price_usd": 337.13
+    },
+    {
+      "supplier_sku": "POD-PEN-NADPLUS-500MG",
+      "product_name": "NAD+",
+      "source_product_name": "NAD+",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "NAD+",
+          "amount": 500,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 500,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33
+    },
+    {
+      "supplier_sku": "POD-PEN-PT141-20MG",
+      "product_name": "PT-141",
+      "source_product_name": "PT-141",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "PT-141",
+          "amount": 20,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 20,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33
+    },
+    {
+      "supplier_sku": "POD-PEN-RETATRUTIDE-10MG",
+      "product_name": "Retatrutide",
+      "source_product_name": "Retatrutide",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Retatrutide",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 10,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33
+    },
+    {
+      "supplier_sku": "POD-PEN-RETATRUTIDE-20MG",
+      "product_name": "Retatrutide",
+      "source_product_name": "Retatrutide",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Retatrutide",
+          "amount": 20,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 20,
+      "gross_price_aed": 1200,
+      "vat_rate": 0.05,
+      "net_price_aed": 1142.86,
+      "net_price_usd": 311.19
+    },
+    {
+      "supplier_sku": "POD-PEN-RETATRUTIDE-40MG",
+      "product_name": "Retatrutide",
+      "source_product_name": "Retatrutide",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Retatrutide",
+          "amount": 40,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 40,
+      "gross_price_aed": 1400,
+      "vat_rate": 0.05,
+      "net_price_aed": 1333.33,
+      "net_price_usd": 363.06
+    },
+    {
+      "supplier_sku": "POD-PEN-RETATRUTIDE-60MG",
+      "product_name": "Retatrutide",
+      "source_product_name": "Retatrutide",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Retatrutide",
+          "amount": 60,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 60,
+      "gross_price_aed": 1600,
+      "vat_rate": 0.05,
+      "net_price_aed": 1523.81,
+      "net_price_usd": 414.92
+    },
+    {
+      "supplier_sku": "POD-PEN-SS31-40MG",
+      "product_name": "SS-31",
+      "source_product_name": "SS-31",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "SS-31",
+          "amount": 40,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 40,
+      "gross_price_aed": 1100,
+      "vat_rate": 0.05,
+      "net_price_aed": 1047.62,
+      "net_price_usd": 285.26
+    },
+    {
+      "supplier_sku": "POD-PEN-TB500-15MG",
+      "product_name": "TB-500",
+      "source_product_name": "TB-500",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "TB-500",
+          "amount": 15,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 15,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33
+    },
+    {
+      "supplier_sku": "POD-PEN-TESAMORELIN-60MG",
+      "product_name": "Tesamorelin",
+      "source_product_name": "Tesamorelin",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Tesamorelin",
+          "amount": 60,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 60,
+      "gross_price_aed": 2800,
+      "vat_rate": 0.05,
+      "net_price_aed": 2666.67,
+      "net_price_usd": 726.12
+    },
+    {
+      "supplier_sku": "POD-PEN-THYMOSINALPHA-12_8MG",
+      "product_name": "Thymosin Alpha",
+      "source_product_name": "Thymosin Alpha",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Thymosin Alpha",
+          "amount": 12.8,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 12.8,
+      "gross_price_aed": 900,
+      "vat_rate": 0.05,
+      "net_price_aed": 857.14,
+      "net_price_usd": 233.39,
+      "requires_variant_confirmation": true,
+      "verification_note": "Confirm whether the product is specifically Thymosin Alpha-1 before exact comparison."
+    },
+    {
+      "supplier_sku": "POD-PEN-TIRZEPATIDE-60MG",
+      "product_name": "Tirzepatide",
+      "source_product_name": "Tirzepatide",
+      "format": "monotherapy",
+      "components": [
+        {
+          "name": "Tirzepatide",
+          "amount": 60,
+          "unit": "mg"
+        }
+      ],
+      "total_active_mg": 60,
+      "gross_price_aed": 1000,
+      "vat_rate": 0.05,
+      "net_price_aed": 952.38,
+      "net_price_usd": 259.33
+    }
+  ]
+}

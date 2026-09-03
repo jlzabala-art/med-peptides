@@ -11,6 +11,8 @@ import * as fb from '../../firebase';
 const db = fb?.db;
 import DataTable from '../ui/DataTable';
 import AppFilterBar from '../ui/AppFilterBar';
+import AppActionGroup from '../ui/AppActionGroup';
+import { toast } from 'react-hot-toast';
 
 
 
@@ -104,7 +106,7 @@ export default function UsersDataWidget({
       setCurrentPage(pageIndex);
     } catch (err) {
       console.error("[UsersDataWidget] Error fetching users:", err);
-      // alert("Error de índices en Firebase. Revisa la consola.");
+      // toast.error("Error de índices en Firebase. Revisa la consola.");
     } finally {
       setLoading(false);
     }
@@ -133,7 +135,7 @@ export default function UsersDataWidget({
     {
       key: 'user', header: 'User', width: '35%',
       render: (u) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '50%',
             backgroundColor: 'var(--primary)', color: 'white',
@@ -190,15 +192,11 @@ export default function UsersDataWidget({
 
   if (!readOnly) {
     columns.push({
-      key: 'actions', header: '', align: 'right', width: '20%',
+      key: 'actions', header: 'Actions', align: 'right', width: '20%',
       render: (u) => (
-        <button 
-          className="admin-danger-btn"
-          onClick={() => { /* Implement delete logic or open modal */ }}
-          style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-        >
-          <Trash2 size={14} /> Remove
-        </button>
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+          <AppActionGroup actions={[{ type: 'delete', onClick: () => { /* Implement delete logic or open modal */ } }]} />
+        </div>
       )
     });
   }
@@ -216,7 +214,7 @@ export default function UsersDataWidget({
           searchPlaceholder="Search users in page..."
           dateRange={dateRange}
           onDateRangeChange={setDateRange}
-          onExport={() => alert('Export not implemented in widget yet')}
+          onExport={() => toast('Export not implemented in widget yet')}
         />
       )}
 

@@ -8,14 +8,14 @@ export default function HealthMatrixWidget({ statusData = [] }) {
       label: 'Sales Network',
       state: 'green',
       desc: 'Quota hit',
-      link: '/admin/sales',
+      link: '/admin/orders',
     },
     {
       id: 'procurement',
       label: 'Procurement',
       state: 'green',
       desc: 'Optimal lead time',
-      link: '/admin/suppliers',
+      link: '/admin/procurement',
     },
     {
       id: 'inventory',
@@ -29,7 +29,7 @@ export default function HealthMatrixWidget({ statusData = [] }) {
       label: 'Cash Flow',
       state: 'green',
       desc: 'Reserves healthy',
-      link: '/admin/finance',
+      link: '/admin/revenue',
     },
     { id: 'crm', label: 'B2B Leads', state: 'green', desc: '14 new leads', link: '/admin/crm' },
     {
@@ -37,7 +37,7 @@ export default function HealthMatrixWidget({ statusData = [] }) {
       label: 'Ops Dispatch',
       state: 'yellow',
       desc: 'Courier delayed',
-      link: '/admin/logistics',
+      link: '/admin/shipping',
     },
   ];
 

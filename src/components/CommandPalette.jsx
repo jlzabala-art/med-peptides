@@ -11,10 +11,13 @@ import Command from "lucide-react/dist/esm/icons/command";
 import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
 import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useDebounce } from '../hooks/useDebounce';
-import { searchProductsAndProtocols, searchUsers, searchOrders } from '../services/searchProviders';
+import { searchFederatedEntities, searchOrders } from '../services/searchProviders';
+import { useWorkspaceStore } from '../stores/useWorkspaceStore';
+import { logger } from '../utils/logger';
 
 const fuzzyMatch = (q, text) => text?.toLowerCase().includes(q.toLowerCase());
 
@@ -24,6 +27,8 @@ const PORTAL_CONFIGS = {
     placeholder: 'Search items, orders, suppliers, RFQs, or commands…',
     routePrefix: '/admin',
     quickActions: [
+      { id: 'qa-workspace-toggle', label: 'Workspace: Open Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
+      { id: 'qa-workspace-clear',  label: 'Workspace: Clear Staged Items', icon: Sparkles, type: 'Action', action: 'clear-workspace' },
       { id: 'qa-ai',       label: 'Ask Atlas AI',           icon: Sparkles, type: 'Action', action: 'ask-ai' },
       { id: 'qa-user',     label: 'Create New User',        icon: Sparkles, type: 'Action', path: '/admin/users?new=true' },
       { id: 'qa-product',  label: 'Add New Item',           icon: Box,      type: 'Action', path: '/admin/products?new=true' },
@@ -37,6 +42,7 @@ const PORTAL_CONFIGS = {
     placeholder: 'Search patients, products, protocols, or commands...',
     routePrefix: '/doctor',
     quickActions: [
+      { id: 'qa-workspace-toggle', label: 'Workspace: Open Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
       { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
       { id: 'qa-patient', label: 'Register New Patient', icon: Sparkles, type: 'Action', path: '/doctor/patients?new=true' },
     ],
@@ -99,26 +105,42 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
   // Build system routes from pinned and groups (unchanged)
   const systemRoutes = useMemo(() => {
     const routes = [];
-    pinnedItems.forEach(item => {
-      routes.push({
-        id: `route-${item.id}`,
-        label: item.label,
-        path: `${config.routePrefix}/${item.id === 'dashboard' ? '' : item.id}`,
-        icon: item.icon || LayoutDashboard,
-        type: 'Module',
+    const addedIds = new Set();
+
+    if (pinnedItems) {
+      pinnedItems.forEach(item => {
+        if (!addedIds.has(item.id)) {
+          addedIds.add(item.id);
+          routes.push({
+            id: `route-${item.id}`,
+            label: item.label,
+            path: `${config.routePrefix}/${item.id === 'dashboard' ? '' : item.id}`,
+            icon: item.icon || LayoutDashboard,
+            type: 'Module',
+          });
+        }
       });
-    });
-    navGroups.forEach(group => {
-      group.items.forEach(item => {
-        routes.push({
-          id: `route-${item.id}`,
-          label: item.label,
-          path: `${config.routePrefix}/${item.id}`,
-          icon: item.icon || LayoutDashboard,
-          type: 'Module',
-        });
+    }
+
+    if (navGroups) {
+      navGroups.forEach(group => {
+        if (group.items) {
+          group.items.forEach(item => {
+            if (!addedIds.has(item.id)) {
+              addedIds.add(item.id);
+              routes.push({
+                id: `route-${item.id}`,
+                label: item.label,
+                path: `${config.routePrefix}/${item.id}`,
+                icon: item.icon || LayoutDashboard,
+                type: 'Module',
+              });
+            }
+          });
+        }
       });
-    });
+    }
+
     return routes;
   }, [navGroups, pinnedItems, config]);
 
@@ -164,21 +186,18 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
     const actionResults = QUICK_ACTIONS.filter(a => fuzzyMatch(lowerQ, a.label));
     const routeResults = systemRoutes.filter(r => fuzzyMatch(lowerQ, r.label));
     try {
-      const [algoliaResults, userResults, orderResults] = await Promise.all([
-        searchProductsAndProtocols(q, config.routePrefix),
-        searchUsers(q, portalType, user),
+      const [federatedResults, orderResults] = await Promise.all([
+        searchFederatedEntities(q, portalType, config.routePrefix),
         searchOrders(q, portalType, user)
       ]);
       setResults([
         ...actionResults,
         ...routeResults,
-        ...algoliaResults.products,
-        ...algoliaResults.protocols,
-        ...userResults,
+        ...federatedResults,
         ...orderResults,
       ]);
     } catch (err) {
-      console.error('Omni-search error:', err);
+      logger.error('Omni-search error', { error: err });
     } finally {
       setIsLoading(false);
       setSelectedIndex(0);
@@ -192,7 +211,15 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
   }, [debouncedSearchQuery, performSearch]);
 
   const handleSelect = (item) => {
-    if (item.type === 'Recent' && item.path) {
+    if (item.action === 'toggle-workspace') {
+      onClose();
+      useWorkspaceStore.getState().toggleDrawer();
+      return;
+    } else if (item.action === 'clear-workspace') {
+      onClose();
+      useWorkspaceStore.getState().clearWorkspaceItems();
+      return;
+    } else if (item.type === 'Recent' && item.path) {
       router.push(item.path);
     } else if (item.action === 'ask-ai') {
       if (onAskAI) onAskAI(searchQuery);
@@ -227,7 +254,7 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
     acc[grp].push(item);
     return acc;
   }, {});
-  const groupOrder = ['Recent', 'Action', 'Module', 'Product', 'Protocol', 'User', 'Patient', 'Order'];
+  const groupOrder = ['Recent', 'Action', 'Module', 'Product', 'Protocol', 'Patient', 'Prescription', 'Clinic', 'User', 'Order'];
 
   let globalIdx = 0;
 
@@ -286,7 +313,12 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
                     <div
                       key={item.id}
                       onClick={() => handleSelect(item)}
-                      onMouseEnter={() => setSelectedIndex(curIdx)}
+                      onMouseEnter={() => {
+                        setSelectedIndex(curIdx);
+                        if (item.path) {
+                          try { router.prefetch(item.path); } catch (e) {}
+                        }
+                      }}
                       style={{
                         display: 'flex', alignItems: 'center', padding: '0.75rem 1rem',
                         cursor: 'pointer', borderRadius: '8px',
@@ -294,8 +326,15 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
                         color: isSel ? '#fff' : '#e2e8f0'
                       }}
                     >
-                      <Icon size={18} style={{ marginRight: '1rem', color: isSel ? '#3b82f6' : '#cbd5e1' }} />
-                      <div style={{ flex: 1 }}>{item.label}</div>
+                      <Icon size={18} style={{ marginRight: '1rem', color: isSel ? '#3b82f6' : '#cbd5e1', flexShrink: 0 }} />
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <span>{item.label}</span>
+                        {item.sublabel && (
+                          <span style={{ fontSize: '0.72rem', color: isSel ? '#93c5fd' : '#94a3b8' }}>
+                            {item.sublabel}
+                          </span>
+                        )}
+                      </div>
                       {group === 'Action' && <Zap size={14} color="#f59e0b" style={{ marginLeft: '0.5rem' }} />}
                     </div>
                   );

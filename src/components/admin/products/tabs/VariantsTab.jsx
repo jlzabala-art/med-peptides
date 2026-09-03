@@ -6,14 +6,14 @@ export default function VariantsTab({ product }) {
     const variants = product?.variants || [];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+        <Card padding="md" style={{ backgroundColor: '#0f172a', borderColor: '#e2e8f0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Product Variants</h3>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Product Variants</h3>
             <button style={{
               padding: '0.4rem 0.75rem',
               borderRadius: '6px',
               backgroundColor: '#3b82f6',
-              color: '#fff',
+              color: '#0f172a',
               border: 'none',
               fontSize: '0.8rem',
               fontWeight: 600,
@@ -46,13 +46,13 @@ export default function VariantsTab({ product }) {
                     <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.9rem', marginBottom: '4px' }}>
                       {v.name || v.sku || `Variant ${i+1}`}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', gap: '12px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', gap: '12px' }}>
                       <span>SKU: {v.sku || 'N/A'}</span>
                       <span>Supplier: {v.supplier || 'N/A'}</span>
                       <span>Stock: {v.stock || 0}</span>
                     </div>
                   </div>
-                  <button style={{ padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '4px', backgroundColor: 'transparent', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.75rem' }}>
+                  <button style={{ padding: '0.4rem 0.6rem', border: '1px solid #334155', borderRadius: '4px', backgroundColor: 'transparent', color: '#475569', cursor: 'pointer', fontSize: '0.75rem' }}>
                     Edit
                   </button>
                 </div>

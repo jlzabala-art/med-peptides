@@ -84,7 +84,7 @@ exports.acceptPrescription = onCall(async (request) => {
         patientId: patientId,
         doctorName: doctorName || 'Unknown',
         patientName: patientName || 'Unknown',
-        supplier: 'Fagron Genomics / Compounding Lab',
+        supplier: 'Fagron Iberica, S.A.U',
         status: 'Draft',
         items: compoundingProducts,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),

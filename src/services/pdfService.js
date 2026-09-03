@@ -3,6 +3,7 @@ import { ROUTE_LABELS, ROUTE } from '../constants/productEnums.js';
 import { normalizeProtocol, frequencyToInjectionsPerWeek, doseToObject } from '../utils/protocolSchemaAdapter.js';
 import { resolveVariantPrice } from '../utils/resolvePrice.js';
 import { storage, ref, uploadBytes, getDownloadURL } from '../firebase.js';
+import logger from '../utils/logger.js';
 
 const formatDate = (dateString) => {
   if (!dateString) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -508,7 +509,7 @@ export const generateClinicalProtocol = async (rawProtocol, options = {}) => {
         yPos += 80;
         chartRendered = true;
       } catch (e) {
-        console.warn('PDF ChartPng failed — falling back to native chart', e);
+        logger.warn('[pdfService] PDF ChartPng failed — falling back to native chart', e);
       }
     }
 
@@ -794,12 +795,28 @@ export const getCachedProtocolPDF = async (protocol) => {
   const path = `protocols/${protocol.id}/${version}/protocol.pdf`;
   const storageRef = ref(storage, path);
 
+  const originalError = console.error;
   try {
+    // Suppress Firebase's internal console.error for missing/unauthorized cache files
+    console.error = (...args) => {
+      const err = args[0];
+      if (err) {
+        const msg = (typeof err === 'string') ? err : (err.message || '');
+        const code = err.code || '';
+        if (msg.includes('storage/unauthorized') || msg.includes('storage/object-not-found') ||
+            code.includes('storage/unauthorized') || code.includes('storage/object-not-found')) {
+          return;
+        }
+      }
+      originalError(...args);
+    };
     const url = await getDownloadURL(storageRef);
     return url;
   } catch (e) {
-    // 404 is expected if not cached
+    // 404 or 403 is expected if not cached or user is not authorized
     return null;
+  } finally {
+    console.error = originalError;
   }
 };
 
@@ -817,7 +834,7 @@ export const cacheProtocolPDF = async (protocol, blob) => {
     const url = await getDownloadURL(storageRef);
     return url;
   } catch (e) {
-    console.error('[pdfService] Cache upload failed', e);
+    logger.error('[pdfService] Cache upload failed', e);
     return null;
   }
 };
@@ -1017,7 +1034,7 @@ export const generateClinicalPDF = async (protocol, formData = {}, optionsOrTier
     try {
       const cachedUrl = await getCachedProtocolPDF(protocol);
       if (cachedUrl) {
-        console.log('[pdfService] Cache hit! Downloading cached PDF from Storage...', cachedUrl);
+        logger.info('[pdfService] Cache hit! Downloading cached PDF from Storage...', cachedUrl);
         if (opts.returnBlob) {
           const res = await fetch(cachedUrl);
           return await res.blob();
@@ -1035,23 +1052,23 @@ export const generateClinicalPDF = async (protocol, formData = {}, optionsOrTier
         }
       }
     } catch (e) {
-      console.warn('[pdfService] Cache hit failed/skipped, falling back to client generation', e);
+      logger.warn('[pdfService] Cache hit failed/skipped, falling back to client generation', e);
     }
   }
 
-  console.log('[pdfService] Cache miss. Generating PDF on the client...');
+  logger.info('[pdfService] Cache miss. Generating PDF on the client...');
 
   if (opts.returnBlob) {
     const blob = await generateClinicalProtocol(protocol, { formData, ...opts });
     if (blob && cacheKey) {
-      cacheProtocolPDF(protocol, blob).catch(e => console.error('[pdfService] Caching failed', e));
+      cacheProtocolPDF(protocol, blob).catch(e => logger.error('[pdfService] Caching failed', e));
     }
     return blob;
   } else {
     const blob = await generateClinicalProtocol(protocol, { formData, ...opts, returnBlob: true });
     if (blob) {
       if (cacheKey) {
-        cacheProtocolPDF(protocol, blob).catch(e => console.error('[pdfService] Caching failed', e));
+        cacheProtocolPDF(protocol, blob).catch(e => logger.error('[pdfService] Caching failed', e));
       }
       if (typeof window !== 'undefined') {
         const url = URL.createObjectURL(blob);

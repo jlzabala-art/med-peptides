@@ -24,24 +24,24 @@ const S = {
   footer: {
     borderTop: '1px solid var(--border-light)',
     background: 'var(--surface)',
-    padding: '4rem 2rem 3rem',
+    padding: '2.5rem 1.5rem 2rem',
     position: 'relative',
     zIndex: 50,
   },
   container: {
-    maxWidth: '1200px',
+    maxWidth: '1100px',
     margin: '0 auto',
   },
   top: {
     display: 'grid',
-    gridTemplateColumns: '1.5fr 1fr 1fr',
-    gap: '4rem',
-    marginBottom: '4rem',
+    gridTemplateColumns: '1.4fr 1fr 1fr',
+    gap: '2.5rem',
+    marginBottom: '2rem',
   },
   branding: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.25rem',
+    gap: '1rem',
   },
   columnTitle: {
     fontSize: '0.75rem',
@@ -49,7 +49,7 @@ const S = {
     textTransform: 'uppercase',
     letterSpacing: '0.1em',
     color: 'var(--primary)',
-    marginBottom: '1.5rem',
+    marginBottom: '1rem',
   },
   linkList: {
     display: 'flex',
@@ -241,9 +241,9 @@ function Footer() {
               </div>
             </div>
 
-            {/* Institutional */}
+            {/* Resources Hub */}
             <div className="footer-column" style={{ display: 'flex', flexDirection: 'column' }}>
-              <h4 style={S.columnTitle}>Institutional</h4>
+              <h4 style={S.columnTitle}>Resources</h4>
               <div style={S.linkList}>
                 {institutionalLinks.map((link) => (
                   <button

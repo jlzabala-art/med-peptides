@@ -1,17 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { fetchB2BSupplierPOById, submitSupplierBillForPO } from '../../services/quotationRepository';
 import { Card } from '../ui';
-
-
-
-
-
 import ZohoPaperPreview from '../admin/ZohoPaperPreview';
 import { Loader2, ShieldCheck, CheckCircle, UploadCloud, FileText } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function B2BSupplierPOView() {
   const { poId } = useParams();
@@ -25,15 +19,13 @@ export default function B2BSupplierPOView() {
   useEffect(() => {
     const fetchPO = async () => {
       try {
-        const docRef = doc(db, 'purchaseOrders', poId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setPo({ id: docSnap.id, ...docSnap.data() });
+        const data = await fetchB2BSupplierPOById(poId);
+        if (data) {
+          setPo(data);
         } else {
           setError('Purchase Order no encontrada.');
         }
       } catch (err) {
-        console.error(err);
         setError('Error al cargar la PO.');
       }
       setLoading(false);
@@ -43,23 +35,18 @@ export default function B2BSupplierPOView() {
 
   const handleSubmitBill = async () => {
     if (!billNumber || !billAmount) {
-      alert("Por favor indica el número de factura y el monto total.");
+      toast("Por favor indica el número de factura y el monto total.");
       return;
     }
     setActionLoading(true);
     try {
-      // Simplification: We update the PO status and save the bill info inside it for now.
-      // In a real flow, we might create a new doc in 'b2b_bills' or 'purchaseBills'
-      await updateDoc(doc(db, 'purchaseOrders', poId), {
-        status: 'billed',
-        supplierBillNumber: billNumber,
-        supplierBillAmount: parseFloat(billAmount),
-        billedAt: new Date()
+      await submitSupplierBillForPO(poId, {
+        billNumber,
+        billAmount: parseFloat(billAmount)
       });
       setPo(prev => ({ ...prev, status: 'billed', supplierBillNumber: billNumber }));
     } catch (err) {
-      console.error(err);
-      alert("Error al subir la factura.");
+      toast.error("Error al subir la factura.");
     }
     setActionLoading(false);
   };

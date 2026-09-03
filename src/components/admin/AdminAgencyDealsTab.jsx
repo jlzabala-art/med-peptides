@@ -18,8 +18,9 @@ import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import DataTable from '../ui/DataTable';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
+import AppActionGroup from '../ui/AppActionGroup';
 import { useAgencyDeals } from '../../hooks/admin/useAgencyDeals';
 
 export default function AdminAgencyDealsTab({ isSubTab = false }) {
@@ -31,7 +32,7 @@ export default function AdminAgencyDealsTab({ isSubTab = false }) {
   const [saving, setSaving] = useState(false);
   // Contacts from Zoho/Firebase
   const [contacts, setContacts] = useState([]);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState([]); // string[]
 
   const [formData, setFormData] = useState({
     supplierId: '',
@@ -155,54 +156,54 @@ export default function AdminAgencyDealsTab({ isSubTab = false }) {
     {
       key: 'status',
       header: 'Status',
-      render: (val) => <StatusBadge status={val} />
+      render: (val) => <StatusChip status={val} />
     },
     {
       key: 'actions',
-      header: 'Action',
-      render: (_, row) => (
-        row.status === 'DRAFT' && (
-          <button 
-            onClick={() => handleInvoiceDeal(row.id)}
-            style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
-          >
-            Mark Invoiced
-          </button>
-        )
-      )
+      header: 'Actions',
+      align: 'right',
+      render: (_, row) => {
+        if (row.status !== 'DRAFT') return null;
+        return (
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={[
+              { type: 'mark_invoiced', onClick: () => handleInvoiceDeal(row.id) }
+            ]} />
+          </div>
+        );
+      }
     }
   ], []);
 
-  const activeFilters = [];
-  if (statusFilter) {
-    activeFilters.push({
-      key: 'status',
-      label: 'Status',
-      value: statusFilter,
-      onRemove: () => setStatusFilter('')
-    });
-  }
+  const ALL_STATUSES = [
+    { label: 'Draft',    value: 'DRAFT' },
+    { label: 'Invoiced', value: 'INVOICED' },
+  ];
+
+  const activeFilters = statusFilter.map(val => ({
+    key: `status-${val}`,
+    label: 'Status',
+    value: val,
+    onRemove: () => setStatusFilter(prev => prev.filter(v => v !== val))
+  }));
 
   const filterOptions = [
     {
       key: 'status',
-      label: 'Deal Status',
-      options: [
-        { label: 'All', value: '' },
-        { label: 'DRAFT', value: 'DRAFT' },
-        { label: 'INVOICED', value: 'INVOICED' }
-      ],
-      value: statusFilter,
+      label: 'Status',
+      multiSelect: true,
+      values: statusFilter,
+      options: ALL_STATUSES.map(s => ({
+        ...s,
+        count: deals.filter(d => d.status === s.value).length || null,
+      })),
       onChange: setStatusFilter
     }
   ];
 
   const filteredDeals = useMemo(() => {
-    let result = deals;
-    if (statusFilter) {
-      result = result.filter(d => d.status === statusFilter);
-    }
-    return result;
+    if (statusFilter.length === 0) return deals;
+    return deals.filter(d => statusFilter.includes(d.status));
   }, [deals, statusFilter]);
 
   return (

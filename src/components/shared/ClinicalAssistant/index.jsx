@@ -1,9 +1,8 @@
 "use client";
-
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect, useMemo } from 'react';
+
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
@@ -35,9 +34,21 @@ import ChatSuggestions from './components/ChatSuggestions';
 import ContextActionCards from './components/ContextActionCards';
 import SessionHistoryDrawer from './components/SessionHistoryDrawer';
 import ResearchDetailDrawer from './components/ResearchDetailDrawer';
-import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen } from '@/lib/icons';
+import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen, X } from '@/lib/icons';
 
-export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false, pageContext = null, contextMode: passedContextMode, agentType: passedAgentType, suggestedPrompts: passedSuggestedPrompts }) {
+export default function ClinicalAssistant({ 
+  isOpen: externalIsOpen, 
+  setIsOpen: externalSetIsOpen, 
+  embedded = false, 
+  pageContext = null, 
+  contextMode: passedContextMode, 
+  agentType: passedAgentType, 
+  suggestedPrompts: passedSuggestedPrompts 
+}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalSetIsOpen || setInternalIsOpen;
+
   const atlasContext = useAtlasContext();
   const contextMode = passedContextMode || atlasContext.contextMode;
   const agentType = passedAgentType || atlasContext.agentType;
@@ -85,6 +96,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -184,7 +196,9 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     handleConfirmAction,
     handleUploadPrice,
     handleUploadStock,
-    setMessages
+    setMessages,
+    dynamicPageContext,
+    clearActiveContext
   } = useClinicalAI({
     products,
     protocolIndex,
@@ -204,6 +218,12 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
     externalPageContext: pageContext,
     agentType
   });
+
+  // Keep a stable ref to handleSend — avoids re-registering event listeners on every render
+  const handleSendRef = useRef(null);
+  useEffect(() => {
+    handleSendRef.current = handleSend;
+  }, [handleSend]);
 
   useEffect(() => {
     const handleContextEvent = (e) => {
@@ -228,7 +248,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
               ...prev,
               {
                 role: 'assistant',
-                content: `**Modo Clínico Activado Temporalmente**\n\nHe recibido el contexto del producto **${product}**${sku ? ` (SKU: ${sku})` : ''}. ¿Qué duda médica o protocolo te gustaría consultar?`,
+                content: `**Clinical Mode Activated**\n\nI have received the context for the product **${product}**${sku ? ` (SKU: ${sku})` : ''}. What medical question or protocol would you like to consult?`,
                 timestamp: new Date()
               }
             ];
@@ -262,26 +282,64 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
 
     const handleAtlasPrefillQuery = (e) => {
       const query = e.detail?.query;
+      const autoSend = e.detail?.autoSend === true;
       if (query && typeof setInput === 'function') {
-        setInput(query);
-        setIsPulsing(true);
         setIsOpen(true);
-        setTimeout(() => {
-          const inputEl = document.querySelector('.clinical-assistant-container input[type="text"], .clinical-assistant-container textarea');
-          if (inputEl) {
-            inputEl.focus();
-          }
-        }, 400);
+        setIsPulsing(true);
+        if (autoSend) {
+          // Open first, then send after drawer animation settles using latest handleSend via ref
+          setTimeout(() => {
+            if (typeof handleSendRef.current === 'function') {
+              handleSendRef.current(query);
+            }
+          }, 500);
+        } else {
+          setInput(query);
+          setTimeout(() => {
+            const inputEl = document.querySelector('.clinical-assistant-container input[type="text"], .clinical-assistant-container textarea');
+            if (inputEl) inputEl.focus();
+          }, 400);
+        }
       }
     };
     window.addEventListener('ATLAS_PREFILL_QUERY', handleAtlasPrefillQuery);
+
+    const handleOpenAiChat = (e) => {
+      const ctx = e.detail?.context || {};
+      const patientName = ctx.name || ctx.patientName || 'Selected Patient';
+      const patientId = ctx.patientId || ctx.id || '';
+
+      setIsOpen(true);
+      setIsPulsing(true);
+
+      setTimeout(() => {
+        if (typeof setMessages === 'function') {
+          setMessages(prev => {
+            const alreadyLoaded = prev.some(m => m.content && m.content.includes(patientName));
+            if (alreadyLoaded) return prev;
+            return [
+              ...prev,
+              {
+                role: 'assistant',
+                content: `**Patient AI Quick View** 🩺\n\nClinical record loaded for **${patientName}**${patientId ? ` (ID: \`${patientId}\`)` : ''}.\n\nHow can I help with this patient? You can ask me to:\n- 📋 *Summarize medical history & active protocols*\n- 💊 *Check dosage recommendations & treatment duration*\n- ⚠️ *Screen for contraindications & drug interactions*\n- 📝 *Draft a new prescription*`,
+                timestamp: new Date()
+              }
+            ];
+          });
+        }
+        const inputEl = document.querySelector('.clinical-assistant-container input[type="text"], .clinical-assistant-container textarea');
+        if (inputEl) inputEl.focus();
+      }, 300);
+    };
+    window.addEventListener('open-ai-chat', handleOpenAiChat);
 
     return () => {
       window.removeEventListener('OPEN_ATLAS_CLINICAL_MODE', handleContextEvent);
       window.removeEventListener('ai-shortcut-prompt', handleShortcutPrompt);
       window.removeEventListener('ATLAS_PREFILL_QUERY', handleAtlasPrefillQuery);
+      window.removeEventListener('open-ai-chat', handleOpenAiChat);
     };
-  }, [setIsOpen, setMessages, setInput]);
+  }, [setIsOpen, setMessages, setInput]); // handleSend omitted: stable via handleSendRef in useClinicalAI
 
   const isProductPage = /^\/product\//.test(pathname);
 
@@ -565,35 +623,88 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           isRegistered={!!user}
           role={userProfile?.role}
           contextMode={contextMode}
-          pageContext={pageContext}
+          pageContext={dynamicPageContext || pageContext}
         />
-        {pageContext && (() => {
-          const isProductContext = pageContext?.isProductPage || 
-            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
-            messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content));
+        {(() => {
+          const effectiveContext = dynamicPageContext || pageContext;
+          if (!effectiveContext) return null;
 
-          const entityTitle = pageContext?.name || pageContext?.productName || pageContext?.entityName || (messages[0]?.content?.match(/about\s+([A-Za-z0-9\-]+)/i)?.[1]) || 'Product Research';
+          const isPatientContext = effectiveContext.mode === 'patient' || effectiveContext.isPatientContext || Boolean(effectiveContext.patientId);
+          const isProductContext = !isPatientContext && (
+            effectiveContext.isProductPage || 
+            Boolean(effectiveContext.productName) ||
+            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/')))
+          );
+
+          const entityTitle = effectiveContext.name || effectiveContext.productName || effectiveContext.entityName || (messages[0]?.content?.match(/about\s+([A-Za-z0-9-]+)/i)?.[1]) || 'Patient Chart';
+          const variantCount = effectiveContext.variants?.length || 0;
+          const category = effectiveContext.clinic || effectiveContext.category || '';
 
           return (
             <div style={{
-              padding: '0.4rem 1rem',
-              backgroundColor: isProductContext ? 'rgba(124, 58, 237, 0.04)' : 'var(--surface-raised, #f8fafc)',
-              borderBottom: `1px solid ${isProductContext ? 'rgba(124, 58, 237, 0.15)' : 'var(--border-light, #e2e8f0)'}`,
+              padding: '0.45rem 1rem',
+              backgroundColor: isPatientContext ? 'rgba(13, 148, 136, 0.06)' : isProductContext ? 'rgba(124, 58, 237, 0.05)' : 'var(--surface-raised, #f8fafc)',
+              borderBottom: `1px solid ${isPatientContext ? 'rgba(13, 148, 136, 0.18)' : isProductContext ? 'rgba(124, 58, 237, 0.15)' : 'var(--border-light, #e2e8f0)'}`,
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
               gap: '0.5rem',
-              fontSize: '0.75rem',
-              color: isProductContext ? '#7c3aed' : 'var(--text-muted, #64748b)',
+              fontSize: '0.76rem',
+              color: isPatientContext ? '#0d9488' : isProductContext ? '#7c3aed' : 'var(--text-muted, #64748b)',
               fontWeight: 600
             }}>
-              <PanelLeft size={14} style={{ opacity: 0.8 }} />
-              <span>
-                {isProductContext ? (
-                  <>🔬 Product Intelligence — <strong>{entityTitle}</strong></>
-                ) : (
-                  <>Context: <strong>{pageContext.label || pageContext.activeTab}</strong></>
-                )}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
+                <span style={{ fontSize: '0.9rem' }}>{isPatientContext ? '🩺' : isProductContext ? '🧬' : '📋'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span>{isPatientContext ? 'Active Patient:' : isProductContext ? 'Active Focus:' : 'Context:'}</span>
+                  <strong style={{ color: isPatientContext ? '#0f766e' : isProductContext ? '#5b21b6' : '#0f172a' }}>{entityTitle}</strong>
+                  {variantCount > 0 && (
+                    <span style={{
+                      fontSize: '0.68rem',
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                      color: '#6d28d9',
+                      fontWeight: 700
+                    }}>
+                      {variantCount} {variantCount === 1 ? 'format' : 'formats'}
+                    </span>
+                  )}
+                  {category && (
+                    <span style={{ fontSize: '0.68rem', opacity: 0.85 }}>· {category}</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={clearActiveContext}
+                title="Clear patient focus and return to general assistant"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: isPatientContext ? '#0d9488' : isProductContext ? '#8b5cf6' : 'var(--text-muted, #94a3b8)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '2px 6px',
+                  borderRadius: '6px',
+                  fontSize: '0.70rem',
+                  fontWeight: 700,
+                  gap: '4px',
+                  transition: 'all 0.2s',
+                  backgroundColor: 'rgba(0,0,0,0.03)'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = '#ef4444';
+                  e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = isPatientContext ? '#0d9488' : isProductContext ? '#8b5cf6' : '#94a3b8';
+                  e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                }}
+              >
+                <span>Clear Focus</span>
+                <X size={12} />
+              </button>
             </div>
           );
         })()}
@@ -668,7 +779,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           );
         })()}
 
-        {messages.length <= 1 && !pageContext?.isProductPage && !Boolean(pageContext?.name || pageContext?.productName || pageContext?.entityName) && !(typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) && !messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)) && (
+        {messages.length <= 1 && !pageContext?.isProductPage && !(pageContext?.name || pageContext?.productName || pageContext?.entityName) && !(typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) && !messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)) && (
           <ContextActionCards cards={contextActions} onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
         )}
 
@@ -686,6 +797,7 @@ export default function ClinicalAssistant({ isOpen, setIsOpen, embedded = false,
           onDeepDive={toggleDeepDive}
           contextMode={contextMode}
           onConfirmAction={handleConfirmAction}
+          pageContext={dynamicPageContext || pageContext}
         />
 
         <AnimatePresence>

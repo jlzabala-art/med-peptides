@@ -157,6 +157,11 @@ function Header(props) {
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === '/';
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const onOpenCart = () => setActiveModal('cart');
   const onOpenSearch = () => { setSearchInitialTab('peptides'); setActiveModal('search'); };
@@ -241,8 +246,10 @@ function Header(props) {
     <>
     <ImpersonationBanner />
     <header className={`site-header ${isOpaque ? 'site-header--opaque' : ''}`}>
-      {/* Disclaimer Top Bar */}
-      <div style={{
+      {/* Disclaimer Top Bar (Desktop Only) */}
+      <div 
+        className="header-disclaimer-bar rp-desktop-only"
+        style={{
         backgroundColor: isOpaque ? 'var(--primary)' : 'rgba(0, 0, 0, 0.3)',
         color: 'white',
         fontSize: '0.65rem',
@@ -258,7 +265,7 @@ function Header(props) {
         justifyContent: 'center',
         minHeight: '1.8rem'
       }}>
-        {activeRole === 'guest' || !user ? (
+        {!mounted || activeRole === 'guest' || !user ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <span>{t('header.guestView', 'Guest View')}</span>
             <span style={{ opacity: 0.5 }}>|</span>
@@ -333,7 +340,7 @@ function Header(props) {
             {/* REGULAR NAV */}
             <nav className="site-header__nav">
             {/* REGULAR NAV */}
-            {(ROLE_NAV_MENUS[activeRole] || ROLE_NAV_MENUS.guest).map(nav => {
+            {(mounted ? (ROLE_NAV_MENUS[activeRole] || ROLE_NAV_MENUS.guest) : ROLE_NAV_MENUS.guest).map(nav => {
               const isDropdown = !!nav.dropdown;
               const isActive = activeDropdown === nav.dropdown;
 
@@ -435,7 +442,7 @@ function Header(props) {
                 onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
                 onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'; }}
               >
-                {user ? (
+                {mounted && user ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     {isProfessional ? <ShieldCheck size={14} color="var(--success)" /> : <User size={14} />}
                     <span>{user.displayName?.split(' ')[0] || t('header.account', 'Account')}</span>
@@ -471,8 +478,9 @@ function Header(props) {
 
 
 
-            {/* Atlas AI Google Cloud Style Button */}
+            {/* Atlas AI Button (Desktop Only) */}
             <button 
+              className="desktop-only"
               onClick={() => setActiveModal('ai')}
               aria-label="Open Atlas AI"
               style={{
@@ -484,7 +492,7 @@ function Header(props) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '0.4rem',
+                padding: '0.4rem 0.6rem',
                 marginRight: '0.25rem',
                 transition: 'all 0.2s ease',
                 gap: '0.35rem'
@@ -502,7 +510,7 @@ function Header(props) {
               <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>{t('header.atlasAI', 'Atlas AI')}</span>
             </button>
 
-            {/* Search button — desktop AND mobile header */}
+            {/* Search button — desktop header (mobile uses bottom bar) */}
             <button 
               className="desktop-only"
               onClick={onOpenSearch}
@@ -524,9 +532,10 @@ function Header(props) {
               <Search size={22} />
             </button>
 
+            {/* Shopping Cart button — desktop AND mobile header */}
             <button 
-              className="desktop-only"
               onClick={onOpenCart}
+              aria-label="Open cart"
               style={{
                 position: 'relative',
                 background: 'none',
@@ -543,7 +552,7 @@ function Header(props) {
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
               <ShoppingCart size={24} />
-              {cartCount > 0 && (() => {
+              {mounted && cartCount > 0 && (() => {
                 const { protocols = 0, kits = 0, peptides = 0 } = cartBreakdown;
                 const hasBreakdown = protocols > 0 || kits > 0 || peptides > 0;
 
@@ -726,7 +735,7 @@ function Header(props) {
 
               {/* DYNAMIC ROLE-BASED MOBILE NAV */}
               {(() => {
-                const navItems = ROLE_NAV_MENUS[activeRole] || ROLE_NAV_MENUS.guest;
+                const navItems = mounted ? (ROLE_NAV_MENUS[activeRole] || ROLE_NAV_MENUS.guest) : ROLE_NAV_MENUS.guest;
                 // Map Lucide name strings to actual components
                 const ICON_MAP = {
                   Home: Home,
@@ -840,7 +849,6 @@ function Header(props) {
                               onClick={() => toggleMobile('resources')}
                               aria-expanded={mobileExpanded === 'resources'}
                             >
-                              <BookMarked size={18} /> {t(`nav.${item.label.replace(/\\s+/g, '')}`, item.label)}
                               <BookMarked size={18} /> {t(`nav.${item.label.replace(/\s+/g, '')}`, item.label)}
                               <ChevronDown size={16} style={{ marginLeft: 'auto', transform: mobileExpanded === 'resources' ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.25s' }} />
                             </button>

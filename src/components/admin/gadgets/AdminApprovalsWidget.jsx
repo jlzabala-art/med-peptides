@@ -1,16 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../../firebase';
-
-
-
-
-
-
 import { useToast } from '../../../hooks/useToast';
 import { useAuth } from '../../../context/AuthContext';
+import { fetchPendingApprovals, resolveApproval } from '../../../services/approvalService';
 import { Check, X, ShieldAlert, Clock, AlertOctagon } from '@/lib/icons';
 
 export default function AdminApprovalsWidget() {
@@ -22,16 +15,8 @@ export default function AdminApprovalsWidget() {
   const fetchApprovals = async () => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, 'financial_approvals'),
-        where('status', '==', 'pending')
-      );
-      const snap = await getDocs(q);
-      let list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const list = await fetchPendingApprovals();
       setApprovals(list);
-    } catch (err) {
-      console.error('Error fetching approvals:', err);
     } finally {
       setLoading(false);
     }
@@ -43,29 +28,17 @@ export default function AdminApprovalsWidget() {
 
   const handleAction = async (approvalId, type, data, action) => {
     try {
-      const approvalRef = doc(db, 'financial_approvals', approvalId);
-      await updateDoc(approvalRef, {
-        status: action === 'approve' ? 'approved' : 'rejected',
-        resolvedBy: currentUser?.email || 'cfo@atlas.com',
-        resolvedAt: new Date().toISOString()
+      await resolveApproval({
+        approvalId,
+        type,
+        data,
+        action,
+        resolvedBy: currentUser?.email || 'cfo@atlas.com'
       });
-
-      if (action === 'approve') {
-        if (type === 'cost_update') {
-          const productRef = doc(db, 'products', data.productId);
-          await updateDoc(productRef, data.updates);
-        } else if (type === 'payout_auth') {
-          if (data.payoutId) {
-             const payoutRef = doc(db, 'payouts', data.payoutId);
-             await updateDoc(payoutRef, { status: 'paid', paidAt: new Date().toISOString() });
-          }
-        }
-      }
 
       toast.success(`Transaction ${action}d successfully.`);
       setApprovals(prev => prev.filter(a => a.id !== approvalId));
     } catch (err) {
-      console.error('Error handling approval action:', err);
       toast.error('Failed to process approval.');
     }
   };

@@ -166,7 +166,7 @@ export default function FinanceApprovals({ dashboardData }) {
                       key: 'invoice_id',
                       header: 'Actions',
                       render: (val, row) => (
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ display: 'inline-flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
                           <button
                             onClick={() => handleSendReminder(val)}
                             disabled={processingId === `remind-${val}`}

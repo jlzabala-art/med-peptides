@@ -34,6 +34,7 @@ import { collection, query, orderBy, getDocs, addDoc, serverTimestamp, updateDoc
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '../../context/AuthContext';
+import logger from '../../utils/logger.js';
 
 
 
@@ -102,13 +103,13 @@ export default function DocumentUploadModule() {
           try {
             const vSnap = await getDocs(collection(db, 'products', prod.id, 'variants'));
             prod.variants = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-          } catch(e) {}
+          } catch(e) { logger.warn("[DocumentUploadModule] Failed to fetch product variants:", e); }
         }));
 
         setDocuments(docsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
         setProducts(prods);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        logger.error("[DocumentUploadModule] Error fetching data:", err);
       } finally {
         setLoading(false);
       }
@@ -151,7 +152,7 @@ export default function DocumentUploadModule() {
       'state_changed',
       (snapshot) => { setProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100); },
       (error) => {
-        console.error('Upload failed:', error);
+        logger.error('[DocumentUploadModule] Upload failed:', error);
         setUploading(false);
         notifier.info('File upload failed: ' + error.message);
       },
@@ -186,7 +187,7 @@ export default function DocumentUploadModule() {
                 await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'processed', extractedData: extracted });
               }
             } catch (aiErr) {
-              console.error("AI Parsing failed:", aiErr);
+              logger.error("[DocumentUploadModule] AI Parsing failed:", aiErr);
               setDocuments(prev => prev.map(d => 
                 d.id === docRef.id ? { ...d, status: 'failed_ai' } : d
               ));
@@ -212,18 +213,18 @@ export default function DocumentUploadModule() {
                     await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'failed_ai' });
                   }
                 } catch (e) {
-                  console.error("AI Price Parsing failed:", e);
+                  logger.error("[DocumentUploadModule] AI Price Parsing failed:", e);
                   setDocuments(prev => prev.map(d => d.id === docRef.id ? { ...d, status: 'failed_ai' } : d));
                   await updateDoc(doc(db, 'uploaded_documents', docRef.id), { status: 'failed_ai' });
                 }
               };
               reader.readAsDataURL(file);
             } catch (e) {
-              console.error("FileReader failed:", e);
+              logger.error("[DocumentUploadModule] FileReader failed:", e);
             }
           }
         } catch (dbError) {
-          console.error("Error adding to Firestore:", dbError);
+          logger.error("[DocumentUploadModule] Error adding to Firestore:", dbError);
         } finally {
           setUploading(false);
           setProgress(0);
@@ -336,7 +337,7 @@ export default function DocumentUploadModule() {
       await updateDoc(doc(db, 'uploaded_documents', docId), { productId, variantId });
       setDocuments(prev => prev.map(d => d.id === docId ? { ...d, productId, variantId } : d));
     } catch(err) {
-      console.error("Error assigning product:", err);
+      logger.error("[DocumentUploadModule] Error assigning product:", err);
       notifier.info("Error assigning product");
     }
   };
@@ -347,14 +348,14 @@ export default function DocumentUploadModule() {
         for (const docId of selectedDocs) {
           const d = documents.find(x => x.id === docId);
           if (d) {
-            if (d.storagePath) await deleteObject(ref(storage, d.storagePath)).catch(e => console.warn(e));
+            if (d.storagePath) await deleteObject(ref(storage, d.storagePath)).catch(e => logger.warn("[DocumentUploadModule] Delete storage object warning:", e));
             await deleteDoc(doc(db, 'uploaded_documents', docId));
           }
         }
         setDocuments(prev => prev.filter(d => !selectedDocs.has(d.id)));
         setSelectedDocs(new Set());
       } catch(err) {
-        console.error("Error bulk deleting:", err);
+        logger.error("[DocumentUploadModule] Error bulk deleting:", err);
       }
     });
   };
@@ -367,7 +368,7 @@ export default function DocumentUploadModule() {
       setDocuments(prev => prev.map(d => selectedDocs.has(d.id) ? { ...d, isArchived: archive } : d));
       setSelectedDocs(new Set());
     } catch(err) {
-      console.error("Error archiving:", err);
+      logger.error("[DocumentUploadModule] Error archiving:", err);
     }
   };
 
@@ -376,7 +377,7 @@ export default function DocumentUploadModule() {
       await updateDoc(doc(db, 'uploaded_documents', docId), { isArchived: !currentState });
       setDocuments(prev => prev.map(d => d.id === docId ? { ...d, isArchived: !currentState } : d));
     } catch(err) {
-      console.error("Error archiving single doc:", err);
+      logger.error("[DocumentUploadModule] Error archiving single doc:", err);
     }
   };
 
@@ -442,7 +443,7 @@ export default function DocumentUploadModule() {
           setDrawerDoc(prev => ({ ...prev, fileName: newName }));
         }
       } catch (err) {
-        console.error("Error renaming document:", err);
+        logger.error("[DocumentUploadModule] Error renaming document:", err);
         notifier.info("Failed to rename document.");
       }
     }
@@ -472,7 +473,7 @@ export default function DocumentUploadModule() {
       notifier.info('¡Precios actualizados correctamente en el catálogo!');
       setDrawerDoc(null);
     } catch (err) {
-      console.error("Failed to apply prices:", err);
+      logger.error("[DocumentUploadModule] Failed to apply prices:", err);
       notifier.info("Error al guardar algunos precios.");
     } finally {
       setIsApplyingPrices(false);

@@ -12,24 +12,14 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import CreditCard from "lucide-react/dist/esm/icons/credit-card";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
-import ProductAutocomplete from './ProductAutocomplete';
+import { fetchSuppliers, saveRFQ } from '../../services/procurementService';
 import DataTable from '../ui/DataTable';
-
-
-
-
-
-
-
-
-
-
-
+import AppActionGroup from '../ui/AppActionGroup';
 import { Card } from '../ui';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
-
+import { toast } from 'react-hot-toast';
+import EmptyState from '../ui/EmptyState';
+import Package from "lucide-react/dist/esm/icons/package";
 
 // ─── Supplier Autocomplete Component ────────────────────────────────────────
 function SupplierAutocomplete({ value, onChange, onSelect }) {
@@ -42,8 +32,8 @@ function SupplierAutocomplete({ value, onChange, onSelect }) {
 
   // Load all suppliers once
   useEffect(() => {
-    getDocs(collection(db, 'suppliers')).then(snap => {
-      setSuppliers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    fetchSuppliers().then(list => {
+      setSuppliers(list);
     });
   }, []);
 
@@ -201,7 +191,7 @@ export default function RFQForm({ rfq, onClose }) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!supplierName) return alert('Supplier Name is required');
+    if (!supplierName) return toast('Supplier Name is required');
     setIsSaving(true);
 
     const rfqData = {
@@ -210,20 +200,13 @@ export default function RFQForm({ rfq, onClose }) {
       rfqNumber,
       status,
       items,
-      updatedAt: serverTimestamp()
     };
 
     try {
-      if (rfq?.id) {
-        await updateDoc(doc(db, 'purchase_rfqs', rfq.id), rfqData);
-      } else {
-        rfqData.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'purchase_rfqs'), rfqData);
-      }
+      await saveRFQ(rfqData, rfq?.id || null, 'purchase_rfqs');
       onClose();
     } catch (error) {
-      console.error('Error saving RFQ:', error);
-      alert('Failed to save RFQ');
+      toast.error('Failed to save RFQ');
     }
     setIsSaving(false);
   };
@@ -377,18 +360,25 @@ export default function RFQForm({ rfq, onClose }) {
                 ] : []),
                 {
                   key: 'actions',
-                  header: '',
+                  header: 'Actions',
                   render: (val, row, idx) => (
-                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+                      <AppActionGroup actions={[{ type: 'delete', onClick: () => removeItem(idx) }]} />
+                    </div>
                   ),
                 }
               ]}
               data={items}
               keyField={(row, idx) => idx.toString()}
             />
-            {items.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No items added yet.</div>}
+            {items.length === 0 && (
+              <EmptyState
+                icon={Package}
+                title="No Items"
+                subtitle="No items added yet."
+                compact={true}
+              />
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>

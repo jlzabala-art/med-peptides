@@ -2,14 +2,15 @@ import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Truck from "lucide-react/dist/esm/icons/truck";
 import React from 'react';
+import StatusChip from '../../ui/StatusChip';
 
 
 
 
 export default function BulkOrderTrackerWidget() {
   const mockOrders = [
-    { id: 'ORD-892', status: 'En Tránsito', items: '50x BPC-157, 20x TB-500', date: '22 May, 2026' },
-    { id: 'ORD-890', status: 'Preparando', items: '100x Jeringas', date: '20 May, 2026' }
+    { id: 'ORD-892', status: 'in_transit', items: '50x BPC-157, 20x TB-500', date: '22 May, 2026' },
+    { id: 'ORD-890', status: 'processing', items: '100x Jeringas', date: '20 May, 2026' }
   ];
 
   return (
@@ -25,13 +26,7 @@ export default function BulkOrderTrackerWidget() {
                 <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#0f172a', fontWeight: 800 }}>{o.id}</h4>
                 <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>{o.items}</div>
               </div>
-              <span style={{ 
-                fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '8px', fontWeight: 800, textTransform: 'uppercase',
-                background: o.status === 'En Tránsito' ? '#eff6ff' : '#fef3c7',
-                color: o.status === 'En Tránsito' ? 'var(--color-primary)' : '#92400e'
-              }}>
-                {o.status}
-              </span>
+              <StatusChip status={o.status} />
             </div>
             <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Truck size={14} color="var(--color-text-secondary)" /> Fecha estimada: {o.date}

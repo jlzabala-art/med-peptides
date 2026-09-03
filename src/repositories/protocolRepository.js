@@ -35,48 +35,24 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import { normalizeProtocol } from './mappers.js';
+import { validateProtocolWrite } from './protocolWriteGuard.js';
+import { createCacheManager } from '../utils/cacheManager.js';
+import { logger } from '../utils/logger.js';
+import { withRetry } from './_resilience.js';
+import { sanitizeClinicalEntity } from '../utils/clinicalSanitizer.js';
+import { logPHIAccess, PHI_ACTIONS } from '../services/PHIAuditService.js';
 
 // ── Collection helpers ────────────────────────────────────────────────────────
 const protocolsCol        = ()  => collection(db, 'protocols');        // canonical source
 
-// ── Protocol Cache (performance layer) ────────────────────────────────────────
-// Strategy: memory-first (fastest), then localStorage (survives tab refresh),
-// then Firestore (authoritative). Cache TTL: 60 minutes.
-// The daily AI cron will bump `version` on changed protocols, so we also store
-// the latest known max version in cache and revalidate if a new version arrives.
-const PROTOCOL_CACHE_KEY = 'regenpept_protocols_cache';
+// ── Protocol Cache (performance layer - Golden Rule #2) ────────────────────────
+const PROTOCOL_CACHE_KEY = 'regenpept_protocols_cache_v2';
 const PROTOCOL_CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
-let _memProtocolCache = null; // { data: [...], cachedAt: ms }
-
-function _readProtocolCache() {
-  if (_memProtocolCache && Date.now() - _memProtocolCache.cachedAt < PROTOCOL_CACHE_TTL_MS) {
-    return _memProtocolCache.data;
-  }
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(PROTOCOL_CACHE_KEY);
-    if (!raw) return null;
-    const { data, cachedAt } = JSON.parse(raw);
-    if (Date.now() - cachedAt < PROTOCOL_CACHE_TTL_MS) {
-      _memProtocolCache = { data, cachedAt };
-      return data;
-    }
-  } catch {}
-  return null;
-}
-
-function _writeProtocolCache(data) {
-  const entry = { data, cachedAt: Date.now() };
-  _memProtocolCache = entry;
-  if (typeof window !== 'undefined') {
-    try { localStorage.setItem(PROTOCOL_CACHE_KEY, JSON.stringify(entry)); } catch {}
-  }
-}
+const cache = createCacheManager(PROTOCOL_CACHE_KEY, PROTOCOL_CACHE_TTL_MS);
 
 /** Force a cache invalidation (call after admin edits or AI version bump detected). */
 export function invalidateProtocolCache() {
-  _memProtocolCache = null;
-  if (typeof window !== 'undefined') localStorage.removeItem(PROTOCOL_CACHE_KEY);
+  cache.invalidate();
 }
 const monitoringCol       = ()  => collection(db, 'monitoring_profiles');
 
@@ -90,17 +66,20 @@ const monitoringCol       = ()  => collection(db, 'monitoring_profiles');
  */
 export async function getAllProtocols({ forceRefresh = false } = {}) {
   if (!forceRefresh) {
-    const cached = _readProtocolCache();
+    const cached = cache.read();
     if (cached) return cached;
   }
   try {
     const q = query(protocolsCol(), limit(200));
-    const snap = await getDocs(q);
+    const snap = await withRetry(
+      () => getDocs(q),
+      { entityName: 'protocolRepository.getAllProtocols' }
+    );
     const protocols = snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
-    _writeProtocolCache(protocols);
+    cache.write(protocols);
     return protocols;
   } catch (err) {
-    console.error('[protocolRepository] getAllProtocols:', err);
+    logger.error('[protocolRepository] getAllProtocols', { error: err.message });
     throw err;
   }
 }
@@ -132,7 +111,10 @@ export async function getTemplatesByObjective(objective) {
     // Query 2: nested metadata.primary_goal (used by some Firestore docs)
     const q2 = query(protocolsCol(), where('metadata.primary_goal', '==', objective));
 
-    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const [snap1, snap2] = await withRetry(
+      () => Promise.all([getDocs(q1), getDocs(q2)]),
+      { entityName: 'protocolRepository.getTemplatesByObjective' }
+    );
 
     const byId = new Map();
     [...snap1.docs, ...snap2.docs].forEach((d) => {
@@ -141,7 +123,7 @@ export async function getTemplatesByObjective(objective) {
 
     return [...byId.values()].filter((p) => !p.status || p.status === 'approved');
   } catch (err) {
-    console.error(`[protocolRepository] getTemplatesByObjective(${objective}):`, err);
+    logger.error('[protocolRepository] getTemplatesByObjective', { objective, error: err.message });
     throw err;
   }
 }
@@ -155,7 +137,7 @@ export async function getTemplatesByPrefix(prefix) {
       return pid.startsWith(cleanPrefix + '_');
     });
   } catch (err) {
-    console.error(`[protocolRepository] getTemplatesByPrefix(${prefix}):`, err);
+    logger.error('[protocolRepository] getTemplatesByPrefix', { prefix, error: err.message });
     throw err;
   }
 }
@@ -179,7 +161,7 @@ export async function getTemplatesByGoalGroup(goals) {
       .map((d) => normalizeProtocol(d.data(), d.id))
       .filter((p) => !p.status || p.status === 'approved');
   } catch (err) {
-    console.error('[protocolRepository] getTemplatesByGoalGroup:', err);
+    logger.error('[protocolRepository] getTemplatesByGoalGroup', { error: err.message });
     throw err;
   }
 }
@@ -201,7 +183,7 @@ export async function getTemplatesByCondition(condition) {
       .map((d) => normalizeProtocol(d.data(), d.id))
       .filter((p) => !p.status || p.status === 'approved');
   } catch (err) {
-    console.error(`[protocolRepository] getTemplatesByCondition(${condition}):`, err);
+    logger.error('[protocolRepository] getTemplatesByCondition', { condition, error: err.message });
     throw err;
   }
 }
@@ -222,7 +204,7 @@ export async function getLatestBlueprints(n = 10) {
     const snap = await getDocs(q);
     return snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
   } catch (err) {
-    console.error('[protocolRepository] getLatestBlueprints:', err);
+    logger.error('[protocolRepository] getLatestBlueprints', { error: err.message });
     throw err;
   }
 }
@@ -243,7 +225,7 @@ export async function getApprovedTemplatesByObjective(objective) {
     const snap = await getDocs(q);
     return snap.docs.map((d) => normalizeProtocol(d.data(), d.id));
   } catch (err) {
-    console.error(`[protocolRepository] getApprovedTemplatesByObjective(${objective}):`, err);
+    logger.error('[protocolRepository] getApprovedTemplatesByObjective', { objective, error: err.message });
     throw err;
   }
 }
@@ -275,7 +257,7 @@ export async function getProtocolTemplate(id) {
 
     return null;
   } catch (err) {
-    console.error(`[protocolRepository] getProtocolTemplate(${id}):`, err);
+    logger.error('[protocolRepository] getProtocolTemplate', { id, error: err.message });
     throw err;
   }
 }
@@ -306,7 +288,7 @@ export async function getMonitoringProfile(objectiveId) {
     const defaultSnap = await getDoc(doc(db, 'monitoring_profiles', 'default_profile'));
     return defaultSnap.exists() ? defaultSnap.data().schedule ?? [] : [];
   } catch (err) {
-    console.error(`[protocolRepository] getMonitoringProfile(${objectiveId}):`, err);
+    logger.error('[protocolRepository] getMonitoringProfile', { objectiveId, error: err.message });
     return []; // non-fatal — monitoring data is supplementary
   }
 }
@@ -346,7 +328,7 @@ export async function getProtocolTemplatesPaginated(pageSize = 50, lastDoc = nul
     
     return { items: results, lastDoc: newLastDoc };
   } catch (err) {
-    console.error('[protocolRepository] getProtocolTemplatesPaginated:', err);
+    logger.error('[protocolRepository] getProtocolTemplatesPaginated', { error: err.message });
     throw err;
   }
 }
@@ -361,16 +343,17 @@ export async function getProtocolTemplatesPaginated(pageSize = 50, lastDoc = nul
  */
 export async function createProtocol(protocolData) {
   try {
+    // Guard: validate & normalize before writing — rejects legacy name fields.
+    const validated = validateProtocolWrite(protocolData, { isUpdate: false, autoResolveName: true });
     const docRef = await addDoc(protocolsCol(), {
-      ...protocolData,
-      status: protocolData.status || 'draft',
+      ...validated,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    invalidateProtocolCache(); // ← cache bust so next read reflects the new doc
+    invalidateProtocolCache();
     return docRef.id;
   } catch (err) {
-    console.error('[protocolRepository] createProtocol:', err);
+    logger.error('[protocolRepository] createProtocol', { error: err.message });
     throw err;
   }
 }
@@ -383,13 +366,15 @@ export async function createProtocol(protocolData) {
  */
 export async function updateProtocol(protocolId, updates) {
   try {
+    // Guard: validate & normalize partial updates — auto-resolves legacy name fields.
+    const validated = validateProtocolWrite(updates, { isUpdate: true, autoResolveName: true });
     await updateDoc(doc(db, 'protocols', protocolId), {
-      ...updates,
+      ...validated,
       updatedAt: serverTimestamp(),
     });
-    invalidateProtocolCache(); // ← cache bust so next read reflects the edit
+    invalidateProtocolCache();
   } catch (err) {
-    console.error(`[protocolRepository] updateProtocol(${protocolId}):`, err);
+    logger.error('[protocolRepository] updateProtocol', { protocolId, error: err.message });
     throw err;
   }
 }
@@ -404,9 +389,113 @@ export async function deleteProtocol(protocolId) {
     await deleteDoc(doc(db, 'protocols', protocolId));
     invalidateProtocolCache(); // ← cache bust so deleted doc is no longer served
   } catch (err) {
-    console.error(`[protocolRepository] deleteProtocol(${protocolId}):`, err);
+    logger.error('[protocolRepository] deleteProtocol', { protocolId, error: err.message });
     throw err;
   }
+}
+
+/**
+ * Clones an existing protocol template as a draft with optional format variant (Vial vs Pen).
+ * 
+ * @param {string|object} sourceProtocolIdOrObject
+ * @param {object} options Optional overrides and format variant ('vial' | 'pen')
+ * @returns {Promise<string>} The new protocol document ID
+ */
+export async function cloneProtocol(sourceProtocolIdOrObject, options = {}) {
+  try {
+    let sourceData = null;
+    if (typeof sourceProtocolIdOrObject === 'string') {
+      sourceData = await getProtocolTemplate(sourceProtocolIdOrObject);
+      if (!sourceData) {
+        throw new Error(`Protocol with ID "${sourceProtocolIdOrObject}" not found`);
+      }
+    } else if (typeof sourceProtocolIdOrObject === 'object' && sourceProtocolIdOrObject !== null) {
+      sourceData = sourceProtocolIdOrObject;
+    } else {
+      throw new Error('Invalid source protocol argument');
+    }
+
+    const { id, _id, createdAt, updatedAt, ...rest } = sourceData;
+    const baseName = rest.name || rest.title || 'Protocol';
+    const targetFormat = options.targetFormat || rest.format || 'vial';
+    
+    let clonedName = options.name || `${baseName} (Copy)`;
+    if (options.targetFormat && options.targetFormat !== rest.format) {
+      clonedName = `${baseName} (${targetFormat === 'pen' ? 'Pen Edition' : 'Vial Edition'})`;
+    }
+
+    // Format specific adjustments (Pens do not require reconstitution or BAC water)
+    const isPen = targetFormat === 'pen' || targetFormat === 'prefilled_pen';
+    const adjustedPhases = (rest.phases || []).map(phase => {
+      let updatedPhase = { ...phase };
+      if (isPen) {
+        // Remove reconstitution instructions and supplies
+        if (updatedPhase.reconstitution) {
+          updatedPhase.reconstitution = {
+            ...updatedPhase.reconstitution,
+            required: false,
+            guide: 'Ready-to-use pre-filled pen. No reconstitution required.',
+            bacWaterMl: 0,
+          };
+        }
+      }
+      return updatedPhase;
+    });
+
+    const clonedPayload = {
+      ...rest,
+      name: clonedName,
+      status: 'draft',
+      isPublished: false,
+      format: targetFormat,
+      requiresReconstitution: !isPen,
+      phases: adjustedPhases,
+      ...options.overrides,
+    };
+
+    return await createProtocol(clonedPayload);
+  } catch (err) {
+    logger.error('[protocolRepository] cloneProtocol', { error: err.message });
+    throw err;
+  }
+}
+
+/**
+ * Fetches custom protocols created by a specific doctor.
+ * @param {string} doctorId
+ * @returns {Promise<Array>}
+ */
+export async function getCustomProtocolsByDoctor(doctorId) {
+  try {
+    const q = query(collection(db, 'custom_protocols'), where('doctorId', '==', doctorId));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    logger.error('[protocolRepository] getCustomProtocolsByDoctor', { error: err.message });
+    return [];
+  }
+}
+
+/**
+ * Creates a new custom protocol for a doctor.
+ * @param {object} protocolData
+ * @returns {Promise<string>}
+ */
+export async function createCustomProtocol(protocolData) {
+  const docRef = await addDoc(collection(db, 'custom_protocols'), {
+    ...protocolData,
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+/**
+ * Deletes a custom protocol by ID.
+ * @param {string} protocolId
+ * @returns {Promise<void>}
+ */
+export async function deleteCustomProtocol(protocolId) {
+  await deleteDoc(doc(db, 'custom_protocols', protocolId));
 }
 
 // ── Legacy compatibility shim ─────────────────────────────────────────────────
@@ -426,6 +515,11 @@ export const protocolRepository = {
   getProtocolVariants,
   getProtocolTemplatesPaginated,
   createProtocol,
+  cloneProtocol,
+  getCustomProtocolsByDoctor,
+  createCustomProtocol,
+  deleteCustomProtocol,
   updateProtocol,
   deleteProtocol,
 };
+

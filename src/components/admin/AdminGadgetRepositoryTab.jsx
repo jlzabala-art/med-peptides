@@ -83,7 +83,7 @@ export default function AdminGadgetRepositoryTab() {
       key: 'status',
       header: 'Used Portals',
       render: (row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '8px' }}>
           <span
             style={{
               fontSize: '0.8rem',

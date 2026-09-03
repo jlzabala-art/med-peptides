@@ -2,11 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Upload, CheckCircle2 } from '@/lib/icons';
-import { collection, query, where, orderBy, onSnapshot, limit, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-const storage = fb?.storage;
+import { subscribeToPrescriptionIntakeQueue } from '../../../services/prescriptionsService';
 import WorkflowDetailWorkspace from '../../../features/operations/components/WorkflowDetailWorkspace';
 import toast from 'react-hot-toast';
 import { useDropzone } from 'react-dropzone';
@@ -18,23 +14,9 @@ export default function PrescriptionIntakeLayout() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    // Escuchar directamente la cola de operaciones filtrada por PRESCRIPTION
-    const q = query(
-      collection(db, 'operations_queue'),
-      where('detectedIntent', '==', 'PRESCRIPTION'),
-      orderBy('date', 'desc'),
-      limit(50)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+    const unsubscribe = subscribeToPrescriptionIntakeQueue((items) => {
       setQueue(items);
-    }, (error) => {
-      console.error("Error fetching prescriptions queue:", error);
-    });
+    }, 50);
 
     return () => unsubscribe();
   }, []);
@@ -149,8 +131,8 @@ export default function PrescriptionIntakeLayout() {
                 fontSize: '12px', 
                 padding: '4px 8px', 
                 borderRadius: '12px',
-                background: rx.status === 'Completed' ? '#dcfce7' : rx.status === 'Awaiting Review' ? '#fef9c3' : '#f1f5f9',
-                color: rx.status === 'Completed' ? '#166534' : rx.status === 'Awaiting Review' ? '#854d0e' : '#475569',
+                background: rx.status === 'Completed' ? '#dcfce7' : rx.status === 'pending' ? '#fef9c3' : '#f1f5f9',
+                color: rx.status === 'Completed' ? '#166534' : rx.status === 'pending' ? '#854d0e' : '#475569',
                 fontWeight: 600
               }}>
                 {rx.status.toUpperCase()}

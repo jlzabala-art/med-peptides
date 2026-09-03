@@ -2,18 +2,11 @@
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { fetchPurchaseRFQById, updatePurchaseRFQ } from '../../services/quotationRepository';
 import { Card } from '../ui';
-
-
-
-
-
-
 import { useTranslation } from 'react-i18next';
 import { Loader2, Send, ShieldCheck, CheckCircle, Truck, FileCheck } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function PublicSupplierQuote() {
   const { id } = useParams();
@@ -31,29 +24,26 @@ export default function PublicSupplierQuote() {
   useEffect(() => {
     const fetchRFQ = async () => {
       try {
-        const docRef = doc(db, 'purchase_rfqs', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        const data = await fetchPurchaseRFQById(id);
+        if (data) {
           if (data.status === 'APPROVED_BY_CLIENT' || data.status === 'AWAITING_INVOICE') {
              setError(t('supplierQuote.noLongerAccepting', "This quote is no longer accepting pricing updates."));
           } else if (data.status === 'SHIPPED' || data.status === 'DELIVERED') {
-             setRfq({ id: docSnap.id, ...data });
+             setRfq(data);
              setItems(data.items || []);
              setShippingData(data.shippingData || {});
           } else {
-             setRfq({ id: docSnap.id, ...data });
+             setRfq(data);
              setItems(data.items || []);
              // Mark as viewed
              if (!data.sharedWithSupplier && data.status === 'PRICING_REQUESTED') {
-               await updateDoc(docRef, { sharedWithSupplier: true });
+               await updatePurchaseRFQ(id, { sharedWithSupplier: true });
              }
           }
         } else {
           setError(t('quote.notFound', "Quote not found or invalid link."));
         }
       } catch (err) {
-        console.error(err);
         setError(t('quote.errorLoading', "Error loading quote."));
       }
       setLoading(false);
@@ -92,15 +82,14 @@ export default function PublicSupplierQuote() {
         };
       });
 
-      await updateDoc(doc(db, 'purchase_rfqs', id), {
+      await updatePurchaseRFQ(id, {
         items: finalItems,
         globalDiscount: parseFloat(globalDiscount) || 0,
         status: 'PRICING_SUBMITTED' // Alert AM
       });
       setSubmitted(true);
     } catch (err) {
-      console.error(err);
-      alert(t('supplierQuote.errorSubmitting', "Error submitting prices."));
+      toast.error(t('supplierQuote.errorSubmitting', "Error submitting prices."));
     }
     setLoading(false);
   };
@@ -142,19 +131,18 @@ export default function PublicSupplierQuote() {
 
   const handleShippingSubmit = async () => {
     if (!shippingData.carrier || !shippingData.awb) {
-      alert(t('supplierQuote.provideCarrierAwb', "Please provide Carrier and AWB Tracking Number."));
+      toast(t('supplierQuote.provideCarrierAwb', "Please provide Carrier and AWB Tracking Number."));
       return;
     }
     setLoading(true);
     try {
-      await updateDoc(doc(db, 'purchase_rfqs', id), {
+      await updatePurchaseRFQ(id, {
         status: 'SHIPPED',
         shippingData
       });
       setShippingSubmitted(true);
     } catch (err) {
-      console.error(err);
-      alert(t('supplierQuote.errorSavingShipment', "Error saving shipment."));
+      toast.error(t('supplierQuote.errorSavingShipment', "Error saving shipment."));
     }
     setLoading(false);
   };

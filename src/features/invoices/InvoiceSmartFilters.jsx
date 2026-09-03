@@ -54,7 +54,7 @@ export default function InvoiceSmartFilters({
         <div>
           <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>Payment Status</label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {['Paid', 'Partially Paid', 'Overdue', 'Draft', 'Sent'].map(status => (
+            {['completed', 'Partially Paid', 'error', 'Draft', 'Sent'].map(status => (
               <label key={status} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
                 <input 
                   type="checkbox" 

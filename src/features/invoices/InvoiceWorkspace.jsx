@@ -7,7 +7,8 @@ import React, { useState } from 'react';
 
 import ProductGrid from '../../components/admin/shared/ProductGrid';
 import ActivityTimeline from "../../components/admin/shared/ActivityTimeline";
-import { Download, Mail, FileText, Link, RefreshCw } from '@/lib/icons';
+import { Download, Share2, MoreHorizontal, ArrowLeft, Building2, CheckCircle2, Clock, Send, CreditCard, ChevronRight } from 'lucide-react';
+import StatusChip from '../../components/ui/StatusChip';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);
@@ -22,11 +23,11 @@ function fmtDate(date) {
 export default function InvoiceWorkspace({ invoice }) {
 
   const total = invoice.grandTotal || 0;
-  const paid = invoice.status === 'Paid' ? total : (invoice.amountPaid || 0);
+  const paid = invoice.status === 'completed' ? total : (invoice.amountPaid || 0);
   const outstanding = total - paid;
   
   const dueDate = invoice.dueDate?.toDate ? invoice.dueDate.toDate() : new Date((invoice.createdAt?.seconds || Date.now() / 1000) * 1000 + 30 * 86400000); // Mock 30 days
-  const isOverdue = invoice.status !== 'Paid' && dueDate < new Date();
+  const isOverdue = invoice.status !== 'completed' && dueDate < new Date();
 
   return (
     <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -46,9 +47,7 @@ export default function InvoiceWorkspace({ invoice }) {
           <div style={{ height: '32px', width: '1px', background: '#e2e8f0' }} />
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-             <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: invoice.status === 'Paid' ? '#d1fae5' : invoice.status === 'Overdue' ? '#fee2e2' : '#eff6ff', color: invoice.status === 'Paid' ? '#059669' : invoice.status === 'Overdue' ? '#dc2626' : '#2563eb', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
-               {invoice.status || 'Draft'}
-             </span>
+             <StatusChip status={invoice.status || 'Draft'} />
              {isOverdue && (
                <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: '#fee2e2', color: '#991b1b', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
                  Overdue

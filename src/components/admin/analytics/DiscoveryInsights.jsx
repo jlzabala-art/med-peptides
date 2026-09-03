@@ -1,4 +1,5 @@
 import { FlaskConical, BookOpen, Search, Lightbulb, TrendingUp } from '@/lib/icons';
+import AlgoliaSearchAnalyticsCard from './AlgoliaSearchAnalyticsCard';
 /* eslint-disable no-unused-vars */
 
 
@@ -343,6 +344,11 @@ export default function DiscoveryInsights({ tops = {} }) {
 
       {/* Auto-generated content intelligence */}
       {hasAnyData && <AutoInsight tops={tops} />}
+
+      {/* Algolia Search & Discovery Intelligence Card */}
+      <div style={{ marginTop: '1.25rem' }}>
+        <AlgoliaSearchAnalyticsCard />
+      </div>
 
       {/* Responsive grid */}
       <style>{`

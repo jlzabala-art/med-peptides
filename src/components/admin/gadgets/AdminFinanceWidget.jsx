@@ -26,6 +26,7 @@ import { auth } from '../../../firebase';
 
 import { Card, CardHeader, CardContent, CardFooter } from '../../ui/Card';
 import Button from '../../ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { TrendingUp, DollarSign, PackageSearch, RefreshCw, AlertCircle, ChevronDown, ChevronUp, BarChart2, ArrowUpRight, ArrowDownRight, Sparkles } from '@/lib/icons';
 
 // ── CF endpoint (same region as other agents) ─────────────────────────────────
@@ -447,24 +448,12 @@ export default function AdminFinanceWidget() {
 
         {/* No data yet */}
         {!loading && !data && !error && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              color: 'var(--color-text-tertiary)',
-              padding: '40px 24px',
-            }}
-          >
-            <BarChart2 size={48} color="var(--color-border)" style={{ marginBottom: 16 }} />
-            <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 8 }}>Finance Intelligence AI</div>
-            <div style={{ fontSize: '14px', maxWidth: 300, marginBottom: 24 }}>Ejecuta el asistente para analizar márgenes, beneficios y métricas clave del portfolio en tiempo real.</div>
-            <Button variant="primary" onClick={fetchSnapshot}>
-              Ejecutar Análisis
-            </Button>
-          </div>
+          <EmptyState
+            icon={BarChart2}
+            title="Finance Intelligence AI"
+            subtitle="Ejecuta el asistente para analizar márgenes, beneficios y métricas clave del portfolio en tiempo real."
+            action={{ label: 'Ejecutar Análisis', onClick: fetchSnapshot }}
+          />
         )}
 
       </CardContent>

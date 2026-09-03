@@ -5,6 +5,7 @@ import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import React from 'react';
+import StatusChip from '../../ui/StatusChip';
 
 
 
@@ -69,9 +70,7 @@ export default function ZohoSyncStatusWidget({ services = [], onSync }) {
                     <span style={{ fontWeight: 600, fontSize: '13px', color: '#64748b' }}>{svc.name}</span>
                     <StatusIcon size={16} color={color} />
                   </div>
-                  <div style={{ fontSize: '20px', fontWeight: 700, color: svc.status === 'Error' ? color : '#0f172a' }}>
-                    {svc.status}
-                  </div>
+                  <StatusChip status={svc.status} />
                   {svc.detail && (
                     <div style={{ fontSize: '12px', color: svc.status === 'Error' ? '#991b1b' : '#64748b', fontWeight: 500, marginTop: '4px' }}>
                       {svc.detail}

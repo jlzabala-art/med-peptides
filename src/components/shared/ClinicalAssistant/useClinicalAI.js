@@ -1,5 +1,4 @@
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 const uuidv4 = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -11,6 +10,49 @@ const uuidv4 = () => {
     return v.toString(16);
   });
 };
+
+/**
+ * Non-disruptive localStorage writer that handles QuotaExceededError gracefully
+ * without crashing or hanging the application.
+ */
+function safeSetLocalStorage(key, value) {
+  if (typeof window === 'undefined') return false;
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    console.warn(`[useClinicalAI] localStorage quota reached for "${key}":`, err?.message || err);
+    try {
+      // 1. Purge older clinicalAI_messages_* entries
+      const keysToPurge = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('clinicalAI_messages_') && k !== key) {
+          keysToPurge.push(k);
+        }
+      }
+      keysToPurge.slice(0, 5).forEach(k => localStorage.removeItem(k));
+
+      // 2. Retry setting item
+      localStorage.setItem(key, value);
+      return true;
+    } catch (retryErr) {
+      // 3. Fallback: Trim messages to keep only the last 15 messages if writing session history
+      try {
+        if (key.startsWith('clinicalAI_messages_')) {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed) && parsed.length > 15) {
+            const trimmed = JSON.stringify(parsed.slice(-15));
+            localStorage.setItem(key, trimmed);
+            return true;
+          }
+        }
+      } catch {}
+      console.warn(`[useClinicalAI] Non-disruptive fallback active. State maintained in RAM.`);
+      return false;
+    }
+  }
+}
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 
 import { 
@@ -38,6 +80,11 @@ import {
   GREETINGS,
   DEFAULT_GREETING
 } from './constants';
+import { buildProductSystemPrompt, buildAutoProfilePrompt } from './buildProductSystemPrompt';
+import { buildProtocolSystemPrompt, buildAutoProtocolPrompt } from './buildProtocolSystemPrompt';
+import { buildPrescriptionSystemPrompt, buildAutoPrescriptionPrompt } from './buildPrescriptionSystemPrompt';
+import { buildSupplierSystemPrompt, buildAutoSupplierPrompt } from './buildSupplierSystemPrompt';
+import { buildPatientSystemPrompt, buildAutoPatientPrompt } from './buildPatientSystemPrompt';
 
 // --- Locale-aware Greeting Helper ------------------------------------------
 const getLocalizedGreeting = () => {
@@ -48,9 +95,6 @@ const getLocalizedGreeting = () => {
 function generateFollowUps(reply = '', userMsg = '', protocols = [], products = [], intent = 'unknown', layer = 1) {
   const r = reply.toLowerCase();
   const q = userMsg.toLowerCase();
-  
-  // Basic language detection - forced to false per user request
-  const isSpanish = false;
 
   const productTagMatch = reply.match(/\[PRODUCT:(.*?)\]/g);
   const hasReconTag = reply.includes('[RECON_TOOL:');
@@ -66,54 +110,54 @@ function generateFollowUps(reply = '', userMsg = '', protocols = [], products = 
   const followUps = [];
 
   const labels = {
-    recon:     isSpanish ? '❄️ Guía de almacenamiento' : '❄️ Storage guidelines',
-    protocols: isSpanish ? '📋 Ver protocolos relacionados' : '📋 See related protocols',
-    profile:   isSpanish ? `📖 Perfil completo de ${compoundName}` : `📖 Full ${compoundName} profile`,
-    reconstitute: isSpanish ? `🧪 Cómo preparar ${compoundName}` : `🧪 Reconstitute ${compoundName}`,
-    compare:   isSpanish ? '⚖️ Comparar con otro similar' : '⚖️ Compare with a similar peptide',
-    sideEffects: isSpanish ? '💊 ¿Efectos secundarios?' : '💊 What about side effects?',
-    alternatives: isSpanish ? '💊 ¿Alternativas más seguras?' : '💊 Safer alternatives?',
-    science:   isSpanish ? '🔬 Más ciencia técnica' : '🔬 More technical science',
-    options:   isSpanish ? '❓ Ver más opciones' : '❓ Tell me more about my options',
-    mix:       isSpanish ? '⚗️ Cómo mezclar péptidos' : '⚗️ How to mix peptides'
+    recon:        '❄️ Storage guidelines',
+    protocols:    '📋 See related protocols',
+    profile:      `📖 Full ${compoundName} profile`,
+    reconstitute: `🧪 Reconstitute ${compoundName}`,
+    compare:      '⚖️ Compare with a similar peptide',
+    sideEffects:  '💊 What about side effects?',
+    alternatives: '💊 Safer alternatives?',
+    science:      '🔬 More technical science',
+    options:      '❓ Tell me more about my options',
+    mix:          '⚗️ How to mix peptides',
   };
 
-  if (hasReconTag || r.includes('reconstitut') || q.includes('reconstitut') || q.includes('mix') || q.includes('bac water') || q.includes('mezclar') || q.includes('reconstitu')) {
-    if (compoundName) followUps.push({ label: labels.profile, action: 'MESSAGE', payload: isSpanish ? `Cuéntame más sobre el mecanismo de ${compoundName}` : `Tell me more about ${compoundName} mechanism and research applications` });
-    followUps.push({ label: labels.protocols, action: 'MESSAGE', payload: isSpanish ? '¿Qué protocolos usan este péptido?' : 'What protocols use this peptide?' });
-    followUps.push({ label: labels.recon, action: 'MESSAGE', payload: isSpanish ? '¿Cómo debo guardar los péptidos?' : 'How should I store reconstituted peptides?' });
+  if (hasReconTag || r.includes('reconstitut') || q.includes('reconstitut') || q.includes('mix') || q.includes('bac water') || q.includes('reconstitu')) {
+    if (compoundName) followUps.push({ label: labels.profile, action: 'MESSAGE', payload: `Tell me more about ${compoundName} mechanism and research applications` });
+    followUps.push({ label: labels.protocols, action: 'MESSAGE', payload: 'What protocols use this peptide?' });
+    followUps.push({ label: labels.recon, action: 'MESSAGE', payload: 'How should I store reconstituted peptides?' });
     return followUps.slice(0, 3);
   }
 
   switch (intent) {
     case 'peptide': {
       if (compoundName) {
-        followUps.push({ label: labels.reconstitute, action: 'MESSAGE', payload: isSpanish ? `¿Cómo preparo ${compoundName}?` : `How do I reconstitute ${compoundName}?` });
-        followUps.push({ label: labels.protocols, action: 'MESSAGE', payload: isSpanish ? `¿Qué protocolos incluyen ${compoundName}?` : `Which protocols include ${compoundName}?` });
-        followUps.push({ label: labels.compare, action: 'MESSAGE', payload: isSpanish ? `Comparar ${compoundName} con otros similares` : `Compare ${compoundName} vs similar peptides` });
+        followUps.push({ label: labels.reconstitute, action: 'MESSAGE', payload: `How do I reconstitute ${compoundName}?` });
+        followUps.push({ label: labels.protocols,    action: 'MESSAGE', payload: `Which protocols include ${compoundName}?` });
+        followUps.push({ label: labels.compare,      action: 'MESSAGE', payload: `Compare ${compoundName} vs similar peptides` });
       }
       break;
     }
     case 'comparison': {
-      followUps.push({ label: isSpanish ? '📋 Planear protocolo con ambos' : '📋 Build a protocol with both', action: 'MESSAGE', payload: isSpanish ? '¿Puedo combinar ambos en un protocolo?' : 'Can I combine both peptides in a protocol?' });
-      followUps.push({ label: labels.sideEffects, action: 'MESSAGE', payload: isSpanish ? '¿Cuál es el perfil de seguridad de estos péptidos?' : 'What are the safety profiles of these peptides?' });
+      followUps.push({ label: '📋 Build a protocol with both', action: 'MESSAGE', payload: 'Can I combine both peptides in a protocol?' });
+      followUps.push({ label: labels.sideEffects,               action: 'MESSAGE', payload: 'What are the safety profiles of these peptides?' });
       break;
     }
     case 'vague':
     case 'goal': {
-      followUps.push({ label: labels.options, action: 'MESSAGE', payload: isSpanish ? 'Explícame mis opciones con más detalle' : 'Can you explain my options in more detail?' });
-      followUps.push({ label: labels.sideEffects, action: 'MESSAGE', payload: isSpanish ? '¿Qué precauciones debo tener?' : 'What safety precautions should I take?' });
-      followUps.push({ label: labels.mix, action: 'MESSAGE', payload: isSpanish ? '¿Es difícil preparar estos péptidos?' : 'Is it difficult to prepare these peptides?' });
+      followUps.push({ label: labels.options,     action: 'MESSAGE', payload: 'Can you explain my options in more detail?' });
+      followUps.push({ label: labels.sideEffects, action: 'MESSAGE', payload: 'What safety precautions should I take?' });
+      followUps.push({ label: labels.mix,         action: 'MESSAGE', payload: 'Is it difficult to prepare these peptides?' });
       break;
     }
     case 'safety': {
-      followUps.push({ label: labels.alternatives, action: 'MESSAGE', payload: isSpanish ? '¿Hay opciones con menos riesgos?' : 'Are there safer alternatives for the same goal?' });
-      followUps.push({ label: labels.protocols, action: 'MESSAGE', payload: isSpanish ? '¿Protocolos recomendados?' : 'What protocols use this peptide safely?' });
+      followUps.push({ label: labels.alternatives, action: 'MESSAGE', payload: 'Are there safer alternatives for the same goal?' });
+      followUps.push({ label: labels.protocols,    action: 'MESSAGE', payload: 'What protocols use this peptide safely?' });
       break;
     }
     default: {
-      followUps.push({ label: labels.options, action: 'MESSAGE', payload: isSpanish ? '¿Cómo empiezo?' : 'How do I get started?' });
-      followUps.push({ label: labels.sideEffects, action: 'MESSAGE', payload: isSpanish ? 'Háblame de seguridad' : 'Tell me about safety' });
+      followUps.push({ label: labels.options,     action: 'MESSAGE', payload: 'How do I get started?' });
+      followUps.push({ label: labels.sideEffects, action: 'MESSAGE', payload: 'Tell me about safety' });
       break;
     }
   }
@@ -148,10 +192,27 @@ export function useClinicalAI({
 
   const [sessionId, setSessionId] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('clinicalAI_activeSessionId') || uuidv4();
+      const stored = localStorage.getItem('clinicalAI_activeSessionId');
+      if (stored) return stored;
+      // Prefix uid_ so the Cloud Function recognizes authenticated sessions
+      const uid = userCtx?.uid || null;
+      return uid ? `uid_${uid}_${uuidv4()}` : uuidv4();
     }
     return uuidv4();
   });
+
+  // When user logs in, upgrade the anonymous sessionId to a uid-prefixed one
+  // so the Cloud Function correctly identifies authenticated users (20+ queries/day)
+  useEffect(() => {
+    if (userCtx?.uid) {
+      setSessionId(prev => {
+        if (prev.startsWith(`uid_${userCtx.uid}`)) return prev; // already stamped
+        const newId = `uid_${userCtx.uid}_${uuidv4()}`;
+        safeSetLocalStorage('clinicalAI_activeSessionId', newId);
+        return newId;
+      });
+    }
+  }, [userCtx?.uid]);
 
   const [sessions, setSessions] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -215,7 +276,7 @@ export function useClinicalAI({
 
   // Save active session ID and update list
   useEffect(() => {
-    localStorage.setItem('clinicalAI_activeSessionId', sessionId);
+    safeSetLocalStorage('clinicalAI_activeSessionId', sessionId);
     // Update sessions list if this session is new
     setSessions(prev => {
       if (prev.find(s => s.id === sessionId)) return prev;
@@ -224,7 +285,7 @@ export function useClinicalAI({
         title: 'New Research Thread', 
         timestamp: Date.now() 
       }, ...prev].slice(0, 15);
-      localStorage.setItem('clinicalAI_sessions', JSON.stringify(newSessions));
+      safeSetLocalStorage('clinicalAI_sessions', JSON.stringify(newSessions));
       return newSessions;
     });
   }, [sessionId]);
@@ -235,7 +296,7 @@ export function useClinicalAI({
     if (firstUserMsg) {
       setSessions(prev => {
         const updated = prev.map(s => s.id === sessionId ? { ...s, title: firstUserMsg.content.slice(0, 30) + '...' } : s);
-        localStorage.setItem('clinicalAI_sessions', JSON.stringify(updated));
+        safeSetLocalStorage('clinicalAI_sessions', JSON.stringify(updated));
         return updated;
       });
     }
@@ -270,7 +331,7 @@ export function useClinicalAI({
     localStorage.removeItem(`clinicalAI_messages_${id}`);
     setSessions(prev => {
       const filtered = prev.filter(s => s.id !== id);
-      localStorage.setItem('clinicalAI_sessions', JSON.stringify(filtered));
+      safeSetLocalStorage('clinicalAI_sessions', JSON.stringify(filtered));
       if (sessionId === id) {
         if (filtered.length > 0) {
           loadSession(filtered[0].id);
@@ -285,6 +346,13 @@ export function useClinicalAI({
   const [queriesToday, setQueriesToday] = useState(0);
   const maxFreeQueries = 5;
   const maxRegisteredQueries = 20;
+  const maxProfessionalQueries = 50;
+  // Derive the effective limit for the current user tier
+  const effectiveQuotaLimit = useMemo(() => {
+    if (!userCtx) return maxFreeQueries;
+    if (userCtx?.isProfessional || userCtx?.role === 'admin' || userCtx?.role === 'doctor') return maxProfessionalQueries;
+    return maxRegisteredQueries;
+  }, [userCtx]);
 
     useEffect(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -320,13 +388,13 @@ export function useClinicalAI({
     const usageKey = `clinicAI_usage_${today}`;
     const used = parseInt(localStorage.getItem(usageKey) || '0', 10);
     const newCount = used + 1;
-    localStorage.setItem(usageKey, newCount);
+    safeSetLocalStorage(usageKey, newCount);
     setQueriesToday(newCount);
   }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem(`clinicalAI_messages_${sessionId}`, JSON.stringify(messages));
+      safeSetLocalStorage(`clinicalAI_messages_${sessionId}`, JSON.stringify(messages));
     }
   }, [messages, sessionId]);
 
@@ -344,7 +412,7 @@ export function useClinicalAI({
     setMessages(defaultGreeting);
     setSuggestions([]);
     setSessionIntents([]);
-    localStorage.setItem(`clinicalAI_messages_${sessionId}`, JSON.stringify(defaultGreeting));
+    safeSetLocalStorage(`clinicalAI_messages_${sessionId}`, JSON.stringify(defaultGreeting));
     localStorage.removeItem(`clinical_ai_session_${sessionId}`);
     activityRef.current = { messagesSent: 0, comparisonCount: 0 };
     exploredCompoundsRef.current = [];
@@ -378,6 +446,14 @@ export function useClinicalAI({
   // ─── Context Bridge: external sections can open the AI with a message ────────
   const pendingContextRef = useRef(null);
   const activeSectionRef = useRef('unknown');
+  const activeProductEntityRef = useRef(null);
+  const eventContextRef = useRef(null);
+  // stickyProductContext: una vez activado el modo producto, el contexto del producto
+  // se mantiene fijo en toda la sesión hasta que el usuario lo limpie explícitamente.
+  const [stickyProductContext, setStickyProductContext] = useState(null);
+  const [isProductMode, setIsProductMode] = useState(false);
+  // moduleMode: 'product' | 'protocol' | 'prescription' | 'admin' | 'general'
+  const [stickyModuleMode, setStickyModuleMode] = useState(null);
   
   useEffect(() => {
     const handleContextBridge = (e) => {
@@ -387,6 +463,24 @@ export function useClinicalAI({
       const action = e?.detail?.action;
       const entityName = e?.detail?.entityName;
       const section = e?.detail?.section;
+      const productMode = e?.detail?.productMode === true;
+      const autoGenerate = e?.detail?.autoGenerate === true;
+      const moduleMode = e?.detail?.moduleMode || (productMode ? 'product' : null);
+
+      if (ctx) {
+        setDynamicPageContext(ctx);
+        eventContextRef.current = ctx;
+        // Anclar el modo y contexto de forma sticky para toda la sesión
+        if (moduleMode && ctx) {
+          setStickyProductContext(ctx);
+          setStickyModuleMode(moduleMode);
+          if (moduleMode === 'product') setIsProductMode(true);
+        } else if (productMode && ctx) {
+          setStickyProductContext(ctx);
+          setIsProductMode(true);
+          setStickyModuleMode('product');
+        }
+      }
 
       if (section) {
         activeSectionRef.current = section;
@@ -397,10 +491,40 @@ export function useClinicalAI({
         doctorContextRef.current = e.detail.doctorContext;
       }
 
+      if (entityName || action === 'ask_about_entity') {
+        activeProductEntityRef.current = entityName || 'this product';
+      }
+
+      // Si autoGenerate está activado y tenemos producto, auto-enviar el perfil
+      if (autoGenerate && ctx && (moduleMode || ctx.isProductPage || ctx.isProtocolPage || ctx.isPrescriptionPage)) {
+        let autoPrompt;
+        const effectiveMode = moduleMode || (ctx.isProtocolPage ? 'protocol' : ctx.isPrescriptionPage ? 'prescription' : ctx.isSupplierPage ? 'supplier' : 'product');
+        if (effectiveMode === 'protocol') {
+          autoPrompt = buildAutoProtocolPrompt(ctx);
+        } else if (effectiveMode === 'prescription') {
+          autoPrompt = buildAutoPrescriptionPrompt(ctx);
+        } else if (effectiveMode === 'supplier') {
+          autoPrompt = buildAutoSupplierPrompt(ctx);
+        } else {
+          autoPrompt = buildAutoProfilePrompt(ctx);
+        }
+        setTimeout(() => {
+          if (typeof handleSendRef?.current === 'function') {
+            handleSendRef.current(autoPrompt);
+          }
+        }, 600);
+        return;
+      }
+
       // Build a contextual opener when no explicit message is given.
       const resolvedMsg = msg || (() => {
         if (action === 'ask_about_entity' && entityName) {
-          return `Provide a detailed clinical study profile for ${entityName}, including its primary mechanism of action, key research applications, and standard clinical dosages in the context of the ${section || 'platform'} section.`;
+          // Usar el prompt enriquecido si tenemos contexto del producto
+          const productCtx = ctx || stickyProductContext;
+          if (productCtx) {
+            return buildAutoProfilePrompt(productCtx);
+          }
+          return `Provide a detailed clinical study profile for ${entityName}, including its primary mechanism of action, key research applications, and standard clinical dosages.`;
         }
         if (action === 'compare_trending' && section === 'TrendingPeptides') {
           return `Which trending peptides are most evidence-backed for my goals? Give me a quick comparison of the top compounds researchers are using right now.`;
@@ -415,22 +539,36 @@ export function useClinicalAI({
         return '';
       })();
 
+      // CLEAR OLD UNRELATED HISTORY WHEN A FOCUSED ENTITY QUERY IS DISPATCHED
+      if (action === 'ask_about_entity' || e?.detail?.clearHistory || entityName) {
+        setMessages([]);
+      }
+
       setIsOpen(true);
       if (resolvedMsg) {
-        if (e?.detail?.autoSend) {
+        // Automatically send entity queries so the user gets an instant, clean product response
+        const shouldAutoSend = e?.detail?.autoSend !== false || action === 'ask_about_entity' || Boolean(entityName);
+        
+        if (shouldAutoSend) {
           pendingContextRef.current = { message: resolvedMsg, displayText: label };
-          if (isOpenRef.current && handleSendRef.current) {
-            handleSendRef.current({ message: resolvedMsg, displayText: label });
-            pendingContextRef.current = null;
-          }
+          setTimeout(() => {
+            if (handleSendRef.current) {
+              handleSendRef.current({ message: resolvedMsg, displayText: label });
+              pendingContextRef.current = null;
+            }
+          }, 150);
         } else {
           setInput(resolvedMsg);
         }
       }
     };
-    window.addEventListener('open-clinical-ai', handleContextBridge);
-    return () => window.removeEventListener('open-clinical-ai', handleContextBridge);
-  }, [setIsOpen]);
+  window.addEventListener('open-clinical-ai', handleContextBridge);
+  window.addEventListener('open-ai-chat', handleContextBridge);
+  return () => {
+    window.removeEventListener('open-clinical-ai', handleContextBridge);
+    window.removeEventListener('open-ai-chat', handleContextBridge);
+  };
+}, [setIsOpen, setMessages]);
 
 
 
@@ -593,6 +731,49 @@ export function useClinicalAI({
     
     trackQueryUsage();
 
+    // Prioridad: evento explícito > sticky > URL dinámica > externo
+    const activeProductCtx = eventContextRef.current || stickyProductContext || dynamicPageContext || externalPageContext;
+    const effectiveModuleMode = activeProductCtx?.moduleMode || stickyModuleMode || null;
+
+    const isProductLocation = 
+      isProductMode ||
+      effectiveModuleMode === 'product' ||
+      pathname.startsWith('/product/') || 
+      pathname.startsWith('/supplements/') || 
+      activeProductCtx?.isProductPage || 
+      activeProductCtx?.productMode === true ||
+      classifyResult.detected_entities.length > 0 ||
+      /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|treatment|side effects|half-life|is this right for me|health goals|symptoms|vial|reconstitution)\b/i.test(messageText);
+
+    const isProtocolLocation =
+      effectiveModuleMode === 'protocol' ||
+      activeProductCtx?.isProtocolPage ||
+      pathname.startsWith('/protocol/') ||
+      pathname.startsWith('/protocols/');
+
+    const isPrescriptionLocation =
+      effectiveModuleMode === 'prescription' ||
+      activeProductCtx?.isPrescriptionPage ||
+      pathname.startsWith('/prescriptions/');
+
+    const isSupplierLocation =
+      effectiveModuleMode === 'supplier' ||
+      activeProductCtx?.isSupplierPage ||
+      pathname.startsWith('/supplier');
+
+    const isB2B = (
+      pathname.startsWith('/doctor') ||
+      pathname.startsWith('/admin') ||
+      pathname.startsWith('/wholesaler') ||
+      pathname.startsWith('/compounding_pharmacy') ||
+      pathname.startsWith('/supplier') ||
+      userCtx?.role === 'doctor' ||
+      userCtx?.role === 'wholesaler' ||
+      userCtx?.role === 'admin' ||
+      userCtx?.role === 'compounding_pharmacy' ||
+      userCtx?.role === 'supplier'
+    );
+
     try {
       const bodyStr = JSON.stringify({
         message: messageText,
@@ -654,37 +835,73 @@ export function useClinicalAI({
             ...externalPageContext,
             ...(dynamicPageContext || {})
           },
-          instructions: contextMode === 'admin' ? `
+          instructions: (() => {
+            // ───────────────────────────────────────────────────
+            // RULE 1: PRODUCT MODE — Clinical Profile
+            // ───────────────────────────────────────────────────
+            if (isProductLocation || activeProductCtx?.isProductPage) {
+              const audience = contextMode === 'admin' ? 'admin'
+                : contextMode === 'doctor' ? 'doctor'
+                : isB2B ? 'researcher'
+                : 'patient';
+              const productForPrompt = activeProductCtx || stickyProductContext || null;
+              return buildProductSystemPrompt(productForPrompt, { audience, forceEnglish: true });
+            }
+
+            // ───────────────────────────────────────────────────
+            // RULE 2: PROTOCOL MODE — Protocol Analysis
+            // ───────────────────────────────────────────────────
+            if (isProtocolLocation) {
+              const protocolCtx = activeProductCtx || stickyProductContext || null;
+              return buildProtocolSystemPrompt(protocolCtx, { forceEnglish: true });
+            }
+
+            // ───────────────────────────────────────────────────
+            // RULE 3: PRESCRIPTION MODE — Clinical Supervision
+            // ───────────────────────────────────────────────────
+            if (isPrescriptionLocation) {
+              const rxCtx = activeProductCtx || stickyProductContext || null;
+              return buildPrescriptionSystemPrompt(rxCtx, { forceEnglish: true });
+            }
+
+            // ───────────────────────────────────────────────────
+            // RULE 4: SUPPLIER MODE — Procurement Intelligence
+            // ───────────────────────────────────────────────────
+            if (isSupplierLocation) {
+              const supplierCtx = activeProductCtx || stickyProductContext || null;
+              return buildSupplierSystemPrompt(supplierCtx, { forceEnglish: true });
+            }
+
+            // ───────────────────────────────────────────────────
+            // RULE 5: ADMIN OPERATIONS (genérico, último recurso)
+            // ───────────────────────────────────────────────────
+            if (contextMode === 'admin') {
+              return `
 --- ADMIN MODE ACTIVE ---
-You are "Atlas AI", the Atlas Health administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system. DO NOT provide medical or research advice.
+You are "Atlas AI", the Atlas Health administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system.
 Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Admin Portal'}.
 ${externalPageContext?.summary ? `Context Summary: ${externalPageContext.summary}` : ''}
 ${externalPageContext ? `Page Data (JSON): ${JSON.stringify(externalPageContext, (key, val) => key === 'page' || key === 'label' || key === 'activeTab' || key === 'summary' ? undefined : val)}` : ''}
-` : `
-${buildClinicalAITrainingBlock(detectedIntent, userCtx?.role || 'patient')}
-LAYER:${responseLayer} DIRECTIVE. Respond at depth ${responseLayer}/4.
-${externalPageContext ? `
---- ACTIVE PAGE CONTEXT ---
-The user is currently navigating the Application.
-Current Tab: ${externalPageContext.label || externalPageContext.activeTab || 'Application'}.
-${externalPageContext.summary ? `Context Summary: ${externalPageContext.summary}` : ''}
-Page Data (JSON): ${JSON.stringify(externalPageContext, (key, val) => key === 'page' || key === 'label' || key === 'activeTab' || key === 'summary' ? undefined : val)}
-If the user asks questions about the platform, help them with tasks related to this section.
---- END ACTIVE PAGE CONTEXT ---` : ''}
-${doctorContextRef.current ? `
---- ACTIVE DOCTOR SUPERVISION CONTEXT ---
-This patient session is under active clinical supervision. A licensed doctor has provided the following guidance. You MUST align your research information with these clinical directives while maintaining full scientific accuracy:
+MANDATORY: ALWAYS respond in ENGLISH regardless of the user's input language.
+`;
+            }
 
-Supervising Doctor: ${doctorContextRef.current.doctorName || 'Licensed Physician'}
-Specialty: ${doctorContextRef.current.specialty || 'General Medicine'}
-${doctorContextRef.current.recommendations ? `Doctor's Active Recommendations:
-${doctorContextRef.current.recommendations.map((r, i) => `${i+1}. [${r.productName || r.product || 'Protocol'}] — ${r.notes || r.rationale || r.text || ''}`).join('\n')}` : ''}
-${doctorContextRef.current.protocolName ? `Active Protocol: ${doctorContextRef.current.protocolName}` : ''}
-${doctorContextRef.current.notes ? `Clinical Notes: ${doctorContextRef.current.notes}` : ''}
-IMPORTANT: The patient retains full purchasing autonomy. Never instruct them what to buy. Provide scientifically grounded information that supports informed decision-making aligned with the doctor's clinical guidance.
---- END SUPERVISION CONTEXT ---` : ''}`,
+            return `
+--- GENERAL CLINICAL & RESEARCH INTELLIGENCE MODE ---
+You are ClinicalAI, expert clinical research assistant.
+${buildClinicalAITrainingBlock(detectedIntent, isB2B ? 'doctor' : 'patient')}
+LAYER:${responseLayer} DIRECTIVE. Respond at depth ${responseLayer}/4.
+MANDATORY: ALWAYS respond in ENGLISH regardless of the user's input language.
+`;
+          })(),
         },
-        history: messages.slice(-5).map(m => ({ role: m.role, content: m.content }))
+        history: messages.filter(m => {
+          const c = m.content?.toLowerCase() || '';
+          if (isProductLocation) {
+            return !c.includes('system admin assistant') && !c.includes('manage the platform') && !c.includes('kpi') && !c.includes('zoho') && !c.includes('monthly report') && !c.includes('unprocessed order');
+          }
+          return !c.includes('kpi') && !c.includes('zoho');
+        }).slice(-5).map(m => ({ role: m.role, content: m.content }))
       });
 
       const response = await fetch(API_ENDPOINT, {
@@ -733,6 +950,7 @@ IMPORTANT: The patient retains full purchasing autonomy. Never instruct them wha
         pendingAction,               // ← AdminAI write proposal (null for normal msgs)
         preRankedProducts: proactiveCards,
         preRankedProtocols: proactiveProtocols,
+        suggestions: contextualSuggestions, // Attach for UI display
         timestamp: new Date()
       }]);
 
@@ -1262,7 +1480,13 @@ Before beginning, establish a clean and sterile working environment. Gather all 
     deleteSession,
     emailSession,
     queriesToday,
-    maxFreeQueries,
+    maxFreeQueries: effectiveQuotaLimit,
+    dynamicPageContext,
+    setDynamicPageContext,
+    clearActiveContext: () => {
+      setDynamicPageContext(null);
+      if (eventContextRef) eventContextRef.current = null;
+    },
     autocompleteCandidates: useMemo(() => {
       const candidates = [];
       if (contextMode === 'admin') return candidates; // Disable peptide autocomplete in admin mode

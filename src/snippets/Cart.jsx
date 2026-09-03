@@ -1,4 +1,9 @@
-import { Beaker, Globe, Activity, AlertTriangle, X } from '@/lib/icons';
+import { Beaker, Globe, Activity, AlertTriangle, X, Briefcase, FileText, Building2, Stethoscope, Send, Share2, Download, Layers, Sparkles, Plus, Trash2, DollarSign, Check, Folder, Save, ChevronDown, Clock, CheckCircle } from '@/lib/icons';
+import notifier from '../services/NotificationService';
+import { dispatchToQuotation, dispatchToSupplierRFQ, dispatchToPrescription } from '../services/WorkspaceDispatcher';
+import { groupWorkspaceByFulfillment } from '../utils/workspaceLogisticsHelper';
+import { saveWorkspaceDraft, getUserWorkspaceDrafts, deleteWorkspaceDraft } from '../repositories/workspaceDraftRepository';
+import { checkWorkspaceClinicalStatus } from '../utils/workspaceClinicalChecker';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useEffect, useState, useMemo } from 'react';
 
@@ -16,6 +21,10 @@ import { useUIStore } from '../stores/uiStore';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 import { useRouter } from 'next/navigation';
 import { EXCHANGE_RATES } from '../utils/currencies';
+import { useClinicalContextStore } from '../stores/clinicalContextStore';
+import { getPatientsByDoctor } from '../repositories/userRepository';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 
 
@@ -163,13 +172,22 @@ export default function Cart() {
   const { activeModal, setActiveModal } = useUIStore();
   const { catalogue: products } = useFirestoreData();
   const router = useRouter();
+  const { userProfile } = useAuth();
+  
+  // Clinical Context & Patient Selection
+  const activePatient = useClinicalContextStore(s => s.activePatient);
+  const setActivePatient = useClinicalContextStore(s => s.setActivePatient);
+  const clearCart = useCart(s => s.clearCart); // Need clearCart for checkout
+  
+  const [patients, setPatients] = useState([]);
+  useEffect(() => {
+    if (userProfile?.role === 'doctor') {
+      getPatientsByDoctor(userProfile.uid).then(setPatients).catch(console.error);
+    }
+  }, [userProfile]);
 
   const isOpen = activeModal === 'cart';
   const onClose = () => setActiveModal(null);
-  const onCheckout = () => {
-    setActiveModal(null);
-    router.push('/checkout');
-  };
 
   const [selectedShipping, setSelectedShipping] = useState('standard');
   const shippingCosts = { standard: 40, express: 80 };
@@ -238,21 +256,14 @@ export default function Cart() {
       const m = cartMetadata[itemKey];
       if (m && (m.isProtocol === true || m.protocolId)) return;
 
-      let namePart = itemKey;
-      let dosagePart = null;
-      if (itemKey.includes('(')) {
-        const match = itemKey.match(/(.+) \((.+)\)/);
-        if (match) {
-          namePart = match[1];
-          dosagePart = match[2];
-        }
-      }
+      let namePart = m?.name || itemKey.split('::')[0];
+      let dosagePart = m?.dosage || null;
 
-      const product = products.find(p => p.name === namePart);
+      const product = products?.find(p => p.id === (m?.productId || itemKey.split('::')[0]) || p.name === namePart);
 
       if (product) {
         const matchedVariant = dosagePart
-          ? product.variants?.find(v => v.dosage === dosagePart || v.strength === dosagePart)
+          ? product.variants?.find(v => v.id === m?.variantId || v.dosage === dosagePart || v.strength === dosagePart)
           : null;
         const pricingSource = matchedVariant ?? product.defaultVariant ?? product.variants?.[0] ?? product;
         const resolved = resolveVariantPrice(pricingSource, { tier });
@@ -358,6 +369,94 @@ export default function Cart() {
   // Individual items: exclude those already inside a protocol
   const cartItemEntries = cartItems.filter(([key]) => !protocolItemKeys.has(key));
 
+  // ─── Workspace Buffer Computations ─────────────────────────────────────────
+  const workspaceItemsList = useMemo(() => {
+    return cartItems.map(([key, qty]) => {
+      const meta = cartMetadata[key] || {};
+      const parts = key.split('::');
+      return {
+        key,
+        productId: meta.productId || parts[0],
+        variantId: meta.variantId || parts[1] || 'default',
+        name: meta.name || parts[0],
+        dosage: meta.dosage || '',
+        presentation: meta.presentation || 'vial',
+        price: Number(meta.price || 0),
+        costPrice: Number(meta.costPrice || meta.unitCost || 0),
+        supplierId: meta.supplierId || null,
+        supplierName: meta.supplierName || '',
+        quantity: Number(qty || 1),
+        bundleMeta: meta.bundleMeta || null
+      };
+    });
+  }, [cartItems, cartMetadata]);
+
+  // Clinical Synergies & Redundancy Intelligence
+  const clinicalStatus = useMemo(() => {
+    return checkWorkspaceClinicalStatus(workspaceItemsList);
+  }, [workspaceItemsList]);
+
+  // Split-Fulfillment Logistics Hubs
+  const fulfillmentGroups = useMemo(() => {
+    return groupWorkspaceByFulfillment(workspaceItemsList);
+  }, [workspaceItemsList]);
+
+  // Cloud Drafts State
+  const [draftsList, setDraftsList] = useState([]);
+  const [showDraftsModal, setShowDraftsModal] = useState(false);
+  const [draftNameInput, setDraftNameInput] = useState('');
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && userProfile?.uid) {
+      getUserWorkspaceDrafts(userProfile.uid).then(setDraftsList).catch(console.error);
+    }
+  }, [isOpen, userProfile]);
+
+  const handleSaveDraft = async () => {
+    if (!userProfile?.uid) {
+      notifier.error('Please log in to save workspace drafts to the cloud.');
+      return;
+    }
+    try {
+      setIsSavingDraft(true);
+      const name = draftNameInput.trim() || `Workspace Staging (${new Date().toLocaleDateString()})`;
+      await saveWorkspaceDraft(userProfile.uid, {
+        name,
+        items: workspaceItemsList,
+        metadata: cartMetadata,
+        targetType: userProfile.role === 'doctor' ? 'prescription' : 'quotation',
+        currency: 'USD'
+      });
+      setDraftNameInput('');
+      setShowDraftsModal(false);
+      const updated = await getUserWorkspaceDrafts(userProfile.uid);
+      setDraftsList(updated);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const handleLoadDraft = (draft) => {
+    if (!draft?.items) return;
+    draft.items.forEach(item => {
+      updateCart(item.key, item.quantity, {
+        productId: item.productId,
+        variantId: item.variantId,
+        name: item.name,
+        dosage: item.dosage,
+        presentation: item.presentation,
+        price: item.price,
+        costPrice: item.costPrice,
+        supplierId: item.supplierId
+      });
+    });
+    notifier.success(`Loaded draft "${draft.name}" into Workspace Buffer!`);
+    setShowDraftsModal(false);
+  };
+
   // ─── Tab classification ───────────────────────────────────────────────────
   // Kits: qty >= 10 (purchased using the Kit stepper by pro users)
   // Products: qty < 10 (individual unit purchases — peptides, supplements, etc.)
@@ -381,8 +480,9 @@ export default function Cart() {
 
     // Resolve full product records for items in the cart
     const cartProducts = cartItemEntries.map(([key]) => {
-      const namePart = key.includes('(') ? key.match(/(.+) \((.+)\)/)?.[1] ?? key : key;
-      return products.find(p => p.name === namePart) ?? null;
+      const m = cartMetadata[key];
+      const prodId = m?.productId || key.split('::')[0];
+      return products.find(p => p.id === prodId || p.name === m?.name) ?? null;
     }).filter(Boolean);
 
     if (cartProducts.length < 2) return [];
@@ -438,13 +538,10 @@ export default function Cart() {
 
   // ─── Item row renderer ────────────────────────────────────────────────────
   const renderItem = ({ itemKey, qty, meta }) => {
-    let namePart = itemKey;
-    let dosagePart = null;
-    if (itemKey.includes('(')) {
-      const match = itemKey.match(/(.+) \((.+)\)/);
-      if (match) { namePart = match[1]; dosagePart = match[2]; }
-    }
-    const product = products?.find(p => p.name === namePart);
+    let namePart = meta?.name || itemKey.split('::')[0];
+    let dosagePart = meta?.dosage || null;
+
+    const product = products?.find(p => p.id === (meta?.productId || itemKey.split('::')[0]) || p.name === namePart);
 
     // Per-unit price for display
     // 1. Try static products catalog (peptides)
@@ -553,6 +650,36 @@ export default function Cart() {
     );
   };
 
+  const onCheckout = async () => {
+    if (userProfile?.role === 'doctor') {
+      if (!activePatient) {
+        alert("Please select a patient first.");
+        return;
+      }
+      try {
+        const newPrescription = {
+          patientId: activePatient.id,
+          doctorId: userProfile.uid,
+          items: cartItems.map(([key, qty]) => ({ name: key, quantity: qty })),
+          protocolBundles: cartMetadata.protocolBundles || [],
+          status: 'draft',
+          createdAt: serverTimestamp(),
+        };
+        await addDoc(collection(db, 'prescriptions'), newPrescription);
+        // We will assume clearCart exists, if not we will fix it
+        if (typeof clearCart === 'function') clearCart(); 
+        setActiveModal(null);
+        alert("Prescription created successfully!");
+      } catch (err) {
+        console.error("Error creating prescription", err);
+        alert("Failed to create prescription.");
+      }
+    } else {
+      setActiveModal(null);
+      router.push('/checkout');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -605,26 +732,54 @@ export default function Cart() {
         `}</style>
 
         {/* Header */}
-        <div style={{ padding: '2rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.5rem' }}>Your Sample Order</h3>
-            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              {totalItems > 0 && `${totalItems} unit${totalItems !== 1 ? 's' : ''}`}
-              {totalItems > 0 && (protocolGroups.length > 0 || protocolRequests.length > 0) && ' · '}
-              {(protocolGroups.length > 0 || protocolRequests.length > 0) &&
-                `${protocolGroups.length || protocolRequests.length} protocol${(protocolGroups.length || protocolRequests.length) !== 1 ? 's' : ''}`}
-              {!hasContent && 'Empty'}
-            </p>
+        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--color-bg-surface, #ffffff)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(0,163,224,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--primary)',
+              flexShrink: 0
+            }}>
+              <Briefcase size={22} strokeWidth={2} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <h3 style={{ margin: 0, color: 'var(--primary)', fontSize: '1.3rem', fontWeight: 800 }}>Workspace Buffer</h3>
+                {totalItems > 0 && (
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(0,163,224,0.12)',
+                    color: 'var(--primary)'
+                  }}>
+                    {totalItems} item{totalItems !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                {userProfile?.role === 'admin' ? 'Staging area for B2B Quotes, Supplier RFQs & Purchase Orders' :
+                 userProfile?.role === 'doctor' ? 'Clinical staging area for Prescriptions & Patient Plans' :
+                 userProfile?.role === 'wholesaler' ? 'Staging area for Custom Catalogs & Bulk Inquiries' :
+                 'Staging area for your health protocols & products'}
+              </p>
+            </div>
           </div>
           <button
             className="cartCloseBtn"
             onClick={onClose}
-            aria-label="Cerrar carrito"
+            aria-label="Cerrar workspace"
             style={{
               background: 'rgba(15,23,42,0.08)',
               border: '1.5px solid rgba(15,23,42,0.2)',
-              width: '44px',
-              height: '44px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -647,7 +802,7 @@ export default function Cart() {
             }}
           >
             <X
-              size={20}
+              size={18}
               strokeWidth={2.5}
               style={{
                 stroke: '#0f172a',
@@ -659,6 +814,169 @@ export default function Cart() {
             />
           </button>
         </div>
+
+        {/* Cloud Drafts Staging Bar */}
+        <div style={{
+          padding: '0.6rem 2rem',
+          backgroundColor: '#f8fafc',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '0.78rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+            <Clock size={14} />
+            <span>Cloud Staging: <strong>{totalItems} active item{totalItems !== 1 ? 's' : ''}</strong></span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {draftsList.length > 0 && (
+              <button
+                onClick={() => setShowDraftsModal(prev => !prev)}
+                style={{
+                  background: 'none',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  padding: '2px 8px',
+                  fontSize: '0.74rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  color: 'var(--primary)'
+                }}
+              >
+                <Folder size={12} /> Drafts ({draftsList.length})
+              </button>
+            )}
+            <button
+              onClick={() => setShowDraftsModal(true)}
+              disabled={!hasContent || isSavingDraft}
+              style={{
+                background: hasContent ? 'var(--primary)' : '#e2e8f0',
+                color: hasContent ? '#ffffff' : '#94a3b8',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '3px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                cursor: hasContent ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.25rem'
+              }}
+            >
+              <Save size={12} /> {isSavingDraft ? 'Saving...' : 'Save Draft'}
+            </button>
+          </div>
+        </div>
+
+        {/* Drafts Modal / Drawer Overlay */}
+        {showDraftsModal && (
+          <div style={{
+            padding: '1rem 2rem',
+            backgroundColor: '#ffffff',
+            borderBottom: '2px solid var(--primary)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+          }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>
+              Save Current Workspace or Load Stored Draft
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: draftsList.length > 0 ? '0.75rem' : 0 }}>
+              <input
+                type="text"
+                value={draftNameInput}
+                onChange={(e) => setDraftNameInput(e.target.value)}
+                placeholder="Draft Name (e.g. Dr. Chen Q3 Quotation)..."
+                style={{
+                  flex: 1,
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.82rem',
+                  outline: 'none'
+                }}
+              />
+              <button
+                onClick={handleSaveDraft}
+                disabled={isSavingDraft || !hasContent}
+                style={{
+                  backgroundColor: '#003666',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Save
+              </button>
+            </div>
+
+            {draftsList.length > 0 && (
+              <div style={{ maxHeight: '120px', overflowY: 'auto', borderTop: '1px solid #e2e8f0', paddingTop: '0.5rem' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Stored Cloud Drafts:</div>
+                {draftsList.map(d => (
+                  <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.3rem 0', fontSize: '0.78rem' }}>
+                    <span><strong>{d.name}</strong> ({d.itemCount || d.items?.length || 0} items)</span>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button
+                        onClick={() => handleLoadDraft(d)}
+                        style={{ background: 'none', border: '1px solid #0284c7', color: '#0284c7', borderRadius: '4px', padding: '1px 6px', fontSize: '0.7rem', cursor: 'pointer' }}
+                      >
+                        Load
+                      </button>
+                      <button
+                        onClick={async () => {
+                          await deleteWorkspaceDraft(d.id);
+                          const updated = await getUserWorkspaceDrafts(userProfile.uid);
+                          setDraftsList(updated);
+                        }}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.7rem' }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Patient Selector (Doctor only) */}
+        {userProfile?.role === 'doctor' && (
+          <div style={{ padding: '1rem 2rem', borderBottom: '1px solid var(--border)', backgroundColor: 'rgba(0,163,224,0.03)' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+              Assign Prescription to Patient
+            </div>
+            <select 
+              value={activePatient ? activePatient.id : ''}
+              onChange={(e) => {
+                const pat = patients.find(p => p.id === e.target.value);
+                setActivePatient(pat || null);
+              }}
+              style={{
+                width: '100%',
+                padding: '0.6rem',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--background)',
+                color: 'var(--text-main)',
+                fontSize: '0.9rem',
+                outline: 'none'
+              }}
+            >
+              <option value="">-- Select a Patient --</option>
+              {patients.map(p => (
+                <option key={p.id} value={p.id}>{p.name || p.displayName || p.email}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
@@ -729,6 +1047,138 @@ export default function Cart() {
               {/* ── Tab Content ── */}
               <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem 1.5rem', animation: 'tabFadeIn 0.2s ease-out' }}>
                 <style>{`@keyframes tabFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
+                {/* ── Split-Fulfillment Logistics Bar ── */}
+                {fulfillmentGroups.length > 0 && (
+                  <div style={{
+                    marginBottom: '1rem',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '10px',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.4rem'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
+                        📦 Multi-Hub Split-Fulfillment
+                      </div>
+                      <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        {fulfillmentGroups.length} dispatch hub{fulfillmentGroups.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {fulfillmentGroups.map(fg => (
+                        <div key={fg.hub.id} style={{
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          backgroundColor: fg.hub.bg,
+                          border: `1px solid ${fg.hub.border}`,
+                          color: fg.hub.color,
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem'
+                        }}>
+                          <span>{fg.hub.badge}</span>
+                          <span style={{ opacity: 0.8, fontSize: '0.65rem' }}>({fg.totalQuantity} units)</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Clinical Synergies & Intelligence Banners ── */}
+                {(clinicalStatus.synergies.length > 0 || clinicalStatus.redundancies.length > 0 || clinicalStatus.accessorySuggestion) && (
+                  <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* Synergies */}
+                    {clinicalStatus.synergies.map((syn, idx) => (
+                      <div key={`syn-${idx}`} style={{
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: '10px',
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.5rem'
+                      }}>
+                        <Sparkles size={15} color={syn.color} style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <div>
+                          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: syn.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {syn.name}
+                          </div>
+                          <div style={{ fontSize: '0.76rem', color: '#166534', lineHeight: 1.35, marginTop: '0.1rem' }}>
+                            {syn.message}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Redundancies */}
+                    {clinicalStatus.redundancies.map((red, idx) => (
+                      <div key={`red-${idx}`} style={{
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: '10px',
+                        backgroundColor: '#fffbeb',
+                        border: '1px solid #fde68a',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.5rem'
+                      }}>
+                        <AlertTriangle size={15} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <div style={{ fontSize: '0.76rem', color: '#92400e', lineHeight: 1.35 }}>
+                          {red.message}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Accessory Quick Add Banner */}
+                    {clinicalStatus.accessorySuggestion && (
+                      <div style={{
+                        padding: '0.7rem 0.85rem',
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(0,163,224,0.06)',
+                        border: '1.5px dashed rgba(0,163,224,0.3)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '0.75rem'
+                      }}>
+                        <div>
+                          <div style={{ fontSize: '0.76rem', fontWeight: 800, color: 'var(--primary)' }}>
+                            💧 {clinicalStatus.accessorySuggestion.title}
+                          </div>
+                          <div style={{ fontSize: '0.71rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+                            {clinicalStatus.accessorySuggestion.description}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const acc = clinicalStatus.accessorySuggestion.itemPayload;
+                            updateCart(`${acc.productId}::${acc.variantId}`, 1, acc);
+                            notifier.success('BAC Water (30ml) added to Workspace Buffer!');
+                          }}
+                          style={{
+                            padding: '0.4rem 0.75rem',
+                            borderRadius: '6px',
+                            backgroundColor: 'var(--primary)',
+                            color: '#ffffff',
+                            border: 'none',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0
+                          }}
+                        >
+                          + Add ($12)
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* ── Clinical Compatibility Insights Banner ── */}
                 {clinicalInsights.length > 0 && (
@@ -875,32 +1325,290 @@ export default function Cart() {
             </div>
           )}
 
-          <button
-            onClick={() => {
-              const itemNames = Object.keys(cart).join(', ');
-              const protocolIds = protocolGroups.map(g => g.id).join(', ');
-              trackEvent('purchase_intent', {
-                intent_type: 'cart_checkout',
-                protocol_id: protocolIds || 'none',
-                peptide_name: itemNames || 'none',
-                cart_total: display,
-                items_count: totalItems
-              });
-              onCheckout();
-            }}
-            className="btn btn-primary"
-            disabled={!hasContent}
-            style={{
-              width: '100%', padding: '1rem',
-              fontWeight: 700, fontSize: '1rem',
-              backgroundColor: !hasContent ? 'var(--color-text-tertiary)' : 'var(--primary)',
-              borderColor: !hasContent ? 'var(--color-text-tertiary)' : 'var(--primary)',
-              cursor: !hasContent ? 'not-allowed' : 'pointer',
-              opacity: !hasContent ? 0.6 : 1
-            }}
-          >
-            Submit Sample Order
-          </button>
+          {/* Multi-Role Action Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {userProfile?.role === 'admin' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <button
+                  onClick={async () => {
+                    try {
+                      const quoteRefNumber = `QUOT-${Date.now().toString().slice(-6)}`;
+                      const itemsList = cartItems.map(([key, qty]) => {
+                        const meta = cartMetadata[key] || {};
+                        return {
+                          key,
+                          name: meta.name || key.split('::')[0],
+                          dosage: meta.dosage || '',
+                          quantity: qty,
+                          price: meta.price || 0,
+                          productId: meta.productId || key.split('::')[0],
+                          variantId: meta.variantId || key.split('::')[1],
+                          supplierId: meta.supplierId || null,
+                        };
+                      });
+
+                      await dispatchToQuotation({
+                        items: workspaceItemsList,
+                        protocols: protocolGroups,
+                        clientName: '',
+                        currency: 'USD',
+                        shippingCost: shippingCost || 0,
+                        shippingMethod: selectedShipping,
+                        createdBy: userProfile?.email || 'admin'
+                      });
+                    } catch (err) {
+                      console.error('[Cart] Quotation error:', err);
+                    }
+                  }}
+                  className="btn"
+                  disabled={!hasContent}
+                  style={{
+                    padding: '0.75rem',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: hasContent ? 'pointer' : 'not-allowed',
+                    opacity: hasContent ? 1 : 0.6
+                  }}
+                >
+                  <FileText size={15} /> Emit B2B Quote
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      await dispatchToSupplierRFQ({
+                        items: workspaceItemsList,
+                        requestedBy: userProfile?.email || 'admin'
+                      });
+                    } catch (err) {
+                      console.error('[Cart] RFQ error:', err);
+                    }
+                  }}
+                  className="btn"
+                  disabled={!hasContent}
+                  style={{
+                    padding: '0.75rem',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: '#f8fafc',
+                    color: '#0f172a',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    cursor: hasContent ? 'pointer' : 'not-allowed',
+                    opacity: hasContent ? 1 : 0.6
+                  }}
+                >
+                  <Building2 size={15} style={{ color: '#0284c7' }} /> Launch RFQ
+                </button>
+              </div>
+            )}
+
+            {userProfile?.role === 'doctor' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <button
+                  onClick={async () => {
+                    try {
+                      if (!activePatient) {
+                        notifier.error('Please select an active patient above to assign the prescription.');
+                        return;
+                      }
+                      await dispatchToPrescription({
+                        items: workspaceItemsList,
+                        protocols: protocolGroups,
+                        patientId: activePatient.id,
+                        patientName: activePatient.name || activePatient.displayName || activePatient.email,
+                        doctorId: userProfile?.uid,
+                        doctorName: userProfile?.displayName || userProfile?.email
+                      });
+                    } catch (err) {
+                      console.error('[Cart] Prescription error:', err);
+                    }
+                  }}
+                  className="btn"
+                  disabled={!hasContent}
+                  style={{
+                    padding: '0.75rem',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: '#0d9488',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: hasContent ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  <Stethoscope size={15} /> Convert to Rx
+                </button>
+                <button
+                  onClick={() => {
+                    const link = `${window.location.origin}/recommendation/${Date.now().toString(36)}`;
+                    navigator.clipboard?.writeText(link);
+                    notifier.success('Patient recommendation link copied to clipboard!');
+                  }}
+                  className="btn"
+                  disabled={!hasContent}
+                  style={{
+                    padding: '0.75rem',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: '#f8fafc',
+                    color: '#0f172a',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    cursor: hasContent ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  <Share2 size={15} style={{ color: '#0d9488' }} /> Recommend
+                </button>
+              </div>
+            )}
+
+            {userProfile?.role === 'wholesaler' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <button
+                  onClick={() => {
+                    notifier.success('Generating Branded Wholesaler Catalog PDF...');
+                    window.open('/api/generate-pdf?docType=catalog', '_blank');
+                  }}
+                  className="btn"
+                  disabled={!hasContent}
+                  style={{
+                    padding: '0.75rem',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: '#c2410c',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: hasContent ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  <Download size={15} /> Export Catalog (PDF)
+                </button>
+                <button
+                  onClick={() => {
+                    notifier.success('Volume RFQ inquiry submitted to Admin desk!');
+                  }}
+                  className="btn"
+                  disabled={!hasContent}
+                  style={{
+                    padding: '0.75rem',
+                    fontWeight: 700,
+                    fontSize: '0.84rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    backgroundColor: '#f8fafc',
+                    color: '#0f172a',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    cursor: hasContent ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  <Send size={15} style={{ color: '#c2410c' }} /> Request Tier RFQ
+                </button>
+              </div>
+            )}
+
+            {/* B2C -> B2B Volume Threshold Bridge */}
+            {(!userProfile?.role || userProfile?.role === 'patient' || userProfile?.role === 'customer') && totalItems >= 5 && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%)',
+                border: '1px solid rgba(217, 119, 6, 0.25)',
+                borderRadius: '10px',
+                padding: '0.75rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.6rem'
+              }}>
+                <div style={{ fontSize: '0.75rem', color: '#92400e', lineHeight: 1.35 }}>
+                  <div style={{ fontWeight: 800 }}>Institutional Volume Detected ({totalItems} items)</div>
+                  <div style={{ opacity: 0.9 }}>Save up to 35% with wholesale tier pricing.</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onClose) onClose();
+                    router.push('/checkout?role=professional');
+                  }}
+                  style={{
+                    padding: '0.45rem 0.75rem',
+                    borderRadius: '6px',
+                    background: '#d97706',
+                    color: '#ffffff',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 6px rgba(217, 119, 6, 0.2)'
+                  }}
+                >
+                  B2B Quote →
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                const itemNames = Object.keys(cart).join(', ');
+                const protocolIds = protocolGroups.map(g => g.id).join(', ');
+                trackEvent('purchase_intent', {
+                  intent_type: 'cart_checkout',
+                  protocol_id: protocolIds || 'none',
+                  peptide_name: itemNames || 'none',
+                  cart_total: display,
+                  items_count: totalItems
+                });
+                onCheckout();
+              }}
+              className="btn btn-primary"
+              disabled={!hasContent}
+              style={{
+                width: '100%', padding: '0.85rem',
+                fontWeight: 700, fontSize: '0.95rem',
+                backgroundColor: !hasContent ? 'var(--color-text-tertiary)' : 'var(--primary)',
+                borderColor: !hasContent ? 'var(--color-text-tertiary)' : 'var(--primary)',
+                cursor: !hasContent ? 'not-allowed' : 'pointer',
+                opacity: !hasContent ? 0.6 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem'
+              }}
+            >
+              <Briefcase size={16} />
+              {userProfile?.role === 'doctor' ? 'Process Prescription Order' : 
+               userProfile?.role === 'admin' ? 'Create Direct Purchase Order' : 
+               userProfile?.role === 'wholesaler' ? 'Submit Wholesale PO' : 
+               'Submit Sample Order'}
+            </button>
+          </div>
 
         </div>
       </div>

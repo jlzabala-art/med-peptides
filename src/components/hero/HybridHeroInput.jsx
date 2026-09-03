@@ -1,13 +1,11 @@
-"use client";
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, Search, ArrowRight, Bot, Package, User, FlaskConical } from '@/lib/icons';
+import { Search, Bot, Package, User, FlaskConical, FileText } from '@/lib/icons';
 import useGuestPreferences from '../../hooks/useGuestPreferences';
 import { performDatabaseSearch } from '../../services/searchDatabaseService';
 import { useAuth } from '../../context/AuthContext';
 
-export default function HybridHeroInput({ onSearch }) {
+export default function HybridHeroInput({ onSearch, onOpenAI }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -18,18 +16,21 @@ export default function HybridHeroInput({ onSearch }) {
   
   const activeRole = userProfile?.role || (isProfessional ? 'professional' : 'retail');
 
-  const EXPLORE_CHIPS = [
-    'Longevity', 'Recovery', 'Cognitive', 'Sleep', 'Metabolic', 'Athletic'
+  // Exact 5 recommendation pills from the mobile UI
+  const SUGGESTION_PILLS = [
+    'GLP-1 Research',
+    'Better Sleep',
+    'Muscle Recovery',
+    'Tirzepatide vs Retatrutide',
+    'Longevity Protocol'
   ];
 
   const handleSubmit = (val = query) => {
     if (!val?.trim()) return;
     setShowSuggestions(false);
     
-    // Simple heuristic: if query is less than 3 words and doesn't contain verbs like 'want', 'need', 'help', 'improve'
-    // treat it as a direct search
     const words = val.trim().split(/\s+/).length;
-    const isConversational = words > 3 || /want|need|help|improve|recover|heal|feel/i.test(val);
+    const isConversational = words > 3 || /want|need|help|improve|recover|heal|feel|vs|protocol/i.test(val);
 
     if (isConversational) {
       handleAnalyze(val);
@@ -41,24 +42,20 @@ export default function HybridHeroInput({ onSearch }) {
   const handleAnalyze = (input) => {
     setIsAnalyzing(true);
     
-    // Tiny delay for UI feedback (shows the spinning bot icon briefly)
     setTimeout(() => {
-      // Very basic categorization for preferences
       const lower = input.toLowerCase();
       let extGoal = 'longevity'; 
       if (lower.match(/recover|heal|injury|joint|pain/)) extGoal = 'recovery';
       else if (lower.match(/brain|focus|cogniti|memory|adhd/)) extGoal = 'cognition';
-      else if (lower.match(/weight|fat|metabol|lean/)) extGoal = 'weight-loss';
+      else if (lower.match(/weight|fat|metabol|lean|glp/)) extGoal = 'weight-loss';
       else if (lower.match(/muscle|strength|hypertrophy|bulk/)) extGoal = 'muscle';
       else if (lower.match(/sleep|insomnia/)) extGoal = 'sleep';
       
-      // Save basic context so other parts of the site can adapt
       savePrefs({ goal: extGoal, context: input });
       
       setIsAnalyzing(false);
       setQuery('');
       
-      // Invoke Semantic Search / AI Assistant Modal directly
       if (onOpenAI) {
         onOpenAI(input, input);
       } else {
@@ -66,7 +63,7 @@ export default function HybridHeroInput({ onSearch }) {
           detail: { query: input, autoSend: true, displayText: input }
         }));
       }
-    }, 400);
+    }, 300);
   };
 
   React.useEffect(() => {
@@ -88,25 +85,48 @@ export default function HybridHeroInput({ onSearch }) {
   }, [query, activeRole]);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%' }}>
+      {/* Floating Search / AI Pill Input */}
       <div style={{
         position: 'relative',
-        background: 'var(--color-bg-surface)',
-        borderRadius: '16px',
-        padding: '0.75rem',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        background: '#ffffff',
+        borderRadius: '999px',
+        padding: '0.4rem 0.5rem 0.4rem 0.6rem',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05)',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
-        border: `2px solid ${isAnalyzing ? '#1a73e8' : 'transparent'}`,
-        transition: 'all 0.3s ease'
+        gap: '0.65rem',
+        border: '1.5px solid #e2e8f0',
+        transition: 'all 0.2s ease'
       }}>
-        {isAnalyzing ? (
-          <Bot size={24} color="#1a73e8" className="spin-slow" style={{ marginLeft: '0.5rem' }} />
-        ) : (
-          <Sparkles size={24} color="#1a73e8" style={{ marginLeft: '0.5rem' }} />
-        )}
+        {/* Purple robot icon badge */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onOpenAI) onOpenAI();
+            else window.dispatchEvent(new CustomEvent('open-clinical-ai', { detail: { query: '' } }));
+          }}
+          aria-label="Clinical AI Assistant"
+          style={{
+            background: 'linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%)',
+            border: 'none',
+            borderRadius: '50%',
+            width: '38px',
+            height: '38px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            flexShrink: 0,
+            transition: 'transform 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Bot size={20} color="#6366f1" />
+        </button>
         
+        {/* Input text */}
         <input
           type="text"
           value={query}
@@ -117,99 +137,121 @@ export default function HybridHeroInput({ onSearch }) {
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          placeholder={t('hero.hybrid.placeholder', "Describe your health goals or search for a compound...")}
+          placeholder="Search or ask ClinicalAI..."
           disabled={isAnalyzing}
           style={{
             flex: 1,
             border: 'none',
             background: 'transparent',
-            fontSize: '1.1rem',
-            color: 'var(--text-main)',
+            fontSize: '0.98rem',
+            color: '#0f172a',
             outline: 'none',
             fontFamily: 'inherit',
-            opacity: isAnalyzing ? 0.7 : 1
+            minWidth: 0,
+            fontWeight: 450
           }}
         />
-        
+
+        {/* Prescription document green icon */}
         <button
-          onClick={() => handleSubmit()}
-          disabled={isAnalyzing || !query.trim()}
+          type="button"
+          onClick={() => {
+            if (onOpenAI) onOpenAI('Analyze Prescription');
+            else window.dispatchEvent(new CustomEvent('open-clinical-ai', { detail: { query: 'Analyze Prescription' } }));
+          }}
+          aria-label="Prescription Analysis"
+          title="Upload or analyze prescription"
           style={{
-            background: '#1a73e8',
-            color: 'white',
+            background: 'none',
             border: 'none',
-            borderRadius: '12px',
-            padding: '0.8rem 1.5rem',
-            cursor: query.trim() && !isAnalyzing ? 'pointer' : 'default',
-            fontWeight: 700,
+            color: '#10b981',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            opacity: query.trim() && !isAnalyzing ? 1 : 0.5,
-            transition: 'opacity 0.2s'
+            justifyContent: 'center',
+            padding: '0.35rem',
+            flexShrink: 0,
+            transition: 'transform 0.2s'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          {t('hero.hybrid.btn', 'Analyze')} <ArrowRight size={18} />
+          <FileText size={20} />
         </button>
         
-        <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-          .spin-slow {
-            animation: spin 3s linear infinite;
-          }
-        `}</style>
+        {/* Circular blue search button with magnifying glass */}
+        <button
+          type="button"
+          onClick={() => handleSubmit()}
+          aria-label="Search"
+          style={{
+            background: '#0284c7',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '50%',
+            width: '38px',
+            height: '38px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            flexShrink: 0,
+            boxShadow: '0 2px 6px rgba(2, 132, 199, 0.35)',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#0369a1'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#0284c7'}
+        >
+          <Search size={18} />
+        </button>
 
+        {/* Autocomplete Suggestions */}
         {showSuggestions && suggestions.length > 0 && (
           <div style={{
             position: 'absolute',
             top: 'calc(100% + 10px)',
             left: 0,
             right: 0,
-            background: 'var(--surface, #ffffff)',
+            background: '#ffffff',
             borderRadius: '16px',
-            boxShadow: '0 12px 48px rgba(0,0,0,0.15)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
             zIndex: 100,
             padding: '0.5rem',
-            border: '1px solid var(--border, #e5e7eb)'
+            border: '1px solid #e2e8f0',
+            textAlign: 'left'
           }}>
             {suggestions.map((hit) => (
               <a 
                 key={hit.id} 
                 href={hit.path}
-                onClick={(e) => {
-                  // Allow default navigation
-                  setShowSuggestions(false);
-                }}
+                onClick={() => setShowSuggestions(false)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
-                  padding: '1rem',
+                  gap: '0.75rem',
+                  padding: '0.75rem',
                   textDecoration: 'none',
                   color: 'inherit',
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   transition: 'background 0.2s',
                   cursor: 'pointer',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(26, 115, 232, 0.05)'}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
               >
                 <div style={{ 
-                  background: 'rgba(26, 115, 232, 0.1)', 
-                  padding: '0.5rem', 
-                  borderRadius: '50%',
-                  color: 'var(--primary, #1a73e8)'
+                  background: '#f1f5f9', 
+                  padding: '0.4rem', 
+                  borderRadius: '8px',
+                  color: '#0284c7'
                 }}>
-                  {hit.iconName === 'flask' ? <FlaskConical size={20} /> :
-                   hit.iconName === 'user' ? <User size={20} /> : 
-                   <Package size={20} />}
+                  {hit.iconName === 'flask' ? <FlaskConical size={18} /> :
+                   hit.iconName === 'user' ? <User size={18} /> : 
+                   <Package size={18} />}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '1.05rem' }}>{hit.title}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted, #6b7280)' }}>{hit.description}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0f172a' }}>{hit.title}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{hit.description}</div>
                 </div>
               </a>
             ))}
@@ -217,35 +259,49 @@ export default function HybridHeroInput({ onSearch }) {
         )}
       </div>
 
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '0.5rem',
-        justifyContent: 'center',
-        marginTop: '1.5rem'
-      }}>
-        <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', alignSelf: 'center', marginRight: '0.5rem' }}>
-          {t('hero.hybrid.try', 'Or try:')}
-        </span>
-        {EXPLORE_CHIPS.map(chip => (
+      {/* Suggestion Pills Strip with horizontal swipe on mobile */}
+      <div 
+        className="hide-scrollbar"
+        style={{
+          display: 'flex',
+          gap: '0.5rem',
+          overflowX: 'auto',
+          padding: '0.85rem 0.25rem 0.25rem',
+          justifyContent: 'flex-start',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
+        {SUGGESTION_PILLS.map(pill => (
           <button
-            key={chip}
-            onClick={() => handleSubmit(`I want to improve my ${chip.toLowerCase()}`)}
+            key={pill}
+            type="button"
+            onClick={() => handleSubmit(pill)}
             style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'white',
-              borderRadius: '20px',
-              padding: '0.4rem 1rem',
-              fontSize: '0.85rem',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              color: '#475569',
+              borderRadius: '999px',
+              padding: '0.35rem 0.85rem',
+              fontSize: '0.78rem',
+              fontWeight: 500,
               cursor: 'pointer',
-              transition: 'all 0.2s',
-              backdropFilter: 'blur(4px)'
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              transition: 'all 0.2s ease'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#0ea5e9';
+              e.currentTarget.style.color = '#0284c7';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.color = '#475569';
+            }}
           >
-            {chip}
+            {pill}
           </button>
         ))}
       </div>

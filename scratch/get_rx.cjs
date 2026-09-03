@@ -1,13 +1,6 @@
-const admin = require('firebase-admin');
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert('./serviceAccountKey.json'),
-  });
-}
-const db = admin.firestore();
-
+const { db } = require('../src/firebase-admin-setup.cjs');
 async function run() {
-  const doc = await db.collection('prescriptions').doc('U4bJuAcvGuD7fMgpLAqt').get();
-  console.log(JSON.stringify(doc.data(), null, 2));
+  const snap = await db.collection('prescriptions').limit(5).get();
+  snap.forEach(d => console.log(d.id, JSON.stringify(d.data(), null, 2)));
 }
-run().catch(console.error);
+run();

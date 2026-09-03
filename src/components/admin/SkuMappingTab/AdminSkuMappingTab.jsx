@@ -5,6 +5,10 @@ import { usePathname } from 'next/navigation';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { CheckCircle2, XCircle, HelpCircle, RefreshCw, AlertTriangle, ChevronRight, ChevronDown, ExternalLink, Check, X, Database, Info, Search, ArrowRight, ArrowLeft } from '@/lib/icons';
+import CopyableId from '../../ui/CopyableId';
+import DataTable from '../../ui/DataTable';
+
+
 
 
 
@@ -126,7 +130,10 @@ export default function AdminSkuMappingTab() {
   const [selectedFamilyProductId, setSelectedFamilyProductId] = useState(null);
   const [expandedRowIds, setExpandedRowIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50;
+  const [rowsPerPage, setRowsPerPage] = useState(50);
+  const itemsPerPage = rowsPerPage;
+
+
   const [edits, setEdits] = useState({});
 
   const addLog = (msg, type = 'info') =>
@@ -552,7 +559,7 @@ export default function AdminSkuMappingTab() {
               label: 'Product Details',
               render: (m) => (
                 <div style={{ cursor: 'pointer', padding: '0.5rem 0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', marginBottom: 4, gap: 8 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, color: '#1a73e8', textTransform: 'uppercase', width: 65 }}>Firebase</span>
                     <div style={styles.productName}>{m.firebase_name || <span style={{color: '#9aa0a6', fontStyle: 'italic'}}>Missing</span>}</div>
                     <code style={styles.sku}>{m.firebase_sku || '—'}</code>
@@ -621,7 +628,7 @@ export default function AdminSkuMappingTab() {
               render: (m) => {
                 const isActing = actionId === m.id;
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                     {m.status === 'pending' && (
                       <div style={styles.actionBtns}>
                         <button
@@ -876,20 +883,23 @@ export default function AdminSkuMappingTab() {
                     {/* Row 9: IDs / Links */}
                     <div style={{ ...styles.detailField, paddingTop: 12, borderTop: '1px solid #f1f3f4', marginTop: 8 }}>
                       <span style={styles.detailLabel}>IDs</span>
-                      <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         {m.firebase_product_id ? (
-                          <span style={styles.idBadge}>Firebase ID: {m.firebase_product_id.substring(0,8)}...</span>
+                          <span style={styles.idBadge}>Firebase ID: <CopyableId value={m.firebase_product_id} /></span>
                         ) : <span style={{fontSize: 11, color: '#9aa0a6'}}>Not in Firebase</span>}
                       </div>
                     </div>
                     <div style={{ borderTop: '1px solid #f1f3f4', marginTop: 8, paddingTop: 12 }}></div>
                     <div style={{ ...styles.detailField, paddingTop: 12, borderTop: '1px solid #f1f3f4', marginTop: 8 }}>
                       <span style={styles.detailLabel}>IDs</span>
-                      <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         {m.zoho_item_id ? (
-                          <a href={`https://books.zoho.com/app#/inventory/items/${m.zoho_item_id}`} target="_blank" rel="noreferrer" style={styles.idBadgeLink}>
-                            Zoho ID: {m.zoho_item_id} <ExternalLink size={10} />
-                          </a>
+                          <span style={styles.idBadge}>
+                            Zoho ID: <CopyableId value={m.zoho_item_id} />
+                            <a href={`https://books.zoho.com/app#/inventory/items/${m.zoho_item_id}`} target="_blank" rel="noreferrer" style={{marginLeft: 8, color: 'inherit'}}>
+                              <ExternalLink size={10} />
+                            </a>
+                          </span>
                         ) : <span style={{fontSize: 11, color: '#9aa0a6'}}>Not in Zoho</span>}
                       </div>
                     </div>
@@ -923,42 +933,7 @@ export default function AdminSkuMappingTab() {
           )}
         />
       </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '16px', borderTop: '1px solid #dadce0' }}>
-              <button
-                style={{ ...styles.btnGcpSecondary, marginRight: 8, padding: '4px 8px' }}
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              >
-                Previous
-              </button>
-              <span style={{ fontSize: 12, color: '#5f6368', margin: '0 8px' }}>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                style={{ ...styles.btnGcpSecondary, marginLeft: 8, padding: '4px 8px' }}
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              >
-                Next
-              </button>
-            </div>
-          )}
-          </>
-        )}
-      </div>
 
       {/* Activity log */}
       {log.length > 0 && (
@@ -1086,7 +1061,7 @@ function ResolveFamilyModal({ firebaseProductId, onClose, getToken, agentBody, a
         <div style={modalStyles.header}>
           <div>
             <h3 style={modalStyles.title}>Align Product Family</h3>
-            <p style={modalStyles.subtitle}>Firebase ID: {firebaseProductId}</p>
+            <p style={modalStyles.subtitle}>Firebase ID: <CopyableId value={firebaseProductId} /></p>
           </div>
           <button style={modalStyles.closeBtn} onClick={onClose}>
             <X size={18} />

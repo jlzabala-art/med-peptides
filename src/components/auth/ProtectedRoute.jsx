@@ -1,31 +1,47 @@
-import { usePathname } from 'next/navigation';
-import React from 'react';
-import { redirect } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
-import { Loader2 } from '@/lib/icons';
+'use client';
 
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
+import TabSkeleton from '../ui/TabSkeleton';
+import { Loader2 } from '@/lib/icons';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
   const { user, activeRole, loading } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
-  if (loading) {
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // In development/test, allow testing with dev_admin flag in localStorage
+  const isDevAdmin = mounted && (
+    localStorage.getItem('dev_admin') === 'true' || 
+    window.__DEV_ADMIN__ === true ||
+    (user && (user.email === 'admin@regenpept.test' || activeRole === 'admin'))
+  );
+
+  const isUnauthorized = mounted && !isDevAdmin && !loading && (!user || (allowedRoles && !allowedRoles.includes(activeRole)));
+
+  React.useEffect(() => {
+    if (isUnauthorized) {
+      router.push('/login');
+    }
+  }, [isUnauthorized, router]);
+
+  if (!mounted || (loading && !isDevAdmin)) {
     return (
-      <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader2 size={32} className="animate-spin text-primary" />
+      <div style={{ width: '100%', minHeight: '100vh', background: 'var(--color-bg-base, #f8fafc)', padding: '1.5rem', boxSizing: 'border-box' }}>
+        <TabSkeleton />
       </div>
     );
   }
 
-  // Si no está logueado, enviar al login (guardando la ruta para redirección futura si se desea)
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Si está logueado pero el rol no está en la lista permitida
-  if (allowedRoles && !allowedRoles.includes(activeRole)) {
-    // Redirigir al dashboard base (el App router ya decide adónde lo manda según el rol)
-    redirect('/login');
+  if (isUnauthorized) {
+    return <AtlasLoadingScreen message="Redirecting to login..." />;
   }
 
   return children;

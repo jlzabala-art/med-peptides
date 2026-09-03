@@ -1,6 +1,9 @@
 'use client';
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import OrderDetailsPanel from './OrderDetailsPanel';
+
+
+import { usePathname, useRouter } from 'next/navigation';
+import { EMAILJS_CONFIG } from '@/config/emailjs';
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import Package from "lucide-react/dist/esm/icons/package";
 import Truck from "lucide-react/dist/esm/icons/truck";
@@ -23,6 +26,9 @@ import Search from "lucide-react/dist/esm/icons/search";
 import Archive from "lucide-react/dist/esm/icons/archive";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import Clock from "lucide-react/dist/esm/icons/clock";
+import Activity from "lucide-react/dist/esm/icons/activity";
+
 import PaginationControl from '../../../components/common/PaginationControl';
 import React, { useState, useEffect, useRef } from 'react';
 import orderRepository from '../../../repositories/orderRepository';
@@ -59,7 +65,8 @@ import PageHeader from '../../../components/ui/PageHeader';
 import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
 import DataTableSkeleton from '../../../components/ui/skeletons/DataTableSkeleton';
 import CopyableId from '../../../components/ui/CopyableId';
-import StatusBadge from '../../../components/ui/StatusBadge';
+import StatusChip from '../../../components/ui/StatusChip';
+import InlineEditableCell from '../../../components/ui/InlineEditableCell';
 
 // ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
 function UniformKPIs({ data, globalMetrics }) {
@@ -74,25 +81,88 @@ function UniformKPIs({ data, globalMetrics }) {
     { label: 'Total Orders', value: total, color: '#3b82f6', icon: <ShoppingCart size={16} /> },
     { label: 'Pending Processing', value: pending, color: '#f59e0b', icon: <Clock size={16} /> },
     { label: 'Shipped', value: shipped, color: '#8b5cf6', icon: <Truck size={16} /> },
-    { label: 'Completed', value: completed, color: '#10b981', icon: <CheckCircle2 size={16} /> },
-    { label: 'Revenue (Loaded)', value: `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, color: '#059669', icon: <Activity size={16} /> },
+    { label: 'Revenue (Loaded)', value: `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}`, color: '#059669', icon: <Activity size={16} /> },
   ];
 
   return (
-    <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.25rem' }}>
+    <div className="orders-kpi-grid">
       {stats.map((s, i) => (
-        <div key={i} style={{ flex: '1 1 200px', minWidth: 180, background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.75rem', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
-            <div style={{ color: s.color, background: s.color + '15', padding: '0.4rem', borderRadius: '8px', display: 'flex' }}>
+        <div key={i} className="orders-kpi-card">
+          <div className="orders-kpi-header">
+            <div className="orders-kpi-icon-wrap" style={{ color: s.color, background: s.color + '18' }}>
               {s.icon}
             </div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</span>
+            <span className="orders-kpi-label">{s.label}</span>
           </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
+          <div className="orders-kpi-value">
             {s.value}
           </div>
         </div>
       ))}
+      <style jsx>{`
+        .orders-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+          margin-bottom: 1.25rem;
+        }
+        .orders-kpi-card {
+          background: #ffffff;
+          padding: 1rem 1.15rem;
+          border-radius: 12px;
+          border: 1px solid var(--border, #e2e8f0);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+          min-width: 0;
+          box-sizing: border-box;
+        }
+        .orders-kpi-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .orders-kpi-icon-wrap {
+          padding: 6px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .orders-kpi-label {
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: var(--text-muted, #64748b);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .orders-kpi-value {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: var(--text-main, #0f172a);
+          line-height: 1.1;
+        }
+        @media (max-width: 768px) {
+          .orders-kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.65rem;
+          }
+          .orders-kpi-card {
+            padding: 0.85rem;
+          }
+          .orders-kpi-value {
+            font-size: 1.25rem;
+          }
+          .orders-kpi-label {
+            font-size: 0.68rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -107,16 +177,16 @@ function SmartChips({ activeChip, setActiveChip }) {
   ];
 
   return (
-    <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingBottom: '0.25rem' }}>
       {chips.map(chip => (
         <button
           key={chip.id}
           onClick={() => setActiveChip(chip.id)}
           style={{
-            padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap',
-            background: activeChip === chip.id ? '#0f172a' : 'white',
+            padding: '0.45rem 0.9rem', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap',
+            background: activeChip === chip.id ? '#003666' : 'white',
             color: activeChip === chip.id ? 'white' : '#64748b',
-            border: activeChip === chip.id ? '1px solid #0f172a' : '1px solid #e2e8f0',
+            border: activeChip === chip.id ? '1px solid #003666' : '1px solid #e2e8f0',
           }}
           onMouseEnter={e => { if (activeChip !== chip.id) e.currentTarget.style.borderColor = '#94a3b8' }}
           onMouseLeave={e => { if (activeChip !== chip.id) e.currentTarget.style.borderColor = '#e2e8f0' }}
@@ -129,7 +199,7 @@ function SmartChips({ activeChip, setActiveChip }) {
 }
 
 // Template for admin-side order confirmation email to customer/doctor
-const EMAILJS_CONFIRM_TEMPLATE = 'template_7unfks8';
+const EMAILJS_CONFIRM_TEMPLATE = EMAILJS_CONFIG.TEMPLATES.ORDER_CONFIRMATION;
 
 export default function OrdersTable({ 
   role = 'admin', 
@@ -473,7 +543,30 @@ export default function OrdersTable({
       sortKey: 'status',
       width: '140px',
       render: (o) => (
-        <StatusBadge status={o.status || 'Pending'} />
+        <InlineEditableCell
+          value={o.status || 'Pending'}
+          type="select"
+          options={[
+            { label: 'Pending', value: 'Pending' },
+            { label: 'Processing', value: 'Processing' },
+            { label: 'Shipped', value: 'Shipped' },
+            { label: 'Delivered', value: 'Delivered' },
+            { label: 'Completed', value: 'Completed' },
+            { label: 'Cancelled', value: 'Cancelled' }
+          ]}
+          format={(val) => <StatusChip status={val} />}
+          onSave={async (newStatus) => {
+            try {
+              await orderRepository.updateOrder(o.id, { status: newStatus });
+              notifier.success('Order status updated');
+              await logAction(auth.currentUser?.uid || 'unknown', 'admin', 'ORDER_STATUS_UPDATE', o.id, `Changed status to ${newStatus}`);
+            } catch (err) {
+              console.error(err);
+              notifier.error('Failed to update status');
+              throw err;
+            }
+          }}
+        />
       ),
     },
   ];
@@ -520,1242 +613,193 @@ export default function OrdersTable({
     });
   }
 
-  const renderOrderDetails = (o) => (
-    <div
-      style={{
-        padding: '1rem',
-        background: 'var(--color-bg-app)',
-        borderTop: '1px solid var(--border)',
-        borderRadius: '0 0 var(--radius-md) var(--radius-md)',
-      }}
-    >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <div>
-          <h5
-            style={{
-              margin: '0 0 0.5rem',
-              fontSize: '0.8rem',
-              color: 'var(--color-text-secondary)',
-              textTransform: 'uppercase',
-            }}
-          >
-            <Stethoscope size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Routing / Doctor
-          </h5>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            {o.doctorName ? o.doctorName : 'Direct B2C Order'}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
-            {o.doctorEmail ? o.doctorEmail : 'No clinic assigned'}
-          </div>
-        </div>
-        <div>
-          <h5
-            style={{
-              margin: '0 0 0.5rem',
-              fontSize: '0.8rem',
-              color: 'var(--color-text-secondary)',
-              textTransform: 'uppercase',
-            }}
-          >
-            <Users size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Assigned To
-          </h5>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            {o.accountManagerName || 'System Default'}
-          </div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>
-            {o.accountManagerId ? `ID: ${o.accountManagerId}` : 'Auto-assigned'}
-          </div>
-        </div>
-        <div>
-          <h5
-            style={{
-              margin: '0 0 0.5rem',
-              fontSize: '0.8rem',
-              color: 'var(--color-text-secondary)',
-              textTransform: 'uppercase',
-            }}
-          >
-            <MapPin size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Shipping
-          </h5>
-          {o.shippingAddress ? (
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-main)', lineHeight: 1.4 }}>
-              <div>{o.shippingAddress.address || o.shippingAddress.line1}</div>
-              {(o.shippingAddress.city || o.shippingAddress.postal_code) && (
-                <div>
-                  {o.shippingAddress.city}, {o.shippingAddress.state}{' '}
-                  {o.shippingAddress.postal_code}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>
-              No shipping details provided
-            </div>
-          )}
-        </div>
-        <div>
-          <h5
-            style={{
-              margin: '0 0 0.5rem',
-              fontSize: '0.8rem',
-              color: 'var(--color-text-secondary)',
-              textTransform: 'uppercase',
-            }}
-          >
-            <Receipt size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Financials
-          </h5>
-          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-main)' }}>
-            Items: <strong>{o.items?.length || 0}</strong>
-            <br />
-            Subtotal: <strong>${parseFloat(o.subtotal || o.total || 0).toFixed(2)}</strong>
-            <br />
-            Total:{' '}
-            <strong style={{ color: 'var(--color-primary)' }}>
-              ${parseFloat(o.total || 0).toFixed(2)}
-            </strong>
-          </div>
-        </div>
-      </div>
+  const renderOrderDetails = (o) => <OrderDetailsPanel order={o} />;
 
-      {/* ── Order Items List ── */}
-      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-        <h5 style={{ margin: '0 0 1rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
-          <Package size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} /> Order Items
-        </h5>
-        {o.items && o.items.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {o.items.map((item, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-surface)', padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  {item.image ? (
-                    <img src={item.image} alt={item.name} style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: '4px' }} />
-                  ) : (
-                    <div style={{ width: 44, height: 44, borderRadius: '4px', background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Package size={20} color="var(--color-text-tertiary)" />
-                    </div>
-                  )}
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{item.name || 'Unknown Product'}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
-                      Qty: <strong>{item.quantity || 1}</strong> • SKU: {item.sku || item.productId || 'N/A'}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.95rem' }}>
-                    ${parseFloat((item.price || 0) * (item.quantity || 1)).toFixed(2)}
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 500 }}>
-                    (${parseFloat(item.price || 0).toFixed(2)} / ea)
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
-            No item details available in this legacy order.
-          </div>
-        )}
-      </div>
-      {/* ── Additional Metadata ── */}
-      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Stripe Payment Intent</span>
-          <code style={{ fontSize: '0.8rem', background: 'var(--color-bg-surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--color-border)', color: 'var(--color-text-main)' }}>
-            {o.paymentIntentId || 'N/A'}
-          </code>
-        </div>
-        <div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Database Order ID</span>
-          <CopyableId value={o.id} />
-        </div>
-        {o.trackingNumber && (
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px', fontWeight: 600 }}>Tracking Number</span>
-            <CopyableId value={o.trackingNumber} />
-          </div>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', display: 'block', fontWeight: 600 }}>Auto-Refill (Zoho Subscriptions)</span>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: o.isSubscription ? 'var(--success)' : 'var(--text-muted)' }}>
-            <input 
-              type="checkbox" 
-              checked={!!o.isSubscription} 
-              onChange={async (e) => {
-                const isSub = e.target.checked;
-                try {
-                  await orderRepository.updateOrder(o.id, { isSubscription: isSub });
-                } catch (err) {
-                  console.error('Error toggling subscription:', err);
-                }
-              }} 
-            />
-            {o.isSubscription ? 'Enabled (Monthly)' : 'Disabled'}
-          </label>
-        </div>
-      </div>
-    </div>
-  );
+  const filterOptions = [
+    {
+      key: 'status',
+      label: 'Status',
+      options: [
+        { label: 'All', value: 'All' },
+        { label: 'Pending', value: 'Pending' },
+        { label: 'Processing', value: 'Processing' },
+        { label: 'Shipped', value: 'Shipped' },
+        { label: 'Delivered', value: 'Delivered' },
+        { label: 'Completed', value: 'Completed' },
+        { label: 'Cancelled', value: 'Cancelled' },
+      ],
+      value: filterStatus,
+      onChange: setFilterStatus,
+    },
+  ];
 
-  const getActiveFilters = () => {
-    const active = [];
-    if (filterSource && filterSource !== 'All') {
-      active.push({ label: 'Source', value: filterSource === 'b2c_home' ? 'B2C (Home)' : 'B2B (Portal)', type: 'sourceFilter' });
-    }
-    if (filterStatus && filterStatus !== 'All') {
-      active.push({ label: 'Status', value: filterStatus, type: 'statusFilter' });
-    }
-    return active;
-  };
+  const activeFilters = [];
+  if (filterStatus !== 'All') {
+    activeFilters.push({ key: 'status', label: 'Status', value: filterStatus, onRemove: () => setFilterStatus('All') });
+  }
 
-  const handleFilterRemove = (f) => {
-    if (f.type === 'statusFilter') setFilterStatus('All');
-    if (f.type === 'sourceFilter') setFilterSource('All');
-  };
-
-
-
-  /* ── Render ──────────────────────────────────────────────────────────── */
   return (
-    <div style={{ marginBottom: '2rem' }}>
-      {/* ── Deep-link banner ── */}
-      {targetId && !loading && (
-        <div
-          style={{
-            background: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
-            border: '1px solid #bfdbfe',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.875rem 1.25rem',
-            marginBottom: '1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ background: '#3b82f6', borderRadius: '8px', padding: '6px', display: 'flex' }}>
-              <Package size={16} color="white" />
-            </div>
-            <div>
-              <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e40af' }}>
-                🔔 Notification filter active
-              </span>
-              <div style={{ fontSize: '0.75rem', color: '#3b82f6', marginTop: '1px' }}>
-                Showing order{' '}
-                <code style={{ background: 'rgba(59,130,246,0.12)', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                  #{targetId.slice(0, 8).toUpperCase()}
-                </code>
-                {' '}— click an order to see details
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => { setSearchTerm(''); router.push('/admin/orders', { replace: true }); }}
-            style={{
-              background: 'none', border: '1px solid #bfdbfe', borderRadius: '6px',
-              padding: '0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600,
-              color: '#3b82f6', cursor: 'pointer', whiteSpace: 'nowrap'
-            }}
-          >
-            Clear filter ✕
-          </button>
-        </div>
-      )}
-
-      {/* ── Header ── */}
+    <div style={{ padding: '0 2rem 2rem 2rem' }}>
+      {/* ── Page Header ──────────────────────────────────────────────────── */}
       <PageHeader
-        title="Patient Orders"
-        subtitle="Review, confirm, and manage your direct-to-consumer orders."
-        icon={ShoppingCart}
+        title="Orders"
+        subtitle="Manage and track all customer orders"
+        actions={
+          <button
+            className="gcp-btn gcp-btn--primary"
+            onClick={handleExportCSV}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Download size={16} /> Export CSV
+          </button>
+        }
       />
 
-      {/* GlobalSearchBar — prominent, above KPIs */}
+      {/* ── KPI Summary Bar ───────────────────────────────────────────────── */}
+      <UniformKPIs data={orders} globalMetrics={globalMetrics} />
+
+      {/* ── Search & Filters ──────────────────────────────────────────────── */}
       <div style={{ marginBottom: '1rem' }}>
         <GlobalSearchBar
-          value={searchTerm || ''}
-          onChange={(v) => setSearchTerm ? setSearchTerm(v) : null}
-          placeholder="Search orders by patient, status, or ID..."
-          resultCount={loading ? undefined : orders.length}
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search by customer name, email, or order ID..."
+          resultCount={filtered.length}
           namespace="admin-orders"
           size="lg"
+          filters={activeFilters}
+          filterOptions={filterOptions}
         />
       </div>
 
-      {/* Uniform KPI Summary Bar */}
-      {!loading && <UniformKPIs data={orders} globalMetrics={globalMetrics} />}
+      {/* ── Status Chips ──────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: '1.5rem' }}>
+        <SmartChips activeChip={filterStatus} setActiveChip={setFilterStatus} />
+      </div>
 
-      {/* ── Table ── */}
-      {loading ? (
-        <DataTableSkeleton rows={8} columns={6} />
-      ) : orders.length === 0 ? (
-        <div
-          className="card"
-          style={{
-            padding: '4rem 2rem',
-            textAlign: 'center',
-            background: 'var(--color-bg-app)',
-            border: '1px dashed var(--border)',
-          }}
-        >
-          <ShoppingCart
-            size={48}
-            color="var(--primary)"
-            style={{ opacity: 0.2, marginBottom: '1rem' }}
-          />
-          <h3 style={{ margin: '0 0 0.5rem' }}>No Orders Found</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
-            No orders have been placed yet.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* GCP Style Pagination in DataTable is removed here as we pass undefined to page/rowsPerPage and render custom PaginationControl */}
+      {/* ── Data Table ────────────────────────────────────────────────────── */}
+      <div className="gcp-table-container">
+        {loading ? (
+          <DataTableSkeleton rows={8} cols={3} />
+        ) : (
           <DataTable
-            virtualize={true}
-          data={paginatedOrders}
-          columns={columns}
-          expandableRender={renderOrderDetails}
-          selectedIds={selectedOrderIds}
-          onSelectionChange={setSelectedOrderIds}
-          searchQuery={searchTerm}
-          onSearchChange={setSearchTerm}
-          filters={getActiveFilters()}
-          onFilterRemove={handleFilterRemove}
-          renderBatchActions={(selected) => (
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={handleExportCSV}
-                className="btn btn-primary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.8rem',
-                }}
-              >
-                <Download size={14} /> Export Selected
-              </button>
-              <button
-                onClick={() => {
-                  notifier.confirmCritical(
-                    `Are you sure you want to archive ${selectedOrderIds.length} orders?`,
-                    async () => {
-                      try {
-                        const promises = selectedOrderIds.map(id => orderRepository.archiveOrder(id));
-                        await Promise.all(promises);
-                        setSelectedOrderIds([]);
-                        notifier.success('Orders archived.');
-                      } catch (err) {
-                        console.error('Bulk archive error:', err);
-                        notifier.error('Failed to archive some orders.');
-                      }
-                    }
-                  );
-                }}
-                className="btn btn-secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.8rem',
-                  color: 'var(--color-warning)',
-                  borderColor: 'var(--color-warning)'
-                }}
-              >
-                <Archive size={14} /> Archive Selected
-              </button>
-              <button
-                onClick={() => {
-                  notifier.confirmCritical(
-                    `Are you sure you want to DELETE ${selectedOrderIds.length} orders? This cannot be undone.`,
-                    async () => {
-                      try {
-                        const promises = selectedOrderIds.map(id => orderRepository.deleteOrder(id));
-                        await Promise.all(promises);
-                        setSelectedOrderIds([]);
-                        notifier.success('Orders deleted.');
-                      } catch (err) {
-                        console.error('Bulk delete error:', err);
-                        notifier.error('Failed to delete some orders.');
-                      }
-                    }
-                  );
-                }}
-                className="btn btn-secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.8rem',
-                  color: 'var(--color-danger)',
-                  borderColor: 'var(--color-danger)'
-                }}
-              >
-                <Trash2 size={14} /> Delete Selected
-              </button>
-              <button
-                onClick={() => notifier.info("Bulk Convert to Invoices will be fully integrated with Zoho Books once the syncing module is active.")}
-                className="btn btn-secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.8rem',
-                  color: '#10b981',
-                  borderColor: '#10b981'
-                }}
-              >
-                <FileText size={14} /> Convert to Invoices
-              </button>
-            </div>
-          )}
-        />
-        </>
-      )}
-      
-      {!loading && orders.length > 0 && hasMore && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: '1.5rem' }}>
-          <button 
-            className="btn btn-secondary"
-            onClick={() => setLimitCount(prev => prev + 50)}
-            style={{ padding: '0.6rem 1.5rem', fontWeight: 'bold' }}
-          >
-            Load More Orders
+            columns={columns}
+            data={paginatedOrders}
+            keyField={(o) => o.id}
+            expandableRender={renderOrderDetails}
+            selectable={!readOnly}
+            selectedIds={selectedOrderIds}
+            onSelectionChange={setSelectedOrderIds}
+            globalSearch={false}
+            emptyState={{
+              icon: <Package size={40} />,
+              title: 'No orders found',
+              subtitle: activeFilters.length > 0 || searchTerm
+                ? 'Try adjusting your search or clearing the filters.'
+                : 'Orders will appear here once customers place them.',
+              action: (activeFilters.length > 0 || searchTerm)
+                ? { label: 'Clear filters', onClick: () => { setSearchTerm(''); setFilterStatus('All'); } }
+                : null,
+            }}
+          />
+        )}
+      </div>
+
+      {/* ── Load More ─────────────────────────────────────────────────────── */}
+      {hasMoreItems && !loading && (
+        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <button className="gcp-btn gcp-btn--secondary" onClick={loadMore}>
+            Load more orders
           </button>
         </div>
       )}
 
-      {/* ── Confirm & Notify Modal ── */}
+      {/* ── Confirm / Email Modal ─────────────────────────────────────────── */}
       {confirmModal && (
         <div
           style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.55)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9000,
-            padding: '1rem',
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
+          onClick={() => { if (!sending) setConfirmModal(null); }}
         >
           <div
             style={{
-              background: 'var(--color-bg-surface)',
-              borderRadius: 'var(--radius-md)',
-              padding: '2rem',
-              maxWidth: '500px',
-              width: '100%',
-              boxShadow: 'var(--shadow-sm)',
-              position: 'relative',
+              background: 'white', borderRadius: '16px', padding: '2rem',
+              maxWidth: 480, width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setConfirmModal(null)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--color-text-tertiary)',
-              }}
-            >
-              <X size={20} />
-            </button>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem', fontWeight: 700 }}>
+              Confirm Order
+            </h3>
+            <p style={{ margin: '0 0 1.25rem 0', color: '#64748b', fontSize: '0.9rem' }}>
+              Order #{confirmModal.orderNumber || confirmModal.id?.substring(0, 8).toUpperCase()} —{' '}
+              <strong>${parseFloat(confirmModal.total || 0).toFixed(2)}</strong>
+            </p>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--surface)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <CheckCheck size={22} color="var(--color-bg-surface)" />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                  Confirm Order
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  #
-                  {confirmModal.orderNumber ||
-                    confirmModal.orderId ||
-                    confirmModal.id.substring(0, 8).toUpperCase()}
-                </p>
-              </div>
-            </div>
-
-            {/* Order summary */}
-            <div
-              style={{
-                background: 'var(--color-bg-app)',
-                borderRadius: 'var(--radius-md)',
-                padding: '1rem 1.25rem',
-                marginBottom: '1.5rem',
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}
-              >
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  Customer
-                </span>
-                <span
-                  style={{
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
-                  {confirmModal.customer?.fullName || '—'}
-                </span>
-              </div>
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}
-              >
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  Email
-                </span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
-                  {confirmModal.customer?.email || '—'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  Total
-                </span>
-                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--color-primary)' }}>
-                  ${parseFloat(confirmModal.total || 0).toFixed(2)}
-                </span>
-              </div>
-            </div>
-
-            {/* Email recipient selector */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <p
-                style={{
-                  fontWeight: 700,
-                  fontSize: '0.8rem',
-                  color: 'var(--color-text-secondary)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  marginBottom: '0.75rem',
-                }}
-              >
-                <Mail size={13} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                Send confirmation email to:
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {/* Customer */}
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    cursor: 'pointer',
-                    padding: '0.75rem 1rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: `2px solid ${sendTo.customer ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                    background: sendTo.customer ? 'rgba(0,54,102,0.04)' : 'var(--color-bg-surface)',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={sendTo.customer}
-                    onChange={(e) => setSendTo((s) => ({ ...s, customer: e.target.checked }))}
-                    style={{ width: 16, height: 16 }}
-                  />
-                  <div>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
-                        color: 'var(--color-text-primary)',
-                      }}
-                    >
-                      🛒 Customer — {confirmModal.customer?.fullName || 'Unknown'}
-                    </div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
-                      {confirmModal.customer?.email || 'No email'}
-                    </div>
-                  </div>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.875rem' }}>Send confirmation email to:</p>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem', cursor: 'pointer' }}>
+                <input type="checkbox" checked={sendTo.customer} onChange={(e) => setSendTo(prev => ({ ...prev, customer: e.target.checked }))} />
+                <span style={{ fontSize: '0.875rem' }}>Customer ({confirmModal.customer?.email || 'N/A'})</span>
+              </label>
+              {confirmModal.doctorEmail && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={sendTo.doctor} onChange={(e) => setSendTo(prev => ({ ...prev, doctor: e.target.checked }))} />
+                  <span style={{ fontSize: '0.875rem' }}>Doctor ({confirmModal.doctorEmail})</span>
                 </label>
-                {/* Doctor (only if assigned) */}
-                {confirmModal.doctorEmail ? (
-                  <label
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.75rem',
-                      cursor: 'pointer',
-                      padding: '0.75rem 1rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: `2px solid ${sendTo.doctor ? '#0284c7' : 'var(--color-border)'}`,
-                      background: sendTo.doctor
-                        ? 'rgba(2,132,199,0.04)'
-                        : 'var(--color-bg-surface)',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={sendTo.doctor}
-                      onChange={(e) => setSendTo((s) => ({ ...s, doctor: e.target.checked }))}
-                      style={{ width: 16, height: 16 }}
-                    />
-                    <div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          color: 'var(--color-text-primary)',
-                        }}
-                      >
-                        👨‍⚕️ Assigned Doctor — {confirmModal.doctorName || 'Doctor'}
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
-                        {confirmModal.doctorEmail}
-                      </div>
-                    </div>
-                  </label>
-                ) : (
-                  <div
-                    style={{
-                      padding: '0.75rem 1rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px dashed #e2e8f0',
-                      background: 'var(--color-bg-app)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: 'var(--color-text-tertiary)',
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      <Users size={14} /> No doctor assigned to this order
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
-            {/* Result */}
             {sendResult && (
-              <div
-                style={{
-                  padding: '0.75rem 1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  background: sendResult.startsWith('✅')
-                    ? 'rgba(16,185,129,0.08)'
-                    : 'rgba(239,68,68,0.08)',
-                  border: `1px solid ${sendResult.startsWith('✅') ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`,
-                  color: sendResult.startsWith('✅')
-                    ? 'var(--color-success)'
-                    : 'var(--color-danger)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  marginBottom: '1rem',
-                }}
-              >
+              <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: '8px', background: sendResult.startsWith('✅') ? '#f0fdf4' : '#fef2f2', color: sendResult.startsWith('✅') ? '#16a34a' : '#dc2626', fontSize: '0.875rem' }}>
                 {sendResult}
               </div>
             )}
 
-            {/* CTA */}
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button
-                onClick={() => setConfirmModal(null)}
-                style={{
-                  flex: 1,
-                  padding: '0.85rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid #e2e8f0',
-                  background: 'var(--color-bg-surface)',
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={sending}
-                style={{
-                  flex: 2,
-                  padding: '0.85rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: 'none',
-                  background: 'var(--surface)',
-                  color: 'var(--color-bg-surface)',
-                  fontWeight: 800,
-                  cursor: sending ? 'not-allowed' : 'pointer',
-                  fontSize: '0.9rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  opacity: sending ? 0.75 : 1,
-                }}
-              >
-                {sending ? (
-                  'Confirming…'
-                ) : (
-                  <>
-                    <Send size={16} /> Confirm & Send
-                  </>
-                )}
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button className="gcp-btn gcp-btn--secondary" disabled={sending} onClick={() => setConfirmModal(null)}>Cancel</button>
+              <button className="gcp-btn gcp-btn--primary" disabled={sending} onClick={handleConfirm}>
+                {sending ? 'Confirming…' : 'Confirm & Send'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── View Order Modal ── */}
+      {/* ── View / Detail Modal ───────────────────────────────────────────── */}
       {viewModal && (
         <div
           style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.55)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9000,
-            padding: '1rem',
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
+          onClick={() => setViewModal(null)}
         >
           <div
             style={{
-              background: 'var(--color-bg-surface)',
-              borderRadius: 'var(--radius-md)',
-              padding: '2rem',
-              maxWidth: '700px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: 'var(--shadow-lg)',
-              position: 'relative',
+              background: 'white', borderRadius: '16px', padding: '2rem',
+              maxWidth: 640, width: '95%', maxHeight: '85vh', overflowY: 'auto',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setViewModal(null)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--color-text-tertiary)',
-              }}
-            >
-              <X size={20} />
-            </button>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--surface)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, fontWeight: 700 }}>Order Details</h3>
+              <button
+                onClick={() => setViewModal(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex' }}
               >
-                <Package size={22} color="var(--color-bg-surface)" />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
-                  Order Details
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  #
-                  {viewModal.orderNumber ||
-                    viewModal.orderId ||
-                    viewModal.id.substring(0, 8).toUpperCase()}{' '}
-                  • {formatDate(viewModal.createdAt)}
-                </p>
-              </div>
-              <div
-                style={{
-                  marginLeft: 'auto',
-                  padding: '0.4rem 0.8rem',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'rgba(0,54,102,0.1)',
-                  color: 'var(--primary)',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {viewModal.status || 'Pending'}
-              </div>
+                <X size={20} />
+              </button>
             </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '1.5rem',
-                marginBottom: '2rem',
-              }}
-            >
-              {/* Customer Info */}
-              <div
-                style={{
-                  background: 'var(--color-bg-app)',
-                  padding: '1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <h4
-                  style={{
-                    margin: '0 0 0.5rem',
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  <Users size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Customer
-                </h4>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    color: 'var(--color-text-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  {viewModal.customer?.fullName || viewModal.customer?.name || '—'}
-                  {viewModal.customer?.id && (
-                    <button
-                      onClick={() => router.push('/admin/users')}
-                      title="Go to Patient/User Profile"
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--color-primary)',
-                        cursor: 'pointer',
-                        padding: 0,
-                      }}
-                    >
-                      <ExternalLink size={14} />
-                    </button>
-                  )}
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  {viewModal.customer?.email || '—'}
-                </div>
-              </div>
-
-              {/* Assignment / Doctor Info */}
-              <div
-                style={{
-                  background: 'var(--color-bg-app)',
-                  padding: '1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <h4
-                  style={{
-                    margin: '0 0 0.5rem',
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  <Stethoscope size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />{' '}
-                  Assigned Doctor/Clinic
-                </h4>
-                <div
-                  style={{
-                    fontWeight: 600,
-                    color: 'var(--color-text-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  {viewModal.doctorName || 'Not Assigned'}
-                  {(viewModal.doctorId || viewModal.doctorEmail) && (
-                    <button
-                      onClick={() => router.push('/admin/users')}
-                      title="Go to Doctor/Clinic Profile"
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--color-primary)',
-                        cursor: 'pointer',
-                        padding: 0,
-                      }}
-                    >
-                      <ExternalLink size={14} />
-                    </button>
-                  )}
-                </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                  {viewModal.doctorEmail || '—'}
-                </div>
-              </div>
-
-              {/* Shipping Info */}
-              <div
-                style={{
-                  background: 'var(--color-bg-app)',
-                  padding: '1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <h4
-                  style={{
-                    margin: '0 0 0.5rem',
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  <MapPin size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Shipping
-                </h4>
-                {viewModal.shippingAddress ? (
-                  <div
-                    style={{
-                      fontSize: '0.85rem',
-                      color: 'var(--color-text-secondary)',
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {viewModal.shippingAddress.name && <div>{viewModal.shippingAddress.name}</div>}
-                    <div>
-                      {viewModal.shippingAddress.address || viewModal.shippingAddress.line1}
-                    </div>
-                    {(viewModal.shippingAddress.city || viewModal.shippingAddress.postal_code) && (
-                      <div>
-                        {viewModal.shippingAddress.city}, {viewModal.shippingAddress.state}{' '}
-                        {viewModal.shippingAddress.postal_code}
-                      </div>
-                    )}
-                    <div>{viewModal.shippingAddress.country}</div>
-                  </div>
-                ) : (
-                  <div style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>
-                    No shipping details provided
-                  </div>
-                )}
-                {viewModal.shippingMethod && (
-                  <div
-                    style={{
-                      marginTop: '0.5rem',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: 'var(--color-primary)',
-                    }}
-                  >
-                    Method: {viewModal.shippingMethod}
-                  </div>
-                )}
-              </div>
-
-              {/* Invoice & VAT */}
-              <div
-                style={{
-                  background: 'var(--color-bg-app)',
-                  padding: '1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <h4
-                  style={{
-                    margin: '0 0 0.5rem',
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  <Receipt size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> Billing
-                  & VAT
-                </h4>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.3rem',
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Subtotal:</span>
-                    <span style={{ fontWeight: 600 }}>
-                      ${parseFloat(viewModal.subtotal || viewModal.total || 0).toFixed(2)}
-                    </span>
-                  </div>
-                  {viewModal.shippingCost !== undefined && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Shipping:</span>
-                      <span style={{ fontWeight: 600 }}>
-                        ${parseFloat(viewModal.shippingCost || 0).toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      color: viewModal.vatAmount
-                        ? 'var(--color-danger)'
-                        : 'var(--color-text-secondary)',
-                    }}
-                  >
-                    <span>VAT / Taxes:</span>
-                    <span style={{ fontWeight: 600 }}>
-                      {viewModal.vatAmount
-                        ? `$${parseFloat(viewModal.vatAmount).toFixed(2)}`
-                        : 'None'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Items Table */}
-            <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#0f172a' }}>
-              Order Items
-            </h4>
-            <div
-              style={{
-                border: '1px solid #e2e8f0',
-                borderRadius: 'var(--radius-sm)',
-                overflow: 'hidden',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  textAlign: 'left',
-                  fontSize: '0.85rem',
-                }}
-              >
-                <thead
-                  style={{ background: 'var(--color-bg-app)', borderBottom: '1px solid #e2e8f0' }}
-                >
-                  <tr>
-                    <th style={{ padding: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                      Item
-                    </th>
-                    <th style={{ padding: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                      Qty
-                    </th>
-                    <th
-                      style={{
-                        padding: '0.75rem',
-                        color: 'var(--color-text-secondary)',
-                        textAlign: 'right',
-                      }}
-                    >
-                      Price
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(viewModal.items || []).map((it, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td
-                        style={{
-                          padding: '0.75rem',
-                          fontWeight: 600,
-                          color: 'var(--color-text-primary)',
-                        }}
-                      >
-                        {it.name || it.title || 'Unknown Product'}
-                      </td>
-                      <td style={{ padding: '0.75rem', color: 'var(--color-text-secondary)' }}>
-                        x{it.quantity || 1}
-                      </td>
-                      <td
-                        style={{
-                          padding: '0.75rem',
-                          color: 'var(--color-text-primary)',
-                          textAlign: 'right',
-                        }}
-                      >
-                        ${parseFloat(it.price || 0).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
-                  {(!viewModal.items || viewModal.items.length === 0) && (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        style={{
-                          padding: '1rem',
-                          textAlign: 'center',
-                          color: 'var(--color-text-tertiary)',
-                        }}
-                      >
-                        No items found
-                      </td>
-                    </tr>
-                  )}
-                  <tr style={{ background: 'var(--color-bg-app)', borderTop: '2px solid #e2e8f0' }}>
-                    <td
-                      colSpan={2}
-                      style={{
-                        padding: '0.75rem',
-                        fontWeight: 700,
-                        color: 'var(--color-text-primary)',
-                        textAlign: 'right',
-                      }}
-                    >
-                      Total:
-                    </td>
-                    <td
-                      style={{
-                        padding: '0.75rem',
-                        fontWeight: 800,
-                        color: 'var(--color-primary)',
-                        textAlign: 'right',
-                      }}
-                    >
-                      ${parseFloat(viewModal.total || 0).toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Assignment Action Block */}
-            {!readOnly && viewMode === 'admin' && (
-              <div
-                style={{
-                  background: 'rgba(59,130,246,0.05)',
-                  border: '1px solid rgba(59,130,246,0.2)',
-                  padding: '1.25rem',
-                  borderRadius: 'var(--radius-md)',
-                }}
-              >
-                <h4
-                  style={{
-                    margin: '0 0 0.75rem',
-                    fontSize: '0.9rem',
-                    color: '#1e3a8a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  <Building size={16} /> Assign & Notify Clinic / Wholesaler
-                </h4>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <select
-                    style={{
-                      flex: 1,
-                      padding: '0.65rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                    }}
-                  >
-                    <option value="">-- Select Partner --</option>
-                    <option value="clinic_a">Wellness Clinic Alpha</option>
-                    <option value="clinic_b">Dr. Smith Practice</option>
-                    <option value="wholesale_1">MedSupplies Corp (Wholesaler)</option>
-                  </select>
-                  <button
-                    onClick={() => {
-                      notifier.success('Assignment notification sent to selected partner.');
-                      setViewModal(null);
-                    }}
-                    style={{
-                      padding: '0.65rem 1.25rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: 'none',
-                      background: 'var(--color-primary)',
-                      color: 'var(--color-bg-surface)',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                    }}
-                  >
-                    Notify & Assign
-                  </button>
-                </div>
-              </div>
-            )}
+            <OrderDetailsPanel order={viewModal} />
           </div>
         </div>
       )}
-
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }`}</style>
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '1rem',
-          right: '1rem',
-          fontSize: '0.7rem',
-          color: 'var(--text-muted)',
-          opacity: 0.8,
-          background: 'var(--surface)',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          border: '1px solid var(--border)',
-          pointerEvents: 'none',
-          zIndex: 1000,
-          boxShadow: 'var(--shadow-sm)',
-        }}
-      >
-        Widget: OrdersTab | Props: userId, viewMode, readOnly
-      </div>
     </div>
   );
 }

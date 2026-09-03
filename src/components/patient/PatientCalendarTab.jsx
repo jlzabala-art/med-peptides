@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { fetchCalendarPrescriptions } from '../../services/patientTabsService';
 import DosingCalendar from '../../features/prescriptions/DosingCalendar';
 
 export default function PatientCalendarTab({ patientUid }) {
@@ -14,17 +12,10 @@ export default function PatientCalendarTab({ patientUid }) {
     async function loadPrescriptions() {
       if (!patientUid) return;
       try {
-        const q = query(
-          collection(db, 'prescriptions'),
-          where('patient.uid', '==', patientUid)
-        );
-        const snap = await getDocs(q);
-        const activeRxs = snap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
-          .filter(rx => rx.status !== 'cancelled' && rx.status !== 'completed'); // Only show active/ordered rx schedules
+        const activeRxs = await fetchCalendarPrescriptions(patientUid);
         setPrescriptions(activeRxs);
       } catch (err) {
-        console.error('Error loading patient prescriptions for calendar:', err);
+        // logged in service
       } finally {
         setLoading(false);
       }

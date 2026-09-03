@@ -1,15 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
-
-
-
-
+import { fetchB2BClientQuoteById, updateB2BClientQuoteStatus } from '../../services/quotationRepository';
+import notifier from '../../services/NotificationService';
 import ZohoPaperPreview from '../admin/ZohoPaperPreview'; // We can reuse the A4 rendering
 import { CheckCircle, XCircle, FileText, Loader2 } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function B2BClientQuoteView() {
   const { quoteId } = useParams();
@@ -21,10 +17,9 @@ export default function B2BClientQuoteView() {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const docRef = doc(db, 'b2b_quotations', quoteId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setQuote({ id: docSnap.id, ...docSnap.data() });
+        const data = await fetchB2BClientQuoteById(quoteId);
+        if (data) {
+          setQuote(data);
         } else {
           setError('Presupuesto no encontrado o enlace inválido.');
         }
@@ -37,15 +32,16 @@ export default function B2BClientQuoteView() {
   }, [quoteId]);
 
   const handleAction = async (action) => {
-    if (!window.confirm(`¿Estás seguro de que quieres ${action === 'Accepted' ? 'Aceptar' : 'Rechazar'} este presupuesto?`)) return;
-    setProcessing(true);
-    try {
-      await updateDoc(doc(db, 'b2b_quotations', quoteId), { status: action });
-      setQuote(prev => ({ ...prev, status: action }));
-    } catch (err) {
-      alert('Error al actualizar el estado.');
-    }
-    setProcessing(false);
+    notifier.confirmCritical(`¿Estás seguro de que quieres ${action === 'Accepted' ? 'Aceptar' : 'Rechazar'} este presupuesto?`, async () => {
+      setProcessing(true);
+      try {
+        await updateB2BClientQuoteStatus(quoteId, action);
+        setQuote(prev => ({ ...prev, status: action }));
+      } catch (err) {
+        toast.error('Error al actualizar el estado.');
+      }
+      setProcessing(false);
+    });
   };
 
   if (loading) {

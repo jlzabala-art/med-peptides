@@ -7,6 +7,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { getActiveTenantForResolution } from '../utils/resolvePrice';
+import { ADMIN_EMAILS } from '../context/AuthContext';
 
 const DEFAULT_ROLE_PERMISSIONS = {
   admin: { read: true, write: true, delete: true, manageUsers: true, manageInventory: true, viewFinances: true, orderB2B: true },
@@ -28,7 +29,7 @@ export function useRegistration() {
    * @param {string} fullName
    * @param {string} institution
    * @param {string} userType
-   * @param {string} accountType ('customer', 'professional', 'patient', 'doctor', 'wholesaler', 'clinic')
+   * @param {string} accountType ('customer', 'professional', 'patient', 'doctor', 'wholesaler', 'clinic', 'admin')
    * @param {object} extraFields
    * @param {array} goals
    */
@@ -36,7 +37,8 @@ export function useRegistration() {
     setLoading(true);
     setError(null);
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const safeEmail = email ? email.trim() : email;
+      const cred = await createUserWithEmailAndPassword(auth, safeEmail, password);
       // Update display name
       await updateProfile(cred.user, { displayName: fullName });
       // Split fullName into firstName / lastName for the canonical schema
@@ -93,7 +95,12 @@ export function useRegistration() {
       let role = 'professional_pending';
       let professionalStatus = 'pending_review';
       
-      if (invitationRoles.length > 0) {
+      const isAdminEmail = ADMIN_EMAILS.includes(email.trim().toLowerCase());
+
+      if (isAdminEmail || accountType === 'admin') {
+        role = 'admin';
+        professionalStatus = 'approved';
+      } else if (invitationRoles.length > 0) {
         role = invitationRoles[0]; // Set primary role to the first in array
         professionalStatus = 'approved'; // Pre-approved via invitation
       } else if (isCustomer || isPatientAccount) {
@@ -233,7 +240,8 @@ export function useRegistration() {
         billingCity: '',
         billingZip: '',
         billingCountry: extraFields.country || '',
-        approved: (isPatientAccount || isCustomer || invitationRoles.length > 0) ? true : false,
+        approved: (role === 'admin' || isPatientAccount || isCustomer || invitationRoles.length > 0) ? true : false,
+        isVerified: (role === 'admin' || isPatientAccount || isCustomer || invitationRoles.length > 0) ? true : false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         assignedPhysicianIds: initialPhysicianIds,

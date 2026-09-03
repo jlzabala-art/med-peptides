@@ -1,14 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { fetchActiveRecommendations, submitRefillRequest } from '../../../services/patientHubService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, CheckCircle2 } from '@/lib/icons';
-
-
 
 export default function RefillRequestWidget() {
   const { user } = useAuth();
@@ -21,9 +17,7 @@ export default function RefillRequestWidget() {
   useEffect(() => {
     async function fetchRx() {
       if (!user?.uid) return;
-      const q = query(collection(db, 'recommendations'), where('patientId', '==', user.uid));
-      const snap = await getDocs(q);
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(p => p.status === 'active');
+      const list = await fetchActiveRecommendations(user.uid);
       setPrescriptions(list);
     }
     fetchRx();
@@ -34,15 +28,12 @@ export default function RefillRequestWidget() {
     setLoading(true);
     try {
       const rx = prescriptions.find(p => p.id === selected);
-      // Create a notification for the doctor/admin
-      await addDoc(collection(db, 'refill_requests'), {
+      await submitRefillRequest({
         patientId: user.uid,
         patientName: user.displayName,
         originalRxId: rx.id,
         doctorId: rx.doctorId,
-        productName: rx.productName,
-        status: 'pending_approval',
-        createdAt: serverTimestamp()
+        productName: rx.productName
       });
       setSuccess(true);
       setTimeout(() => {
@@ -50,7 +41,7 @@ export default function RefillRequestWidget() {
         setSelected('');
       }, 4000);
     } catch (err) {
-      console.error(err);
+      // logged in service
     } finally {
       setLoading(false);
     }

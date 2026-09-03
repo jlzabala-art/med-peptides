@@ -2,9 +2,11 @@
 
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
-import { db } from '../../firebase';
+import {
+  getGlobalSettingsFromCollection,
+  queueCostUpdateApproval
+} from '../../services/settingsService';
 import DataTable from '../ui/DataTable';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
@@ -27,10 +29,9 @@ export default function AdminCostsTab({ readOnly = false }) {
   async function fetchData() {
     setLoading(true);
     try {
-      const settingsSnap = await getDocs(query(collection(db, 'settings')));
-      const globalSettings = settingsSnap.docs.find((d) => d.id === 'global');
-      if (globalSettings) {
-        setSettings(globalSettings.data());
+      const data = await getGlobalSettingsFromCollection();
+      if (data && Object.keys(data).length > 0) {
+        setSettings(data);
       }
     } catch (err) {
       console.error('Error fetching data for costs tab:', err);
@@ -44,21 +45,8 @@ export default function AdminCostsTab({ readOnly = false }) {
       const product = filteredProducts.find(p => p.objectID === id || p.id === id);
       const oldCost = product ? product.costPrice : 0;
       const productName = product ? product.name : id;
-      
-      // PHASE 1: CFO Architecture - Send to Approval Queue instead of direct update
-      await addDoc(collection(db, 'financial_approvals'), {
-        type: 'cost_update',
-        status: 'pending',
-        data: {
-          productId: id,
-          productName,
-          oldCost,
-          updates
-        },
-        requestedBy: currentUser?.email || 'Admin',
-        createdAt: new Date().toISOString()
-      });
-      
+
+      await queueCostUpdateApproval(id, productName, oldCost, updates, currentUser?.email || 'Admin');
       toast.success('Cost update sent to CFO for approval.');
     } catch (err) {
       console.error('Error queueing product cost update:', err);
@@ -104,7 +92,7 @@ export default function AdminCostsTab({ readOnly = false }) {
       sortValue: (p) => p.costPrice || 0,
       render: (p) => (
         <div
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
         >
           <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>$</span>
           {readOnly ? (

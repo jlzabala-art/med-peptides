@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, TrendingUp, AlertTriangle, FileText, CheckCircle, Brain } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function ProductIntelligenceModal({ isOpen, onClose, product }) {
   const [loading, setLoading] = useState(true);
@@ -72,7 +73,7 @@ export default function ProductIntelligenceModal({ isOpen, onClose, product }) {
                        </p>
                      </div>
                      {margin < 40 && (
-                       <button onClick={() => alert('Opening pricing optimizer...')} style={{ backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                       <button onClick={() => toast('Opening pricing optimizer...')} style={{ backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                          Auto-Adjust Price
                        </button>
                      )}
@@ -98,7 +99,7 @@ export default function ProductIntelligenceModal({ isOpen, onClose, product }) {
                          </p>
                        )}
                      </div>
-                     <button onClick={() => alert(product.missingCOA || product.missingSDS ? 'Drafting email to supplier...' : 'Exporting audit report...')} style={{ 
+                     <button onClick={() => toast.error(product.missingCOA || product.missingSDS ? 'Drafting email to supplier...' : 'Exporting audit report...')} style={{ 
                        backgroundColor: product.missingCOA || product.missingSDS ? '#ef4444' : '#22c55e', 
                        color: '#fff', border: 'none', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' 
                      }}>
@@ -120,10 +121,10 @@ export default function ProductIntelligenceModal({ isOpen, onClose, product }) {
                        </ul>
                      </div>
                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                       <button onClick={() => alert('Opening bundle generator...')} style={{ backgroundColor: '#d97706', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                       <button onClick={() => toast('Opening bundle generator...')} style={{ backgroundColor: '#d97706', color: '#fff', border: 'none', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                          Generate Bundle
                        </button>
-                       <button onClick={() => alert('Drafting AI protocol...')} style={{ backgroundColor: 'transparent', color: '#d97706', border: '1px solid #d97706', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                       <button onClick={() => toast('Drafting AI protocol...')} style={{ backgroundColor: 'transparent', color: '#d97706', border: '1px solid #d97706', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                          Draft Protocol
                        </button>
                      </div>

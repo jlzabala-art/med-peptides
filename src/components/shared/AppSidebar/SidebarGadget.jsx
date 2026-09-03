@@ -12,6 +12,7 @@ import AppSidebar from './index';
 
 import SidebarOrderModal from './SidebarOrderModal';
 import { Settings, Save, X, ListOrdered } from '@/lib/icons';
+import logger from '../../../utils/logger.js';
 
 export default function SidebarGadget(props) {
   const { user } = useAuth();
@@ -86,7 +87,9 @@ export default function SidebarGadget(props) {
         try {
           const parsed = JSON.parse(localPrefs);
           setSidebarGroups(rehydrateGroups(parsed, props.groups));
-        } catch(e) {}
+        } catch(e) {
+          logger.warn('[SidebarGadget] Failed to parse local sidebar preferences:', e);
+        }
       }
 
       if (!currentPrefsDocRef) {

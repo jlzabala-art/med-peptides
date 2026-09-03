@@ -47,7 +47,17 @@ const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
     return () => { active = false; };
   }, [primaryGoal]);
 
-  if (loading || siblings.length <= 1) return null;
+  useEffect(() => {
+    if (loading || siblings.length <= 1) return;
+    if (activePillRef.current && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const pill = activePillRef.current;
+      const scrollLeft = pill.offsetLeft - container.offsetLeft - (container.clientWidth / 2) + (pill.clientWidth / 2);
+      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
+  }, [loading, siblings, currentSlug]);
+
+  if (loading || siblings.length === 0) return null;
 
   const currentIdx = siblings.findIndex(
     (p) => {
@@ -76,15 +86,6 @@ const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
     router.push(`/protocol/${getSlug(target)}`);
   };
 
-  useEffect(() => {
-    if (activePillRef.current && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const pill = activePillRef.current;
-      const scrollLeft = pill.offsetLeft - container.offsetLeft - (container.clientWidth / 2) + (pill.clientWidth / 2);
-      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-    }
-  }, [idx, siblings]);
-
   return (
     <div
       aria-label={`${goalLabel} protocol navigator`}
@@ -112,56 +113,23 @@ const CategoryProtocolNavigator = memo(function CategoryProtocolNavigator({
       </button>
 
       <div 
-        ref={scrollContainerRef}
-        className="hide-scrollbar"
         style={{ 
           display: 'flex', 
-          gap: '0.5rem', 
-          overflowX: 'auto', 
-          scrollBehavior: 'smooth',
-          WebkitOverflowScrolling: 'touch',
-          padding: '0.25rem 0',
-          flexGrow: 1
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexGrow: 1,
+          padding: '0.25rem 1rem',
+          textAlign: 'center'
         }}
       >
-        {siblings.map((p, i) => {
-          const active = i === idx;
-          return (
-            <button
-              key={getSlug(p)}
-              ref={active ? activePillRef : null}
-              onClick={() => goTo(p)}
-              title={getTitle(p)}
-              style={{
-                whiteSpace: 'nowrap',
-                padding: '0.4rem 0.85rem',
-                fontSize: '0.75rem',
-                fontWeight: active ? 700 : 500,
-                borderRadius: '999px',
-                background: active ? (goalGradient || 'linear-gradient(135deg, #1e293b, #0f172a)') : 'rgba(255,255,255,0.05)',
-                color: active ? 'var(--color-bg-surface)' : 'rgba(255,255,255,0.6)',
-                border: `1px solid ${active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: active ? '0 2px 8px rgba(0,0,0,0.2)' : 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
-                }
-              }}
-            >
-              {getTitle(p)}
-            </button>
-          );
-        })}
+        <span style={{ 
+          fontSize: '0.85rem', 
+          color: 'rgba(255,255,255,0.7)',
+          fontWeight: 500
+        }}>
+          Protocolo <strong style={{ color: 'var(--color-bg-surface)' }}>{idx + 1}</strong> de <strong style={{ color: 'var(--color-bg-surface)' }}>{total}</strong>: 
+          <span style={{ marginLeft: '0.5rem', color: 'var(--color-bg-surface)', fontWeight: 600 }}>{getTitle(siblings[idx])}</span>
+        </span>
       </div>
 
       <button

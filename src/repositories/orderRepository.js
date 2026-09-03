@@ -24,6 +24,11 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { validateOrderWrite } from './orderWriteGuard';
+import { getCache, setCache, invalidateCache } from '../lib/cache';
+import { canTransitionTo } from '../schemas/transactionalStateMachine';
+import { ClinicalStateTransitionError } from '../errors/ClinicalErrors';
+import { withRetry } from './_resilience';
 
 const COLLECTION = 'orders';
 
@@ -34,8 +39,21 @@ const COLLECTION = 'orders';
  */
 export async function getOrderById(orderId) {
   if (!orderId) return null;
+  const cacheKey = `${COLLECTION}/${orderId}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   const snap = await getDoc(doc(db, COLLECTION, orderId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  if (!snap.exists()) return null;
+
+  const data = { id: snap.id, ...snap.data() };
+  setCache(cacheKey, data);
+  return data;
+}
+
+export function invalidateOrderCache(orderId) {
+  if (!orderId) return;
+  invalidateCache(`${COLLECTION}/${orderId}`);
 }
 
 /**
@@ -112,12 +130,16 @@ export async function getAllOrders({ limitCount = 50, lastDoc = null, status } =
  * @returns {Promise<string>} ID del nuevo pedido
  */
 export async function createOrder(orderData) {
-  const ref = await addDoc(collection(db, COLLECTION), {
-    ...orderData,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    status: orderData.status ?? 'pending',
-  });
+  const cleanData = validateOrderWrite(orderData, false);
+
+  const ref = await withRetry(
+    () => addDoc(collection(db, COLLECTION), {
+      ...cleanData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }),
+    { entityName: 'orderRepository.createOrder' }
+  );
   return ref.id;
 }
 
@@ -127,40 +149,107 @@ export async function createOrder(orderData) {
  * @param {object} updates
  */
 export async function updateOrder(orderId, updates) {
-  await updateDoc(doc(db, COLLECTION, orderId), {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
+  const cleanData = validateOrderWrite(updates, true);
+
+  await withRetry(
+    () => updateDoc(doc(db, COLLECTION, orderId), { ...cleanData, updatedAt: serverTimestamp() }),
+    { entityName: 'orderRepository.updateOrder' }
+  );
+  invalidateOrderCache(orderId);
 }
 
 /**
- * Archiva un pedido.
+ * Updates order status with State Machine enforcement.
+ * Throws ClinicalStateTransitionError if the transition is not in the allowed graph.
  * @param {string} orderId
+ * @param {string} currentStatus
+ * @param {string} targetStatus
+ * @param {object} [opts]
+ * @param {string} [opts.actorId]
  */
+export async function updateOrderStatus(orderId, currentStatus, targetStatus, { actorId = null } = {}) {
+  if (!orderId || !currentStatus || !targetStatus) throw new Error('updateOrderStatus: orderId, currentStatus, and targetStatus are required');
+
+  if (!canTransitionTo('sales_order', currentStatus, targetStatus)) {
+    throw new ClinicalStateTransitionError('sales_order', currentStatus, targetStatus);
+  }
+
+  await withRetry(
+    () => updateDoc(doc(db, COLLECTION, orderId), {
+      status: targetStatus,
+      updatedAt: serverTimestamp(),
+      [`statusHistory.${Date.now()}`]: { from: currentStatus, to: targetStatus, by: actorId, at: new Date().toISOString() },
+    }),
+    { entityName: 'orderRepository.updateOrderStatus' }
+  );
+  invalidateOrderCache(orderId);
+}
+
 export async function archiveOrder(orderId) {
-  await updateDoc(doc(db, COLLECTION, orderId), {
-    status: 'Archived',
-    updatedAt: serverTimestamp(),
-  });
+  await withRetry(
+    () => updateDoc(doc(db, COLLECTION, orderId), { status: 'Archived', updatedAt: serverTimestamp() }),
+    { entityName: 'orderRepository.archiveOrder' }
+  );
+  invalidateOrderCache(orderId);
+}
+
+export async function deleteOrder(orderId) {
+  await withRetry(
+    () => deleteDoc(doc(db, COLLECTION, orderId)),
+    { entityName: 'orderRepository.deleteOrder' }
+  );
+  invalidateOrderCache(orderId);
 }
 
 /**
- * Elimina un pedido permanentemente.
- * @param {string} orderId
+ * Obtiene pedidos de venta B2B.
+ * @param {number} limitCount
+ * @returns {Promise<Array<object>>}
  */
-export async function deleteOrder(orderId) {
-  await deleteDoc(doc(db, COLLECTION, orderId));
+export async function getB2BSalesOrders(limitCount = 100) {
+  try {
+    const q = query(collection(db, 'b2b_sales_orders'), limit(limitCount));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (error) {
+    return [];
+  }
+}
+
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../firebase';
+import { logger } from '../utils/logger';
+
+/**
+ * Invoca Cloud Function para generar link de pago de Stripe.
+ * @param {{ orderId: string, currency?: string, sendEmail?: boolean }} params
+ * @returns {Promise<string>} URL de pago
+ */
+export async function generateOrderPaymentLink({ orderId, currency = 'usd', sendEmail = false }) {
+  try {
+    const fn = httpsCallable(functions, 'generatePaymentLink');
+    const result = await fn({ orderId, currency, sendEmail });
+    return result?.data?.url;
+  } catch (err) {
+    logger.error('[orderRepository] generateOrderPaymentLink failed', { orderId, error: err.message });
+    throw err;
+  }
 }
 
 const orderRepository = {
   getOrderById,
   getOrdersByUser,
   getAllOrders,
+  getB2BSalesOrders,
   createOrder,
   updateOrder,
+  updateOrderStatus,
   archiveOrder,
   deleteOrder,
   subscribeToUserOrders,
+  invalidateOrderCache,
+  generateOrderPaymentLink,
 };
 
 export default orderRepository;
+

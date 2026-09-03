@@ -34,13 +34,41 @@ function dispatchContextEvent(productsList) {
 }
 
 export function useProducts(allowedCategories = ['All'], options = {}) {
+  const { filters = {} } = options;
+  
   // Build where conditions only when categories are restricted
-  const whereConditions =
-    allowedCategories.includes('All') || allowedCategories.length === 0
-      ? []
-      : allowedCategories.length === 1
-      ? [['category', '==', allowedCategories[0]]]
-      : []; // Multiple categories: filter client-side (Firestore doesn't support OR across != field)
+  const whereConditions = [];
+
+  if (!allowedCategories.includes('All') && allowedCategories.length === 1) {
+    whereConditions.push(['category', '==', allowedCategories[0]]);
+  }
+
+  // Dynamic server-side filters — always use canonical IDs, never display names
+  if (filters.supplier && filters.supplier !== 'All') {
+    let sId = String(filters.supplier).toLowerCase().trim();
+    if (!sId.startsWith('supplier-')) sId = `supplier-${sId.replace(/[\s_]+/g, '-')}`;
+    whereConditions.push(['supplierIds', 'array-contains', sId]);
+  }
+  
+  if (filters.category && filters.category !== 'All') {
+    const cId = String(filters.category).toLowerCase().trim();
+    whereConditions.push(['categoryId', '==', cId]);
+  }
+  
+  if (filters.isActive && filters.isActive !== 'All') {
+    // Note: depends on how data is stored. Usually status: active/inactive or isActive boolean.
+    // We will filter based on 'status' == 'active'/'inactive' or 'isActive' == true/false
+    // Assuming 'status' is used for products.
+    whereConditions.push(['status', '==', filters.isActive === 'Active' ? 'active' : 'inactive']);
+  }
+  
+  if (filters.warehouse && filters.warehouse !== 'All') {
+    whereConditions.push(['warehouse', '==', filters.warehouse]);
+  }
+
+  if (filters.apiPlaceholder && filters.apiPlaceholder !== 'All') {
+    whereConditions.push(['isApiPlaceholder', '==', filters.apiPlaceholder === 'Only APIs']);
+  }
 
   const {
     data: rawProducts,

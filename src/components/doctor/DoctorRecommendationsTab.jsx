@@ -13,6 +13,7 @@ import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
+import EmptyState from '../ui/EmptyState';
 
 
 
@@ -75,11 +76,11 @@ export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patient
   if (activePatients.length === 0) {
     return (
       <Card>
-        <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-          <ClipboardList size={48} color="var(--color-border)" style={{ margin: '0 auto 1rem' }} />
-          <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '1.1rem', margin: '0 0 0.5rem' }}>No Active Patients</p>
-          <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Add patients first in the Patients tab.</p>
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title="No Active Patients"
+          subtitle="Add patients first in the Patients tab before making recommendations."
+        />
       </Card>
     );
   }
@@ -133,7 +134,12 @@ export default function DoctorRecommendationsTab({ doctorId, doctorMeta, patient
             {recLoading ? (
               <Spinner text="Loading recommendations..." />
             ) : recs.length === 0 ? (
-              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>No previous recommendations for this patient.</p>
+              <EmptyState
+                icon={ClipboardList}
+                title="No Recommendations"
+                subtitle="No previous recommendations for this patient."
+                compact={true}
+              />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {recs.map(r => (

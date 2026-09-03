@@ -11,11 +11,13 @@ import { db } from '../../firebase';
 
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
+import EmptyState from '../ui/EmptyState';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
 
 export default function PhysicianPatientsTab({ doctorId }) {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export default function PhysicianPatientsTab({ doctorId }) {
   async function fetchPatients() {
     try {
       setLoading(true);
+      setError(null);
       // Fetches active relationships where this doctor is supervising
       const relQ = query(
         collection(db, 'doctor_patient_relationships'),
@@ -66,6 +69,7 @@ export default function PhysicianPatientsTab({ doctorId }) {
       }));
     } catch (err) {
       console.error('Error fetching patients:', err);
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -86,7 +90,7 @@ export default function PhysicianPatientsTab({ doctorId }) {
         subtitle="Manage your clinically supervised patients and review their assigned protocols."
         icon={Users}
         actions={
-          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-primary" onClick={() => {/* ... */}}>
             <PlusCircle size={18} /> Invite New Patient
           </button>
         }
@@ -104,24 +108,20 @@ export default function PhysicianPatientsTab({ doctorId }) {
         />
       </div>
 
-      {loading ? (
+      {error ? (
+        <EmptyState
+          icon={Users}
+          title="Error Loading Patients"
+          subtitle="There was a problem fetching the data."
+        />
+      ) : loading ? (
         <GridSkeleton count={6} cols={3} />
       ) : patients.length === 0 ? (
-        <div
-          className="card"
-          style={{
-            padding: '4rem 2rem',
-            textAlign: 'center',
-            backgroundColor: 'var(--color-bg-app)',
-            border: '1px dashed var(--border)',
-          }}
-        >
-          <Users size={48} color="var(--primary)" style={{ opacity: 0.2, marginBottom: '1rem' }} />
-          <h3 style={{ margin: '0 0 0.5rem 0' }}>No Patients Found</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
-            Invite patients to connect with your clinical account to assign protocols.
-          </p>
-        </div>
+          <EmptyState
+            icon={Users}
+            title="No Patients Found"
+            subtitle="Invite patients to connect with your clinical account to assign protocols."
+          />
       ) : (
         <div
           style={{

@@ -16,8 +16,7 @@ import { useState } from 'react';
 
 
 
-
-
+import { useRoleAccess } from '../hooks/useRoleAccess';
 import { WORKPLACE_MENU } from './navConfig';
 import { ShoppingCart, Bookmark, ClipboardList, History, Settings } from '@/lib/icons';
 
@@ -79,7 +78,7 @@ function WorkplaceItem({ label, path, onClose }) {
   const [hovered, setHovered] = useState(false);
   return (
     <Link
-      to={path}
+      href={path}
       style={{
         ...S.item,
         background: hovered ? 'var(--background, #f5f5f5)' : 'transparent',
@@ -97,9 +96,11 @@ function WorkplaceItem({ label, path, onClose }) {
   );
 }
 
-export default function WorkplaceDropdown({ role = 'guest', onClose }) {
+export default function WorkplaceDropdown({ onClose }) {
+  const { is, effectiveRole } = useRoleAccess();
+  
   // Normalise role: any professional variant → 'professional', admin → 'admin'
-  const key = role === 'admin' ? 'admin' : role === 'guest' ? 'guest' : 'professional';
+  const key = is('admin') ? 'admin' : (is('doctor') || is('wholesaler')) ? 'professional' : 'guest';
   const items = WORKPLACE_MENU[key] ?? WORKPLACE_MENU.guest;
 
   const roleLabel = key === 'admin' ? 'Admin Access' : key === 'professional' ? 'Professional' : 'Guest';

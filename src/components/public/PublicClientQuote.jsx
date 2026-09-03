@@ -1,17 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { fetchAgencyRFQById, updateAgencyRFQStatus } from '../../services/quotationRepository';
 import { Card } from '../ui';
-
-
-
-
-
 import { useTranslation } from 'react-i18next';
 import { Loader2, CheckCircle, ShieldCheck, XCircle, Truck } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function PublicClientQuote() {
   const { id } = useParams();
@@ -25,18 +19,15 @@ export default function PublicClientQuote() {
   useEffect(() => {
     const fetchRFQ = async () => {
       try {
-        const docRef = doc(db, 'agency_rfqs', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        const data = await fetchAgencyRFQById(id);
+        if (data) {
           if (['APPROVED_BY_CLIENT', 'AWAITING_INVOICE', 'RECONCILED', 'SHIPPED', 'DELIVERED'].includes(data.status)) setStatus('APPROVED');
           if (data.status === 'REJECTED') setStatus('REJECTED');
-          setRfq({ id: docSnap.id, ...data });
+          setRfq(data);
         } else {
           setError(t('quote.notFound', "Quote not found or invalid link."));
         }
       } catch (err) {
-        console.error(err);
         setError(t('quote.errorLoading', "Error loading quote."));
       }
       setLoading(false);
@@ -48,13 +39,10 @@ export default function PublicClientQuote() {
     setActionLoading(true);
     try {
       const newStatus = action === 'accept' ? 'APPROVED_BY_CLIENT' : 'REJECTED';
-      await updateDoc(doc(db, 'agency_rfqs', id), {
-        status: newStatus
-      });
+      await updateAgencyRFQStatus(id, newStatus);
       setStatus(action === 'accept' ? 'APPROVED' : 'REJECTED');
     } catch (err) {
-      console.error(err);
-      alert(t('quote.errorAction', "Error processing action."));
+      toast.error(t('quote.errorAction', "Error processing action."));
     }
     setActionLoading(false);
   };

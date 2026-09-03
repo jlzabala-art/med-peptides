@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { logger } from '../utils/logger';
 import { getPubMedLiterature } from './pubmedService.js';
 import { protocolRepository } from '../repositories/protocolRepository.js';
 import { runClinicalValidation } from './validationEngine.js';
@@ -600,7 +601,9 @@ export const generateProtocolData = async (formData, products, skipPubMed = fals
         try {
           const lit = await getPubMedLiterature(matchProd);
           if (lit && lit.length > 0) evidenceData[slug] = lit;
-        } catch (e) {}
+        } catch (e) {
+          logger.warn(`[protocolEngine] PubMed fetch skipped for ${slug}`, { error: e.message });
+        }
       }
     }
   }

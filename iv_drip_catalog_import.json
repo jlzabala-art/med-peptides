@@ -1,0 +1,1547 @@
+{
+  "catalog": {
+    "catalog_id": "iv_drips_2025",
+    "name": "IV Drip Formulations",
+    "currency": "AED",
+    "professional_use_only": true,
+    "source_note": "Transcribed from the supplied IV Drip Order Form – Prescription 2025.",
+    "default_pricing": {
+      "internal_cost_aed": 250,
+      "clinic_price_aed": 500,
+      "gross_profit_aed": 250,
+      "markup_on_cost_percent": 100,
+      "gross_margin_percent": 50
+    },
+    "administration": {
+      "route": "intravenous",
+      "instruction": "Dilute the vial into an appropriate isotonic IV solution as directed by the prescribing clinician.",
+      "compatible_fluid_options": [
+        "250 mL NSS",
+        "500 mL NSS"
+      ],
+      "consumables": [
+        "Cannula G24",
+        "Macroset"
+      ],
+      "requires_prescription": true,
+      "requires_physician_approval": true
+    }
+  },
+  "ingredients_master": [
+    {
+      "ingredient_id": "ascorbic_acid",
+      "name": "Ascorbic Acid",
+      "common_name": "Vitamin C"
+    },
+    {
+      "ingredient_id": "magnesium_chloride",
+      "name": "Magnesium Chloride"
+    },
+    {
+      "ingredient_id": "trimethylglycine",
+      "name": "Trimethylglycine",
+      "common_name": "TMG"
+    },
+    {
+      "ingredient_id": "dimethyl_sulfoxide",
+      "name": "Dimethyl Sulfoxide",
+      "common_name": "DMSO"
+    },
+    {
+      "ingredient_id": "dimethyl_sulfone",
+      "name": "Dimethyl Sulfone",
+      "common_name": "MSM"
+    },
+    {
+      "ingredient_id": "dexpanthenol",
+      "name": "Dexpanthenol",
+      "common_name": "Vitamin B5"
+    },
+    {
+      "ingredient_id": "n_acetylcysteine",
+      "name": "N-Acetylcysteine",
+      "common_name": "NAC"
+    },
+    {
+      "ingredient_id": "l_glutamine",
+      "name": "L-Glutamine"
+    },
+    {
+      "ingredient_id": "taurine",
+      "name": "Taurine"
+    },
+    {
+      "ingredient_id": "thiamine_hcl",
+      "name": "Thiamine HCl",
+      "common_name": "Vitamin B1"
+    },
+    {
+      "ingredient_id": "inositol",
+      "name": "Inositol"
+    },
+    {
+      "ingredient_id": "pyridoxine",
+      "name": "Pyridoxine",
+      "common_name": "Vitamin B6"
+    },
+    {
+      "ingredient_id": "tryptophan",
+      "name": "Tryptophan"
+    },
+    {
+      "ingredient_id": "zinc",
+      "name": "Zinc"
+    },
+    {
+      "ingredient_id": "tyrosine",
+      "name": "Tyrosine"
+    },
+    {
+      "ingredient_id": "riboflavin",
+      "name": "Riboflavin",
+      "common_name": "Vitamin B2"
+    },
+    {
+      "ingredient_id": "hydroxocobalamin",
+      "name": "Hydroxocobalamin",
+      "common_name": "Vitamin B12"
+    },
+    {
+      "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+      "name": "Calcium-L-5-Methyltetrahydrofolate",
+      "common_name": "Vitamin B9"
+    },
+    {
+      "ingredient_id": "selenium",
+      "name": "Selenium"
+    },
+    {
+      "ingredient_id": "l_carnitine",
+      "name": "L-Carnitine"
+    },
+    {
+      "ingredient_id": "methionine",
+      "name": "Methionine"
+    },
+    {
+      "ingredient_id": "choline_chloride",
+      "name": "Choline Chloride"
+    },
+    {
+      "ingredient_id": "l_lysine",
+      "name": "L-Lysine"
+    },
+    {
+      "ingredient_id": "l_arginine",
+      "name": "L-Arginine"
+    },
+    {
+      "ingredient_id": "niacinamide",
+      "name": "Niacinamide",
+      "common_name": "Vitamin B3"
+    },
+    {
+      "ingredient_id": "proline",
+      "name": "Proline"
+    },
+    {
+      "ingredient_id": "glycine",
+      "name": "Glycine"
+    },
+    {
+      "ingredient_id": "biotin",
+      "name": "Biotin"
+    },
+    {
+      "ingredient_id": "ondansetron",
+      "name": "Ondansetron"
+    },
+    {
+      "ingredient_id": "vitamin_d3",
+      "name": "Vitamin D3"
+    },
+    {
+      "ingredient_id": "iron",
+      "name": "Iron"
+    }
+  ],
+  "vials": [
+    {
+      "vial_id": "iv_cognitive_50",
+      "sku": "IV-COG-050",
+      "type": "standard",
+      "commercial_names": [
+        "Brain Power+ IV Drip",
+        "Relax & Anti-Stress+ IV Drip",
+        "Memory and Focus+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "cognitive_support",
+        "stress_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 5000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 600,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "inositol",
+          "quantity": 200,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "tryptophan",
+          "quantity": 50,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 15,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "tyrosine",
+          "quantity": 10,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "riboflavin",
+          "quantity": 5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1.5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 1,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.05,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_detox_50",
+      "sku": "IV-DET-050",
+      "type": "standard",
+      "commercial_names": [
+        "Detox+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "detox_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 4000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 2000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfoxide",
+          "quantity": 2000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "inositol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 20,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 2,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.2,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_fat_burning_50",
+      "sku": "IV-FAT-050",
+      "type": "standard",
+      "commercial_names": [
+        "Fat Burning+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "metabolic_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 3000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 600,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "methionine",
+          "quantity": 600,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "choline_chloride",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_lysine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_arginine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 300,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 200,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 150,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "niacinamide",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 50,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 25,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1.5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 1,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_energy_men_50",
+      "sku": "IV-ENE-050",
+      "type": "standard",
+      "commercial_names": [
+        "Energy Boost+ IV Drip",
+        "Men Drip+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "energy_support",
+        "mens_wellness"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 5000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "inositol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "niacinamide",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 20,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "riboflavin",
+          "quantity": 5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1.5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": "The catalog lists Energy Boost+ and Men Drip+ with the same formula; represented as one unique vial with two commercial names."
+    },
+    {
+      "vial_id": "iv_radiant_skin_50",
+      "sku": "IV-SKN-050",
+      "type": "standard",
+      "commercial_names": [
+        "Radiant Skin+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "skin_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 4000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfone",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "proline",
+          "quantity": 800,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 300,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "niacinamide",
+          "quantity": 200,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_lysine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 30,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "riboflavin",
+          "quantity": 20,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.2,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_wellness_antiaging_50",
+      "sku": "IV-AGE-050",
+      "type": "standard",
+      "commercial_names": [
+        "Wellness Anti-Aging+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "wellness",
+        "healthy_aging"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 5000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfoxide",
+          "quantity": 3000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 1200,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "proline",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 600,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_arginine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_lysine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "glycine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 150,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 30,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "riboflavin",
+          "quantity": 5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "biotin",
+          "quantity": 2,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 1,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_women_50",
+      "sku": "IV-WOM-050",
+      "type": "standard",
+      "commercial_names": [
+        "Women+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "womens_wellness"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 4000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "inositol",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfone",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 10,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1.5,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_post_party_25",
+      "sku": "IV-PST-025",
+      "type": "standard",
+      "commercial_names": [
+        "Post Party+ IV Drip",
+        "Hangover+ IV Drip"
+      ],
+      "volume_ml": 25,
+      "categories": [
+        "recovery_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "dimethyl_sulfoxide",
+          "quantity": 2000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 1500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfone",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 125,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 125,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 50,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 15,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 0.75,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 0.5,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [
+        {
+          "ingredient_id": "ondansetron",
+          "quantity": 4,
+          "unit": "mg",
+          "presentation": "separate_vial",
+          "requires_specific_prescription": true
+        }
+      ],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_hair_nail_50",
+      "sku": "IV-HAR-050",
+      "type": "standard",
+      "commercial_names": [
+        "Grow Hair and Nail+ Drip",
+        "Hair+ Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "hair_support",
+        "nail_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 4000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 1200,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfone",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 300,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "glycine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_lysine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 30,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "biotin",
+          "quantity": 15,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "riboflavin",
+          "quantity": 5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [
+        {
+          "ingredient_id": "vitamin_d3",
+          "quantity": null,
+          "unit": null,
+          "presentation": "separate_vial",
+          "applies_to": [
+            "Grow Hair and Nail+ Drip"
+          ],
+          "note": "Optional; dose not specified in source."
+        },
+        {
+          "ingredient_id": "iron",
+          "quantity": 20,
+          "unit": "mg",
+          "presentation": "separate_vial",
+          "applies_to": [
+            "Hair+ Drip"
+          ]
+        }
+      ],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": "The two catalog names share the same base vial; only their optional separate-vial add-ons differ."
+    },
+    {
+      "vial_id": "iv_gut_healer_50",
+      "sku": "IV-GUT-050",
+      "type": "standard",
+      "commercial_names": [
+        "Gut Healer+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "gastrointestinal_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "dimethyl_sulfoxide",
+          "quantity": 5000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 3000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 2000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfone",
+          "quantity": 2000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 30,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1.5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_multivitamin_50",
+      "sku": "IV-MVI-050",
+      "type": "standard",
+      "commercial_names": [
+        "Multivitamin Mix+ IV Drip",
+        "Multivitamin Mix and Iron Boost+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "multivitamin_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 4000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 4,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [
+        {
+          "ingredient_id": "iron",
+          "quantity": 20,
+          "unit": "mg",
+          "presentation": "separate_vial",
+          "applies_to": [
+            "Multivitamin Mix and Iron Boost+ IV Drip"
+          ]
+        }
+      ],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": "The Iron Boost presentation uses the same base multivitamin vial plus a separate 20 mg iron vial."
+    },
+    {
+      "vial_id": "iv_immune_boost_50",
+      "sku": "IV-IMM-050",
+      "type": "standard",
+      "commercial_names": [
+        "Immune Boost+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "immune_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 5000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dimethyl_sulfone",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 800,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "n_acetylcysteine",
+          "quantity": 800,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "trimethylglycine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 400,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 30,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "calcium_l_5_methyltetrahydrofolate",
+          "quantity": 3,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1.5,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "selenium",
+          "quantity": 0.1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_intima_men_50",
+      "sku": "IV-INT-050",
+      "type": "standard",
+      "commercial_names": [
+        "Intima Men+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "mens_wellness"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "l_arginine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 800,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_glutamine",
+          "quantity": 300,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 50,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "niacinamide",
+          "quantity": 10,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_alpha_boost_50",
+      "sku": "IV-ALP-050",
+      "type": "standard",
+      "commercial_names": [
+        "Alpha Boost+ IV Drip"
+      ],
+      "volume_ml": 50,
+      "categories": [
+        "performance_support"
+      ],
+      "ingredients": [
+        {
+          "ingredient_id": "ascorbic_acid",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "l_carnitine",
+          "quantity": 1000,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "taurine",
+          "quantity": 500,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "magnesium_chloride",
+          "quantity": 400,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "dexpanthenol",
+          "quantity": 250,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "thiamine_hcl",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "pyridoxine",
+          "quantity": 100,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "zinc",
+          "quantity": 15,
+          "unit": "mg"
+        },
+        {
+          "ingredient_id": "hydroxocobalamin",
+          "quantity": 1,
+          "unit": "mg"
+        }
+      ],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": null
+    },
+    {
+      "vial_id": "iv_customized",
+      "sku": "IV-CUS",
+      "type": "customized",
+      "commercial_names": [
+        "Customized IV Drip"
+      ],
+      "volume_ml": null,
+      "categories": [
+        "custom"
+      ],
+      "ingredients": [],
+      "optional_separate_vials": [],
+      "pricing": {
+        "internal_cost_aed": 250,
+        "clinic_price_aed": 500,
+        "gross_profit_aed": 250,
+        "gross_margin_percent": 50
+      },
+      "active": true,
+      "notes": "Ingredients and quantities must be entered and clinically approved for each custom prescription."
+    }
+  ]
+}

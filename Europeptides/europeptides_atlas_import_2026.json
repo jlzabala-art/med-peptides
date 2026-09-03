@@ -1,0 +1,4825 @@
+{
+  "import_version": "1.0",
+  "import_type": "supplier_price_list",
+  "source": {
+    "file_name": "Europeptides_Price List 2026.xlsx",
+    "sheet_name": "Europeptides",
+    "price_list_year": 2026,
+    "currency": "EUR"
+  },
+  "supplier": {
+    "supplier_id": "supplier-europeptides",
+    "name": "Europeptides",
+    "supplier_type": "peptide_supplier",
+    "warehouse_region": "Central Europe"
+  },
+  "business_rules": {
+    "wholesale_price_is_cost": true,
+    "retail_price_is_orientative_only": true,
+    "retail_price_must_not_overwrite_atlas_selling_price": true,
+    "vial_and_pen_are_separate_presentations": true,
+    "supplier_offers_must_remain_separate_from_other_suppliers": true,
+    "lotusland_supported_presentations": [
+      "vial"
+    ],
+    "europeptides_supported_presentations": [
+      "vial",
+      "prefilled_pen"
+    ],
+    "shipping_included": false
+  },
+  "items": [
+    {
+      "master_product_candidate": {
+        "product_id": "pep-5-amino-1-50-mg",
+        "display_name": "5 Amino-1 50 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "5 Amino-1",
+            "strength_value": 50.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "5 Amino-1 50 mg",
+        "source_row": 3,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-5-amino-1-50-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 18.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 26,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-5-amino-1-50-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32258064516129,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-adipotide-2mg",
+        "display_name": "Adipotide 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Adipotide",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Adipotide 2mg",
+        "source_row": 4,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-adipotide-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 29.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-adipotide-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 57,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.357142857142857,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-adipotide-5mg",
+        "display_name": "Adipotide 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Adipotide",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Adipotide 5mg",
+        "source_row": 5,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-adipotide-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 54.6,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 78,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-adipotide-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 67,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 93,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.388059701492537,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-aicar-50-mg",
+        "display_name": "AICAR 50 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "AICAR",
+            "strength_value": 50.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "AICAR 50 mg",
+        "source_row": 6,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-aicar-50-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 20.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 29,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-aicar-50-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 44,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.333333333333333,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-aod-9604-10mg",
+        "display_name": "AOD-9604 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "AOD-9604",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "AOD 9064 10mg",
+        "source_row": 7,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-aod-9604-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 63,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 90,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-aod-9604-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 75,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 105,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.4,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-aod-9604-5mg",
+        "display_name": "AOD-9604 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "AOD-9604",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "AOD 9064 5mg",
+        "source_row": 8,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-aod-9604-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 36.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 52,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-aod-9604-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 49,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 67,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.36734693877551,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ara-290-10mg",
+        "display_name": "Ara-290 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Ara-290",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Ara-290 10mg",
+        "source_row": 9,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ara-290-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 18.9,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 27,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ara-290-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.354838709677419,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-bpc-10mg-tb-10mg",
+        "display_name": "BPC 10mg + TB 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "BPC",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          },
+          {
+            "name": "TB",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "BPC 10mg + TB 10mg",
+        "source_row": 10,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-bpc-10mg-tb-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 83.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 119,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-bpc-10mg-tb-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 96,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 134,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.395833333333333,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-bpc-157-5mg",
+        "display_name": "BPC-157 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "BPC-157",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "BPC 157 5mg",
+        "source_row": 11,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-bpc-157-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 25.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 36,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-bpc-157-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 38,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 51,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.342105263157895,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-bpc-5-mg-tb-5-mg",
+        "display_name": "BPC 5 mg+TB 5 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "BPC",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          },
+          {
+            "name": "TB",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "BPC 5 mg+TB 5 mg",
+        "source_row": 12,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-bpc-5-mg-tb-5-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 49,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 70,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-bpc-5-mg-tb-5-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 61,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 85,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.39344262295082,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-bpc-157-10mg",
+        "display_name": "BPC-157 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "BPC-157",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "BPC157 10mg",
+        "source_row": 13,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-bpc-157-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 40.32,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 57.6,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-bpc-157-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 53,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 73,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.377358490566038,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cagrilintide-10mg",
+        "display_name": "Cagrilintide 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Cagrilintide",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Cagrilintide 10mg / vial",
+        "source_row": 14,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cagrilintide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 84,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 120,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cagrilintide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 96,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 135,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.40625,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cagrilintide-5mg",
+        "display_name": "Cagrilintide 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Cagrilintide",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Cagrilintide 5mg / vial",
+        "source_row": 15,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cagrilintide-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 48.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 69,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cagrilintide-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 61,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 84,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.377049180327869,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cagrilintide-5mg-semaglutide-5mg",
+        "display_name": "Cagrilintide 5mg+Semaglutide 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Cagrilintide",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          },
+          {
+            "name": "Semaglutide",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Cagrilintide 5mg+Semaglutide 5mg",
+        "source_row": 16,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cagrilintide-5mg-semaglutide-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 63,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 90,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cagrilintide-5mg-semaglutide-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 75,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 105,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.4,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cjc-1295-with-dac-5mg",
+        "display_name": "CJC-1295 with DAC 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "CJC-1295 with DAC",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "CJC-1295 with DAC 5mg",
+        "source_row": 17,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-with-dac-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 59.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 85,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-with-dac-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 72,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 100,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.388888888888889,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cjc-1295-without-dac-10mg",
+        "display_name": "CJC-1295 without DAC 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "CJC-1295 without DAC",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "CJC-1295 without DAC 10mg",
+        "source_row": 18,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 49.7,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 71,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 62,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 86,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.387096774193548,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cjc-1295-without-dac-2mg",
+        "display_name": "CJC-1295 without DAC 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "CJC-1295 without DAC",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "CJC-1295 without DAC 2mg",
+        "source_row": 19,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 16.8,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 24,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 29,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 39,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.344827586206897,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cjc-1295-without-dac-5mg",
+        "display_name": "CJC-1295 without DAC 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "CJC-1295 without DAC",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "CJC-1295 without DAC 5mg",
+        "source_row": 20,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 28.7,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 56,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.365853658536585,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cjc-1295-without-dac-5mg-ipa-5mg",
+        "display_name": "CJC-1295 without DAC 5mg + IPA 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "CJC-1295 without DAC",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          },
+          {
+            "name": "IPA",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "CJC-1295 without DAC 5mg + IPA 5mg",
+        "source_row": 21,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-5mg-ipa-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 45.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 65,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cjc-1295-without-dac-5mg-ipa-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 58,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 80,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.379310344827586,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-cjc1295-dac-2-mg",
+        "display_name": "CJC1295/DAC 2 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "CJC1295/DAC",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "CJC1295/DAC 2 mg /vial",
+        "source_row": 22,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-cjc1295-dac-2-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 28,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-cjc1295-dac-2-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 55,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.375,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-dsip-10mg",
+        "display_name": "DSIP 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "DSIP",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "DSIP 10mg",
+        "source_row": 23,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-dsip-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 57.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 82,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-dsip-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 70,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 97,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.385714285714286,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-dsip-5mg",
+        "display_name": "DSIP 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "DSIP",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "DSIP 5mg",
+        "source_row": 24,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-dsip-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 33.6,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 48,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-dsip-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 46,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 63,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.369565217391304,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-epithalon-10-mg-anti-aging",
+        "display_name": "Epithalon 10 mg anti aging",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Epithalon",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Epithalon 10 mg anti aging",
+        "source_row": 25,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-epithalon-10-mg-anti-aging-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 21,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 30,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-epithalon-10-mg-anti-aging-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 45,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.363636363636364,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-foxo4-10-mg",
+        "display_name": "FOXO4 10 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "FOXO4",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "FOXO4 10 mg",
+        "source_row": 26,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-foxo4-10-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 81.9,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 117,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-foxo4-10-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 94,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 132,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.404255319148936,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ghk-cu-100-mg",
+        "display_name": "GHK-Cu - 100 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "GHK-Cu",
+            "strength_value": 100.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "GHK-CU - 100 mg",
+        "source_row": 27,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ghk-cu-100-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 35.7,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 51,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ghk-cu-100-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 48,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 66,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.375,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ghk-cu-50-mg",
+        "display_name": "GHK-Cu - 50 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "GHK-Cu",
+            "strength_value": 50.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "GHK-CU - 50 mg",
+        "source_row": 28,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ghk-cu-50-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 21,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 30,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ghk-cu-50-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 45,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.363636363636364,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ghrp-2-5mg",
+        "display_name": "GHRP-2 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "GHRP-2",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "GHRP-2 5mg/ vial",
+        "source_row": 29,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ghrp-2-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 12.6,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 18,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ghrp-2-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 25,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ghrp-6-5mg",
+        "display_name": "GHRP-6 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "GHRP-6",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "GHRP-6 5mg/ vial",
+        "source_row": 30,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ghrp-6-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 11.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 16,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ghrp-6-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 24,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.291666666666667,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-gonadorelin-acetate-2mg",
+        "display_name": "Gonadorelin Acetate 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Gonadorelin Acetate",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Gonadorrlin Acetate 2mg",
+        "source_row": 31,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-gonadorelin-acetate-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 15.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 22,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-gonadorelin-acetate-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 28,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 37,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.321428571428571,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-hcg-5000iu",
+        "display_name": "HCG 5000iu",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "HCG",
+            "strength_value": 5000.0,
+            "strength_unit": "iu"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "HCG 5000iu",
+        "source_row": 32,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-hcg-5000iu-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 17.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 25,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-hcg-5000iu-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 30,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.333333333333333,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-hexarelin-2mg",
+        "display_name": "Hexarelin - 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Hexarelin",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Hexarelin - 2mg",
+        "source_row": 33,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-hexarelin-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 15.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 22,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-hexarelin-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 28,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 37,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.321428571428571,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-hexarelin-10mg",
+        "display_name": "Hexarelin 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Hexarelin",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Hexarelin 10mg",
+        "source_row": 34,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-hexarelin-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 49.7,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 71,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-hexarelin-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 62,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 86,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.387096774193548,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-hexarelin-5mg",
+        "display_name": "Hexarelin 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Hexarelin",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Hexarelin 5mg",
+        "source_row": 35,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-hexarelin-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 27.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 39,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-hexarelin-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 54,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.35,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-hgh-frag-176-191-5-mg",
+        "display_name": "HGH frag 176-191 - 5 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "HGH frag 176-191",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "HGH frag 176-191 - 5 mg",
+        "source_row": 36,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-hgh-frag-176-191-5-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 29.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-hgh-frag-176-191-5-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 57,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.357142857142857,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-hmg-75iu",
+        "display_name": "HMG 75iu",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "HMG",
+            "strength_value": 75.0,
+            "strength_unit": "iu"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "HMG 75iu",
+        "source_row": 37,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-hmg-75iu-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 12.6,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 18,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-hmg-75iu-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 25,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-igf-1-lr3-0-1mg",
+        "display_name": "IGF-1 LR3 0.1mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "IGF-1 LR3",
+            "strength_value": 0.1,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "IGF-1 LR3 0.1mg",
+        "source_row": 38,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-igf-1-lr3-0-1mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 13.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 19,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-igf-1-lr3-0-1mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 26,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 34,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.307692307692308,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-igf-1-lr3-1mg",
+        "display_name": "IGF-1 LR3 1mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "IGF-1 LR3",
+            "strength_value": 1.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "IGF-1 LR3 1mg",
+        "source_row": 39,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-igf-1-lr3-1mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 65.1,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 93,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-igf-1-lr3-1mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 78,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 108,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.384615384615385,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ipamorelin-10mg",
+        "display_name": "Ipamorelin 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Ipamorelin",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Ipamorelin 10mg",
+        "source_row": 40,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ipamorelin-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 31.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 45,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ipamorelin-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 44,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 60,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.363636363636364,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ipamorelin-5mg",
+        "display_name": "Ipamorelin 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Ipamorelin",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Ipamorelin 5mg",
+        "source_row": 41,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ipamorelin-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 18.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 26,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ipamorelin-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32258064516129,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-kisspeptin-10-mg",
+        "display_name": "Kisspeptin 10 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Kisspeptin",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Kisspeptin 10 mg",
+        "source_row": 42,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-kisspeptin-10-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 30.8,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 44,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-kisspeptin-10-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 43,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 59,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.372093023255814,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-kpv-10-mg",
+        "display_name": "KPV 10 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "KPV",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "KPV 10 mg",
+        "source_row": 43,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-kpv-10-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 27.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 39,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-kpv-10-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 54,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.35,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ll37-5mg",
+        "display_name": "LL37 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "LL37",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "LL37 5mg",
+        "source_row": 44,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ll37-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 32.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 46,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ll37-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 45,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 61,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.355555555555556,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-melanotan-ii-10mg",
+        "display_name": "Melanotan II 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Melanotan II",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Melanotan II 10mg/ vial",
+        "source_row": 45,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-melanotan-ii-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 24.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 35,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-melanotan-ii-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 37,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 50,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.351351351351351,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-mgf-2-mg",
+        "display_name": "MGF 2 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "MGF",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Mgf 2 mg",
+        "source_row": 46,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-mgf-2-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 18.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 26,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-mgf-2-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32258064516129,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-mgf-peg-2mg",
+        "display_name": "MGF-PEG - 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "MGF-PEG",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "MGF-PEG - 2mg",
+        "source_row": 47,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-mgf-peg-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 35.7,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 51,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-mgf-peg-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 48,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 66,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.375,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-mots-c-10mg",
+        "display_name": "MOTS-C 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "MOTS-C",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "MOTS-C 10mg / vial",
+        "source_row": 48,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-mots-c-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 31.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 45,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-mots-c-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 44,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 60,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.363636363636364,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-mt-1-10mg",
+        "display_name": "MT-1 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "MT-1",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "MT-1 10mg",
+        "source_row": 49,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-mt-1-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 24.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 35,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-mt-1-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 37,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 50,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.351351351351351,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-nad-100mg",
+        "display_name": "NAD+ 100mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "NAD",
+            "strength_value": null,
+            "strength_unit": null
+          },
+          {
+            "name": "",
+            "strength_value": 100.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "NAD 100mg",
+        "source_row": 50,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-nad-100mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 97.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 139,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-nad-100mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 110,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 154,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.4,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-oxytocin-acetate-10mg",
+        "display_name": "Oxytocin Acetate 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Oxytocin Acetate",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Oxytocin Acetate 10mg",
+        "source_row": 51,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-oxytocin-acetate-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 29.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-oxytocin-acetate-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 57,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.357142857142857,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-oxytocin-acetate-2mg",
+        "display_name": "Oxytocin Acetate 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Oxytocin Acetate",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Oxytocin Acetate 2mg",
+        "source_row": 52,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-oxytocin-acetate-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 11.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 16,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-oxytocin-acetate-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 24,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.291666666666667,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-oxytocin-acetate-5mg",
+        "display_name": "Oxytocin Acetate 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Oxytocin Acetate",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Oxytocin Acetate 5mg",
+        "source_row": 53,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-oxytocin-acetate-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 17.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 25,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-oxytocin-acetate-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 30,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.333333333333333,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-pt-141-bremelanotide-10mg",
+        "display_name": "PT-141 (Bremelanotide) 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "PT-141 (Bremelanotide)",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "PT-141 (Bremelanotide) 10mg/ vial",
+        "source_row": 54,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-pt-141-bremelanotide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 28,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-pt-141-bremelanotide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 55,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.375,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-retatrutide-10mg",
+        "display_name": "Retatrutide 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Retatrutide",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Retatrutida 10mg",
+        "source_row": 55,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-retatrutide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 101.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 145,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-retatrutide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 114,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 160,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.403508771929825,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-selank-10mg",
+        "display_name": "Selank 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Selank",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Selank 10mg",
+        "source_row": 56,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-selank-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 35,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 50,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-selank-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 47,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 65,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.382978723404255,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-semaglutide-10mg",
+        "display_name": "Semaglutide 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Semaglutide",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Semaglutide 10mg",
+        "source_row": 57,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-semaglutide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 101.5,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 145,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-semaglutide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 114,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 160,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.403508771929825,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-semax-10mg",
+        "display_name": "Semax 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Semax",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Semax 10mg",
+        "source_row": 58,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-semax-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 29.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-semax-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 42,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 57,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.357142857142857,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-semax-5mg",
+        "display_name": "Semax 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Semax",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Semax 5mg",
+        "source_row": 59,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-semax-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 20.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 29,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-semax-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 44,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.333333333333333,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-sermorelin-10-mg",
+        "display_name": "Sermorelin 10 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Sermorelin",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Sermorelin 10 mg",
+        "source_row": 60,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-sermorelin-10-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 91,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 130,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-sermorelin-10-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 103,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 145,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.407766990291262,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-sermorelin-5-mg",
+        "display_name": "Sermorelin 5 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Sermorelin",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Sermorelin 5 mg",
+        "source_row": 61,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-sermorelin-5-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 53.9,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 77,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-sermorelin-5-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 66,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 92,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.393939393939394,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-snap-8-10-mg-cosmetic",
+        "display_name": "Snap 8 - 10 mg cosmetic",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Snap 8",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Snap 8 - 10 mg cosmetic",
+        "source_row": 62,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-snap-8-10-mg-cosmetic-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 18.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 26,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-snap-8-10-mg-cosmetic-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32258064516129,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-ss-31-elamipretide-10mg",
+        "display_name": "SS-31 (Elamipretide) 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "SS-31 (Elamipretide)",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "SS-31 (Elamipretide) 10mg /vial",
+        "source_row": 63,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-ss-31-elamipretide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 25.9,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 37,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-ss-31-elamipretide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 38,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 52,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.368421052631579,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-survodutide-10mg",
+        "display_name": "Survodutide 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Survodutide",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Survodutide 10mg",
+        "source_row": 64,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-survodutide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 86.8,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 124,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-survodutide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 99,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 139,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.404040404040404,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-tb-10-mg-bpc-10-mg-ghk-50-mg",
+        "display_name": "TB 10 mg + BPC 10 mg + GHK 50 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "TB",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          },
+          {
+            "name": "BPC",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          },
+          {
+            "name": "GHK",
+            "strength_value": 50.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "TB 10 mg + BPC 10 mg + GHK 50 mg",
+        "source_row": 65,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-tb-10-mg-bpc-10-mg-ghk-50-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 60.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 86,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-tb-10-mg-bpc-10-mg-ghk-50-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 73,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 101,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.383561643835616,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-tb-500-thymosin-b4-acetate-10mg",
+        "display_name": "TB-500 (Thymosin B4 Acetate) 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "TB-500 (Thymosin B4 Acetate)",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "TB500 (Thymosin B4 Acetate) 10mg",
+        "source_row": 66,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-tb-500-thymosin-b4-acetate-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 54.6,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 78,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-tb-500-thymosin-b4-acetate-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 67,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 93,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.388059701492537,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-tb-500-thymosin-b4-acetate-5mg",
+        "display_name": "TB-500 (Thymosin B4 Acetate) 5mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "TB-500 (Thymosin B4 Acetate)",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "TB500 (Thymosin B4 Acetate) 5mg",
+        "source_row": 67,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-tb-500-thymosin-b4-acetate-5mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 23.8,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 34,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-tb-500-thymosin-b4-acetate-5mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 36,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 49,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.361111111111111,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-tesamorelin-10mg",
+        "display_name": "Tesamorelin 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Tesamorelin",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Tesamorelin 10mg",
+        "source_row": 68,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-tesamorelin-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 65.1,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 93,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-tesamorelin-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 78,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 108,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.384615384615385,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-tesamorelin-2mg",
+        "display_name": "Tesamorelin 2mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Tesamorelin",
+            "strength_value": 2.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Tesamorelin 2mg",
+        "source_row": 69,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-tesamorelin-2mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 20.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 29,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-tesamorelin-2mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 33,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 44,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.333333333333333,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-thymalin-10-mg",
+        "display_name": "Thymalin 10 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Thymalin",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Thymalin 10 mg",
+        "source_row": 70,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-thymalin-10-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 18.2,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 26,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-thymalin-10-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 31,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 41,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.32258064516129,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-thymosin-alpha-1-5-mg",
+        "display_name": "Thymosin Alpha - 1 5 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Thymosin Alpha - 1",
+            "strength_value": 5.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Thymosin Alpha - 1 5 mg",
+        "source_row": 71,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-thymosin-alpha-1-5-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 27.3,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 39,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-thymosin-alpha-1-5-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 40,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 54,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.35,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-tirzepatide-10mg",
+        "display_name": "Tirzepatide 10mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "Tirzepatide",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "Tirzepatide 10mg",
+        "source_row": 72,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-tirzepatide-10mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 79.8,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 114,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-tirzepatide-10mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 92,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 129,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.402173913043478,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    },
+    {
+      "master_product_candidate": {
+        "product_id": "pep-vip-10-mg",
+        "display_name": "VIP 10 mg",
+        "category": "peptide",
+        "components": [
+          {
+            "name": "VIP",
+            "strength_value": 10.0,
+            "strength_unit": "mg"
+          }
+        ]
+      },
+      "supplier_product": {
+        "supplier_id": "supplier-europeptides",
+        "supplier_name": "Europeptides",
+        "supplier_raw_name": "VIP 10 mg",
+        "source_row": 73,
+        "offers": [
+          {
+            "supplier_offer_id": "europeptides-vip-10-mg-vial",
+            "presentation_type": "vial",
+            "price_type": {
+              "cost": {
+                "amount": 57.4,
+                "currency": "EUR",
+                "label": "Wholesale price",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 82,
+                "currency": "EUR",
+                "label": "Indicative retail price",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.428571428571429,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "active": true
+          },
+          {
+            "supplier_offer_id": "europeptides-vip-10-mg-pen",
+            "presentation_type": "prefilled_pen",
+            "price_type": {
+              "cost": {
+                "amount": 70,
+                "currency": "EUR",
+                "label": "Wholesale price with pen",
+                "meaning": "Mediluxe acquisition cost"
+              },
+              "suggested_retail": {
+                "amount": 97,
+                "currency": "EUR",
+                "label": "Indicative retail price with pen",
+                "meaning": "Reference only; not an Atlas selling price"
+              }
+            },
+            "supplier_margin_ratio": 0.385714285714286,
+            "commercial_terms": "EXW",
+            "shipping_included": false,
+            "shipping_note": "Add shipping from the Central Europe warehouse to the final European destination.",
+            "active": true
+          }
+        ]
+      }
+    }
+  ]
+}

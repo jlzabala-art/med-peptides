@@ -1,3 +1,4 @@
+import logger from '../utils/logger.js';
 /* eslint-disable no-unused-vars */
 /**
  * Atlas Health - Multi-Layer Clinical Validation Engine
@@ -241,11 +242,11 @@ export const runClinicalValidation = (protocol, formData) => {
     };
 
     // Store log for traceability (can be persisted to Firestore later)
-    console.log("Validation Log Generated:", validationSummary);
+    logger.info("[validationEngine] Validation Log Generated:", validationSummary);
 
     return validationSummary;
   } catch (err) {
-    console.error("Validation Engine Failure:", err);
+    logger.error("[validationEngine] Validation Engine Failure:", err);
     return {
       state: 'ERROR',
       error: "Validation unavailable. Retry validation."

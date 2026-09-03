@@ -3,7 +3,7 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import MoreVertical from "lucide-react/dist/esm/icons/more-vertical";
 import { Card } from '../../ui';
 import DataTable from '../../ui/DataTable';
-import StatusBadge from '../../ui/StatusBadge';
+import StatusChip from '../../ui/StatusChip';
 import EmptyState from '../../ui/EmptyState';
 
 export default function DistributorTerritoryManager({ wholesalers, orders }) {
@@ -52,7 +52,7 @@ export default function DistributorTerritoryManager({ wholesalers, orders }) {
     {
       key: 'status',
       header: 'Status',
-      render: (r) => <StatusBadge status={r.status !== 'suspended' ? 'active' : 'error'} />
+      render: (r) => <StatusChip status={r.status !== 'suspended' ? 'active' : 'error'} />
     },
     {
       key: '_actions',

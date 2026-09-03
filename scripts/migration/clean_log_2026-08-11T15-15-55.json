@@ -1,0 +1,923 @@
+{
+  "namesFixed": 43,
+  "variantsDeleted": 94,
+  "variantsFixed": 507,
+  "actions": [
+    {
+      "type": "name_fix",
+      "docId": "5-amino-1-50-mg",
+      "from": "5 Amino-1 50 mg",
+      "to": "5 Amino-1"
+    },
+    {
+      "type": "name_fix",
+      "docId": "adipotide-2mg",
+      "from": "Adipotide 2mg",
+      "to": "Adipotide"
+    },
+    {
+      "type": "name_fix",
+      "docId": "aicar-50-mg",
+      "from": "AICAR 50 mg",
+      "to": "AICAR"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "amlexanox-40mg-caps-x30",
+      "deleted": "xx5KS2E63XZFjG0Zjw0b-default",
+      "kept": "FbrR6IlePdE6Afr6PXZl-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "aod-9604",
+      "deleted": "lotusland_aod_9604_5_mg_vial-default",
+      "kept": "lotusland_aod_9604_2_mg_vial-default",
+      "key": "supplier-lotusland::aod-9604"
+    },
+    {
+      "type": "name_fix",
+      "docId": "aod-9604-5mg",
+      "from": "AOD-9604 5mg",
+      "to": "AOD-9604"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "aod-9604-5mg-vial",
+      "deleted": "u0KD32qRHs2sjRzaWo3d-default",
+      "kept": "pfCbZrsigUSpy8p4xt08-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ara-290-10mg",
+      "from": "Ara-290 10mg",
+      "to": "Ara-290"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bac-water",
+      "deleted": "lotusland_bac_water_3_ml_10_bottles-default",
+      "kept": "lotusland_bac_water_30_ml_bottle-default",
+      "key": "supplier-lotusland::bac water"
+    },
+    {
+      "type": "name_fix",
+      "docId": "bpc-10mg-tb-10mg",
+      "from": "BPC 10mg + TB 10mg",
+      "to": "BPC 10mg + TB"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "EaJbjeLrX83jpOPF7pku-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "HMVi6zmZLyslAHJkP1ct-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "Q2W2JdKPqgwbcMUn1dSU-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "QXCKi2QEFituGzVYTgQe-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "YRvnQAjC9AT5j8K9eOM8-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "ZYc70Pa7uM1Eg9J7a8GE-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "gpLdTOXehtsh6fm4xVyc-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "hd2aLSicnhvAKFp0KCde-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "ndSXGLM9fy0sCCGeclVt-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "omQ8RQWFzWusnd2TAq2I-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "xmcoy4kt34v7XLD4TxK2-default",
+      "kept": "EUtmtCWKpojjR6yKK0KW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "lotusland_bpc_157_20_mg_vial-default",
+      "kept": "lotusland_bpc_157_10_mg_vial-default",
+      "key": "supplier-lotusland::bpc-157"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "lotusland_bpc_157_2_mg_vial-default",
+      "kept": "lotusland_bpc_157_10_mg_vial-default",
+      "key": "supplier-lotusland::bpc-157"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157",
+      "deleted": "lotusland_bpc_157_5_mg_vial-default",
+      "kept": "lotusland_bpc_157_10_mg_vial-default",
+      "key": "supplier-lotusland::bpc-157"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "bpc-157-tb-500",
+      "deleted": "lotusland_bpc_157_tb_500_5_mg_5_mg_vial-default",
+      "kept": "lotusland_bpc_157_tb_500_10_mg_10_mg_vial-default",
+      "key": "supplier-lotusland::bpc-157 + tb-500"
+    },
+    {
+      "type": "name_fix",
+      "docId": "bpc-5-mgtb-5-mg",
+      "from": "BPC 5 mg+TB 5 mg",
+      "to": "BPC 5 mg+TB"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cagrilintide",
+      "deleted": "ESdoGhuDe9dvWWqn4qeg-default",
+      "kept": "DyWsCPR3U6Sm73TkSbHv-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cagrilintide",
+      "deleted": "lotusland_cagrilintide_5_mg_vial-default",
+      "kept": "lotusland_cagrilintide_10_mg_vial-default",
+      "key": "supplier-lotusland::cagrilintide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cjc-1295-dac",
+      "deleted": "olhgWoyCcFr3Gl45oPRY-default",
+      "kept": "nplabs_cjc-1295-dac_10mg_vial",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cjc-1295-no-dac-10mg-vial",
+      "deleted": "EgTVpGvJEnLj1FI5K6Le-default",
+      "kept": "2QmtGhPjoSvKERb2nqPS-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cjc-1295-no-dac-10mg-vial",
+      "deleted": "MJuNguC01SoAhxa4lrcg-default",
+      "kept": "2QmtGhPjoSvKERb2nqPS-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cjc-1295-no-dac-10mg-vial",
+      "deleted": "XncSj8ARrLuoFWhpT3X3-default",
+      "kept": "2QmtGhPjoSvKERb2nqPS-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "cjc-1295-no-dac-10mg-vial",
+      "deleted": "fWZr6OnX3DJxyTsdkGDc-default",
+      "kept": "2QmtGhPjoSvKERb2nqPS-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "cjc-1295-with-dac-5mg",
+      "from": "CJC-1295 with DAC 5mg",
+      "to": "CJC-1295 with DAC"
+    },
+    {
+      "type": "name_fix",
+      "docId": "cjc-1295-without-dac-2mg",
+      "from": "CJC-1295 without DAC 2mg",
+      "to": "CJC-1295 without DAC"
+    },
+    {
+      "type": "name_fix",
+      "docId": "cjc-1295-without-dac-5mg-ipa-5mg",
+      "from": "CJC-1295 without DAC 5mg + IPA 5mg",
+      "to": "CJC-1295 without DAC 5mg + IPA"
+    },
+    {
+      "type": "name_fix",
+      "docId": "cjc1295dac-2-mg",
+      "from": "CJC1295/DAC 2 mg",
+      "to": "CJC1295/DAC"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "dihexa",
+      "deleted": "OxiJD1LU2g6BxYSziDyL-default",
+      "kept": "I9hDGgzkUQUTqrjlAIkp-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "dihexa",
+      "deleted": "ymmr0TtBqFwW3Tc1qKSd-default",
+      "kept": "I9hDGgzkUQUTqrjlAIkp-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "dsip",
+      "deleted": "lotusland_dsip_5_mg_vial-default",
+      "kept": "lotusland_dsip_10_mg_vial-default",
+      "key": "supplier-lotusland::dsip"
+    },
+    {
+      "type": "name_fix",
+      "docId": "dsip-5mg",
+      "from": "DSIP 5mg",
+      "to": "DSIP"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "epithalon",
+      "deleted": "lotusland_epithalon_10_mg_vial-default",
+      "kept": "lotusland_epithalon_100_mg_vial-default",
+      "key": "supplier-lotusland::epithalon"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "epithalon",
+      "deleted": "lotusland_epithalon_30_mg_vial-default",
+      "kept": "lotusland_epithalon_100_mg_vial-default",
+      "key": "supplier-lotusland::epithalon"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "epithalon",
+      "deleted": "lotusland_epithalon_50_mg_vial-default",
+      "kept": "lotusland_epithalon_100_mg_vial-default",
+      "key": "supplier-lotusland::epithalon"
+    },
+    {
+      "type": "name_fix",
+      "docId": "fagronlab-green-homogeneous-container-30-ml",
+      "from": "FagronLab Green Homogeneous Container 30 ml",
+      "to": "FagronLab Green Homogeneous Container"
+    },
+    {
+      "type": "name_fix",
+      "docId": "foxo4-10-mg",
+      "from": "FOXO4 10 mg",
+      "to": "FOXO4"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ghk-cu",
+      "deleted": "bioniq_ghk_cu_single_use_pen_30_mg-default",
+      "kept": "bioniq_ghk_cu_single_use_pen_100_mg-default",
+      "key": "supplier-bioniq::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ghk-cu",
+      "deleted": "r0cFTwkcAdJeMuNJiJyE-default",
+      "kept": "iiHCc1frQUxYTdEGz0Mt-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ghk-cu-50-mg",
+      "from": "GHK-Cu - 50 mg",
+      "to": "GHK-Cu"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ghk-cu-human-copper",
+      "deleted": "lotusland_ghk_cu_human_copper_50_mg_vial-default",
+      "kept": "lotusland_ghk_cu_human_copper_100_mg_vial-default",
+      "key": "supplier-lotusland::ghk-cu (human copper)"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ghrp-2-5mg",
+      "from": "GHRP-2 5mg",
+      "to": "GHRP-2"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ghrp-6-5mg",
+      "from": "GHRP-6 5mg",
+      "to": "GHRP-6"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "glutathione",
+      "deleted": "SnpfnOKj6BMR3MVc5kEq",
+      "kept": "KIIz0cmiCTf7hNzUCL8d",
+      "key": "supplier-nplabs::5%"
+    },
+    {
+      "type": "name_fix",
+      "docId": "gonadorelin-acetate-2mg",
+      "from": "Gonadorelin Acetate 2mg",
+      "to": "Gonadorelin Acetate"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "hcg",
+      "deleted": "Q7qskegro7D8jrxbwJbe-default",
+      "kept": "K7pp4z7rL6M4o0nMZIoN-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "hcg",
+      "deleted": "lotusland_hcg_5000_iu_vial-default",
+      "kept": "lotusland_hcg_10000_iu_vial-default",
+      "key": "supplier-lotusland::hcg"
+    },
+    {
+      "type": "name_fix",
+      "docId": "hcg-5000iu",
+      "from": "HCG 5000iu",
+      "to": "HCG"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "hexarelin",
+      "deleted": "lotusland_hexarelin_5_mg_vial-default",
+      "kept": "lotusland_hexarelin_2_mg_vial-default",
+      "key": "supplier-lotusland::hexarelin"
+    },
+    {
+      "type": "name_fix",
+      "docId": "hexarelin-2mg",
+      "from": "Hexarelin - 2mg",
+      "to": "Hexarelin"
+    },
+    {
+      "type": "name_fix",
+      "docId": "hexarelin-5mg",
+      "from": "Hexarelin 5mg",
+      "to": "Hexarelin"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "hgh",
+      "deleted": "lotusland_hgh_20_iu_vial-default",
+      "kept": "lotusland_hgh_10_iu_vial-default",
+      "key": "supplier-lotusland::hgh"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "hgh",
+      "deleted": "lotusland_hgh_36_iu_vial-default",
+      "kept": "lotusland_hgh_10_iu_vial-default",
+      "key": "supplier-lotusland::hgh"
+    },
+    {
+      "type": "name_fix",
+      "docId": "hgh-frag-176-191-5-mg",
+      "from": "HGH frag 176-191 - 5 mg",
+      "to": "HGH frag 176-191"
+    },
+    {
+      "type": "name_fix",
+      "docId": "hmg-75iu",
+      "from": "HMG 75iu",
+      "to": "HMG"
+    },
+    {
+      "type": "name_fix",
+      "docId": "igf-1-lr3-1mg",
+      "from": "IGF-1 LR3 1mg",
+      "to": "IGF-1 LR3"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "igf-lr3",
+      "deleted": "lotusland_igf_lr3_1_mg_vial-default",
+      "kept": "lotusland_igf_lr3_0_1_mg_vial-default",
+      "key": "supplier-lotusland::igf lr3"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ipamorelin",
+      "deleted": "ZQX9CQmBYH7xbDDepoer-default",
+      "kept": "YOTGmTU2GZzePRID6SyW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ipamorelin",
+      "deleted": "nplabs_ipamorelin_15mg_nasal_spray",
+      "kept": "YOTGmTU2GZzePRID6SyW-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ipamorelin-5mg",
+      "from": "Ipamorelin 5mg",
+      "to": "Ipamorelin"
+    },
+    {
+      "type": "name_fix",
+      "docId": "kisspeptin-10-mg",
+      "from": "Kisspeptin 10 mg",
+      "to": "Kisspeptin"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "kpv",
+      "deleted": "j7VPz1VUeJopTRUMj2ZL-default",
+      "kept": "S9tWSye5eXaLCFnADg0B-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ll37-5mg",
+      "from": "LL37 5mg",
+      "to": "LL37"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "lotusland_cjc_1295_without_dac_2_mg_vial",
+      "deleted": "lotusland_cjc_1295_without_dac_2_mg_vial-default",
+      "kept": "lotusland_cjc_1295_without_dac_10_mg_vial-default",
+      "key": "supplier-lotusland::cjc-1295 without dac"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "lotusland_cjc_1295_without_dac_2_mg_vial",
+      "deleted": "lotusland_cjc_1295_without_dac_5_mg_vial-default",
+      "kept": "lotusland_cjc_1295_without_dac_10_mg_vial-default",
+      "key": "supplier-lotusland::cjc-1295 without dac"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "melanotan-ii",
+      "deleted": "nplabs_melanotan-ii_2000mcg_ml_nasal_spray",
+      "kept": "ES6lsOPkNa7ZAJaoWMGX-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "melanotan-ii-10mg",
+      "from": "Melanotan II 10mg",
+      "to": "Melanotan II"
+    },
+    {
+      "type": "name_fix",
+      "docId": "mgf-2-mg",
+      "from": "MGF 2 mg",
+      "to": "MGF"
+    },
+    {
+      "type": "name_fix",
+      "docId": "mgf-peg-2mg",
+      "from": "MGF-PEG - 2mg",
+      "to": "MGF-PEG"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "mots-c",
+      "deleted": "D3kYybmYfChi1CpFfgXt-default",
+      "kept": "8IoE4wwnxUVHtXzQj1BJ-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "mots-c",
+      "deleted": "ae8Asd0bSMCLRmjNzDDO-default",
+      "kept": "8IoE4wwnxUVHtXzQj1BJ-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "mots-c",
+      "deleted": "sm14vniE0KxpBugkU8e7-default",
+      "kept": "8IoE4wwnxUVHtXzQj1BJ-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "mots-c",
+      "deleted": "lotusland_mots_c_40_mg_vial-default",
+      "kept": "lotusland_mots_c_10_mg_vial-default",
+      "key": "supplier-lotusland::mots-c"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "mots-c",
+      "deleted": "lotusland_mots_c_60_mg_vial-default",
+      "kept": "lotusland_mots_c_10_mg_vial-default",
+      "key": "supplier-lotusland::mots-c"
+    },
+    {
+      "type": "name_fix",
+      "docId": "mots-c-10mg",
+      "from": "MOTS-C 10mg",
+      "to": "MOTS-C"
+    },
+    {
+      "type": "name_fix",
+      "docId": "mt-1-10mg",
+      "from": "MT-1 10mg",
+      "to": "MT-1"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "nad",
+      "deleted": "bioniq_nad_single_use_pen_300_mg-default",
+      "kept": "bioniq_nad_nasal_spray-default",
+      "key": "supplier-bioniq::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "nad",
+      "deleted": "lotusland_nad_500_mg_vial-default",
+      "kept": "lotusland_nad_1000_mg_vial-default",
+      "key": "supplier-lotusland::nad+"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "nad",
+      "deleted": "lotusland_nad_750_mg_vial-default",
+      "kept": "lotusland_nad_1000_mg_vial-default",
+      "key": "supplier-lotusland::nad+"
+    },
+    {
+      "type": "name_fix",
+      "docId": "nad-100mg",
+      "from": "NAD+ 100mg",
+      "to": "NAD+"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "oxytocin",
+      "deleted": "nplabs_oxytocin_50iu_ml_nasal_spray",
+      "kept": "mmp3kqENoUqLeoUrSM3F-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "oxytocin-acetate",
+      "deleted": "lotusland_oxytocin_acetate_2_mg_vial-default",
+      "kept": "lotusland_oxytocin_acetate_10_mg_vial-default",
+      "key": "supplier-lotusland::oxytocin acetate"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "pinealon",
+      "deleted": "lotusland_pinealon_25_mg_vial-default",
+      "kept": "lotusland_pinealon_16_mg_vial-default",
+      "key": "supplier-lotusland::pinealon"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "pt-141-10mg-vial",
+      "deleted": "lotusland_pt_141_20_mg_vial-default",
+      "kept": "lotusland_pt_141_10_mg_vial-default",
+      "key": "supplier-lotusland::pt-141"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "pt-141-10mg-vial",
+      "deleted": "lotusland_pt_141_5_mg_vial-default",
+      "kept": "lotusland_pt_141_10_mg_vial-default",
+      "key": "supplier-lotusland::pt-141"
+    },
+    {
+      "type": "name_fix",
+      "docId": "pt-141-bremelanotide-10mg",
+      "from": "PT-141 (Bremelanotide) 10mg",
+      "to": "PT-141 (Bremelanotide)"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "WnTDhrpGtQcupcN4c1lJ-default",
+      "kept": "PlRd12y0w1ch3VUZ6OJp-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "ZTNRApt4cNpv1WoK8s0V-default",
+      "kept": "PlRd12y0w1ch3VUZ6OJp-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "apeVB5zMLe56qHgsTmW0-default",
+      "kept": "PlRd12y0w1ch3VUZ6OJp-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "lotusland_retatrutide_20_mg_vial-default",
+      "kept": "lotusland_retatrutide_10_mg_vial-default",
+      "key": "supplier-lotusland::retatrutide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "lotusland_retatrutide_30_mg_vial-default",
+      "kept": "lotusland_retatrutide_10_mg_vial-default",
+      "key": "supplier-lotusland::retatrutide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "lotusland_retatrutide_40_mg_vial-default",
+      "kept": "lotusland_retatrutide_10_mg_vial-default",
+      "key": "supplier-lotusland::retatrutide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "retatrutide",
+      "deleted": "lotusland_retatrutide_5_mg_vial-default",
+      "kept": "lotusland_retatrutide_10_mg_vial-default",
+      "key": "supplier-lotusland::retatrutide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "selank",
+      "deleted": "vIHzmiljsnmxvQyKNIN2-default",
+      "kept": "CeQkwMjOnL9OlcsdpK27-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "selank",
+      "deleted": "bioniq_selank_single_use_pen_15_mg-default",
+      "kept": "bioniq_selank_nasal_spray-default",
+      "key": "supplier-bioniq::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "selank",
+      "deleted": "lotusland_selank_5_mg_vial-default",
+      "kept": "lotusland_selank_10_mg_vial-default",
+      "key": "supplier-lotusland::selank"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "semaglutide",
+      "deleted": "ClpxgSmU8IdnrBuYT5Wl-default",
+      "kept": "BcwWwoVhS76ChauChmWu-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "semaglutide",
+      "deleted": "WCAeRnnJZcP11dFHcGvM-default",
+      "kept": "BcwWwoVhS76ChauChmWu-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "semaglutide",
+      "deleted": "lotusland_semaglutide_2_mg_vial-default",
+      "kept": "lotusland_semaglutide_10_mg_vial-default",
+      "key": "supplier-lotusland::semaglutide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "semaglutide",
+      "deleted": "lotusland_semaglutide_5_mg_vial-default",
+      "kept": "lotusland_semaglutide_10_mg_vial-default",
+      "key": "supplier-lotusland::semaglutide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "semax",
+      "deleted": "bioniq_semax_single_use_pen_15_mg-default",
+      "kept": "bioniq_semax_nasal_spray-default",
+      "key": "supplier-bioniq::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "sermorelin",
+      "deleted": "nplabs_sermorelin_15mg_nasal_spray",
+      "kept": "GImln1iKD58tO4AHZsfa-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "sermorelin",
+      "deleted": "lotusland_sermorelin_5_mg_vial-default",
+      "kept": "lotusland_sermorelin_10_mg_vial-default",
+      "key": "supplier-lotusland::sermorelin"
+    },
+    {
+      "type": "name_fix",
+      "docId": "sermorelin-5-mg",
+      "from": "Sermorelin 5 mg",
+      "to": "Sermorelin"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ss-31",
+      "deleted": "lotusland_ss_31_50_mg_vial-default",
+      "kept": "lotusland_ss_31_10_mg_vial-default",
+      "key": "supplier-lotusland::ss-31"
+    },
+    {
+      "type": "name_fix",
+      "docId": "ss-31-elamipretide-10mg",
+      "from": "SS-31 (Elamipretide) 10mg",
+      "to": "SS-31 (Elamipretide)"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ss-31-elamipretide-5mg-vial",
+      "deleted": "gbuWc5tUAIrhdlF2RKMv-default",
+      "kept": "QIN2P1AjhQkdmQfrjGfF-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "ss-31-elamipretide-5mg-vial",
+      "deleted": "proYuPLYLn62sArD7rCq-default",
+      "kept": "QIN2P1AjhQkdmQfrjGfF-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "survodutide-10mg",
+      "from": "Survodutide 10mg",
+      "to": "Survodutide"
+    },
+    {
+      "type": "name_fix",
+      "docId": "tb-10-mg-bpc-10-mg-ghk-50-mg",
+      "from": "TB 10 mg + BPC 10 mg + GHK 50 mg",
+      "to": "TB 10 mg + BPC 10 mg + GHK"
+    },
+    {
+      "type": "name_fix",
+      "docId": "tb-500-thymosin-b4-acetate-5mg",
+      "from": "TB-500 (Thymosin B4 Acetate) 5mg",
+      "to": "TB-500 (Thymosin B4 Acetate)"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tesamorelin",
+      "deleted": "nplabs_tesamorelin_15mg_nasal_spray",
+      "kept": "cvGpOwchQDvtQ3k9yB4T-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tesamorelin",
+      "deleted": "r6pHsPvslIJnfJPLmusn-default",
+      "kept": "cvGpOwchQDvtQ3k9yB4T-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "name_fix",
+      "docId": "tesamorelin-2mg",
+      "from": "Tesamorelin 2mg",
+      "to": "Tesamorelin"
+    },
+    {
+      "type": "name_fix",
+      "docId": "thymalin-10-mg",
+      "from": "Thymalin 10 mg",
+      "to": "Thymalin"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "thymosin-4-tb-500",
+      "deleted": "lotusland_thymosin_4_tb_500_2_mg_vial-default",
+      "kept": "lotusland_thymosin_4_tb_500_10_mg_vial-default",
+      "key": "supplier-lotusland::thymosin β4 (tb-500)"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "thymosin-4-tb-500",
+      "deleted": "lotusland_thymosin_4_tb_500_5_mg_vial-default",
+      "kept": "lotusland_thymosin_4_tb_500_10_mg_vial-default",
+      "key": "supplier-lotusland::thymosin β4 (tb-500)"
+    },
+    {
+      "type": "name_fix",
+      "docId": "thymosin-alpha-1-5-mg",
+      "from": "Thymosin Alpha - 1 5 mg",
+      "to": "Thymosin Alpha - 1"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "thymosin-beta-tb-500",
+      "deleted": "nplabs_thymosin-beta-tb-500_2mg_nasal_spray",
+      "kept": "BA4bW6rxOyZjGdTPcebr-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "thymosin-beta-tb-500",
+      "deleted": "w1VvC4UgFC6kB5IMtgeV-default",
+      "kept": "BA4bW6rxOyZjGdTPcebr-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "a8aG6NKCccTzxouh0pZC-default",
+      "kept": "MtoTuQVhNnuu2LqXOfBq-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "d1VPqXm9S9gO7G26Kkc3-default",
+      "kept": "MtoTuQVhNnuu2LqXOfBq-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "ehr9VNobbU5XMbCHqAmN-default",
+      "kept": "MtoTuQVhNnuu2LqXOfBq-default",
+      "key": "supplier-nplabs::default variant"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "lotusland_tirzepatide_15_mg_vial-default",
+      "kept": "lotusland_tirzepatide_10_mg_vial-default",
+      "key": "supplier-lotusland::tirzepatide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "lotusland_tirzepatide_30_mg_vial-default",
+      "kept": "lotusland_tirzepatide_10_mg_vial-default",
+      "key": "supplier-lotusland::tirzepatide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "lotusland_tirzepatide_5_mg_vial-default",
+      "kept": "lotusland_tirzepatide_10_mg_vial-default",
+      "key": "supplier-lotusland::tirzepatide"
+    },
+    {
+      "type": "variant_dedup",
+      "docId": "tirzepatide",
+      "deleted": "lotusland_tirzepatide_60_mg_vial-default",
+      "kept": "lotusland_tirzepatide_10_mg_vial-default",
+      "key": "supplier-lotusland::tirzepatide"
+    },
+    {
+      "type": "name_fix",
+      "docId": "vip-10-mg",
+      "from": "VIP 10 mg",
+      "to": "VIP"
+    }
+  ]
+}

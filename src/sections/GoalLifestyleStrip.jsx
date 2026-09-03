@@ -55,16 +55,7 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const ITEMS = [
-    {
-      id: 'intro',
-      isIntro: true,
-      label: 'Begin Your Journey',
-      desc: 'Get ready for a wonderful journey to improve your health. Explore our 8 optimization paths integrating advanced research peptides and protocols.',
-    },
-    ...GOALS
-  ];
-
+  const ITEMS = GOALS;
   const TOTAL = ITEMS.length;
 
   const [navOpen,    setNavOpen]    = useState(false); // Phase 7: mini navigator
@@ -233,17 +224,12 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
     <section className="gls-container">
       {/* ── HEADER ───────────────────────────────────────────────────────── */}
       <div className="gls-header">
-        <div className="gls-date-badge">Updated: May 2026</div>
-
-        {/* Phase 1 — new title */}
-        <h2 className="gls-title">8 Optimization Paths by Lifestyle Goal</h2>
-
-        {/* Phase 5 — improved subtitle */}
+        <h2 className="gls-title">Explore by Goal</h2>
         <p className="gls-subtitle">
-          Explore curated peptides, supplements and intelligent protocols tailored to specific biological goals.
+          Curated peptides, supplements and intelligent protocols tailored to specific biological goals.
         </p>
 
-        {/* Progress indicator — minimal text counter */}
+        {/* Progress indicator — minimal text counter & navigation */}
         <div className="gls-progress-counter">
           <button className="gls-prog-arrow" onClick={() => scrollManual('left')} aria-label="Previous">
             ‹
@@ -257,11 +243,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
             ›
           </button>
         </div>
-
-        {/* First-visit hint */}
-        {showHint && (
-          <p className="gls-scroll-hint">Swipe or drag to explore all paths →</p>
-        )}
       </div>
 
       {/* ── CAROUSEL VIEWPORT ────────────────────────────────────────────── */}
@@ -282,7 +263,6 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
           <ChevronRight size={24} />
         </button>
 
-        {/* Phase 4 — enhanced side fade edges */}
         <div className="gls-fade gls-fade-left" />
         <div className="gls-fade gls-fade-right" />
 
@@ -293,90 +273,43 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
           onTouchStart={(e) => onStart(e.touches[0].pageX)}
         >
           <div className="gls-inner">
-            {ITEMS.map((goal, idx) => {
-              if (goal.isIntro) {
-                return (
-                  <div
-                    key="intro-card"
-                    className={`gls-card gls-intro-card-new ${idx === activeIdx ? 'gls-card--active' : ''}`}
-                    onClick={() => handleGoalClick(goal)}
-                    onMouseEnter={() => setActiveIdx(idx)}
-                    style={{ cursor: 'pointer' }}
+            {ITEMS.map((goal, idx) => (
+              <div
+                key={`${goal.id}-${idx}`}
+                className={`gls-card ${idx === activeIdx ? 'gls-card--active' : ''}`}
+                onClick={() => handleGoalClick(goal)}
+                onMouseEnter={() => setActiveIdx(idx)}
+              >
+                {/* Image area */}
+                <div className="gls-image-container">
+                  <img src={goal.img} alt={goal.label} className="gls-image" loading="lazy" style={{ objectPosition: goal.imgPos || 'center center' }} />
+
+                  {/* Position badge */}
+                  <button
+                    className="gls-position-badge"
+                    aria-label={`Path ${idx + 1} of ${TOTAL} — click to navigate`}
+                    onClick={(e) => openNavigator(e, idx)}
+                    title="Open path navigator"
                   >
-                    {/* Top visual block: scenic pathway image acting as a photo */}
-                    <div className="gls-image-container">
-                      <img 
-                        src="/assets/goals/journey_intro.png" 
-                        alt="Your Clinical Journey" 
-                        className="gls-image" 
-                        loading="lazy" 
-                        style={{ objectPosition: 'center center' }} 
-                      />
+                    {String(idx + 1).padStart(2, '0')} / {String(TOTAL).padStart(2, '0')}
+                  </button>
 
-                      <div className="gls-overlay">
-                        <span className="gls-badge">Begin Journey</span>
-                      </div>
-                    </div>
-
-                    {/* Bottom info block: matches gls-info perfectly */}
-                    <div className="gls-info">
-                      <h3 className="gls-label">{goal.label}</h3>
-                      <p className="gls-desc">{goal.desc}</p>
-                      <div className="gls-card-footer">
-                        <span className="gls-footer-cta">Explore Paths</span>
-                        <span className="gls-footer-arrow">↓</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <div
-                  key={`${goal.id}-${idx}`}
-                  className={`gls-card ${idx === activeIdx ? 'gls-card--active' : ''}`}
-                  onClick={() => handleGoalClick(goal)}
-                  onMouseEnter={() => setActiveIdx(idx)}
-                >
-                  {/* Image area */}
-                  <div className="gls-image-container">
-                    <img src={goal.img} alt={goal.label} className="gls-image" loading="lazy" style={{ objectPosition: goal.imgPos || 'center center' }} />
-
-                    {/* Phase 2 + 7 — clickable position badge → mini navigator */}
-                    <button
-                      className="gls-position-badge"
-                      aria-label={`Path ${idx + 1} of ${TOTAL} — click to navigate`}
-                      onClick={(e) => openNavigator(e, idx)}
-                      title="Open path navigator"
-                    >
-                      {String(idx + 1).padStart(2, '0')} / {String(TOTAL).padStart(2, '0')}
-                    </button>
-
-                    {/* "Start Here" badge — only on first photographic card */}
-                    {idx === (isMobile ? 1 : 0) && (
-                      <div className="gls-start-here">
-                        <span className="gls-start-here-dot" />
-                        Start Here
-                      </div>
-                    )}
-
-                    <div className="gls-overlay">
-                      <span className="gls-badge">Explore</span>
-                    </div>
-                  </div>
-
-                  {/* Card info */}
-                  <div className="gls-info">
-                    <h3 className="gls-label">{goal.label}</h3>
-                    <p className="gls-desc">{goal.desc}</p>
-
-                    <div className="gls-card-footer">
-                      <span className="gls-footer-cta">Explore Research</span>
-                      <span className="gls-footer-arrow">→</span>
-                    </div>
+                  <div className="gls-overlay">
+                    <span className="gls-badge">Explore</span>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Card info */}
+                <div className="gls-info">
+                  <h3 className="gls-label">{goal.label}</h3>
+                  <p className="gls-desc">{goal.desc}</p>
+
+                  <div className="gls-card-footer">
+                    <span className="gls-footer-cta">Explore →</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1011,94 +944,52 @@ export default function GoalLifestyleStrip({ onSelectCategory, onOpenSearch, onS
         }
 
         @media (max-width: 768px) {
-          .gls-title           { font-size: 1.45rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
-          .gls-subtitle        { font-size: 0.82rem; margin-bottom: 1.25rem; line-height: 1.4; }
-          .gls-container       { padding: 2rem 0; }
-          /* Change carousel strip into a highly-optimized 2-column grid on mobile */
+          .gls-title           { font-size: 1.55rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+          .gls-subtitle        { font-size: 0.85rem; margin-bottom: 1.25rem; line-height: 1.4; }
+          .gls-container       { padding: 1.5rem 0; }
           .gls-strip {
-            display: block;
-            overflow-x: visible;
-            cursor: default !important;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.5rem 1rem 1.25rem;
+            scrollbar-width: none;
           }
+          .gls-strip::-webkit-scrollbar { display: none; }
           .gls-inner {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.6rem;
-            width: 100% !important;
-            padding: 0 0.85rem 1rem;
+            display: flex;
+            gap: 1rem;
+            width: max-content !important;
+            padding: 0;
             margin: 0;
-            box-sizing: border-box;
           }
           .gls-card {
-            flex: none;
-            width: 100% !important;
-            border-radius: 12px;
-            scroll-snap-align: none;
+            flex: 0 0 78vw !important;
+            max-width: 320px;
+            scroll-snap-align: center;
+            border-radius: 16px;
             background: var(--surface);
-            border: 1px solid rgba(0, 150, 204, 0.08);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            grid-column: auto !important;
-          }
-          .gls-intro-card-new,
-          .gls-card:first-child {
-            grid-column: auto !important;
+            border: 1px solid rgba(0, 150, 204, 0.12);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
           }
           .gls-image-container {
-            height: 140px; /* Increased from 105px for taller and beautifully clear photos on mobile */
-          }
-
-          .gls-position-badge {
-            font-size: 0.48rem;
-            top: 0.4rem;
-            right: 0.4rem;
-            padding: 0.18rem 0.4rem;
-            border-radius: 4px;
-          }
-          .gls-start-here {
-            font-size: 0.46rem;
-            padding: 0.18rem 0.4rem;
-            top: 0.4rem;
-            left: 0.4rem;
-            border-radius: 4px;
+            height: 180px;
           }
           .gls-info {
-            padding: 0.5rem 0.6rem 0.6rem;
+            padding: 0.85rem 1rem 1rem;
           }
           .gls-label {
-            font-size: 0.76rem;
-            font-weight: 900;
+            font-size: 0.98rem;
+            font-weight: 850;
             line-height: 1.25;
-            margin-bottom: 0.15rem;
-            letter-spacing: -0.01em;
+            margin-bottom: 0.25rem;
           }
           .gls-desc {
-            font-size: 0.6rem;
-            margin-bottom: 0.25rem;
-            line-height: 1.25;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            height: 2.45em; /* exact height to perfectly align footer borders */
+            font-size: 0.78rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.35;
           }
-          .gls-card-footer {
-            margin-top: 0.35rem;
-            padding-top: 0.35rem;
-            border-top: 1px solid rgba(0,0,0,0.04);
-          }
-          .gls-footer-cta {
-            font-size: 0.55rem;
-            font-weight: 800;
-          }
-          .gls-footer-arrow {
-            font-size: 0.8rem;
-          }
-          /* Hide pagination, scroll hints, and fade borders when grid is active */
-          .gls-progress-counter { display: none !important; }
-          .gls-scroll-hint       { display: none !important; }
-          .gls-fade              { display: none !important; }
-          .gls-dots              { display: none !important; }
+          .gls-progress-counter { display: flex !important; }
         }
       `}</style>
 

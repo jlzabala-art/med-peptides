@@ -18,7 +18,9 @@ export default function SmartProductIntakeWizard({
     parentProductId: '', // Used for variants
     name: '', // Used for products
     sku: '',
-    category: 'Peptides',
+    type: 'finished_product',
+    categoryId: 'peptide',
+    category: 'peptide',
     format: 'Vial', // Variant
     size: '5mg', // Variant
     pricePerGram: 0,
@@ -317,22 +319,28 @@ export default function SmartProductIntakeWizard({
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>
-                      Category
+                      Category (Canonical)
                     </label>
                     <select
                       className="input"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      value={formData.categoryId || formData.category}
+                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, category: e.target.value })}
                       style={{
                         padding: '0.6rem',
                         borderRadius: '6px',
                         border: '1px solid #d1d5db',
                       }}
                     >
-                      <option>Peptides</option>
-                      <option>Longevity</option>
-                      <option>Nootropics</option>
-                      <option>Testing Kits</option>
+                      <option value="peptide">🧬 Peptides</option>
+                      <option value="supplement">🌿 Supplements</option>
+                      <option value="hormone">⚡ Hormones</option>
+                      <option value="diagnostic_test">🧪 Diagnostic Tests</option>
+                      <option value="raw_material">⚖️ Bulk API Raw Materials</option>
+                      <option value="consumable">💉 Consumables & Supplies</option>
+                      <option value="skincare">✨ Skincare & Cosmeceuticals</option>
+                      <option value="bundle">📦 Bundles & Kits</option>
+                      <option value="service">📋 Clinical Services</option>
+                      <option value="equipment">🔬 Lab Equipment</option>
                     </select>
                   </div>
                 </div>

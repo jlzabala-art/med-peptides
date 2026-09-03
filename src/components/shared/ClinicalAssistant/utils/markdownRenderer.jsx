@@ -113,7 +113,7 @@ export function inlineFormat(text) {
 function renderMarkdownTable(lines, key) {
   const parseRow = (row) =>
     row.trim().split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
-  const isSeparator = (row) => /^[\s|:\-]+$/.test(row);
+  const isSeparator = (row) => /^[\s|:-]+$/.test(row);
   const nonSep = lines.filter(l => !isSeparator(l));
   if (!nonSep.length) return null;
   const headers = parseRow(nonSep[0]);
@@ -126,6 +126,7 @@ function renderMarkdownTable(lines, key) {
       border: '1px solid rgba(226, 234, 245, 0.8)',
       boxShadow: '0 4px 12px rgba(0, 75, 135, 0.02)'
     }}>
+      {/* eslint-disable-next-line no-restricted-syntax */}
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', fontFamily: 'Inter, sans-serif' }}>
         {headers.length > 0 && (
           <thead>
@@ -184,6 +185,24 @@ export function processMarkdown(content) {
   };
 
   let processed = content;
+
+  // Sanitize internal prompt leakage / directive tokens BEFORE extraction and rendering
+  processed = processed
+    .replace(/\[AUDIENCE:.*?\]/gi, '')
+    .replace(/\[GOAL:.*?\]/gi, '')
+    .replace(/\[STYLE:.*?\]/gi, '')
+    .replace(/\[LAYER:.*?\]/gi, '')
+    .replace(/\[DIRECTIVE[:\s].*?\]/gi, '')
+    .replace(/\[RESPONSE_LAYER:.*?\]/gi, '')
+    .replace(/\[INTENT:.*?\]/gi, '')
+    .replace(/\[QUERY_TYPE:.*?\]/gi, '')
+    .replace(/\[ROLE:.*?\]/gi, '')
+    .replace(/\[CONTEXT_MODE:.*?\]/gi, '')
+    .replace(/\[PROFESSIONAL_MODE\]/gi, '')
+    .replace(/WHO THIS IS FOR:.*$/gim, '')
+    .replace(/^\s*LAYER:\d+.*$/gim, '')
+    .replace(/^\s*---\s*(PRODUCT CONTEXT|ADMIN MODE|PROFESSIONAL|TRAINING|END PRODUCT CONTEXT).*---\s*$/gim, '')
+    .trim();
 
   // Extract Deep Dive
   const deepDiveMatch = processed.match(/\[DEEP_DIVE:(\{.*?\})\]/i);
@@ -385,14 +404,24 @@ export function renderAIMarkdown(raw) {
     }
 
     if (/^##\s/.test(trimmed)) {
+      const isClinicalProfileTitle = trimmed.includes('🧬') || /clinical\s+profile/i.test(trimmed);
       return (
         <h2 key={bi} style={{
-          fontSize: '1.0rem',
-          fontWeight: 750,
-          color: 'var(--color-text-primary)',
-          margin: '0.9rem 0 0.5rem 0',
+          fontSize: isClinicalProfileTitle ? '1.08rem' : '0.98rem',
+          fontWeight: 800,
+          color: isClinicalProfileTitle ? 'var(--primary, #003666)' : 'var(--color-text-primary)',
+          margin: '1rem 0 0.55rem 0',
           letterSpacing: '-0.015em',
-          lineHeight: '1.3'
+          lineHeight: '1.35',
+          ...(isClinicalProfileTitle ? {
+            background: 'linear-gradient(135deg, rgba(0, 54, 102, 0.07) 0%, rgba(13, 148, 136, 0.05) 100%)',
+            padding: '0.65rem 0.95rem',
+            borderRadius: '10px',
+            border: '1px solid rgba(0, 54, 102, 0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          } : {})
         }}>
           {inlineFormat(trimmed.replace(/^##\s+/, ''))}
         </h2>
@@ -402,10 +431,10 @@ export function renderAIMarkdown(raw) {
     if (/^###\s/.test(trimmed)) {
       return (
         <h3 key={bi} style={{
-          fontSize: '0.86rem',
-          fontWeight: 700,
-          color: 'var(--color-text-secondary)',
-          margin: '0.75rem 0 0.4rem 0',
+          fontSize: '0.88rem',
+          fontWeight: 750,
+          color: 'var(--primary, #003666)',
+          margin: '0.85rem 0 0.4rem 0',
           letterSpacing: '0.01em',
           lineHeight: '1.3'
         }}>
@@ -415,7 +444,7 @@ export function renderAIMarkdown(raw) {
     }
 
     // Graphical Steps Renderer
-    const stepLineRe = /^(\d+[\.\)]|Step\s+\d+:?|[-*•]\s+\*\*(?:Step|Paso|Phase|Fase|Etapa|Stage|Etapa|\d+)\b)/i;
+    const stepLineRe = /^(\d+[.)]|Step\s+\d+:?|[-*•]\s+\*\*(?:Step|Paso|Phase|Fase|Etapa|Stage|\d+)\b)/i;
     const blockLines = trimmed.split('\n');
     const hasMultipleSteps = blockLines.filter(l => stepLineRe.test(l.trim())).length >= 2;
 
@@ -428,7 +457,7 @@ export function renderAIMarkdown(raw) {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        const stepMatch = trimmedLine.match(/^(\d+[\.\)]|Step\s+\d+:?|[-*•])\s*(?:\*\*(.*?)\*\*|([a-zA-Z0-9\s,&_]+)):?(.*)$/i);
+        const stepMatch = trimmedLine.match(/^(\d+[.)]|Step\s+\d+:?|[-*•])\s*(?:\*\*(.*?)\*\*|([a-zA-Z0-9\s,&_]+)):?(.*)$/i);
         if (stepMatch) {
           if (currentStep) parsedSteps.push(currentStep);
           const stepMarker = stepMatch[1];
@@ -529,7 +558,7 @@ export function renderAIMarkdown(raw) {
       return renderMarkdownTable(tableLines, bi);
     }
 
-    const listLineRe = /^([-•*]|\d+\.)\ +/;
+    const listLineRe = /^([-•*]|\d+\.)\s+/;
     const lines = trimmed.split('\n');
     const hasListItem = lines.some(l => listLineRe.test(l.trim()));
 
@@ -657,7 +686,7 @@ export function renderAIMarkdown(raw) {
     }
 
     // AI Section Header match
-    const headerMatch = trimmed.match(/^\*\*([A-Z][A-Z0-9 _\-]+?):?\*\*\s*([\s\S]*)$/i);
+    const headerMatch = trimmed.match(/^\*\*([A-Z][A-Z0-9 _-]+?):?\*\*\s*([\s\S]*)$/i);
     if (headerMatch) {
       const labelRaw = headerMatch[1].trim().toUpperCase();
       const style = AI_SECTION_MAP[labelRaw];

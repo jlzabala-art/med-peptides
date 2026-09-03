@@ -18,6 +18,7 @@ import React, { useState, useMemo, useEffect, useDeferredValue } from 'react';
 
 import { useCatalogData } from './useCatalogData';
 import { useCatalogActionRouter } from './hooks/useCatalogActionRouter';
+import UniversalProductQuickView from '../../shared/UniversalProductQuickView';
 import OperationalActionCards from './OperationalActionCards';
 import BulkUpdateModal from './BulkUpdateModal';
 import CatalogProductsWorkspace from './views/CatalogProductsWorkspace';
@@ -101,6 +102,7 @@ export default function CatalogIntelligenceHub({
   const [bulkActionState, setBulkActionState] = useState({ isOpen: false, type: null, ids: [] });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [catalogToEdit, setCatalogToEdit] = useState(null);
 
   const [aiProduct, setAiProduct] = useState(null);
@@ -326,6 +328,7 @@ export default function CatalogIntelligenceHub({
     setVariantEditMode,
     setIsVariantModalOpen,
     setIsDrawerOpen,
+    setIsQuickViewOpen,
     setBulkActionState,
     setAiProduct,
     setIsAiModalOpen,
@@ -359,8 +362,15 @@ export default function CatalogIntelligenceHub({
     const supplierMap = new Map();
     [...products, ...variants].forEach(item => {
       if (item.supplier) {
-        const name = item.supplier.trim();
-        const lower = name.toLowerCase();
+        let name = item.supplier.trim();
+        let lower = name.toLowerCase();
+        
+        // Normalize Lotusland to a single canonical name
+        if (lower.includes('lotusland')) {
+           name = 'Lotusland';
+           lower = 'lotusland';
+        }
+        
         if (!supplierMap.has(lower)) {
           supplierMap.set(lower, name);
         }
@@ -547,8 +557,22 @@ export default function CatalogIntelligenceHub({
               setSelectedProduct(null);
             }}
             onProductUpdated={() => refresh()}
+            onSave={() => {
+              refreshProducts();
+              refreshVariants();
+            }}
           />
         )}
+        <UniversalProductQuickView
+          isOpen={isQuickViewOpen && !!selectedProduct}
+          onClose={() => {
+            setSelectedProduct(null);
+            setIsQuickViewOpen(false);
+          }}
+          product={selectedProduct}
+          products={products}
+          activeSupplierFilter={advancedFilters?.suppliers?.length === 1 ? advancedFilters.suppliers[0] : null}
+        />
         <AdvancedFiltersDrawer
           isOpen={isAdvancedFiltersOpen}
           onClose={() => setIsAdvancedFiltersOpen(false)}

@@ -1,51 +1,97 @@
-
-
-
-
 import React from 'react';
-import { CheckCircle, Clock, Package, AlertCircle } from '@/lib/icons';
 
-
-
-
-
-export default function StatusChip({ status }) {
-  const normalized = status?.toLowerCase() || 'unknown';
-  switch(normalized) {
-    case 'completed':
-    case 'delivered':
-    case 'accepted':
-    case 'active':
-      return (
-        <span style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-          <CheckCircle size={12} /> {status}
-        </span>
-      );
-    case 'pending':
-    case 'processing':
-    case 'awaiting payment':
-    case 'paused':
-    case 'draft':
-      return (
-        <span style={{ backgroundColor: 'var(--color-warning-bg)', color: 'var(--color-warning)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-          <Clock size={12} /> {status}
-        </span>
-      );
-    case 'cancelled':
-    case 'rejected':
-    case 'revoked':
-    case 'inactive':
-    case 'out of stock':
-      return (
-        <span style={{ backgroundColor: 'var(--color-danger-bg)', color: 'var(--color-danger)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-          <AlertCircle size={12} /> {status}
-        </span>
-      );
-    default:
-      return (
-        <span style={{ backgroundColor: 'var(--color-bg-hover)', color: 'var(--color-text-secondary)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-          <Package size={12} /> {status}
-        </span>
-      );
+/**
+ * StatusChip
+ * ─────────────────────────────────────────────────────────────────────────────
+ * GCP-inspired status badge with semantic colors. Golden Rule #8.
+ * 
+ * Semantic Maps:
+ * - Green: active, approved, reconciled, published, success
+ * - Yellow: pending, draft, awaiting, processing
+ * - Red: error, rejected, disputed, failed, cancelled
+ * - Gray: inactive, archived, disabled
+ * - Blue: po_created, synced, converted
+ */
+export default function StatusChip({ status, customLabel, style = {}, variant = 'pill' }) {
+  if (!status && !customLabel) return null;
+  
+  // Safely get string for semantic mapping
+  const s = (status || (typeof customLabel === 'string' ? customLabel : '')).toLowerCase();
+  
+  let bg = '#f1f5f9';
+  let color = '#64748b';
+  
+  if (['active', 'approved', 'reconciled', 'published', 'success', 'completed', 'delivered', 'accepted', 'aceptada', 'linked', 'in_stock', 'in stock'].includes(s)) {
+    bg = '#f0fdf4';
+    color = '#16a34a';
+  } else if (['pending', 'draft', 'awaiting', 'processing', 'pendiente', 'unverified', 'awaiting payment', 'paused'].includes(s)) {
+    bg = '#fffbeb';
+    color = '#d97706';
+  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled', 'suspended', 'inactive', 'expired', 'caducada', 'revoked', 'out of stock', 'out_of_stock'].includes(s)) {
+    bg = '#fef2f2';
+    color = '#dc2626';
+  } else if (['po_created', 'synced', 'converted', 'info', 'invited', 'sent', 'enviada', 'protected', 'in_transit', 'in transit', 'en tránsito', 'en transito', 'shipped'].includes(s)) {
+    bg = '#eff6ff';
+    color = '#2563eb';
+  } else if (['archived', 'hidden', 'disabled', 'unknown'].includes(s)) {
+    bg = '#f1f5f9';
+    color = '#64748b';
   }
+  
+  // Canonical English label dictionary for any legacy status string
+  const SPANISH_TO_ENGLISH_MAP = {
+    'en tránsito': 'In Transit',
+    'en transito': 'In Transit',
+    'pendiente': 'Pending',
+    'aceptada': 'Accepted',
+    'enviada': 'Sent',
+    'caducada': 'Expired',
+    'anulada': 'Cancelled',
+    'rechazada': 'Rejected',
+    'borrador': 'Draft',
+  };
+
+  const formattedDefault = status 
+    ? (SPANISH_TO_ENGLISH_MAP[s] || (status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ')))
+    : '';
+
+  const label = customLabel || formattedDefault;
+
+  if (variant === 'dot') {
+    return (
+      <span
+        title={label}
+        style={{
+          display: 'inline-block',
+          width: '10px',
+          height: '10px',
+          borderRadius: '50%',
+          backgroundColor: color,
+          ...style
+        }}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="status-badge"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '2px 7px',
+        borderRadius: '9999px',
+        fontSize: '0.70rem',
+        fontWeight: 650,
+        letterSpacing: '0.01em',
+        backgroundColor: bg,
+        color: color,
+        whiteSpace: 'nowrap',
+        lineHeight: '1.2',
+        ...style
+      }}
+    >
+      {label}
+    </span>
+  );
 }

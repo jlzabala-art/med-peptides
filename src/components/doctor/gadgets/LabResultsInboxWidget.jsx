@@ -1,15 +1,8 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { subscribeToPendingLabResults, markLabResultReviewed } from '../../../repositories/labResultsRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { FlaskConical, Check, X, FileText } from '@/lib/icons';
-
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function LabResultsInboxWidget() {
   const { user } = useAuth();
@@ -18,14 +11,7 @@ export default function LabResultsInboxWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const q = query(
-      collection(db, 'lab_results'),
-      where('doctorId', '==', user.uid),
-      where('status', '==', 'pending_review')
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToPendingLabResults(user.uid, (list) => {
       setResults(list);
     });
 
@@ -35,12 +21,9 @@ export default function LabResultsInboxWidget() {
   const handleReview = async (resId) => {
     setLoadingId(resId);
     try {
-      await updateDoc(doc(db, 'lab_results', resId), {
-        status: 'reviewed',
-        reviewedAt: serverTimestamp()
-      });
+      await markLabResultReviewed(resId, user?.displayName || 'Doctor');
     } catch (err) {
-      console.error(err);
+      toast.error('Error al marcar como revisado');
     } finally {
       setLoadingId(null);
     }
@@ -83,7 +66,7 @@ export default function LabResultsInboxWidget() {
 
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                 <button 
-                  onClick={() => alert("Mostrando PDF o imagen del paciente...")}
+                  onClick={() => toast("Mostrando PDF o imagen del paciente...")}
                   style={{ 
                     flex: 1, padding: '0.5rem', background: 'var(--color-border)', color: 'var(--color-text-secondary)', 
                     border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer',

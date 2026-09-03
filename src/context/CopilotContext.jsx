@@ -4,11 +4,26 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const CopilotContext = createContext(null);
 
 export function useCopilot() {
-  return useContext(CopilotContext);
+  const context = useContext(CopilotContext);
+  return context || {
+    isOpen: false,
+    isPinned: false,
+    isCommandBarOpen: false,
+    panelWidth: 'context',
+    mode: 'operations',
+    contextData: {},
+    toggleCopilot: () => {},
+    openCopilot: () => {},
+    closeCopilot: () => {},
+    toggleCommandBar: () => {},
+    setMode: () => {},
+    setContextData: () => {},
+  };
 }
 
 export function CopilotProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
   const [isCommandBarOpen, setIsCommandBarOpen] = useState(false);
   const [panelWidth, setPanelWidth] = useState('context'); // 'compact', 'context', 'full'
   const [mode, setMode] = useState('operations'); // operations, medical, commercial, executive, personal
@@ -60,7 +75,9 @@ export function CopilotProvider({ children }) {
     mode,
     setMode,
     contextData,
-    setContextData
+    setContextData,
+    isPinned,
+    setIsPinned
   };
 
   return (

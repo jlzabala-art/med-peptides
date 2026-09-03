@@ -248,6 +248,7 @@ export default function ObjectiveDetailView({
           ))}
         </div>
       </div>
+    </div>
 
       <div style={{ 
         marginTop: '4rem', 

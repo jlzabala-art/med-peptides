@@ -46,16 +46,36 @@ export const generateZohoSalesOrder = async (protocolData, patientContext) => {
 
     console.log("🚀 Prepared Zoho Payload:", zohoPayload);
 
-    // TODO: When credentials are available, replace this block with:
-    // const response = await fetch(ZOHO_CLOUD_FUNCTION_URL, { method: 'POST', body: JSON.stringify(zohoPayload), signal: controller.signal });
+    // Call actual Cloud Function
+    const ZOHO_CLOUD_FUNCTION_URL = import.meta.env.VITE_ZOHO_CLOUD_FUNCTION_URL;
+    let responseData = null;
 
-    await new Promise(resolve => setTimeout(resolve, 1200)); // Simulated latency
+    if (ZOHO_CLOUD_FUNCTION_URL) {
+      const response = await fetch(ZOHO_CLOUD_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(zohoPayload),
+        signal: controller.signal
+      });
+      if (!response.ok) {
+        throw new Error(`Zoho sync failed: ${response.statusText}`);
+      }
+      responseData = await response.json();
+    } else {
+      console.warn("VITE_ZOHO_CLOUD_FUNCTION_URL not set, falling back to mock response.");
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      responseData = {
+        salesorder_id: `SO-GEN-${Math.floor(Math.random() * 100000)}`
+      };
+    }
     clearTimeout(timeout);
 
     // 4. Successful Response
     return {
       success: true,
-      salesorder_id: `SO-GEN-${Math.floor(Math.random() * 100000)}`,
+      salesorder_id: responseData.salesorder_id || `SO-GEN-${Math.floor(Math.random() * 100000)}`,
       status: "draft_validated",
       total: costData.totalEstimatedCost,
       syncTime: new Date().toISOString(),

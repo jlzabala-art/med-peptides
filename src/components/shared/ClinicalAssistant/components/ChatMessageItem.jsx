@@ -28,6 +28,7 @@ import { User, Bot, Copy, Check, Volume2, VolumeX, ThumbsUp, ThumbsDown, Externa
 export default function ChatMessageItem({ msg, idx, onProductClick, InstantResultsTabs, navigate, setIsOpen, onSend, onRate, onDeepDive, contextMode = 'patient', onConfirmAction }) {
   const [copyIdx, setCopyIdx] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const isAssistant = msg.role === 'assistant';
   const { html, metadata } = isAssistant ? processMarkdown(msg.content) : { html: null, metadata: {} };
   const isSpecialMode = contextMode === 'admin' || contextMode === 'doctor';
@@ -189,16 +190,129 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
               {copyIdx === idx ? (
                 <>
                   <Check size={13} strokeWidth={2.5} />
-                  <span>¡Reporte Copiado!</span>
+                  <span>Report Copied!</span>
                 </>
               ) : (
                 <>
                   <Copy size={13} />
-                  <span>📋 Copiar Reporte Clínico</span>
+                  <span>📋 Copy Clinical Report</span>
                 </>
               )}
             </button>
           )}
+
+          {isAssistant && (msg.content?.includes('🧬') || /clinical\s+profile/i.test(msg.content || '')) && (() => {
+            const detectedProductMatch = msg.content?.match(/##\s+🧬\s+([^\n—–-]+)/i);
+            const detectedProductName = detectedProductMatch ? detectedProductMatch[1].trim() : null;
+            const detectedProductLink = msg.content?.match(/\[(?:View|Ver)[^\]]*\]\(([^)]+)\)/i)?.[1] || (detectedProductName ? `/product/${detectedProductName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}` : null);
+
+            return (
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.45rem',
+                marginTop: '0.9rem',
+                padding: '0.65rem 0.85rem',
+                backgroundColor: 'rgba(0, 54, 102, 0.03)',
+                borderRadius: '10px',
+                border: '1px solid rgba(0, 54, 102, 0.08)'
+              }}>
+                {detectedProductLink && (
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('nav:internal', { detail: { href: detectedProductLink } }));
+                      if (setIsOpen) setIsOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '0.4rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(0, 54, 102, 0.15)',
+                      backgroundColor: 'white',
+                      color: 'var(--primary, #003666)',
+                      fontSize: '0.72rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0, 54, 102, 0.06)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}
+                  >
+                    <span>📄 View Full Profile & Pricing</span>
+                    <ExternalLink size={12} />
+                  </button>
+                )}
+
+                {detectedProductName && (
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('nav:internal', { detail: { href: `/admin/protocols?q=${encodeURIComponent(detectedProductName)}` } }));
+                      if (setIsOpen) setIsOpen(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '0.4rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(13, 148, 136, 0.2)',
+                      backgroundColor: 'white',
+                      color: '#0f766e',
+                      fontSize: '0.72rem',
+                      fontWeight: 750,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(13, 148, 136, 0.06)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}
+                  >
+                    <span>🧪 View Clinical Protocols</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(msg.content);
+                    setCopyIdx(idx);
+                    setTimeout(() => setCopyIdx(null), 2500);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: '8px',
+                    border: copyIdx === idx ? '1px solid #10b981' : '1px solid rgba(0, 0, 0, 0.1)',
+                    backgroundColor: copyIdx === idx ? '#ecfdf5' : 'white',
+                    color: copyIdx === idx ? '#059669' : '#475569',
+                    fontSize: '0.72rem',
+                    fontWeight: 750,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
+                  }}
+                  onMouseEnter={e => { if (copyIdx !== idx) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                  onMouseLeave={e => { if (copyIdx !== idx) e.currentTarget.style.backgroundColor = copyIdx === idx ? '#ecfdf5' : 'white'; }}
+                >
+                  {copyIdx === idx ? (
+                    <>
+                      <Check size={12} />
+                      <span>Profile Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} />
+                      <span>📋 Copy Profile</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            );
+          })()}
           {isAssistant && (
             <div style={{ 
               display: 'flex', 
@@ -325,13 +439,12 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
         )}
 
         {/* ── AdminAI Pending Action Card ───────────────────────────── */}
-        {isAssistant && msg.pendingAction && onConfirmAction && !msg._pendingCancelled && (
+        {isAssistant && msg.pendingAction && onConfirmAction && !isCancelled && !msg._pendingCancelled && (
           <PendingActionCard
             pendingAction={msg.pendingAction}
             onConfirm={onConfirmAction}
             onCancel={() => {
-              msg._pendingCancelled = true;
-              if (typeof onSend === 'function') onSend(''); // trigger re-render
+              setIsCancelled(true);
             }}
           />
         )}
@@ -412,6 +525,68 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
                   <ExternalLink size={10} />
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Dynamic Follow-up Chips ──────────────────────────────────────── */}
+        {isAssistant && msg.suggestions && msg.suggestions.length > 0 && onSend && (
+          <div style={{ marginTop: '0.85rem' }}>
+            <div style={{
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              color: 'var(--color-text-tertiary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}>
+              <span style={{ opacity: 0.6 }}>✦</span> Continue exploring
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {msg.suggestions.map((s, si) => {
+                const rawLabel = typeof s === 'string' ? s : (s.label || s.displayText || s.payload || '');
+                const cleanLabel = String(rawLabel).replace(/\bundefined\b/gi, '').trim();
+                if (!cleanLabel) return null;
+                return (
+                  <button
+                    key={si}
+                    onClick={() => onSend(s)}
+                    style={{
+                      border: `1.5px solid ${themeAccent}30`,
+                      backgroundColor: `${themeAccent}08`,
+                      color: themeAccent,
+                      borderRadius: '20px',
+                      padding: '0.35rem 0.85rem',
+                      fontSize: '0.71rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.18s',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      outline: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = `${themeAccent}18`;
+                      e.currentTarget.style.borderColor = themeAccent;
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = `0 3px 8px ${themeAccent}22`;
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = `${themeAccent}08`;
+                      e.currentTarget.style.borderColor = `${themeAccent}30`;
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {cleanLabel}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

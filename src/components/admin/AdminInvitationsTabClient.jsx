@@ -22,7 +22,7 @@ import { useToast } from '../../hooks/useToast';
 
 import DataTable from '../ui/DataTable';
 import AppEntityCell from '../ui/AppEntityCell';
-import AppStatusChip from '../ui/AppStatusChip';
+import { StatusChip, CopyableId } from '../ui';
 import AppActionGroup from '../ui/AppActionGroup';
 import notifier from '../../services/NotificationService';
 
@@ -32,8 +32,9 @@ import BulkInviteModal from './invitations/BulkInviteModal';
 import { useInvitations } from '../../hooks/admin/useInvitations';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import { EMAILJS_CONFIG } from '../../config/emailjs';
 
-const EMAILJS_TEMPLATE_ID = 'template_7unfks8';
+const EMAILJS_TEMPLATE_ID = EMAILJS_CONFIG.TEMPLATES.STANDARD_INVITATION;
 
 export default function AdminInvitationsTabClient({ restrictedRoles = null, readOnly = false, tenantId = null, initialInvitations = null }) {
   const { toast } = useToast();
@@ -274,7 +275,7 @@ export default function AdminInvitationsTabClient({ restrictedRoles = null, read
               {
                 key: 'status',
                 header: 'Status',
-                render: (inv) => <AppStatusChip status={getInvitationStatus(inv)} />,
+                render: (inv) => <StatusChip status={getInvitationStatus(inv)} />,
               },
               {
                 key: 'actions',

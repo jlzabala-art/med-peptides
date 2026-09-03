@@ -12,24 +12,11 @@
  * - Responsive grid and list views
  */
 /* eslint-disable react-refresh/only-export-components */
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartProvider';
 import { motion, AnimatePresence } from 'framer-motion';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useRouter, usePathname } from 'next/navigation';
 import '../styles/collection_shared.css';
 import CollectionHeader from '../components/collection/CollectionHeader';
@@ -39,7 +26,7 @@ import FilterDrawer from '../components/collection/FilterDrawer';
 import PaginationControl from '../components/common/PaginationControl';
 import SharedChip from '../components/collection/SharedChip';
 import ProductCard, { SkeletonCard } from '../components/collection/ProductCard';
-import { getPublicProtocols } from '../services/protocolStorage.js';
+import { getAllProtocols } from '../repositories/protocolRepository';
 import { ProtocolPreviewModal } from '../components/protocol/ProtocolPreviewModal';
 import { LayoutGrid, List, Search, SlidersHorizontal, ArrowRight, FlaskConical, X, Brain, Moon, Activity, Shield, Zap, Sparkles, Droplets, Tag } from '@/lib/icons';
 
@@ -414,10 +401,10 @@ function useProtocols() {
     setLoading(true);
     setError(null);
 
-    getPublicProtocols()
+    getAllProtocols()
       .then(docs => {
         if (cancelled) return;
-        console.log(`[ProtocolCollectionPage] Loaded ${docs.length} public protocols from Firestore`);
+        console.log(`[ProtocolCollectionPage] Loaded ${docs.length} protocols from Firestore`);
         setProtocols(docs.map(d => normalizeProtocolCard(d, 'firestore')));
         setLoading(false);
       })
@@ -438,8 +425,10 @@ function useProtocols() {
    FASE 3a — component shell + filter state + derived options
    ───────────────────────────────────────────────────────────── */
 
-export default function ProtocolCollectionPage({ onNavigate, onBack }) {
+export default function ProtocolCollectionPage({ onNavigate, onBack, isDoctor = true }) {
   const navigate = useRouter();
+  const { userProfile, isProfessional } = useAuth();
+  const { updateCart } = useCart();
   const location = usePathname();
 
   usePageMeta({
@@ -1017,7 +1006,7 @@ export default function ProtocolCollectionPage({ onNavigate, onBack }) {
         <ProtocolPreviewModal
           protocol={selectedProtocol}
           onClose={() => setSelectedProtocol(null)}
-          updateCart={() => {}}
+          updateCart={updateCart}
           stickyTotal={0}
           bundleAdded={false}
           localTier="retail"

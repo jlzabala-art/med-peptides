@@ -77,16 +77,19 @@ export const ADMIN_ROLES = {
 };
 
 let globalSimulatedRole = 'admin';
+let globalImpersonatedUser = null;
 const listeners = new Set();
 
 /**
- * Global singleton state for simulated role inside the Admin Dashboard.
+ * Global singleton state for simulated role and user impersonation inside the Admin Dashboard.
  */
 export function useAdminRoleSimulation() {
   const [role, setRole] = useState(globalSimulatedRole);
+  const [impersonatedUser, setImpersonatedUser] = useState(globalImpersonatedUser);
 
   const sync = useCallback(() => {
     setRole(globalSimulatedRole);
+    setImpersonatedUser(globalImpersonatedUser);
   }, []);
 
   useEffect(() => {
@@ -101,12 +104,29 @@ export function useAdminRoleSimulation() {
     }
   }, []);
 
+  const impersonateUser = useCallback((userObj) => {
+    globalImpersonatedUser = userObj;
+    if (userObj?.role) {
+      globalSimulatedRole = userObj.role;
+    }
+    listeners.forEach((listener) => listener());
+  }, []);
+
+  const exitImpersonation = useCallback(() => {
+    globalImpersonatedUser = null;
+    globalSimulatedRole = 'admin';
+    listeners.forEach((listener) => listener());
+  }, []);
+
   const currentRoleConfig = ADMIN_ROLES[role] || ADMIN_ROLES.admin;
 
   return {
     simulatedRole: role,
     setSimulatedRole,
+    impersonatedUser,
+    impersonateUser,
+    exitImpersonation,
     allowedAdminTabs: currentRoleConfig.allowedTabs,
-    isSimulating: role !== 'admin',
+    isSimulating: role !== 'admin' || Boolean(impersonatedUser),
   };
 }

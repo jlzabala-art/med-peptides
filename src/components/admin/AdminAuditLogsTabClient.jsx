@@ -114,7 +114,7 @@ export default function AdminAuditLogsTabClient({ initialData = [], isSubTab = f
                   key: 'executed_by',
                   header: 'Source & User',
                   render: (val, row) => (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '0.25rem' }}>
                       <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.9rem' }}>{val || 'Unknown'}</span>
                       <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                         <ShieldAlert size={12} /> {row.source || 'Manual'}

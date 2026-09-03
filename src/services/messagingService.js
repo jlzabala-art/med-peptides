@@ -1,4 +1,5 @@
 import * as fb from '../firebase';
+import logger from '../utils/logger.js';
 const db = fb?.db;
 const storage = fb?.storage;
 import { 
@@ -21,7 +22,7 @@ export const messagingService = {
         lastActive: serverTimestamp()
       });
     } catch (error) {
-      console.error('[messagingService] Error updating presence:', error);
+      logger.error('[messagingService] Error updating presence:', error);
     }
   },
 
@@ -156,7 +157,7 @@ export const messagingService = {
       });
 
     } catch (error) {
-      console.error('[messagingService] Error sending message:', error);
+      logger.error('[messagingService] Error sending message:', error);
       throw error;
     }
   },
@@ -183,7 +184,7 @@ export const messagingService = {
         // A better approach in production is batch writes with arrayUnion
       });
     } catch (e) {
-      console.error(e);
+      logger.error('[messagingService] Error marking messages read:', e);
     }
   }
 };

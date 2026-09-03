@@ -11,6 +11,7 @@ import React, { useMemo, useState } from 'react';
 
 import { derivePhaseSupply, ACCESSORY_DEFS } from '../../utils/supplyMath';
 import { resolveProductPrice } from '../../utils/resolveProductPrice';
+import DataTable from '../ui/DataTable';
 
 const ProtocolEconomicSection = ({
   protocol,
@@ -174,7 +175,12 @@ const ProtocolEconomicSection = ({
 
   // 4. Combine all elements and compute totals
   const allBundleItems = useMemo(() => {
-    return [...peptideItems, ...supplementItems, ...testingItems, ...accessoryItems];
+    return [
+      ...peptideItems.map(p => ({ ...p, categoryLabel: 'Peptide', categoryBadgeClass: 'pes-badge-peptide' })),
+      ...supplementItems.map(s => ({ ...s, categoryLabel: 'Nutrient', categoryBadgeClass: 'pes-badge-nutrient' })),
+      ...testingItems.map(t => ({ ...t, categoryLabel: 'Testing', categoryBadgeClass: 'pes-badge-testing' })),
+      ...accessoryItems.map(a => ({ ...a, categoryLabel: 'Supply', categoryBadgeClass: 'pes-badge-supply' })),
+    ];
   }, [peptideItems, supplementItems, testingItems, accessoryItems]);
 
   const totalCost = useMemo(() => {
@@ -258,133 +264,116 @@ const ProtocolEconomicSection = ({
         }
         .pes-total-label {
           font-size: 0.55rem;
+          font-weight: 700;
+          color: #64748b;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: #64748b;
-          font-weight: 700;
-          margin-bottom: 0.05rem;
+          margin-bottom: 0.15rem;
         }
         .pes-total-value {
-          font-size: 1.2rem;
+          font-size: 1.15rem;
           font-weight: 800;
-          color: #0f172a;
-          font-family: 'JetBrains Mono', monospace;
+          color: #003666;
+          line-height: 1;
         }
         .pes-table-title {
           font-size: 0.72rem;
-          font-weight: 700;
-          color: #64748b;
+          font-weight: 800;
+          color: #0f172a;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          margin: 0.75rem 0 0.4rem 0;
+          margin-bottom: 0.5rem;
           display: flex;
           align-items: center;
-          gap: 0.25rem;
+          gap: 0.35rem;
         }
         .pes-table-container {
           background: #ffffff;
-          border: 1px solid #e2e8f0;
           border-radius: 8px;
+          border: 1px solid #e2e8f0;
           overflow: hidden;
-        }
-        .pes-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 0.75rem;
-          text-align: left;
-        }
-        .pes-table th {
-          background: #f1f5f9;
-          color: #475569;
-          font-weight: 700;
-          padding: 0.5rem 0.75rem;
-          border-bottom: 1px solid #e2e8f0;
-        }
-        .pes-table td {
-          padding: 0.6rem 0.75rem;
-          border-bottom: 1px solid #f1f5f9;
-          color: #334155;
-          vertical-align: middle;
-        }
-        .pes-table tr:last-child td {
-          border-bottom: none;
+          margin-bottom: 1rem;
         }
         .pes-item-name {
           font-weight: 600;
+          color: #0f172a;
+          font-size: 0.76rem;
         }
         .pes-badge {
+          display: inline-block;
           font-size: 0.58rem;
           font-weight: 700;
-          padding: 0.1rem 0.35rem;
-          border-radius: 10px;
           text-transform: uppercase;
-          letter-spacing: 0.02em;
+          letter-spacing: 0.05em;
+          padding: 0.15rem 0.4rem;
+          border-radius: 4px;
         }
         .pes-badge-peptide {
-          background: #e0f2fe;
-          color: #0369a1;
+          background: #eff6ff;
+          color: #1d4ed8;
+          border: 1px solid #bfdbfe;
         }
         .pes-badge-nutrient {
           background: #f0fdf4;
-          color: #166534;
-        }
-        .pes-badge-supply {
-          background: #ecfeff;
-          color: #0891b2;
+          color: #15803d;
+          border: 1px solid #bbf7d0;
         }
         .pes-badge-testing {
-          background: #fef3c7;
-          color: #d97706;
+          background: #faf5ff;
+          color: #7e22ce;
+          border: 1px solid #e9d5ff;
+        }
+        .pes-badge-supply {
+          background: #f8fafc;
+          color: #475569;
+          border: 1px solid #e2e8f0;
         }
         .pes-qty-col {
-          text-align: center;
-          font-family: 'JetBrains Mono', monospace;
           font-weight: 600;
+          color: #334155;
+          text-align: center;
+          font-size: 0.74rem;
         }
         .pes-price-col {
+          font-weight: 700;
+          color: #003666;
           text-align: right;
-          font-family: 'JetBrains Mono', monospace;
-          font-weight: 600;
+          font-size: 0.76rem;
         }
         .pes-subtotals-grid {
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, 1fr);
           gap: 0.5rem;
-          margin-top: 0.75rem;
+          margin-bottom: 1rem;
         }
         @media (min-width: 640px) {
           .pes-subtotals-grid {
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
           }
         }
         .pes-subtotal-card {
           background: #ffffff;
-          border: 1px solid #e2e8f0;
-          padding: 0.5rem 0.75rem;
+          padding: 0.6rem;
           border-radius: 8px;
+          border: 1px solid #e2e8f0;
         }
         .pes-subtotal-label {
           font-size: 0.58rem;
-          text-transform: uppercase;
           color: #64748b;
-          font-weight: 700;
-          margin-bottom: 0.1rem;
+          font-weight: 600;
+          margin-bottom: 0.15rem;
         }
         .pes-subtotal-val {
-          font-size: 0.9rem;
+          font-size: 0.82rem;
           font-weight: 700;
-          color: #1e293b;
-          font-family: 'JetBrains Mono', monospace;
+          color: #0f172a;
         }
-        .pes-footer-actions {
+        .pes-actions-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
           gap: 1rem;
           margin-top: 1rem;
-          padding-top: 0.75rem;
-          border-top: 1px solid #e2e8f0;
-          flex-wrap: wrap;
         }
         .pes-action-hint {
           font-size: 0.65rem;
@@ -451,69 +440,47 @@ const ProtocolEconomicSection = ({
             <Sparkles size={11} color="#22c55e" /> Protocol Bundle
           </h4>
           <div className="pes-table-container">
-            <table className="gcp-table">
-              <thead>
-                <tr>
-                  <th>Compound / Item</th>
-                  <th style={{ textAlign: 'center', width: '4.5rem' }}>Category</th>
-                  <th style={{ textAlign: 'center', width: '3rem' }}>Qty</th>
-                  <th style={{ textAlign: 'right', width: '5.5rem' }}>Est. Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {peptideItems.map((item, idx) => (
-                  <tr key={`pep-${idx}`}>
-                    <td className="pes-item-name">{item.name}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className="pes-badge pes-badge-peptide">Peptide</span>
-                    </td>
-                    <td className="pes-qty-col">{item.quantity}</td>
-                    <td className="pes-price-col">{formatCurrency(item.subtotal)}</td>
-                  </tr>
-                ))}
-
-                {supplementItems.map((item, idx) => (
-                  <tr key={`supp-${idx}`}>
-                    <td className="pes-item-name">{item.name}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className="pes-badge pes-badge-nutrient">Nutrient</span>
-                    </td>
-                    <td className="pes-qty-col">{item.quantity}</td>
-                    <td className="pes-price-col">{formatCurrency(item.subtotal)}</td>
-                  </tr>
-                ))}
-
-                {testingItems.map((item, idx) => (
-                  <tr key={`test-${idx}`}>
-                    <td className="pes-item-name">{item.name}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className="pes-badge pes-badge-testing">Testing</span>
-                    </td>
-                    <td className="pes-qty-col">{item.quantity}</td>
-                    <td className="pes-price-col">{formatCurrency(item.subtotal)}</td>
-                  </tr>
-                ))}
-
-                {accessoryItems.map((item, idx) => (
-                  <tr key={`acc-${idx}`}>
-                    <td className="pes-item-name">{item.name}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className="pes-badge pes-badge-supply">Supply</span>
-                    </td>
-                    <td className="pes-qty-col">{item.quantity}</td>
-                    <td className="pes-price-col">{formatCurrency(item.subtotal)}</td>
-                  </tr>
-                ))}
-
-                {allBundleItems.length === 0 && (
-                  <tr>
-                    <td colSpan="4" style={{ textAlign: 'center', padding: '1.25rem', color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
-                      No items currently selected in the sections above.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <DataTable
+              data={allBundleItems}
+              keyField="id"
+              emptyMessage="No items currently selected in the sections above."
+              columns={[
+                {
+                  id: 'name',
+                  header: 'Compound / Item',
+                  width: '50%',
+                  render: (item) => (
+                    <span className="pes-item-name">{item.name}</span>
+                  ),
+                },
+                {
+                  id: 'category',
+                  header: 'Category',
+                  width: '20%',
+                  render: (item) => (
+                    <span className={`pes-badge ${item.categoryBadgeClass || 'pes-badge-supply'}`}>
+                      {item.categoryLabel || 'Item'}
+                    </span>
+                  ),
+                },
+                {
+                  id: 'quantity',
+                  header: 'Qty',
+                  width: '12%',
+                  render: (item) => (
+                    <span className="pes-qty-col">{item.quantity}</span>
+                  ),
+                },
+                {
+                  id: 'subtotal',
+                  header: 'Est. Cost',
+                  width: '18%',
+                  render: (item) => (
+                    <span className="pes-price-col">{formatCurrency(item.subtotal)}</span>
+                  ),
+                },
+              ]}
+            />
           </div>
         </div>
 

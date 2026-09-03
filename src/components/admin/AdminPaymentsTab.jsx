@@ -17,7 +17,7 @@ export default function AdminPaymentsTab() {
       />
       
       {/* KPI Cards (Generated automatically per Rule #22) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="kpi-scroll-row" style={{ marginBottom: '1.5rem' }}>
         <MetricCard
           title="Total Received (This Month)"
           value="$124,500.00"
@@ -35,6 +35,12 @@ export default function AdminPaymentsTab() {
           title="Pending Payables"
           value="$18,400.00"
           icon={ArrowUpRight}
+          color="var(--color-danger)"
+        />
+        <MetricCard
+          title="Failed Payments"
+          value="3"
+          icon={CreditCard}
           color="var(--color-danger)"
         />
       </div>

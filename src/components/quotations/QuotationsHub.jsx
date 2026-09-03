@@ -3,9 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuotationsUIStore } from '../../stores/quotationsUIStore';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { subscribeToAllQuotationsAndRfqs } from '../../services/quotationRepository';
 import { FileText, Search, Plus, Filter, MoreHorizontal, Archive, RefreshCw, LayoutGrid, List as ListIcon } from '@/lib/icons';
 import QuotationBuilderWizard from './modals/QuotationBuilderWizard';
 import QuotationDetailDrawer from './QuotationDetailDrawer';
@@ -27,57 +25,27 @@ export default function QuotationsHub() {
 
   // Fetch quotations and RFQs
   useEffect(() => {
-    const qQuotes = query(collection(db, 'quotations'), orderBy('createdAt', 'desc'));
-    const qRfqs = query(collection(db, 'rfqs'), orderBy('createdAt', 'desc'));
-
-    let quotesData = [];
-    let rfqsData = [];
-
-    const processData = () => {
-      const merged = [...quotesData, ...rfqsData].sort((a, b) => {
-        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-        return timeB - timeA;
+    const unsubscribe = subscribeToAllQuotationsAndRfqs((merged) => {
+      const formatted = merged.map(item => {
+        if (item.type === 'rfq') {
+          return {
+            ...item,
+            quotationNumber: item.rfqId,
+            patientName: item.customer?.fullName || 'N/A',
+            clinicName: item.customer?.institution || 'N/A',
+            doctorName: 'N/A',
+            totalAmount: item.totals?.total || 0,
+            status: 'RFQ ' + (item.status || 'Pending'),
+            updatedAt: item.createdAt
+          };
+        }
+        return item;
       });
-      setQuotations(merged);
-      setLoading(false);
-    };
-
-    const unsubQuotes = onSnapshot(qQuotes, (snapshot) => {
-      quotesData = snapshot.docs.map(doc => ({ id: doc.id, type: 'quotation', ...doc.data() }));
-      processData();
-    }, (err) => {
-      console.error('Error fetching quotations:', err);
+      setQuotations(formatted);
       setLoading(false);
     });
 
-    const unsubRfqs = onSnapshot(qRfqs, (snapshot) => {
-      rfqsData = snapshot.docs.map(doc => {
-        const d = doc.data();
-        return {
-          id: doc.id,
-          type: 'rfq',
-          ...d,
-          // Map RFQ fields to expected Quotation fields for the table
-          quotationNumber: d.rfqId,
-          patientName: d.customer?.fullName || 'N/A',
-          clinicName: d.customer?.institution || 'N/A',
-          doctorName: 'N/A',
-          totalAmount: d.totals?.total || 0,
-          status: 'RFQ ' + (d.status || 'Pending'),
-          updatedAt: d.createdAt
-        };
-      });
-      processData();
-    }, (err) => {
-      console.error('Error fetching rfqs:', err);
-      setLoading(false);
-    });
-
-    return () => {
-      unsubQuotes();
-      unsubRfqs();
-    };
+    return () => unsubscribe();
   }, []);
 
   // Listen for external events (like clicking "Create Quotation" from Prescriptions)

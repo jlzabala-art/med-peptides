@@ -4,13 +4,13 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
-import { db } from '../../../firebase';
-
-import { doc, getDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { logger } from '../../../utils/logger';
 import { GOALS } from '../../../constants/catalogFilters';
 import { catalogRepository } from '../../../repositories/catalogRepository';
 import { productRepository } from '../../../repositories/productRepository';
+
+
 import { emptyCatalog, CATALOG_STATUS } from '../../../schemas/catalogSchema';
 import { useCatalogData } from '../../admin/catalog/useCatalogData';
 import SmartCatalogWelcomeModal from '../../admin/catalog/modals/SmartCatalogWelcomeModal';
@@ -257,58 +257,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
       setLoadingCart(true);
       const fetchMissing = async () => {
         try {
-          const { collection, collectionGroup, query, where, getDocs } =
-            await import('firebase/firestore');
-          const fetchedVariants = [];
-
-          for (let i = 0; i < missingIds.length; i += 10) {
-            const chunk = missingIds.slice(i, i + 10);
-
-            // Fetch parent products
-            const q = query(collection(db, 'products'), where('__name__', 'in', chunk));
-            const snap = await getDocs(q);
-            const rawProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-            // Fetch variants
-            const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
-            const vSnap = await getDocs(vQ);
-            const allVariants = vSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-            const variantsByProduct = {};
-            allVariants.forEach((v) => {
-              if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
-              variantsByProduct[v.productId].push(v);
-            });
-
-            // Flatten logic matching useCatalogData
-            rawProducts.forEach((p) => {
-              const vars = variantsByProduct[p.id] || [];
-              if (vars.length > 0) {
-                vars.forEach((v, idx) => {
-                  fetchedVariants.push({
-                    ...v,
-                    id: v.id || `${p.id}-var-${idx}`,
-                    productId: p.id,
-                    productName: p.name,
-                    name: `${p.name} - ${v.format || ''} ${v.size || ''}`.trim(),
-                    supplier: v.supplier || p.supplier || 'Unassigned',
-                    rawVariant: v,
-                    rawProduct: p,
-                  });
-                });
-              } else {
-                fetchedVariants.push({
-                  ...p,
-                  id: p.id,
-                  productId: p.id,
-                  productName: p.name,
-                  supplier: p.supplier || 'Unassigned',
-                  rawVariant: null,
-                  rawProduct: p,
-                });
-              }
-            });
-          }
+          const fetchedVariants = await productRepository.fetchProductsWithVariantsByIds(missingIds);
 
           setCartProducts((prev) => {
             const newCart = [...prev, ...fetchedVariants];
@@ -318,7 +267,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
             );
           });
         } catch (e) {
-          console.error('Failed to fetch cart missing products', e);
+          logger.error('Failed to fetch cart missing products in CatalogCreatorFlow', { error: e.message });
         } finally {
           setLoadingCart(false);
         }
@@ -326,6 +275,7 @@ export default function CatalogCreatorFlow({ ownerId, ownerType, editingCatalog 
       fetchMissing();
     }
   }, [catalogCart, isFilteredMode]);
+
 
   // Auto-generate if products were pre-selected
   useEffect(() => {

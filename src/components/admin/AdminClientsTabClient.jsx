@@ -5,14 +5,15 @@ import { Users, Edit2, Trash2 } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
+import AppActionGroup from '../ui/AppActionGroup';
 
 const AdminClientsTabClient = ({ ownerId, ownerType, initialData = [] }) => {
   const [clients, setClients] = useState(initialData);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState([]); // string[]
 
   useEffect(() => {
     if (initialData.length > 0) return; // skip fetch if SSR data provided
@@ -48,66 +49,63 @@ const AdminClientsTabClient = ({ ownerId, ownerType, initialData = [] }) => {
     {
       key: 'role',
       header: 'Rol',
-      render: (val) => <StatusBadge status={val === 'patient' ? 'active' : 'inactive'} />
+      render: (val) => <StatusChip status={val === 'patient' ? 'active' : 'inactive'} />
     },
     {
       key: 'actions',
-      header: <span style={{ float: 'right' }}>Acciones</span>,
+      header: 'Actions',
+      align: 'right',
       render: (val, row) => (
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-          <button className="gcp-btn gcp-btn--text" style={{ padding: '4px' }} title="Editar">
-            <Edit2 size={16} />
-          </button>
-          <button className="gcp-btn gcp-btn--text" style={{ padding: '4px', color: '#ef4444' }} title="Eliminar">
-            <Trash2 size={16} />
-          </button>
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+          <AppActionGroup actions={[
+            { type: 'edit', onClick: () => {} },
+            { type: 'delete', onClick: () => {} }
+          ]} />
         </div>
       )
     }
   ], []);
 
-  // Filter integration
-  const activeFilters = [];
-  if (roleFilter) {
-    activeFilters.push({
-      key: 'role',
-      label: 'Rol',
-      value: roleFilter,
-      onRemove: () => setRoleFilter('')
-    });
-  }
+  const ALL_ROLES = [
+    { label: 'Paciente', value: 'patient' },
+    { label: 'Médico',   value: 'physician' },
+  ];
+
+  const activeFilters = roleFilter.map(val => ({
+    key: `role-${val}`,
+    label: 'Rol',
+    value: ALL_ROLES.find(r => r.value === val)?.label || val,
+    onRemove: () => setRoleFilter(prev => prev.filter(v => v !== val))
+  }));
 
   const filterOptions = [
     {
       key: 'role',
       label: 'Rol',
-      options: [
-        { label: 'Todos', value: '' },
-        { label: 'Paciente', value: 'patient' },
-        { label: 'Médico', value: 'physician' }
-      ],
-      value: roleFilter,
+      multiSelect: true,
+      values: roleFilter,
+      options: ALL_ROLES.map(r => ({
+        ...r,
+        count: clients.filter(c => c.role === r.value).length || null,
+      })),
       onChange: setRoleFilter
     }
   ];
 
   const filteredClients = useMemo(() => {
-    let result = clients;
-    if (roleFilter) {
-      result = result.filter(c => c.role === roleFilter);
-    }
-    return result;
+    if (roleFilter.length === 0) return clients;
+    return clients.filter(c => roleFilter.includes(c.role));
   }, [clients, roleFilter]);
 
   return (
     <div style={{ padding: '0 2rem 2rem 2rem' }}>
       <PageHeader 
-        title="Gestión de Clientes" 
-        subtitle="Administra los pacientes y sus datos principales."
+        title="Clients Management" 
+        subtitle="Manage patient accounts and master client records."
         icon={Users}
         actions={
           <button className="gcp-btn gcp-btn--primary">
-            Nuevo Cliente
+            New Client
           </button>
         }
       />
@@ -116,7 +114,7 @@ const AdminClientsTabClient = ({ ownerId, ownerType, initialData = [] }) => {
         <GlobalSearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="Buscar clientes por nombre, email o ID..."
+          placeholder="Search clients by name, email or ID..."
           resultCount={filteredClients.length}
           namespace="admin-clients"
           size="lg"

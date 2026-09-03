@@ -292,7 +292,7 @@ export default function MissingDataCenterView({ variants = [], onAction }) {
                 key: '_tags',
                 header: 'Missing Data Tags',
                 render: (item) => (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '8px' }}>
                     {item.missing.price && (
                       <span style={{ padding: '4px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#fef3c7', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <DollarSign size={12} /> Pricing

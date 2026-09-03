@@ -1,6 +1,75 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { GoogleGenAI } = require('@google/genai');
+const { z } = require("zod");
+
+const emailZodSchema = z.object({
+  intent: z.enum(["CUSTOMER_RFQ", "SUPPLIER_QUOTATION", "PRICE_LIST", "PRESCRIPTION", "COA", "INQUIRY", "PURCHASE_ORDER", "LOGISTICS", "REGULATORY"]),
+  confidenceScore: z.number().optional(),
+  extractedData: z.object({
+    supplierOrCustomer: z.string().optional(),
+    requestDate: z.string().optional(),
+    requestedBy: z.string().optional(),
+    requestedTo: z.string().optional(),
+    deliveryLocation: z.string().optional(),
+    urgency: z.enum(["Urgent", "Normal", "Low"]).optional(),
+    prescriptionDetails: z.object({
+      date: z.string().optional(),
+      doctorName: z.string().optional(),
+      doctorContact: z.string().optional(),
+      patientName: z.string().optional(),
+      patientDOB: z.string().optional(),
+      patientGender: z.string().optional(),
+      patientAge: z.string().optional(),
+      duration: z.string().optional(),
+      formulaType: z.string().optional(),
+      diagnosis: z.string().optional()
+    }).optional().nullable(),
+    products: z.array(z.object({
+      name: z.string().optional(),
+      quantity: z.string().optional(),
+      concentration: z.string().optional(),
+      dosage: z.string().optional(),
+      frequency: z.string().optional(),
+      instructions: z.string().optional(),
+      unitPrice: z.string().optional(),
+      totalPrice: z.string().optional()
+    })).optional().default([]),
+    prescriptions: z.array(z.object({
+      prescriptionDetails: z.object({
+        date: z.string().optional(),
+        doctorName: z.string().optional(),
+        doctorContact: z.string().optional(),
+        patientName: z.string().optional(),
+        patientDOB: z.string().optional(),
+        patientGender: z.string().optional(),
+        patientAge: z.string().optional(),
+        duration: z.string().optional(),
+        formulaType: z.string().optional(),
+        diagnosis: z.string().optional()
+      }).optional().nullable(),
+      products: z.array(z.object({
+        name: z.string().optional(),
+        quantity: z.string().optional(),
+        unit: z.string().optional(),
+        concentration: z.string().optional(),
+        dosage: z.string().optional(),
+        frequency: z.string().optional(),
+        duration: z.string().optional(),
+        instructions: z.string().optional(),
+        form: z.string().optional(),
+        unitPrice: z.string().optional(),
+        totalPrice: z.string().optional()
+      })).optional().default([])
+    })).optional().default([]),
+    financialDetails: z.object({
+      subtotal: z.string().optional(),
+      discount: z.string().optional(),
+      commission: z.string().optional(),
+      grandTotal: z.string().optional()
+    }).optional().nullable()
+  }).optional().nullable()
+});
 
 // Ensure firebase app is initialized
 if (!admin.apps.length) {
@@ -269,6 +338,7 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
     - Even if the email only contains a subject (like "Cagrilintide Inquiry"), ALWAYS extract the product name (e.g. "Cagrilintide").
     - If quantity or concentration are not specified, just leave them as empty strings or "Not specified", BUT STILL EXTRACT THE PRODUCT NAME! Do not omit a product just because you don't know the quantity.
     - If it's a PRESCRIPTION, extract as much detail as possible (dates, doctor, patient info, duration, formula) and put it inside the prescriptionDetails object.
+    - IMPORTANT FOR PRESCRIPTIONS: Strictly separate the "dosage" (e.g. 5mg, 0.1mL), "frequency" (e.g. once daily), and "instructions" (the full unabridged administration text). Do NOT cram the entire instruction paragraph into the dosage field.
     - If there are MULTIPLE distinct prescriptions or PDF files attached, extract each one as a separate object within the "prescriptions" array. Each object should have its own prescriptionDetails and products.
     - If it is a FAGRON REPORT (e.g., TrichoTest, NutriGen) or a similar genetic/personalized medicine report, classify it as a PRESCRIPTION. Carefully extract the recommended personalized formulas, active ingredients, and dosages as products, and fully extract the patient and doctor details.
     - If it's a SUPPLIER_QUOTATION or PRICE_LIST, extract unit prices and total prices for products, and overall financial details (discounts, commissions, grand total) into the financialDetails object.
@@ -365,6 +435,9 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
                 name: { type: Type.STRING },
                 quantity: { type: Type.STRING },
                 concentration: { type: Type.STRING },
+                dosage: { type: Type.STRING, description: "Numeric amount per administration (e.g., 0.25 mg, 5 mg, 1 capsule, 0.1 mL)" },
+                frequency: { type: Type.STRING, description: "How often to administer (e.g., once daily, twice a week, 5 nights per week)" },
+                instructions: { type: Type.STRING, description: "The complete, unabridged clinical instructions (e.g., Inject 0.1 mL once daily subcutaneously. 2 days are free...)" },
                 unitPrice: { type: Type.STRING },
                 totalPrice: { type: Type.STRING }
               }
@@ -397,8 +470,14 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
                     type: Type.OBJECT,
                     properties: {
                       name: { type: Type.STRING },
-                      quantity: { type: Type.STRING },
+                      quantity: { type: Type.STRING, description: "Numeric amount (e.g., 2, 30)" },
+                      unit: { type: Type.STRING, description: "The unit for the quantity (e.g., vials, capsules, mg, mL)" },
                       concentration: { type: Type.STRING },
+                      dosage: { type: Type.STRING, description: "Numeric amount per administration (e.g., 0.25 mg, 5 mg, 1 capsule, 0.1 mL)" },
+                      frequency: { type: Type.STRING, description: "How often to administer (e.g., once daily, twice a week, 5 nights per week)" },
+                      duration: { type: Type.STRING, description: "Treatment duration for this specific product (e.g., 8 weeks, 1 month)" },
+                      instructions: { type: Type.STRING, description: "The complete, unabridged clinical instructions (e.g., Inject 0.1 mL once daily subcutaneously. 2 days are free...)" },
+                      form: { type: Type.STRING, description: "The physical form, group, or vehicle of the product (e.g., 'Cream', 'Capsules', 'Supplements', 'Injectable', 'Lotion'). Used to group APIs belonging to the same formula." },
                       unitPrice: { type: Type.STRING },
                       totalPrice: { type: Type.STRING }
                     }
@@ -458,7 +537,8 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
 
     const response = await callGeminiWithRetry(ai, aiContents, emailSchema);
     const aiResultText = response.text;
-    aiResultJson = JSON.parse(aiResultText);
+    const rawAiResultJson = JSON.parse(aiResultText);
+    aiResultJson = emailZodSchema.parse(rawAiResultJson);
   } catch (e) {
     console.error("Failed to call Gemini or parse JSON after all retries:", e);
     throw e;

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-
+import InlineEditableCell from '../ui/InlineEditableCell';
+import notifier from '../../services/NotificationService';
 
 /**
  * EditablePriceCell – renders a numeric value that can be edited inline.
@@ -11,51 +12,39 @@ import { db } from '../../firebase';
  *   - value: current numeric value (string or number)
  *   - productId: Firestore document ID for the product
  *   - fieldPath: path within product document (e.g., 'pricing.retail.perUnit')
+ *   - field: optional alternative for fieldPath
+ *   - onSave: optional callback after save
  */
-export default function EditablePriceCell({ value, productId, fieldPath }) {
-  const [editing, setEditing] = useState(false);
-  const [temp, setTemp] = useState(value);
+export default function EditablePriceCell({ value, productId, fieldPath, field, onSave }) {
+  const actualFieldPath = fieldPath || `pricing.${field}.perUnit`;
 
-  const handleSave = async () => {
-    const numeric = parseFloat(temp);
-    if (isNaN(numeric)) {
-      setTemp(value);
-    } else if (numeric !== Number(value)) {
+  const handleSave = async (newVal) => {
+    const numeric = parseFloat(newVal);
+    if (isNaN(numeric)) return;
+    
+    if (numeric !== Number(value)) {
       try {
         const productRef = doc(db, 'products', productId);
-        await updateDoc(productRef, { [fieldPath]: numeric });
+        await updateDoc(productRef, { [actualFieldPath]: numeric });
+        notifier.success('Price updated');
+        if (onSave) {
+           onSave(productId, field || fieldPath, numeric);
+        }
       } catch (err) {
         console.error('Failed to update price cell:', err);
-        // revert on error
-        setTemp(value);
+        notifier.error('Failed to update price');
+        throw err;
       }
     }
-    setEditing(false);
   };
 
-  return editing ? (
-    <input
-      type="number"
-      value={temp}
-      autoFocus
-      onChange={(e) => setTemp(e.target.value)}
-      onBlur={handleSave}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') handleSave();
-        if (e.key === 'Escape') {
-          setTemp(value);
-          setEditing(false);
-        }
-      }}
-      className="editable-price-input mono-data"
-    />
-  ) : (
-    <span
-      onClick={() => setEditing(true)}
-      className="editable-price-display mono-data"
-      style={{ cursor: 'pointer' }}
-    >
-      {value}
-    </span>
+  return (
+    <div className="editable-price-display mono-data">
+      <InlineEditableCell
+        value={value || 0}
+        type="number"
+        onSave={handleSave}
+      />
+    </div>
   );
 }

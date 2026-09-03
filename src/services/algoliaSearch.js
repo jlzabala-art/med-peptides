@@ -1,15 +1,14 @@
 /**
  * Algolia Search Service
  * 
- * Wraps the Algolia client with aggressive quota-saving measures:
- * 1. 700ms debounce (handled by the caller)
- * 2. Minimum 3-character query to avoid wasting searches on short inputs
- * 3. Results capped at 5 per index to stay lightweight
- * 4. Monthly usage tracker stored in localStorage to warn before exceeding free tier
- * 
- * Free tier limits: 10,000 search requests/month, 10,000 records
+ * Wraps the Algolia client with quota-saving measures and in-memory TTL caching:
+ * 1. Minimum 2-character query
+ * 2. In-memory caching (5 min TTL) to avoid repeat queries
+ * 3. Monthly usage tracker in localStorage
+ * 4. Multi-index federated search capabilities (products, protocols, patients, prescriptions, clinics)
  */
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
+import logger from '../utils/logger.js';
 
 const APP_ID = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '';
 const SEARCH_KEY = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '';
@@ -20,7 +19,29 @@ try {
     client = algoliasearch(APP_ID, SEARCH_KEY);
   }
 } catch (e) {
-  console.warn('[AlgoliaSearch] Failed to initialize client:', e.message);
+  logger.warn('[AlgoliaSearch] Failed to initialize client:', e.message);
+}
+
+// ── In-memory Query Cache (5 min TTL) ─────────────────────────────────────────
+const memoryCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getCached(key) {
+  const item = memoryCache.get(key);
+  if (!item) return null;
+  if (Date.now() - item.ts > CACHE_TTL_MS) {
+    memoryCache.delete(key);
+    return null;
+  }
+  return item.data;
+}
+
+function setCached(key, data) {
+  if (memoryCache.size > 150) {
+    const firstKey = memoryCache.keys().next().value;
+    memoryCache.delete(firstKey);
+  }
+  memoryCache.set(key, { data, ts: Date.now() });
 }
 
 // ── Monthly Usage Tracker ──────────────────────────────────────────────────
@@ -35,10 +56,9 @@ function getMonthKey() {
 
 function getUsage() {
   try {
-    const raw = localStorage.getItem(USAGE_KEY);
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(USAGE_KEY) : null;
     if (!raw) return { month: getMonthKey(), count: 0 };
     const parsed = JSON.parse(raw);
-    // Reset counter if we're in a new month
     if (parsed.month !== getMonthKey()) {
       return { month: getMonthKey(), count: 0 };
     }
@@ -52,14 +72,15 @@ function incrementUsage() {
   const usage = getUsage();
   usage.count += 1;
   try {
-    localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
-  } catch { /* localStorage full — ignore */ }
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+    }
+  } catch { /* ignore */ }
   return usage;
 }
 
 /**
  * Check if we're approaching the free tier limit.
- * Returns { allowed: boolean, count: number, limit: number, percentage: number }
  */
 export function checkAlgoliaQuota() {
   const usage = getUsage();
@@ -75,53 +96,97 @@ export function checkAlgoliaQuota() {
 /**
  * Perform a multi-index Algolia search (products + protocols).
  * Returns { products: [], protocols: [] }
- * 
- * Quota-saving measures applied:
- * - Rejects queries < 3 chars
- * - Blocks searches when monthly limit is exceeded
- * - Caps results at 5 per index
  */
 export async function searchAlgolia(query) {
-  // Guard: no client configured
   if (!client) {
     return { products: [], protocols: [], source: 'disabled' };
   }
 
-  // Guard: query too short
-  if (!query || query.trim().length < 3) {
+  if (!query || query.trim().length < 2) {
     return { products: [], protocols: [], source: 'skipped' };
   }
 
-  // Guard: free tier exhausted
+  const cleanQuery = query.trim();
+  const cacheKey = `basic:${cleanQuery.toLowerCase()}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   const quota = checkAlgoliaQuota();
   if (!quota.allowed) {
-    console.warn(`[AlgoliaSearch] Monthly free tier limit reached (${quota.count}/${quota.limit}). Blocking search.`);
+    logger.warn(`[AlgoliaSearch] Monthly free tier limit reached (${quota.count}/${quota.limit}). Blocking search.`);
     return { products: [], protocols: [], source: 'quota_exceeded' };
   }
 
-  // Log warning if approaching limit
-  if (quota.warning) {
-    console.warn(`[AlgoliaSearch] ⚠️ Approaching free tier limit: ${quota.count}/${quota.limit} (${quota.percentage}%)`);
-  }
-
   try {
-    // Multi-index search in a single API call (counts as 1 search operation)
-    const results = await client.multipleQueries([
-      { indexName: 'products', query: query.trim(), params: { hitsPerPage: 5 } },
-      { indexName: 'protocols', query: query.trim(), params: { hitsPerPage: 5 } },
-    ]);
+    const results = await client.search({
+      requests: [
+        { indexName: 'products', query: cleanQuery, hitsPerPage: 6, clickAnalytics: true },
+        { indexName: 'protocols', query: cleanQuery, hitsPerPage: 6, clickAnalytics: true },
+      ]
+    });
 
-    // Increment usage counter (1 multipleQueries call = 1 search operation)
-    const usage = incrementUsage();
+    incrementUsage();
 
-    return {
+    const data = {
       products: results.results[0]?.hits || [],
       protocols: results.results[1]?.hits || [],
+      queryID: results.results[0]?.queryID,
       source: 'algolia',
-      usage: { count: usage.count, limit: FREE_TIER_LIMIT }
+      usage: { count: quota.count + 1, limit: FREE_TIER_LIMIT }
     };
+
+    setCached(cacheKey, data);
+    return data;
   } catch (error) {
-    console.error('[AlgoliaSearch] Search failed:', error);
+    logger.warn('[AlgoliaSearch] Search failed, suppressed to avoid Next.js overlay:', error.message || error);
     return { products: [], protocols: [], source: 'error' };
+  }
+}
+
+/**
+ * Perform a federated Algolia search across all platform entities.
+ * Returns { products, protocols, patients, prescriptions, clinics, queryID }
+ */
+export async function searchAlgoliaFederated(query, indices = ['products', 'protocols', 'users'], hitsPerPage = 4) {
+  if (!client || !query || query.trim().length < 2) {
+    return { products: [], protocols: [], patients: [], prescriptions: [], clinics: [], users: [] };
+  }
+
+  const cleanQuery = query.trim();
+  const cacheKey = `federated:${cleanQuery.toLowerCase()}:${indices.join(',')}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const requests = indices.map((idx) => ({
+      indexName: idx,
+      query: cleanQuery,
+      hitsPerPage,
+      clickAnalytics: true,
+    }));
+
+    const results = await client.search({ requests });
+
+    incrementUsage();
+
+    const resMap = {};
+    indices.forEach((idx, i) => {
+      resMap[idx] = results.results[i]?.hits || [];
+    });
+
+    const data = {
+      products: resMap.products || [],
+      protocols: resMap.protocols || [],
+      users: resMap.users || resMap.patients || [],
+      prescriptions: resMap.prescriptions || [],
+      clinics: resMap.clinics || [],
+      queryID: results.results[0]?.queryID,
+      source: 'algolia'
+    };
+
+    setCached(cacheKey, data);
+    return data;
+  } catch (err) {
+    return { products: [], protocols: [], patients: [], prescriptions: [], clinics: [], users: [] };
   }
 }

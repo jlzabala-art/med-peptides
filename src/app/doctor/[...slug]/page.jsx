@@ -12,6 +12,7 @@ import DoctorOverviewTab from '../../../components/doctor/DoctorOverviewTab';
 
 // ── Dynamic imports ──────────────────────────────────────────────────────────
 const PhysicianPatientsTab = dynamic(() => import('../../../components/doctor/DoctorPatientsTab'), { ssr: false });
+const DoctorLeadsTab = dynamic(() => import('../../../components/doctor/DoctorLeadsTab'), { ssr: false });
 const PhysicianRecommendationsTab = dynamic(() => import('../../../components/doctor/DoctorRecommendationsTab'), { ssr: false });
 const PhysicianOrdersTab = dynamic(() => import('../../../components/doctor/DoctorOrdersTab'), { ssr: false });
 const PhysicianProtocolsTab = dynamic(() => import('../../../components/doctor/DoctorProtocolsTab'), { ssr: false });
@@ -141,6 +142,11 @@ function ResearchWrapper() {
   return <DoctorResearch />;
 }
 
+function LeadsWrapper() {
+  const { doctorId } = useContext(DoctorContext) || {};
+  return <DoctorLeadsTab doctorId={doctorId} />;
+}
+
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
 export default function DynamicRoute({ params }) {
   const slug = params.slug || [];
@@ -150,6 +156,7 @@ export default function DynamicRoute({ params }) {
     case 'new-prescription': return <NewPrescriptionWrapper />;
     case 'prescriptions-history': return <PrescriptionsHistoryWrapper />;
     case 'patients': return <PatientsWrapper />;
+    case 'leads': return <LeadsWrapper />;
     case 'orders': return <OrdersWrapper />;
     case 'recommendations': return <RecommendationsWrapper />;
     case 'protocols': return <ProtocolsWrapper />;

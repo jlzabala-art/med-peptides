@@ -1,0 +1,38 @@
+{
+  "appId": "14102Y4B4O",
+  "indexPrefix": "crawler_",
+  "rateLimit": 8,
+  "maxDepth": 4,
+  "startUrls": [
+    "https://regenpept.com/api/sitemap"
+  ],
+  "sitemaps": [
+    "https://regenpept.com/api/sitemap"
+  ],
+  "actions": [
+    {
+      "indexName": "crawler_products",
+      "pathsToMatch": ["https://regenpept.com/p/**"],
+      "recordExtractor": {
+        "title": "h1",
+        "description": "meta[name='description']",
+        "category": ".pbb-badge",
+        "goals": "meta[name='keywords']",
+        "content": "main, [data-public-mode]"
+      }
+    },
+    {
+      "indexName": "crawler_protocols",
+      "pathsToMatch": ["https://regenpept.com/proto/**"],
+      "recordExtractor": {
+        "title": "h1",
+        "description": "meta[name='description']",
+        "phases": ".proto-timeline-phase",
+        "content": "main"
+      }
+    }
+  ],
+  "safetyBox": {
+    "maxRecords": 10000
+  }
+}

@@ -116,7 +116,7 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
       key: 'displayDosageFormat',
       header: <span onClick={() => handleSort('displayDosageFormat')} style={{ cursor: 'pointer' }}>Dosage / Format{getSortIcon('displayDosageFormat')}</span>,
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           {row.warehouses && row.warehouses.length > 0 && (
             <div onClick={(e) => toggleRow(row.id, e)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               {expandedRows[row.id] ? <ChevronDown size={16} color="#64748b" /> : <ChevronRight size={16} color="#64748b" />}
@@ -139,7 +139,7 @@ export default function VariantInventoryTable({ variants, parentProduct, onActio
       key: 'actions',
       header: 'Actions',
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
           <AppActionGroup
             maxVisible={3}
             actions={[{ type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'inventory') }]}

@@ -240,7 +240,7 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
     return '#ef4444';
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusChip = (status) => {
     switch (status) {
       case 'active':
         return 'si-badge si-badge-success';
@@ -623,8 +623,8 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
               header: 'Supplier',
               sortKey: 'name',
               render: (s) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
-                  <span className={getStatusBadge(s.status)} style={{ width: 8, height: 8, padding: 0, borderRadius: '50%' }}></span>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                  <span className={getStatusChip(s.status)} style={{ width: 8, height: 8, padding: 0, borderRadius: '50%' }}></span>
                   {s.name}
                 </div>
               )
@@ -668,7 +668,7 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
               >
                 <div>
                   <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.1rem' }}>{s.name}</h4>
-                  <span className={getStatusBadge(s.status)}>{s.status.replace('-', ' ')}</span>
+                  <span className={getStatusChip(s.status)}>{s.status.replace('-', ' ')}</span>
                 </div>
                 <div
                   className="si-score-ring"
@@ -752,7 +752,7 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
                     >
                       {selectedSupplier.name}
                       <span
-                        className={getStatusBadge(selectedSupplier.status)}
+                        className={getStatusChip(selectedSupplier.status)}
                         style={{ marginLeft: '0.5rem' }}
                       >
                         {selectedSupplier.status.replace('-', ' ')}

@@ -4,14 +4,10 @@ import Package from "lucide-react/dist/esm/icons/package";
 import Minus from "lucide-react/dist/esm/icons/minus";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { subscribeToInventory, updateInventoryQuantity } from '../../../repositories/inventoryRepository';
 import { useAuth } from '../../../context/AuthContext';
-
-
-
 import { catalog } from '../../../data/v2/index.js';
+import { logger } from '../../../utils/logger';
 
 export default function RealTimeStockManagerWidget() {
   const { user } = useAuth();
@@ -19,10 +15,7 @@ export default function RealTimeStockManagerWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const q = query(collection(db, 'wholesaler_inventory'), where('wholesalerId', '==', user.uid));
-    const unsub = onSnapshot(q, (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      // Merge with catalog for names if they don't exist yet
+    const unsub = subscribeToInventory(user.uid, (items) => {
       setInventory(items);
     });
 
@@ -32,19 +25,13 @@ export default function RealTimeStockManagerWidget() {
   const updateQuantity = async (productId, currentQty, delta) => {
     const newQty = Math.max(0, currentQty + delta);
     try {
-      const docRef = doc(db, 'wholesaler_inventory', `${user.uid}_${productId}`);
-      const prodData = catalog.find(p => p.id === productId);
-      await setDoc(docRef, {
-        wholesalerId: user.uid,
-        productId: productId,
-        productName: prodData?.name || productId,
-        quantity: newQty,
-        threshold: 5 // Default low stock alert threshold
-      }, { merge: true });
+      const prodData = catalog.find((p) => p.id === productId);
+      await updateInventoryQuantity(user.uid, productId, newQty, prodData?.name || productId);
     } catch (err) {
-      console.error(err);
+      logger.error('Error updating inventory qty', { error: err.message });
     }
   };
+
 
   return (
     <div className="card" style={{ padding: '2rem', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '100%' }}>

@@ -404,14 +404,14 @@ export default function CatalogTableView({
 
     const actionColumn = {
       key: 'actions',
-      header: '',
+      header: 'Actions',
       align: 'right',
       render: (row) => {
         const productRef = row.isVariantRow ? row.parentProduct : row;
         return (
           <div
             style={{
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
               gap: '0.5rem',

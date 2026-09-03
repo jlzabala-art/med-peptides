@@ -10,6 +10,8 @@ const db = fb?.db;
 import { findMatchingProduct, getFuzzySuggestions, slugify } from './LeadUtils';
 import { Edit2, Plus, Check, X, Trash2, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import DataTable from '../../ui/DataTable';
+import AppActionGroup from '../../ui/AppActionGroup';
+import { toast } from 'react-hot-toast';
 
 function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUpdated }) {
   const match = findMatchingProduct(item.peptide_name, catalogProducts);
@@ -49,9 +51,9 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
         await updateDoc(variantRef, { 'stock.quantity': stockInput, 'stock.available': stockInput > 0 });
       } catch (err) {}
       onStockUpdated(match.id, stockInput);
-      alert('Stock updated successfully!');
+      toast.success('Stock updated successfully!');
     } catch (err) {
-      alert('Failed to update stock: ' + err.message);
+      toast.error('Failed to update stock: ' + err.message);
     } finally {
       setIsUpdatingStock(false);
     }
@@ -59,7 +61,7 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
 
   const handleRegisterProduct = async (e) => {
     e.preventDefault();
-    if (!sku.trim()) return alert('SKU is required');
+    if (!sku.trim()) return toast('SKU is required');
     setIsRegistering(true);
     try {
       const finalCategory = category === 'Other' ? customCategory : category;
@@ -99,9 +101,9 @@ function ProductDetailsPane({ item, catalogProducts, onProductCreated, onStockUp
       await setDoc(doc(db, 'products', docId, 'variants', 'default'), variantDoc);
 
       onProductCreated(newProduct);
-      alert('Product quick-registered successfully in catalog!');
+      toast.success('Product quick-registered successfully in catalog!');
     } catch (err) {
-      alert('Failed to register product: ' + err.message);
+      toast.error('Failed to register product: ' + err.message);
     } finally {
       setIsRegistering(false);
     }
@@ -253,7 +255,7 @@ export default function RFQItemsTab({ rfqId, items: initialItems, onSaveItems, s
         render: (val, row) => {
           const originalIndex = items.findIndex(x => x._id === row._id);
           return isEditing ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '4px' }} onClick={e => e.stopPropagation()}>
               <TextField type="text" value={row.peptide_name || ''} onChange={e => handleItemChange(originalIndex, 'peptide_name', e.target.value)} />
               <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Cost $</span>
@@ -333,9 +335,11 @@ export default function RFQItemsTab({ rfqId, items: initialItems, onSaveItems, s
         render: (val, row) => {
           const originalIndex = items.findIndex(x => x._id === row._id);
           return (
-            <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(originalIndex); }} style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}>
-              <Trash2 size={16} />
-            </button>
+            <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+              <AppActionGroup actions={[
+                { type: 'delete', onClick: (e) => { e.stopPropagation(); handleDeleteItem(originalIndex); } }
+              ]} />
+            </div>
           );
         }
       });

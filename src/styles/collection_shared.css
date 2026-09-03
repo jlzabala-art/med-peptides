@@ -90,7 +90,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.85rem 8.5rem 0.85rem 2.75rem;
+  padding: 0.85rem 1.25rem 0.85rem 2.75rem;
   color: var(--text-main);
   font-size: 0.95rem;
   font-weight: 500;
@@ -1078,6 +1078,7 @@
 @media (max-width: 768px) {
   .pc-mobile-floating-bar {
     display: block;
+    bottom: calc(76px + env(safe-area-inset-bottom, 8px));
   }
 }
 

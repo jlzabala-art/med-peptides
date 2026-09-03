@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
 import '../../../styles/header.css'; 
+import EmptyState from '../../ui/EmptyState';
 
 function formatTimeAgo(date) {
   if (!date) return 'Just now';
@@ -109,11 +110,12 @@ export default function NotificationsPanel({ onClose }) {
         </div>
         <div style={{ maxHeight: '380px', overflowY: 'auto' }}>
           {filteredNotifications.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <Bell size={24} style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-              <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>No notifications</div>
-              <div style={{ fontSize: '0.7rem' }}>You're all caught up!</div>
-            </div>
+            <EmptyState
+              icon={Bell}
+              title="No notifications"
+              subtitle="You're all caught up!"
+              compact={true}
+            />
           ) : (
             filteredNotifications.map(notif => (
               <div key={notif.id} style={{ 

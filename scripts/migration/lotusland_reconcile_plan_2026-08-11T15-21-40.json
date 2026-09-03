@@ -1,0 +1,1990 @@
+{
+  "summary": {
+    "existing": 217,
+    "toUpdate": 9,
+    "toDelete": 208,
+    "toCreate": 95
+  },
+  "toDelete": [
+    {
+      "variantId": "5-amino-1-mq-sc-default",
+      "productId": "5-amino-1mq",
+      "productName": "5-Amino-1MQ",
+      "dosage": "50mg/tablet – SC",
+      "lookupKey": "5 amino 1mq|50mg/tablet – sc"
+    },
+    {
+      "variantId": "imLaf5RoNqeespb3a3ur",
+      "productId": "5-amino-1mq",
+      "productName": "5-Amino-1MQ",
+      "dosage": "10 mg",
+      "lookupKey": "5 amino 1mq|10 mg"
+    },
+    {
+      "variantId": "lotusland_5_amino_1mq_10_mg_vial-default",
+      "productId": "5-amino-1mq",
+      "productName": "5-Amino-1MQ",
+      "dosage": "5-Amino-1MQ",
+      "lookupKey": "5 amino 1mq|5-amino-1mq"
+    },
+    {
+      "variantId": "Q0NNX6RZSakFE1UZFQSt",
+      "productId": "aod-9604",
+      "productName": "AOD-9604",
+      "dosage": "5 mg",
+      "lookupKey": "aod 9604|5 mg"
+    },
+    {
+      "variantId": "lotusland_aod_9604_2_mg_vial-default",
+      "productId": "aod-9604",
+      "productName": "AOD-9604",
+      "dosage": "AOD-9604",
+      "lookupKey": "aod 9604|aod-9604"
+    },
+    {
+      "variantId": "u8T3EotDcP3CZoQJ1JqY",
+      "productId": "aod-9604",
+      "productName": "AOD-9604",
+      "dosage": "2 mg",
+      "lookupKey": "aod 9604|2 mg"
+    },
+    {
+      "variantId": "ara-290-sc-default",
+      "productId": "ara-290",
+      "productName": "ARA-290",
+      "dosage": "16mg/vial – SC",
+      "lookupKey": "ara 290|16mg/vial – sc"
+    },
+    {
+      "variantId": "jGuKD35ag7M6Wiv3cy5n",
+      "productId": "ara-290",
+      "productName": "ARA-290",
+      "dosage": "10 mg",
+      "lookupKey": "ara 290|10 mg"
+    },
+    {
+      "variantId": "lotusland_ara_290_10_mg_vial-default",
+      "productId": "ara-290",
+      "productName": "ARA-290",
+      "dosage": "ARA-290",
+      "lookupKey": "ara 290|ara-290"
+    },
+    {
+      "variantId": "2HxqLEyfqfgCLBozBC2p",
+      "productId": "bac-water",
+      "productName": "Bac Water",
+      "dosage": "30 ml",
+      "lookupKey": "bac water|30 ml"
+    },
+    {
+      "variantId": "lotusland_bac_water_30_ml_bottle-default",
+      "productId": "bac-water",
+      "productName": "Bac Water",
+      "dosage": "Bac Water",
+      "lookupKey": "bac water|bac water"
+    },
+    {
+      "variantId": "bacteriostatic-water-sc-default",
+      "productId": "bacteriostatic-water",
+      "productName": "Bacteriostatic Water",
+      "dosage": "30ml/vial – SC",
+      "lookupKey": "bacteriostatic water|30ml/vial – sc"
+    },
+    {
+      "variantId": "bloodo-nad-test-default",
+      "productId": "bloodo-nad-level-test",
+      "productName": "Bloodo NAD Level Test",
+      "dosage": "Default Variant",
+      "lookupKey": "bloodo nad level test|default variant"
+    },
+    {
+      "variantId": "6ZHalxwLJoIX0Ow6sX7p",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "dosage": "20 mg",
+      "lookupKey": "bpc 157|20 mg"
+    },
+    {
+      "variantId": "9WmOGKlQBFsV86gOklTM",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "dosage": "5 mg",
+      "lookupKey": "bpc 157|5 mg"
+    },
+    {
+      "variantId": "UK4s9qprJrOkKPrc49ul",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "dosage": "2 mg",
+      "lookupKey": "bpc 157|2 mg"
+    },
+    {
+      "variantId": "lotusland_bpc_157_10_mg_vial-default",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "dosage": "BPC-157",
+      "lookupKey": "bpc 157|bpc-157"
+    },
+    {
+      "variantId": "wj0XsgWASynAQWmhXBjl",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "dosage": "10 mg",
+      "lookupKey": "bpc 157|10 mg"
+    },
+    {
+      "variantId": "IqvLf8lr0XytTK6EproS",
+      "productId": "bpc-157-tb-500",
+      "productName": "BPC-157 + TB-500",
+      "dosage": "5 mg + 5 mg",
+      "lookupKey": "bpc 157 tb 500|5 mg + 5 mg"
+    },
+    {
+      "variantId": "jvzwsl8H7kRUCXOTkTGa",
+      "productId": "bpc-157-tb-500",
+      "productName": "BPC-157 + TB-500",
+      "dosage": "10 mg + 10 mg",
+      "lookupKey": "bpc 157 tb 500|10 mg + 10 mg"
+    },
+    {
+      "variantId": "lotusland_bpc_157_tb_500_10_mg_10_mg_vial-default",
+      "productId": "bpc-157-tb-500",
+      "productName": "BPC-157 + TB-500",
+      "dosage": "BPC-157 + TB-500",
+      "lookupKey": "bpc 157 tb 500|bpc-157 + tb-500"
+    },
+    {
+      "variantId": "cagrilintide-sc-default",
+      "productId": "cagrilintide",
+      "productName": "Cagrilintide",
+      "dosage": "5mg/vial – SC",
+      "lookupKey": "cagrilintide|5mg/vial – sc"
+    },
+    {
+      "variantId": "kvLPCXSg7hFVNXczeeoJ",
+      "productId": "cagrilintide",
+      "productName": "Cagrilintide",
+      "dosage": "10 mg",
+      "lookupKey": "cagrilintide|10 mg"
+    },
+    {
+      "variantId": "lZLvyQCBrbBr3IsVObym",
+      "productId": "cagrilintide",
+      "productName": "Cagrilintide",
+      "dosage": "5 mg",
+      "lookupKey": "cagrilintide|5 mg"
+    },
+    {
+      "variantId": "lotusland_cagrilintide_10_mg_vial-default",
+      "productId": "cagrilintide",
+      "productName": "Cagrilintide",
+      "dosage": "Cagrilintide",
+      "lookupKey": "cagrilintide|cagrilintide"
+    },
+    {
+      "variantId": "aq2YyycSlElI1RLGbX5T",
+      "productId": "cardiogen",
+      "productName": "Cardiogen",
+      "dosage": "25 mg",
+      "lookupKey": "cardiogen|25 mg"
+    },
+    {
+      "variantId": "cardiogen-sc-default",
+      "productId": "cardiogen",
+      "productName": "Cardiogen",
+      "dosage": "10mg/vial – SC",
+      "lookupKey": "cardiogen|10mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_cardiogen_25_mg_vial-default",
+      "productId": "cardiogen",
+      "productName": "Cardiogen",
+      "dosage": "Cardiogen",
+      "lookupKey": "cardiogen|cardiogen"
+    },
+    {
+      "variantId": "NM1vDq3j5BBX2rKLC6Es",
+      "productId": "cartalax",
+      "productName": "Cartalax",
+      "dosage": "25 mg",
+      "lookupKey": "cartalax|25 mg"
+    },
+    {
+      "variantId": "cartalax-sc-default",
+      "productId": "cartalax",
+      "productName": "Cartalax",
+      "dosage": "10mg/vial – SC",
+      "lookupKey": "cartalax|10mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_cartalax_25_mg_vial-default",
+      "productId": "cartalax",
+      "productName": "Cartalax",
+      "dosage": "Cartalax",
+      "lookupKey": "cartalax|cartalax"
+    },
+    {
+      "variantId": "HWwcWXkfJGHosep8hDGo",
+      "productId": "cjc",
+      "productName": "CJC",
+      "dosage": "5 mg",
+      "lookupKey": "cjc|5 mg"
+    },
+    {
+      "variantId": "Hzbj6xXSYGNWpGNxv7Nw",
+      "productId": "cjc",
+      "productName": "CJC",
+      "dosage": "10 mg",
+      "lookupKey": "cjc|10 mg"
+    },
+    {
+      "variantId": "IzJbtfKgSgdQDDN8vYC7",
+      "productId": "cjc",
+      "productName": "CJC",
+      "dosage": "2 mg",
+      "lookupKey": "cjc|2 mg"
+    },
+    {
+      "variantId": "lotusland_cjc_1295_with_dac_2_mg_vial-default",
+      "productId": "cjc-1295-with-dac",
+      "productName": "CJC-1295 with DAC",
+      "dosage": "CJC-1295 with DAC",
+      "lookupKey": "cjc 1295 with dac|cjc-1295 with dac"
+    },
+    {
+      "variantId": "67mhL7sEOgpxvD1ZjSi1",
+      "productId": "cjc-1295-without-dac",
+      "productName": "CJC-1295 without DAC (Modified GRF 1-29)",
+      "dosage": "5 mg / vial",
+      "lookupKey": "cjc 1295 without dac modified grf 1 29|5 mg/vial"
+    },
+    {
+      "variantId": "cjc-1295-without-dac-modified-grf-1-29-sc-default",
+      "productId": "cjc-1295-without-dac",
+      "productName": "CJC-1295 without DAC (Modified GRF 1-29)",
+      "dosage": "2mg/vial – SC",
+      "lookupKey": "cjc 1295 without dac modified grf 1 29|2mg/vial – sc"
+    },
+    {
+      "variantId": "CJC-1295_without_DAC_Ipamorelin-5-5mg-vial-default",
+      "productId": "cjc-1295-without-dac-ipamorelin",
+      "productName": "CJC-1295 without DAC + Ipamorelin",
+      "dosage": "Default Variant",
+      "lookupKey": "cjc 1295 without dac ipamorelin|default variant"
+    },
+    {
+      "variantId": "IYcn5l7foezE1kPEuC9U",
+      "productId": "cjc-1295-without-dac-ipamorelin",
+      "productName": "CJC-1295 without DAC + Ipamorelin",
+      "dosage": "5 mg + 5 mg",
+      "lookupKey": "cjc 1295 without dac ipamorelin|5 mg + 5 mg"
+    },
+    {
+      "variantId": "lotusland_cjc_1295_without_dac_ipamorelin_5_mg_5_mg_vial-default",
+      "productId": "cjc-1295-without-dac-ipamorelin",
+      "productName": "CJC-1295 without DAC + Ipamorelin",
+      "dosage": "CJC-1295 without DAC + Ipamorelin",
+      "lookupKey": "cjc 1295 without dac ipamorelin|cjc-1295 without dac + ipamorelin"
+    },
+    {
+      "variantId": "TAF0DynbcDFqcYIqTZsn",
+      "productId": "dsip",
+      "productName": "DSIP",
+      "dosage": "10 mg",
+      "lookupKey": "dsip|10 mg"
+    },
+    {
+      "variantId": "kzxRFJ8mNikrqeedj58t",
+      "productId": "dsip",
+      "productName": "DSIP",
+      "dosage": "5 mg",
+      "lookupKey": "dsip|5 mg"
+    },
+    {
+      "variantId": "lotusland_dsip_10_mg_vial-default",
+      "productId": "dsip",
+      "productName": "DSIP",
+      "dosage": "DSIP",
+      "lookupKey": "dsip|dsip"
+    },
+    {
+      "variantId": "lotusland_insulin_syringes_1_2_ml_31g_x_8_mm_100_counts_n_a-default",
+      "productId": "e9URhAeNH7ygDWzvrf83",
+      "productName": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "dosage": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "lookupKey": "insulin syringes 1 2 ml 31g x 8 mm 100 counts|insulin syringes 1/2 ml - 31g x 8 mm 100 counts"
+    },
+    {
+      "variantId": "9eKHWIp5GtuaGPfydVzV",
+      "productId": "epithalon",
+      "productName": "Epithalon",
+      "dosage": "10 mg",
+      "lookupKey": "epithalon|10 mg"
+    },
+    {
+      "variantId": "DWCvAr373KKNft1sUJ1k",
+      "productId": "epithalon",
+      "productName": "Epithalon",
+      "dosage": "50 mg",
+      "lookupKey": "epithalon|50 mg"
+    },
+    {
+      "variantId": "QBor1NWioMFUkjzK844q",
+      "productId": "epithalon",
+      "productName": "Epithalon",
+      "dosage": "100 mg",
+      "lookupKey": "epithalon|100 mg"
+    },
+    {
+      "variantId": "VJE9yrbwCOepQDkjHv4u",
+      "productId": "epithalon",
+      "productName": "Epithalon",
+      "dosage": "30 mg",
+      "lookupKey": "epithalon|30 mg"
+    },
+    {
+      "variantId": "epithalon-sc-default",
+      "productId": "epithalon",
+      "productName": "Epithalon",
+      "dosage": "10mg/vial – SC",
+      "lookupKey": "epithalon|10mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_epithalon_100_mg_vial-default",
+      "productId": "epithalon",
+      "productName": "Epithalon",
+      "dosage": "Epithalon",
+      "lookupKey": "epithalon|epithalon"
+    },
+    {
+      "variantId": "PuGWeL2jO7FhgZxjrSXe",
+      "productId": "fox-04",
+      "productName": "FOX-04",
+      "dosage": "12 mg",
+      "lookupKey": "fox 04|12 mg"
+    },
+    {
+      "variantId": "lotusland_fox_04_12_mg_vial-default",
+      "productId": "fox-04",
+      "productName": "FOX-04",
+      "dosage": "FOX-04",
+      "lookupKey": "fox 04|fox-04"
+    },
+    {
+      "variantId": "fst-344-follistatin-sc-default",
+      "productId": "fst-344-follistatin",
+      "productName": "FST-344 (Follistatin)",
+      "dosage": "1mg/vial – SC",
+      "lookupKey": "fst 344 follistatin|1mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_fst344_1_mg_vial-default",
+      "productId": "fst344",
+      "productName": "FST344",
+      "dosage": "FST344",
+      "lookupKey": "fst344|fst344"
+    },
+    {
+      "variantId": "uN0cOvz2vSx685UnTsku",
+      "productId": "fst344",
+      "productName": "FST344",
+      "dosage": "1 mg",
+      "lookupKey": "fst344|1 mg"
+    },
+    {
+      "variantId": "ghk-cu-copper-peptide-sc-default",
+      "productId": "ghk-cu-copper-peptide",
+      "productName": "GHK-Cu (Copper Peptide)",
+      "dosage": "50mg/vial – SC",
+      "lookupKey": "ghk cu copper peptide|50mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_ghk_cu_human_copper_100_mg_vial-default",
+      "productId": "ghk-cu-human-copper",
+      "productName": "GHK-Cu (Human Copper)",
+      "dosage": "GHK-Cu (Human Copper)",
+      "lookupKey": "ghk cu human copper|ghk-cu (human copper)"
+    },
+    {
+      "variantId": "q37amDQjIVHTANuplSmL",
+      "productId": "ghk-cu-human-copper",
+      "productName": "GHK-Cu (Human Copper)",
+      "dosage": "50 mg",
+      "lookupKey": "ghk cu human copper|50 mg"
+    },
+    {
+      "variantId": "uJ8ADMJCun93cRe3DBLZ",
+      "productId": "ghk-cu-human-copper",
+      "productName": "GHK-Cu (Human Copper)",
+      "dosage": "100 mg",
+      "lookupKey": "ghk cu human copper|100 mg"
+    },
+    {
+      "variantId": "HdK4m571yozLxWKnPQk1",
+      "productId": "ghrp-2",
+      "productName": "GHRP-2",
+      "dosage": "5 mg",
+      "lookupKey": "ghrp 2|5 mg"
+    },
+    {
+      "variantId": "ghrp-2-sc-default",
+      "productId": "ghrp-2",
+      "productName": "GHRP-2",
+      "dosage": "5mg/vial – SC",
+      "lookupKey": "ghrp 2|5mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_ghrp_2_5_mg_vial-default",
+      "productId": "ghrp-2",
+      "productName": "GHRP-2",
+      "dosage": "GHRP-2",
+      "lookupKey": "ghrp 2|ghrp-2"
+    },
+    {
+      "variantId": "8KdwYW6nrsgdVxLganBR",
+      "productId": "glow-bpc-157-tb-500-ghk",
+      "productName": "GLOW (BPC-157 / TB-500 / GHK)",
+      "dosage": "10 mg + 10 mg + 75 mg",
+      "lookupKey": "glow bpc 157 tb 500 ghk|10 mg + 10 mg + 75 mg"
+    },
+    {
+      "variantId": "glow-bpc-157-tb-500-ghk-cu-sc-default",
+      "productId": "glow-bpc-157-tb-500-ghk",
+      "productName": "GLOW (BPC-157 / TB-500 / GHK)",
+      "dosage": "10/10/75mg/vial – SC",
+      "lookupKey": "glow bpc 157 tb 500 ghk|10/10/75mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_glow_bpc_157_tb_500_ghk_10_mg_10_mg_75_mg_vial-default",
+      "productId": "glow-bpc-157-tb-500-ghk",
+      "productName": "GLOW (BPC-157 / TB-500 / GHK)",
+      "dosage": "GLOW (BPC-157 / TB-500 / GHK)",
+      "lookupKey": "glow bpc 157 tb 500 ghk|glow (bpc-157/tb-500/ghk)"
+    },
+    {
+      "variantId": "lotusland_glutathione_500_mg_vial-default",
+      "productId": "glutathione",
+      "productName": "Glutathione",
+      "dosage": "Glutathione",
+      "lookupKey": "glutathione|glutathione"
+    },
+    {
+      "variantId": "lotusland_gw501516_10_mg-default",
+      "productId": "gw501516",
+      "productName": "GW501516",
+      "dosage": "GW501516",
+      "lookupKey": "gw501516|gw501516"
+    },
+    {
+      "variantId": "T5LP6TwNyPZesO9nYqDG",
+      "productId": "hcg",
+      "productName": "HCG",
+      "dosage": "10000 IU",
+      "lookupKey": "hcg|10000 iu"
+    },
+    {
+      "variantId": "ZcfkYBifyZAYu5tQ0s3C",
+      "productId": "hcg",
+      "productName": "HCG",
+      "dosage": "5000 IU",
+      "lookupKey": "hcg|5000 iu"
+    },
+    {
+      "variantId": "hcg-sc-default",
+      "productId": "hcg",
+      "productName": "HCG",
+      "dosage": "5000iu/vial – SC",
+      "lookupKey": "hcg|5000iu/vial – sc"
+    },
+    {
+      "variantId": "lotusland_hcg_10000_iu_vial-default",
+      "productId": "hcg",
+      "productName": "HCG",
+      "dosage": "hCG",
+      "lookupKey": "hcg|hcg"
+    },
+    {
+      "variantId": "hexarelin-sc-default",
+      "productId": "hexarelin",
+      "productName": "Hexarelin",
+      "dosage": "2mg/vial – SC",
+      "lookupKey": "hexarelin|2mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_hexarelin_2_mg_vial-default",
+      "productId": "hexarelin",
+      "productName": "Hexarelin",
+      "dosage": "Hexarelin",
+      "lookupKey": "hexarelin|hexarelin"
+    },
+    {
+      "variantId": "po6hBcaJYWN77pnECoPq",
+      "productId": "hexarelin",
+      "productName": "Hexarelin",
+      "dosage": "2 mg",
+      "lookupKey": "hexarelin|2 mg"
+    },
+    {
+      "variantId": "r8Wj3yk9CYPKBJXgF3CE",
+      "productId": "hexarelin",
+      "productName": "Hexarelin",
+      "dosage": "5 mg",
+      "lookupKey": "hexarelin|5 mg"
+    },
+    {
+      "variantId": "0ot2wwKrpbfTUK6JZVeg",
+      "productId": "hgh",
+      "productName": "HGH",
+      "dosage": "36 IU",
+      "lookupKey": "hgh|36 iu"
+    },
+    {
+      "variantId": "JOe7hgSzbhIpcrqkT3eg",
+      "productId": "hgh",
+      "productName": "HGH",
+      "dosage": "10 IU",
+      "lookupKey": "hgh|10 iu"
+    },
+    {
+      "variantId": "a599k0JRLIf2aPpOekbQ",
+      "productId": "hgh",
+      "productName": "HGH",
+      "dosage": "20 IU",
+      "lookupKey": "hgh|20 iu"
+    },
+    {
+      "variantId": "hgh-sc-default",
+      "productId": "hgh",
+      "productName": "HGH",
+      "dosage": "10iu/vial – SC",
+      "lookupKey": "hgh|10iu/vial – sc"
+    },
+    {
+      "variantId": "lotusland_hgh_10_iu_vial-default",
+      "productId": "hgh",
+      "productName": "HGH",
+      "dosage": "HGH",
+      "lookupKey": "hgh|hgh"
+    },
+    {
+      "variantId": "AUtYj11XwCEw0EIBpx4t",
+      "productId": "hmg",
+      "productName": "HMG",
+      "dosage": "75 IU",
+      "lookupKey": "hmg|75 iu"
+    },
+    {
+      "variantId": "hmg-sc-default",
+      "productId": "hmg",
+      "productName": "HMG",
+      "dosage": "75iu/vial – SC",
+      "lookupKey": "hmg|75iu/vial – sc"
+    },
+    {
+      "variantId": "lotusland_hmg_75_iu_vial-default",
+      "productId": "hmg",
+      "productName": "HMG",
+      "dosage": "HMG",
+      "lookupKey": "hmg|hmg"
+    },
+    {
+      "variantId": "R3edRRp0z1qJEVUgUdpg",
+      "productId": "igf-lr3",
+      "productName": "IGF LR3",
+      "dosage": "0.1 mg",
+      "lookupKey": "igf lr3|0.1 mg"
+    },
+    {
+      "variantId": "ga4fPcucGivey31wmxEx",
+      "productId": "igf-lr3",
+      "productName": "IGF LR3",
+      "dosage": "1 mg",
+      "lookupKey": "igf lr3|1 mg"
+    },
+    {
+      "variantId": "lotusland_igf_lr3_0_1_mg_vial-default",
+      "productId": "igf-lr3",
+      "productName": "IGF LR3",
+      "dosage": "IGF LR3",
+      "lookupKey": "igf lr3|igf lr3"
+    },
+    {
+      "variantId": "lotusland_ipamorelin_10_mg_vial-default",
+      "productId": "ipamorelin",
+      "productName": "Ipamorelin",
+      "dosage": "Ipamorelin",
+      "lookupKey": "ipamorelin|ipamorelin"
+    },
+    {
+      "variantId": "wxeQLx1iHh9xac62tViv",
+      "productId": "ipamorelin",
+      "productName": "Ipamorelin",
+      "dosage": "10 mg",
+      "lookupKey": "ipamorelin|10 mg"
+    },
+    {
+      "variantId": "Q1hxoT4RzjMcDQ1A9rhx",
+      "productId": "kisspeptin-10",
+      "productName": "Kisspeptin-10",
+      "dosage": "5 mg",
+      "lookupKey": "kisspeptin 10|5 mg"
+    },
+    {
+      "variantId": "lotusland_kisspeptin_10_5_mg_vial-default",
+      "productId": "kisspeptin-10",
+      "productName": "Kisspeptin-10",
+      "dosage": "Kisspeptin-10",
+      "lookupKey": "kisspeptin 10|kisspeptin-10"
+    },
+    {
+      "variantId": "5WwkhvpkRE2fIGs2mGjI",
+      "productId": "klow-bpc-157-tb-500-ghkcu-kpv",
+      "productName": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+      "dosage": "10 mg + 10 mg + 75 mg + 10 mg",
+      "lookupKey": "klow bpc 157 tb 500 ghkcu kpv|10 mg + 10 mg + 75 mg + 10 mg"
+    },
+    {
+      "variantId": "klow-bpc-157-tb-500-ghk-cu-kpv-sc-default",
+      "productId": "klow-bpc-157-tb-500-ghkcu-kpv",
+      "productName": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+      "dosage": "10/10/75/10mg/vial – SC",
+      "lookupKey": "klow bpc 157 tb 500 ghkcu kpv|10/10/75/10mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_klow_bpc_157_tb_500_ghkcu_kpv_10_mg_10_mg_75_mg_10_mg_vial-default",
+      "productId": "klow-bpc-157-tb-500-ghkcu-kpv",
+      "productName": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+      "dosage": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+      "lookupKey": "klow bpc 157 tb 500 ghkcu kpv|klow (bpc-157/tb-500/ghkcu/kpv)"
+    },
+    {
+      "variantId": "5vdbwxeegknxXAbVboC6",
+      "productId": "kpv",
+      "productName": "KPV",
+      "dosage": "10 mg",
+      "lookupKey": "kpv|10 mg"
+    },
+    {
+      "variantId": "lotusland_kpv_10_mg_vial-default",
+      "productId": "kpv",
+      "productName": "KPV",
+      "dosage": "KPV",
+      "lookupKey": "kpv|kpv"
+    },
+    {
+      "variantId": "MOjMKeALd8HXkB1uzZay",
+      "productId": "ll-37",
+      "productName": "LL-37",
+      "dosage": "12 mg",
+      "lookupKey": "ll 37|12 mg"
+    },
+    {
+      "variantId": "lotusland_ll_37_12_mg_vial-default",
+      "productId": "ll-37",
+      "productName": "LL-37",
+      "dosage": "LL-37",
+      "lookupKey": "ll 37|ll-37"
+    },
+    {
+      "variantId": "lotusland_cjc_1295_without_dac_10_mg_vial-default",
+      "productId": "lotusland_cjc_1295_without_dac_2_mg_vial",
+      "productName": "CJC-1295 without DAC",
+      "dosage": "CJC-1295 without DAC",
+      "lookupKey": "cjc 1295 without dac|cjc-1295 without dac"
+    },
+    {
+      "variantId": "lotusland_fox_04_12_mg_vial-default",
+      "productId": "lotusland_fox_04_12_mg_vial",
+      "productName": "FOX-04",
+      "dosage": "FOX-04",
+      "lookupKey": "fox 04|fox-04"
+    },
+    {
+      "variantId": "lotusland_fst344_1_mg_vial-default",
+      "productId": "lotusland_fst344_1_mg_vial",
+      "productName": "FST344",
+      "dosage": "FST344",
+      "lookupKey": "fst344|fst344"
+    },
+    {
+      "variantId": "lotusland_ghk_cu_human_copper_100_mg_vial-default",
+      "productId": "lotusland_ghk_cu_human_copper_100_mg_vial",
+      "productName": "GHK-Cu (Human Copper)",
+      "dosage": "GHK-Cu (Human Copper)",
+      "lookupKey": "ghk cu human copper|ghk-cu (human copper)"
+    },
+    {
+      "variantId": "lotusland_ghk_cu_human_copper_50_mg_vial-default",
+      "productId": "lotusland_ghk_cu_human_copper_50_mg_vial",
+      "productName": "GHK-Cu (Human Copper)",
+      "dosage": "GHK-Cu (Human Copper)",
+      "lookupKey": "ghk cu human copper|ghk-cu (human copper)"
+    },
+    {
+      "variantId": "lotusland_igf_lr3_0_1_mg_vial-default",
+      "productId": "lotusland_igf_lr3_0_1_mg_vial",
+      "productName": "IGF LR3",
+      "dosage": "IGF LR3",
+      "lookupKey": "igf lr3|igf lr3"
+    },
+    {
+      "variantId": "lotusland_igf_lr3_1_mg_vial-default",
+      "productId": "lotusland_igf_lr3_1_mg_vial",
+      "productName": "IGF LR3",
+      "dosage": "IGF LR3",
+      "lookupKey": "igf lr3|igf lr3"
+    },
+    {
+      "variantId": "lotusland_ll_37_12_mg_vial-default",
+      "productId": "lotusland_ll_37_12_mg_vial",
+      "productName": "LL-37",
+      "dosage": "LL-37",
+      "lookupKey": "ll 37|ll-37"
+    },
+    {
+      "variantId": "lotusland_mk_677_12_mg-default",
+      "productId": "lotusland_mk_677_12_mg",
+      "productName": "MK-677",
+      "dosage": "MK-677",
+      "lookupKey": "mk 677|mk-677"
+    },
+    {
+      "variantId": "lotusland_mt2_10_mg_vial-default",
+      "productId": "lotusland_mt2_10_mg_vial",
+      "productName": "MT2",
+      "dosage": "MT2",
+      "lookupKey": "mt2|mt2"
+    },
+    {
+      "variantId": "lotusland_nmn_50_mg_tablet-default",
+      "productId": "lotusland_nmn_50_mg_tablet",
+      "productName": "NMN",
+      "dosage": "NMN",
+      "lookupKey": "nmn|nmn"
+    },
+    {
+      "variantId": "lotusland_pe_22_28_10_mg_vial-default",
+      "productId": "lotusland_pe_22_28_10_mg_vial",
+      "productName": "PE 22-28",
+      "dosage": "PE 22-28",
+      "lookupKey": "pe 22 28|pe 22-28"
+    },
+    {
+      "variantId": "lotusland_peg_mgf_5_mg_vial-default",
+      "productId": "lotusland_peg_mgf_5_mg_vial",
+      "productName": "PEG-MGF",
+      "dosage": "PEG-MGF",
+      "lookupKey": "peg mgf|peg-mgf"
+    },
+    {
+      "variantId": "lotusland_pinealon_16_mg_vial-default",
+      "productId": "lotusland_pinealon_16_mg_vial",
+      "productName": "Pinealon",
+      "dosage": "Pinealon",
+      "lookupKey": "pinealon|pinealon"
+    },
+    {
+      "variantId": "lotusland_pinealon_25_mg_vial-default",
+      "productId": "lotusland_pinealon_25_mg_vial",
+      "productName": "Pinealon",
+      "dosage": "Pinealon",
+      "lookupKey": "pinealon|pinealon"
+    },
+    {
+      "variantId": "lotusland_pnc_27_10_mg_vial-default",
+      "productId": "lotusland_pnc_27_10_mg_vial",
+      "productName": "PNC-27",
+      "dosage": "PNC-27",
+      "lookupKey": "pnc 27|pnc-27"
+    },
+    {
+      "variantId": "lotusland_prostamax_25_mg_vial-default",
+      "productId": "lotusland_prostamax_25_mg_vial",
+      "productName": "Prostamax",
+      "dosage": "Prostamax",
+      "lookupKey": "prostamax|prostamax"
+    },
+    {
+      "variantId": "lotusland_snap_8_10_mg_vial-default",
+      "productId": "lotusland_snap_8_10_mg_vial",
+      "productName": "Snap-8",
+      "dosage": "Snap-8",
+      "lookupKey": "snap 8|snap-8"
+    },
+    {
+      "variantId": "lotusland_testagen_25_mg_vial-default",
+      "productId": "lotusland_testagen_25_mg_vial",
+      "productName": "Testagen",
+      "dosage": "Testagen",
+      "lookupKey": "testagen|testagen"
+    },
+    {
+      "variantId": "lotusland_thymogen_25_mg_vial-default",
+      "productId": "lotusland_thymogen_25_mg_vial",
+      "productName": "Thymogen",
+      "dosage": "Thymogen",
+      "lookupKey": "thymogen|thymogen"
+    },
+    {
+      "variantId": "lotusland_thymosin_alpha_1_thymalin_10_mg_10_mg_vial-default",
+      "productId": "lotusland_thymosin_alpha_1_thymalin_10_mg_10_mg_vial",
+      "productName": "Thymosin Alpha 1 + Thymalin",
+      "dosage": "Thymosin Alpha 1 + Thymalin",
+      "lookupKey": "thymosin alpha 1 thymalin|thymosin alpha 1 + thymalin"
+    },
+    {
+      "variantId": "lotusland_thymulin_10_mg_vial-default",
+      "productId": "lotusland_thymulin_10_mg_vial",
+      "productName": "Thymulin",
+      "dosage": "Thymulin",
+      "lookupKey": "thymulin|thymulin"
+    },
+    {
+      "variantId": "lotusland_mk_677_12_mg-default",
+      "productId": "mk-677",
+      "productName": "MK-677",
+      "dosage": "MK-677",
+      "lookupKey": "mk 677|mk-677"
+    },
+    {
+      "variantId": "mk-677-ibutamoren-sc-default",
+      "productId": "mk-677-ibutamoren",
+      "productName": "MK-677 (Ibutamoren)",
+      "dosage": "10mg/vial – SC",
+      "lookupKey": "mk 677 ibutamoren|10mg/vial – sc"
+    },
+    {
+      "variantId": "7jPfG5NV24E17Mvgrxar",
+      "productId": "mots-c",
+      "productName": "MOTS-C",
+      "dosage": "60 mg",
+      "lookupKey": "mots c|60 mg"
+    },
+    {
+      "variantId": "B7wZOYdtugWEPaF5gzHh",
+      "productId": "mots-c",
+      "productName": "MOTS-C",
+      "dosage": "40 mg",
+      "lookupKey": "mots c|40 mg"
+    },
+    {
+      "variantId": "WskRy5g5DpnSlNlTIFcG",
+      "productId": "mots-c",
+      "productName": "MOTS-C",
+      "dosage": "10 mg",
+      "lookupKey": "mots c|10 mg"
+    },
+    {
+      "variantId": "lotusland_mots_c_10_mg_vial-default",
+      "productId": "mots-c",
+      "productName": "MOTS-C",
+      "dosage": "MOTS-C",
+      "lookupKey": "mots c|mots-c"
+    },
+    {
+      "variantId": "EeIvUTodJPgOAJP8JJWm",
+      "productId": "mt2",
+      "productName": "MT2",
+      "dosage": "10 mg",
+      "lookupKey": "mt2|10 mg"
+    },
+    {
+      "variantId": "lotusland_mt2_10_mg_vial-default",
+      "productId": "mt2",
+      "productName": "MT2",
+      "dosage": "MT2",
+      "lookupKey": "mt2|mt2"
+    },
+    {
+      "variantId": "mt2-melanotan-ii-sc-default",
+      "productId": "mt2-melanotan-ii",
+      "productName": "MT2 (Melanotan II)",
+      "dosage": "10mg/vial – SC",
+      "lookupKey": "mt2 melanotan ii|10mg/vial – sc"
+    },
+    {
+      "variantId": "nac-var-0",
+      "productId": "nac",
+      "productName": "NAC",
+      "dosage": "Variant 1",
+      "lookupKey": "nac|variant 1"
+    },
+    {
+      "variantId": "GTFxy8GseDI33Y7rK1QZ",
+      "productId": "nad",
+      "productName": "NAD+",
+      "dosage": "750 mg",
+      "lookupKey": "nad|750 mg"
+    },
+    {
+      "variantId": "W5CeLfCEf7UuA9sTc0vK",
+      "productId": "nad",
+      "productName": "NAD+",
+      "dosage": "500 mg",
+      "lookupKey": "nad|500 mg"
+    },
+    {
+      "variantId": "bX3SBujBYi7mRtzalnI8",
+      "productId": "nad",
+      "productName": "NAD+",
+      "dosage": "1000 mg",
+      "lookupKey": "nad|1000 mg"
+    },
+    {
+      "variantId": "lotusland_nad_1000_mg_vial-default",
+      "productId": "nad",
+      "productName": "NAD+",
+      "dosage": "NAD+",
+      "lookupKey": "nad|nad+"
+    },
+    {
+      "variantId": "cPllYlT5DLTpxQffbtyQ",
+      "productId": "nmn",
+      "productName": "NMN",
+      "dosage": "50 mg",
+      "lookupKey": "nmn|50 mg"
+    },
+    {
+      "variantId": "lotusland_nmn_50_mg_tablet-default",
+      "productId": "nmn",
+      "productName": "NMN",
+      "dosage": "NMN",
+      "lookupKey": "nmn|nmn"
+    },
+    {
+      "variantId": "O5Xj0qAZbpLJ9Q5wlxF1",
+      "productId": "oxytocin-acetate",
+      "productName": "Oxytocin Acetate",
+      "dosage": "10 mg",
+      "lookupKey": "oxytocin acetate|10 mg"
+    },
+    {
+      "variantId": "h4xXBKEio3i3XpKS21iY",
+      "productId": "oxytocin-acetate",
+      "productName": "Oxytocin Acetate",
+      "dosage": "2 mg",
+      "lookupKey": "oxytocin acetate|2 mg"
+    },
+    {
+      "variantId": "lotusland_oxytocin_acetate_10_mg_vial-default",
+      "productId": "oxytocin-acetate",
+      "productName": "Oxytocin Acetate",
+      "dosage": "Oxytocin Acetate",
+      "lookupKey": "oxytocin acetate|oxytocin acetate"
+    },
+    {
+      "variantId": "HLL9hTTT7UOJZaloAxWv",
+      "productId": "pe-22-28",
+      "productName": "PE 22-28",
+      "dosage": "10 mg",
+      "lookupKey": "pe 22 28|10 mg"
+    },
+    {
+      "variantId": "lotusland_pe_22_28_10_mg_vial-default",
+      "productId": "pe-22-28",
+      "productName": "PE 22-28",
+      "dosage": "PE 22-28",
+      "lookupKey": "pe 22 28|pe 22-28"
+    },
+    {
+      "variantId": "PZyURkVgQBk8E4NikeA6",
+      "productId": "peg-mgf",
+      "productName": "PEG-MGF",
+      "dosage": "5 mg",
+      "lookupKey": "peg mgf|5 mg"
+    },
+    {
+      "variantId": "lotusland_peg_mgf_5_mg_vial-default",
+      "productId": "peg-mgf",
+      "productName": "PEG-MGF",
+      "dosage": "PEG-MGF",
+      "lookupKey": "peg mgf|peg-mgf"
+    },
+    {
+      "variantId": "lotusland_pinealon_16_mg_vial-default",
+      "productId": "pinealon",
+      "productName": "Pinealon",
+      "dosage": "Pinealon",
+      "lookupKey": "pinealon|pinealon"
+    },
+    {
+      "variantId": "R9T1Cs8xmC633pavCaUV",
+      "productId": "pnc-27",
+      "productName": "PNC-27",
+      "dosage": "10 mg",
+      "lookupKey": "pnc 27|10 mg"
+    },
+    {
+      "variantId": "lotusland_pnc_27_10_mg_vial-default",
+      "productId": "pnc-27",
+      "productName": "PNC-27",
+      "dosage": "PNC-27",
+      "lookupKey": "pnc 27|pnc-27"
+    },
+    {
+      "variantId": "precision-insulin-syringes-sc-default",
+      "productId": "precision-insulin-syringes",
+      "productName": "Precision Insulin Syringes",
+      "dosage": "Box of 100 – SC",
+      "lookupKey": "precision insulin syringes|box of 100 – sc"
+    },
+    {
+      "variantId": "Midh3bQfXFluJVHjNB6a",
+      "productId": "prostamax",
+      "productName": "Prostamax",
+      "dosage": "25 mg",
+      "lookupKey": "prostamax|25 mg"
+    },
+    {
+      "variantId": "lotusland_prostamax_25_mg_vial-default",
+      "productId": "prostamax",
+      "productName": "Prostamax",
+      "dosage": "Prostamax",
+      "lookupKey": "prostamax|prostamax"
+    },
+    {
+      "variantId": "KVVQvAu9BgYw2XRg7NqU-default",
+      "productId": "pt-141",
+      "productName": "Bremelanotide (PT 141)",
+      "dosage": "Default Variant",
+      "lookupKey": "bremelanotide pt 141|default variant"
+    },
+    {
+      "variantId": "3Mumh5BlYcYfm3tAV6aJ",
+      "productId": "pt-141-10mg-vial",
+      "productName": "PT-141",
+      "dosage": "20 mg",
+      "lookupKey": "pt 141|20 mg"
+    },
+    {
+      "variantId": "J2zMDVmDhlVGCLas6tTj",
+      "productId": "pt-141-10mg-vial",
+      "productName": "PT-141",
+      "dosage": "10 mg",
+      "lookupKey": "pt 141|10 mg"
+    },
+    {
+      "variantId": "lotusland_pt_141_10_mg_vial-default",
+      "productId": "pt-141-10mg-vial",
+      "productName": "PT-141",
+      "dosage": "PT-141",
+      "lookupKey": "pt 141|pt-141"
+    },
+    {
+      "variantId": "uJI1tW49S8QFEONgQ0tX",
+      "productId": "pt-141-10mg-vial",
+      "productName": "PT-141",
+      "dosage": "5 mg",
+      "lookupKey": "pt 141|5 mg"
+    },
+    {
+      "variantId": "0ncBX3po8PvhUqgvbmow",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "dosage": "40 mg",
+      "lookupKey": "retatrutide|40 mg"
+    },
+    {
+      "variantId": "QiUlYyiPcqvmahU6Y5Fx",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "dosage": "5 mg",
+      "lookupKey": "retatrutide|5 mg"
+    },
+    {
+      "variantId": "jP2nhM9XJZQ796WXke29",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "dosage": "10 mg",
+      "lookupKey": "retatrutide|10 mg"
+    },
+    {
+      "variantId": "ketTCtUfzro4feur3Unh",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "dosage": "30 mg",
+      "lookupKey": "retatrutide|30 mg"
+    },
+    {
+      "variantId": "lotusland_retatrutide_10_mg_vial-default",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "dosage": "Retatrutide",
+      "lookupKey": "retatrutide|retatrutide"
+    },
+    {
+      "variantId": "zmUfP8QDm9jgUhiRu689",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "dosage": "20 mg",
+      "lookupKey": "retatrutide|20 mg"
+    },
+    {
+      "variantId": "Hrq0b46KA9unNLvi7P2X",
+      "productId": "selank",
+      "productName": "SELANK",
+      "dosage": "10 mg",
+      "lookupKey": "selank|10 mg"
+    },
+    {
+      "variantId": "lotusland_selank_10_mg_vial-default",
+      "productId": "selank",
+      "productName": "SELANK",
+      "dosage": "Selank",
+      "lookupKey": "selank|selank"
+    },
+    {
+      "variantId": "srQnh1URrCWPNHfiglpG",
+      "productId": "selank",
+      "productName": "SELANK",
+      "dosage": "5 mg",
+      "lookupKey": "selank|5 mg"
+    },
+    {
+      "variantId": "62D9dJ355emy7yScNbmB",
+      "productId": "semaglutide",
+      "productName": "Semaglutide",
+      "dosage": "2 mg",
+      "lookupKey": "semaglutide|2 mg"
+    },
+    {
+      "variantId": "BjKlxqjOlvpSI2ynUeJF",
+      "productId": "semaglutide",
+      "productName": "Semaglutide",
+      "dosage": "10 mg",
+      "lookupKey": "semaglutide|10 mg"
+    },
+    {
+      "variantId": "LMfM08I6BXS0r1dxwhlc",
+      "productId": "semaglutide",
+      "productName": "Semaglutide",
+      "dosage": "5 mg",
+      "lookupKey": "semaglutide|5 mg"
+    },
+    {
+      "variantId": "lotusland_semaglutide_10_mg_vial-default",
+      "productId": "semaglutide",
+      "productName": "Semaglutide",
+      "dosage": "Semaglutide",
+      "lookupKey": "semaglutide|semaglutide"
+    },
+    {
+      "variantId": "ZM1P28BjU7vaMXqD4dFH",
+      "productId": "semax",
+      "productName": "SEMAX",
+      "dosage": "10 mg",
+      "lookupKey": "semax|10 mg"
+    },
+    {
+      "variantId": "lotusland_semax_10_mg_vial-default",
+      "productId": "semax",
+      "productName": "SEMAX",
+      "dosage": "Semax",
+      "lookupKey": "semax|semax"
+    },
+    {
+      "variantId": "CDSE6Ig5i7zDOTbTM8I7",
+      "productId": "sermorelin",
+      "productName": "Sermorelin",
+      "dosage": "5 mg",
+      "lookupKey": "sermorelin|5 mg"
+    },
+    {
+      "variantId": "Qu2ZrjKc6oNfeBsROaN6",
+      "productId": "sermorelin",
+      "productName": "Sermorelin",
+      "dosage": "10 mg",
+      "lookupKey": "sermorelin|10 mg"
+    },
+    {
+      "variantId": "lotusland_sermorelin_10_mg_vial-default",
+      "productId": "sermorelin",
+      "productName": "Sermorelin",
+      "dosage": "Sermorelin",
+      "lookupKey": "sermorelin|sermorelin"
+    },
+    {
+      "variantId": "slu-pp-332-sc-default",
+      "productId": "slu-pp-332",
+      "productName": "SLU PP-332",
+      "dosage": "50mg/vial – SC",
+      "lookupKey": "slu pp 332|50mg/vial – sc"
+    },
+    {
+      "variantId": "EfcfPRThcccni0cljmxk",
+      "productId": "slu-pp-332-100mg-caps-x30",
+      "productName": "SLU-PP-332",
+      "dosage": "250 mcg",
+      "lookupKey": "slu pp 332|250 mcg"
+    },
+    {
+      "variantId": "lotusland_slu_pp_332_250_mcg_tablet-default",
+      "productId": "slu-pp-332-100mg-caps-x30",
+      "productName": "SLU-PP-332",
+      "dosage": "SLU-PP-332",
+      "lookupKey": "slu pp 332|slu-pp-332"
+    },
+    {
+      "variantId": "lotusland_snap_8_10_mg_vial-default",
+      "productId": "snap-8",
+      "productName": "Snap-8",
+      "dosage": "Snap-8",
+      "lookupKey": "snap 8|snap-8"
+    },
+    {
+      "variantId": "nYQLfJiwo7oXZIQb5ELZ",
+      "productId": "snap-8",
+      "productName": "Snap-8",
+      "dosage": "10 mg",
+      "lookupKey": "snap 8|10 mg"
+    },
+    {
+      "variantId": "0Cus43Ey9o0zvposuRJN",
+      "productId": "ss-31",
+      "productName": "SS-31",
+      "dosage": "10 mg",
+      "lookupKey": "ss 31|10 mg"
+    },
+    {
+      "variantId": "lotusland_ss_31_10_mg_vial-default",
+      "productId": "ss-31",
+      "productName": "SS-31",
+      "dosage": "SS-31",
+      "lookupKey": "ss 31|ss-31"
+    },
+    {
+      "variantId": "rqjyL10VfKYDiy7JRnUQ",
+      "productId": "ss-31",
+      "productName": "SS-31",
+      "dosage": "50 mg",
+      "lookupKey": "ss 31|50 mg"
+    },
+    {
+      "variantId": "lotusland_starter_kit_syringe_bac_water_n_a-default",
+      "productId": "starter-kit-syringe-bac-water",
+      "productName": "Starter Kit (Syringe + Bac Water)",
+      "dosage": "Starter Kit (Syringe + Bac Water)",
+      "lookupKey": "starter kit syringe bac water|starter kit (syringe + bac water)"
+    },
+    {
+      "variantId": "lotusland-syringeandbacwaterbundle-100insulinsyringesone30mlbacwaterbottle-default",
+      "productId": "syringe-bac-water-bundle",
+      "productName": "Syringe + Bac Water Bundle",
+      "dosage": "100 insulin syringes + one 30 ml Bac Water bottle",
+      "lookupKey": "syringe bac water bundle|100 insulin syringes + one 30 ml bac water bottle"
+    },
+    {
+      "variantId": "lotusland_syringe_bac_water_bundle_30_ml_bac_water_100_syringes-default",
+      "productId": "syringe-bac-water-bundle",
+      "productName": "Syringe + Bac Water Bundle",
+      "dosage": "Syringe + Bac Water Bundle",
+      "lookupKey": "syringe bac water bundle|syringe + bac water bundle"
+    },
+    {
+      "variantId": "TB-500-5mg-vial-default",
+      "productId": "tb-500",
+      "productName": "TB-500",
+      "dosage": "Default Variant",
+      "lookupKey": "tb 500|default variant"
+    },
+    {
+      "variantId": "tb-500-thymosin-4-sc-default",
+      "productId": "tb-500-thymosin-4",
+      "productName": "TB-500 (Thymosin β4)",
+      "dosage": "2mg/vial – SC",
+      "lookupKey": "tb 500 thymosin b4|2mg/vial – sc"
+    },
+    {
+      "variantId": "9RHXk0Lo4vwprhLruEqu",
+      "productId": "tesamorelin",
+      "productName": "Tesamorelin",
+      "dosage": "10 mg",
+      "lookupKey": "tesamorelin|10 mg"
+    },
+    {
+      "variantId": "lotusland_tesamorelin_10_mg_vial-default",
+      "productId": "tesamorelin",
+      "productName": "Tesamorelin",
+      "dosage": "Tesamorelin",
+      "lookupKey": "tesamorelin|tesamorelin"
+    },
+    {
+      "variantId": "AC24UASvHlYmZa5NZa4w",
+      "productId": "testagen",
+      "productName": "Testagen",
+      "dosage": "25 mg",
+      "lookupKey": "testagen|25 mg"
+    },
+    {
+      "variantId": "lotusland_testagen_25_mg_vial-default",
+      "productId": "testagen",
+      "productName": "Testagen",
+      "dosage": "Testagen",
+      "lookupKey": "testagen|testagen"
+    },
+    {
+      "variantId": "thymagen-sc-default",
+      "productId": "thymagen",
+      "productName": "Thymagen",
+      "dosage": "10mg/vial – SC",
+      "lookupKey": "thymagen|10mg/vial – sc"
+    },
+    {
+      "variantId": "lotusland_thymogen_25_mg_vial-default",
+      "productId": "thymogen",
+      "productName": "Thymogen",
+      "dosage": "Thymogen",
+      "lookupKey": "thymogen|thymogen"
+    },
+    {
+      "variantId": "oCxS7NHtmOArOMKyc0JY",
+      "productId": "thymogen",
+      "productName": "Thymogen",
+      "dosage": "25 mg",
+      "lookupKey": "thymogen|25 mg"
+    },
+    {
+      "variantId": "oCxS7NHtmOArOMKyc0JY",
+      "productId": "thymogen-5mg-vial",
+      "productName": "Thymogen",
+      "dosage": "25 mg",
+      "lookupKey": "thymogen|25 mg"
+    },
+    {
+      "variantId": "1bTSvK4HHnuEFDLl20mG",
+      "productId": "thymosin-4-tb-500",
+      "productName": "Thymosin β4 (TB-500)",
+      "dosage": "5 mg",
+      "lookupKey": "thymosin b4 tb 500|5 mg"
+    },
+    {
+      "variantId": "XUECZzw4Qy2lcg8Giq8g",
+      "productId": "thymosin-4-tb-500",
+      "productName": "Thymosin β4 (TB-500)",
+      "dosage": "2 mg",
+      "lookupKey": "thymosin b4 tb 500|2 mg"
+    },
+    {
+      "variantId": "lotusland_thymosin_4_tb_500_10_mg_vial-default",
+      "productId": "thymosin-4-tb-500",
+      "productName": "Thymosin β4 (TB-500)",
+      "dosage": "Thymosin β4 (TB-500)",
+      "lookupKey": "thymosin b4 tb 500|thymosin β4 (tb-500)"
+    },
+    {
+      "variantId": "nYDo80F7UgJypRHcRq1I",
+      "productId": "thymosin-4-tb-500",
+      "productName": "Thymosin β4 (TB-500)",
+      "dosage": "10 mg",
+      "lookupKey": "thymosin b4 tb 500|10 mg"
+    },
+    {
+      "variantId": "gUnlCL8cgQv7rqCHHfkD",
+      "productId": "thymosin-alpha-1",
+      "productName": "Thymosin Alpha 1",
+      "dosage": "10 mg",
+      "lookupKey": "thymosin alpha 1|10 mg"
+    },
+    {
+      "variantId": "lotusland_thymosin_alpha_1_10_mg_vial-default",
+      "productId": "thymosin-alpha-1",
+      "productName": "Thymosin Alpha 1",
+      "dosage": "Thymosin Alpha 1",
+      "lookupKey": "thymosin alpha 1|thymosin alpha 1"
+    },
+    {
+      "variantId": "lotusland_thymosin_alpha_1_thymalin_10_mg_10_mg_vial-default",
+      "productId": "thymosin-alpha-1-thymalin",
+      "productName": "Thymosin Alpha 1 + Thymalin",
+      "dosage": "Thymosin Alpha 1 + Thymalin",
+      "lookupKey": "thymosin alpha 1 thymalin|thymosin alpha 1 + thymalin"
+    },
+    {
+      "variantId": "tJXkSVTTpjolpro0Gr5m",
+      "productId": "thymosin-alpha-1-thymalin",
+      "productName": "Thymosin Alpha 1 + Thymalin",
+      "dosage": "10 mg + 10 mg",
+      "lookupKey": "thymosin alpha 1 thymalin|10 mg + 10 mg"
+    },
+    {
+      "variantId": "JS5XWzbwoJfTvQOn0gBr",
+      "productId": "thymulin",
+      "productName": "Thymulin",
+      "dosage": "10 mg",
+      "lookupKey": "thymulin|10 mg"
+    },
+    {
+      "variantId": "lotusland_thymulin_10_mg_vial-default",
+      "productId": "thymulin",
+      "productName": "Thymulin",
+      "dosage": "Thymulin",
+      "lookupKey": "thymulin|thymulin"
+    },
+    {
+      "variantId": "05wzIwa8B6PdJN8GGAvc",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "dosage": "30 mg",
+      "lookupKey": "tirzepatide|30 mg"
+    },
+    {
+      "variantId": "LMLZCEoLGLwfguhNckeU",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "dosage": "10 mg",
+      "lookupKey": "tirzepatide|10 mg"
+    },
+    {
+      "variantId": "PoMnPETaNsqlFRjSxCLC",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "dosage": "60 mg",
+      "lookupKey": "tirzepatide|60 mg"
+    },
+    {
+      "variantId": "h088YSdr0FaN3tGvqYrp",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "dosage": "15 mg",
+      "lookupKey": "tirzepatide|15 mg"
+    },
+    {
+      "variantId": "lotusland_tirzepatide_10_mg_vial-default",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "dosage": "Tirzepatide",
+      "lookupKey": "tirzepatide|tirzepatide"
+    },
+    {
+      "variantId": "tVt5A6cyssUYJeSZfDyU",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "dosage": "5 mg",
+      "lookupKey": "tirzepatide|5 mg"
+    }
+  ],
+  "toCreate": [
+    {
+      "product": "Glutathione",
+      "dosage": "500 mg / vial",
+      "productDocId": "glutathione"
+    },
+    {
+      "product": "Retatrutide",
+      "dosage": "5 mg / vial",
+      "productDocId": "retatrutide"
+    },
+    {
+      "product": "Retatrutide",
+      "dosage": "10 mg / vial",
+      "productDocId": "retatrutide"
+    },
+    {
+      "product": "Retatrutide",
+      "dosage": "20 mg / vial",
+      "productDocId": "retatrutide"
+    },
+    {
+      "product": "Retatrutide",
+      "dosage": "30 mg / vial",
+      "productDocId": "retatrutide"
+    },
+    {
+      "product": "Retatrutide",
+      "dosage": "40 mg / vial",
+      "productDocId": "retatrutide"
+    },
+    {
+      "product": "Tirzepatide",
+      "dosage": "5 mg / vial",
+      "productDocId": "tirzepatide"
+    },
+    {
+      "product": "Tirzepatide",
+      "dosage": "10 mg / vial",
+      "productDocId": "tirzepatide"
+    },
+    {
+      "product": "Tirzepatide",
+      "dosage": "15 mg / vial",
+      "productDocId": "tirzepatide"
+    },
+    {
+      "product": "Tirzepatide",
+      "dosage": "30 mg / vial",
+      "productDocId": "tirzepatide"
+    },
+    {
+      "product": "Tirzepatide",
+      "dosage": "60 mg / vial",
+      "productDocId": "tirzepatide"
+    },
+    {
+      "product": "Semaglutide",
+      "dosage": "2 mg / vial",
+      "productDocId": "semaglutide"
+    },
+    {
+      "product": "Semaglutide",
+      "dosage": "5 mg / vial",
+      "productDocId": "semaglutide"
+    },
+    {
+      "product": "Semaglutide",
+      "dosage": "10 mg / vial",
+      "productDocId": "semaglutide"
+    },
+    {
+      "product": "AOD-9604",
+      "dosage": "2 mg / vial",
+      "productDocId": "aod-9604-5mg-vial"
+    },
+    {
+      "product": "AOD-9604",
+      "dosage": "5 mg / vial",
+      "productDocId": "aod-9604-5mg-vial"
+    },
+    {
+      "product": "ARA-290",
+      "dosage": "10 mg / vial",
+      "productDocId": "ara-290-10mg"
+    },
+    {
+      "product": "BPC-157",
+      "dosage": "2 mg / vial",
+      "productDocId": "bpc-157"
+    },
+    {
+      "product": "BPC-157",
+      "dosage": "5 mg / vial",
+      "productDocId": "bpc-157"
+    },
+    {
+      "product": "BPC-157",
+      "dosage": "10 mg / vial",
+      "productDocId": "bpc-157"
+    },
+    {
+      "product": "BPC-157",
+      "dosage": "20 mg / vial",
+      "productDocId": "bpc-157"
+    },
+    {
+      "product": "BPC-157 + TB-500",
+      "dosage": "5 mg | 5 mg / vial",
+      "productDocId": "bpc-157-tb-500"
+    },
+    {
+      "product": "BPC-157 + TB-500",
+      "dosage": "10 mg | 10 mg / vial",
+      "productDocId": "bpc-157-tb-500"
+    },
+    {
+      "product": "CJC-1295 with DAC",
+      "dosage": "2 mg / vial",
+      "productDocId": "cjc-1295-with-dac-5mg"
+    },
+    {
+      "product": "5-Amino-1MQ",
+      "dosage": "10 mg / vial",
+      "productDocId": "5-amino-1mq"
+    },
+    {
+      "product": "CJC-1295 without DAC",
+      "dosage": "2 mg / vial",
+      "productDocId": "lotusland_cjc_1295_without_dac_2_mg_vial"
+    },
+    {
+      "product": "CJC-1295 without DAC",
+      "dosage": "5 mg / vial",
+      "productDocId": "lotusland_cjc_1295_without_dac_2_mg_vial"
+    },
+    {
+      "product": "CJC-1295 without DAC",
+      "dosage": "10 mg / vial",
+      "productDocId": "lotusland_cjc_1295_without_dac_2_mg_vial"
+    },
+    {
+      "product": "CJC-1295 without DAC + Ipamorelin",
+      "dosage": "5 mg | 5 mg / vial",
+      "productDocId": "cjc-1295-without-dac-ipamorelin"
+    },
+    {
+      "product": "Cartalax",
+      "dosage": "25 mg / vial",
+      "productDocId": "cartalax"
+    },
+    {
+      "product": "Cardiogen",
+      "dosage": "25 mg / vial",
+      "productDocId": "cardiogen"
+    },
+    {
+      "product": "Thymogen",
+      "dosage": "25 mg / vial",
+      "productDocId": "thymogen-5mg-vial"
+    },
+    {
+      "product": "Prostamax",
+      "dosage": "25 mg / vial",
+      "productDocId": "prostamax"
+    },
+    {
+      "product": "Testagen",
+      "dosage": "25 mg / vial",
+      "productDocId": "testagen"
+    },
+    {
+      "product": "Cagrilintide",
+      "dosage": "5 mg / vial",
+      "productDocId": "cagrilintide"
+    },
+    {
+      "product": "Cagrilintide",
+      "dosage": "10 mg / vial",
+      "productDocId": "cagrilintide"
+    },
+    {
+      "product": "DSIP",
+      "dosage": "5 mg / vial",
+      "productDocId": "dsip-5mg"
+    },
+    {
+      "product": "DSIP",
+      "dosage": "10 mg / vial",
+      "productDocId": "dsip-5mg"
+    },
+    {
+      "product": "Epithalon",
+      "dosage": "10 mg / vial",
+      "productDocId": "epithalon"
+    },
+    {
+      "product": "Epithalon",
+      "dosage": "30 mg / vial",
+      "productDocId": "epithalon"
+    },
+    {
+      "product": "Epithalon",
+      "dosage": "50 mg / vial",
+      "productDocId": "epithalon"
+    },
+    {
+      "product": "Epithalon",
+      "dosage": "100 mg / vial",
+      "productDocId": "epithalon"
+    },
+    {
+      "product": "FST344",
+      "dosage": "1 mg / vial",
+      "productDocId": "lotusland_fst344_1_mg_vial"
+    },
+    {
+      "product": "FOX-04",
+      "dosage": "12 mg / vial",
+      "productDocId": "lotusland_fox_04_12_mg_vial"
+    },
+    {
+      "product": "GHK-Cu (Human Copper)",
+      "dosage": "50 mg / vial",
+      "productDocId": "lotusland_ghk_cu_human_copper_50_mg_vial"
+    },
+    {
+      "product": "GHK-Cu (Human Copper)",
+      "dosage": "100 mg / vial",
+      "productDocId": "lotusland_ghk_cu_human_copper_50_mg_vial"
+    },
+    {
+      "product": "GHRP-2",
+      "dosage": "5 mg / vial",
+      "productDocId": "ghrp-2-5mg"
+    },
+    {
+      "product": "GLOW (BPC-157 / TB-500 / GHK)",
+      "dosage": "10 mg | 10 mg | 75 mg / vial",
+      "productDocId": "glow-bpc-157-tb-500-ghk"
+    },
+    {
+      "product": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+      "dosage": "10 mg | 10 mg | 75 mg | 10 mg / vial",
+      "productDocId": "klow-bpc-157-tb-500-ghkcu-kpv"
+    },
+    {
+      "product": "Thymosin Alpha 1 + Thymalin",
+      "dosage": "10 mg | 10 mg / vial",
+      "productDocId": "thymosin-alpha-1-thymalin"
+    },
+    {
+      "product": "hCG",
+      "dosage": "5000 IU / vial",
+      "productDocId": "hcg-5000iu"
+    },
+    {
+      "product": "hCG",
+      "dosage": "10000 IU / vial",
+      "productDocId": "hcg-5000iu"
+    },
+    {
+      "product": "Hexarelin",
+      "dosage": "2 mg / vial",
+      "productDocId": "hexarelin-5mg"
+    },
+    {
+      "product": "Hexarelin",
+      "dosage": "5 mg / vial",
+      "productDocId": "hexarelin-5mg"
+    },
+    {
+      "product": "HGH",
+      "dosage": "10 IU / vial",
+      "productDocId": "hgh"
+    },
+    {
+      "product": "HGH",
+      "dosage": "20 IU / vial",
+      "productDocId": "hgh"
+    },
+    {
+      "product": "HGH",
+      "dosage": "36 IU / vial",
+      "productDocId": "hgh"
+    },
+    {
+      "product": "HMG",
+      "dosage": "75 IU / vial",
+      "productDocId": "hmg-75iu"
+    },
+    {
+      "product": "IGF LR3",
+      "dosage": "0.1 mg / vial",
+      "productDocId": "lotusland_igf_lr3_1_mg_vial"
+    },
+    {
+      "product": "IGF LR3",
+      "dosage": "1 mg / vial",
+      "productDocId": "lotusland_igf_lr3_1_mg_vial"
+    },
+    {
+      "product": "Ipamorelin",
+      "dosage": "10 mg / vial",
+      "productDocId": "ipamorelin-5mg"
+    },
+    {
+      "product": "Kisspeptin-10",
+      "dosage": "5 mg / vial",
+      "productDocId": "kisspeptin-10"
+    },
+    {
+      "product": "KPV",
+      "dosage": "10 mg / vial",
+      "productDocId": "kpv"
+    },
+    {
+      "product": "SLU-PP-332",
+      "dosage": "250 mcg / tablet",
+      "productDocId": "slu-pp-332-100mg-caps-x30"
+    },
+    {
+      "product": "LL-37",
+      "dosage": "12 mg / vial",
+      "productDocId": "lotusland_ll_37_12_mg_vial"
+    },
+    {
+      "product": "MOTS-C",
+      "dosage": "10 mg / vial",
+      "productDocId": "mots-c-10mg"
+    },
+    {
+      "product": "MOTS-C",
+      "dosage": "40 mg / vial",
+      "productDocId": "mots-c-10mg"
+    },
+    {
+      "product": "MOTS-C",
+      "dosage": "60 mg / vial",
+      "productDocId": "mots-c-10mg"
+    },
+    {
+      "product": "MT2",
+      "dosage": "10 mg / vial",
+      "productDocId": "mt2"
+    },
+    {
+      "product": "NAD+",
+      "dosage": "500 mg / vial",
+      "productDocId": "nad-100mg"
+    },
+    {
+      "product": "NAD+",
+      "dosage": "750 mg / vial",
+      "productDocId": "nad-100mg"
+    },
+    {
+      "product": "NAD+",
+      "dosage": "1000 mg / vial",
+      "productDocId": "nad-100mg"
+    },
+    {
+      "product": "NMN",
+      "dosage": "50 mg / tablet",
+      "productDocId": "nmn"
+    },
+    {
+      "product": "Oxytocin Acetate",
+      "dosage": "2 mg / vial",
+      "productDocId": "oxytocin-acetate"
+    },
+    {
+      "product": "Oxytocin Acetate",
+      "dosage": "10 mg / vial",
+      "productDocId": "oxytocin-acetate"
+    },
+    {
+      "product": "PE 22-28",
+      "dosage": "10 mg / vial",
+      "productDocId": "pe-22-28"
+    },
+    {
+      "product": "PNC-27",
+      "dosage": "10 mg / vial",
+      "productDocId": "pnc-27"
+    },
+    {
+      "product": "PEG-MGF",
+      "dosage": "5 mg / vial",
+      "productDocId": "peg-mgf"
+    },
+    {
+      "product": "PT-141",
+      "dosage": "5 mg / vial",
+      "productDocId": "pt-141-10mg-vial"
+    },
+    {
+      "product": "PT-141",
+      "dosage": "10 mg / vial",
+      "productDocId": "pt-141-10mg-vial"
+    },
+    {
+      "product": "PT-141",
+      "dosage": "20 mg / vial",
+      "productDocId": "pt-141-10mg-vial"
+    },
+    {
+      "product": "Selank",
+      "dosage": "5 mg / vial",
+      "productDocId": "selank"
+    },
+    {
+      "product": "Selank",
+      "dosage": "10 mg / vial",
+      "productDocId": "selank"
+    },
+    {
+      "product": "Semax",
+      "dosage": "10 mg / vial",
+      "productDocId": "semax"
+    },
+    {
+      "product": "Sermorelin",
+      "dosage": "5 mg / vial",
+      "productDocId": "sermorelin-5-mg"
+    },
+    {
+      "product": "Sermorelin",
+      "dosage": "10 mg / vial",
+      "productDocId": "sermorelin-5-mg"
+    },
+    {
+      "product": "Snap-8",
+      "dosage": "10 mg / vial",
+      "productDocId": "snap-8"
+    },
+    {
+      "product": "SS-31",
+      "dosage": "10 mg / vial",
+      "productDocId": "ss-31"
+    },
+    {
+      "product": "SS-31",
+      "dosage": "50 mg / vial",
+      "productDocId": "ss-31"
+    },
+    {
+      "product": "Thymulin",
+      "dosage": "10 mg / vial",
+      "productDocId": "thymulin"
+    },
+    {
+      "product": "Tesamorelin",
+      "dosage": "10 mg / vial",
+      "productDocId": "tesamorelin-2mg"
+    },
+    {
+      "product": "Thymosin Alpha 1",
+      "dosage": "10 mg / vial",
+      "productDocId": "thymosin-alpha-1-5-mg"
+    },
+    {
+      "product": "Thymosin β4 (TB-500)",
+      "dosage": "2 mg / vial",
+      "productDocId": "thymosin-4-tb-500"
+    },
+    {
+      "product": "Thymosin β4 (TB-500)",
+      "dosage": "5 mg / vial",
+      "productDocId": "thymosin-4-tb-500"
+    },
+    {
+      "product": "Thymosin β4 (TB-500)",
+      "dosage": "10 mg / vial",
+      "productDocId": "thymosin-4-tb-500"
+    }
+  ],
+  "toUpdate": [
+    {
+      "variantId": "L4Kl6n9S4dheIGVIU5V3",
+      "productId": "bac-water",
+      "productName": "Bac Water"
+    },
+    {
+      "variantId": "lotusland-bacteriostaticwater-30mlbottle-default",
+      "productId": "bac-water",
+      "productName": "Bac Water"
+    },
+    {
+      "variantId": "rlquV5BesN4OEKodMjx7",
+      "productId": "e9URhAeNH7ygDWzvrf83",
+      "productName": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts"
+    },
+    {
+      "variantId": "v3hhdYzbLosS1jRabRLE",
+      "productId": "gw501516",
+      "productName": "GW501516"
+    },
+    {
+      "variantId": "AQylf155e5MNMz1KkwNw",
+      "productId": "mk-677",
+      "productName": "MK-677"
+    },
+    {
+      "variantId": "3kZjdb8YPp9CQ8MrnHnw",
+      "productId": "pinealon",
+      "productName": "Pinealon"
+    },
+    {
+      "variantId": "DjonhMId6Nrxtkrmuzai",
+      "productId": "pinealon",
+      "productName": "Pinealon"
+    },
+    {
+      "variantId": "LNdIs76yiUmEaywUSh76",
+      "productId": "starter-kit-syringe-bac-water",
+      "productName": "Starter Kit (Syringe + Bac Water)"
+    },
+    {
+      "variantId": "JurZK65aaBVeaCC4i5rr",
+      "productId": "syringe-bac-water-bundle",
+      "productName": "Syringe + Bac Water Bundle"
+    }
+  ]
+}

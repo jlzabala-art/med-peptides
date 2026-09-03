@@ -1,0 +1,135 @@
+/* 
+  src/styles/themes/roles.css 
+  Centralized theme variables for all roles and panels in the application.
+  Golden Rule #15: CSS Variables Override per panel.
+*/
+
+.theme-admin {
+  --color-primary: #003666; /* Deep Corporate Blue */
+  --color-primary-light: #eff6ff;
+  --color-primary-hover: #002547;
+  --color-bg-app: #f8fafc;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #e2e8f0;
+}
+
+.theme-ceo {
+  --color-primary: #0ea5e9; /* Sky Blue */
+  --color-primary-light: #f0f9ff;
+  --color-primary-hover: #0284c7;
+  --color-bg-app: #f0f9ff;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #e0f2fe;
+}
+
+.theme-medical_director {
+  --color-primary: #10b981; /* Emerald */
+  --color-primary-light: #ecfdf5;
+  --color-primary-hover: #059669;
+  --color-bg-app: #ecfdf5;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #d1fae5;
+}
+
+.theme-doctor {
+  --color-primary: #0d9488; /* Medical Teal */
+  --color-primary-light: #f0fdfa;
+  --color-primary-hover: #0f766e;
+  --color-bg-app: #f0fdfa;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #ccfbf1;
+}
+
+.theme-clinic_manager {
+  --color-primary: #8b5cf6; /* Violet */
+  --color-primary-light: #f5f3ff;
+  --color-primary-hover: #7c3aed;
+  --color-bg-app: #f5f3ff;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #ede9fe;
+}
+
+.theme-pharmacist {
+  --color-primary: #f59e0b; /* Amber */
+  --color-primary-light: #fffbeb;
+  --color-primary-hover: #d97706;
+  --color-bg-app: #fffbeb;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #fef3c7;
+}
+
+.theme-sales {
+  --color-primary: #ef4444; /* Red */
+  --color-primary-light: #fef2f2;
+  --color-primary-hover: #dc2626;
+  --color-bg-app: #fef2f2;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #fee2e2;
+}
+
+.theme-operations {
+  --color-primary: #64748b; /* Slate */
+  --color-primary-light: #f8fafc;
+  --color-primary-hover: #475569;
+  --color-bg-app: #f8fafc;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #e2e8f0;
+}
+
+.theme-finance {
+  --color-primary: #22c55e; /* Green */
+  --color-primary-light: #f0fdf4;
+  --color-primary-hover: #16a34a;
+  --color-bg-app: #f0fdf4;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #dcfce7;
+}
+
+.theme-wholesaler {
+  --color-primary: #c2410c; /* Orange Commercial */
+  --color-primary-light: #fff7ed;
+  --color-primary-hover: #9a3412;
+  --color-bg-app: #fff7ed;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #ffedd5;
+}
+
+.theme-supplier {
+  --color-primary: #c2410c; /* Orange Commercial */
+  --color-primary-light: #fff7ed;
+  --color-primary-hover: #9a3412;
+  --color-bg-app: #fff7ed;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #ffedd5;
+}
+
+.theme-patient {
+  --color-primary: #7c3aed; /* Wellness Purple */
+  --color-primary-light: #faf5ff;
+  --color-primary-hover: #6d28d9;
+  --color-bg-app: #f8fafc;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #f3e8ff;
+}
+
+.theme-guest {
+  --color-primary: #475569; /* Slate Dark */
+  --color-primary-light: #f8fafc;
+  --color-primary-hover: #334155;
+  --color-bg-app: #f8fafc;
+  --color-bg-surface: #ffffff;
+  --color-sidebar-bg: #ffffff;
+  --color-border: #e2e8f0;
+}

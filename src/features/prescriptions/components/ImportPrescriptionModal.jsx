@@ -1,17 +1,20 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, CheckCircle2, Activity, AlertCircle } from 'lucide-react';
-import { usePrescriptionAI } from '../../../hooks/shared/usePrescriptionAI';
 import toast from 'react-hot-toast';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../../firebase';
+import { prescriptionSchema } from '../../../schemas/prescriptionSchema';
+import { resolveIngredients } from '../../../services/apiIngredientMatcher';
 
 export default function ImportPrescriptionModal({ 
   isOpen, 
   onClose, 
   context = {}, 
-  title = "Import Prescription" 
+  title = "Import Prescription",
+  onExtractionComplete
 }) {
   const [uploading, setUploading] = useState(false);
-  const { queuePrescription } = usePrescriptionAI();
 
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length === 0) return;
@@ -19,20 +22,146 @@ export default function ImportPrescriptionModal({
     
     try {
       setUploading(true);
-      toast.loading('Uploading and queueing document...', { id: 'upload-toast' });
+      toast.loading('Analyzing prescription via AI...', { id: 'upload-toast' });
 
-      // Queue for processing, passing the metadata context
-      await queuePrescription(file, 'b2b_portal', context);
+      const formData = new FormData();
+      formData.append('file', file);
 
-      toast.success('Prescription queued for AI processing successfully!', { id: 'upload-toast' });
-      onClose(); // Automatically close after successful queueing
+      const res = await fetch('/api/ai-extract-prescription', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to analyze document');
+      }
+
+      const extractedData = await res.json();
+      
+      // Save directly to Firestore if no onExtractionComplete callback is provided
+      if (onExtractionComplete) {
+        onExtractionComplete(extractedData);
+        toast.success('Extraction complete!', { id: 'upload-toast' });
+      } else {
+        // Handle multi-formulation blocks (e.g., Trichotest → TrichoSol + TrichoOil)
+        const blocks = extractedData.formulationBlocks && extractedData.formulationBlocks.length > 0 
+          ? extractedData.formulationBlocks 
+          : [{ 
+              treatmentType: null,
+              treatmentProgram: null,
+              ingredients: extractedData.ingredients || [],
+              posology: extractedData.posology || '',
+              volume: null,
+              dispensingForm: null
+            }];
+
+        let totalNewPlaceholders = 0;
+        let totalMatchedCatalog = 0;
+        const sessionId = blocks.length > 1 ? crypto.randomUUID() : null;
+
+        for (const block of blocks) {
+          /**
+           * Resolve each ingredient against the product catalog (Algolia).
+           * - Match found (≥75% similarity) → use existing productId
+           * - No match → create a placeholder 'draft' product in Firestore
+           *   with isApiPlaceholder:true for admin follow-up
+           */
+          const resolved = await resolveIngredients(
+            block.ingredients || [],
+            { supplierHint: 'Fagron Iberia', importSource: 'fagron_genemocis' }
+          );
+
+          const blockNewPlaceholders = resolved.filter(r => r.isPlaceholder && r.isNew).length;
+          const blockMatched = resolved.filter(r => !r.isPlaceholder).length;
+          totalNewPlaceholders += blockNewPlaceholders;
+          totalMatchedCatalog += blockMatched;
+
+          const allResolved = resolved.every(r => r.productId && !r.isPlaceholder);
+          const anyUnresolved = resolved.some(r => !r.productId || r.isPlaceholder);
+
+          const mappedItems = resolved.map((r, idx) => ({
+            id: `ai_item_${Date.now()}_${idx}`,
+            productId: r.productId || null,
+            variantId: null,
+            productName: r.matchedName || r.original?.name || '',
+            sku: '',
+            activeIngredient: r.original?.name || '',
+            concentration: r.original?.dose || '',
+            dosage: r.original?.dose || '',
+            dose: r.original?.dose || '',
+            quantity: r.original?.quantity || 1,
+            price: 0,
+            instructions: block.posology || extractedData.posology || '',
+            _aiRawName: r.original?.name,
+            _aiRawDose: r.original?.dose,
+            _isPlaceholder: r.isPlaceholder,
+            _needsProductMapping: !r.productId || r.isPlaceholder,
+            _matchScore: r.score,
+            status: 'Pending',
+          }));
+
+          const newRx = {
+            ...prescriptionSchema,
+            ...context,
+            patientName: extractedData.patient || context.patientName || 'Unknown Patient',
+            doctorName: extractedData.doctor || context.doctorName || 'Unknown Doctor',
+            clinicName: extractedData.clinic || null,
+            doctorLicense: extractedData.doctorLicense || null,
+            sourceType: 'fagron_genemocis',
+            source: 'fagron',
+            status: 'draft',
+            // 'Ready' if every item was matched to catalog; 'Needs Review' if any placeholder
+            validationStatus: anyUnresolved ? 'Needs Review' : 'Ready',
+            sessionId,
+            treatmentProgram: block.treatmentProgram || null,
+            treatmentType: block.treatmentType || null,
+            importSource: 'fagron_genemocis',
+            posology: block.posology || extractedData.posology || '',
+            clinicalIndication: block.posology || '',
+            volume: block.volume || null,
+            dispensingForm: block.dispensingForm || null,
+            items: mappedItems,
+            prescriptionLines: mappedItems,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            aiExtraction: {
+              completeness: extractedData.completeness || 0,
+              missing: extractedData.missing || [],
+              rawDate: extractedData.date || null,
+              extractedAt: new Date().toISOString(),
+              matchSummary: {
+                total: resolved.length,
+                matched: blockMatched,
+                newPlaceholders: blockNewPlaceholders,
+              },
+            },
+          };
+
+          await addDoc(collection(db, 'prescriptions'), newRx);
+        }
+
+        // Final toast summary
+        const baseMsg = blocks.length > 1
+          ? `${blocks.length} formulaciones importadas (${blocks.map(b => b.treatmentType || 'Form.').join(', ')})`
+          : 'Prescripción importada';
+        const matchMsg = totalMatchedCatalog > 0
+          ? ` · ${totalMatchedCatalog} API${totalMatchedCatalog > 1 ? 's' : ''} en catálogo`
+          : '';
+        const placeholderMsg = totalNewPlaceholders > 0
+          ? ` · ${totalNewPlaceholders} placeholder${totalNewPlaceholders > 1 ? 's' : ''} creado${totalNewPlaceholders > 1 ? 's' : ''} (completar en Catálogo)`
+          : '';
+
+        toast.success(`${baseMsg}${matchMsg}${placeholderMsg}`, { id: 'upload-toast' });
+      }
+      
+      onClose();
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error.message || 'Failed to upload document', { id: 'upload-toast' });
+      toast.error(error.message || 'Failed to analyze document', { id: 'upload-toast' });
     } finally {
       setUploading(false);
     }
-  }, [queuePrescription, context, onClose]);
+  }, [context, onClose, onExtractionComplete]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
     onDrop, 
@@ -80,7 +209,7 @@ export default function ImportPrescriptionModal({
           <div>
             <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#0f172a' }}>{title}</h2>
             <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Upload a document to automatically parse and create a draft prescription.
+              Upload a document to automatically parse and extract details instantly.
             </p>
           </div>
           <button 
@@ -122,7 +251,7 @@ export default function ImportPrescriptionModal({
                 <Activity size={48} color="#0ea5e9" style={{ marginBottom: '16px', animation: 'pulse 2s infinite' }} />
                 <h3 style={{ margin: '0 0 8px 0', color: '#0f172a', fontSize: '1rem' }}>Processing Document...</h3>
                 <p style={{ margin: 0, color: '#64748b', textAlign: 'center', fontSize: '0.85rem' }}>
-                  Please wait while we upload and queue this for AI extraction.
+                  Please wait while Gemini Flash analyzes the document.
                 </p>
               </>
             ) : (
@@ -161,7 +290,7 @@ export default function ImportPrescriptionModal({
           }}>
             <AlertCircle size={18} color="#64748b" style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.5' }}>
-              <strong>Note:</strong> Uploaded prescriptions will be queued for AI extraction. You can review and approve them in the <strong>Prescription Intake</strong> tab once processing is complete. The document will automatically be linked to the current context.
+              <strong>Note:</strong> Uploaded prescriptions will be immediately analyzed and mapped into the creation flow.
             </div>
           </div>
         </div>

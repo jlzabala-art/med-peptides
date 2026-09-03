@@ -1,0 +1,129 @@
+{
+  "import_version": "1.0",
+  "base_currency": "USD",
+  "conversion": {
+    "source_currency": "AED",
+    "aed_per_usd": 3.6725,
+    "formula": "USD = net AED / 3.6725",
+    "rounding_decimals": 2,
+    "rate_source": "Central Bank of the UAE"
+  },
+  "normalization_policy": {
+    "canonical_price": "net_price_usd",
+    "exclude_vat_from_supplier_cost": true,
+    "compare_only_when": [
+      "normalized active ingredient/component set is identical",
+      "strength or total active amount is identical",
+      "dosage form and presentation are equivalent",
+      "container volume or unit count is equivalent"
+    ],
+    "do_not_directly_compare": [
+      "prefilled pen vs refill cartridge",
+      "pen/cartridge vs vial",
+      "nasal spray vs injection",
+      "single ingredient vs combination product",
+      "different strengths or total active quantities"
+    ],
+    "comparison_keys": [
+      "components",
+      "dosage_form",
+      "container_volume",
+      "container_volume_unit",
+      "total_active_mg"
+    ]
+  },
+  "data_quality_warnings": [
+    {
+      "supplier": "Fusion",
+      "product": "Kisspeptin 1 mg/mL, 4 mL vial",
+      "issue": "Source shows AED 775 net and AED 1,800 with VAT. At 5% VAT, the expected gross price is AED 813.75. Net AED 775 was retained; gross value must be verified."
+    },
+    {
+      "supplier": "Fusion",
+      "product": "BPC-157 capsule",
+      "issue": "Source wording is '2000 mcg/mL Capsule' and does not state capsule count. Requires supplier confirmation before like-for-like comparison."
+    },
+    {
+      "supplier": "Fusion",
+      "product": "Epitalon and Thymosin Beta",
+      "issue": "Strength and presentation are missing in the source image; these records must not be matched until completed."
+    }
+  ],
+  "products": [
+    {
+      "supplier": "Magenta",
+      "product_name": "AOD-9604",
+      "components": [
+        {
+          "name": "AOD-9604",
+          "amount": 3.6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "pre_filled_pen",
+      "container_volume": 3,
+      "container_volume_unit": "mL",
+      "price_type": "trade_price",
+      "source_currency": "AED",
+      "source_price_aed": 440,
+      "vat_included": false,
+      "net_price_aed": 440,
+      "fx_rate_aed_per_usd": 3.6725,
+      "net_price_usd": 119.81,
+      "total_active_mg": 3.6,
+      "net_price_usd_per_total_mg": 33.2806,
+      "source_reference": "Peptides Pricing R2.2603(3).pdf"
+    },
+    {
+      "supplier": "Magenta",
+      "product_name": "AOD-9604",
+      "components": [
+        {
+          "name": "AOD-9604",
+          "amount": 3.6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "refill_cartridge",
+      "container_volume": 3,
+      "container_volume_unit": "mL",
+      "price_type": "trade_price",
+      "source_currency": "AED",
+      "source_price_aed": 340,
+      "vat_included": false,
+      "net_price_aed": 340,
+      "fx_rate_aed_per_usd": 3.6725,
+      "net_price_usd": 92.58,
+      "total_active_mg": 3.6,
+      "net_price_usd_per_total_mg": 25.7167,
+      "source_reference": "Peptides Pricing R2.2603(3).pdf"
+    },
+    {
+      "supplier": "Fusion",
+      "product_name": "AOD-9604",
+      "components": [
+        {
+          "name": "AOD-9604",
+          "amount": 6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "container_volume": 5,
+      "container_volume_unit": "mL",
+      "price_type": "cost_price_ex_vat",
+      "source_currency": "AED",
+      "source_price_aed": 575,
+      "net_price_aed": 575,
+      "fx_rate_aed_per_usd": 3.6725,
+      "net_price_usd": 156.57,
+      "total_active_mg": 6,
+      "net_price_usd_per_total_mg": 26.095,
+      "source_price_with_vat_aed": 603.75,
+      "calculated_price_with_vat_aed": 603.75,
+      "vat_validation": "validated",
+      "notes": "Calculated from 1200 mcg/mL × 5 mL.",
+      "source_reference": "WhatsApp Image 2026-06-21 at 12.38.36(2).jpeg"
+    }
+  ]
+}

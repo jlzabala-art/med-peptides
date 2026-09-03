@@ -43,14 +43,16 @@ export function useProtocolPDF() {
     setError(null);
 
     try {
-      // 1. Caching (Rendimiento)
-      const cachedUrl = await getCachedProtocolPDF(protocol);
-      if (cachedUrl) {
-        window.open(cachedUrl, '_blank');
-        toast.success("PDF loaded successfully!");
-        trackProtocolPDFDownload(protocol.protocol_title || protocol.name, protocol.id, audienceType);
-        setIsGenerating(false);
-        return;
+      // 1. Caching (Rendimiento) - Sólo para documentos clínicos (B2B)
+      if (audienceType !== 'patient') {
+        const cachedUrl = await getCachedProtocolPDF(protocol);
+        if (cachedUrl) {
+          window.open(cachedUrl, '_blank');
+          toast.success("PDF loaded successfully!");
+          trackProtocolPDFDownload(protocol.protocol_title || protocol.name, protocol.id, audienceType);
+          setIsGenerating(false);
+          return;
+        }
       }
 
       // 2. Generation

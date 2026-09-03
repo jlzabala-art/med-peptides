@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, X, Globe, Users, DollarSign, Shield, RefreshCw, Save, Archive } from '@/lib/icons';
 import { db } from '../../../firebase.js';
 import { doc, getDoc } from 'firebase/firestore';
+import { toast } from 'react-hot-toast';
 
 export default function SelectedItemsVisibilityWorkflow({ selectedItemIds, onClearSelection }) {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function SelectedItemsVisibilityWorkflow({ selectedItemIds, onCle
     console.log("Saving rules for items", items.map(i => i.id), {
       regions, segments, pricingMode, regulatoryGates, zohoSync
     });
-    alert("Visibility rules saved successfully!");
+    toast.success("Visibility rules saved successfully!");
     onClearSelection();
   };
 

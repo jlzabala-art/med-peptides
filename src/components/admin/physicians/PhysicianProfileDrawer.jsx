@@ -1,215 +1,405 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Activity, ShieldCheck, FileText, Loader2, ClipboardList, UserPlus, FilePlus } from '@/lib/icons';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ShieldCheck, MapPin, Mail, FilePlus, UserPlus, ClipboardList, Loader2, Eye, FileUp } from '@/lib/icons';
+import { useDrawer } from '../../../context/DrawerContext';
+import { UniversalForm } from '../../shared/UniversalFormDrawer';
+import notifier from '../../../services/NotificationService';
+import { doc, updateDoc, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
 import StandardDrawer from '../../ui/StandardDrawer';
 import StandardDrawerTabs from '../../common/StandardDrawerTabs';
 import DataTable from '../../ui/DataTable';
+import StatusChip from '../../ui/StatusChip';
 import ImportPrescriptionModal from '../../../features/prescriptions/components/ImportPrescriptionModal';
 import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
-import { FileUp, Eye } from 'lucide-react';
 
-export default function PhysicianProfileDrawer({ doctor, onClose }) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [patients, setPatients] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [loadingData, setLoadingData] = useState(false);
-  const [dataFetched, setDataFetched] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
-  const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
+// ── Physician form schema ────────────────────────────────────────────────────
+export const physicianSchema = [
+  { name: 'firstName',   label: 'First Name',     type: 'text',   required: true },
+  { name: 'lastName',    label: 'Last Name',      type: 'text',   required: true },
+  { name: 'email',       label: 'Email Address',  type: 'email',  required: true },
+  { name: 'phone',       label: 'Phone Number',   type: 'text',   required: true },
+  { name: 'specialty',   label: 'Specialty',      type: 'select', required: true, options: [
+    { value: 'Functional Medicine', label: 'Functional Medicine' },
+    { value: 'Longevity',           label: 'Longevity'           },
+    { value: 'Anti-Aging',          label: 'Anti-Aging'          },
+    { value: 'Endocrinology',       label: 'Endocrinology'       },
+    { value: 'General Practice',    label: 'General Practice'    },
+  ]},
+  { name: 'clinicName',    label: 'Clinic / Hospital', type: 'text', required: true  },
+  { name: 'licenseNumber', label: 'License Number',    type: 'text', required: false },
+  { name: 'roleTemplate',  label: 'Permissions Role',  type: 'select', required: true, options: [
+    { value: 'basic',    label: 'Basic (Portal only)' },
+    { value: 'standard', label: 'Standard (+ Catalog)' },
+    { value: 'senior',   label: 'Senior (+ Prescribe)' },
+  ]},
+];
+
+// ── Column definitions — fields taken directly from Firestore, no mapping ────
+// prescriptions: { doctorId, patientId, patient:{name,email,phone}, status,
+//                  diagnosis, clinicalNotes, createdAt, doctorName,
+//                  fagron:{boxId, originalPdfUrl}, fileUrl, source }
+const getPrescriptionColumns = (onRxClick) => [
+  {
+    key: 'patient', header: 'Patient', width: '35%',
+    render: (p) => (
+      <span 
+        style={{ cursor: 'pointer', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          if (onRxClick) onRxClick(p.id);
+        }}
+      >
+        {p.patient?.name || p.patientName || '—'}
+      </span>
+    ),
+  },
+  {
+    key: 'diagnosis', header: 'Diagnosis', width: '30%',
+    render: (p) => (
+      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        {p.diagnosis || (p.source === 'fagron_pdf_ocr' ? 'Fagron Genomics' : '—')}
+      </span>
+    ),
+  },
+  {
+    key: 'status', header: 'Status', width: '20%',
+    render: (p) => <StatusChip status={p.status || 'draft'} />,
+  },
+  {
+    key: 'date', header: 'Date', width: '10%',
+    render: (p) => p.createdAt?.seconds
+      ? new Date(p.createdAt.seconds * 1000).toLocaleDateString()
+      : '—',
+  },
+  {
+    key: 'pdf', header: '', width: '5%',
+    render: (p) => {
+      const url = p.fileUrl || p.fagron?.originalPdfUrl;
+      return url
+        ? <PdfButton url={url} />
+        : null;
+    },
+  },
+];
+
+// doctor_patient_relationships: { doctorId, patientId, patientName, patientEmail,
+//                                  status, createdAt, source, initiatedByRole }
+const PATIENT_COLUMNS = [
+  { key: 'name',   header: 'Patient Name',  width: '38%', render: (r) => r.patientName  || '—' },
+  { key: 'email',  header: 'Email',         width: '35%', render: (r) => r.patientEmail || '—' },
+  { key: 'status', header: 'Status',        width: '15%', render: (r) => <StatusChip status={r.status || 'active'} /> },
+  { key: 'date',   header: 'Linked',        width: '12%', render: (r) => r.createdAt?.seconds
+      ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : '—' },
+];
+
+// orders: { orderId, userId, customerName, customer:{fullName,email}, status,
+//            total, currency, createdAt, paymentStatus }
+const ORDER_COLUMNS = [
+  { key: 'order',  header: 'Order #', width: '22%',
+    render: (o) => <span style={{ fontFamily: 'monospace', fontSize: '0.78rem' }}>{o.orderId || o.id?.slice(0,8).toUpperCase()}</span> },
+  { key: 'customer', header: 'Customer', width: '30%',
+    render: (o) => o.customerName || o.customer?.fullName || '—' },
+  { key: 'total',  header: 'Total',  width: '18%',
+    render: (o) => o.total != null ? `${o.total} ${o.currency || 'USD'}` : '—' },
+  { key: 'status', header: 'Status', width: '15%',
+    render: (o) => <StatusChip status={o.status || 'pending'} /> },
+  { key: 'date',   header: 'Date',   width: '15%',
+    render: (o) => o.createdAt?.seconds ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : '—' },
+];
+
+// Tiny helper rendered in prescription PDF column
+function PdfButton({ url }) {
+  const [, forceRender] = useState(0);
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); window._previewPdf?.(url); }}
+      style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '2px' }}
+      title="View PDF"
+    >
+      <Eye size={15} />
+    </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+import { useRouter } from 'next/navigation';
+
+export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, serverBundle = null }) {
+  const { openDrawer } = useDrawer();
+  const router = useRouter();
+  const [activeTab,      setActiveTab]      = useState(doctor?.activeTab || initialTab || 'overview');
+  const [patients,       setPatients]       = useState(serverBundle?.relationships || []);
+  const [orders,         setOrders]         = useState(serverBundle?.orders || []);
+  const [prescriptions,  setPrescriptions]  = useState(serverBundle?.prescriptions || []);
+  const [loadingData,    setLoadingData]    = useState(false);
+  const [dataFetched,    setDataFetched]    = useState(serverBundle != null);
+  const [isImportOpen,   setIsImportOpen]   = useState(false);
+  const [previewPdfUrl,  setPreviewPdfUrl]  = useState(null);
+  const [currentDoctor,  setCurrentDoctor]  = useState(doctor);
+
+  // Expose PDF preview to PdfButton via window (avoids prop drilling into column defs)
+  useEffect(() => {
+    window._previewPdf = (url) => setPreviewPdfUrl(url);
+    return () => { delete window._previewPdf; };
+  }, []);
 
   useEffect(() => {
-    async function fetchDetailedData() {
-      if (!doctor || dataFetched) return;
+    setCurrentDoctor(doctor);
+    // If a new doctor is opened and no serverBundle, reset data for fresh fetch
+    if (!serverBundle) {
+      setDataFetched(false);
+      setPatients([]);
+      setPrescriptions([]);
+      setOrders([]);
+    } else {
+      // Hydrate from server bundle immediately
+      setPatients(serverBundle.relationships || []);
+      setPrescriptions(serverBundle.prescriptions || []);
+      setOrders(serverBundle.orders || []);
+      setDataFetched(true);
+    }
+    if (doctor?.activeTab || initialTab) setActiveTab(doctor?.activeTab || initialTab || 'overview');
+  }, [doctor?.id]);
+
+  // ── Data fetching — one fetch per doctor, cached in state ─────────────────
+  useEffect(() => {
+    if (activeTab === 'overview' || !currentDoctor?.id || dataFetched) return;
+
+    const id = currentDoctor.id;
+
+    async function fetchAll() {
       setLoadingData(true);
       try {
-        const [patientsSnap, ordersSnap, presSnap] = await Promise.all([
-          getDocs(query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', doctor.id), limit(50))),
-          getDocs(query(collection(db, 'orders'), where('supervisingPhysicianId', '==', doctor.id), limit(50))),
-          getDocs(query(collection(db, 'prescriptions'), where('doctorId', '==', doctor.id), limit(50)))
+        // Run all queries in parallel for speed
+        const [presSnap, relSnap] = await Promise.all([
+          // PRESCRIPTIONS — doctorId is the canonical field (all 3 are the same value)
+          getDocs(query(
+            collection(db, 'prescriptions'),
+            where('doctorId', '==', id),
+            limit(200)
+          )),
+          // PATIENTS — from doctor_patient_relationships
+          getDocs(query(
+            collection(db, 'doctor_patient_relationships'),
+            where('doctorId', '==', id),
+            limit(200)
+          )),
         ]);
-        setPatients(patientsSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-        setOrders(ordersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
-        setPrescriptions(presSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+
+        const presData = presSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setPrescriptions(presData);
+
+        let patData = relSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // Fallback: if no relationships, derive unique patients from prescriptions
+        // (happens when doctor_patient_relationships not yet populated)
+        if (patData.length === 0 && presData.length > 0) {
+          const seen = new Set();
+          patData = presData
+            .filter(rx => {
+              const pid = rx.patientId;
+              if (!pid || seen.has(pid)) return false;
+              seen.add(pid);
+              return true;
+            })
+            .map(rx => ({
+              id:           rx.patientId,
+              patientId:    rx.patientId,
+              patientName:  rx.patient?.name  || rx.patientName  || 'Unknown',
+              patientEmail: rx.patient?.email || rx.patientEmail || '',
+              status:       'active',
+              createdAt:    rx.createdAt,
+            }));
+        }
+        setPatients(patData);
+
+        // ORDERS — query by patientIds found in prescriptions
+        // (orders have userId = patientId, no physician reference)
+        const patientIds = [...new Set(presData.map(p => p.patientId).filter(Boolean))];
+        if (patientIds.length > 0) {
+          // Firestore 'in' max = 30 per query; take first 30
+          const chunk = patientIds.slice(0, 30);
+          const ordSnap = await getDocs(query(
+            collection(db, 'orders'),
+            where('userId', 'in', chunk),
+            limit(100)
+          ));
+          setOrders(ordSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        }
+
         setDataFetched(true);
       } catch (e) {
-        console.error("Error fetching detailed doctor data", e);
+        console.error('PhysicianProfileDrawer fetch error:', e);
+        notifier.error('Failed to load physician data');
       } finally {
         setLoadingData(false);
       }
     }
-    if (activeTab !== 'overview') {
-      fetchDetailedData();
+
+    fetchAll();
+  }, [currentDoctor?.id, activeTab, dataFetched]);
+
+  const handleUpdateDoctor = async (formData) => {
+    try {
+      await updateDoc(doc(db, 'users', currentDoctor.id), formData);
+      setCurrentDoctor(prev => ({ ...prev, ...formData }));
+      notifier.success('Physician updated successfully');
+    } catch (err) {
+      console.error(err);
+      notifier.error('Failed to update physician');
+      throw err;
     }
-  }, [doctor, activeTab, dataFetched]);
+  };
 
-  if (!doctor) return null;
+  if (!currentDoctor) return null;
 
-  const doctorName = doctor.displayName || [doctor.firstName, doctor.lastName].filter(Boolean).join(' ') || 'Unnamed Physician';
-  
-  const headerContent = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-      <div style={{ width: 64, height: 64, borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.75rem', fontWeight: 700 }}>
-        {doctorName.charAt(0).toUpperCase()}
-      </div>
-      <div>
-        <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {doctorName}
-        </h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><ShieldCheck size={14} color="var(--primary)"/> {doctor.specialty || 'General Practitioner'}</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {doctor.clinicName || 'Atlas Health Clinic'}</span>
-        </div>
-      </div>
-    </div>
-  );
+  const doctorName = currentDoctor.displayName
+    || [currentDoctor.firstName, currentDoctor.lastName].filter(Boolean).join(' ')
+    || 'Unnamed Physician';
 
   const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'patients', label: 'Patients', count: patients.length || null },
+    { id: 'overview',      label: 'Overview' },
+    { id: 'patients',      label: 'Patients',      count: patients.length      || null },
     { id: 'prescriptions', label: 'Prescriptions', count: prescriptions.length || null },
-    { id: 'orders', label: 'Orders', count: orders.length || null },
-    { id: 'timeline', label: 'Timeline' }
+    { id: 'orders',        label: 'Orders',        count: orders.length        || null },
+    { id: 'timeline',      label: 'Timeline' },
   ];
 
-  // Merge events for Timeline
-  const timelineEvents = [...patients.map(p => ({ ...p, type: 'patient_assigned', date: p.createdAt })), 
-                          ...orders.map(o => ({ ...o, type: 'order_created', date: o.createdAt })), 
-                          ...prescriptions.map(p => ({ ...p, type: 'prescription_issued', date: p.createdAt }))]
-                         .filter(e => e.date)
-                         .sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
+  const timelineEvents = [
+    ...patients.map(p      => ({ ...p, _type: 'patient',      _date: p.createdAt })),
+    ...prescriptions.map(p => ({ ...p, _type: 'prescription', _date: p.createdAt })),
+    ...orders.map(o        => ({ ...o, _type: 'order',        _date: o.createdAt })),
+  ]
+    .filter(e => e._date?.seconds)
+    .sort((a, b) => b._date.seconds - a._date.seconds)
+    .slice(0, 50);
 
   return (
     <StandardDrawer
-      isOpen={!!doctor}
+      isOpen={!!currentDoctor}
       onClose={onClose}
-      headerContent={headerContent}
+      headerContent={
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 700, flexShrink: 0 }}>
+            {doctorName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '0.3rem' }}>{doctorName}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><ShieldCheck size={12} color="var(--primary)" />{currentDoctor.specialty || 'General'}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><MapPin size={12} />{currentDoctor.clinicName || '—'}</span>
+              {currentDoctor.email && <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Mail size={12} />{currentDoctor.email}</span>}
+            </div>
+          </div>
+          {/* Nueva Rx quick action */}
+          <button
+            onClick={() => openDrawer('rx-builder', 'new', {
+              initialDoctor: { id: currentDoctor.id, name: doctorName },
+              initialDoctorId: currentDoctor.id,
+              initialDoctorName: doctorName,
+              sourceModule: 'physician-profile',
+            })}
+            className="gcp-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0, fontSize: '0.82rem', padding: '0.45rem 0.9rem' }}
+          >
+            <ClipboardList size={14} /> New Prescription
+          </button>
+        </div>
+      }
       headerColor="var(--color-bg-surface)"
-      width="800px"
+      width="840px"
     >
-      <StandardDrawerTabs 
-        tabs={tabs} 
-        activeTab={activeTab} 
-        onChange={setActiveTab} 
-      />
+      <StandardDrawerTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
-        {loadingData && activeTab !== 'overview' ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem', color: 'var(--primary)' }}>
-            <Loader2 size={24} className="spin" />
-            <style>{`.spin { animation: spin 1s linear infinite; } @keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+
+        {/* Loading state */}
+        {loadingData && activeTab !== 'overview' && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '3rem', color: 'var(--text-muted)' }}>
+            <Loader2 size={20} className="spin" />
+            <style>{`.spin{animation:spin 1s linear infinite}@keyframes spin{100%{transform:rotate(360deg)}}`}</style>
+            Loading data…
           </div>
-        ) : (
+        )}
+
+        {!loadingData && (
           <>
             {activeTab === 'overview' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                  <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Contact Information</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', marginBottom: '0.5rem', fontSize: '0.9rem' }}><Mail size={14} color="var(--text-muted)"/> {doctor.email || 'N/A'}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.9rem' }}><Phone size={14} color="var(--text-muted)"/> {doctor.phone || 'N/A'}</div>
-                  </div>
-                  <div style={{ padding: '1.25rem', backgroundColor: 'var(--color-bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Account Status</div>
-                    <div style={{ color: 'var(--color-success)', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={14}/> Active</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Registered: {doctor.createdAt ? new Date(doctor.createdAt.seconds ? doctor.createdAt.toDate() : doctor.createdAt).toLocaleDateString() : 'N/A'}</div>
-                  </div>
-                </div>
-              </div>
+              <UniversalForm
+                schema={physicianSchema}
+                initialData={currentDoctor}
+                initialMode="view"
+                onSubmit={handleUpdateDoctor}
+                submitLabel="Save Changes"
+              />
             )}
 
             {activeTab === 'patients' && (
-              <DataTable 
+              <DataTable
                 data={patients}
-                columns={[
-                  { header: 'Patient Name', accessor: (p) => p.patientName || 'Unnamed' },
-                  { header: 'Status', accessor: (p) => p.status || 'Active' }
-                ]}
-                emptyState={
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No patients assigned to this physician.</div>
-                }
+                keyField="id"
+                columns={PATIENT_COLUMNS}
+                emptyTitle="No patients linked"
+                emptySubtitle="No patient relationships found for this physician."
               />
             )}
 
             {activeTab === 'prescriptions' && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-                  <button 
+                  <button
                     onClick={() => setIsImportOpen(true)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '6px 12px', borderRadius: '8px',
-                      backgroundColor: '#e0f2fe', color: '#0369a1',
-                      border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '8px', background: '#e0f2fe', color: '#0369a1', border: 'none', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}
                   >
                     <FileUp size={14} /> Import Rx
                   </button>
                 </div>
-                <DataTable 
+                <DataTable
                   data={prescriptions}
-                  columns={[
-                    { header: 'Document', accessor: (p) => p.documentNumber || p.id },
-                    { header: 'Patient', accessor: (p) => p.patientName || 'Unknown' },
-                    { header: 'Status', accessor: (p) => p.status || 'Draft' },
-                    { header: 'Action', accessor: (p) => p.fileUrl ? (
-                      <button 
-                        onClick={() => setPreviewPdfUrl(p.fileUrl)}
-                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                        title="View PDF"
-                      >
-                        <Eye size={16} />
-                      </button>
-                    ) : '-' }
-                  ]}
-                  emptyState={
-                    <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No prescriptions created by this physician.</div>
-                  }
+                  keyField="id"
+                  columns={getPrescriptionColumns((rxId) => router.push(`/admin/prescriptions?id=${rxId}`))}
+                  emptyTitle="No prescriptions found"
+                  emptySubtitle="No prescriptions have been created for this physician yet."
                 />
               </div>
             )}
 
             {activeTab === 'orders' && (
-              <DataTable 
+              <DataTable
                 data={orders}
-                columns={[
-                  { header: 'Order #', accessor: (o) => o.documentNumber || o.id },
-                  { header: 'Date', accessor: (o) => o.createdAt ? new Date(o.createdAt?.seconds * 1000).toLocaleDateString() : 'N/A' },
-                  { header: 'Status', accessor: (o) => o.status || 'Pending' }
-                ]}
-                emptyState={
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No orders supervised by this physician.</div>
-                }
+                keyField="id"
+                columns={ORDER_COLUMNS}
+                emptyTitle="No orders found"
+                emptySubtitle="Orders are linked to patients. No orders found for this physician's patients."
               />
             )}
 
             {activeTab === 'timeline' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                 {timelineEvents.length === 0 ? (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No activity timeline available.</div>
+                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No activity yet.</div>
                 ) : (
-                  timelineEvents.map((event, idx) => (
-                    <div key={idx} style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}>
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--color-bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {event.type === 'patient_assigned' && <UserPlus size={14} color="var(--primary)" />}
-                          {event.type === 'prescription_issued' && <FilePlus size={14} color="var(--primary)" />}
-                          {event.type === 'order_created' && <ClipboardList size={14} color="var(--primary)" />}
+                  timelineEvents.map((ev, idx) => (
+                    <div key={ev.id + idx} style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 36, flexShrink: 0 }}>
+                        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--color-bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {ev._type === 'patient'      && <UserPlus     size={13} color="var(--primary)" />}
+                          {ev._type === 'prescription' && <FilePlus     size={13} color="var(--primary)" />}
+                          {ev._type === 'order'        && <ClipboardList size={13} color="var(--primary)" />}
                         </div>
-                        {idx !== timelineEvents.length - 1 && <div style={{ width: '2px', flex: 1, backgroundColor: 'var(--border)', marginTop: '0.5rem', marginBottom: '0.5rem' }} />}
+                        {idx < timelineEvents.length - 1 && <div style={{ width: 2, flex: 1, background: 'var(--border)', margin: '4px 0' }} />}
                       </div>
-                      <div style={{ flex: 1, paddingBottom: '1.5rem' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                          {event.type === 'patient_assigned' && `Patient Assigned: ${event.patientName || 'Unknown'}`}
-                          {event.type === 'prescription_issued' && `Prescription Issued: ${event.documentNumber || event.id}`}
-                          {event.type === 'order_created' && `Order Created: ${event.documentNumber || event.id}`}
+                      <div style={{ flex: 1, paddingBottom: '1.25rem' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.87rem', color: 'var(--text-main)' }}>
+                          {ev._type === 'patient'      && `Patient linked: ${ev.patientName || '—'}`}
+                          {ev._type === 'prescription' && `Prescription: ${ev.fagron?.boxId || ev.documentNumber || ev.id?.slice(0,8)} — ${ev.patient?.name || ev.patientName || '—'}`}
+                          {ev._type === 'order'        && `Order: ${ev.orderId || ev.id?.slice(0,8)} — ${ev.customerName || ev.customer?.fullName || '—'}`}
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          {new Date(event.date?.seconds * 1000).toLocaleString()}
+                        <div style={{ fontSize: '0.77rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                          {new Date(ev._date.seconds * 1000).toLocaleString()}
                         </div>
                       </div>
                     </div>
@@ -220,13 +410,12 @@ export default function PhysicianProfileDrawer({ doctor, onClose }) {
           </>
         )}
       </div>
-      
+
       <ImportPrescriptionModal
         isOpen={isImportOpen}
         onClose={() => setIsImportOpen(false)}
-        context={{ doctorId: doctor.id, doctorName: doctorName }}
+        context={{ doctorId: doctor.id, doctorName }}
       />
-
       <DocumentPreviewModal
         isOpen={!!previewPdfUrl}
         onClose={() => setPreviewPdfUrl(null)}

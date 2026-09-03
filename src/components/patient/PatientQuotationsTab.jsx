@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { subscribeToPatientQuotations } from '../../../services/patientTabsService';
 import { useTransactionManager } from '../../../hooks/data/useTransactionManager';
 import { toast } from 'react-hot-toast';
 
@@ -16,14 +14,7 @@ export default function PatientQuotationsTab() {
 
   useEffect(() => {
     if (!user) return;
-    const q = query(
-      collection(db, 'quotations'),
-      where('customerUid', '==', user.uid),
-      where('status', 'in', ['draft', 'sent'])
-    );
-
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const unsubscribe = subscribeToPatientQuotations(user.uid, (data) => {
       setQuotations(data);
       setLoading(false);
     });

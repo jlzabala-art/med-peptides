@@ -20,7 +20,7 @@ export default function AdminProtocolEdit() {
   useEffect(() => {
     if (id === 'new') {
       setProtocol({
-        protocol_name: '',
+        name: '',
         status: 'draft',
         phases: [{ label: 'Phase 1', durationWeeks: 4, items: [] }],
         supplements: [],
@@ -48,7 +48,7 @@ export default function AdminProtocolEdit() {
       }
     };
     fetchProtocol();
-  }, [id, navigate, showToast]);
+  }, [id, router, showToast]);
 
   const handleSave = async (formData) => {
     setSaving(true);
@@ -58,7 +58,7 @@ export default function AdminProtocolEdit() {
       // Assuming updateProtocolFull handles the deep merge
       const docId = id === 'new' ? (formData.protocol_slug || `new-${Date.now()}`) : id;
       await updateProtocolFull(docId, formData);
-      showToast('Protocol saved successfully', 'success');
+      showToast(`Protocol "${formData.name || formData.protocol_slug}" saved successfully.`, 'success');
       router.push('/admin/protocols');
     } catch (error) {
       console.error('Save error:', error);

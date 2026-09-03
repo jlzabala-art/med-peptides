@@ -83,12 +83,20 @@
 
 .overviewGrid {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 1.5rem;
 }
 
 .colSpan4 {
   grid-column: span 4;
+}
+
+.colSpan5 {
+  grid-column: span 5;
+}
+
+.colSpan7 {
+  grid-column: span 7;
 }
 
 .colSpan8 {
@@ -107,7 +115,7 @@
 }
 
 @media (max-width: 1024px) {
-  .colSpan4, .colSpan8 {
+  .colSpan4, .colSpan5, .colSpan7, .colSpan8 {
     grid-column: span 12;
   }
 }
@@ -144,6 +152,8 @@
   border: 1px solid var(--border);
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .aiCard {
@@ -152,4 +162,6 @@
   border: 1px solid #bae6fd;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(2, 132, 199, 0.1);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }

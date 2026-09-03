@@ -24,6 +24,7 @@ import * as XLSX from 'xlsx';
 import { functions, db, storage } from '../../../firebase';
 import { useAuth } from '../../../context/AuthContext';
 import { createPatient } from '../../../services/patientLinkService';
+import { resolveIngredients } from '../../../services/apiIngredientMatcher';
 import {
   UploadCloud, FileText, Loader2, Save, X, CheckCircle, AlertTriangle,
   ShieldCheck, ShieldAlert, Users, ClipboardList
@@ -33,7 +34,7 @@ import DataTable from '../../ui/DataTable';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function StatusBadge({ status }) {
+function StatusChip({ status }) {
   const styles = {
     new:      { bg: '#f0fdf4', color: '#166534', border: '#bbf7d0', label: '✦ Nueva' },
     duplicate:{ bg: '#fef9c3', color: '#854d0e', border: '#fde68a', label: '⚠ Ya existe' },
@@ -119,7 +120,7 @@ export default function AdminFagronBulkImportTab() {
         addLog('Enviando a Gemini AI Engine (puede tardar hasta 5 min)…');
         const instructions = `
           Este es un informe de prescripción de Fagron Genomics.
-          Extrae los siguientes campos por cada prescripción encontrada:
+          Extrae los siguientes campos por cada prescripción o formulación encontrada:
           - patientName: Nombre completo del paciente
           - patientDob: Fecha de nacimiento (YYYY-MM-DD si es posible)
           - patientGender: Sexo del paciente
@@ -129,17 +130,29 @@ export default function AdminFagronBulkImportTab() {
           - reportDate: Fecha del informe (YYYY-MM-DD)
           - boxId: Código BOX o número de referencia de la prescripción (si aparece)
           - diagnosis: Diagnóstico o indicación clínica
+          - testName: Nombre del test genético realizado (e.g. TrichoTest, NutriTest, TeloTest, etc.) si aparece en el título o notas.
+          - treatmentType: Nombre de la formulación específica (e.g., TrichoSol, TrichoOil).
+          - treatmentProgram: Programa o test padre (e.g., Trichotest).
+          - posology: Instrucciones de uso para esta formulación.
+          - volume: Volumen total (e.g., 60ml, 100ml).
+          - dispensingForm: Forma farmacéutica (e.g., Solution, Capsules).
           - clinicalNotes: Notas clínicas, biomarcadores, marcadores genéticos
-          - items: Array de productos prescritos. Cada item tiene: name, strength, quantity, unit, dosage, frequency, route
-          Devuelve un array de objetos JSON, uno por prescripción.
+          - items: Array de INGREDIENTES de esta formulación. Cada ingrediente tiene: name (nombre del API/excipiente), dose (concentración/dosis), quantity (cantidad si aplica).
+          
+          CRÍTICO: Si el documento contiene MÚLTIPLES formulaciones distintas (como un Trichotest con TrichoSol y TrichoOil), debes devolver un objeto JSON SEPARADO por cada formulación. Repite los datos del paciente y el boxId en cada objeto, pero con su propio 'treatmentType', 'posology' e 'items' específicos.
+          Devuelve un array de objetos JSON.
         `;
         const response = await parseUniversal({ storagePath, mimeType, context: 'FagronPrescription', instructions });
         if (response.data.success) {
+          // If the AI split a single document into multiple formulas, link them with a sessionId
+          const sessionId = response.data.items.length > 1 ? crypto.randomUUID() : null;
+
           const items = response.data.items.map(item => ({
             ...item,
             _sourceFile: file.name,
+            sessionId: sessionId || item.sessionId, // keep AI sessionId if generated, otherwise use ours
           }));
-          addLog(`✓ ${items.length} prescripciones extraídas de ${file.name}`);
+          addLog(`✓ ${items.length} formulaciones extraídas de ${file.name}`);
           allItems = [...allItems, ...items];
         } else {
           addLog(`✗ Error en ${file.name}: ${response.data.error || 'desconocido'}`);
@@ -234,11 +247,75 @@ export default function AdminFagronBulkImportTab() {
           }
         }
 
+        // Deduce volume and duration for future bulk imports
+        let totalMl = null;
+        (rx.items || []).forEach(it => {
+          const doseStr = String(it.dose || it.dosage || it.strength || '');
+          const match = doseStr.match(/(\d+)\s*ml/i);
+          if (match) totalMl = parseInt(match[1], 10);
+        });
+
+        const inferredVolume = rx.volume || (totalMl ? `${totalMl} ml` : null);
+        const inferredDuration = rx.duration || (totalMl === 100 ? 90 : (totalMl === 60 ? 60 : 30));
+        const inferredPosology = rx.posology || (totalMl ? "Apply 1ml topically to clean, dry scalp once daily at night. Massaging gently. Leave on overnight." : "As directed by prescribing physician.");
+        const inferredTreatmentType = rx.treatmentType || (totalMl ? "Topical Magistral Capillary Formulation" : "Genomic Prescription Protocol");
+
+        // Resolve ingredients with Algolia + Placeholders + Genomics-First Lookup
+        const targetProg = rx.testName || rx.treatmentProgram || 'Fagron Genomics';
+        const resolved = await resolveIngredients(
+          Array.isArray(rx.items) ? rx.items : [],
+          { supplierHint: 'Fagron Iberia', importSource: 'fagron_bulk_import', programName: targetProg }
+        );
+
+        const anyUnresolved = resolved.some(r => !r.productId || r.isPlaceholder);
+        const unassignedAlerts = resolved.filter(r => r.isUnassignedProgramApi && r.programAlert).map(r => r.programAlert);
+
+        const mappedItems = resolved.map((r, idx) => {
+          const name = (r.original?.name || '').toLowerCase();
+          let form = r.original?.form || r.original?.dispensingForm;
+          if (!form || form === 'Other' || form === 'magistral') {
+            if (name.includes('trichosol')) form = 'Topical Base Solution (Vehicle)';
+            else if (name.includes('latanoprost') || name.includes('spironolactone') || name.includes('minoxidil') || name.includes('igrantine')) form = 'Magistral Active Component';
+            else if (name.includes('cap') || name.includes('oral')) form = 'Capsule';
+            else if (name.includes('lotion') || name.includes('topical') || name.includes('solution')) form = 'Topical Solution';
+            else form = 'Magistral Component';
+          }
+          
+          return {
+            id: `bulk_item_${Date.now()}_${idx}`,
+            productId: r.productId || null,
+            variantId: null,
+            productName: r.matchedName || r.original?.name || '',
+            sku: '',
+            activeIngredient: r.original?.name || '',
+            concentration: r.original?.dose || r.original?.strength || '',
+            dose: r.original?.dose || r.original?.strength || '',
+            quantity: r.original?.quantity || 1,
+            price: 0,
+            instructions: inferredPosology,
+            form,
+            frequency: r.original?.frequency || 'Once Daily (Night)',
+            duration: r.original?.duration || (inferredDuration ? `${inferredDuration} days` : '30 days'),
+            _aiRawName: r.original?.name,
+            _aiRawDose: r.original?.dose,
+            _isPlaceholder: r.isPlaceholder,
+            _needsProductMapping: !r.productId || r.isPlaceholder,
+            _matchScore: r.score,
+            _genomicPriority: r.priority || null,
+            _isProgramAssigned: r.isProgramAssigned ?? true,
+            _isUnassignedProgramApi: !!r.isUnassignedProgramApi,
+            _programAlert: r.programAlert || null,
+            _unassignedProgramName: r.unassignedProgramName || null,
+            status: 'Pending',
+          };
+        });
+
         // 2. Build prescription document
         const rxDoc = {
-          source: 'fagron_pdf_ocr',
+          source: rx.testName ? `Fagron ${rx.testName}` : 'fagron_pdf_ocr',
           sourceType: 'Fagron Genomics',
-          status: 'Imported',
+          status: 'draft', // strictly lowercase per AGENTS.md Rule #28
+          validationStatus: anyUnresolved ? 'Needs Review' : 'Ready',
           doctorName: rx.doctorName || '',
           patientId,
           patient: {
@@ -250,7 +327,15 @@ export default function AdminFagronBulkImportTab() {
           },
           diagnosis: rx.diagnosis || '',
           clinicalNotes: rx.clinicalNotes || '',
-          items: Array.isArray(rx.items) ? rx.items : [],
+          posology: inferredPosology,
+          treatmentType: inferredTreatmentType,
+          treatmentProgram: rx.treatmentProgram || rx.testName || null,
+          sessionId: rx.sessionId || null,
+          duration: inferredDuration,
+          volume: inferredVolume,
+          dispensingForm: rx.dispensingForm || null,
+          items: mappedItems,
+          prescriptionLines: mappedItems,
           fagron: {
             boxId: rx.boxId || null,
             reportDate: rx.reportDate || null,
@@ -463,7 +548,7 @@ export default function AdminFagronBulkImportTab() {
                 onSelectionChange={(ids) => setSelectedRows(new Set(ids))}
                 emptyTitle="No data available"
                 columns={[
-                  { key: '_dupStatus', header: 'Estado', render: (r) => <StatusBadge status={r._dupStatus} /> },
+                  { key: '_dupStatus', header: 'Estado', render: (r) => <StatusChip status={r._dupStatus} /> },
                   { key: 'patientName', header: 'Paciente', render: (r) => (
                       <div>
                         <div style={{ fontWeight: 600 }}>{r.patientName || '—'}</div>

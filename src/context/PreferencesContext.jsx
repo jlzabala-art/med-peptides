@@ -9,13 +9,17 @@ export const PreferencesProvider = ({ children }) => {
   const [currency, setCurrency] = useState('DUAL'); 
   // density can be: 'comfortable' or 'compact'
   const [density, setDensity] = useState('comfortable');
+  // weatherDisplay can be: 'automatic', 'visible', 'hidden'
+  const [weatherDisplay, setWeatherDisplay] = useState('automatic');
 
   useEffect(() => {
     try {
       const savedCurrency = localStorage.getItem('atlas_currency');
       const savedDensity = localStorage.getItem('atlas_density');
+      const savedWeather = localStorage.getItem('atlas_weather');
       if (savedCurrency) setCurrency(savedCurrency);
       if (savedDensity) setDensity(savedDensity);
+      if (savedWeather) setWeatherDisplay(savedWeather);
     } catch (e) {
       console.warn("Failed to read preferences from local storage.");
     }
@@ -34,6 +38,13 @@ export const PreferencesProvider = ({ children }) => {
       localStorage.setItem('atlas_density', newDensity);
     } catch(e) {}
   };
+  
+  const updateWeatherDisplay = (newWeatherDisplay) => {
+    setWeatherDisplay(newWeatherDisplay);
+    try {
+      localStorage.setItem('atlas_weather', newWeatherDisplay);
+    } catch(e) {}
+  };
 
   const AED_RATE = 3.6725;
 
@@ -43,8 +54,13 @@ export const PreferencesProvider = ({ children }) => {
     // Assume value from backend (Zoho Books) is in AED
     const usdValue = valueInAed / AED_RATE;
     
-    const usdFormatted = `$${usdValue.toLocaleString('en-US', {maximumFractionDigits:0})}`;
-    const aedFormatted = `${Number(valueInAed).toLocaleString('en-US', {maximumFractionDigits:0})} AED`;
+    const usdAbs = Math.abs(usdValue);
+    const usdFrac = usdAbs >= 100 ? 0 : 2;
+    const aedAbs = Math.abs(valueInAed);
+    const aedFrac = aedAbs >= 100 ? 0 : 2;
+    
+    const usdFormatted = `$${usdValue.toLocaleString('en-US', {minimumFractionDigits: usdFrac, maximumFractionDigits: usdFrac})}`;
+    const aedFormatted = `${Number(valueInAed).toLocaleString('en-US', {minimumFractionDigits: aedFrac, maximumFractionDigits: aedFrac})} AED`;
 
     if (currency === 'USD') return usdFormatted;
     if (currency === 'AED') return aedFormatted;
@@ -52,7 +68,7 @@ export const PreferencesProvider = ({ children }) => {
   };
 
   return (
-    <PreferencesContext.Provider value={{ currency, updateCurrency, density, updateDensity, formatCurrency }}>
+    <PreferencesContext.Provider value={{ currency, updateCurrency, density, updateDensity, weatherDisplay, updateWeatherDisplay, formatCurrency }}>
       {children}
     </PreferencesContext.Provider>
   );

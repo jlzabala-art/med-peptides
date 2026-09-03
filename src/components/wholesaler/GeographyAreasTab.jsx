@@ -9,19 +9,10 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-
+import { getTenantGeography, updateTenantGeography } from '../../repositories/wholesalerRepository';
 import { useAuth } from '../../context/AuthContext';
 import { MapPin, ShieldAlert, Save, Check, ShieldCheck, Eye, EyeOff, Lock } from '@/lib/icons';
-
-
-
-
-
-
-
-
+import { logger } from '../../utils/logger';
 
 export default function GeographyAreasTab() {
   const { userProfile } = useAuth();
@@ -47,10 +38,8 @@ export default function GeographyAreasTab() {
     async function loadTenantGeography() {
       setLoading(true);
       try {
-        const tenantRef = doc(db, 'tenants', tenantId);
-        const snap = await getDoc(tenantRef);
-        if (snap.exists()) {
-          const data = snap.data();
+        const data = await getTenantGeography(tenantId);
+        if (data) {
           setTerritories(data.territories || []);
           setRules({
             peptideVialsVisibility: data.commercialRules?.peptideVialsVisibility || 'clinic_only',
@@ -61,7 +50,7 @@ export default function GeographyAreasTab() {
           });
         }
       } catch (err) {
-        console.error('Failed to load geography areas:', err);
+        logger.error('Failed to load geography areas in GeographyAreasTab', { error: err.message });
         setError('Could not load territory configurations.');
       } finally {
         setLoading(false);
@@ -80,38 +69,17 @@ export default function GeographyAreasTab() {
     setSuccess(false);
 
     try {
-      const tenantRef = doc(db, 'tenants', tenantId);
-      await updateDoc(tenantRef, {
-        'commercialRules.peptideVialsVisibility': rules.peptideVialsVisibility,
-        'commercialRules.supplementsVisibility': rules.supplementsVisibility,
-        'commercialRules.compoundedVisibility': rules.compoundedVisibility,
-        'commercialRules.hidePricesForGuests': rules.hidePricesForGuests,
-        'commercialRules.allowCheckout': rules.allowCheckout,
-      });
-
-      // Write audit log
-      try {
-        const auditRef = doc(db, 'tenantAuditLogs', `${tenantId}_${Date.now()}`);
-        await setDoc(auditRef, {
-          tenantId,
-          timestamp: new Date().toISOString(),
-          action: 'update_geography_rules',
-          userId: userProfile?.uid || 'unknown',
-          details: { commercialRules: rules }
-        });
-      } catch (e) {
-        console.warn('Audit log write failed:', e);
-      }
-
+      await updateTenantGeography(tenantId, rules, userProfile?.uid || 'unknown');
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
-      console.error('Failed to update geography rules:', err);
+      logger.error('Failed to update geography rules in GeographyAreasTab', { error: err.message });
       setError('Failed to save territory commercial rules.');
     } finally {
       setSaving(false);
     }
   };
+
 
   if (!tenantId) {
     return (

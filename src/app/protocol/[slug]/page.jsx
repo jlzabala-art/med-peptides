@@ -7,9 +7,9 @@ import { useShop } from '../../../context/ShopProvider';
 import { useCart } from '../../../context/CartProvider';
 import { useParams } from 'next/navigation';
 
-export default function NextProtocolPage({ params: serverParams }) {
+export default function NextProtocolPage() {
   const params = useParams();
-  const slug = serverParams?.slug || params?.slug;
+  const slug = params?.slug;
 
   const { isProfessional, isAdmin } = useAuth();
   const { products, region, setRegion } = useShop();

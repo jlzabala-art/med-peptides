@@ -42,6 +42,11 @@ async function reindexProtocols() {
         phaseCount:  Array.isArray(data.phases) ? data.phases.length : 0,
         slug:        data.slug || data.protocol_slug || '',
         version:     data.version || 1,
+        peptides:    Array.isArray(data.peptides) ? data.peptides : [],
+        sex_restriction: data.sex_restriction || 'any',
+        min_age:     data.min_age || null,
+        max_age:     data.max_age || null,
+        contraindications: Array.isArray(data.contraindications) ? data.contraindications : [],
     });
   });
 

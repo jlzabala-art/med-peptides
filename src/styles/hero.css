@@ -1,7 +1,4 @@
-/* ── Master Hero Layout Styles ── */
-
 .hero-section {
-  /* Reduced blue intensity: -20% brightness and saturation compared to old gradient */
   background: var(--gradient-clinical, linear-gradient(160deg, #00152a 0%, #00274c 45%, #073a6a 100%));
   color: white;
   min-height: 80vh;
@@ -10,6 +7,26 @@
   position: relative;
   overflow: hidden;
   padding: 6.5rem 1.5rem 2.5rem;
+}
+
+.hero-section--light-grid {
+  background: radial-gradient(circle at 50% 15%, rgba(14, 165, 233, 0.07) 0%, rgba(248, 250, 252, 0.98) 75%), #f8fafc;
+  color: #0f172a;
+  min-height: auto;
+  padding: clamp(2.25rem, 4vw, 3.5rem) 1rem clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.hero-section__grid-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(to right, rgba(14, 165, 233, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(14, 165, 233, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 40%, transparent 100%);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .hero-section > * {
@@ -354,12 +371,36 @@
   }
 }
 
+.guest-hero-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2.5rem 1.5rem;
+}
+
+.guest-hero-headings {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  margin-top: 1rem;
+}
+
 /* Mobile Stack layout (max-width: 768px) */
 @media (max-width: 768px) {
   .hero-section {
-    padding-top: 5rem;
+    padding-top: 1.5rem;
     padding-bottom: 2rem;
-    min-height: 900px;
+    min-height: auto;
+  }
+
+  .guest-hero-container {
+    padding: 0.5rem 1rem 1.5rem;
+  }
+
+  .guest-hero-headings {
+    margin-top: 0.25rem;
+    margin-bottom: 1.5rem;
   }
   
   .hero-container {

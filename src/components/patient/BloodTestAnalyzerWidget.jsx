@@ -35,10 +35,10 @@ const BloodTestAnalyzerWidget = ({ onRecommendationClick }) => {
           { name: 'HbA1c', value: 5.8, unit: '%', range: '< 5.7', status: 'high', info: 'Indicates slightly elevated average blood sugar.' },
           { name: 'C-Reactive Protein (CRP)', value: 4.2, unit: 'mg/L', range: '< 3.0', status: 'high', info: 'Marker of systemic inflammation.' }
         ],
-        interpretation: "Hemos detectado una deficiencia significativa en tus niveles de IGF-1 y marcadores de inflamación elevados (CRP). Esto coincide con síntomas de recuperación lenta y fatiga. Se recomienda una revisión con un especialista para considerar terapias de péptidos como Ipamorelin o BPC-157.",
-        recommendedAction: "Consultar Protocolo de Recuperación"
+        interpretation: "We detected a significant deficiency in your IGF-1 levels along with elevated inflammatory markers (CRP). This matches symptoms of slow muscle recovery and systemic fatigue. A clinical consultation is recommended to evaluate targeted peptide therapy such as Ipamorelin or BPC-157.",
+        recommendedAction: "View Bio-Recovery Protocol"
       });
-      toast.success('Análisis completado por Atlas AI.');
+      toast.success('Analysis completed by Atlas AI.');
     }, 3500);
   };
 

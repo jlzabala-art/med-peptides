@@ -102,7 +102,7 @@ export default function VariantSupplierTable({ variants, parentProduct, onAction
       header: <span onClick={() => handleSort('primarySupplierName')} style={{ cursor: 'pointer' }}>Primary Supplier{getSortIcon('primarySupplierName')}</span>,
       render: (val, row) => (
         val ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '0.2rem' }}>
             <span style={{ fontWeight: 600, color: '#334155' }}>{val}</span>
             <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Health: {row.primarySupplier?.healthScore || 'N/A'}</span>
           </div>
@@ -136,7 +136,7 @@ export default function VariantSupplierTable({ variants, parentProduct, onAction
       key: 'actions',
       header: 'Actions',
       render: (val, row) => (
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <div style={{ display: 'inline-flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
           <button
             onClick={(e) => { e.stopPropagation(); onAction('assignSupplier', row); }}
             style={{ padding: '0.3rem 0.6rem', border: '1px solid #e2e8f0', borderRadius: '4px', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 600 }}

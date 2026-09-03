@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Upload, MessageCircle, AlertTriangle } from '@/lib/icons';
+import { User, Upload, MessageCircle, AlertTriangle, Stethoscope, UserCheck, Building2, RefreshCw } from '@/lib/icons';
 
 export default function TimelineTab({ rx }) {
   // Aggregate and enrich timeline events
@@ -33,7 +33,29 @@ export default function TimelineTab({ rx }) {
     }
   }
 
-  // 3. Interactions / Consultations
+  // 3. Version Changes & Formulation Updates
+  if (rx.versionHistory && Array.isArray(rx.versionHistory)) {
+    rx.versionHistory.forEach(v => {
+      allEvents.push({
+        timestamp: v.savedAt || v.timestamp || new Date().toISOString(),
+        event: `Formulation Updated (v${v.version})`,
+        description: v.changeSummary || `Prescription updated to version ${v.version}.`
+      });
+    });
+  }
+
+  // 4. Audit Trail Actions
+  if (rx.auditTrail && Array.isArray(rx.auditTrail)) {
+    rx.auditTrail.forEach(a => {
+      allEvents.push({
+        timestamp: a.timestamp || new Date().toISOString(),
+        event: `Audit: ${a.action || 'Prescription Modified'}`,
+        description: a.details || `Modified by ${a.user || 'System'}`
+      });
+    });
+  }
+
+  // 5. Interactions / Consultations
   if (rx.messages && Array.isArray(rx.messages)) {
     rx.messages.forEach(msg => {
       allEvents.push({
@@ -76,10 +98,16 @@ export default function TimelineTab({ rx }) {
 
   const getEventIcon = (event = '') => {
     const eLower = event.toLowerCase();
+    if (eLower.includes('formulation') || eLower.includes('swap') || eLower.includes('v2') || eLower.includes('v3'))
+      return { icon: RefreshCw, color: '#9333ea', bg: '#faf5ff' };
+    if (eLower.includes('care team') || eLower.includes('reassigned') || eLower.includes('doctor'))
+      return { icon: Stethoscope, color: '#10b981', bg: '#ecfdf5' };
+    if (eLower.includes('wholeseller') || eLower.includes('pharmacy'))
+      return { icon: Building2, color: '#8b5cf6', bg: '#f3e8ff' };
     if (eLower.includes('upload') || eLower.includes('document') || eLower.includes('pdf'))
       return { icon: Upload, color: '#3b82f6', bg: '#eff6ff' };
     if (eLower.includes('assign') || eLower.includes('manager'))
-      return { icon: User, color: '#f59e0b', bg: '#fffbeb' };
+      return { icon: UserCheck, color: '#f59e0b', bg: '#fffbeb' };
     if (eLower.includes('message') || eLower.includes('consultation'))
       return { icon: MessageCircle, color: '#10b981', bg: '#ecfdf5' };
     if (eLower.includes('alert') || eLower.includes('adherence'))

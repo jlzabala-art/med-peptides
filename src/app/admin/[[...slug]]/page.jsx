@@ -3,31 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
 import AdminPlaceholderTab from '../../../components/admin/AdminPlaceholderTab';
-
-// ─── Tab Loading Skeleton ────────────────────────────────────────────────────
-function TabSkeleton() {
-  return (
-    <div style={{ padding: '24px', width: '100%' }}>
-      {[...Array(3)].map((_, i) => (
-        <div key={i} style={{
-          height: i === 0 ? '48px' : '120px',
-          borderRadius: '12px',
-          background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-          backgroundSize: '200% 100%',
-          animation: 'shimmer 1.4s infinite',
-          marginBottom: '16px',
-          opacity: 1 - i * 0.15,
-        }} />
-      ))}
-      <style>{`
-        @keyframes shimmer {
-          0%   { background-position: -200% 0; }
-          100% { background-position:  200% 0; }
-        }
-      `}</style>
-    </div>
-  );
-}
+import { TabSkeleton } from '../../../components/ui';
 
 // ─── Dynamic Server Component Registry ─────────────────────────────────────────
 // Using native async import() in a Server Component instead of next/dynamic.
@@ -37,6 +13,7 @@ const getTabComponent = async (tabId) => {
   switch (tabId) {
     // Dashboard
     case 'dashboard':          return (await import('../../../components/admin/AdminMetricsDashboard')).default;
+    case 'analytics':          return (await import('../../../components/admin/AdminAnalyticsTab')).default;
     case 'inbox':
     case 'messages':           return (await import('../../../components/admin/AdminMessagesTab')).default;
     case 'calendar':           return (await import('../../../components/calendar/CalendarPage')).default;
@@ -62,21 +39,27 @@ const getTabComponent = async (tabId) => {
     case 'quality-review':     return (await import('../../../components/admin/AdminApprovalsTab')).default;
 
     // Catalog
+    case 'iv-drips':
+    case 'iv-drip-catalog':    return (await import('../../../features/iv-drips/IvDripCatalogPage')).default;
     case 'products':
     case 'catalog':
     case 'catalog-builder':
     case 'alternatives':       return (await import('../../../components/admin/AdminProductsTab')).default;
+    case 'pricing-engine':     return (await import('../../../components/admin/AdminPricingEngineTab')).default;
     case 'prices':
     case 'pricing-visibility': return (await import('../../../components/admin/AdminPricesTab')).default;
     case 'competitors':        return (await import('../../../components/admin/AdminCompetitorsTab')).default;
+    case 'import-prices':      return (await import('../../../components/admin/AdminImportPricesTab')).default;
     case 'catalog-enrichment': return (await import('../../../components/admin/AdminCatalogEnrichmentTab')).default;
-    case 'inventory':          return (await import('../../../components/admin/AdminStorageTab')).default;
+    case 'inventory':          return (await import('../../../components/admin/AdminPlaceholderTab')).default;
+    case 'knowledge-base':     return (await import('../../../components/admin/AdminStorageTab')).default;
 
     // Sales
     case 'crm':                return (await import('../../../components/admin/AdminCrmTab')).default;
-    case 'leads':              return (await import('../../../components/admin/AdminLeadsTab')).default;
-    case 'clinics':            return (await import('../../../components/admin/AdminClinicsTab')).default;
-    case 'quotations':         return (await import('../../../components/admin/AdminBulkOrdersTab')).default;
+    case 'leads':              return (await import('../../../components/admin/AdminLeadsTabWrapper')).default;
+    case 'clinics':            return (await import('../../../components/admin/AdminClinicsTabWrapper')).default;
+    case 'account-managers':   return (await import('../../../components/admin/AdminAccountManagersTab')).default;
+    case 'quotations':         return (await import('../../../components/admin/quotations/AdminQuotationsTab')).default;
     case 'patient-orders':
     case 'sales-orders':
     case 'my-orders':
@@ -86,7 +69,8 @@ const getTabComponent = async (tabId) => {
 
     // Purchasing
     case 'procurement':        return (await import('../../../components/admin/AdminProcurementTab')).default;
-    case 'suppliers':          return (await import('../../../components/admin/AdminWholesellersTab')).default;
+    case 'suppliers':          return (await import('../../../components/admin/AdminSuppliersTab')).default;
+    case 'wholesellers':       return (await import('../../../components/admin/AdminWholesellersTab')).default;
     case 'rfqs':               return (await import('../../../components/admin/AdminRFQTab')).default;
     case 'purchase-orders':    return (await import('../../../components/admin/AdminBulkOrdersTab')).default;
 

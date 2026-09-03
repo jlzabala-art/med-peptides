@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import StatusChip from '../ui/StatusChip';
 
 import { ArrowLeft, Edit3, FlaskConical } from '@/lib/icons';
 
@@ -53,11 +54,9 @@ export default function AdminProtocolView() {
             <ArrowLeft size={20} />
           </button>
           <h1 style={{ margin: 0, fontSize: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FlaskConical color="#3b82f6" /> {protocol.protocol_name || protocol.name || 'Untitled Protocol'}
+            <FlaskConical color="#3b82f6" /> {protocol.name || protocol.name || 'Untitled Protocol'}
           </h1>
-          <span style={{ padding: '4px 8px', borderRadius: '4px', background: protocol.status === 'active' ? '#dcfce7' : '#f1f5f9', color: protocol.status === 'active' ? '#166534' : '#475569', fontSize: '0.75rem', fontWeight: 600 }}>
-            {(protocol.status || 'draft').toUpperCase()}
-          </span>
+          <StatusChip status={protocol.status || 'draft'} />
         </div>
         <Link to={`/admin/protocols/${id}/edit`} style={{ padding: '0.5rem 1rem', borderRadius: '6px', background: '#3b82f6', color: 'white', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Edit3 size={16} /> Edit Protocol

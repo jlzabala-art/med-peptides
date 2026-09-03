@@ -14,10 +14,10 @@ function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);
 }
 
-const STAGES = ['Confirmed', 'PO Generated', 'Manufacturing', 'Ready', 'Shipped', 'Delivered', 'Invoiced', 'Paid'];
+const STAGES = ['Confirmed', 'PO Generated', 'Manufacturing', 'Ready', 'Shipped', 'Delivered', 'Invoiced', 'completed'];
 
 function getStageIndex(order) {
-  if (order.financialStatus === 'Paid') return 7;
+  if (order.financialStatus === 'completed') return 7;
   if (order.commercialStatus === 'Invoiced' || order.financialStatus === 'Unpaid') return 6;
   if (order.operationalStatus === 'Delivered') return 5;
   if (order.operationalStatus === 'In Transit') return 4;
@@ -34,7 +34,7 @@ export default function SalesOrderWorkspace({ order }) {
   const cogs = (order.items || []).reduce((acc, item) => acc + ((parseFloat(item.unitCost) || 0) * (parseInt(item.quantity) || 0)), 0);
   const margin = order.subTotal > 0 ? order.subTotal - cogs : 0;
   const marginPercent = order.subTotal > 0 ? (margin / order.subTotal) * 100 : 0;
-  const paid = order.financialStatus === 'Paid' ? total : 0;
+  const paid = order.financialStatus === 'completed' ? total : 0;
   const outstanding = total - paid;
 
   return (
@@ -61,7 +61,7 @@ export default function SalesOrderWorkspace({ order }) {
              <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: order.operationalStatus === 'Awaiting Stock' ? '#fef3c7' : '#ede9fe', color: order.operationalStatus === 'Awaiting Stock' ? '#d97706' : '#7c3aed', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
                {order.operationalStatus || 'Awaiting'}
              </span>
-             <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: order.financialStatus === 'Paid' ? '#d1fae5' : '#fee2e2', color: order.financialStatus === 'Paid' ? '#059669' : '#b91c1c', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
+             <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: order.financialStatus === 'completed' ? '#d1fae5' : '#fee2e2', color: order.financialStatus === 'completed' ? '#059669' : '#b91c1c', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase' }}>
                {order.financialStatus || 'Unpaid'}
              </span>
           </div>

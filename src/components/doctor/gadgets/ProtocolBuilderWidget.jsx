@@ -1,17 +1,9 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { getCustomProtocolsByDoctor, createCustomProtocol, deleteCustomProtocol } from '../../../repositories/protocolRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { catalog } from '../../../data/v2/index.js';
 import { Beaker, Plus, Trash2, Save, FlaskConical } from '@/lib/icons';
-
-
-
-
-
+import notifier from '../../../services/NotificationService';
 
 export default function ProtocolBuilderWidget() {
   const { user } = useAuth();
@@ -26,16 +18,14 @@ export default function ProtocolBuilderWidget() {
     async function fetchProtocols() {
       if (!user?.uid) return;
       try {
-        const q = query(collection(db, 'custom_protocols'), where('doctorId', '==', user.uid));
-        const snap = await getDocs(q);
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const list = await getCustomProtocolsByDoctor(user.uid);
         setProtocols(list);
       } catch (err) {
         console.error(err);
       }
     }
     fetchProtocols();
-  }, [user, loading]); // reload when loading changes (after save)
+  }, [user, loading]);
 
   const toggleProduct = (prodId) => {
     setSelectedProducts(prev => 
@@ -51,12 +41,11 @@ export default function ProtocolBuilderWidget() {
         const p = catalog.find(x => x.id === id);
         return { id, name: p?.name || id };
       });
-      await addDoc(collection(db, 'custom_protocols'), {
+      await createCustomProtocol({
         doctorId: user.uid,
         name: protocolName,
         products: prods,
         instructions: instructions,
-        createdAt: serverTimestamp()
       });
       setIsCreating(false);
       setProtocolName('');
@@ -70,15 +59,16 @@ export default function ProtocolBuilderWidget() {
   };
 
   const handleDelete = async (id) => {
-    if(!window.confirm("Eliminar este protocolo?")) return;
-    setLoading(true);
-    try {
-      await deleteDoc(doc(db, 'custom_protocols', id));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    notifier.confirmCritical("Eliminar este protocolo?", async () => {
+      setLoading(true);
+      try {
+        await deleteCustomProtocol(id);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    });
   };
 
   return (

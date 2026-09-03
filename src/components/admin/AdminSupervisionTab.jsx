@@ -23,8 +23,10 @@ import { RefreshCw, Activity } from '@/lib/icons';
 import { MetricCard } from '../ui';
 import DataTable from '../ui/DataTable';
 import PageHeader from '../ui/PageHeader';
+import EmptyState from '../ui/EmptyState';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
-import StatusBadge from '../ui/StatusBadge';
+import AppActionGroup from '../ui/AppActionGroup';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -43,7 +45,7 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState([]); // string[]
   const [searchQuery, setSearchQuery] = useState('');
 
   // ── Load users for name resolution ─────────────────────────────────────────
@@ -116,37 +118,38 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
 
   const filtered = useMemo(() => {
     let res = relationships;
-    if (statusFilter) {
-      res = res.filter(r => r.status === statusFilter);
+    if (statusFilter.length > 0) {
+      res = res.filter(r => statusFilter.includes(r.status));
     }
     return res;
   }, [relationships, statusFilter]);
 
   const userName = (uid) => userMap[uid]?.displayName || uid;
 
-  // ── Search & Filters Integration ─────────────────────────────────────────────
-  const activeFilters = [];
-  if (statusFilter) {
-    activeFilters.push({
-      key: 'status',
-      label: 'Status',
-      value: statusFilter,
-      onRemove: () => setStatusFilter('')
-    });
-  }
+  const ALL_STATUSES = [
+    { label: 'Active',  value: 'active' },
+    { label: 'Pending', value: 'pending' },
+    { label: 'Paused',  value: 'paused' },
+    { label: 'Revoked', value: 'revoked' },
+  ];
+
+  const activeFilters = statusFilter.map(val => ({
+    key: `status-${val}`,
+    label: 'Status',
+    value: val,
+    onRemove: () => setStatusFilter(prev => prev.filter(v => v !== val))
+  }));
 
   const filterOptions = [
     {
       key: 'status',
-      label: 'Estado',
-      options: [
-        { label: 'Todos', value: '' },
-        { label: 'Active', value: 'active' },
-        { label: 'Pending', value: 'pending' },
-        { label: 'Paused', value: 'paused' },
-        { label: 'Revoked', value: 'revoked' }
-      ],
-      value: statusFilter,
+      label: 'Status',
+      multiSelect: true,
+      values: statusFilter,
+      options: ALL_STATUSES.map(s => ({
+        ...s,
+        count: relationships.filter(r => r.status === s.value).length || null,
+      })),
       onChange: setStatusFilter
     }
   ];
@@ -226,7 +229,7 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
     {
       key: 'status',
       header: 'Status',
-      render: (val, row) => <StatusBadge status={row.status} />
+      render: (val, row) => <StatusChip status={row.status} />
     },
     {
       key: 'initiatedByRole',
@@ -253,50 +256,34 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
     {
       key: 'actions',
       header: 'Actions',
+      align: 'right',
       render: (val, r) => {
         const isLoading = (k) => actionLoading === r.id + k;
+        
+        let actions = [];
+        if (r.status === 'pending') {
+          actions.push({ type: 'activate', onClick: () => handleAction(r.id, 'active') });
+        }
+        if (r.status === 'active') {
+          actions.push({ type: 'pause', onClick: () => handleAction(r.id, 'paused') });
+        }
+        if (r.status === 'paused') {
+          actions.push({ type: 'activate', onClick: () => handleAction(r.id, 'active') });
+        }
+        if (r.status !== 'revoked') {
+          actions.push({ 
+            type: 'revoke', 
+            onClick: () => {
+              notifier.confirmCritical('Revoke this relationship?', async () => {
+                handleAction(r.id, 'revoked');
+              });
+            }
+          });
+        }
+        
         return (
-          <div>
-            {r.status === 'pending' && (
-              <button
-                style={s.actionBtn('var(--color-success)')}
-                onClick={() => handleAction(r.id, 'active')}
-                disabled={isLoading('active')}
-              >
-                {isLoading('active') ? '…' : 'Activate'}
-              </button>
-            )}
-            {r.status === 'active' && (
-              <button
-                style={s.actionBtn('#6366f1')}
-                onClick={() => handleAction(r.id, 'paused')}
-                disabled={isLoading('paused')}
-              >
-                {isLoading('paused') ? '…' : 'Pause'}
-              </button>
-            )}
-            {r.status === 'paused' && (
-              <button
-                style={s.actionBtn('var(--color-success)')}
-                onClick={() => handleAction(r.id, 'active')}
-                disabled={isLoading('active')}
-              >
-                {isLoading('active') ? '…' : 'Reactivate'}
-              </button>
-            )}
-            {r.status !== 'revoked' && (
-              <button
-                style={s.actionBtn('var(--color-danger)')}
-                onClick={() => {
-                  notifier.confirmCritical('Revoke this relationship?', async () => {
-                    handleAction(r.id, 'revoked');
-                  });
-                }}
-                disabled={isLoading('revoked')}
-              >
-                {isLoading('revoked') ? '…' : 'Revoke'}
-              </button>
-            )}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={actions} maxVisible={3} />
           </div>
         );
       }
@@ -323,7 +310,7 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
         <GlobalSearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="Buscar por paciente, médico o notas..."
+          placeholder="Search by patient, physician or notes..."
           resultCount={filtered.length}
           namespace="admin-supervision"
           size="lg"
@@ -333,14 +320,14 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
       </div>
 
       {/* KPI Cards */}
-      <div style={s.kpiRow}>
+      <div className="kpi-scroll-row">
         <MetricCard
           title="Active"
           value={counts.active || 0}
           color="var(--color-success)"
           icon="✅"
           onClick={() => {
-            setStatusFilter('active');
+            setStatusFilter(['active']);
             onNavigateToClinicalAI?.({
               filter: 'active',
               label: 'Active Relationships',
@@ -356,7 +343,7 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
           color="#f59e0b"
           icon="⏳"
           onClick={() => {
-            setStatusFilter('pending');
+            setStatusFilter(['pending']);
             onNavigateToClinicalAI?.({
               filter: 'pending',
               label: 'Pending Relationships',
@@ -367,34 +354,18 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
           }}
         />
         <MetricCard
-          title="Paused"
-          value={counts.paused || 0}
-          color="#6366f1"
-          icon="⏸"
-          onClick={() => {
-            setStatusFilter('paused');
-            onNavigateToClinicalAI?.({
-              filter: 'paused',
-              label: 'Paused Relationships',
-              icon: '⏸',
-              count: counts.paused || 0,
-              note: 'Supervision temporarily suspended',
-            });
-          }}
-        />
-        <MetricCard
-          title="Revoked"
-          value={counts.revoked || 0}
+          title="Inactive"
+          value={(counts.paused || 0) + (counts.revoked || 0)}
           color="var(--color-danger)"
           icon="🚫"
           onClick={() => {
-            setStatusFilter('revoked');
+            setStatusFilter([]);
             onNavigateToClinicalAI?.({
-              filter: 'revoked',
-              label: 'Revoked Relationships',
+              filter: 'inactive',
+              label: 'Inactive Relationships',
               icon: '🚫',
-              count: counts.revoked || 0,
-              note: 'Relationships revoked by admin or physician',
+              count: (counts.paused || 0) + (counts.revoked || 0),
+              note: 'Relationships paused or revoked',
             });
           }}
         />
@@ -404,7 +375,7 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
           color="var(--color-text-tertiary)"
           icon="🔗"
           onClick={() => {
-            setStatusFilter('');
+            setStatusFilter([]);
             onNavigateToClinicalAI?.({
               filter: 'all',
               label: 'All Relationships',
@@ -441,11 +412,14 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
         </div>
       )}
 
-      {/* Table */}
       {loading ? (
         <div style={s.emptyState}>Loading relationships…</div>
       ) : filtered.length === 0 ? (
-        <div style={s.emptyState}>No relationships match the selected filter.</div>
+        <EmptyState
+          icon={Activity}
+          title="No Relationships"
+          subtitle="No relationships match the selected filter."
+        />
       ) : (
         <div className="gcp-table-container gcp-table-container--dark">
           <DataTable

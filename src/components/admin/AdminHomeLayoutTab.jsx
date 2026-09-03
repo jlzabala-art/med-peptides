@@ -1217,6 +1217,7 @@ export default function AdminHomeLayoutTab() {
   const [previewing, setPreviewing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [activeRoleTab, setActiveRoleTab] = useState('admin');
+  const [copyTargetRole, setCopyTargetRole] = useState('');
 
   // Working copy: draft ∥ layout from Firestore
   const working = draft ?? layout;
@@ -1260,14 +1261,16 @@ export default function AdminHomeLayoutTab() {
   };
 
   const handleCopyToOther = () => {
-    const targetRole = window.prompt(
-      `Copy ${ROLE_METADATA[activeRoleTab].label} layout to which role?\nAvailable: ${ALL_ROLES.filter((r) => r !== activeRoleTab).join(', ')}`
-    );
-    if (!targetRole || !ALL_ROLES.includes(targetRole)) return;
+    const targetRole = copyTargetRole;
+    if (!targetRole || !ALL_ROLES.includes(targetRole) || targetRole === activeRoleTab) {
+      toast.error('Select a valid target role (different from the current one) before copying.');
+      return;
+    }
     notifier.confirmCritical(`Overwrite ${targetRole} layout with ${activeRoleTab}'s layout?`, () => {
       setDraft((prev) => ({ ...(prev ?? layout), [targetRole]: working[activeRoleTab] }));
       setSaved(false);
       setError(null);
+      setCopyTargetRole('');
     });
   };
 

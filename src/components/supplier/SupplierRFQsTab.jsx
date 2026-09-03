@@ -1,9 +1,15 @@
 "use client";
+/**
+ * SupplierRFQsTab.jsx
+ *
+ * Vista de RFQs para el panel Supplier.
+ * Sin imports directos de firebase/firestore — usa supplierRepository vía React Query.
+ */
 
-import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getRFQsBySupplier } from '@/repositories/supplierRepository';
+import { queryKeys } from '@/hooks/data/queryKeys';
 import { useAuth } from '../../context/AuthContext';
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import Clock from "lucide-react/dist/esm/icons/clock";
@@ -12,116 +18,157 @@ import XCircle from "lucide-react/dist/esm/icons/x-circle";
 import format from 'date-fns/format';
 import SupplierRFQModal from './SupplierRFQModal';
 import DataTable from '../ui/DataTable';
+import StatusBadge from '../ui/StatusBadge';
+import EmptyState from '../ui/EmptyState';
 
+// ── Mapa de estados → StatusBadge ─────────────────────────────────────────────
+const RFQ_STATUS_MAP = {
+  pending_supplier: 'pending',
+  supplier_quoted:  'po_created',
+  accepted:         'active',
+  rejected:         'rejected',
+};
+
+const RFQ_STATUS_LABEL = {
+  pending_supplier: 'Necesita Acción',
+  supplier_quoted:  'Cotizado · Esperando Admin',
+  accepted:         'Aceptado (PO Creada)',
+  rejected:         'Rechazado',
+};
+
+// ── Columnas ──────────────────────────────────────────────────────────────────
+const columns = [
+  {
+    key: 'prfqId',
+    header: 'ID Solicitud',
+    width: '18%',
+    render: (row) => (
+      <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontFamily: 'monospace', fontSize: '0.82rem' }}>
+        {row.prfqId || row.id?.slice(0, 10)}
+      </span>
+    ),
+  },
+  {
+    key: 'createdAt',
+    header: 'Fecha',
+    width: '16%',
+    render: (row) =>
+      row.createdAt?.seconds
+        ? format(new Date(row.createdAt.seconds * 1000), 'dd MMM yyyy')
+        : '—',
+  },
+  {
+    key: 'items',
+    header: 'Ítems',
+    width: '12%',
+    render: (row) => `${row.items?.reduce((s, i) => s + (i.qty ?? 0), 0) ?? 0} uds`,
+  },
+  {
+    key: 'totals',
+    header: 'Valor Propuesto',
+    width: '18%',
+    render: (row) => (
+      <span style={{ fontWeight: 700 }}>
+        {row.totals?.subtotal != null ? `$${row.totals.subtotal.toFixed(2)}` : '—'}
+      </span>
+    ),
+  },
+  {
+    key: 'status',
+    header: 'Estado',
+    width: '20%',
+    render: (row) => (
+      <StatusBadge
+        status={RFQ_STATUS_MAP[row.status] ?? 'inactive'}
+        label={RFQ_STATUS_LABEL[row.status] ?? row.status}
+      />
+    ),
+  },
+  {
+    key: '_actions',
+    header: 'Acción',
+    width: '16%',
+    align: 'right',
+    render: (row, _, { onOpen }) => (
+      <button
+        onClick={(e) => { e.stopPropagation(); onOpen(row); }}
+        style={{
+          padding: '0.35rem 0.85rem',
+          background: row.status === 'pending_supplier' ? 'var(--color-primary)' : 'var(--color-bg-app)',
+          color: row.status === 'pending_supplier' ? 'white' : 'var(--color-text-secondary)',
+          border: '1px solid var(--border)',
+          borderRadius: '6px',
+          fontWeight: 600,
+          fontSize: '0.78rem',
+          cursor: 'pointer',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {row.status === 'pending_supplier' ? 'Revisar y Responder' : 'Ver Detalles'}
+      </button>
+    ),
+  },
+];
+
+// ── Componente ────────────────────────────────────────────────────────────────
 export default function SupplierRFQsTab() {
   const { userProfile } = useAuth();
-  const [rfqs, setRfqs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const supplierId = userProfile?.uid;
+  const queryClient = useQueryClient();
   const [selectedRfq, setSelectedRfq] = useState(null);
 
-  const fetchRfqs = async () => {
-    if (!userProfile?.uid) return;
-    setLoading(true);
-    try {
-      const q = query(
-        collection(db, 'purchase_rfqs'),
-        where('supplierId', '==', userProfile.uid),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(q);
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRfqs(data);
-    } catch (err) {
-      console.error('Error fetching supplier RFQs:', err);
-    } finally {
-      setLoading(false);
-    }
+  const { data: rfqs = [], isLoading } = useQuery({
+    queryKey: queryKeys.rfqs.bySupplier(supplierId, {}),
+    queryFn: () => getRFQsBySupplier(supplierId),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!supplierId,
+  });
+
+  const handleSuccess = () => {
+    setSelectedRfq(null);
+    queryClient.invalidateQueries({ queryKey: queryKeys.rfqs.bySupplier(supplierId, {}) });
   };
 
-  useEffect(() => {
-    fetchRfqs();
-  }, [userProfile?.uid]);
-
-  const getStatusBadge = (status) => {
-    switch(status) {
-      case 'pending_supplier':
-        return <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Clock size={12}/> Needs Action</span>;
-      case 'supplier_quoted':
-        return <span style={{ background: '#e0e7ff', color: '#3730a3', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Clock size={12}/> Quoted, Waiting Admin</span>;
-      case 'accepted':
-        return <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={12}/> Accepted (PO Created)</span>;
-      case 'rejected':
-        return <span style={{ background: '#fee2e2', color: '#991b1b', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><XCircle size={12}/> Rejected</span>;
-      default:
-        return <span style={{ background: '#f1f5f9', color: '#475569', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>{status}</span>;
-    }
-  };
-
-  const columns = [
-    {
-      key: 'prfqId',
-      header: 'Request ID',
-      render: (val) => <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{val}</span>,
-    },
-    {
-      key: 'createdAt',
-      header: 'Date',
-      render: (val) => val?.seconds ? format(new Date(val.seconds * 1000), 'MMM d, yyyy') : 'N/A',
-    },
-    {
-      key: 'items',
-      header: 'Items',
-      render: (val) => `${val?.reduce((sum, item) => sum + item.qty, 0) ?? 0} items`,
-    },
-    {
-      key: 'totals',
-      header: 'Value (Admin Proposed)',
-      render: (val) => <span style={{ fontWeight: 600 }}>${val?.subtotal?.toFixed(2)}</span>,
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (val) => getStatusBadge(val),
-    },
-    {
-      key: '_actions',
-      header: 'Action',
-      render: (_, row) => (
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={(e) => { e.stopPropagation(); setSelectedRfq(row); }}
-        >
-          {row.status === 'pending_supplier' ? 'Review & Respond' : 'View Details'}
-        </button>
-      ),
-    },
-  ];
+  // Columnas con contexto de onOpen inyectado
+  const columnsWithCtx = columns.map((col) =>
+    col.key === '_actions'
+      ? { ...col, render: (row) => col.render(row, null, { onOpen: setSelectedRfq }) }
+      : col
+  );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Quotation Requests</h1>
-        <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)' }}>Review and respond to Admin purchase requests.</p>
+        <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>
+          Solicitudes de Cotización
+        </h1>
+        <p style={{ margin: '4px 0 0', color: 'var(--color-text-secondary)', fontSize: '0.88rem' }}>
+          Revisa y responde las solicitudes de compra enviadas por el administrador.
+        </p>
       </div>
 
       <DataTable
-        columns={columns}
+        columns={columnsWithCtx}
         data={rfqs}
         keyField="id"
-        isLoading={loading}
+        loading={isLoading}
         onRowClick={(row) => setSelectedRfq(row)}
-        emptyTitle="No quotation requests found"
-        emptyDescription="You have no pending requests from Admin."
+        globalSearch={true}
+        searchPlaceholder="Buscar por ID o estado…"
+        emptyState={
+          <EmptyState
+            icon={FileText}
+            title="Sin solicitudes de cotización"
+            subtitle="No tienes solicitudes pendientes del administrador."
+          />
+        }
       />
 
       {selectedRfq && (
         <SupplierRFQModal
           rfq={selectedRfq}
           onClose={() => setSelectedRfq(null)}
-          onSuccess={() => {
-            setSelectedRfq(null);
-            fetchRfqs();
-          }}
+          onSuccess={handleSuccess}
         />
       )}
     </div>

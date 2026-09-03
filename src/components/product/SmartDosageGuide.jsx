@@ -252,10 +252,10 @@ export default function SmartDosageGuide({ product, selectedVariant }) {
             overflow: 'hidden',
           }}>
             {[
-              { label: 'Half-life', value: scientificPK?.halfLife || pk.half_life, scientific: !!scientificPK },
+              { label: 'Half-life', value: scientificPK?.halfLife || pk?.half_life, scientific: !!scientificPK },
               { label: 'Steady State', value: scientificPK?.steadyState || 'N/A', scientific: !!scientificPK },
-              pk.route && { label: 'Route of Administration', value: Array.isArray(pk.route) ? pk.route.join(', ') : pk.route },
-              pk.bioavailability && { label: 'Bioavailability', value: pk.bioavailability },
+              pk?.route && { label: 'Route of Administration', value: Array.isArray(pk?.route) ? pk?.route.join(', ') : pk?.route },
+              pk?.bioavailability && { label: 'Bioavailability', value: pk?.bioavailability },
             ].filter(Boolean).map((row, i, arr) => (
               <div key={i} style={{
                 display: 'flex',

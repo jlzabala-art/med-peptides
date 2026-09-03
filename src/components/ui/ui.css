@@ -741,30 +741,23 @@
    13. MOBILE UX — TOUCH TARGETS & LAYOUT IMPROVEMENTS
    ═══════════════════════════════════════════════════════════════ */
 
-/* KPI Cards: 2-column grid on mobile, single column on very small screens */
+/* KPI Cards: 2-column grid on mobile (≤768px), 4-column grid on desktop (≥768px) */
 .kpi-scroll-row {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
 }
 .kpi-scroll-row > * {
-  scroll-snap-align: start;
-  flex: 0 0 calc(50% - 0.5rem);
-  min-width: 160px;
+  min-width: 0;
 }
 @media (min-width: 768px) {
   .kpi-scroll-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
     overflow-x: visible;
-    scroll-snap-type: none;
-  }
-  .kpi-scroll-row > * {
-    flex: unset;
-    min-width: unset;
   }
 }
 

@@ -124,7 +124,7 @@ export default function AlgoliaProductPicker({ onProductSelect }) {
             transition: 'all 0.2s'
           }}
         >
-          <Search size={14} /> Smart Search (Algolia)
+          <Search size={14} /> Smart Search
         </button>
         <button
           onClick={() => { setSearchMode('id'); setQueryTerm(''); setResults([]); setIsOpen(false); }}

@@ -1,18 +1,28 @@
 "use client";
 
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar } from '@/lib/icons';
-import React, { useState, useMemo, useRef } from 'react';
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Inbox, ArrowUp, ArrowDown, Search, X, Calendar, Zap } from '@/lib/icons';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { DataTableSearchEngine } from '@/utils/DataTableSearchEngine';
+import { AlertTriangle } from 'lucide-react';
 
 import Skeleton from './Skeleton';
 import EmptyState from './EmptyState';
+import MobileRecordCard from './MobileRecordCard';
+import MobileContextualActionBar from './MobileContextualActionBar';
+import MobileCardSkeleton from './MobileCardSkeleton';
+import usePullToRefresh from '../../hooks/ui/usePullToRefresh';
+import SwipeableCard from './SwipeableCard';
+import DataTableContextualHeader from './DataTableContextualHeader';
+import StickyBulkActionBar from './StickyBulkActionBar';
+import { useRoleAccess } from '@/hooks/useRoleAccess';
 
 export default function DataTable({
   columns,
   data = [],
   keyField = 'id',
   isLoading = false,
+  error = null,
   // Selection
   selectedIds = [],
   indeterminateIds = [], // Array of IDs that should be shown as indeterminate
@@ -65,17 +75,126 @@ export default function DataTable({
   onColumnToggle, // (columnKey, isVisible) => void
   tableId,
   getRowProps, // (row) => ({ style?: {}, className?: string })
+  minHeight, // custom minHeight override
+  pagination = true,
+  hidePagination = false,
+
+  // Ask Atlas Action
+  enableAskAtlas = true,
+  askAtlasTopic = 'record',
+  // Mobile View
+  mobileView = 'cards',  // 'cards' | 'scroll'
+  mobileCardComponent = null, // Optional custom card component; falls back to MobileRecordCard
+  mobileCardProps = {},       // Extra props forwarded to every mobile card instance
+  bulkActions = [],           // [{label, icon?, onClick, variant?}] — reused for mobile bulk sheet
+  onRefresh = null,           // async fn → triggers pull-to-refresh gesture
+  swipeActions = null,        // fn(row) → { leftAction?, rightActions[] } | null
+  forceMobileSelectionMode,   // boolean flag to force selection mode externally
+  onForceMobileSelectionModeChange, // callback to update external state
 }) {
+  const { is, can } = useRoleAccess();
+  // ── Mobile detection ──────────────────────────────────────────────────────
+  // Always start as false (SSR safe — avoids hydration mismatch).
+  // Immediately set to real value after mount via useEffect.
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  useEffect(() => {
+    // Set immediately on mount (runs client-side only)
+    setIsMobileViewport(window.innerWidth <= 768);
+    const onResize = () => setIsMobileViewport(window.innerWidth <= 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  // Render card list when on mobile AND caller hasn't opted out via mobileView='scroll'
+  const showMobileCards = isMobileViewport && mobileView !== 'scroll';
+
   const [expandedId, setExpandedId] = useState(null);
   const [hoveredRowId, setHoveredRowId] = useState(null);
+  const [focusedRowIndex, setFocusedRowIndex] = useState(-1);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [showColMenu, setShowColMenu] = useState(false);
 
+  // Mobile selection mode (long-press to enter)
+  const [internalMobileSelectionMode, setInternalMobileSelectionMode] = useState(false);
+  const mobileSelectionMode = forceMobileSelectionMode !== undefined ? forceMobileSelectionMode : internalMobileSelectionMode;
+  
+  const setMobileSelectionMode = (value) => {
+    if (onForceMobileSelectionModeChange) onForceMobileSelectionModeChange(value);
+    setInternalMobileSelectionMode(value);
+  };
+
+  const [mobileSelectedIds, setMobileSelectedIds] = useState([]);
+
+  const handleMobileLongPress = (row, rowKey) => {
+    setMobileSelectionMode(true);
+    setMobileSelectedIds([rowKey]);
+    // Also notify parent if it cares about selection
+    onSelectionChange?.([rowKey]);
+  };
+
+  const handleMobileToggleSelect = (rowKey) => {
+    setMobileSelectedIds((prev) => {
+      const next = prev.includes(rowKey)
+        ? prev.filter(id => id !== rowKey)
+        : [...prev, rowKey];
+      
+      // Schedule side-effects outside of the render phase
+      setTimeout(() => {
+        onSelectionChange?.(next);
+        if (next.length === 0) {
+          setMobileSelectionMode(false);
+        } else if (next.length > 0 && !mobileSelectionMode) {
+          setMobileSelectionMode(true);
+        }
+      }, 0);
+      
+      return next;
+    });
+  };
+
+  const exitMobileSelection = () => {
+    setMobileSelectionMode(false);
+    setMobileSelectedIds([]);
+    onSelectionChange?.([]);
+  };
+
+  // Sync external selectionIds into mobileSelectedIds if DataModule controls them
+  useEffect(() => {
+    if (forceMobileSelectionMode !== undefined && selectedIds) {
+      setMobileSelectedIds(selectedIds);
+      if (selectedIds.length === 0 && mobileSelectionMode) {
+        setMobileSelectionMode(false);
+      } else if (selectedIds.length > 0 && !mobileSelectionMode) {
+        setMobileSelectionMode(true);
+      }
+    }
+  }, [selectedIds, forceMobileSelectionMode, mobileSelectionMode]);
+
+
   const [touchTimer, setTouchTimer] = useState(null);
   const parentRef = useRef(null);
+  const mobileContainerRef = useRef(null);
+
+  // Pull-to-Refresh — only active on mobile
+  const { isPulling, pullProgress, isRefreshing } = usePullToRefresh(
+    mobileContainerRef,
+    onRefresh,
+    72
+  );
 
   const [internalPage, setInternalPage] = useState(1);
   const [internalRowsPerPage, setInternalRowsPerPage] = useState(25);
+
+  // Reset to page 1 whenever the data set changes (e.g. filter applied on server).
+  // Without this, navigating from page 2 of 46 results to a 21-result filtered set
+  // keeps internalPage=2 and slice(20,40) returns 0-1 rows → blank table.
+  const prevDataLenRef = React.useRef(data?.length ?? 0);
+  React.useEffect(() => {
+    const newLen = data?.length ?? 0;
+    if (newLen !== prevDataLenRef.current) {
+      setInternalPage(1);
+      prevDataLenRef.current = newLen;
+    }
+  }, [data]);
   
   // Search state
   const [filteredData, setFilteredData] = useState(data || []);
@@ -93,27 +212,35 @@ export default function DataTable({
 
     setIsSearching(true);
     
-    const result = DataTableSearchEngine.execute(
-      data || [], 
-      searchQuery, 
-      columns, 
-      searchStrategy, 
-      searchConfig
-    );
-    
-    if (result instanceof Promise) {
-      result.then((res) => {
+    // Use a short timeout to allow the browser to paint the Skeleton state
+    const timer = setTimeout(() => {
+      const result = DataTableSearchEngine.execute(
+        data || [], 
+        searchQuery, 
+        columns, 
+        searchStrategy, 
+        searchConfig
+      );
+      
+      if (result instanceof Promise) {
+        result.then((res) => {
+          if (isMounted) {
+            setFilteredData(res);
+            setIsSearching(false);
+          }
+        });
+      } else {
         if (isMounted) {
-          setFilteredData(res);
+          setFilteredData(result);
           setIsSearching(false);
         }
-      });
-    } else {
-      setFilteredData(result);
-      setIsSearching(false);
-    }
+      }
+    }, 50);
 
-    return () => { isMounted = false; };
+    return () => { 
+      isMounted = false; 
+      clearTimeout(timer);
+    };
   }, [data, searchQuery, columns, searchStrategy, JSON.stringify(searchConfig)]);
 
   const activePage = onPageChange ? currentPage : internalPage;
@@ -133,11 +260,23 @@ export default function DataTable({
   };
 
 
-  // Use visibleColumns prop if provided, otherwise assume all visible
+  // Use visibleColumns prop if provided, and apply automatic role masking (Rule #13)
   const activeColumns = useMemo(() => {
-    if (!visibleColumns) return columns;
-    return columns.filter((c) => visibleColumns.includes(c.key || c.header));
-  }, [columns, visibleColumns]);
+    if (!columns || !Array.isArray(columns)) return [];
+    let cols = columns;
+    if (visibleColumns && Array.isArray(visibleColumns)) {
+      cols = cols.filter((c) => visibleColumns.includes(c.key || c.header || c.label));
+    }
+    // Automated Role Masking Engine
+    return cols.filter((c) => {
+      if (c.requiredPermission && !can(c.requiredPermission)) return false;
+      if (c.minRole === 'admin' && !is('admin')) return false;
+      if (c.hiddenRoles && Array.isArray(c.hiddenRoles)) {
+        if (c.hiddenRoles.some(r => is(r)) && !is('admin')) return false;
+      }
+      return true;
+    });
+  }, [columns, visibleColumns, is, can]);
 
   const sortedData = useMemo(() => {
     const safeData = filteredData || [];
@@ -171,15 +310,41 @@ export default function DataTable({
       return 0;
     });
     return sortableItems;
-  }, [data, sortConfig, columns]);
+  }, [filteredData, sortConfig, columns]);
 
   const paginatedData = useMemo(() => {
-    if (onPageChange || onRowsPerPageChange) {
-      return sortedData; // Controlled mode
-    }
-    const start = (activePage - 1) * activeRowsPerPage;
-    return sortedData.slice(start, start + activeRowsPerPage);
-  }, [sortedData, activePage, activeRowsPerPage, onPageChange, onRowsPerPageChange]);
+    return !onPageChange
+      ? sortedData.slice((internalPage - 1) * internalRowsPerPage, internalPage * internalRowsPerPage)
+      : sortedData;
+  }, [sortedData, onPageChange, internalPage, internalRowsPerPage]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+      if (!paginatedData || paginatedData.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedRowIndex(prev => Math.min(prev + 1, paginatedData.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedRowIndex(prev => Math.max(prev - 1, 0));
+      } else if (e.key === 'Enter' && focusedRowIndex >= 0) {
+        e.preventDefault();
+        const row = paginatedData[focusedRowIndex];
+        if (onRowClick) {
+          onRowClick(row);
+        } else if (expandableRender) {
+          const rowKey = row[keyField] || focusedRowIndex;
+          setExpandedId(expandedId === rowKey ? null : rowKey);
+        }
+      } else if (e.key === 'Escape') {
+        setFocusedRowIndex(-1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [paginatedData, focusedRowIndex, onRowClick, expandableRender, expandedId, keyField]);
 
   const rowVirtualizer = useVirtualizer({
     count: paginatedData.length,
@@ -235,6 +400,208 @@ export default function DataTable({
   const someSelected =
     (selectedIds.length > 0 && selectedIds.length < sortedData.length) ||
     indeterminateIds.length > 0;
+
+  /* ── MOBILE CARD LIST ─────────────────────────────────────────────────────
+     Renders when viewport ≤ 768px and mobileView !== 'scroll'.
+     Replaces the desktop table entirely — same data, different presentation.
+  ─────────────────────────────────────────────────────────────────────────── */
+  if (showMobileCards) {
+    const totalInternalPages = Math.ceil(filteredData.length / internalRowsPerPage);
+
+    // Pull-to-refresh arc progress (0–56.5 = full circle circumference for r=9)
+    const circumference = 56.5;
+    const dashOffset = circumference - pullProgress * circumference;
+
+    return (
+      <div
+        ref={mobileContainerRef}
+        className="ptr-container"
+        style={{ display: 'flex', flexDirection: 'column', position: 'relative', overflowY: 'auto', minHeight: 0, flex: 1 }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {(isPulling || isRefreshing) && (
+          <div className={`ptr-indicator ptr-indicator--visible${isRefreshing ? ' ptr-indicator--refreshing' : ''}`}>
+            {isRefreshing ? (
+              <div className="ptr-spinner ptr-spinner--spin" />
+            ) : (
+              <div className="ptr-arc">
+                <svg viewBox="0 0 20 20" width="20" height="20">
+                  <circle className="ptr-arc-track" cx="10" cy="10" r="9" />
+                  <circle
+                    className="ptr-arc-fill"
+                    cx="10" cy="10" r="9"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={dashOffset}
+                  />
+                </svg>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Loading skeleton */}
+        {(isLoading || isSearching) && (
+          <MobileCardSkeleton
+            count={5}
+            variant={mobileCardComponent && mobileCardComponent.displayName === 'MobileProtocolCard' ? 'protocol' : 'default'}
+          />
+        )}
+
+
+        {/* Empty state */}
+        {!isLoading && !isSearching && paginatedData.length === 0 && (
+          <EmptyState
+            title={emptyTitle}
+            description={emptyDescription || emptyMessage}
+            actionLabel={emptyActionLabel}
+            onAction={onEmptyAction}
+          />
+        )}
+
+        {/* Mobile Contextual Selection Header */}
+        {mobileSelectionMode && (
+          <div className="mobile-contextual-selection-header" style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+            background: 'var(--color-surface, #ffffff)',
+            borderBottom: '1px solid var(--color-border)',
+            padding: '0.75rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+            marginBottom: '0.5rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <button 
+                onClick={exitMobileSelection}
+                aria-label="Cancel selection"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '4px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--color-text)'
+                }}
+              >
+                <X size={20} />
+              </button>
+              <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>
+                {mobileSelectedIds.length} selected
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                const visibleIds = filteredData.map(r => r[keyField]);
+                onSelectionChange?.(visibleIds);
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--color-primary, #003666)',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: 'pointer'
+              }}
+            >
+              Select all
+            </button>
+          </div>
+        )}
+
+        {/* Card list */}
+        {!isLoading && !isSearching && paginatedData.length > 0 && (
+          <div className="data-table-mobile-cards">
+            {paginatedData.map((row, idx) => {
+              const rowKey = row[keyField] ?? idx;
+              const cardReactKey = `${rowKey}_${idx}`;
+              const CardComponent = mobileCardComponent || MobileRecordCard;
+              const isMobileSelected = mobileSelectedIds.includes(rowKey);
+              const cardEl = (
+                <CardComponent
+                  key={cardReactKey}
+                  row={row}
+                  columns={activeColumns}
+                  onRowClick={onRowClick}
+                  expandableRender={expandableRender}
+                  isSelected={isMobileSelected}
+                  onSelectionChange={onSelectionChange}
+                  selectionMode={mobileSelectionMode}
+                  onToggleSelect={() => handleMobileToggleSelect(rowKey)}
+                  onLongPress={() => handleMobileLongPress(row, rowKey)}
+                  {...mobileCardProps}
+                />
+              );
+              if (swipeActions && !mobileSelectionMode) {
+                const actions = swipeActions(row) || {};
+                return (
+                  <SwipeableCard
+                    key={cardReactKey}
+                    leftAction={actions.leftAction}
+                    rightActions={actions.rightActions || []}
+                  >
+                    {cardEl}
+                  </SwipeableCard>
+                );
+              }
+              return React.cloneElement(cardEl, { key: cardReactKey });
+            })}
+          </div>
+        )}
+
+        {/* Mobile selection bar — Portal-rendered floating bottom bar */}
+        <MobileContextualActionBar
+          count={mobileSelectedIds.length}
+          bulkActions={bulkActions.map(a => ({
+            ...a,
+            onClick: () => {
+              // Pass selected rows to bulk action
+              const selectedRows = paginatedData.filter(r =>
+                mobileSelectedIds.includes(r[keyField] ?? paginatedData.indexOf(r))
+              );
+              a.onClick?.(selectedRows);
+              exitMobileSelection();
+            },
+          }))}
+        />
+
+        {/* Pagination — simplified for mobile */}
+        {!onPageChange && filteredData.length > internalRowsPerPage && (
+          <div className="ui-pagination-footer" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0.75rem 1rem',
+            borderTop: '1px solid var(--color-border)',
+            gap: '0.5rem',
+          }}>
+            <button
+              onClick={() => setInternalPage(p => Math.max(1, p - 1))}
+              disabled={internalPage <= 1}
+              style={{ minWidth: 44, minHeight: 44, border: '1px solid var(--color-border)', borderRadius: '8px', background: 'transparent', cursor: internalPage <= 1 ? 'not-allowed' : 'pointer', opacity: internalPage <= 1 ? 0.4 : 1 }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+              {internalPage} / {totalInternalPages}
+              <span style={{ marginLeft: '0.5rem', opacity: 0.6 }}>({filteredData.length} total)</span>
+            </span>
+            <button
+              onClick={() => setInternalPage(p => Math.min(totalInternalPages, p + 1))}
+              disabled={internalPage >= totalInternalPages}
+              style={{ minWidth: 44, minHeight: 44, border: '1px solid var(--color-border)', borderRadius: '8px', background: 'transparent', cursor: internalPage >= totalInternalPages ? 'not-allowed' : 'pointer', opacity: internalPage >= totalInternalPages ? 0.4 : 1 }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -405,7 +772,7 @@ export default function DataTable({
                         }}
                       >
                         {columns.map((c, i) => {
-                          const colKey = c.key || c.header;
+                          const colKey = c.key || c.header || c.label;
                           const isVisible = visibleColumns ? visibleColumns.includes(colKey) : true;
                           return (
                             <label
@@ -425,7 +792,7 @@ export default function DataTable({
                                   onColumnToggle && onColumnToggle(colKey, e.target.checked)
                                 }
                               />
-                              {c.header || colKey}
+                              {c.header || c.label || colKey}
                             </label>
                           );
                         })}
@@ -482,22 +849,43 @@ export default function DataTable({
           )}
         </div>
       )}
+      {/* Desktop Contextual Selection Header */}
+      {(someSelected || allSelected) && (bulkActions.length > 0 || renderBatchActions) && (
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 15,
+          backgroundColor: '#f0fdf4',
+          borderBottom: '2px solid #0f766e',
+          padding: '0.25rem 0.75rem',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.04)'
+        }}>
+          <DataTableContextualHeader
+            selectedCount={selectedIds.length}
+            bulkActions={bulkActions}
+            renderBatchActions={renderBatchActions}
+            selectedIds={selectedIds}
+            onClearSelection={() => onSelectionChange?.([])}
+          />
+        </div>
+      )}
+
       <div
         ref={virtualize ? parentRef : null}
-        className={`gcp-table-container ui-table-container content-visibility-auto rsp-table-wrap${virtualize ? '' : ' responsive-stack'}`}
+        className={`gcp-table-container ui-table-container content-visibility-auto${!virtualize && mobileView === 'stack' ? ' rsp-table-wrap responsive-stack' : ''}`}
         style={{
           overflowX: 'auto',
           overflowY: 'auto',
           width: '100%',
-          minHeight: '350px',
-          maxHeight: virtualize ? '600px' : 'calc(100vh - 200px)',
+          minHeight: minHeight !== undefined ? minHeight : (isLoading ? '350px' : (!data || data.length <= 8 ? 'auto' : '350px')),
+          maxHeight: virtualize ? 'calc(100vh - 220px)' : 'calc(100vh - 200px)',
           backgroundColor: 'var(--color-bg-app)',
           WebkitOverflowScrolling: 'touch',
         }}
       >
         <table
           className="gcp-table ui-table"
-          style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}
+          style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}
         >
           <thead
             style={{
@@ -512,7 +900,7 @@ export default function DataTable({
               style={{
                 backgroundColor:
                   someSelected || allSelected
-                    ? 'rgba(var(--color-primary-rgb), 0.05)'
+                    ? 'rgba(15, 118, 110, 0.05)'
                     : 'transparent',
               }}
             >
@@ -526,6 +914,7 @@ export default function DataTable({
                     borderBottom: '1px solid var(--color-border)',
                     textAlign: 'center',
                     verticalAlign: 'middle',
+                    backgroundColor: 'var(--color-bg-subtle)',
                   }}
                 >
                   <input
@@ -539,95 +928,97 @@ export default function DataTable({
                   />
                 </th>
               )}
-              {/* We no longer render batch actions in the table header. It's a floating bar now. */}
-              {!(someSelected || allSelected) || !renderBatchActions ? (
-                <React.Fragment>
-                  {expandableRender && (
-                    <th
+
+              {expandableRender && (
+                <th
+                  style={{
+                    width: '48px',
+                    minWidth: '48px',
+                    whiteSpace: 'nowrap',
+                    padding: '0',
+                    borderBottom: '1px solid var(--color-border)',
+                    textAlign: 'center',
+                  }}
+                ></th>
+              )}
+
+              {activeColumns.map((col, idx) => {
+                const isSortable = col.key && col.sortable !== false;
+                const effectiveAlign = idx === 0 ? 'left' : idx === activeColumns.length - 1 ? 'right' : 'center';
+                return (
+                  <th
+                    key={col.key || idx}
+                    className={col.hideOnMobile ? 'hide-on-mobile' : ''}
+                    onClick={() => isSortable && requestSort(col.key)}
+                    style={{
+                      height: '36px',
+                      padding: '0 16px',
+                      fontSize: 'clamp(0.6rem, 0.8vw, 0.75rem)',
+                      fontWeight: 600,
+                      color:
+                        sortConfig.key === col.key
+                          ? 'var(--color-primary)'
+                          : 'var(--text-muted)',
+                      textAlign: effectiveAlign,
+                      width: col.width || 'auto',
+                      borderBottom: '1px solid var(--color-border)',
+                      cursor: isSortable ? 'pointer' : 'default',
+                      userSelect: 'none',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      wordBreak: 'normal',
+                      lineHeight: '1.2',
+                      position:
+                        col.key === 'name' ||
+                        col.header === 'Product Name' ||
+                        col.label === 'Product Name'
+                          ? 'sticky'
+                          : 'static',
+                      left:
+                        col.key === 'name' ||
+                        col.header === 'Product Name' ||
+                        col.label === 'Product Name'
+                          ? onSelectionChange
+                            ? '48px'
+                            : '0'
+                          : 'auto',
+                      backgroundColor: 'var(--color-bg-subtle)',
+                      zIndex:
+                        col.key === 'name' ||
+                        col.header === 'Product Name' ||
+                        col.label === 'Product Name'
+                          ? 2
+                          : 0,
+                    }}
+                  >
+                    <div
                       style={{
-                        width: '48px',
-                        minWidth: '48px',
-                        whiteSpace: 'nowrap',
-                        padding: '0',
-                        borderBottom: '1px solid var(--color-border)',
-                        textAlign: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent:
+                          effectiveAlign === 'right'
+                            ? 'flex-end'
+                            : effectiveAlign === 'center'
+                              ? 'center'
+                              : 'flex-start',
+                        gap: '4px',
                       }}
-                    ></th>
-                  )}
-                  {activeColumns.map((col, idx) => {
-                    const isSortable = col.key && col.sortable !== false;
-                    return (
-                      <th
-                        key={col.key || idx}
-                        className={col.hideOnMobile ? 'hide-on-mobile' : ''}
-                        onClick={() => isSortable && requestSort(col.key)}
-                        style={{
-                          height: '36px',
-                          padding: '0 16px',
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          color:
-                            sortConfig.key === col.key
-                              ? 'var(--color-primary)'
-                              : 'var(--text-muted)',
-                          textAlign: col.align || 'left',
-                          width: col.width || 'auto',
-                          borderBottom: '1px solid var(--color-border)',
-                          cursor: isSortable ? 'pointer' : 'default',
-                          userSelect: 'none',
-                          whiteSpace: 'nowrap',
-                          position:
-                            col.key === 'name' ||
-                            col.header === 'Product Name' ||
-                            col.label === 'Product Name'
-                              ? 'sticky'
-                              : 'static',
-                          left:
-                            col.key === 'name' ||
-                            col.header === 'Product Name' ||
-                            col.label === 'Product Name'
-                              ? onSelectionChange
-                                ? '48px'
-                                : '0'
-                              : 'auto',
-                          backgroundColor: 'var(--color-bg-subtle)',
-                          zIndex:
-                            col.key === 'name' ||
-                            col.header === 'Product Name' ||
-                            col.label === 'Product Name'
-                              ? 2
-                              : 0,
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent:
-                              col.align === 'right'
-                                ? 'flex-end'
-                                : col.align === 'center'
-                                  ? 'center'
-                                  : 'flex-start',
-                            gap: '4px',
-                          }}
-                        >
-                          {col.header}
-                          {isSortable && sortConfig.key === col.key && (
-                            <span style={{ display: 'flex', color: 'var(--color-primary)' }}>
-                              {sortConfig.direction === 'asc' ? (
-                                <ArrowUp size={14} />
-                              ) : (
-                                <ArrowDown size={14} />
-                              )}
-                            </span>
+                    >
+                      {col.header || col.label}
+                      {isSortable && sortConfig.key === col.key && (
+                        <span style={{ display: 'flex', color: 'var(--color-primary)' }}>
+                          {sortConfig.direction === 'asc' ? (
+                            <ArrowUp size={14} />
+                          ) : (
+                            <ArrowDown size={14} />
                           )}
-                        </div>
-                      </th>
-                    );
-                  })}
-                </React.Fragment>
-              ) : null}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody
@@ -663,6 +1054,22 @@ export default function DataTable({
                   ))}
                 </tr>
               ))
+            ) : error ? (
+              <tr>
+                <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)}>
+                    <EmptyState
+                      icon={AlertTriangle}
+                      title="Data Error"
+                      subtitle={`System error: ${error}. Please try clearing filters.`}
+                      action={{
+                        label: 'Clear Filters',
+                        onClick: () => {
+                          if (onSearchChange) onSearchChange('');
+                        }
+                      }}
+                    />
+                </td>
+              </tr>
             ) : !filteredData || filteredData.length === 0 ? (
               <tr>
                 <td
@@ -682,47 +1089,61 @@ export default function DataTable({
                 </td>
               </tr>
             ) : (
-              (virtualize ? rowVirtualizer.getVirtualItems() : paginatedData).map(
-                (virtualRowOrRow, rowIndex) => {
-                  const row = virtualize ? paginatedData[virtualRowOrRow.index] : virtualRowOrRow;
+              ((virtualize && rowVirtualizer.getVirtualItems().length > 0) ? rowVirtualizer.getVirtualItems() : paginatedData).map(
+                (virtualRowOrRow, index) => {
+                  const isVirtual = virtualize && rowVirtualizer.getVirtualItems().length > 0;
+                  const row = isVirtual ? paginatedData[virtualRowOrRow.index] : virtualRowOrRow;
                   const rowKey =
                     row && row[keyField] !== undefined && row[keyField] !== null
                       ? row[keyField]
-                      : `fallback-key-${virtualize ? virtualRowOrRow.index : rowIndex}`;
+                      : `fallback-key-${isVirtual ? virtualRowOrRow.index : index}`;
+                  const rowReactKey = `${rowKey}_${isVirtual ? virtualRowOrRow.index : index}`;
                   const isExpanded = expandedId === rowKey;
                   const isSelected = selectedIds.includes(rowKey);
                   const isIndeterminate = indeterminateIds.includes(rowKey);
                   const isActive = isSelected || isIndeterminate;
+                  const isFocused = isVirtual ? virtualRowOrRow.index === focusedRowIndex : index === focusedRowIndex;
+
 
                   const customProps = getRowProps ? getRowProps(row) : {};
 
                   return (
-                    <React.Fragment key={rowKey}>
+                    <React.Fragment key={rowReactKey}>
                       <tr
+                        ref={virtualize ? rowVirtualizer.measureElement : null}
+                        data-index={virtualize ? virtualRowOrRow.index : index}
                         className={customProps.className || ''}
                         style={{
                           borderBottom: '1px solid var(--color-border)',
-                          borderLeft: isActive ? '4px solid #3b82f6' : '4px solid transparent',
-                          backgroundColor: isActive
-                            ? 'var(--color-bg-selected)'
-                            : isExpanded
-                              ? 'var(--color-bg-hover)'
-                              : 'transparent',
-                          transition: 'all 0.2s ease',
-                          height: '64px',
+                          borderLeft: isFocused 
+                            ? '4px solid #0284c7' 
+                            : isActive 
+                              ? '4px solid #3b82f6' 
+                              : '4px solid transparent',
+                          backgroundColor: isFocused
+                            ? 'rgba(2, 132, 199, 0.05)'
+                            : isActive
+                              ? 'var(--color-bg-selected)'
+                              : isExpanded
+                                ? 'var(--color-bg-hover)'
+                                : 'transparent',
+                          transition: 'background-color 0.15s ease',
                           cursor: expandableRender || onRowClick ? 'pointer' : 'default',
-                          position: virtualize ? 'absolute' : 'relative',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          transform: virtualize ? `translateY(${virtualRowOrRow.start}px)` : 'none',
+                          ...(virtualize ? {
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            transform: `translateY(${virtualRowOrRow.start}px)`
+                          } : {}),
                           ...customProps.style,
                         }}
                         onClick={() => {
+                          const toggleExpand = () => setExpandedId(isExpanded ? null : rowKey);
                           if (onRowClick) {
-                            onRowClick(row);
+                            onRowClick(row, toggleExpand);
                           } else if (expandableRender) {
-                            setExpandedId(isExpanded ? null : rowKey);
+                            toggleExpand();
                           }
                         }}
                         onMouseEnter={(e) => {
@@ -787,16 +1208,18 @@ export default function DataTable({
                           </td>
                         )}
                         {activeColumns.map((col, idx) => {
+                          const effectiveAlign = idx === 0 ? 'left' : idx === activeColumns.length - 1 ? 'right' : 'center';
                           let cellValue = col.render ? col.render(row) : row[col.key];
                           const isProductColumn =
                             col.key === 'name' ||
                             col.header === 'Product Name' ||
                             col.label === 'Product Name';
+                          const isActionColumn = col.key === 'actions' || col.isAction;
                           const cellStyle = {
-                            padding: '12px 16px',
+                            padding: isActionColumn ? '12px 12px 12px 6px' : '12px 16px',
                             fontSize: '13px',
                             color: 'var(--text-main)',
-                            textAlign: col.align || 'left',
+                            textAlign: effectiveAlign,
                             verticalAlign: 'middle',
                             position: isProductColumn ? 'sticky' : 'static',
                             left: isProductColumn ? (onSelectionChange ? '48px' : '0') : 'auto',
@@ -808,17 +1231,33 @@ export default function DataTable({
                             <td
                               key={col.key || idx}
                               className={col.hideOnMobile ? 'hide-on-mobile' : ''}
-                              data-label={typeof col.header === 'string' ? col.header : col.key}
-                              style={cellStyle}
+                              data-label={typeof (col.header || col.label) === 'string' ? (col.header || col.label) : col.key}
+                              style={{ 
+                                ...cellStyle, 
+                                overflow: isActionColumn ? 'visible' : 'hidden', 
+                                textOverflow: isActionColumn ? 'clip' : 'ellipsis', 
+                                whiteSpace: col.nowrap || isActionColumn ? 'nowrap' : 'normal', 
+                                wordBreak: isActionColumn ? 'normal' : 'break-word', 
+                                maxWidth: col.width || 'none' 
+                              }}
                             >
                               <div
                                 style={{
                                   display: 'flex',
                                   alignItems: 'center',
-                                  justifyContent: 'space-between',
+                                  justifyContent: effectiveAlign === 'right' ? 'flex-end' : effectiveAlign === 'center' ? 'center' : 'flex-start',
+                                  minWidth: 0,
                                 }}
                               >
-                                <div style={{ flex: 1, overflow: 'hidden' }}>{cellValue}</div>
+                                <div style={{ 
+                                  flex: isActionColumn ? 'none' : 1, 
+                                  overflow: isActionColumn ? 'visible' : 'hidden', 
+                                  textOverflow: isActionColumn ? 'clip' : 'ellipsis', 
+                                  whiteSpace: col.nowrap || isActionColumn ? 'nowrap' : 'normal', 
+                                  wordBreak: isActionColumn ? 'normal' : 'break-word', 
+                                  minWidth: 0, 
+                                  textAlign: effectiveAlign 
+                                }}>{cellValue}</div>
                                 {idx === activeColumns.length - 1 &&
                                   renderHoverActions &&
                                   hoveredRowId === rowKey && (
@@ -834,7 +1273,41 @@ export default function DataTable({
                                         paddingLeft: '24px',
                                       }}
                                     >
-                                      {renderHoverActions(row)}
+                                      {enableAskAtlas && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            window.dispatchEvent(
+                                              new CustomEvent('ATLAS_PREFILL_QUERY', {
+                                                detail: {
+                                                  query: `Analyze ${askAtlasTopic}: ${row[keyField] || row.id}`,
+                                                  record: row
+                                                }
+                                              })
+                                            );
+                                          }}
+                                          title={`Ask Atlas to analyze this ${askAtlasTopic}`}
+                                          style={{
+                                            background: '#0f172a',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            width: '28px',
+                                            height: '28px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            color: '#fff',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.1s'
+                                          }}
+                                          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                        >
+                                          <Zap size={14} />
+                                        </button>
+                                      )}
+                                      {renderHoverActions && renderHoverActions(row)}
                                     </div>
                                   )}
                               </div>
@@ -865,6 +1338,7 @@ export default function DataTable({
       </div>
 
       {/* Pagination Footer (Google Cloud Style) */}
+      {!hidePagination && pagination !== false && (onPageChange || sortedData.length > (activeRowsPerPage || 25) || (totalItems > 0 && totalItems > (activeRowsPerPage || 25))) && (
       <div
         style={{
           display: 'flex',
@@ -937,15 +1411,26 @@ export default function DataTable({
             <ChevronLeft size={20} />
           </button>
           <button
-            onClick={() => (onNextPage ? onNextPage() : handlePageChange(activePage + 1))}
+            onClick={() => {
+              if (onPageChange) {
+                if (onNextPage) onNextPage();
+                else handlePageChange(activePage + 1);
+              } else {
+                const isLastLocalPage = activePage >= Math.ceil(sortedData.length / activeRowsPerPage);
+                if (isLastLocalPage && onNextPage) {
+                  onNextPage();
+                  handlePageChange(activePage + 1);
+                } else {
+                  handlePageChange(activePage + 1);
+                }
+              }
+            }}
             disabled={
               hasNextPage !== undefined
                 ? !hasNextPage
-                : onPageChange && totalPages
-                  ? activePage >= totalPages
-                  : !onPageChange
-                    ? activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
-                    : true
+                : onPageChange
+                  ? (totalPages ? activePage >= totalPages : true)
+                  : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
             }
             style={{
               display: 'flex',
@@ -959,22 +1444,18 @@ export default function DataTable({
               color: (
                 hasNextPage !== undefined
                   ? !hasNextPage
-                  : onPageChange && totalPages
-                    ? activePage >= totalPages
-                    : !onPageChange
-                      ? activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
-                      : true
+                  : onPageChange
+                    ? (totalPages ? activePage >= totalPages : true)
+                    : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
               )
                 ? 'var(--color-border)'
                 : 'var(--color-text-primary)',
               cursor: (
                 hasNextPage !== undefined
                   ? !hasNextPage
-                  : onPageChange && totalPages
-                    ? activePage >= totalPages
-                    : !onPageChange
-                      ? activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
-                      : true
+                  : onPageChange
+                    ? (totalPages ? activePage >= totalPages : true)
+                    : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
               )
                 ? 'not-allowed'
                 : 'pointer',
@@ -984,73 +1465,18 @@ export default function DataTable({
           </button>
         </div>
       </div>
-      {/* Floating Batch Actions */}
-      {selectedIds.length > 0 && renderBatchActions && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: '#1e293b', // Dark modern color
-            borderRadius: '12px',
-            padding: '12px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '24px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
-            zIndex: 1000,
-            color: 'white',
-            animation: 'slideUp 0.3s ease-out forwards',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div
-              style={{
-                backgroundColor: '#334155',
-                color: '#e2e8f0',
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-              }}
-            >
-              {selectedIds.length}
-            </div>
-            <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#e2e8f0' }}>Selected</span>
-          </div>
-          <div style={{ width: '1px', height: '24px', backgroundColor: '#475569' }} />
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            {renderBatchActions(selectedIds)}
-          </div>
-          <button
-            onClick={() => onSelectionChange?.([])}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              padding: '4px',
-              marginLeft: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            title="Clear Selection"
-          >
-            <X size={16} />
-          </button>
-          <style>{`
-            @keyframes slideUp {
-              from { opacity: 0; transform: translate(-50%, 20px); }
-              to { opacity: 1; transform: translate(-50%, 0); }
-            }
-          `}</style>
-        </div>
+      )}
+      {/* Mobile Contextual Action Bar — reserved for mobile touch layout */}
+      
+      {/* Desktop Sticky Floating Bulk Action Bar */}
+      {(someSelected || allSelected) && (bulkActions.length > 0 || renderBatchActions) && (
+        <StickyBulkActionBar
+          selectedCount={selectedIds.length}
+          bulkActions={bulkActions}
+          renderBatchActions={renderBatchActions}
+          selectedIds={selectedIds}
+          onClearSelection={() => onSelectionChange?.([])}
+        />
       )}
     </div>
   );

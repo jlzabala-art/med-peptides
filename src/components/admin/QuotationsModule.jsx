@@ -65,11 +65,9 @@ export default function QuotationsModule() {
   });
 
   // Auto-select first document when loaded if none is selected
-  useEffect(() => {
-    if (!selectedDoc && documents.length > 0 && !isCreatingNew) {
-      setSelectedDoc(documents[0]);
-    }
-  }, [documents, selectedDoc, isCreatingNew]);
+  if (!selectedDoc && documents.length > 0 && !isCreatingNew) {
+    setSelectedDoc(documents[0]);
+  }
 
   const handleCreateNew = () => {
     setIsCreatingNew(true);
@@ -104,63 +102,77 @@ export default function QuotationsModule() {
 
     try {
       await addDoc(collection(db, 'b2b_quotations'), payload);
-      toast.success("Presupuesto guardado exitosamente");
+      toast.success("Quotation saved successfully");
       setIsCreatingNew(false);
       queryClient.invalidateQueries({ queryKey: ['b2b_quotations'] });
     } catch (e) {
       console.error(e);
-      toast.error("Error al guardar presupuesto");
+      toast.error("Error saving quotation");
     }
   };
 
   const handleAnalyzeRFQ = async () => {
-    const text = window.prompt("Pega aquí el contenido del email o texto del RFQ:");
-    if (!text) return;
-    setAiLoading(true);
-    try {
-      const url = window.location.hostname === 'localhost'
-        ? 'http://127.0.0.1:5001/med-peptides-app/us-central1/analyzeRFQEndpoint'
-        : 'https://us-central1-med-peptides-app.cloudfunctions.net/analyzeRFQEndpoint';
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rfqText: text })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'AI Failed');
-      const r = data.result;
-      setCustomerName(r.customerName || '');
-      setCustomerEmail(r.customerEmail || '');
-      if (r.items && Array.isArray(r.items)) {
-        setItems(r.items.map(i => ({ name: i.name, quantity: i.quantity, rate: 0 })));
+    let rfqInput = '';
+    notifier.confirmCritical(
+      <div>
+        <p style={{ marginBottom: '0.5rem', fontWeight: 500 }}>Paste RFQ email content or text below:</p>
+        <textarea
+          autoFocus
+          rows={5}
+          style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.85rem' }}
+          placeholder="Paste RFQ items, quantities, and specifications..."
+          onChange={(e) => { rfqInput = e.target.value; }}
+        />
+      </div>,
+      async () => {
+        if (!rfqInput.trim()) return;
+        setAiLoading(true);
+        try {
+          const url = window.location.hostname === 'localhost'
+            ? 'http://127.0.0.1:5001/med-peptides-app/us-central1/analyzeRFQEndpoint'
+            : 'https://us-central1-med-peptides-app.cloudfunctions.net/analyzeRFQEndpoint';
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rfqText: rfqInput })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'AI Failed');
+          const r = data.result;
+          setCustomerName(r.customerName || '');
+          setCustomerEmail(r.customerEmail || '');
+          if (r.items && Array.isArray(r.items)) {
+            setItems(r.items.map(i => ({ name: i.name, quantity: i.quantity, rate: 0 })));
+          }
+          setNotes(r.notes || '');
+          setIsCreatingNew(true);
+          setSelectedDoc(null);
+          toast.success("RFQ analyzed successfully. Please review and adjust pricing.");
+        } catch (e) {
+          console.error(e);
+          toast.error("Error analyzing RFQ: " + e.message);
+        }
+        setAiLoading(false);
       }
-      setNotes(r.notes || '');
-      setIsCreatingNew(true);
-      setSelectedDoc(null);
-      toast.success("RFQ Analizado con éxito. Por favor revisa y ajusta los precios.");
-    } catch (e) {
-      console.error(e);
-      toast.error("Error analizando RFQ: " + e.message);
-    }
-    setAiLoading(false);
+    );
   };
 
   const handleCopyLink = () => {
     if (!selectedDoc) return;
     const url = `${window.location.origin}/b2b-quote/${selectedDoc.id}`;
     navigator.clipboard.writeText(url);
-    toast.success('Enlace copiado al portapapeles');
+    toast.success('Link copied to clipboard');
   };
 
   const markAsAccepted = async () => {
     if (!selectedDoc) return;
     try {
       await updateDoc(doc(db, 'b2b_quotations', selectedDoc.id), { status: 'Accepted' });
-      toast.success("Presupuesto marcado como Aceptado");
+      toast.success("Quotation marked as Accepted");
       queryClient.invalidateQueries({ queryKey: ['b2b_quotations'] });
     } catch (e) {
       console.error(e);
-      toast.error("Error al actualizar estado");
+      toast.error("Error updating status");
     }
   };
 
@@ -184,11 +196,11 @@ export default function QuotationsModule() {
         createdBy: user?.uid
       };
       await addDoc(collection(db, 'b2b_sales_orders'), payload);
-      toast.success("Sales Order generado con éxito.");
+      toast.success("Sales Order generated successfully.");
       queryClient.invalidateQueries({ queryKey: ['b2b_quotations'] });
     } catch (e) {
       console.error(e);
-      toast.error("Error al generar Sales Order");
+      toast.error("Error generating Sales Order");
     }
   };
 
@@ -230,26 +242,26 @@ export default function QuotationsModule() {
       return (
         <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: '#fff', flex: 1, overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Nuevo Presupuesto</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>New Quotation</h2>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={() => setIsCreatingNew(false)} style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancelar</button>
+              <button onClick={() => setIsCreatingNew(false)} style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
               <button onClick={handleAnalyzeRFQ} disabled={aiLoading} style={{ padding: '0.5rem 1rem', background: '#e0e7ff', color: '#4f46e5', border: '1px solid #6366f1', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                {aiLoading ? <Loader2 size={16} className="spin" /> : <Bot size={16} />} Analizar RFQ (IA)
+                {aiLoading ? <Loader2 size={16} className="spin" /> : <Bot size={16} />} Analyze RFQ (AI)
               </button>
               <button onClick={handleSaveDraft} style={{ padding: '0.5rem 1rem', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Save size={16} /> Guardar Borrador
+                <Save size={16} /> Save Draft
               </button>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '2rem' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Nombre del Cliente</label>
-              <input value={customerName} onChange={e => setCustomerName(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="Ej. Dr. Martínez" />
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Client Name</label>
+              <input value={customerName} onChange={e => setCustomerName(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="e.g. Dr. Martinez" />
             </div>
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Email (Opcional)</label>
-              <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="Email para enviar" />
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Email (Optional)</label>
+              <input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="Email for delivery" />
             </div>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', paddingTop: '1.2rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>
@@ -259,19 +271,19 @@ export default function QuotationsModule() {
                   onChange={e => setIsDropship(e.target.checked)} 
                   style={{ width: '16px', height: '16px' }}
                 />
-                Pedido Dropshipping (Envío directo de Proveedor a Cliente)
+                Dropshipping Order (Direct Delivery from Supplier to Client)
               </label>
             </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Detalle de Artículos</label>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Items Breakdown</label>
             <B2BOrderBuilderTable items={items} onChange={setItems} />
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Notas del Presupuesto (Términos)</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="Condiciones de formulación magistral..."></textarea>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>Quotation Notes (Terms &amp; Conditions)</label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }} placeholder="Formulation terms and conditions..."></textarea>
           </div>
         </div>
       );
@@ -284,10 +296,10 @@ export default function QuotationsModule() {
           <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>{docData.documentNumber}</div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button style={{ padding: '0.4rem 0.8rem', background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-              <Edit size={14} /> Editar
+              <Edit size={14} /> Edit
             </button>
             <button style={{ padding: '0.4rem 0.8rem', background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
-              <Send size={14} /> Enviar por Email
+              <Send size={14} /> Send via Email
             </button>
             <button onClick={handleCopyLink} style={{ padding: '0.4rem 0.8rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 600 }}>
               <Link size={14} /> Magic Link

@@ -137,9 +137,20 @@ Output a JSON object:
   "confidence": number,
   "data": { ... type-specific extracted object ... }
 }`;
+  } else if (context === 'FagronPrescription' || context === 'Prescription') {
+    systemInstruction = `You are an elite Clinical Prescription and Compounding Pharmacy AI expert. Your task is to rigorously extract medical prescriptions, Fagron Genomics reports (TrichoTest, NutriGen, TeloTest, etc.), and magistral formulations.
+Rules:
+1. Extract patient details (patientName, patientDob, patientGender, patientEmail, patientPhone).
+2. Extract prescribing physician details (doctorName, doctorLicense, clinicName).
+3. If this is a Fagron report, extract 'boxId', 'testName', and 'reportDate'.
+4. For each distinct formulation block (e.g. TrichoSol solution vs TrichoOil vs Oral capsules), return a distinct object.
+5. In each formulation, extract 'treatmentType', 'treatmentProgram', 'posology', 'volume', 'dispensingForm', 'clinicalNotes', and 'items'.
+6. 'items' MUST be an array of ingredient objects: { "name": "str", "dose": "str", "quantity": number, "route": "str", "frequency": "str" }.
+7. Provide a 'confidence_score' (0-100).
+Output a JSON array of prescription/formulation objects: [{ "patientName": "str", "patientDob": "str|null", "patientGender": "str|null", "doctorName": "str", "doctorLicense": "str|null", "boxId": "str|null", "testName": "str|null", "reportDate": "str|null", "treatmentType": "str", "treatmentProgram": "str|null", "posology": "str", "volume": "str|null", "dispensingForm": "str|null", "items": [{ "name": "str", "dose": "str", "quantity": number }], "confidence_score": number }]. Return ONLY a valid JSON array.`;
   } else {
     throw new Error(
-      'Invalid context. Allowed: RFQ, PriceList, COA, Invoice, Auto, BloodTest, GeneticReport, ClinicalDocument'
+      'Invalid context. Allowed: RFQ, PriceList, COA, Invoice, Auto, BloodTest, GeneticReport, ClinicalDocument, FagronPrescription, Prescription'
     );
   }
 

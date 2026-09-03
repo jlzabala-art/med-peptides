@@ -72,21 +72,26 @@ const LEGACY_KEY_MAP = Object.freeze({
 /**
  * Normalise a single tier entry so it always exposes { perUnit, kit, currency }.
  *
- * Firestore variant docs may store tier prices in two different schemas:
+ * Firestore variant docs may store tier prices in three schemas:
  *   Schema A (canonical): { perUnit: 50, kit: 45, currency: 'USD' }
  *   Schema B (legacy):    { base: 50, byCountry: {...} }
  *                     OR  { perUnit: 50, base: 50, byCountry: {...} }
+ *   Schema C (flat):      50   (plain number — converted to { perUnit: 50 })
  *
- * This function unifies both so extractBase always finds 'perUnit'.
+ * This function unifies all so extractBase always finds 'perUnit'.
  *
- * @param {Object|null} entry  - A single tier object (e.g. pricing.retail)
+ * @param {Object|number|null} entry  - A single tier object or flat number
  * @returns {Object|null}
  */
 function normaliseTierEntry(entry) {
+  // Schema C: flat number (e.g. pricing.retail = 55)
+  if (entry != null && typeof entry === 'number' && !isNaN(entry)) {
+    return { perUnit: entry };
+  }
   if (!entry || typeof entry !== 'object') return entry;
-  // If already has perUnit, nothing to do
+  // Schema A: already has perUnit — nothing to do
   if (entry.perUnit != null) return entry;
-  // Map 'base' → 'perUnit' (legacy Firestore schema)
+  // Schema B: Map 'base' → 'perUnit' (legacy Firestore schema)
   if (entry.base != null) {
     return { ...entry, perUnit: entry.base };
   }
@@ -129,34 +134,47 @@ function normalisePricingKeys(pricing) {
     }
   }
 
-  // ── Step 2: inner-field normalization (base → perUnit) ──
+  // ── Step 2: inner-field normalization (base → perUnit, and flat numbers → { perUnit }) ──
   // Walk all canonical tier keys and normalise each tier entry.
   const canonicalKeys = Object.values(TIER_TO_KEY); // ['retail','wholesale','clinic','master']
+  // Also check supplierCost → map to master if master missing
+  const allTierKeys = [...canonicalKeys, 'volume10Kit', 'supplierCost'];
   let needsInnerFix = false;
-  for (const key of canonicalKeys) {
+  for (const key of allTierKeys) {
     const entry = normalised[key];
-    if (entry && typeof entry === 'object' && entry.perUnit == null && entry.base != null) {
-      needsInnerFix = true;
-      break;
+    if (entry == null) continue;
+    // Schema C: flat number
+    if (typeof entry === 'number') { needsInnerFix = true; break; }
+    // Schema B: object with 'base' instead of 'perUnit'
+    if (typeof entry === 'object' && entry.perUnit == null && entry.base != null) {
+      needsInnerFix = true; break;
     }
+  }
+
+  // Also check if supplierCost exists but master doesn't
+  if (normalised.supplierCost != null && normalised.master == null) {
+    needsInnerFix = true;
   }
 
   if (needsInnerFix) {
     if (normalised === pricing) normalised = { ...pricing }; // ensure we have a copy
-    for (const key of canonicalKeys) {
-      if (normalised[key]) {
-        const fixed = normaliseTierEntry(normalised[key]);
-        if (fixed !== normalised[key]) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.warn(
-              '[resolvePrice] Tier "%s" uses legacy "base" field instead of "perUnit". ' +
-              'Update Firestore docs to use "perUnit".',
-              key
-            );
-          }
-          normalised = { ...normalised, [key]: fixed };
+    for (const key of allTierKeys) {
+      if (normalised[key] == null) continue;
+      const fixed = normaliseTierEntry(normalised[key]);
+      if (fixed !== normalised[key]) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(
+            '[resolvePrice] Tier "%s" uses flat/legacy schema instead of canonical { perUnit }. ' +
+            'Firestore docs should be updated.',
+            key
+          );
         }
+        normalised = { ...normalised, [key]: fixed };
       }
+    }
+    // Map supplierCost → master if master is missing
+    if (normalised.supplierCost != null && normalised.master == null) {
+      normalised = { ...normalised, master: normaliseTierEntry(normalised.supplierCost) };
     }
   }
 
@@ -389,16 +407,42 @@ export function resolveVariantPrice(variant, {
 
   // Normalise pricing keys (handles both 'retail' and 'retailPrice' schemas)
   let pricing = variant?.pricing ?? null;
-  if (variant && (!pricing || (pricing.retail == null && pricing.retailPrice == null))) {
-    const flatPrice = variant.priceUSD ?? variant.perVialPriceUSD ?? variant.perUnit ?? null;
-    const flatKit = variant.kitPriceUSD ?? variant.kit ?? null;
+  const hasValidRetail = pricing?.retail && (pricing.retail.perUnit != null || pricing.retail.base != null || (Array.isArray(pricing.retail.tiers) && pricing.retail.tiers.length > 0));
+  const hasValidMaster = pricing?.master && (pricing.master.perUnit != null || pricing.master.base != null || (Array.isArray(pricing.master.tiers) && pricing.master.tiers.length > 0));
+  const hasValidAcq    = pricing?.acquisition && (pricing.acquisition.perUnit != null || (Array.isArray(pricing.acquisition.tiers) && pricing.acquisition.tiers[0]?.unitCost != null));
+
+  if (variant && (!hasValidRetail || !hasValidMaster)) {
+    const flatPrice = variant.unit_price ??
+                      variant.cost_tiers?.cost_1 ??
+                      variant.cost_1 ??
+                      variant.priceUSD ??
+                      variant.perVialPriceUSD ??
+                      variant.perUnit ??
+                      variant.supplierUnitCostUSD ??
+                      variant.price ??
+                      (hasValidAcq ? (pricing.acquisition.perUnit ?? pricing.acquisition.tiers[0]?.unitCost) : null) ??
+                      null;
+    const flatKit   = variant.cost_10    ??
+                      variant.cost_tiers?.cost_10 ??
+                      variant.kitPriceUSD ??
+                      variant.kit ??
+                      variant.supplierKitCostUSD ??
+                      (hasValidAcq ? (pricing.acquisition.kit ?? (pricing.acquisition.tiers[0]?.unitCost ? pricing.acquisition.tiers[0].unitCost * 10 : null)) : null) ??
+                      null;
     if (flatPrice != null || flatKit != null) {
       pricing = {
         ...pricing,
         retail: {
-          perUnit: flatPrice,
-          kit: flatKit,
-          currency: variant.currency ?? 'USD'
+          ...(pricing?.retail || {}),
+          perUnit: pricing?.retail?.perUnit ?? flatPrice,
+          kit: pricing?.retail?.kit ?? flatKit,
+          currency: pricing?.retail?.currency ?? variant.currency ?? 'USD'
+        },
+        master: {
+          ...(pricing?.master || {}),
+          perUnit: pricing?.master?.perUnit ?? flatPrice,
+          kit: pricing?.master?.kit ?? flatKit,
+          currency: pricing?.master?.currency ?? variant.currency ?? 'USD'
         }
       };
     }
@@ -486,8 +530,7 @@ export function resolveVariantPrice(variant, {
           tax: null,
         };
       }
-    } else {
-      // If there's no override for this variant/product under the active tenant, hide prices
+    } else if (activeTenant.priceOverrides) {
       resolved = {
         perUnit: null,
         kit: null,
@@ -499,6 +542,7 @@ export function resolveVariantPrice(variant, {
       };
     }
   }
+
 
   if (!resolved) {
     // 2. Customer override

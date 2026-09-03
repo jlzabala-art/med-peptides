@@ -1,5 +1,7 @@
 
 
+import { logger } from '../utils/logger';
+
 /**
  * Admin AI Service
  * Handles AI-powered features for the admin dashboard.
@@ -33,7 +35,7 @@ export const generateExecutiveSummary = async (metrics) => {
             }, 2500); // Simulate network and generation latency
         });
     } catch (error) {
-        console.error("Admin AI Backend Extraction failed:", error);
+        logger.error("Admin AI Backend Extraction failed", { error });
         throw new Error("Failed to generate executive summary.");
     }
 };
@@ -87,7 +89,7 @@ export const generateThreadInsights = async (threadText, entityName) => {
             }, 1500); // AI simulation latency
         });
     } catch (error) {
-        console.error("Thread insights generation failed:", error);
+        logger.error("Thread insights generation failed", { error });
         return { sentiment: 'neutral', healthScore: 50, aiSummary: 'Failed to analyze.', suggestedReplies: [] };
     }
 };

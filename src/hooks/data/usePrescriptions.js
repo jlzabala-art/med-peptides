@@ -1,131 +1,110 @@
-import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, limit, onSnapshot, getDocs, startAfter } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { onSnapshot } from 'firebase/firestore';
+import { prescriptionRepository } from '../../repositories/prescriptionRepository';
+import logger from '../../utils/logger';
 
 /**
- * Hook estandarizado para obtener prescripciones (recetas).
- * Implementa la Golden Rule de paginación o límite estricto.
- *
- * @param {Object} filters - Filtros de la consulta (ej. { wholesalerId: '123', status: 'assigned' })
- * @param {Object} options - Opciones de configuración
- * @param {number} options.pageSize - Límite de documentos por página (default: 50)
- * @param {boolean} options.realtime - Si es true, usa onSnapshot; si es false, usa getDocs (default: true)
- * @param {boolean} options.orderByDesc - Ordenar por createdAt desc (default: true)
+ * Hook estandarizado para obtener prescripciones utilizando React Query y Repositorios.
+ * Implementa las 4 capas de la Golden Rule de rendimiento.
  */
 export default function usePrescriptions(filters = {}, options = {}) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastDoc, setLastDoc] = useState(null);
-  const [hasMore, setHasMore] = useState(false);
-
+  const queryClient = useQueryClient();
   const pageSize = options.pageSize || 50;
   const realtime = options.realtime !== undefined ? options.realtime : true;
   const orderByDesc = options.orderByDesc !== undefined ? options.orderByDesc : true;
+  
+  // Serializamos el queryKey para garantizar un caché robusto
+  const filterStr = JSON.stringify(filters);
+  const queryKey = ['prescriptions', filters, pageSize, orderByDesc];
+  const cacheKey = `__rg_prescriptions_cache_${filterStr}_${pageSize}_${orderByDesc}`;
 
-  // Evitar refetch infinito serializando los filtros básicos
-  const filterKey = JSON.stringify(filters);
-
-  useEffect(() => {
-    setLoading(true);
-    let unsub = () => {};
-
-    try {
-      const colRef = collection(db, 'prescriptions');
-      const constraints = [];
-
-      // Aplicar filtros dinámicamente
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          constraints.push(where(key, '==', value));
-        }
-      });
-
-      if (orderByDesc) {
-        constraints.push(orderBy('createdAt', 'desc'));
-      }
-      
-      // Aplicar Golden Rule
-      constraints.push(limit(pageSize));
-
-      const q = query(colRef, ...constraints);
-
-      if (realtime) {
-        unsub = onSnapshot(
-          q,
-          (snap) => {
-            const results = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setData(results);
-            setLastDoc(snap.docs[snap.docs.length - 1]);
-            setHasMore(snap.docs.length === pageSize);
-            setLoading(false);
-          },
-          (err) => {
-            console.error('Error in usePrescriptions:', err);
-            setError(err);
-            setLoading(false);
+  const {
+    data: infiniteData,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isLoading,
+    error
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam = null }) => 
+      prescriptionRepository.getPrescriptionsPage({ filters, pageSize, pageParam, orderByDesc }),
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.lastDoc : undefined,
+    initialPageParam: null,
+    staleTime: 5 * 60 * 1000, // 5 minutos de stale time (Capa 3 - RAM)
+    initialData: () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Date.now() - parsed.ts < 30 * 60 * 1000) { // 30 min TTL
+              return {
+                pages: [{ data: parsed.data, lastDoc: null, hasMore: parsed.hasMore, fromCache: true }],
+                pageParams: [null]
+              };
+            }
           }
-        );
-      } else {
-        getDocs(q).then((snap) => {
-          const results = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-          setData(results);
-          setLastDoc(snap.docs[snap.docs.length - 1]);
-          setHasMore(snap.docs.length === pageSize);
-          setLoading(false);
-        }).catch((err) => {
-          console.error('Error in usePrescriptions (getDocs):', err);
-          setError(err);
-          setLoading(false);
-        });
+        } catch (e) {
+          logger.warn('[usePrescriptions] Failed to read cached initial data from localStorage:', e);
+        }
       }
-    } catch (err) {
-      console.error('Error building query in usePrescriptions:', err);
-      setError(err);
-      setLoading(false);
+      return undefined;
     }
+  });
+
+  // Suscripción en tiempo real (Capa 4 - Sync Activo) y Persistencia en LocalStorage
+  useEffect(() => {
+    // Si obtenemos datos frescos del servidor en la página 0, los guardamos en localStorage
+    if (infiniteData?.pages?.[0] && !infiniteData.pages[0].fromCache && typeof window !== 'undefined') {
+      try {
+        const firstPage = infiniteData.pages[0];
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data: firstPage.data,
+          hasMore: firstPage.hasMore,
+          ts: Date.now()
+        }));
+      } catch (e) {
+        logger.warn('[usePrescriptions] Failed to persist page cache in localStorage:', e);
+      }
+    }
+
+    if (!realtime) return;
+    
+    const q = prescriptionRepository.buildQuery(filters, pageSize, null, orderByDesc);
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // Actualizar solo la primera página para mantener la paginación estable
+      queryClient.setQueryData(queryKey, (oldData) => {
+        if (!oldData || !oldData.pages) return oldData;
+        const newPages = [...oldData.pages];
+        newPages[0] = {
+          ...newPages[0],
+          data,
+          lastDoc: snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null,
+          hasMore: snap.docs.length === pageSize,
+          fromCache: false
+        };
+        return { ...oldData, pages: newPages };
+      });
+    }, (err) => {
+      logger.error('[usePrescriptions] Error in realtime sync:', err);
+    });
 
     return () => unsub();
-  }, [filterKey, pageSize, realtime, orderByDesc]);
+  }, [filterStr, pageSize, realtime, orderByDesc, queryClient, infiniteData, cacheKey]);
 
-  const loadMore = async () => {
-    if (!hasMore || !lastDoc || loading) return;
-    setLoading(true);
+  // Aplanar las páginas de React Query para mantener compatibilidad hacia atrás
+  const flatData = infiniteData?.pages.flatMap(page => page.data) || [];
 
-    try {
-      const colRef = collection(db, 'prescriptions');
-      const constraints = [];
-
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          constraints.push(where(key, '==', value));
-        }
-      });
-
-      if (orderByDesc) {
-        constraints.push(orderBy('createdAt', 'desc'));
-      }
-      
-      // Start after last document
-      constraints.push(startAfter(lastDoc));
-      constraints.push(limit(pageSize));
-
-      const q = query(colRef, ...constraints);
-      const snap = await getDocs(q);
-      
-      const newResults = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      
-      setData((prev) => [...prev, ...newResults]);
-      setLastDoc(snap.docs[snap.docs.length - 1]);
-      setHasMore(snap.docs.length === pageSize);
-    } catch (err) {
-      console.error('Error loading more prescriptions:', err);
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
+  return {
+    data: flatData,
+    loading: isLoading,
+    error,
+    loadMore: fetchNextPage,
+    hasMore: hasNextPage,
+    isFetching
   };
-
-  return { data, loading, error, loadMore, hasMore };
 }

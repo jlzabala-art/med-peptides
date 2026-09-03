@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 /**
  * Manages cart state with localStorage persistence, stock validation,
@@ -91,7 +92,7 @@ export function useCart(products, isProfessional, user) {
         (p) => `${p.name} (${p.dosage})` === itemKey || p.name === itemKey
       );
       if (product && delta > 0 && newQty > (product.stock || 0)) {
-        alert(`Sorry, we only have ${product.stock} units of ${productName} in stock.`);
+        toast(`Sorry, we only have ${product.stock} units of ${productName} in stock.`);
         return prev;
       }
 

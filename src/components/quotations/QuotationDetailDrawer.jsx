@@ -33,13 +33,13 @@ export default function QuotationDetailDrawer() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'overview': return <OverviewTab quotationId={activeQuotation.id} />;
-      case 'items': return <ItemsTab quotationId={activeQuotation.id} />;
-      case 'pricing': return <PricingTab quotationId={activeQuotation.id} />;
-      case 'shipping': return <ShippingTab quotationId={activeQuotation.id} />;
-      case 'documents': return <DocumentsTab quotationId={activeQuotation.id} />;
-      case 'history': return <HistoryTab quotationId={activeQuotation.id} />;
-      case 'internal': return <InternalNotesTab quotationId={activeQuotation.id} />;
+      case 'overview': return <OverviewTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
+      case 'items': return <ItemsTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
+      case 'pricing': return <PricingTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
+      case 'shipping': return <ShippingTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
+      case 'documents': return <DocumentsTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
+      case 'history': return <HistoryTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
+      case 'internal': return <InternalNotesTab quotation={activeQuotation} quotationId={activeQuotation.id} />;
       default: return null;
     }
   };

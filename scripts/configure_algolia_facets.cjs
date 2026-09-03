@@ -12,28 +12,34 @@ if (!APP_ID || !ADMIN_KEY) {
 
 const client = algoliasearch(APP_ID, ADMIN_KEY);
 
-const PATIENTS_INDEX = "atlas_patients";
+const indicesConfig = {
+  "atlas_users": ['roles', 'status'],
+  "atlas_products": ['category', 'supplierName', 'visibility'],
+  "atlas_patients": ['status', 'physicianId', 'wholesaler', 'accountManager', 'category', 'goals'],
+  "atlas_protocols": ['status', 'category'],
+  "atlas_physicians": ['status', 'specialty'],
+  "atlas_clinics": ['status'],
+  "atlas_leads": ['status', 'type'],
+  "atlas_suppliers": ['status', 'type', 'tags'],
+  "atlas_rfqs": ['status', 'supplierId'],
+  "prescriptions": ['status'],
+  "orders": ['status', 'type']
+};
 
 async function configureFacets() {
-  console.log(`--- Configuring Facets for ${PATIENTS_INDEX} ---`);
-  
-  try {
-    await client.setSettings({
-      indexName: PATIENTS_INDEX,
-      indexSettings: {
-        attributesForFaceting: [
-          'status',
-          'physicianId',
-          'wholesaler',
-          'accountManager',
-          'category',
-          'goals'
-        ]
-      }
-    });
-    console.log("Successfully updated attributesForFaceting for atlas_patients.");
-  } catch (error) {
-    console.error("Error setting Algolia settings:", error);
+  for (const [indexName, attributes] of Object.entries(indicesConfig)) {
+    console.log(`--- Configuring Facets for ${indexName} ---`);
+    try {
+      await client.setSettings({
+        indexName,
+        indexSettings: {
+          attributesForFaceting: attributes
+        }
+      });
+      console.log(`Successfully updated attributesForFaceting for ${indexName}.`);
+    } catch (error) {
+      console.error(`Error setting Algolia settings for ${indexName}:`, error);
+    }
   }
 }
 

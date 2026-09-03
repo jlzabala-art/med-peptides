@@ -66,6 +66,7 @@ export default async function ProtocolDetailPage({ params }) {
   return <ProtocolPageClient protocol={protocol} />;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Next.js App Router convention: generateMetadata must be exported from the page file
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const protocol = await getProtocol(id);

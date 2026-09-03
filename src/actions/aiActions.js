@@ -221,80 +221,129 @@ export async function matchProtocolAction(items = []) {
 }
 
 /**
- * AI-based Drug-to-Drug Interaction (DDI) and Contraindications Check
- * @param {string} patientId - Patient ID to fetch active prescriptions
+ * Creates a new custom protocol from prescribed items if approved by physician.
+ * @param {Object} protocolData 
+ */
+export async function createCustomProtocolFromPrescriptionAction(protocolData) {
+  try {
+    if (!dbAdmin) throw new Error("Firebase Admin not initialized.");
+
+    const docRef = await dbAdmin.collection('protocols').add({
+      ...protocolData,
+      status: 'active',
+      isCustom: true,
+      createdAt: new Date().toISOString(),
+      source: 'physician_prescription_intake'
+    });
+
+    return {
+      success: true,
+      protocolId: docRef.id
+    };
+  } catch (error) {
+    console.error("Create Custom Protocol failed:", error);
+    throw new Error("Failed to create protocol on server.");
+  }
+}
+
+/**
+ * AI & Evidence-based Drug-to-Drug Interaction (DDI), Contraindications and Clinical Safety Check
+ * Powered by ClinicalRulesEngine (50+ evidence-based clinical guidelines).
+ * @param {string} patientId - Patient ID to fetch active prescriptions and medical background
  * @param {Array} newItems - Items in the current prescription
- * @returns {Promise<Object>} { hasRisk: boolean, riskLevel: 'low'|'medium'|'high', warnings: string[] }
+ * @returns {Promise<Object>} { hasRisk: boolean, riskLevel: 'none'|'low'|'medium'|'high', warnings: string[], errors: Array, ruleResults: Object }
  */
 export async function checkInteractionsAction(patientId, newItems = []) {
   try {
     if (!dbAdmin) throw new Error("Firebase Admin not initialized.");
 
-    // Simulate server-side AI processing
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Fetch active prescriptions for this patient
+    // Fetch active prescriptions & patient clinical context
     const activeItems = [];
+    let patientCtx = {};
+
     if (patientId) {
-      const rxSnap = await dbAdmin.collection('prescriptions')
-        .where('patientId', '==', patientId)
-        .where('status', 'in', ['Active', 'active'])
-        .get();
-        
+      const [rxSnap, patientDoc] = await Promise.all([
+        dbAdmin.collection('prescriptions')
+          .where('patientId', '==', patientId)
+          .where('status', 'in', ['Active', 'active'])
+          .get(),
+        dbAdmin.collection('patients').doc(patientId).get().catch(() => null)
+      ]);
+
       rxSnap.forEach(doc => {
         const data = doc.data();
-        if (data.items) {
+        if (Array.isArray(data.items)) {
           data.items.forEach(item => activeItems.push(item));
+        } else if (Array.isArray(data.products)) {
+          data.products.forEach(item => activeItems.push(item));
         }
       });
+
+      if (patientDoc && patientDoc.exists) {
+        const pData = patientDoc.data();
+        patientCtx = {
+          hasActiveMalignancy: Boolean(pData.hasActiveMalignancy || pData.cancerHistory),
+          hasMTC_MEN2_History: Boolean(pData.hasMTC_MEN2_History || pData.thyroidRisk),
+          hasPancreatitisHistory: Boolean(pData.hasPancreatitisHistory),
+          isPregnant: Boolean(pData.isPregnant),
+          ageYears: pData.dateOfBirth ? (new Date().getFullYear() - new Date(pData.dateOfBirth).getFullYear()) : undefined,
+          allergies: pData.allergies || [],
+        };
+      }
     }
 
-    const newItemNames = newItems.map(i => (i.name || i.productName || '').toLowerCase());
-    const activeItemNames = activeItems.map(i => (i.name || i.productName || '').toLowerCase());
-    
-    let hasRisk = false;
+    // Combine current prescription items with already active items
+    const combinedItems = [...activeItems, ...newItems];
+
+    if (!combinedItems.length) {
+      return {
+        hasRisk: false,
+        riskLevel: 'none',
+        warnings: ["No items to evaluate for clinical interactions."],
+        errors: [],
+        info: [],
+        all: []
+      };
+    }
+
+    // Run evidence-based Clinical Rules Engine
+    const ruleEvaluation = runClinicalRules(combinedItems, patientCtx);
+
+    const hasErrors = ruleEvaluation.errors.length > 0;
+    const hasWarnings = ruleEvaluation.warnings.length > 0;
+    const hasRisk = hasErrors || hasWarnings;
+
     let riskLevel = 'none';
-    let warnings = [];
-
-    // Mock logic: e.g. Combining Semaglutide and Retatrutide is high risk
-    const allItems = [...newItemNames, ...activeItemNames];
-    const hasSema = allItems.some(n => n.includes('semaglutide') || n.includes('ozempic'));
-    const hasReta = allItems.some(n => n.includes('retatrutide'));
-    const hasTirz = allItems.some(n => n.includes('tirzepatide') || n.includes('mounjaro'));
-
-    // Count GLP-1 agonists
-    let glp1Count = 0;
-    if (hasSema) glp1Count++;
-    if (hasReta) glp1Count++;
-    if (hasTirz) glp1Count++;
-
-    if (glp1Count >= 2) {
-      hasRisk = true;
+    if (hasErrors) {
       riskLevel = 'high';
-      warnings.push("High Risk: Concurrent use of multiple GLP-1/GIP receptor agonists detected. This increases the risk of severe gastrointestinal adverse effects and hypoglycemia.");
+    } else if (hasWarnings) {
+      riskLevel = 'medium';
+    } else if (ruleEvaluation.info.length > 0) {
+      riskLevel = 'low';
     }
 
-    // Mock logic: Testosterone + Nandrolone
-    const hasTest = allItems.some(n => n.includes('testosterone'));
-    const hasNand = allItems.some(n => n.includes('nandrolone') || n.includes('deca'));
-    if (hasTest && hasNand) {
-      hasRisk = true;
-      if (riskLevel !== 'high') riskLevel = 'medium';
-      warnings.push("Medium Risk: Combined use of Testosterone and Nandrolone. Monitor hematocrit, lipid profile, and cardiovascular markers closely.");
-    }
+    const warningMessages = [
+      ...ruleEvaluation.errors.map(e => `[STRICT] ${e.message}${e.reference ? ` (${e.reference})` : ''}`),
+      ...ruleEvaluation.warnings.map(w => `[WARNING] ${w.message}${w.reference ? ` (${w.reference})` : ''}`),
+      ...ruleEvaluation.info.map(i => `[INFO] ${i.message}`)
+    ];
 
-    if (!hasRisk && newItemNames.length > 0) {
-      warnings.push("No significant drug-to-drug interactions detected against active prescriptions.");
+    if (!hasRisk && warningMessages.length === 0) {
+      warningMessages.push("No significant drug-to-drug interactions, GH-axis stacking or contraindications detected.");
     }
 
     return {
       hasRisk,
       riskLevel,
-      warnings
+      warnings: warningMessages,
+      errors: ruleEvaluation.errors,
+      ruleWarnings: ruleEvaluation.warnings,
+      info: ruleEvaluation.info,
+      allRulesCount: ruleEvaluation.all.length
     };
   } catch (error) {
-    console.error("DDI Check failed:", error);
-    throw new Error("Failed to process interaction check securely on the server.");
+    console.error("Clinical DDI Check failed:", error);
+    throw new Error("Failed to process clinical interaction check securely on the server.");
   }
 }
 

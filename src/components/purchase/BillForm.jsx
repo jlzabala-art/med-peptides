@@ -7,12 +7,14 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Save from "lucide-react/dist/esm/icons/save";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import React, { useState } from 'react';
-import { collection, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { saveBill } from '../../services/procurementService';
 import { Card } from '../ui';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
 import DataTable from '../ui/DataTable';
-
+import AppActionGroup from '../ui/AppActionGroup';
+import EmptyState from '../ui/EmptyState';
+import Package from "lucide-react/dist/esm/icons/package";
+import { toast } from 'react-hot-toast';
 
 export default function BillForm({ bill, onClose }) {
   const [supplierName, setSupplierName] = useState(bill?.supplierName || '');
@@ -23,7 +25,7 @@ export default function BillForm({ bill, onClose }) {
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!supplierName) return alert('Supplier Name is required');
+    if (!supplierName) return toast('Supplier Name is required');
     setIsSaving(true);
     const totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
     const billData = {
@@ -33,20 +35,13 @@ export default function BillForm({ bill, onClose }) {
       status,
       items,
       totalAmount,
-      updatedAt: serverTimestamp()
     };
 
     try {
-      if (bill?.id) {
-        await updateDoc(doc(db, 'purchaseBills', bill.id), billData);
-      } else {
-        billData.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'purchaseBills'), billData);
-      }
+      await saveBill(billData, bill?.id || null);
       onClose();
     } catch (error) {
-      console.error('Error saving Bill:', error);
-      alert('Failed to save Bill');
+      toast.error('Failed to save Bill');
     }
     setIsSaving(false);
   };
@@ -197,7 +192,7 @@ export default function BillForm({ bill, onClose }) {
                   key: 'unitPrice',
                   header: 'Unit Price',
                   render: (val, row, idx) => (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
                       <span>$</span>
                       <input 
                         type="number" min="0" step="0.01"
@@ -218,18 +213,25 @@ export default function BillForm({ bill, onClose }) {
                 },
                 {
                   key: 'actions',
-                  header: '',
+                  header: 'Actions',
                   render: (val, row, idx) => (
-                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+                      <AppActionGroup actions={[{ type: 'delete', onClick: () => removeItem(idx) }]} />
+                    </div>
                   ),
                 }
               ]}
               data={items}
               keyField={(row, idx) => idx.toString()}
             />
-            {items.length === 0 && <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>No items added yet.</div>}
+            {items.length === 0 && (
+              <EmptyState
+                icon={Package}
+                title="No Items"
+                subtitle="No items added yet."
+                compact={true}
+              />
+            )}
             {items.length > 0 && (
               <div style={{ padding: '1rem', backgroundColor: '#f8fafc', borderTop: '2px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
                 <span style={{ fontWeight: 600 }}>Amount Due:</span>

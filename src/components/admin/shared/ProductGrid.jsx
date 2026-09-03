@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Edit2, Check, AlertTriangle, ChevronDown, ChevronRight } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
+import CopyableId from '../ui/CopyableId';
+import AppActionGroup from '../ui/AppActionGroup';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(amount || 0);
@@ -41,12 +43,12 @@ export default function ProductGrid({ items = [], readOnly = false, onUpdateItem
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', fontSize: '0.8rem', color: '#475569' }}>
                 <div>
                   <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.25rem' }}>Identifiers</div>
-                  <div>Variant ID: <span style={{ fontFamily: 'monospace' }}>{r.variantId || 'N/A'}</span></div>
-                  <div>Product ID: <span style={{ fontFamily: 'monospace' }}>{r.productId || 'N/A'}</span></div>
+                  <div>Variant ID: <span style={{ fontFamily: 'monospace' }}>{r.variantId ? <CopyableId value={r.variantId} /> : 'N/A'}</span></div>
+                  <div>Product ID: <span style={{ fontFamily: 'monospace' }}>{r.productId ? <CopyableId value={r.productId} /> : 'N/A'}</span></div>
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, color: '#0f172a', marginBottom: '0.25rem' }}>Supplier Specs</div>
-                  <div>Supplier ID: <span style={{ fontFamily: 'monospace' }}>{r.supplierId || 'N/A'}</span></div>
+                  <div>Supplier ID: <span style={{ fontFamily: 'monospace' }}>{r.supplierId ? <CopyableId value={r.supplierId} /> : 'N/A'}</span></div>
                   <div>Lead Time: {r.leadTime || 'Standard 3-5 days'}</div>
                   <div>Cold Chain: {r.coldChain ? 'Yes ❄️' : 'No'}</div>
                 </div>
@@ -147,15 +149,15 @@ export default function ProductGrid({ items = [], readOnly = false, onUpdateItem
             },
             ...(!readOnly ? [{
               key: 'actions',
-              header: '',
+              header: 'Actions',
               render: (r) => {
                 const isEditing = editingRow === r._idx;
                 return (
-                  <div style={{ textAlign: 'center' }}>
+                  <div style={{ display: 'inline-flex', justifyContent: 'center', width: '100%' }}>
                     {isEditing ? (
-                      <button onClick={() => saveEdit(r._idx)} style={{ color: '#059669', background: 'none', border: 'none', cursor: 'pointer' }}><Check size={14} /></button>
+                      <AppActionGroup actions={[{ type: 'custom', icon: Check, label: 'Save', onClick: () => saveEdit(r._idx), color: '#059669' }]} />
                     ) : (
-                      <button onClick={() => startEdit(r._idx, r)} style={{ color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer' }}><Edit2 size={14} /></button>
+                      <AppActionGroup actions={[{ type: 'edit', onClick: () => startEdit(r._idx, r) }]} />
                     )}
                   </div>
                 );

@@ -1,25 +1,13 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Search from "lucide-react/dist/esm/icons/search";
-import Star from "lucide-react/dist/esm/icons/star";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import SlidersHorizontal from "lucide-react/dist/esm/icons/sliders-horizontal";
-import FilterX from "lucide-react/dist/esm/icons/filter-x";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+  Activity, Search, Star, ArrowLeft, AlertCircle, 
+  SlidersHorizontal, FilterX, BookOpen 
+} from '@/lib/icons';
 
-
-
-
-
-
-
-
-
-import { getUserProtocols, updateProtocol } from '../services/protocolStorage';
+import { getUserProtocols, updateProtocol, deleteProtocol } from '../services/protocolStorage';
 import { useDebounce } from '../hooks/useDebounce';
 import ProtocolItem from '../components/common/ProtocolItem';
 import ProtocolSkeleton from '../components/common/ProtocolSkeleton';
@@ -27,7 +15,6 @@ import FilterDrawer from '../components/common/FilterDrawer';
 import ProtocolErrorBoundary from '../components/common/ProtocolErrorBoundary';
 import { ToastContainer } from '../components/common/Toast';
 import { useToast } from '../hooks/useToast';
-import { deleteProtocol } from '../services/protocolStorage';
 
 /* ─────────────────────────────────────────────
    PHASE 4 — ProtocolHistory

@@ -17,7 +17,8 @@ import { collection, getDocs } from 'firebase/firestore';
 
 
 import AppStatusToggle from '../../ui/AppStatusToggle';
-import { ChevronDown, ChevronUp, Bot, MessageSquare, FileText, LineChart, Stethoscope, Link2 } from '@/lib/icons';
+import { ChevronDown, ChevronUp, Bot, MessageSquare, FileText, LineChart, Stethoscope, Link2, Package } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function ProductMicrosite({ product, onUpdateProduct }) {
   const router = useRouter();
@@ -45,11 +46,11 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
           // Pass the enriched fields back up so the UI refreshes
           onUpdateProduct({ ...product, ...response.data.data });
         }
-        alert(`Data enriched successfully! Fields updated: ${response.data.enrichedFields.join(', ')}`);
+        toast.success(`Data enriched successfully! Fields updated: ${response.data.enrichedFields.join(', ')}`);
       }
     } catch (error) {
       console.error('Error enriching data:', error);
-      alert('Error enriching data: ' + error.message);
+      toast.error('Error enriching data: ' + error.message);
     } finally {
       setIsEnriching(false);
     }
@@ -147,7 +148,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
         style={{ 
           width: '100%',
           padding: '1.25rem 1.5rem', 
-          backgroundColor: isExpanded ? '#f8fafc' : '#ffffff', 
+          backgroundColor: isExpanded ? '#1e293b' : '#0f172a', 
           borderBottom: '1px solid #e2e8f0',
           cursor: 'pointer',
           display: 'flex',
@@ -160,8 +161,8 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
         }}
         onFocus={(e) => e.target.style.boxShadow = 'inset 0 0 0 2px #3b82f6'}
         onBlur={(e) => e.target.style.boxShadow = 'none'}
-        onMouseEnter={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#f8fafc'; }}
-        onMouseLeave={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#ffffff'; }}
+        onMouseEnter={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#1e293b'; }}
+        onMouseLeave={(e) => { if (!isExpanded) e.target.style.backgroundColor = '#0f172a'; }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{
@@ -174,11 +175,11 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
             {Icon && <Icon size={20} />}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '1rem', fontWeight: 600, color: isExpanded ? '#0f172a' : '#334155' }}>{title}</span>
+            <span style={{ fontSize: '1rem', fontWeight: 600, color: isExpanded ? '#0f172a' : '#475569' }}>{title}</span>
             {subtitle && <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>{subtitle}</span>}
           </div>
         </div>
-        <span style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', padding: '0.5rem', borderRadius: '50%', backgroundColor: isExpanded ? '#e2e8f0' : 'transparent' }}>
+        <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', padding: '0.5rem', borderRadius: '50%', backgroundColor: isExpanded ? '#e2e8f0' : 'transparent' }}>
           {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </span>
       </button>
@@ -187,7 +188,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
 
   return (
     <div style={{
-      backgroundColor: '#ffffff',
+      backgroundColor: '#0f172a',
       borderRadius: '8px',
       border: '1px solid #e2e8f0',
       margin: '0.5rem 0',
@@ -219,7 +220,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
             Checking AI Data...
           </div>
         ) : materia ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: '0.95rem', color: '#334155', lineHeight: 1.6, paddingBottom: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: '0.95rem', color: '#475569', lineHeight: 1.6, paddingBottom: '1rem' }}>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               {/* CAS Number Header if present */}
               {product.casNumber && (
@@ -241,7 +242,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
               )}
             </div>
 
-            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div style={{ backgroundColor: '#0f172a', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
                 <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Mechanism of Action</h4>
                 <button
@@ -279,7 +280,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
                 </div>
               )}
             </div>
-            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem' }}>
+            <div style={{ backgroundColor: '#1e293b', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem' }}>
               <h4 style={{ margin: '0 0 1rem', fontSize: '1rem', color: '#0f172a', fontWeight: 700, borderBottom: '2px solid #e2e8f0', paddingBottom: '0.5rem' }}>Clinical Applications</h4>
               <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
                 {materia.clinical_applications?.map((app, idx) => (
@@ -318,7 +319,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
               <button 
                 onClick={() => window.location.href = `/admin/messages?to=medical_team&product=${product.sku}`} 
                 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', backgroundColor: '#0f172a', color: 'white', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#334155'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#475569'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0f172a'; }}
               >
                 <MessageSquare size={18} /> Request Additional Information
@@ -327,7 +328,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
           </div>
         ) : (
           <div 
-            style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.6 }}
+            style={{ fontSize: '0.95rem', color: '#475569', lineHeight: 1.6 }}
             dangerouslySetInnerHTML={{ 
               __html: summary
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -337,6 +338,87 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
             }}
           />
         )}
+      </div>
+
+      {/* Accordion: Inventory & Supply */}
+      <AccordionHeader 
+        title="Inventory & Supply" 
+        subtitle="Stock levels, thresholds, and supplier details"
+        icon={Package}
+        id="inventory" 
+      />
+      <div 
+        id="accordion-content-inventory"
+        style={{ 
+          display: expandedAccordion === 'inventory' ? 'block' : 'none',
+          padding: '1.5rem', 
+          borderBottom: '1px solid #e2e8f0',
+          animation: 'fadeIn 0.3s ease-in-out',
+          backgroundColor: '#1e293b'
+        }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          {/* Stock Levels */}
+          <div style={{ backgroundColor: 'white', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <h5 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: '#0f172a' }}>Stock Levels</h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Current Stock</label>
+                <input 
+                  type="number" 
+                  value={product.stock_level || 0}
+                  onChange={(e) => {
+                    if (onUpdateProduct) {
+                      const val = parseInt(e.target.value, 10);
+                      onUpdateProduct({ ...product, stock_level: isNaN(val) ? 0 : val });
+                    }
+                  }}
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Minimum Stock Threshold</label>
+                <input 
+                  type="number" 
+                  value={product.stock_min_threshold || 0}
+                  onChange={(e) => {
+                    if (onUpdateProduct) {
+                      const val = parseInt(e.target.value, 10);
+                      onUpdateProduct({ ...product, stock_min_threshold: isNaN(val) ? 0 : val });
+                    }
+                  }}
+                  style={{ width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.85rem' }}
+                />
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.7rem', color: '#64748b' }}>Triggers Low Stock warning when Current Stock falls below this value.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Supplier Info */}
+          <div style={{ backgroundColor: 'white', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <h5 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: '#0f172a' }}>Supplier Details</h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Primary Supplier</label>
+                <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
+                  {product.supplier || 'Not specified'}
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Cost Price</label>
+                <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
+                  ${product.costPrice || 0}
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Warehouse</label>
+                <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
+                  {product.warehouse || 'Not specified'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Accordion 2: Batches & CoAs */}
@@ -353,7 +435,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
           padding: '1.5rem', 
           borderBottom: '1px solid #e2e8f0',
           animation: 'fadeIn 0.3s ease-in-out',
-          backgroundColor: '#f8fafc'
+          backgroundColor: '#1e293b'
         }}
       >
         {loadingBatches ? (
@@ -363,7 +445,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
         ) : (
           <div style={{ display: 'grid', gap: '1rem' }}>
             {batches.map(batch => (
-              <div key={batch.id} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+              <div key={batch.id} style={{ backgroundColor: '#0f172a', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
                   <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>Document: {batch.fileName || batch.id}</h4>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -372,11 +454,11 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
                 </div>
                 {batch.extractedData && (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', fontSize: '0.85rem' }}>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Peptide</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.peptide_name || 'N/A'}</span></div>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Dosage</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.dosage || 'N/A'}</span></div>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>HPLC Purity</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purity_percentage || batch.extractedData.purityHPLC ? `${batch.extractedData.purity_percentage || batch.extractedData.purityHPLC}` : 'N/A'}</span></div>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Net Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}` : 'N/A'}</span></div>
-                    <div style={{ backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Result / Status</span><span style={{ fontWeight: 700, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Peptide</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.peptide_name || 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Dosage</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.dosage || 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>HPLC Purity</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.purity_percentage || batch.extractedData.purityHPLC ? `${batch.extractedData.purity_percentage || batch.extractedData.purityHPLC}` : 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Net Content</span><span style={{ fontWeight: 600, color: '#0f172a' }}>{batch.extractedData.netPeptideContent ? `${batch.extractedData.netPeptideContent}` : 'N/A'}</span></div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '0.75rem', borderRadius: '6px' }}><span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '4px' }}>Result / Status</span><span style={{ fontWeight: 700, color: batch.extractedData.conclusion === 'Pass' || batch.extractedData.conclusion === 'Approved' ? '#10b981' : '#f59e0b' }}>{batch.extractedData.conclusion || 'N/A'}</span></div>
                   </div>
                 )}
                 {batch.url && (
@@ -404,7 +486,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
         style={{ 
           display: expandedAccordion === 'ai' ? 'flex' : 'none',
           flexDirection: 'column',
-          backgroundColor: '#f8fafc', 
+          backgroundColor: '#1e293b', 
           borderBottom: '1px solid #e2e8f0',
           animation: 'fadeIn 0.3s ease-in-out'
         }}
@@ -416,12 +498,12 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
           <div style={{ padding: '1.5rem', maxHeight: '250px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {chatLog.map((msg, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '0.25rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: '0.25rem', fontWeight: 600, textTransform: 'uppercase' }}>
                   {msg.role === 'user' ? 'You' : 'Atlas AI'}
                 </span>
                 <div style={{
                   backgroundColor: msg.role === 'user' ? '#0f172a' : '#f1f5f9',
-                  color: msg.role === 'user' ? 'white' : '#334155',
+                  color: msg.role === 'user' ? 'white' : '#475569',
                   padding: '0.75rem 1rem',
                   borderRadius: '8px',
                   borderBottomRightRadius: msg.role === 'user' ? 0 : '8px',
@@ -435,7 +517,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
               </div>
             ))}
             {isTyping && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem', color: '#94a3b8', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.5rem', color: '#64748b', fontSize: '0.8rem' }}>
                 Atlas AI is typing...
               </div>
             )}
@@ -467,7 +549,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
           padding: '1.5rem', 
           borderBottom: '1px solid #e2e8f0',
           animation: 'fadeIn 0.3s ease-in-out',
-          backgroundColor: '#f8fafc'
+          backgroundColor: '#1e293b'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'white', padding: '1rem 1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
@@ -502,7 +584,7 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
         style={{ 
           display: expandedAccordion === 'accounting' ? 'block' : 'none',
           padding: '1.5rem', 
-          backgroundColor: '#f8fafc'
+          backgroundColor: '#1e293b'
         }}
       >
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -510,13 +592,13 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
             <h5 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: '#0f172a' }}>Sales Information</h5>
             <div style={{ marginBottom: '0.75rem' }}>
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Sales Account</label>
-              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>
+              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
                 {product.salesAccount || 'Sales (System Default)'}
               </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Sales Tax</label>
-              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>
+              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
                 {product.taxId || 'Tax Exempt (Default)'}
               </div>
             </div>
@@ -525,13 +607,13 @@ export default function ProductMicrosite({ product, onUpdateProduct }) {
             <h5 style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: '#0f172a' }}>Purchase Information</h5>
             <div style={{ marginBottom: '0.75rem' }}>
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Purchase Account</label>
-              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>
+              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
                 {product.purchaseAccount || 'Cost of Goods Sold (System Default)'}
               </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>Zoho Item ID</label>
-              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#334155', fontWeight: 500 }}>
+              <div style={{ padding: '0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.85rem', color: '#475569', fontWeight: 500 }}>
                 {product.zoho_item_id || 'Not synced yet'}
               </div>
             </div>

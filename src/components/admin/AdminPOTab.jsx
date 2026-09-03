@@ -5,13 +5,12 @@ import PageHeader from '../ui/PageHeader';
 import POWidget from '../widgets/purchase/POWidget';
 import { usePurchaseOrderAggregates } from '../../hooks/data/usePurchaseOrderAggregates';
 import { MetricCard } from '../ui';
-import DataModule from '../ui/DataModule';
 
 export default function AdminPOTab() {
   const { data: kpis, isLoading } = usePurchaseOrderAggregates();
 
   const kpiSection = (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+    <div className="kpi-grid-4">
       <MetricCard
         title="Total POs"
         value={isLoading ? '...' : kpis?.totalPOs || 0}
@@ -37,11 +36,14 @@ export default function AdminPOTab() {
   );
 
   return (
-    <DataModule
-      header={<PageHeader title="Purchase Orders" subtitle="Manage official orders sent to suppliers." icon={ShoppingCart} />}
-      kpis={kpiSection}
-    >
-      <POWidget collectionName="purchaseOrders" readOnly={false} compact={false} />
-    </DataModule>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <PageHeader title="Purchase Orders" subtitle="Manage official orders sent to suppliers." />
+      <div className="tab-container" style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+        {kpiSection}
+        <div style={{ marginTop: '1.5rem' }}>
+          <POWidget collectionName="purchaseOrders" readOnly={false} compact={false} />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -7,7 +7,9 @@ import { useAuth } from '../context/AuthContext';
 import { orderRepository } from '../repositories/orderRepository';
 import userRepository from '../repositories/userRepository';
 import { recommendationRepository } from '../repositories/recommendationRepository';
-
+import { auth } from '../firebase';
+import { usePathname } from 'next/navigation';
+import notifier from '../services/NotificationService';
 
 
 
@@ -40,6 +42,7 @@ import OrderTrackingWidget from '../components/widgets/logistics/OrderTrackingWi
 import BillingInvoicesWidget from '../components/widgets/finance/BillingInvoicesWidget';
 import ClinicalHistoryWidget from '../components/widgets/clinical/ClinicalHistoryWidget';
 import { Package, Clock, CheckCircle2, Truck, ExternalLink, ShieldCheck, ArrowLeft, ClipboardList, Info, FileText, MessageSquare, Download, Loader2, FlaskConical, Stethoscope, Bell, Check, X, UserPlus, BrainCircuit, Send, Sparkles } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 
 // ─── Status Configuration ────────────────────────────────────────────────────
@@ -401,16 +404,17 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
   };
 
   const handleDeclineRecommendation = async (recId) => {
-    if (!window.confirm('Are you sure you want to decline this recommendation?')) return;
-    try {
-      setRecLoading(true);
-      await recommendationRepository.declineRecommendation(recId);
-      await fetchRecommendations();
-    } catch (e) {
-      console.error('[DeclineRecommendation] failed:', e);
-    } finally {
-      setRecLoading(false);
-    }
+    notifier.confirmCritical('Are you sure you want to decline this recommendation?', async () => {
+      try {
+        setRecLoading(true);
+        await recommendationRepository.declineRecommendation(recId);
+        await fetchRecommendations();
+      } catch (e) {
+        console.error('[DeclineRecommendation] failed:', e);
+      } finally {
+        setRecLoading(false);
+      }
+    });
   };
 
   const askAI = (r) => {
@@ -499,7 +503,7 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
       }
     } catch (err) {
       console.error('PDF generation failed:', err);
-      alert('Could not generate the PDF. Please try again.');
+      toast.error('Could not generate the PDF. Please try again.');
     } finally {
       setPdfLoading((prev) => ({ ...prev, [order.id]: false }));
     }
@@ -735,7 +739,7 @@ export default function UserDashboard({ onBack, acceptRecommendation, onOpenCart
                                 quantity: 1
                               }
                             }));
-                            alert(`Added ${rx.match} to cart for quick reorder!`);
+                            toast.success(`Added ${rx.match} to cart for quick reorder!`);
                           }
                         }}
                         style={{

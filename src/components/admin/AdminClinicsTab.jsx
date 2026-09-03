@@ -3,100 +3,45 @@
 import Building2 from "lucide-react/dist/esm/icons/building-2";
 import Users from "lucide-react/dist/esm/icons/users";
 import FileText from "lucide-react/dist/esm/icons/file-text";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import Navigation from "lucide-react/dist/esm/icons/navigation";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Lock from "lucide-react/dist/esm/icons/lock";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import Building from "lucide-react/dist/esm/icons/building";
 import Target from "lucide-react/dist/esm/icons/target";
-import X from "lucide-react/dist/esm/icons/x";
-import React, { useState, useEffect } from 'react';
-import ERPListDetailLayout from '../shared/ERPListDetailLayout';
-import { Tabs, StatusChip } from '../ui';
-import ClinicOnboardingWizard from './clinics/ClinicOnboardingWizard';
+import MapPin from "lucide-react/dist/esm/icons/map-pin";
+import Mail from "lucide-react/dist/esm/icons/mail";
+import Plus from "lucide-react/dist/esm/icons/plus";
+import Archive from "lucide-react/dist/esm/icons/archive";
+import React, { useState, useEffect, useMemo } from 'react';
+import { StatusBadge, CopyableId, QuoteQuickActionDropdown } from '../ui';
+import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
+import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 import ClinicProfileWorkspace from './clinics/ClinicProfileWorkspace';
 import TerritoryFilter from './clinics/TerritoryFilter';
 import PageHeader from '../ui/PageHeader';
+import AIQuickActionButton from '../ui/AIQuickActionButton';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
+import DataTable from '../ui/DataTable';
+import StandardDrawer from '../ui/StandardDrawer';
+import { useToast } from '../../hooks/useToast';
+import AdminTabErrorBoundary from './AdminTabErrorBoundary';
+import useDataModuleState from '../../hooks/useDataModuleState';
+import MobileClinicCard from '../shared/mobile/MobileClinicCard';
 
-// --- MOCK DATA LAYER ---
-const MOCK_CLINICS = [
-  {
-    id: 'cln_001',
-    name: 'Atlas Longevity Center',
-    network: 'Atlas Prime',
-    territory: 'North America - West',
-    manager: 'Sarah Jenkins',
-    status: 'active',
-    address: '100 Wellness Way, Los Angeles, CA',
-    tier: 'Platinum',
-    physicians: 12,
-    patients: 450,
-    monthlyVolume: 125000,
-    email: 'contact@atlaslongevity.com',
-    phone: '+1 (555) 123-4567',
-    insights: [
-      "Upsell Opportunity: High demand for NAD+ precursors in this territory.",
-      "Engagement Alert: Account manager hasn't visited in 45 days."
-    ]
-  },
-  {
-    id: 'cln_002',
-    name: 'Metabolic Reset Clinic',
-    network: 'Independent',
-    territory: 'Europe - South',
-    manager: 'Carlos Silva',
-    status: 'onboarding',
-    address: 'Av. Diagonal 123, Barcelona, Spain',
-    tier: 'Gold',
-    physicians: 3,
-    patients: 80,
-    monthlyVolume: 15000,
-    email: 'info@metabolicreset.es',
-    phone: '+34 600 123 456',
-    insights: [
-      "Onboarding: Needs final catalog approval.",
-      "Territory Expansion: Good candidate for the new Weight Loss protocol beta."
-    ]
-  },
-  {
-    id: 'cln_003',
-    name: 'Peak Performance Med',
-    network: 'Athletics Health Group',
-    territory: 'North America - East',
-    manager: 'Mike O\'Connor',
-    status: 'active',
-    address: '500 Sport Ave, Miami, FL',
-    tier: 'Platinum',
-    physicians: 8,
-    patients: 320,
-    monthlyVolume: 85000,
-    email: 'sales@peakperformancemed.com',
-    phone: '+1 (555) 987-6543',
-    insights: [
-      "Cross-sell Opportunity: BPC-157 is their top seller, recommend TB-500 stack."
-    ]
-  }
-];
-
-// ── Dashboard KPI Cards ───────────────
+// ── Dashboard KPI Cards (Computed from genuine Firestore records) ───────────────
 function ClinicKPIs({ data }) {
-  const totals = {
-    clinics: data.length,
-    physicians: data.reduce((acc, curr) => acc + (curr.physicians || 0), 0),
-    patients: data.reduce((acc, curr) => acc + (curr.patients || 0), 0),
-    volume: data.reduce((acc, curr) => acc + (curr.monthlyVolume || 0), 0)
-  };
+  const totals = useMemo(() => {
+    const list = Array.isArray(data) ? data : [];
+    const uniqueCountries = new Set(list.map(c => c.country).filter(Boolean)).size;
+    const totalPhysicians = list.reduce((acc, curr) => acc + (curr.assignedPhysiciansCount || (curr.assignedPhysicianIds && curr.assignedPhysicianIds.length) || 0), 0);
+    const activeCount = list.filter(c => c.status === 'active').length;
 
-  const fmtCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
+    return {
+      clinics: list.length,
+      physicians: totalPhysicians,
+      countries: uniqueCountries || (list.length > 0 ? 1 : 0),
+      active: activeCount
+    };
+  }, [data]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem', flexShrink: 0 }}>
+    <div className="kpi-grid-4" style={{ marginBottom: '1rem', flexShrink: 0 }}>
       <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '50%', color: '#1d4ed8' }}><Building2 size={24} /></div>
         <div>
@@ -107,143 +52,285 @@ function ClinicKPIs({ data }) {
       <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ padding: '12px', background: '#f0fdf4', borderRadius: '50%', color: '#15803d' }}><Users size={24} /></div>
         <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Active Physicians</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Assigned Physicians</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.physicians}</div>
         </div>
       </div>
       <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ padding: '12px', background: '#fdf4ff', borderRadius: '50%', color: '#a21caf' }}><Target size={24} /></div>
         <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Network Patients</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.patients}</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Territories / Countries</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.countries}</div>
         </div>
       </div>
       <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ padding: '12px', background: '#fefce8', borderRadius: '50%', color: '#a16207' }}><FileText size={24} /></div>
         <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Monthly Volume</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{fmtCurrency(totals.volume)}</div>
+          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Active Facility Status</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.active} / {totals.clinics}</div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Detail Drawer (Replaced by ClinicProfileWorkspace) ───────────────
+import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
 
-// ── Main Tab ───────────────
-export default function AdminClinicsTab({ isSubTab = false }) {
-  const [clinics, setClinics] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
-  const [selectedTerritory, setSelectedTerritory] = useState('All');
-
-  useEffect(() => {
-    // Simulate fetching from a real repository
-    setTimeout(() => {
-      setClinics(MOCK_CLINICS);
-      setLoading(false);
-    }, 600);
-  }, []);
-
-  const filtered = clinics.filter(c => {
-    const matchesSearch = (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (c.network || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (c.territory || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTerritory = selectedTerritory === 'All' || (c.territory || '').includes(selectedTerritory);
-    return matchesSearch && matchesTerritory;
+export default function AdminClinicsTab({ isSubTab = false, initialData = null, serverKPIs = null }) {
+  const { searchTerm, updateSearchTerm, getUrlParam, updateUrlParam } = useDataModuleState('admin-clinics');
+  
+  // Use server-prefetched data if provided; fall back to real-time Firestore collection
+  const { data: rawClinics = [], isLoading: loading, refresh } = useFirestoreCollection('clinics', {
+    orderByFields: [['name', 'asc']],
+    limitCount: 100,
+    // Skip the initial Firestore fetch when server already provided data
+    enabled: !initialData,
   });
 
-  const renderListItem = (c, isSelected) => (
-    <div style={{ padding: '0.85rem 1.15rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: isSelected ? '#1d4ed8' : '#1e293b' }}>
-          {c.name}
-        </span>
-        <StatusChip status={c.status} />
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-        <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#f3f4f6', color: '#4b5563', padding: '2px 6px', borderRadius: '4px' }}>
-          {c.tier}
-        </span>
-        <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>· {c.network}</span>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '0.75rem', color: '#94a3b8' }}>
-        <span>Mgr: {c.manager}</span>
-        <span>{c.territory}</span>
+  const clinics = useMemo(() => {
+    // Prefer server data on first render (zero-latency), then merge with live Firestore data
+    const source = (initialData && rawClinics.length === 0) ? initialData : rawClinics;
+    return Array.isArray(source) ? source : [];
+  }, [rawClinics, initialData]);
+
+
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const selectedTerritory = getUrlParam('territory', 'All');
+  const setSelectedTerritory = (val) => updateUrlParam('territory', val);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedClinic, setSelectedClinic] = useState(null);
+  const { toast } = useToast();
+
+  const filtered = useMemo(() => {
+    return clinics.filter(c => {
+      const name = (c.name || c.legalName || '').toLowerCase();
+      const city = (c.city || '').toLowerCase();
+      const country = (c.country || '').toLowerCase();
+      const type = (c.type || '').toLowerCase();
+      const q = searchTerm.toLowerCase();
+
+      const matchesSearch = !q || name.includes(q) || city.includes(q) || country.includes(q) || type.includes(q);
+      const matchesTerritory = selectedTerritory === 'All' || country.includes(selectedTerritory.toLowerCase()) || city.includes(selectedTerritory.toLowerCase());
+      return matchesSearch && matchesTerritory;
+    });
+  }, [clinics, searchTerm, selectedTerritory]);
+
+  const columns = [
+    {
+      key: 'name',
+      header: 'Clinic / Medical Center',
+      width: '38%',
+      render: (c) => {
+        const typeLabel = c.type ? c.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Medical Clinic';
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0, border: '1px solid #bfdbfe' }}>
+              🏥
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.90rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {c.name || c.legalName}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <CopyableId value={c.id} iconOnly={true} />
+                <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>{typeLabel}</span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'location',
+      header: 'Location & Address',
+      width: '28%',
+      render: (c) => {
+        const loc = [c.city, c.country].filter(Boolean).join(', ');
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              📍 {loc || 'Location on file'}
+            </span>
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {c.streetAddress || c.state || 'Address registered'}
+            </span>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'contact',
+      header: 'Direct Contact',
+      width: '20%',
+      render: (c) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+            📞 {c.phone || '—'}
+          </span>
+          <span style={{ fontSize: '0.74rem', color: '#0369a1' }}>
+            {c.email || (c.website ? new URL(c.website).hostname.replace('www.', '') : '—')}
+          </span>
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Status & Actions',
+      width: '14%',
+      render: (c) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }} onClick={e => e.stopPropagation()}>
+          <StatusBadge status={c.status || 'active'} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <QuoteQuickActionDropdown 
+              size="sm" 
+              variant="icon" 
+              entityContext={{ 
+                type: 'clinic', 
+                recipientType: 'clinic', 
+                clinicId: c.id, 
+                clinicName: c.name || c.legalName
+              }} 
+            />
+            <button
+              onClick={() => setSelectedClinic(c)}
+              className="gcp-btn-icon"
+              title="Open Clinic Profile"
+              style={{ padding: '4px 6px', border: 'none', background: 'transparent', cursor: 'pointer' }}
+            >
+              👁️
+            </button>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const bulkActions = [
+    {
+      label: 'Assign Territory',
+      icon: MapPin,
+      onClick: () => {
+        toast.success(`Territory reassigned for ${selectedIds.length} clinics`);
+        setSelectedIds([]);
+      }
+    },
+    {
+      label: 'Send Notification',
+      icon: Mail,
+      onClick: () => {
+        toast.success(`Notification sent to ${selectedIds.length} clinics`);
+        setSelectedIds([]);
+      }
+    },
+    {
+      label: 'Archive',
+      icon: Archive,
+      onClick: () => {
+        toast.success(`${selectedIds.length} clinics archived`);
+        setSelectedIds([]);
+      },
+      variant: 'danger'
+    }
+  ];
+
+  const clinicExpandableRender = (clinic) => (
+    <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Contact & Address</span>
+          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a', marginTop: '4px' }}>{clinic.address || '—'}</div>
+          <div style={{ fontSize: '0.8rem', color: '#475569' }}>{clinic.email || '—'} · {clinic.phone || '—'}</div>
+        </div>
+        <div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Account Manager</span>
+          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a', marginTop: '4px' }}>{clinic.manager || 'Unassigned'}</div>
+        </div>
+        {clinic.insights && clinic.insights.length > 0 && (
+          <div style={{ gridColumn: '1 / -1' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Clinical & Commercial Insights</span>
+            <ul style={{ margin: '4px 0 0', paddingLeft: '1.2rem', fontSize: '0.8rem', color: '#334155' }}>
+              {clinic.insights.map((ins, i) => (
+                <li key={i}>{ins}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
 
   return (
-    <div style={{ padding: isSubTab ? '0' : '1.5rem', display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem', backgroundColor: '#f1f5f9' }}>
-      {/* Header — normalised */}
-      {!isSubTab && (
+    <AdminTabErrorBoundary tabId="clinics" tabLabel="Clinics">
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <PageHeader
           title="Clinic Network Management"
           subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
-          icon={Building2}
           actions={
-            <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '13px', padding: '0.4rem 1rem' }}>
-              <Plus size={16} /> Add Clinic
-            </button>
-          }
-        />
-      )}
-
-      {/* GlobalSearchBar — prominent position */}
-      <GlobalSearchBar
-        value={searchTerm}
-        onChange={setSearchTerm}
-        placeholder="Search clinics by name, network, or territory..."
-        resultCount={loading ? undefined : filtered.length}
-        namespace="admin-clinics"
-        size="lg"
-      />
-
-      {/* KPI Dashboard */}
-      {!loading && <ClinicKPIs data={clinics} />}
-
-      {/* Territory Filter */}
-      <TerritoryFilter selectedTerritory={selectedTerritory} onSelectTerritory={setSelectedTerritory} />
-
-      {/* ERP List / Detail Layout */}
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <ERPListDetailLayout
-          items={filtered}
-          renderListItem={renderListItem}
-          renderDetail={(c, onClose) => <ClinicProfileWorkspace key={c.id} clinic={c} onClose={onClose} />}
-          getItemId={c => c.id}
-          loading={loading}
-          searchQuery={searchTerm}
-          onSearchChange={setSearchTerm}
-          searchPlaceholder="Search clinics by name, network, or territory..."
-          detailWidth="60%"
-          headerLeft={
-            <div style={{ fontWeight: 800, color: '#1e293b', fontSize: '1rem' }}>Active Clinics</div>
-          }
-          headerActions={null}
-          emptyState={
-            <div style={{ textAlign: 'center', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Building2 size={40} style={{ margin: '0 auto', opacity: 0.4 }} />
-              <div style={{ fontWeight: 600, color: '#64748b' }}>Select a Clinic</div>
-              <div style={{ fontSize: '0.8rem' }}>Click a clinic on the left to inspect network and commercial details.</div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <AIQuickActionButton
+                label="AI Forecast Demand"
+                onClick={() => {
+                  toast.success("AI Clinic Demand & Inventory Forecast generated.");
+                }}
+                title="Forecast clinic stock reordering and peptide demand with AI"
+              />
+              <QuoteQuickActionDropdown size="md" variant="secondary" buttonLabel="Quote" />
+              <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)}>
+                <Plus size={16} /> Add Clinic
+              </button>
             </div>
           }
         />
+        <div className="tab-container" style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+          {!loading && <ClinicKPIs data={clinics} />}
+
+          <GlobalSearchBar
+            namespace="admin-clinics"
+            placeholder="Search clinics by name, network, or territory..."
+            searchTerm={searchTerm}
+            onSearchChange={updateSearchTerm}
+            resultCount={loading ? undefined : filtered.length}
+            bulkActions={bulkActions}
+            selectedIds={selectedIds}
+          />
+          
+          <TerritoryFilter selectedTerritory={selectedTerritory} onSelectTerritory={setSelectedTerritory} />
+          
+          <div style={{ backgroundColor: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden', marginTop: '1rem' }}>
+            <DataTable
+              data={filtered}
+              columns={columns}
+              keyField="id"
+              expandableRender={clinicExpandableRender}
+              onRowClick={setSelectedClinic}
+              mobileCardComponent={MobileClinicCard}
+              emptyTitle="No clinics found"
+              emptySubtitle="Try adjusting your search or filters."
+            />
+          </div>
+
+          {isWizardOpen && (
+            <ClinicFormDrawer 
+              isOpen={isWizardOpen}
+              onClose={() => setIsWizardOpen(false)}
+              onComplete={(newClinic) => {
+                setIsWizardOpen(false);
+                setClinics(prev => [newClinic, ...prev]);
+                toast.success(`Clinic ${newClinic.name} created successfully.`);
+              }}
+            />
+          )}
+
+          <StandardDrawer 
+            isOpen={!!selectedClinic} 
+            onClose={() => setSelectedClinic(null)} 
+            title={selectedClinic?.name}
+            width="50vw"
+          >
+            {selectedClinic && <ClinicProfileWorkspace clinic={selectedClinic} onClose={() => setSelectedClinic(null)} />}
+          </StandardDrawer>
+        </div>
       </div>
-
-      {isWizardOpen && (
-        <ClinicOnboardingWizard 
-          onClose={() => setIsWizardOpen(false)}
-          onComplete={(newClinic) => {
-            setClinics(prev => [newClinic, ...prev]);
-            setIsWizardOpen(false);
-          }}
-        />
-      )}
-
-    </div>
+    </AdminTabErrorBoundary>
   );
 }

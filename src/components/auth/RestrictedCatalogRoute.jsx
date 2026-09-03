@@ -1,20 +1,10 @@
 "use client";
 import React from 'react';
-import { Navigate } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { ShieldAlert } from '@/lib/icons';
 
-
 export default function RestrictedCatalogRoute({ catalogName, children }) {
-  const { userProfile, loading, activeRole } = useAuth();
-
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <div className="spinner"></div>
-      </div>
-    );
-  }
+  const { userProfile, activeRole } = useAuth();
 
   // Admins always have access
   if (activeRole === 'admin') {
@@ -32,18 +22,18 @@ export default function RestrictedCatalogRoute({ catalogName, children }) {
         }}>
           <ShieldAlert size={64} style={{ color: 'var(--accent-color, #ff4b4b)', marginBottom: '1rem' }} />
           <h2 style={{ fontSize: '1.8rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-color, #111)' }}>
-            Acceso Restringido
+            Restricted Access
           </h2>
           <p style={{ fontSize: '1.1rem', color: 'var(--text-color-light, #666)', maxWidth: '500px', lineHeight: 1.6 }}>
-            Tu cuenta no tiene permisos para acceder al catálogo de <strong>{catalogName}</strong>. 
-            Contacta a tu gestor de cuenta para solicitar acceso a esta sección.
+            Your account does not have permissions to access the <strong>{catalogName}</strong> catalog. 
+            Please contact your account manager to request access.
           </p>
           <button 
             onClick={() => window.history.back()}
             className="btn btn-primary"
             style={{ marginTop: '2rem' }}
           >
-            Volver
+            Go Back
           </button>
         </div>
       );

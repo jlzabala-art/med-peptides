@@ -4,16 +4,17 @@ import BaseImportTab from './BaseImportTab';
 import { getStatusColor } from './utils';
 import productRepository from '../../../repositories/productRepository';
 import DataTable from '../../ui/DataTable';
-import StatusBadge from '../../ui/StatusBadge';
+import StatusChip from '../../ui/StatusChip';
+import { toast } from 'react-hot-toast';
 
 export default function ImportCatalogsTab() {
   const handleSave = async (data) => {
     try {
       await productRepository.importCatalogs(data);
-      alert('Catalogs saved successfully!');
+      toast.success('Catalogs saved successfully!');
     } catch (error) {
       console.error('Error saving catalogs:', error);
-      alert('Failed to save catalogs.');
+      toast.error('Failed to save catalogs.');
     }
   };
 

@@ -6,16 +6,10 @@ import Moon from "lucide-react/dist/esm/icons/moon";
 import Frown from "lucide-react/dist/esm/icons/frown";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { fetchMedicalTeam, submitSymptomLog } from '../../../services/patientHubService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-
-
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function SymptomLoggerWidget() {
   const { user } = useAuth();
@@ -33,13 +27,11 @@ export default function SymptomLoggerWidget() {
     async function fetchPhysicians() {
       if (!user?.uid) return;
       try {
-        const q = query(collection(db, 'doctor_patient_relationships'), where('patientId', '==', user.uid), where('status', '==', 'active'));
-        const snap = await getDocs(q);
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const list = await fetchMedicalTeam(user.uid);
         setPhysicians(list);
         if (list.length === 1) setSelectedPhysician(list[0].doctorId);
       } catch (err) {
-        console.error(err);
+        // logged in service
       }
     }
     fetchPhysicians();
@@ -47,20 +39,19 @@ export default function SymptomLoggerWidget() {
 
   const handleLog = async () => {
     if (!selectedPhysician) {
-      alert(t('patient.symptoms.alert_select_physician') || "Selecciona un médico al que enviar el reporte.");
+      toast(t('patient.symptoms.alert_select_physician') || "Selecciona un médico al que enviar el reporte.");
       return;
     }
     setLoading(true);
     try {
-      await addDoc(collection(db, 'symptom_logs'), {
+      await submitSymptomLog({
         patientId: user.uid,
         patientName: user.displayName || 'Patient',
         doctorId: selectedPhysician,
         energyLevel: Number(energy),
         sleepQuality: Number(sleep),
         painLevel: Number(pain),
-        sideEffects: sideEffects,
-        timestamp: serverTimestamp()
+        sideEffects: sideEffects
       });
       setSuccess(true);
       setTimeout(() => {
@@ -71,7 +62,7 @@ export default function SymptomLoggerWidget() {
         setSideEffects('');
       }, 3000);
     } catch (err) {
-      console.error(err);
+      // logged in service
     } finally {
       setLoading(false);
     }

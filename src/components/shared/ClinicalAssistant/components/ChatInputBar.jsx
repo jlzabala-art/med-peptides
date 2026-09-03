@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable no-unused-vars */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 
 
@@ -16,6 +16,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../../context/AuthContext';
 import { Send, Mic, MicOff, Search, Paperclip, FileText, CheckCircle, AlertCircle, X, ClipboardList, Sparkles } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 const CLINICAL_QUICK_PROMPTS = [
   { label: 'Reconstitute Peptides', text: 'How do I reconstitute a research peptide vial?' },
@@ -60,6 +61,25 @@ const RESEARCH_QUICK_PROMPTS = [
   { label: 'Longevity Studies', text: 'Summarize the latest research on longevity peptides.' },
   { label: 'Research Log', text: 'Show me how to log my optimization progress.' },
   { label: 'Anti-Aging Research', text: 'What peptides are currently being researched for anti-aging?' }
+];
+
+// Dynamic patient context prompts — built at render time from patient context
+const buildPatientQuickPrompts = (patientName) => [
+  { label: '📋 Clinical Summary', text: `Summarize the clinical profile, active protocols, and medical history for ${patientName}.` },
+  { label: '💊 Active Protocols', text: `What active peptide protocols and prescriptions are on file for ${patientName}?` },
+  { label: '⚠️ Safety & Interactions', text: `Screen for known contraindications, allergic risks, or drug interactions for ${patientName}.` },
+  { label: '📝 New Prescription', text: `Draft a new prescription protocol tailored to ${patientName}'s clinical goals.` },
+  { label: '📊 Biomarkers & Follow-up', text: `What baseline biomarkers and clinical follow-up schedule are recommended for ${patientName}?` }
+];
+
+// Dynamic protocol context prompts — built at render time from pageContext
+const buildProtocolQuickPrompts = (protocolName) => [
+  { label: '📋 Phase Overview', text: `Give me a comprehensive overview of all phases in the "${protocolName}" protocol, including objectives and expected outcomes.` },
+  { label: '⚠️ Safety Profile', text: `What are the safety considerations and contraindications for the "${protocolName}" protocol?` },
+  { label: '🔬 Compound Interactions', text: `Analyze potential interactions between the compounds used in the "${protocolName}" protocol.` },
+  { label: '📈 Efficacy Evidence', text: `What clinical research evidence supports the compounds in the "${protocolName}" protocol?` },
+  { label: '🧬 Optimization Tips', text: `How can the "${protocolName}" protocol be optimized for better patient outcomes based on current research?` },
+  { label: '📊 Patient Monitoring', text: `What biomarkers and metrics should be monitored during the "${protocolName}" protocol?` },
 ];
 
 // PDF.js dynamic CDN loader
@@ -167,16 +187,22 @@ export default function ChatInputBar({
   const [placeholder, setPlaceholder] = useState("Ask ClinicalAI or upload...");
   const [isFocused, setIsFocused] = useState(false);
 
-  const themeAccent = contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
-  const themeBgActive = contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
-  const themeScanBg = contextMode === 'admin' ? 'linear-gradient(135deg, #1a73e8 0%, #1557b0 100%)' : contextMode === 'doctor' ? 'linear-gradient(135deg, #0f9d58 0%, #0b7843 100%)' : 'linear-gradient(135deg, #4285f4 0%, #1a73e8 100%)';
-  const themeScanShadow = contextMode === 'admin' ? '0 4px 10px rgba(26,115,232,0.25)' : contextMode === 'doctor' ? '0 4px 10px rgba(15,157,88,0.25)' : '0 4px 10px rgba(66,133,244,0.25)';
+  const isPatientContext = contextMode === 'patient' || pageContext?.mode === 'patient' || Boolean(pageContext?.patientId);
+  const themeAccent = isPatientContext ? '#0d9488' : contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
+  const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
+  const themeScanBg = isPatientContext ? 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)' : contextMode === 'admin' ? 'linear-gradient(135deg, #1a73e8 0%, #1557b0 100%)' : contextMode === 'doctor' ? 'linear-gradient(135deg, #0f9d58 0%, #0b7843 100%)' : 'linear-gradient(135deg, #4285f4 0%, #1a73e8 100%)';
+  const themeScanShadow = isPatientContext ? '0 4px 10px rgba(13,148,136,0.25)' : contextMode === 'admin' ? '0 4px 10px rgba(26,115,232,0.25)' : contextMode === 'doctor' ? '0 4px 10px rgba(15,157,88,0.25)' : '0 4px 10px rgba(66,133,244,0.25)';
 
   React.useEffect(() => {
     const handleResize = () => {
+      const isPat = contextMode === 'patient' || pageContext?.mode === 'patient' || Boolean(pageContext?.patientId);
       const isAd = contextMode === 'admin';
       const isDoc = contextMode === 'doctor';
-      if (window.innerWidth < 640) {
+      const patName = pageContext?.name || '';
+      
+      if (isPat) {
+        setPlaceholder(window.innerWidth < 640 ? 'Ask Patient Intelligence...' : `Ask Patient Intelligence about ${patName || 'patient'}...`);
+      } else if (window.innerWidth < 640) {
         setPlaceholder(isAd ? "Ask AdminAI..." : isDoc ? "Ask ClinicalAI..." : "Ask ResearchAI...");
       } else {
         setPlaceholder(
@@ -191,7 +217,7 @@ export default function ChatInputBar({
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [contextMode]);
+  }, [contextMode, pageContext]);
 
   const getVariantDisplayPrice = (prod, variant) => {
     const tier = isProfessional ? 'pro' : 'guest';
@@ -237,10 +263,65 @@ export default function ChatInputBar({
         c && typeof c.label === 'string' && c.label.toLowerCase().includes(val.toLowerCase())
       ).slice(0, 5);
       setFilteredSuggestions(filtered);
-      setShowAutocomplete(filtered.length > 0);
-      setActiveIndex(0);
     } else {
-      setShowAutocomplete(false);
+      setFilteredSuggestions([]);
+    }
+    setShowAutocomplete(val.length >= 2);
+  };
+
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US'; // Forced to English
+
+        recognition.onresult = (event) => {
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            }
+          }
+          if (finalTranscript) {
+            setInput((prev) => prev + (prev ? ' ' : '') + finalTranscript);
+          }
+        };
+
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+          setIsRecording(false);
+        };
+
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+        recognitionRef.current = recognition;
+      }
+    }
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [setInput]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } else {
+        toast.error("Speech recognition is not supported in this browser.");
+      }
     }
   };
 
@@ -788,7 +869,7 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       accessories.forEach(acc => {
                         window.dispatchEvent(new CustomEvent('add-to-cart-direct', { detail: { product: acc } }));
                       });
-                      alert('🎉 All selected compounds & essential reconstitution supplies successfully added to your cart!');
+                      toast.success('🎉 All selected compounds & essential reconstitution supplies successfully added to your cart!');
                     }}
                     style={{
                       width: '100%',
@@ -877,7 +958,9 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
           >
             {suggestions && suggestions.length > 0 ? (
               suggestions.map((s, index) => {
-                const labelText = typeof s === 'string' ? s : s.label || s.payload || '';
+                const rawLabel = typeof s === 'string' ? s : (s.label || s.displayText || s.payload || s.name || s.title || '');
+                const cleanLabel = String(rawLabel).replace(/\bundefined\b/gi, '').trim();
+                if (!cleanLabel) return null;
                 return (
                   <button
                     key={index}
@@ -913,65 +996,90 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    {labelText}
+                    {cleanLabel}
                   </button>
                 );
               })
             ) : (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
-              {(pageContext?.activeTab === 'calendar' ? CALENDAR_QUICK_PROMPTS :
-                pageContext?.activeTab === 'orders' ? ORDERS_QUICK_PROMPTS :
-                pageContext?.activeTab === 'leads' ? LEADS_QUICK_PROMPTS :
-                pageContext?.activeTab === 'zoho_books' ? [
-                  { label: 'Sync Pending', text: 'Show me how to sync pending products to Zoho Books.' },
-                  { label: 'Check Errors', text: 'Can you help me resolve the current Zoho synchronization errors?' },
-                  { label: 'Item Groups', text: 'How do we create Item Groups and Variants in Zoho Inventory?' },
-                  { label: 'Composite Items', text: 'Show me how to structure protocols as Composite Items.' },
-                  { label: 'Zoho Permissions', text: 'Explain the Zoho Books permissions required for synchronization.' }
-                ] :
-                contextMode === 'admin' ? ADMIN_QUICK_PROMPTS : 
-                contextMode === 'doctor' ? CLINICAL_QUICK_PROMPTS : 
-                RESEARCH_QUICK_PROMPTS).map((p, index) => (
-                <button
-                  key={`quick-${index}`}
-                  onClick={() => {
-                    if (p.action) {
-                      p.action();
-                    } else {
-                      onSend(p.text);
-                    }
-                  }}
-                  style={{
-                    border: `1px solid ${themeAccent}1C`,
-                    backgroundColor: 'var(--color-bg-app)',
-                    color: 'var(--color-text-primary)',
-                    borderRadius: '20px',
-                    padding: '0.45rem 0.85rem',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    outline: 'none',
-                    flexShrink: 0
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.backgroundColor = `${themeAccent}0F`;
-                    e.currentTarget.style.borderColor = themeAccent;
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg-app)';
-                    e.currentTarget.style.borderColor = `${themeAccent}1C`;
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {p.label}
-                </button>
-              ))}
+              {(() => {
+                const isPatientContext = contextMode === 'patient' || pageContext?.mode === 'patient' || Boolean(pageContext?.patientId);
+                const patientName = pageContext?.name || 'this patient';
+
+                const isProductContext = !isPatientContext && (
+                  pageContext?.isProductPage || 
+                  (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
+                  (!pageContext && messages?.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)))
+                );
+
+                // Protocol context takes highest priority after patient
+                const isProtocolContext = !isPatientContext && (pageContext?.contextType === 'protocol' || !!pageContext?.protocolName);
+                const protocolName = pageContext?.protocolName || pageContext?.name || 'this protocol';
+
+                const promptList = isPatientContext ? buildPatientQuickPrompts(patientName) :
+                  isProtocolContext ? buildProtocolQuickPrompts(protocolName) :
+                  isProductContext ? [
+                  { label: '🔬 Mechanism', text: 'Explain the scientific mechanism of action for this product.' },
+                  { label: '💊 Dosage', text: 'What is the standard studied research dosage?' },
+                  { label: '✨ Suitability', text: 'Can you ask me 3 questions about my health goals to evaluate suitability?' },
+                  { label: '🧊 Reconstitution', text: 'How do I reconstitute and store this product?' }
+                ] : (pageContext?.activeTab === 'calendar' ? CALENDAR_QUICK_PROMPTS :
+                  pageContext?.activeTab === 'orders' ? ORDERS_QUICK_PROMPTS :
+                  pageContext?.activeTab === 'leads' ? LEADS_QUICK_PROMPTS :
+                  pageContext?.activeTab === 'zoho_books' ? [
+                    { label: 'Sync Pending', text: 'Show me how to sync pending products to Zoho Books.' },
+                    { label: 'Check Errors', text: 'Can you help me resolve the current Zoho synchronization errors?' },
+                    { label: 'Item Groups', text: 'How do we create Item Groups and Variants in Zoho Inventory?' },
+                    { label: 'Composite Items', text: 'Show me how to structure protocols as Composite Items.' },
+                    { label: 'Zoho Permissions', text: 'Explain the Zoho Books permissions required for synchronization.' }
+                  ] :
+                  contextMode === 'admin' ? ADMIN_QUICK_PROMPTS : 
+                  contextMode === 'doctor' ? CLINICAL_QUICK_PROMPTS : 
+                  RESEARCH_QUICK_PROMPTS);
+
+
+                return promptList.map((p, index) => (
+                  <button
+                    key={`quick-${index}`}
+                    onClick={() => {
+                      if (p.action) {
+                        p.action();
+                      } else {
+                        onSend(p.text);
+                      }
+                    }}
+                    style={{
+                      border: `1px solid ${themeAccent}1C`,
+                      backgroundColor: 'var(--color-bg-app)',
+                      color: 'var(--color-text-primary)',
+                      borderRadius: '20px',
+                      padding: '0.45rem 0.85rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      outline: 'none',
+                      flexShrink: 0
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = `${themeAccent}0F`;
+                      e.currentTarget.style.borderColor = themeAccent;
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'var(--color-bg-app)';
+                      e.currentTarget.style.borderColor = `${themeAccent}1C`;
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ));
+              })()}
               </div>
             )}
           </div>
@@ -989,71 +1097,83 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
         transition: 'all 0.2s',
         minHeight: '40px'
       }}>
-        {/* Simple Attachment Button */}
-        {contextMode === 'admin' && (
-          <>
-            <button
-              onClick={() => document.getElementById('price-upload-input').click()}
-              disabled={isAnalyzing || isLoading}
-              className="ca-scan-btn"
-              style={{
-                width: '32px', height: '32px', borderRadius: '50%', background: 'transparent',
-                color: 'var(--color-text-tertiary)', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0
-              }}
-              title="Upload Supplier Price Catalog (PDF/CSV)"
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'; e.currentTarget.style.color = '#10b981'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
-            >
-              <FileText size={18} />
-            </button>
-            <button
-              onClick={() => document.getElementById('stock-upload-input').click()}
-              disabled={isAnalyzing || isLoading}
-              className="ca-scan-btn"
-              style={{
-                width: '32px', height: '32px', borderRadius: '50%', background: 'transparent',
-                color: 'var(--color-text-tertiary)', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0
-              }}
-              title="Upload Stock File (PDF/CSV)"
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'; e.currentTarget.style.color = '#f59e0b'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
-            >
-              <ClipboardList size={18} />
-            </button>
-          </>
-        )}
-        <button
-          onClick={handleFileClick}
-          disabled={isAnalyzing || isLoading}
-          className="ca-scan-btn"
-          style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            background: 'transparent',
-            color: 'var(--color-text-tertiary)',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s',
-            flexShrink: 0
-          }}
-          title="Attach document or image"
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
-            e.currentTarget.style.color = themeAccent;
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = 'var(--color-text-tertiary)';
-          }}
-        >
-          <Paperclip size={18} />
-        </button>
+        {/* Simple Attachment Buttons - Hidden in Product Q&A Context */}
+        {(() => {
+          const isProductContext = pageContext?.isProductPage || 
+            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
+            messages?.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content));
+
+          if (isProductContext) return null;
+
+          return (
+            <>
+              {contextMode === 'admin' && (
+                <>
+                  <button
+                    onClick={() => document.getElementById('price-upload-input').click()}
+                    disabled={isAnalyzing || isLoading}
+                    className="ca-scan-btn"
+                    style={{
+                      width: '32px', height: '32px', borderRadius: '50%', background: 'transparent',
+                      color: 'var(--color-text-tertiary)', border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0
+                    }}
+                    title="Upload Supplier Price Catalog (PDF/CSV)"
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'; e.currentTarget.style.color = '#10b981'; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
+                  >
+                    <FileText size={18} />
+                  </button>
+                  <button
+                    onClick={() => document.getElementById('stock-upload-input').click()}
+                    disabled={isAnalyzing || isLoading}
+                    className="ca-scan-btn"
+                    style={{
+                      width: '32px', height: '32px', borderRadius: '50%', background: 'transparent',
+                      color: 'var(--color-text-tertiary)', border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0
+                    }}
+                    title="Upload Stock File (PDF/CSV)"
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'; e.currentTarget.style.color = '#f59e0b'; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
+                  >
+                    <ClipboardList size={18} />
+                  </button>
+                </>
+              )}
+              <button
+                onClick={handleFileClick}
+                disabled={isAnalyzing || isLoading}
+                className="ca-scan-btn"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'transparent',
+                  color: 'var(--color-text-tertiary)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  flexShrink: 0
+                }}
+                title="Attach document or image"
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
+                  e.currentTarget.style.color = themeAccent;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--color-text-tertiary)';
+                }}
+              >
+                <Paperclip size={18} />
+              </button>
+            </>
+          );
+        })()}
 
         <textarea 
           placeholder={placeholder}
@@ -1080,7 +1200,40 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
             minWidth: 0
           }}
         />
-        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+          <button
+            onClick={toggleRecording}
+            title={isRecording ? "Stop recording" : "Use voice input"}
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '50%',
+              backgroundColor: isRecording ? '#ef4444' : 'transparent',
+              color: isRecording ? 'white' : 'var(--color-text-tertiary)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+              flexShrink: 0
+            }}
+            onMouseEnter={e => {
+              if (!isRecording) {
+                e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
+                e.currentTarget.style.color = themeAccent;
+              }
+            }}
+            onMouseLeave={e => {
+              if (!isRecording) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--color-text-tertiary)';
+              }
+            }}
+          >
+            {isRecording ? <MicOff size={16} /> : <Mic size={16} />}
+          </button>
+          
           <button 
             onClick={() => onSend()}
             disabled={!input.trim() || isLoading}

@@ -1099,14 +1099,13 @@ export function WholesalersLeaderboard({ wholesalersData = [], onSelect }) {
 }
 
 // 8. AI COMMAND CONSOLE / SOURCING HUB
-export function AiCommandConsole({ onAskQuestion }) {
+export function AiCommandConsole({ onAskQuestion, role = 'CEO' }) {
   const [queryVal, setQueryVal] = useState('');
   const [loading, setLoading] = useState(false);
   const [reply, setReply] = useState(null);
   const [activeTab, setActiveTab] = useState('insights');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleAsk = () => {
     if (!queryVal.trim()) return;
     setLoading(true);
 
@@ -1123,6 +1122,25 @@ export function AiCommandConsole({ onAskQuestion }) {
         });
         setLoading(false);
       }, 700);
+    }
+  };
+
+  const getHubTitle = () => {
+    switch(role) {
+      case 'Clinical': return 'Atlas Clinical Hub';
+      case 'Finance': return 'Atlas Finance Hub';
+      case 'Operations': return 'Atlas Ops Hub';
+      case 'Sales': return 'Atlas Sales Hub';
+      case 'Purchasing': return 'Atlas Sourcing Hub';
+      default: return 'Atlas Command Hub';
+    }
+  };
+
+  const getPlaceholder = () => {
+    switch(role) {
+      case 'Clinical': return 'Type: "Which patients need follow-ups?"...';
+      case 'Finance': return 'Type: "Show me outstanding invoices"...';
+      default: return 'Type: "What requires my attention today?"...';
     }
   };
 
@@ -1148,7 +1166,7 @@ export function AiCommandConsole({ onAskQuestion }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Sparkles size={18} color="#0284c7" />
           <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#0f172a' }}>
-            Atlas Sourcing Hub
+            {getHubTitle()}
           </h2>
         </div>
 
@@ -1247,12 +1265,12 @@ export function AiCommandConsole({ onAskQuestion }) {
 
       {/* INPUT CONSOLE */}
       <div style={{ marginTop: '0.5rem', borderTop: '1px solid #bae6fd', paddingTop: '1rem' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleAsk(); }} style={{ display: 'flex', gap: '0.5rem' }}>
           <input
             type="text"
             value={queryVal}
             onChange={(e) => setQueryVal(e.target.value)}
-            placeholder='Type: "What requires my attention today?"...'
+            placeholder={getPlaceholder()}
             style={{
               flex: 1,
               padding: '0.65rem 1rem',

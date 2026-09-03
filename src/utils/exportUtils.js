@@ -1,6 +1,8 @@
+
+import { toast } from 'react-hot-toast';
 export const exportToCSV = (data, filename, columns) => {
   if (!data || data.length === 0) {
-    alert('No data to export');
+    toast('No data to export');
     return;
   }
 

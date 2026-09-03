@@ -252,8 +252,16 @@ export default function CatalogPreviewPanel({ catalog, products = [], protocols 
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ color: '#137333', fontSize: '1.1rem', fontWeight: 800 }}>
-                          {prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD 
-                            ? `$${prod.defaultVariant.pricing.retailPrice.base.kitUSD}`
+                          {(prod.defaultVariant?.pricing?.retail?.kit ??
+                            prod.defaultVariant?.pricing?.retail?.perUnit ??
+                            prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD ??
+                            prod.defaultVariant?.retailPrice ??
+                            prod.defaultVariant?.price)
+                            ? `$${Number(prod.defaultVariant?.pricing?.retail?.kit ??
+                                   prod.defaultVariant?.pricing?.retail?.perUnit ??
+                                   prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD ??
+                                   prod.defaultVariant?.retailPrice ??
+                                   prod.defaultVariant?.price).toFixed(2)}`
                             : 'Contact for Pricing'}
                         </div>
                       </div>

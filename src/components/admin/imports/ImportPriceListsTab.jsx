@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { Checkbox } from '../../../components/ui';
 import BaseImportTab from './BaseImportTab';
 import { db } from '../../../firebase';
-import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { serverTimestamp } from 'firebase/firestore';
 import { useShop } from '../../../context/ShopProvider';
 import Fuse from 'fuse.js';
 import { CheckCircle, AlertCircle } from '@/lib/icons';
 import DataTable from '../../ui/DataTable';
-import productRepository from '../../../repositories/productRepository';
+import { createProduct, updateProduct } from '../../../repositories/productRepository';
 
 export default function ImportPriceListsTab() {
   const { products } = useShop();
@@ -30,23 +30,25 @@ export default function ImportPriceListsTab() {
       if (isNaN(finalCost)) return null;
 
       if (productId === '__CREATE_NEW__') {
-        return addDoc(collection(db, 'products'), {
+        return createProduct({
           name: item.peptide_name || item.original_text,
+          displayName: item.peptide_name || item.original_text,
+          type: 'finished_product',
+          productType: 'finished_product',
+          categoryId: 'peptide',
+          category: 'peptide',
+          status: 'draft',
           guestVialPrice: finalCost,
           isActive: false,
-          createdAt: serverTimestamp(),
-          updatedAt: new Date().toISOString(),
           source: 'import',
           lastImportedAt: new Date().toISOString()
-        });
+        }, { strict: false });
       }
 
-      const productRef = doc(db, 'products', productId);
-      return updateDoc(productRef, {
+      return updateProduct(productId, {
         guestVialPrice: finalCost,
-        updatedAt: new Date().toISOString(),
         lastImportedAt: new Date().toISOString()
-      });
+      }, { strict: false });
     }).filter(Boolean);
     await Promise.all(promises);
   };
@@ -171,7 +173,7 @@ export default function ImportPriceListsTab() {
         header: 'Unit Price',
         align: 'right',
         render: (r) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             $<input
               type="number"
               step="0.01"

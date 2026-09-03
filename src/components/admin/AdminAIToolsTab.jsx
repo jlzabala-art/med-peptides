@@ -231,7 +231,7 @@ export default function AdminAIToolsTab() {
                 render: (t) => {
                   const Icon = t.icon;
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem' }}>
                       <div
                         style={{
                           width: 36,

@@ -18,18 +18,26 @@ const GOALS = [
   { id: 'general_wellness', label: 'General Wellness' }
 ];
 
+const CANONICAL_CATEGORIES = [
+  { id: 'peptide', label: '🧬 Peptides' },
+  { id: 'supplement', label: '🌿 Supplements' },
+  { id: 'hormone', label: '⚡ Hormones' },
+  { id: 'diagnostic_test', label: '🧪 Diagnostic Tests' },
+  { id: 'raw_material', label: '⚖️ Bulk API Raw Materials' },
+  { id: 'consumable', label: '💉 Consumables & Supplies' },
+  { id: 'skincare', label: '✨ Skincare & Cosmeceuticals' },
+  { id: 'bundle', label: '📦 Bundles & Kits' },
+  { id: 'service', label: '📋 Clinical Services' },
+  { id: 'equipment', label: '🔬 Lab Equipment' },
+];
+
 const PRODUCT_TYPES = [
-  { id: 'lyophilized_peptide', label: 'Lyophilized Peptides' },
-  { id: 'api_peptide', label: 'API Peptides' },
-  { id: 'api_supplement', label: 'API Supplements' },
-  { id: 'dna_testing_kit', label: 'DNA Testing Kits' },
-  { id: 'biomarker_testing_kit', label: 'Biomarker Testing Kits' },
-  { id: 'pellet', label: 'Pellets' },
-  { id: 'injectable', label: 'Injectables' },
-  { id: 'capsule_tablet', label: 'Capsules / Tablets' },
-  { id: 'medical_device', label: 'Medical Devices' },
-  { id: 'consumable', label: 'Consumables' },
-  { id: 'service', label: 'Services' }
+  { id: 'multi_type', label: '🔄 Multi-Type / Hybrid (2+ Formats)' },
+  { id: 'finished_product', label: '💊 Finished Products (Patient-Ready)' },
+  { id: 'raw_material', label: '🧪 Bulk API Raw Materials' },
+  { id: 'clinical_supplies', label: '💉 Clinical Supplies & Diluents' },
+  { id: 'diagnostic', label: '🔬 Diagnostics & Testing Kits' },
+  { id: 'service', label: '📋 Clinical Services' },
 ];
 
 const COMMERCIAL_STATUSES = [
@@ -46,6 +54,12 @@ const REGULATORY_STATUSES = [
   { id: 'missingCOA', label: 'Missing COA' },
   { id: 'regulatoryRisk', label: 'Regulatory Risk' },
   { id: 'researchUseOnly', label: 'Research Use Only' }
+];
+
+const GENOMIC_PROGRAMS = [
+  { id: 'fagron-genomics-telotest', label: '🧬 Fagron Genomics | TeloTest' },
+  { id: 'fagron-genomics-trichotest', label: '🧬 Fagron Genomics | TrichoTest' },
+  { id: 'fagron-genomics-nutrigen', label: '🧬 Fagron Genomics | NutriGen' },
 ];
 
 export default function AdvancedFiltersDrawer({ isOpen, onClose, advancedFilters, setAdvancedFilters, suppliers = [], filteredCount = 0, totalCount = 0 }) {
@@ -151,6 +165,27 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, advancedFilters
       `}</style>
       <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         
+        {/* Tags & Genomics Programs */}
+        <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+          <details style={{ width: '100%' }}>
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🧬 Tags & Genomics Programs
+                {(advancedFilters?.tags || []).length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{(advancedFilters?.tags || []).length}</span>}
+              </div>
+              <ChevronDown size={20} className="accordion-icon" />
+            </summary>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {GENOMIC_PROGRAMS.map(prog => (
+                <label key={prog.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                  <input type="checkbox" className="glass-checkbox" checked={(advancedFilters?.tags || []).includes(prog.id)} onChange={() => toggleArrayFilter('tags', prog.id)} /> 
+                  {prog.label}
+                </label>
+              ))}
+            </div>
+          </details>
+        </div>
+
         {/* Goal / Use Case */}
         <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
           <details style={{ width: '100%' }}>
@@ -166,6 +201,27 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, advancedFilters
                 <label key={goal.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
                   <input type="checkbox" className="glass-checkbox" checked={safeGoals.includes(goal.id)} onChange={() => toggleArrayFilter('goals', goal.id)} /> 
                   {goal.label}
+                </label>
+              ))}
+            </div>
+          </details>
+        </div>
+
+        {/* Canonical Category */}
+        <div style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(226, 232, 240, 0.8)', borderRadius: '16px', backdropFilter: 'blur(12px)', overflow: 'hidden' }}>
+          <details style={{ width: '100%' }}>
+            <summary style={{ padding: '1.25rem', fontWeight: 600, fontSize: '1rem', color: '#1e293b', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Category
+                {(advancedFilters?.categories || []).length > 0 && <span style={{ background: '#2563eb', color: 'white', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem' }}>{(advancedFilters?.categories || []).length}</span>}
+              </div>
+              <ChevronDown size={20} className="accordion-icon" />
+            </summary>
+            <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {CANONICAL_CATEGORIES.map(cat => (
+                <label key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                  <input type="checkbox" className="glass-checkbox" checked={(advancedFilters?.categories || []).includes(cat.id)} onChange={() => toggleArrayFilter('categories', cat.id)} /> 
+                  {cat.label}
                 </label>
               ))}
             </div>
@@ -205,12 +261,17 @@ export default function AdvancedFiltersDrawer({ isOpen, onClose, advancedFilters
                 <ChevronDown size={20} className="accordion-icon" />
               </summary>
               <div style={{ padding: '0 1.25rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {suppliers.map(supplier => (
-                  <label key={supplier} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
-                    <input type="checkbox" className="glass-checkbox" checked={safeSuppliers.includes(supplier)} onChange={() => toggleArrayFilter('suppliers', supplier)} /> 
-                    {supplier}
-                  </label>
-                ))}
+                {suppliers.map(supplier => {
+                  // Support both legacy string format and new {id, label} object format
+                  const supplierId    = supplier?.id    ?? supplier;
+                  const supplierLabel = supplier?.label ?? supplier?.companyName ?? supplier?.name ?? supplier;
+                  return (
+                    <label key={supplierId} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.95rem', cursor: 'pointer', color: '#333' }}>
+                      <input type="checkbox" className="glass-checkbox" checked={safeSuppliers.includes(supplierId)} onChange={() => toggleArrayFilter('suppliers', supplierId)} />
+                      {supplierLabel}
+                    </label>
+                  );
+                })}
               </div>
             </details>
           </div>

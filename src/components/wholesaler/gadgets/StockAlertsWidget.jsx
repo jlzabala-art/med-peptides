@@ -1,13 +1,8 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { subscribeToLowStock } from '../../../repositories/inventoryRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { AlertTriangle, ArrowRight } from '@/lib/icons';
-
-
+import { toast } from 'react-hot-toast';
 
 export default function StockAlertsWidget() {
   const { user } = useAuth();
@@ -15,10 +10,7 @@ export default function StockAlertsWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const q = query(collection(db, 'wholesaler_inventory'), where('wholesalerId', '==', user.uid));
-    const unsub = onSnapshot(q, (snap) => {
-      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const lowStock = items.filter(i => i.quantity <= (i.threshold || 5));
+    const unsub = subscribeToLowStock(user.uid, (lowStock) => {
       setAlerts(lowStock);
     });
 
@@ -43,7 +35,7 @@ export default function StockAlertsWidget() {
                 <div style={{ fontSize: '0.8rem', color: '#991b1b', marginTop: '0.2rem' }}>Quedan {a.quantity} unidades</div>
               </div>
               <button 
-                onClick={() => alert("Por favor usa el Portal B2B para reabastecer.")}
+                onClick={() => toast("Por favor usa el Portal B2B para reabastecer.")}
                 style={{ padding: '0.4rem 0.8rem', background: 'var(--color-danger)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
               >
                 Re-Stock

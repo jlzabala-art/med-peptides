@@ -1,12 +1,11 @@
 "use client";
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 /**
  * SupplementDetailPage — Phase 2: premium hero + full layout
  * Route: /supplements/:slug
  */
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { getSupplementWithVariants, getActiveSupplements } from '../repositories/supplementRepository';
 import { trackRecentView } from '../utils/recentViews';

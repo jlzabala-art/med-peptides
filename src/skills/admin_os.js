@@ -1,3 +1,5 @@
+
+import StatusChip from '../components/ui/StatusChip';
 // src/skills/admin_os.js
 // Admin OS – utilities for the admin dashboard
 // -------------------------------------------------
@@ -62,9 +64,7 @@ export function renderOpsPanel(ops) {
         >
           {op.icon}
           <span style={{ flex: 1 }}>{op.label}</span>
-          <span style={{ color: op.status === 'error' ? 'var(--color-danger)' : 'var(--color-success)' }}>
-            {op.status}
-          </span>
+          <StatusChip status={op.status} />
         </div>
       ))}
     </div>

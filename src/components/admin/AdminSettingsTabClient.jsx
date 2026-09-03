@@ -5,15 +5,14 @@ import HardDrive from "lucide-react/dist/esm/icons/hard-drive";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import GitCommit from "lucide-react/dist/esm/icons/git-commit";
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, setDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-
-
-
-
-
+import {
+  getGlobalSettingsFromCollection,
+  updateGlobalSettings,
+  initGlobalSettingsIfMissing
+} from '../../services/settingsService';
 
 import DataTable from '../ui/DataTable';
+import PresentationsManager from './catalog/PresentationsManager';
 import ScreenPermissionsSettings from './ScreenPermissionsSettings';
 import AccessGovernanceCenter from './access-control/AccessGovernanceCenter';
 import notifier from '../../services/NotificationService';
@@ -50,13 +49,11 @@ export default function AdminSettingsTabClient({ readOnly = false, initialSettin
       if (!initialSettings) {
         setLoading(true);
       }
-      const docSnap = await getDocs(query(collection(db, 'settings')));
-      const globalSettings = docSnap.docs.find((d) => d.id === 'global');
-
-      if (globalSettings) {
-        setSettings(globalSettings.data());
+      const data = await getGlobalSettingsFromCollection();
+      if (data && Object.keys(data).length > 0) {
+        setSettings(data);
       } else if (!initialSettings) {
-        await setDoc(doc(db, 'settings', 'global'), settings);
+        await initGlobalSettingsIfMissing(settings);
       }
     } catch (err) {
       console.error('Error fetching settings:', err);
@@ -69,7 +66,7 @@ export default function AdminSettingsTabClient({ readOnly = false, initialSettin
     try {
       const newSettings = { ...settings, ...updates };
       setSettings(newSettings);
-      await setDoc(doc(db, 'settings', 'global'), newSettings);
+      await updateGlobalSettings(newSettings);
     } catch (err) {
       console.error('Error updating settings:', err);
       notifier.info('Failed to save settings.');
@@ -196,7 +193,7 @@ export default function AdminSettingsTabClient({ readOnly = false, initialSettin
         readOnly ? (
           <span style={{ fontWeight: 700 }}>${row.cost}</span>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>$</span>
             <input
               type="number"
@@ -479,6 +476,9 @@ export default function AdminSettingsTabClient({ readOnly = false, initialSettin
           </div>
         </div>
       </div>
+      {/* Catalog Presentations */}
+      <PresentationsManager />
+
       {/* Dynamic Role Permissions */}
       <ScreenPermissionsSettings />
       <AccessGovernanceCenter />

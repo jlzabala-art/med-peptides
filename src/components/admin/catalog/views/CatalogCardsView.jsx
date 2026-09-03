@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { calculateProductHealthScore } from '../useProductHealthScore';
 import { Box, Sparkles, MoreVertical, Package, AlertCircle, ShieldAlert } from '@/lib/icons';
 
@@ -97,11 +98,15 @@ export default function CatalogCardsView({ items, loading, onRowClick, onAction,
                 }}
               >
                 {product.images?.length > 0 ? (
-                  <img
-                    src={product.images[0]}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+                  <div style={{ position: 'relative', width: '48px', height: '48px' }}>
+                    <Image
+                      src={product.images[0]}
+                      alt=""
+                      fill
+                      sizes="48px"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
                 ) : (
                   <Box size={24} color="#cbd5e1" />
                 )}

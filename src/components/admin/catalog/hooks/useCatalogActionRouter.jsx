@@ -10,12 +10,34 @@ import { CatalogService } from '../api/catalog.service';
 import { useCatalogSelectionStore } from '../../../../stores/useCatalogSelectionStore';
 import { useCatalogBuilderStore } from '../../../../stores/useCatalogBuilderStore';
 
+export const CATALOG_ACTIONS = {
+  EDIT_VARIANT: 'edit_variant',
+  EDIT: 'edit',
+  QUICK_VIEW: 'quick_view',
+  EDIT_PRICING: 'edit_pricing',
+  MANAGE_VARIANTS: 'manage_variants',
+  CLONE_VARIANT: 'clone_variant',
+  SYNC_ZOHO: 'sync_zoho',
+  BUILD_PROTOCOL: 'build_protocol',
+  AI_RECOMMEND: 'ai_recommend',
+  ENRICH_AI: 'enrich_ai',
+  CREATE_LEAD: 'create_lead',
+  RESTOCK: 'restock',
+  ARCHIVE: 'archive',
+  TOGGLE_VISIBILITY: 'toggle_visibility',
+  VIEW_SALES: 'view_sales',
+  VIEW_SUPPLIERS: 'view_suppliers',
+  VIEW_AUDIT: 'view_audit',
+  LINK_SUPPLIER: 'link_supplier'
+};
+
 export function useCatalogActionRouter({
   setSelectedProduct,
   setSelectedVariant,
   setVariantEditMode,
   setIsVariantModalOpen,
   setIsDrawerOpen,
+  setIsQuickViewOpen,
   setBulkActionState,
   setAiProduct,
   setIsAiModalOpen,
@@ -40,15 +62,27 @@ export function useCatalogActionRouter({
     const context = typeof valOrContext === 'string' ? valOrContext : 'overview';
     const val = valOrContext;
 
-    if (action === 'edit_variant' && variant) {
+    if (action === CATALOG_ACTIONS.EDIT_VARIANT && variant) {
       setSelectedProduct(product);
       setSelectedVariant(variant);
       setVariantEditMode(context);
       setIsVariantModalOpen(true);
-    } else if (action === 'edit') {
+    } else if (action === CATALOG_ACTIONS.EDIT) {
       setSelectedProduct(product);
+      setVariantEditMode('overview');
       setIsDrawerOpen(true);
-    } else if (action === 'clone_variant' && variant) {
+    } else if (action === CATALOG_ACTIONS.QUICK_VIEW) {
+      setSelectedProduct(product);
+      if (setIsQuickViewOpen) setIsQuickViewOpen(true);
+    } else if (action === CATALOG_ACTIONS.EDIT_PRICING) {
+      setSelectedProduct(product);
+      setVariantEditMode('pricing');
+      setIsDrawerOpen(true);
+    } else if (action === CATALOG_ACTIONS.MANAGE_VARIANTS) {
+      setSelectedProduct(product);
+      setVariantEditMode('variants');
+      setIsDrawerOpen(true);
+    } else if (action === CATALOG_ACTIONS.CLONE_VARIANT && variant) {
       CatalogService.cloneVariant(product.id || product.originalProduct?.id, variant)
         .then(() => toast.success('Variant cloned successfully.'))
         .catch(e => toast.error('Failed to clone variant: ' + e.message));

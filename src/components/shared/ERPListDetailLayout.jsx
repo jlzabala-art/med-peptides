@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Search, Eye } from '@/lib/icons';
+import EmptyState from '../ui/EmptyState';
+import FileText from 'lucide-react/dist/esm/icons/file-text';
 
 
 
@@ -274,11 +276,12 @@ export default function ERPListDetailLayout({
           {loading ? (
             <SkeletonList />
           ) : items.length === 0 ? (
-            <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#94a3b8' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem', filter: 'grayscale(0.5)' }}>📋</div>
-              <div style={{ fontWeight: 700, color: '#64748b', fontSize: '0.9rem' }}>No records found</div>
-              <div style={{ fontSize: '0.8rem', marginTop: '0.25rem', color: '#94a3b8' }}>Try adjusting your search or filters.</div>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="No records found"
+              subtitle="Try adjusting your search or filters."
+              compact={true}
+            />
           ) : (
             items.map(item => {
               const id = getItemId(item);

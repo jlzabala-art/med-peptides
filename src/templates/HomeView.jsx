@@ -3,7 +3,6 @@
  
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { usePageMeta } from '../hooks/usePageMeta';
-import { getAnalytics, logEvent } from 'firebase/analytics';
 import app from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { useHomeLayout, DEFAULT_GUEST_SECTIONS, DEFAULT_PRO_SECTIONS, PRO_ROLES } from '../hooks/useHomeLayout';
@@ -33,12 +32,17 @@ export default function HomeView({
   const renderRole = forcedRole || activeRole;
 
   useEffect(() => {
-    try {
-      const analytics = getAnalytics(app);
-      logEvent(analytics, `home_view_${renderRole}`);
-    } catch (err) {
-      // Analytics is non-critical — silently ignore if unavailable
-      console.warn('[HomeView] Analytics unavailable:', err?.message);
+    if (typeof window !== 'undefined') {
+      import('firebase/analytics').then(({ getAnalytics, logEvent, isSupported }) => {
+        isSupported().then((supported) => {
+          if (supported && app) {
+            try {
+              const analytics = getAnalytics(app);
+              logEvent(analytics, `home_view_${renderRole}`);
+            } catch {}
+          }
+        }).catch(() => {});
+      }).catch(() => {});
     }
   }, [renderRole]);
 
@@ -142,7 +146,7 @@ export default function HomeView({
   return (
     <div style={{ position: 'relative', background: 'var(--background)' }}>
       <MoleculeParticles />
-      <div className="home-seq" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '140px', paddingBottom: '140px' }}>
+      <div className="home-seq" style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 'clamp(56px, 6vw, 84px)', paddingBottom: 'clamp(56px, 6vw, 84px)' }}>
         {sections.map((section, idx) => (
           <HomeSectionRenderer
             key={section.id}

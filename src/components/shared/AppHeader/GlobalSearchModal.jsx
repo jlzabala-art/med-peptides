@@ -21,6 +21,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { searchIndex } from '../../../navigation/searchIndex';
 import { performDatabaseSearch } from '../../../services/searchDatabaseService';
+import EmptyState from '../../ui/EmptyState';
 
 
 
@@ -239,9 +240,12 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
           {/* Results Area */}
           <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '0.5rem' }}>
             {combinedResults.length === 0 && !isSearchingDB ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-                <p style={{ margin: 0, fontSize: '0.9rem' }}>No results found for "{query}"</p>
-              </div>
+              <EmptyState
+                icon={Search}
+                title="No results found"
+                subtitle={`No results found for "${query}"`}
+                compact={true}
+              />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {combinedResults.map((item, index) => (

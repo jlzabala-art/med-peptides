@@ -47,19 +47,25 @@ import { useUIStore } from '../../stores/uiStore';
 import { useAuth } from '../../context/AuthContext';
 import { generateICS } from '../../utils/calendarHelper';
 
-import ProtocolSupplyEngine from '../../components/protocol/ProtocolSupplyEngine';
-import InjectionDoseChart from '../../components/protocol/InjectionDoseChart';
-import ProtocolHeaderCharts from '../../components/protocol/ProtocolHeaderCharts';
-import RelatedProtocolsSection from '../../components/protocol/RelatedProtocolsSection';
-import ProductDetailDrawer from '../../components/protocol/ProductDetailDrawer';
-// TestingSection removed — content merged into Monitoring & Follow-Up accordion
-import ProtocolSupplementSection from '../../components/protocol/ProtocolSupplementSection';
-import ProtocolTechnicalSection from '../../components/protocol/ProtocolTechnicalSection';
-import ReconstitutionVisualGuide from '../../components/protocol/ReconstitutionVisualGuide';
-import PharmacokineticsSimulator from '../../components/protocol/PharmacokineticsSimulator';
-import ProtocolOutcomesSection from '../../components/protocol/ProtocolOutcomesSection';
+import dynamic from 'next/dynamic';
 import { useDailyDose } from '../../hooks/useDailyDose';
 import { useProtocolProducts } from '../../hooks/data/useProtocolProducts';
+
+import ProtocolSupplyEngine from '../../components/protocol/ProtocolSupplyEngine';
+import ProtocolHeaderCharts from '../../components/protocol/ProtocolHeaderCharts';
+import ProtocolLifespanTracker from '@/components/protocols/ProtocolLifespanTracker';
+import RelatedProtocolsSection from '../../components/protocol/RelatedProtocolsSection';
+import ProductDetailDrawer from '../../components/protocol/ProductDetailDrawer';
+import ProtocolSupplementSection from '../../components/protocol/ProtocolSupplementSection';
+import ProtocolTechnicalSection from '../../components/protocol/ProtocolTechnicalSection';
+import ProtocolOutcomesSection from '../../components/protocol/ProtocolOutcomesSection';
+import MedicalSupervisionBanner from '../../components/shared/MedicalSupervisionBanner';
+import ClinicalGanttTimeline from '../../components/protocol/ClinicalGanttTimeline';
+
+// ── Heavy Interactive Components dynamically loaded on demand ───────────────
+const InjectionDoseChart = dynamic(() => import('../../components/protocol/InjectionDoseChart'), { ssr: false });
+const ReconstitutionVisualGuide = dynamic(() => import('../../components/protocol/ReconstitutionVisualGuide'), { ssr: false });
+const PharmacokineticsSimulator = dynamic(() => import('../../components/protocol/PharmacokineticsSimulator'), { ssr: false });
 
 import { normalizeProtocol, frequencyToInjectionsPerWeek } from '../../utils/protocolSchemaAdapter';
 import ClinicalAssistant from '../../components/shared/ClinicalAssistant';
@@ -142,7 +148,8 @@ function displayPhases(protocol) {
 
 // ── Loading skeleton ──────────────────────────────────────────────────────────
 import { ProtocolSkeleton, ProtocolNotFound, IncludedPeptideCard } from "./subComponents";
-import { Activity, AlertCircle, AlertTriangle, ArrowLeft, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Clock, Download, Droplets, DollarSign, FlaskConical, Layers, Package, ShieldCheck, ShoppingCart, Star, Syringe, Target, TrendingDown, Users, XCircle, Zap, Calendar, TestTube, CheckCircle2, Sparkles } from '@/lib/icons';
+import { Activity, AlertCircle, AlertTriangle, ArrowLeft, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Clock, Download, Droplets, DollarSign, FlaskConical, Layers, Package, ShieldCheck, Briefcase, Star, Syringe, Target, TrendingDown, Users, XCircle, Zap, Calendar, TestTube, CheckCircle2, Sparkles, ShoppingCart } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 // ── Main template ─────────────────────────────────────────────────────────────
 export default function ProtocolTemplate({
@@ -174,6 +181,7 @@ export default function ProtocolTemplate({
   const heroPdfDropdownRef = useRef(null);
 
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isClinicAIOpen, setIsClinicAIOpen] = useState(false);
   const [calendarStartDate, setCalendarStartDate] = useState(() => {
     const d = new Date();
     const y = d.getFullYear();
@@ -203,13 +211,13 @@ export default function ProtocolTemplate({
       setIsCalendarModalOpen(false);
       trackEvent('download_calendar', {
         protocol_slug: slug,
-        protocol_name: protocol?.name || slug,
+        name: protocol?.name || slug,
         start_date: calendarStartDate,
         all_day: calendarAllDay,
       });
     } catch (e) {
       console.error('[ProtocolTemplate] Calendar generation failed', e);
-      alert('Could not generate calendar. Please verify the start date is valid.');
+      toast.error('Could not generate calendar. Please verify the start date is valid.');
     }
   };
 
@@ -278,7 +286,7 @@ export default function ProtocolTemplate({
 
     trackEvent('download_pdf', {
       protocol_slug: slug,
-      protocol_name: protocol?.name || slug,
+      name: protocol?.name || slug,
       version,
       location,
     });
@@ -380,6 +388,9 @@ export default function ProtocolTemplate({
   // ── Background pre-caching ───────────────────────────────────────────────
   useEffect(() => {
     if (!protocol || loading) return;
+    // Only professionals and admins have permissions to read/write clinical PDFs in storage
+    if (!isMed) return;
+
     const timer = setTimeout(async () => {
       try {
         const cachedUrl = await getCachedProtocolPDF(protocol);
@@ -400,19 +411,19 @@ export default function ProtocolTemplate({
     }, 4000); // 4-second delay to ensure rendering and chart are fully settled
 
     return () => clearTimeout(timer);
-  }, [protocol, loading, captureChartDataUrl]);
+  }, [protocol, loading, captureChartDataUrl, isMed]);
 
   // ── Dynamic SEO: title + meta description + JSON-LD ────────────────────────
   const seoData = useMemo(() => {
     if (!protocol) return null;
 
-    // Priority: metadata.scientificName > protocol_title > protocol_name > name > compound-based fallback
+    // Priority: metadata.scientificName > name > name > name > compound-based fallback
     const sciName  = protocol.metadata?.scientificName;
     const isRawId  = (s = '') => /^(rec_|prot_|id_|[a-z]{2,4}_\d{3,})/i.test(String(s).trim());
 
     // Best available human title from the Firestore document
-    const firestoreTitle = protocol.protocol_title || protocol.metadata?.title || '';
-    const rawName        = protocol.name || protocol.protocol_name || '';
+    const firestoreTitle = protocol.name || protocol.metadata?.title || '';
+    const rawName        = protocol.name || protocol.name || '';
     const resolvedName   = firestoreTitle || (isRawId(rawName) ? '' : rawName);
 
     // Ultimate fallback: build from compound names
@@ -630,10 +641,10 @@ export default function ProtocolTemplate({
 
   // ── Derived values from actual DB document ─────────────────────────────────
   // Never show raw ID-like strings (e.g. "wm_001", "prot_003") as the visible name.
-  // Priority: protocol_title → metadata.display_name → abbreviatedName → humanized slug.
+  // Priority: name → metadata.display_name → abbreviatedName → humanized slug.
   const _isRawId = (s = '') => /^[a-z]{1,5}[_-]\d{2,}/i.test(String(s).trim());
-  const _rawName = protocol.protocol_name || protocol.name || '';
-  const name = protocol.protocol_title
+  const _rawName = protocol.name || protocol.name || '';
+  const name = protocol.name
     || protocol.metadata?.display_name
     || protocol.metadata?.abbreviatedName
     || (_isRawId(_rawName) ? '' : _rawName)
@@ -813,6 +824,7 @@ export default function ProtocolTemplate({
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
+              onClick={() => setIsClinicAIOpen(!isClinicAIOpen)}
             >
               <Sparkles size={12} />
               <span>ClinicAI</span>
@@ -1209,50 +1221,24 @@ export default function ProtocolTemplate({
       {/* ── Body ─────────────────────────────────────────────────────────── */}
       <div className="proto-detail__body">
         <div className="container pt-grid">
-          {/* Left: TOC */}
-          <aside className="pt-toc-col">
-            <ProtocolTOC 
-              sections={[
-                (overviewSummary || longDescription || synergyRationale) && { id: `${slug}_overview`, label: 'Protocol Overview' },
-                targetPatient && { id: `${slug}_target_patient`, label: 'Target Patient' },
-                (protocol.reconstitution || (protocol.phase_blueprints || []).some(ph => (ph.drugs || []).some(d => d.reconstitution || d.dose_logic?.reconstitution_water_ml))) && { id: `${slug}_reconstitution`, label: 'Reconstitution' },
-                clinicalEvidence && { id: `${slug}_clinical`, label: 'Clinical Evidence' },
-                logistics && { id: `${slug}_logistics`, label: 'Implementation Logistics' },
-                { id: `${slug}_safety`, label: 'Safety Profile' },
-                { id: `${slug}_supply`, label: 'Supply & Dosage' }
-              ].filter(Boolean)} 
-            />
-          </aside>
-
-          <div className="mobile-toc-fab-container">
-            <MobileTOCDrawer>
-
-            <ProtocolTOC 
-              sections={[
-                (overviewSummary || longDescription || synergyRationale) && { id: `${slug}_overview`, label: 'Protocol Overview' },
-                targetPatient && { id: `${slug}_target_patient`, label: 'Target Patient' },
-                (protocol.reconstitution || (protocol.phase_blueprints || []).some(ph => (ph.drugs || []).some(d => d.reconstitution || d.dose_logic?.reconstitution_water_ml))) && { id: `${slug}_reconstitution`, label: 'Reconstitution' },
-                clinicalEvidence && { id: `${slug}_clinical`, label: 'Clinical Evidence' },
-                logistics && { id: `${slug}_logistics`, label: 'Implementation Logistics' },
-                { id: `${slug}_safety`, label: 'Safety Profile' },
-                { id: `${slug}_supply`, label: 'Supply & Dosage' }
-              ].filter(Boolean)} 
-            />
-                      </MobileTOCDrawer>
-          </div>
-
           {/* Center: Main Content */}
           <div className="proto-detail__main">
 
             {/* ── Expected Clinical Outcomes (Relocated below Hero, outside accordion) ── */}
             {protocol.expected_outcomes && (
-              <div style={{ marginBottom: '2rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
                 <ProtocolOutcomesSection
                   expectedOutcomes={protocol.expected_outcomes}
                   accentColor="var(--color-success)"
                 />
               </div>
             )}
+
+            {/* ── Real-Time Aqueous Lifespan & Replenishment Forecaster ── */}
+            <ProtocolLifespanTracker protocol={protocol} />
+
+            {/* ── Cross-Integration: Medical Supervision On-Ramp (B2C -> B2B) ── */}
+            <MedicalSupervisionBanner itemName={name} itemType="protocol" />
 
             {/* ── Protocol Overview Accordion ───────────────────────────── */}
             {(overviewSummary || longDescription || synergyRationale) && (
@@ -1263,14 +1249,14 @@ export default function ProtocolTemplate({
                 accentColor="#0ea5e9"
                 defaultOpen={true}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingTop: '0.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingTop: '0.25rem', maxWidth: '85ch' }}>
                   {overviewSummary && (
-                    <p className="proto-section__text" style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.05rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.6, margin: 0, letterSpacing: '-0.01em' }}>
+                    <p className="proto-section__text" style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.6, margin: 0, letterSpacing: '-0.015em' }}>
                       {overviewSummary}
                     </p>
                   )}
                   {longDescription && (
-                    <div style={{ fontFamily: "'Inter', sans-serif", color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.75, letterSpacing: '0.01em' }}>
+                    <div style={{ fontFamily: "'Inter', sans-serif", color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: 1.8, letterSpacing: '0.01em', whiteSpace: 'pre-wrap' }}>
                       {longDescription}
                     </div>
                   )}
@@ -1375,6 +1361,11 @@ export default function ProtocolTemplate({
               );
             })()}
 
+
+            {/* Interactive Clinical Gantt Diagram & Phased Timeline */}
+            <div style={{ marginBottom: '2rem' }}>
+              <ClinicalGanttTimeline protocol={protocol} />
+            </div>
 
             {/* Phases accordion (detailed) — Section: Treatment Flow */}
             {activeBlueprintPhases.length > 0 && (() => {
@@ -1866,9 +1857,99 @@ export default function ProtocolTemplate({
                 </ol>
               </SectionAccordion>
             )}
+            {/* ── Included Peptides ─────────────────────────────────────────── */}
+            {(() => {
+              // Extract unique compounds from v2 phase_blueprints OR legacy phases
+              const allCompounds = (protocol?.phase_blueprints || protocol?.phases || [])
+                .flatMap(ph => ph.drugs || ph.compounds || ph.drugs_used || []);
+
+              // Deduplicate by slug/name
+              const seen = new Set();
+              const uniqueCompounds = allCompounds.filter(d => {
+                const key = d.product_slug || d.slug || d.name || d.product_title;
+                if (!key || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+              });
+
+              if (!uniqueCompounds.length) return null;
+
+              // Accent colors by category keyword
+              const accentFor = (cat = '') => {
+                const c = cat.toLowerCase();
+                if (c.includes('weight') || c.includes('metabolic')) return '#10B981';
+                if (c.includes('healing') || c.includes('recovery'))  return 'var(--color-primary)';
+                if (c.includes('aging') || c.includes('longevity'))   return '#A78BFA';
+                if (c.includes('cognitive') || c.includes('neuro'))   return '#22D3EE';
+                if (c.includes('muscle') || c.includes('performance'))return '#F59E0B';
+                if (c.includes('hormonal'))                           return '#F97316';
+                return 'var(--color-primary)';
+              };
+
+              // Enrich with product catalog data when available
+              const enrichedCards = uniqueCompounds.map(d => {
+                const slugKey = d.product_slug || d.slug || d.name || d.product_title;
+                const match = (protocolProducts || []).find(p =>
+                  p.slug === slugKey || p.id === slugKey ||
+                  (p.displayName || p.name || '').toLowerCase() === (d.product_title || d.name || '').toLowerCase()
+                );
+                const cat    = match?.category || d.category || '';
+                const color  = accentFor(cat);
+                return {
+                  name:        match?.displayName || match?.name || d.product_title || d.name || slugKey,
+                  slug:        match?.slug || slugKey,
+                  role:        match?.shortDescription || match?.subtitle || cat || 'Research Compound',
+                  description: match?.description || match?.shortDescription || d.description || '',
+                  color,
+                  dosage:      d.dosage || d.dose || '',
+                  frequency:   d.frequency || '',
+                };
+              });
+
+              return (
+                <div style={{ marginBottom: '2rem', marginTop: '1rem' }}>
+                  {/* Section header */}
+                  <div style={{ marginBottom: '1.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+                      <FlaskConical size={18} style={{ color: 'var(--color-primary)' }} />
+                      <span style={{
+                        fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em',
+                        textTransform: 'uppercase', color: 'var(--color-primary)',
+                      }}>Protocol Compounds</span>
+                    </div>
+                    <h2 style={{
+                      fontSize: 'clamp(1.35rem, 3vw, 1.75rem)', fontWeight: 800,
+                      color: '#0f172a', margin: 0, letterSpacing: '-0.02em',
+                    }}>
+                      Included Peptides
+                    </h2>
+                    <p style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)', marginTop: '0.35rem' }}>
+                      {enrichedCards.length} active compound{enrichedCards.length !== 1 ? 's' : ''} in this protocol
+                    </p>
+                  </div>
+
+                  {/* Card flex wrapper */}
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    gap: '1.25rem',
+                    paddingBottom: '0.75rem',
+                  }}>
+                    {enrichedCards.map((peptide, idx) => (
+                      <IncludedPeptideCard
+                        key={peptide.slug || idx}
+                        peptide={peptide}
+                        onClick={() => setActiveProductDrawer(peptide)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* ── Related Protocols — Phase 9: clinical similarity engine ── */}
             {protocol?.id && <RelatedProtocolsSection protocolId={protocol.id} />}
-
             {/* ── Supplement Section ─────────────────────────────────────── */}
             {Array.isArray(protocol?.recommended_supplements) && protocol.recommended_supplements.length > 0 && (
               <ProtocolSupplementSection
@@ -1920,103 +2001,27 @@ export default function ProtocolTemplate({
               dailyDose={dailyDose}
             />
           </div>
-          {/* Right: ClinicAI Sidebar */}
-          <div className="pt-ai-col">
-            <ClinicalAssistant embedded={true} isOpen={true} setIsOpen={() => {}} />
+          {/* ClinicAI Drawer Modal */}
+          <div className={`pt-ai-drawer ${isClinicAIOpen ? 'open' : ''}`}>
+            <div className="pt-ai-drawer__header">
+              <span style={{ fontWeight: 600, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Sparkles size={18} /> ClinicAI
+              </span>
+              <button 
+                onClick={() => setIsClinicAIOpen(false)} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem' }}
+              >
+                <XCircle size={20} color="var(--color-text-muted)" />
+              </button>
+            </div>
+            <div className="pt-ai-drawer__content">
+              <ClinicalAssistant embedded={true} isOpen={isClinicAIOpen} setIsOpen={setIsClinicAIOpen} />
+            </div>
           </div>
         </div>{/* /pt-grid */}
       </div>
 
-      {/* ── Included Peptides ─────────────────────────────────────────── */}
-      {(() => {
-        // Extract unique compounds from v2 phase_blueprints OR legacy phases
-        const allCompounds = (protocol?.phase_blueprints || protocol?.phases || [])
-          .flatMap(ph => ph.drugs || ph.compounds || ph.drugs_used || []);
 
-        // Deduplicate by slug/name
-        const seen = new Set();
-        const uniqueCompounds = allCompounds.filter(d => {
-          const key = d.product_slug || d.slug || d.name || d.product_title;
-          if (!key || seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-
-        if (!uniqueCompounds.length) return null;
-
-        // Accent colors by category keyword
-        const accentFor = (cat = '') => {
-          const c = cat.toLowerCase();
-          if (c.includes('weight') || c.includes('metabolic')) return '#10B981';
-          if (c.includes('healing') || c.includes('recovery'))  return 'var(--color-primary)';
-          if (c.includes('aging') || c.includes('longevity'))   return '#A78BFA';
-          if (c.includes('cognitive') || c.includes('neuro'))   return '#22D3EE';
-          if (c.includes('muscle') || c.includes('performance'))return '#F59E0B';
-          if (c.includes('hormonal'))                           return '#F97316';
-          return 'var(--color-primary)';
-        };
-
-        // Enrich with product catalog data when available
-        const enrichedCards = uniqueCompounds.map(d => {
-          const slugKey = d.product_slug || d.slug || d.name || d.product_title;
-          const match = (protocolProducts || []).find(p =>
-            p.slug === slugKey || p.id === slugKey ||
-            (p.displayName || p.name || '').toLowerCase() === (d.product_title || d.name || '').toLowerCase()
-          );
-          const cat    = match?.category || d.category || '';
-          const color  = accentFor(cat);
-          return {
-            name:        match?.displayName || match?.name || d.product_title || d.name || slugKey,
-            slug:        match?.slug || slugKey,
-            role:        match?.shortDescription || match?.subtitle || cat || 'Research Compound',
-            description: match?.description || match?.shortDescription || d.description || '',
-            color,
-            dosage:      d.dosage || d.dose || '',
-            frequency:   d.frequency || '',
-          };
-        });
-
-        return (
-          <div style={{
-            maxWidth: '1280px', margin: '0 auto 3rem', padding: '0 1.5rem',
-          }}>
-            {/* Section header */}
-            <div style={{ marginBottom: '1.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-                <FlaskConical size={18} style={{ color: 'var(--color-primary)' }} />
-                <span style={{
-                  fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em',
-                  textTransform: 'uppercase', color: 'var(--color-primary)',
-                }}>Protocol Compounds</span>
-              </div>
-              <h2 style={{
-                fontSize: 'clamp(1.35rem, 3vw, 1.75rem)', fontWeight: 800,
-                color: '#0f172a', margin: 0, letterSpacing: '-0.02em',
-              }}>
-                Included Peptides
-              </h2>
-              <p style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)', marginTop: '0.35rem' }}>
-                {enrichedCards.length} active compound{enrichedCards.length !== 1 ? 's' : ''} in this protocol
-              </p>
-            </div>
-
-            {/* Card grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: '1.1rem',
-            }}>
-              {enrichedCards.map((peptide, idx) => (
-                <IncludedPeptideCard
-                  key={peptide.slug || idx}
-                  peptide={peptide}
-                  onClick={() => setActiveProductDrawer(peptide)}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })()}
 
       {/* ── RUO Disclaimer footer ─────────────────────────────────────── */}
       <div className="proto-ruo-footer">
@@ -2077,7 +2082,7 @@ export default function ProtocolTemplate({
               if (!bundleAdded) {
                 trackEvent('add_to_cart', {
                   protocol_slug: slug,
-                  protocol_name: protocol?.name || slug,
+                  name: protocol?.name || slug,
                   value: stickyTotal || 0,
                   currency: 'USD',
                   location: 'floating_action_bar',
@@ -2098,9 +2103,9 @@ export default function ProtocolTemplate({
             }}
           >
             {bundleAdded ? (
-              <><CheckCircle2 size={16} /> Added!</>
+              <><CheckCircle2 size={16} /> Added to Workspace</>
             ) : (
-              <><ShoppingCart size={16} /> Get Bundle</>
+              <><Briefcase size={16} /> Add to Workspace</>
             )}
           </button>
         </div>

@@ -7,6 +7,7 @@ import { getPrescription, updatePrescription, createPrescription } from '../../s
 import { getProtocolById } from '../../services/protocolStorage';
 import { generatePrescriptionLines } from '../../engine/protocolMath';
 import DosingCalendar from './DosingCalendar';
+import UniversalUserSelector from '../../components/shared/UniversalUserSelector';
 
 const PrescriptionDetail = () => {
   const { id } = useParams();
@@ -151,12 +152,12 @@ const PrescriptionDetail = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Doctor ID</label>
-                <input 
-                  type="text" 
+                <UniversalUserSelector 
+                  roleFilter="doctor"
+                  label="Doctor Asignado"
                   value={prescription.doctorId || ''}
-                  onChange={(e) => setPrescription({...prescription, doctorId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  onChange={(user) => setPrescription({...prescription, doctorId: user ? (user.id || user.objectID) : ''})}
+                  containerStyle={{ padding: 0, border: 'none' }}
                 />
               </div>
               <div className="col-span-2">

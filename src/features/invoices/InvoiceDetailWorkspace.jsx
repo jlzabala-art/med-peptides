@@ -21,9 +21,9 @@ import { X, ExternalLink, ShieldCheck, AlertTriangle, CloudLightning, Activity, 
 export default function InvoiceDetailWorkspace({ invoice, onClose }) {
   const amount = Number(invoice.grandTotal) || Number(invoice.totalAmount) || 0;
   // Mock logic based on the user's prompt requirements
-  const isOverdue = invoice.status === 'Overdue';
-  const riskScore = isOverdue ? 32 : (invoice.status === 'Paid' ? 95 : 84);
-  const paidAmount = invoice.status === 'Paid' ? amount : (invoice.status === 'Partially Paid' ? amount * 0.4 : 0);
+  const isOverdue = invoice.status === 'error';
+  const riskScore = isOverdue ? 32 : (invoice.status === 'completed' ? 95 : 84);
+  const paidAmount = invoice.status === 'completed' ? amount : (invoice.status === 'Partially Paid' ? amount * 0.4 : 0);
   const outstandingAmount = amount - paidAmount;
   const progressPercent = amount > 0 ? (paidAmount / amount) * 100 : 0;
 
@@ -38,8 +38,8 @@ export default function InvoiceDetailWorkspace({ invoice, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
             <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--color-text-primary)' }}>{invoice.documentNumber || invoice.id.slice(0,8)}</h2>
             <span style={{ 
-              background: invoice.status === 'Paid' ? '#dcfce7' : (isOverdue ? '#fef2f2' : '#fef3c7'),
-              color: invoice.status === 'Paid' ? '#166534' : (isOverdue ? '#b91c1c' : '#854d0e'),
+              background: invoice.status === 'completed' ? '#dcfce7' : (isOverdue ? '#fef2f2' : '#fef3c7'),
+              color: invoice.status === 'completed' ? '#166534' : (isOverdue ? '#b91c1c' : '#854d0e'),
               padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700
             }}>
               {invoice.status || 'Draft'}

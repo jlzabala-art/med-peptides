@@ -8,22 +8,30 @@ import {
   getDoc,
   orderBy,
   doc,
-  updateDoc,
-  deleteDoc,
-  addDoc,
   collectionGroup,
   limit,
   startAfter,
   where,
   getCountFromServer,
-  setDoc,
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
 
 import { useToast } from '../../../hooks/useToast';
+import {
+  createProduct as repoCreateProduct,
+  updateProduct as repoUpdateProduct,
+  deleteProduct as repoDeleteProduct,
+  createVariant as repoCreateVariant,
+} from '../../../repositories/productRepository';
 
 const DEFAULT_ADVANCED_FILTERS = {};
 const DEFAULT_ACTIVE_KPIS = [];
+
+
+
+// ── In-memory cache (Layer 1) ─────────────────────────────────────────────────
+const _catalogCache = { products: null, variants: null, ts: 0 };
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function useCatalogData(options = {}) {
   const {
@@ -37,8 +45,41 @@ export function useCatalogData(options = {}) {
     skipFetch = false,
   } = options;
 
-  const [products, setProducts] = useState([]);
-  const [variants, setVariants] = useState([]);
+  const hasAlgoliaFilters = 
+    (advancedFilters.goals && advancedFilters.goals.length > 0) ||
+    (advancedFilters.productTypes && advancedFilters.productTypes.length > 0) ||
+    (advancedFilters.commercialStatus && advancedFilters.commercialStatus.length > 0) ||
+    (advancedFilters.regulatoryStatus && advancedFilters.regulatoryStatus.length > 0) ||
+    (activeKpis && activeKpis.length > 0) ||
+    (categoryFilter && categoryFilter !== 'All Categories');
+
+  const isDefaultQuery = !searchQuery && !hasAlgoliaFilters && !supplierFilter;
+
+  // Initialize state with cache if available
+  const getInitialState = () => {
+    if (isDefaultQuery && typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('__rg_catalog_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (Date.now() - parsed.ts) < CACHE_TTL_MS * 6) {
+             _catalogCache.products = parsed.products;
+             _catalogCache.variants = parsed.variants;
+             _catalogCache.ts = parsed.ts;
+             return { p: parsed.products, v: parsed.variants, loading: false };
+          }
+        }
+      } catch(e) {}
+    }
+    return { p: [], v: [], loading: true };
+  };
+
+  const initial = getInitialState();
+
+  const [products, setProducts] = useState(initial.p);
+  const [variants, setVariants] = useState(initial.v);
+  const [loading, setLoading] = useState(initial.loading);
+
   const [metrics, setMetrics] = useState({
     totalProducts: 0,
     totalVariants: 0,
@@ -50,7 +91,6 @@ export function useCatalogData(options = {}) {
     missingPricing: 0,
   });
   
-  const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [lastVisible, setLastVisible] = useState(null);
   const [pageHistory, setPageHistory] = useState([]);
@@ -59,18 +99,41 @@ export function useCatalogData(options = {}) {
 
   const fetchProducts = async (direction = 'next', reset = false) => {
     try {
-      setLoading(true);
+      // If we are resetting, checking if it's the default query, and we have in-memory or localStorage cache, serve it instantly
+      if (reset && isDefaultQuery) {
+         const now = Date.now();
+         if (_catalogCache.products && (now - _catalogCache.ts) < CACHE_TTL_MS) {
+            setProducts(_catalogCache.products);
+            setVariants(_catalogCache.variants);
+            setLoading(false);
+            
+            // Re-validate silently
+            setTimeout(() => fetchProductsImpl(direction, reset, true), 500);
+            return;
+         }
+      }
 
+      await fetchProductsImpl(direction, reset, false);
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
+  };
+
+  const fetchProductsImpl = async (direction, reset, isSilent) => {
+    if (!isSilent) setLoading(true);
+    setError(null);
+    try {
       if (supplierFilter) {
-        // Query variants for this supplier
-        const vQ = query(collectionGroup(db, 'variants'), where('supplier', '==', supplierFilter));
+        // Query variants by supplierId (canonical field)
+        const vQ = query(collectionGroup(db, 'variants'), where('supplierId', '==', supplierFilter));
         const vSnap = await getDocs(vQ);
         const variantsOfSupplier = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
         
         const productIds = [...new Set(variantsOfSupplier.map(v => v.productId).filter(Boolean))];
         
-        // Also query products directly just in case
-        const pQ = query(collection(db, 'products'), where('supplier', '==', supplierFilter));
+        // Also query products by supplierIds array (canonical field)
+        const pQ = query(collection(db, 'products'), where('supplierIds', 'array-contains', supplierFilter));
         const pSnap = await getDocs(pQ);
         pSnap.docs.forEach(d => {
             if (!productIds.includes(d.id)) {
@@ -126,8 +189,8 @@ export function useCatalogData(options = {}) {
                 v.dosage || p.dosage || '',
                 v.size || p.size || '',
               ].filter(Boolean).join(' ');
-              const computedPrice = Number(v.pricing?.retail?.perUnit || v.price) || 0;
-              const computedCost = Number(v.cost_per_gram || v.pricing?.master?.perUnit || v.cost) || 0;
+              const computedPrice = Number(v.pricing?.retail?.perUnit) || 0;
+              const computedCost = Number(v.pricing?.master?.perUnit) || 0;
   
               flatVars.push({
                 ...v,
@@ -135,7 +198,7 @@ export function useCatalogData(options = {}) {
                 productId: p.id,
                 productName: p.name || 'Unknown Product',
                 name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
-                supplier: v.supplier || p.supplier || 'Unassigned',
+                supplierId: v.supplierId || null,
                 stock: Number(v.stock?.available || v.stock) || 0,
                 reorderPoint: Number(v.reorderPoint) || 20,
                 price: computedPrice,
@@ -143,15 +206,15 @@ export function useCatalogData(options = {}) {
                 coa: v.hasCoa ? 'Valid' : 'Missing',
                 gmp: v.hasGmp ? 'Valid' : 'Missing',
                 registration: 'Active',
-                isMissingSupplier: !(v.supplier || p.supplier),
+                isMissingSupplier: !v.supplierId,
                 isMissingPricing: !(computedPrice || computedCost),
                 rawVariant: v,
                 rawProduct: p,
               });
             });
           } else {
-            const computedPrice = Number(p.pricing?.retail?.perUnit || p.price) || 0;
-            const computedCost = Number(p.cost_per_gram || p.pricing?.master?.perUnit || p.cost) || 0;
+            const computedPrice = Number(p.pricing?.retail?.perUnit) || 0;
+            const computedCost = Number(p.pricing?.master?.perUnit) || 0;
   
             flatVars.push({
               ...p,
@@ -159,7 +222,7 @@ export function useCatalogData(options = {}) {
               productId: p.id,
               productName: p.name || 'Unknown Product',
               name: p.name || 'Unknown Product',
-              supplier: p.supplier || 'Unassigned',
+              supplierId: p.supplierIds?.[0] || null,
               stock: Number(p.stock?.available || p.stock) || 0,
               reorderPoint: Number(p.reorderPoint) || 20,
               price: computedPrice,
@@ -167,7 +230,7 @@ export function useCatalogData(options = {}) {
               coa: p.hasCoa ? 'Valid' : 'Missing',
               gmp: p.hasGmp ? 'Valid' : 'Missing',
               registration: 'Active',
-              isMissingSupplier: !p.supplier,
+              isMissingSupplier: !(p.supplierIds?.length > 0),
               isMissingPricing: !(computedPrice || computedCost),
               rawVariant: null,
               rawProduct: p,
@@ -484,8 +547,8 @@ export function useCatalogData(options = {}) {
               v.dosage || p.dosage || '',
               v.size || p.size || '',
             ].filter(Boolean).join(' ');
-            const computedPrice = Number(v.pricing?.retail?.perUnit || v.price) || 0;
-            const computedCost = Number(v.cost_per_gram || v.pricing?.master?.perUnit || v.cost) || 0;
+            const computedPrice = Number(v.pricing?.retail?.perUnit) || 0;
+            const computedCost = Number(v.pricing?.master?.perUnit) || 0;
 
             flatVars.push({
               ...v,
@@ -493,7 +556,7 @@ export function useCatalogData(options = {}) {
               productId: p.id,
               productName: p.name || 'Unknown Product',
               name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
-              supplier: v.supplier || p.supplier || 'Unassigned',
+              supplierId: v.supplierId || null,
               stock: Number(v.stock?.available || v.stock) || 0,
               reorderPoint: Number(v.reorderPoint) || 20,
               price: computedPrice,
@@ -501,15 +564,15 @@ export function useCatalogData(options = {}) {
               coa: v.hasCoa ? 'Valid' : 'Missing',
               gmp: v.hasGmp ? 'Valid' : 'Missing',
               registration: 'Active',
-              isMissingSupplier: !(v.supplier || p.supplier),
+              isMissingSupplier: !v.supplierId,
               isMissingPricing: !(computedPrice || computedCost),
               rawVariant: v,
               rawProduct: p,
             });
           });
         } else {
-          const computedPrice = Number(p.pricing?.retail?.perUnit || p.price) || 0;
-          const computedCost = Number(p.cost_per_gram || p.pricing?.master?.perUnit || p.cost) || 0;
+          const computedPrice = Number(p.pricing?.retail?.perUnit) || 0;
+          const computedCost = Number(p.pricing?.master?.perUnit) || 0;
 
           flatVars.push({
             ...p,
@@ -517,7 +580,7 @@ export function useCatalogData(options = {}) {
             productId: p.id,
             productName: p.name || 'Unknown Product',
             name: p.name || 'Unknown Product',
-            supplier: p.supplier || 'Unassigned',
+            supplierId: p.supplierIds?.[0] || null,
             stock: Number(p.stock?.available || p.stock) || 0,
             reorderPoint: Number(p.reorderPoint) || 20,
             price: computedPrice,
@@ -525,7 +588,7 @@ export function useCatalogData(options = {}) {
             coa: p.hasCoa ? 'Valid' : 'Missing',
             gmp: p.hasGmp ? 'Valid' : 'Missing',
             registration: 'Active',
-            isMissingSupplier: !p.supplier,
+            isMissingSupplier: !(p.supplierIds?.length > 0),
             isMissingPricing: !(computedPrice || computedCost),
             rawVariant: null,
             rawProduct: p,
@@ -552,7 +615,7 @@ export function useCatalogData(options = {}) {
       console.error('Error fetching catalog:', err);
       toast.error('Failed to load catalog data.');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
@@ -565,16 +628,33 @@ export function useCatalogData(options = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, categoryFilter, activeWorkspace, supplierFilter, advancedFilters, activeKpis, skipFetch]);
 
+  // Persist Default View to LocalStorage for zero-latency load
+  useEffect(() => {
+    if (isDefaultQuery && currentPage === 1 && products.length > 0 && typeof window !== 'undefined') {
+      try {
+        const cachePayload = { products, variants, ts: Date.now() };
+        localStorage.setItem('__rg_catalog_cache', JSON.stringify(cachePayload));
+        _catalogCache.products = products;
+        _catalogCache.variants = variants;
+        _catalogCache.ts = Date.now();
+      } catch (e) {
+         // Ignore quota errors
+      }
+    }
+  }, [products, variants, isDefaultQuery, currentPage]);
+
+  // ── Write operations — delegated to productRepository (schema-validated) ──
+
   const updateProduct = async (id, updates) => {
     try {
-      const ref = doc(db, 'products', id);
-      await updateDoc(ref, { ...updates, updatedAt: new Date().toISOString() });
+      await repoUpdateProduct(id, updates, { strict: false });
+      // Optimistic UI update — keep the table reactive without re-fetch
       setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
       toast.success('Product updated');
       return true;
     } catch (err) {
-      console.error(err);
-      toast.error('Failed to update product');
+      console.error('[useCatalogData] updateProduct failed:', err);
+      toast.error(err?.message || 'Failed to update product');
       return false;
     }
   };
@@ -583,70 +663,51 @@ export function useCatalogData(options = {}) {
     try {
       const { _mode, parentProductId, ...data } = productData;
       if (_mode === 'variant') {
-        const parentRef = doc(db, 'products', parentProductId);
-        const parentDoc = await getDoc(parentRef);
-        if (!parentDoc.exists()) throw new Error('Parent product not found');
-
-        const newVariantId = `var_${Date.now()}`;
-        const newVariantRef = doc(db, 'products', parentProductId, 'variants', newVariantId);
-        
-        await setDoc(newVariantRef, {
+        // Delegate variant creation to the repository
+        await repoCreateVariant(parentProductId, {
           ...data,
           productId: parentProductId,
-          isVariant: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-        
+        }, { strict: false });
+
         toast.success('Variant created successfully');
         fetchProducts('next', true); // Refresh to show new variant
         return true;
       } else {
-        // Create Product
-        const newProductRef = await addDoc(collection(db, 'products'), {
-          ...data,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-        
-        // Ensure a default variant is initialized
-        const defaultVariantId = `var_${Date.now()}`;
-        const defaultVariantRef = doc(db, 'products', newProductRef.id, 'variants', defaultVariantId);
-        await setDoc(defaultVariantRef, {
+        // Delegate product creation to the repository (includes Write Guard)
+        const { id: newId } = await repoCreateProduct(data, { strict: false });
+
+        // Create a default variant through the repository as well
+        await repoCreateVariant(newId, {
           sku: data.sku ? `${data.sku}-DEFAULT` : 'DEFAULT',
           format: 'Standard',
           size: 'Standard',
-          supplier: data.supplier || 'Unassigned',
-          costPerGram: data.costPerGram || 0,
-          pricePerGram: data.pricePerGram || 0,
-          stock: data.stock || 0,
+          supplierId: data.supplierId || null,
+          stock: { available: data.stock || 0 },
           reorderPoint: data.reorderPoint || 20,
-          productId: newProductRef.id,
-          isVariant: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
+          productId: newId,
+        }, { strict: false });
 
         toast.success('Product created successfully');
         fetchProducts('next', true); // Refresh
         return true;
       }
     } catch (err) {
-      console.error(err);
-      toast.error('Failed to save data');
+      console.error('[useCatalogData] addProduct failed:', err);
+      toast.error(err?.message || 'Failed to save data');
       return false;
     }
   };
 
   const deleteProduct = async (id) => {
     try {
-      await deleteDoc(doc(db, 'products', id));
+      // Repository handles sub-collection variant cleanup automatically
+      await repoDeleteProduct(id);
       setProducts((prev) => prev.filter((p) => p.id !== id));
       toast.success('Product deleted');
       return true;
     } catch (err) {
-      console.error(err);
-      toast.error('Failed to delete product');
+      console.error('[useCatalogData] deleteProduct failed:', err);
+      toast.error(err?.message || 'Failed to delete product');
       return false;
     }
   };

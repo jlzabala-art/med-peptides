@@ -21,18 +21,45 @@ const searchCollectionFirestore = async (collectionName, fieldName, searchText, 
   const capText = capitalize(searchText);
   
   try {
-    const q = query(
-      collection(db, collectionName),
-      where(fieldName, '>=', capText),
-      where(fieldName, '<=', capText + '\uf8ff'),
-      limit(5)
-    );
+    const isProduct = collectionName === 'products';
+    let snapshot;
+    let localFiltered = [];
     
-    const snapshot = await getDocs(q);
+    if (isProduct) {
+      // For products, fetch up to 300 active/published items to allow flexible case-insensitive search
+      // since Firestore doesn't support it natively.
+      const q = query(
+        collection(db, collectionName),
+        where('status', '==', 'active'),
+        limit(300)
+      );
+      snapshot = await getDocs(q);
+      const lowerSearch = searchText.toLowerCase();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const name = (data.name || '').toLowerCase();
+        if (name.includes(lowerSearch)) {
+          localFiltered.push({ id: doc.id, ...data });
+        }
+      });
+      // Limit to 5 results after filtering
+      localFiltered = localFiltered.slice(0, 5);
+    } else {
+      const q = query(
+        collection(db, collectionName),
+        where(fieldName, '>=', capText),
+        where(fieldName, '<=', capText + '\uf8ff'),
+        limit(5)
+      );
+      snapshot = await getDocs(q);
+      snapshot.forEach(doc => {
+        localFiltered.push({ id: doc.id, ...doc.data() });
+      });
+    }
+    
     const results = [];
     
-    snapshot.forEach((doc) => {
-      const data = doc.data();
+    localFiltered.forEach((data) => {
       let pendingAction = null;
       if (resultType === 'User/Patient') {
           pendingAction = Math.random() > 0.5 ? 'Pending Review' : 'Needs Signature';
@@ -43,11 +70,11 @@ const searchCollectionFirestore = async (collectionName, fieldName, searchText, 
       }
 
       results.push({
-        id: `db-${collectionName}-${doc.id}`,
+        id: `db-${collectionName}-${data.id}`,
         title: data[fieldName] || data.name || data.email || 'Unknown',
         description: data.description || data.role || data.email || `${resultType} record`,
         category: resultType,
-        path: `${pathPrefix}/${doc.id}`,
+        path: `${pathPrefix}/${data.id}`,
         iconName: iconName,
         isDynamic: true,
         pendingAction: pendingAction
@@ -85,7 +112,14 @@ const performAlgoliaSearch = async (searchText, activeRole) => {
     indexName: algoliaConfig.indices.products || 'products',
     query: searchText,
     hitsPerPage: 5,
-    filters: isB2C ? 'isActive:true' : ''
+    filters: isB2C ? 'status:published' : ''
+  });
+
+  // Search Blog Posts (All roles)
+  requests.push({
+    indexName: 'blogPosts',
+    query: searchText,
+    hitsPerPage: 3
   });
 
   // Search Users
@@ -124,6 +158,10 @@ const performAlgoliaSearch = async (searchText, activeRole) => {
           resultType = 'User/Patient';
           pathPrefix = '/admin/patient';
           iconName = 'user';
+        } else if (req.indexName === 'blogPosts') {
+          resultType = 'Article';
+          pathPrefix = '/blog';
+          iconName = 'book-open';
         }
 
         // For B2C, the product slug might be better than the objectID, but we'll use objectID and the routing will handle it or we append it.
@@ -133,7 +171,7 @@ const performAlgoliaSearch = async (searchText, activeRole) => {
 
         results.push({
           id: `alg-${req.indexName}-${hit.objectID}`,
-          title: hit.name || hit.firstName || hit.email || 'Unknown',
+          title: hit.title || hit.name || hit.firstName || hit.email || 'Unknown',
           description: hit.description || hit.role || hit.email || `${resultType} record`,
           category: resultType,
           path: finalPath,
@@ -146,7 +184,7 @@ const performAlgoliaSearch = async (searchText, activeRole) => {
 
     return results;
   } catch (err) {
-    console.error('Algolia multi-index search failed:', err);
+    console.warn('Algolia multi-index search failed, suppressed to avoid Next.js overlay:', err.message || err);
     throw err; // throw to fallback to Firestore
   }
 };
@@ -180,6 +218,9 @@ export const performDatabaseSearch = async (searchText, activeRole) => {
     ? '/collection/all'
     : '/admin?s=operations&t=products&id=';
   promises.push(searchCollectionFirestore('products', 'name', searchText, 'Product', productPathPrefix, 'package'));
+
+  // Search Blog Posts
+  promises.push(searchCollectionFirestore('blogPosts', 'title', searchText, 'Article', '/blog', 'book-open'));
 
   if (activeRole === 'admin') {
     promises.push(searchCollectionFirestore('users', 'firstName', searchText, 'User/Patient', '/admin/patient', 'user'));

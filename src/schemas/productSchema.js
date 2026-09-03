@@ -1,56 +1,59 @@
- 
 /**
  * productSchema.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Canonical v2 Product Schema — Atlas Health
+ * Bridge & Re-export file for Canonical Product Schema.
+ * Canonical Source of Truth: src/schemas/firestoreProductSchema.js
  *
- * This file is the single source of truth for the product data model.
- * It defines:
- *   - PRODUCT_TYPE         → allowed productType values
- *   - PRODUCT_STATUS       → allowed status values
- *   - ROUTE                → allowed administration route values
- *   - SCHEMA_VERSION       → current schema version (2)
- *   - CANONICAL_FIELDS     → list of required root-level field keys
- *   - validateProduct()    → validate a product object (returns { ok, errors })
- *   - validateVariant()    → validate a variant object
- *   - emptyProduct()       → produce a blank canonical product skeleton
- *   - emptyVariant()       → produce a blank canonical variant skeleton
- *
- * RULES:
- *   - Zero UI imports (no React, no CSS).
- *   - Zero Firebase imports.
- *   - Pure JS — safe for Node scripts and browser alike.
+ * This file maintains backward compatibility for legacy imports while
+ * re-exporting canonical constants, types, and factories.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+export * from './firestoreProductSchema.js';
+
+import {
+  CURRENT_SCHEMA_VER,
+  VALID_TYPES,
+  VALID_STATUSES,
+  VALID_CATEGORIES,
+  PRICING_TIERS,
+  emptyProduct as canonicalEmptyProduct,
+  emptyVariant as canonicalEmptyVariant,
+} from './firestoreProductSchema.js';
+
 // ── Schema version ────────────────────────────────────────────────────────────
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = CURRENT_SCHEMA_VER;
 
-// ── Allowed enum values ───────────────────────────────────────────────────────
-
-/** @readonly */
+// ── Legacy Enum Mappings (preserved for backward compatibility) ───────────────
 export const PRODUCT_TYPE = Object.freeze({
-  PEPTIDE:              'peptide',
-  SUPPLEMENT:           'supplement',
-  GENETIC_TEST:         'genetic_test',
-  PROFESSIONAL:         'professional_material',
-  HORMONE:              'hormone',
-  SMALL_MOLECULE:       'small_molecule',
-  INJECTABLE_NUTRIENT:  'injectable_nutrient',
-  IV_PROTOCOL:          'iv_protocol',
-  TOPICAL_COSMETIC:     'topical_cosmetic',
+  FINISHED_PRODUCT:     'finished_product',
+  RAW_MATERIAL:         'raw_material',
+  CLINICAL_SUPPLIES:    'clinical_supplies',
+  DUAL:                 'dual',
+  SERVICE:              'service',
+  // Legacy aliases
+  PEPTIDE:              'finished_product',
+  SUPPLEMENT:           'finished_product',
+  GENETIC_TEST:         'service',
+  PROFESSIONAL:         'finished_product',
+  HORMONE:              'finished_product',
+  SMALL_MOLECULE:       'finished_product',
+  INJECTABLE_NUTRIENT:  'finished_product',
+  IV_PROTOCOL:          'finished_product',
+  TOPICAL_COSMETIC:     'finished_product',
 });
 
-/** @readonly */
 export const PRODUCT_STATUS = Object.freeze({
   ACTIVE:        'active',
-  DEPRECATED:    'deprecated',
-  COMING_SOON:   'coming_soon',
-  OUT_OF_STOCK:  'out_of_stock',
   DRAFT:         'draft',
+  OUT_OF_STOCK:  'out of stock',
+  HIDDEN:        'hidden',
+  ARCHIVED:      'archived',
+  // Legacy aliases
+  DEPRECATED:    'archived',
+  COMING_SOON:   'draft',
 });
 
-/** @readonly */
 export const ROUTE = Object.freeze({
   INJECTABLE_VIAL: 'injectable_vial',
   INJECTABLE_PEN:  'injectable_pen',
@@ -61,53 +64,10 @@ export const ROUTE = Object.freeze({
   SUBLINGUAL:      'sublingual',
 });
 
-// ── Canonical root field list ─────────────────────────────────────────────────
-/**
- * Every canonical product document MUST have these fields.
- * Used by Phase 1 audit + Phase 2 normalizer.
- */
-export const CANONICAL_FIELDS = Object.freeze([
-  'id',
-  'name',
-  'displayName',
-  'productType',
-  'status',
-  'slug',
-  'cas',
-  'isBlend',
-  'blendComponents',
-  'identity',
-  'science',
-  'classification',
-  'aiContent',
-  'ui',
-  'meta',
-  'variants',
-]);
+// ── Factories ─────────────────────────────────────────────────────────────────
+export const emptyProduct = canonicalEmptyProduct;
+export const emptyVariant = canonicalEmptyVariant;
 
-/** Fields that must live inside the identity block */
-export const IDENTITY_FIELDS = Object.freeze([
-  'synonyms',
-  'searchAliases',
-  'semanticKeywords',
-]);
-
-/** Fields that must live inside the science block */
-export const SCIENCE_FIELDS = Object.freeze([
-  'desc',
-  'objective',
-  'scientificName',
-  'molecularWeight',
-  'molecularFormula',
-  'pharmacokinetics',
-  'storageConditions',
-  'mechanisms',
-  'mechanismSummary',
-  'researchStatus',
-  'referencePmids',
-  'safetyNote',
-  'contraindications',
-]);
 
 /** Fields that must live inside the classification block */
 export const CLASSIFICATION_FIELDS = Object.freeze([
@@ -303,140 +263,3 @@ export function validateVariant(v, productId) {
   return { ok: errors.length === 0, errors };
 }
 
-// ── Skeleton factories ─────────────────────────────────────────────────────────
-
-/**
- * Return a blank canonical product skeleton (all required fields, empty values).
- * Useful for migration scripts and seed templates.
- *
- * @param {Partial<Object>} overrides - Fields to pre-populate
- * @returns {Object}
- */
-export function emptyProduct(overrides = {}) {
-  const now = new Date().toISOString();
-  return {
-    id: '',
-    name: '',
-    displayName: '',
-    cas: '',
-    productType: PRODUCT_TYPE.PEPTIDE,
-    status: PRODUCT_STATUS.ACTIVE,
-    slug: '',
-    isBlend: false,
-    blendComponents: [],
-
-    identity: {
-      synonyms: [],
-      searchAliases: [],
-      semanticKeywords: [],
-    },
-
-    science: {
-      desc: '',
-      objective: '',
-      scientificName: '',
-      molecularWeight: null,
-      molecularFormula: '',
-      pharmacokinetics: {
-        halfLife: '',
-        bioavailability: '',
-        route: [],
-        metabolism: '',
-      },
-      storageConditions: {
-        temperature: '',
-        light: '',
-        shelfLife: '',
-      },
-      mechanisms: [],
-      mechanismSummary: '',
-      researchFocus: [],
-      researchStatus: '',
-      referencePmids: [],
-      safetyNote: '',
-      contraindications: [],
-    },
-
-    classification: {
-      goals: [],
-      secondaryFactors: [],
-      tags: [],
-      categories: [],
-    },
-
-    aiContent: {
-      faqModalEnabled: false,
-      scientificModalEnabled: false,
-      faqModalItems: [],
-      summary: '',
-      beginnerExplanation: '',
-      scientificSummary: '',
-    },
-
-    typeData: {},
-
-    ui: {
-      image: '/assets/vials/generic-vial.png',
-    },
-
-    meta: {
-      schemaVersion: SCHEMA_VERSION,
-      source: 'local',
-      seedVersion: 1,
-      createdAt: now,
-      updatedAt: now,
-    },
-
-    variants: [],
-    ...overrides,
-  };
-}
-
-/**
- * Return a blank canonical variant skeleton.
- *
- * @param {string} productId - Parent product ID
- * @param {Partial<Object>} overrides
- * @returns {Object}
- */
-export function emptyVariant(productId = '', overrides = {}) {
-  const now = new Date().toISOString();
-  return {
-    id: '',
-    productId,
-    productName: '',
-    sku: '',
-    route: ROUTE.INJECTABLE_VIAL,
-    strength: {
-      dosageMg: null,
-      dosageLabel: '',
-      isBlendStrength: false,
-    },
-    kit: {
-      size: 1,
-      unit: 'vial',
-      label: '1 vial/kit',
-    },
-    pricing: {
-      base: {
-        perVialUSD: null,
-        kitUSD: null,
-        currency: 'USD',
-      },
-      byCountry: {},
-    },
-    stock: {
-      available: true,
-      note: '',
-    },
-    isDefault: false,
-    sortOrder: 1,
-    meta: {
-      schemaVersion: SCHEMA_VERSION,
-      seedVersion: 1,
-      createdAt: now,
-      updatedAt: now,
-    },
-    ...overrides,
-  };
-}

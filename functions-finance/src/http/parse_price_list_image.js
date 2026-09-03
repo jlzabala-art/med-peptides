@@ -12,17 +12,21 @@ exports.parsePriceListImage = onCall(
     // Auth check
     if (!request.auth) throw new HttpsError("unauthenticated", "Auth required.");
 
-    const { imageBase64, mimeType, instructions } = request.data;
+    const { imageBase64, mimeType, instructions, targetCategory, targetSupplierId } = request.data;
     if (!imageBase64 || !mimeType) {
       throw new HttpsError("invalid-argument", "Missing imageBase64 or mimeType data.");
     }
 
     const db = getFirestore();
 
-    // Fetch entire catalog for matching
+    // Fetch catalog for matching (filtered by category if provided)
     let catalogString = "";
     try {
-      const productsSnap = await db.collection("products").get();
+      let productsRef = db.collection("products");
+      if (targetCategory) {
+        productsRef = productsRef.where("category", "==", targetCategory);
+      }
+      const productsSnap = await productsRef.get();
       const catalog = [];
       productsSnap.forEach(doc => {
         const p = doc.data();

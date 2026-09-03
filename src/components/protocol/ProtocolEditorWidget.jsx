@@ -11,9 +11,12 @@ import Layers from "lucide-react/dist/esm/icons/layers";
 import Cloud from "lucide-react/dist/esm/icons/cloud";
 import CloudOff from "lucide-react/dist/esm/icons/cloud-off";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import ClipboardPlus from "lucide-react/dist/esm/icons/clipboard-plus";
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProtocolToPrescription } from '@/hooks/data/useProtocolToPrescription';
 
 
 
@@ -65,7 +68,10 @@ export default function ProtocolEditorWidget({
   isSaving,
   lastSavedAt,
   onCancel,
-  showCancel = false
+  showCancel = false,
+  // onPrescriptionCreated — callback opcional cuando se inicia una prescripción
+  // Si no se pasa, el hook navega automáticamente a /prescriptions/{id}
+  onPrescriptionCreated,
 }) {
   const [formData, setFormData] = useState({
     protocol_id: '',
@@ -93,6 +99,29 @@ export default function ProtocolEditorWidget({
   });
 
   const { products } = useShop();
+  const router = useRouter();
+
+  // Flujo Protocol → Prescription
+  const protocol = initialData?.id ? initialData : null;
+  const {
+    initiateFromProtocol,
+    isCreating: isCreatingPrescription,
+    productCount,
+  } = useProtocolToPrescription(protocol);
+
+  const handleInitiatePrescription = async () => {
+    if (!protocol) return;
+    try {
+      const newId = await initiateFromProtocol(protocol);
+      if (onPrescriptionCreated) {
+        onPrescriptionCreated(newId);
+      } else {
+        router.push(`/prescriptions/${newId}`);
+      }
+    } catch (_) {
+      // El hook ya muestra el toast de error
+    }
+  };
 
   const [activeSection, setActiveSection] = useState('general');
 
@@ -132,10 +161,40 @@ export default function ProtocolEditorWidget({
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {showCancel && <button onClick={onCancel} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer' }}>Cancel</button>}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {/* CTA: Iniciar Prescripción — visible solo si el protocolo ya está guardado */}
+            {protocol && (
+              <button
+                onClick={handleInitiatePrescription}
+                disabled={isCreatingPrescription}
+                title={`Crear prescripción borrador con los ${productCount} productos de este protocolo`}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '6px',
+                  border: '1.5px solid #0d9488',
+                  background: isCreatingPrescription ? '#f0fdfa' : 'white',
+                  color: '#0d9488',
+                  fontWeight: 600,
+                  cursor: isCreatingPrescription ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.82rem',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <ClipboardPlus size={15} />
+                {isCreatingPrescription
+                  ? 'Creando…'
+                  : productCount > 0
+                    ? `Iniciar Prescripción (${productCount})`
+                    : 'Iniciar Prescripción'}
+              </button>
+            )}
+            {showCancel && <button onClick={onCancel} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer' }}>Cancelar</button>}
             <button onClick={() => onSave(formData)} disabled={isSaving} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Save size={16} /> {isSaving ? 'Saving...' : 'Save Changes'}
+              <Save size={16} /> {isSaving ? 'Guardando…' : 'Guardar Cambios'}
             </button>
           </div>
         </div>

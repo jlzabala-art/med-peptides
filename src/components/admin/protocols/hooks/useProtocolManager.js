@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGlobalStore } from '../../../../stores/globalStore';
 
 /**
@@ -11,6 +11,9 @@ export function useProtocolManager({ initialProtocol, onSave, onClose, onChange 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
+  const protocolRef = useRef(editedProtocol);
+  protocolRef.current = editedProtocol;
+  
   const initializeGlobalData = useGlobalStore(state => state.initializeGlobalData);
 
   useEffect(() => {
@@ -22,12 +25,19 @@ export function useProtocolManager({ initialProtocol, onSave, onClose, onChange 
 
   // Deep update handler for the protocol
   const handleUpdate = (updates) => {
-    setEditedProtocol(prev => {
-      const next = { ...prev, ...updates };
-      if (onChange) onChange(next);
-      return next;
-    });
+    const next = { ...protocolRef.current, ...updates };
+    protocolRef.current = next;
+    setEditedProtocol(next);
+    if (onChange) onChange(next);
     setHasUnsavedChanges(true);
+  };
+
+  const handleSilentUpdate = (updates) => {
+    const next = { ...protocolRef.current, ...updates };
+    protocolRef.current = next;
+    setEditedProtocol(next);
+    if (onChange) onChange(next);
+    // NOTE: intentionally does NOT set hasUnsavedChanges — used after AI auto-saves to Firestore
   };
 
   const handleSaveAll = async () => {
@@ -52,6 +62,7 @@ export function useProtocolManager({ initialProtocol, onSave, onClose, onChange 
     isMobile,
     hasUnsavedChanges,
     handleUpdate,
+    handleSilentUpdate,
     handleSaveAll,
     handleClose,
   };

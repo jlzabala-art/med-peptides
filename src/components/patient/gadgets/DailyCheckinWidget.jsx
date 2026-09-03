@@ -1,21 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { hasCheckedInToday, submitDailyCheckin } from '../../../services/patientHubService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Activity, Smile, Frown, CheckCircle2 } from '@/lib/icons';
-
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function DailyCheckinWidget() {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [mood, setMood] = useState(3); // 1 to 5
+  const [mood, setMood] = useState(3);
   const [sleepQuality, setSleepQuality] = useState(3);
   const [energyLevel, setEnergyLevel] = useState(3);
   const [notes, setNotes] = useState('');
@@ -27,19 +22,10 @@ export default function DailyCheckinWidget() {
     async function checkToday() {
       if (!user?.uid) return;
       try {
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const q = query(
-          collection(db, 'daily_checkins'), 
-          where('patientId', '==', user.uid),
-          where('createdAt', '>=', startOfDay)
-        );
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          setHasCheckedIn(true);
-        }
+        const alreadyDone = await hasCheckedInToday(user.uid);
+        if (alreadyDone) setHasCheckedIn(true);
       } catch (err) {
-        console.error("Error checking today's checkin", err);
+        // logged in service
       } finally {
         setCheckLoading(false);
       }
@@ -51,18 +37,10 @@ export default function DailyCheckinWidget() {
     e.preventDefault();
     setLoading(true);
     try {
-      await addDoc(collection(db, 'daily_checkins'), {
-        patientId: user.uid,
-        mood,
-        sleepQuality,
-        energyLevel,
-        notes: notes.trim(),
-        createdAt: serverTimestamp()
-      });
+      await submitDailyCheckin({ patientId: user.uid, mood, sleepQuality, energyLevel, notes });
       setHasCheckedIn(true);
     } catch (err) {
-      console.error("Failed to log check-in", err);
-      alert(t('patient.daily_checkin.error_saving') || "Hubo un error al guardar el check-in.");
+      toast.error(t('patient.daily_checkin.error_saving') || "Hubo un error al guardar el check-in.");
     } finally {
       setLoading(false);
     }

@@ -63,41 +63,51 @@ export function useCatalogFilters() {
   };
 
   const checkItemAgainstFilters = (item) => {
-    // Goals (OR logic within goals)
+    // Goals — OR logic: product must match at least one selected goal
     if (advancedFilters.goals?.length > 0) {
-      const itemGoals = [...(item.goals || []), ...(item.canonicalGoals || []), ...(item.tags || [])].map(g => (g || '').toLowerCase());
-      
-      const activeDbKeys = advancedFilters.goals.flatMap(goalId => {
-        const goalObj = GOALS.find(g => g.id === goalId);
-        return goalObj ? goalObj.dbKeys : [goalId];
-      });
+      // PRIMARY: match against canonical goalIds[] (post-migration field)
+      const itemGoalIds = Array.isArray(item.goalIds) ? item.goalIds : [];
 
-      const hasMatch = activeDbKeys.some(key => {
-        const keySpace = key.replace(/_/g, ' ');
-        const keyDash = key.replace(/_/g, '-');
-        
-        // Check goals
-        if (itemGoals.some(ig => ig.includes(key) || ig.includes(keySpace) || ig.includes(keyDash))) {
-          return true;
-        }
-        
-        // Check category as fallback
-        const categoryStr = (item.category || '').toLowerCase();
-        if (categoryStr.includes(key) || categoryStr.includes(keySpace) || categoryStr.includes(keyDash)) {
-          return true;
-        }
-        
-        return false;
-      });
+      // FALLBACK: legacy items may not yet have goalIds[] — use dbKeys matching
+      let hasMatch = advancedFilters.goals.some(selectedGoalId =>
+        itemGoalIds.includes(selectedGoalId)
+      );
 
-      if (!hasMatch) {
-        return false;
+      if (!hasMatch && itemGoalIds.length === 0) {
+        // Legacy fallback: resolve selected goals to dbKeys and fuzzy-match
+        const legacyFields = [
+          ...(item.goals || []),
+          ...(item.canonicalGoals || []),
+          ...(item.tags || []),
+          item.category || '',
+        ].join(' ').toLowerCase();
+
+        const activeDbKeys = advancedFilters.goals.flatMap(goalId => {
+          const goalObj = GOALS.find(g => g.id === goalId);
+          return goalObj ? goalObj.dbKeys : [goalId];
+        });
+
+        hasMatch = activeDbKeys.some(key => {
+          const keySpace = key.replace(/_/g, ' ');
+          const keyDash  = key.replace(/_/g, '-');
+          return legacyFields.includes(key) || legacyFields.includes(keySpace) || legacyFields.includes(keyDash);
+        });
       }
+
+      if (!hasMatch) return false;
     }
+
     
-    // Product Type (OR logic within types)
+    // Product Type (OR logic within types) — supports availableTypes[] with fallback to primaryType/productType
     if (advancedFilters.productTypes?.length > 0) {
-      if (!advancedFilters.productTypes.includes(item.productType)) {
+      const itemTypes = Array.isArray(item.availableTypes) && item.availableTypes.length > 0
+        ? item.availableTypes
+        : [item.primaryType || item.productType || item.type].filter(Boolean);
+
+      const matchesType = advancedFilters.productTypes.some(filterType => 
+        itemTypes.includes(filterType) || (filterType === 'raw_material' && itemTypes.includes('api_raw_material'))
+      );
+      if (!matchesType) {
         return false;
       }
     }
@@ -111,8 +121,9 @@ export function useCatalogFilters() {
     
     // Commercial Status (AND logic)
     const cStatus = advancedFilters.commercialStatus || {};
-    if (cStatus.inStock && !(item.commercialStatus?.inStock || item.stock > 0)) return false;
-    if (cStatus.outOfStock && (item.commercialStatus?.inStock || item.stock > 0)) return false;
+    const isItemAvailable = item.inStock !== false || item.stockType === 'on_demand' || item.isDemand === true || item.commercialStatus?.inStock || item.stock > 0;
+    if (cStatus.inStock && !isItemAvailable) return false;
+    if (cStatus.outOfStock && isItemAvailable) return false;
     if (cStatus.priceMissing && !(item.commercialStatus?.priceMissing || item.isMissingPricing)) return false;
     if (cStatus.supplierMissing && !(item.commercialStatus?.supplierMissing || item.isMissingSupplier)) return false;
     if (cStatus.singleSourceRisk && !(item.commercialStatus?.singleSourceRisk || item.suppliersCount === 1)) return false;

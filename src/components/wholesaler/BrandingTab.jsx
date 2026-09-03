@@ -7,17 +7,10 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-
+import { getTenantBranding, updateTenantBranding } from '../../repositories/wholesalerRepository';
 import { useAuth } from '../../context/AuthContext';
 import { Paintbrush, Check, Globe, HelpCircle, Save, AlertCircle } from '@/lib/icons';
-
-
-
-
-
-
+import { logger } from '../../utils/logger';
 
 export default function BrandingTab() {
   const { userProfile } = useAuth();
@@ -46,10 +39,8 @@ export default function BrandingTab() {
     async function loadTenantBranding() {
       setLoading(true);
       try {
-        const tenantRef = doc(db, 'tenants', tenantId);
-        const snap = await getDoc(tenantRef);
-        if (snap.exists()) {
-          const data = snap.data();
+        const data = await getTenantBranding(tenantId);
+        if (data) {
           setBranding({
             displayName: data.name || '',
             logoUrl: data.branding?.logoUrl || '',
@@ -63,7 +54,7 @@ export default function BrandingTab() {
           });
         }
       } catch (err) {
-        console.error('Failed to load branding:', err);
+        logger.error('Failed to load branding in BrandingTab', { error: err.message });
         setError('Could not load tenant configurations.');
       } finally {
         setLoading(false);
@@ -82,42 +73,17 @@ export default function BrandingTab() {
     setSuccess(false);
 
     try {
-      const tenantRef = doc(db, 'tenants', tenantId);
-      await updateDoc(tenantRef, {
-        name: branding.displayName,
-        'branding.logoUrl': branding.logoUrl,
-        'branding.primaryColor': branding.primaryColor,
-        'branding.secondaryColor': branding.secondaryColor,
-        'branding.fontFamily': branding.fontFamily,
-        'branding.supportEmail': branding.supportEmail,
-        'branding.supportWhatsapp': branding.supportWhatsapp,
-        'branding.footerText': branding.footerText,
-        'branding.defaultCTA': branding.defaultCTA,
-      });
-
-      // Write tenant audit log
-      try {
-        const auditRef = doc(db, 'tenantAuditLogs', `${tenantId}_${Date.now()}`);
-        await setDoc(auditRef, {
-          tenantId,
-          timestamp: new Date().toISOString(),
-          action: 'update_branding',
-          userId: userProfile?.uid || 'unknown',
-          details: { updatedFields: Object.keys(branding) }
-        });
-      } catch (e) {
-        console.warn('Audit log write failed:', e);
-      }
-
+      await updateTenantBranding(tenantId, branding, userProfile?.uid || 'unknown');
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
-      console.error('Failed to update branding:', err);
+      logger.error('Failed to update branding in BrandingTab', { error: err.message });
       setError('Failed to save branding configurations.');
     } finally {
       setSaving(false);
     }
   };
+
 
   if (!tenantId) {
     return (

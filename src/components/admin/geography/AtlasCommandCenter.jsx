@@ -1,13 +1,8 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../../firebase';
-
-
-
-
-
+import { getGlobalMarkets } from '../../../repositories/configRepository';
+import { getCatalog } from '../../../repositories/productRepository';
+import { getWholesalers } from '../../../repositories/wholesalerRepository';
+import { getAllOrders, getB2BSalesOrders } from '../../../repositories/orderRepository';
 import GlobalFootprintDashboard from './GlobalFootprintDashboard';
 import InteractiveWorldMap from './InteractiveWorldMap';
 import CountryDetailDrawer from './CountryDetailDrawer';
@@ -46,32 +41,25 @@ export default function AtlasCommandCenter() {
       try {
         setLoading(true);
         // 1. Fetch Global Markets
-        const marketsSnap = await getDocs(query(collection(db, 'global_markets'), limit(100)));
-        let fetchedMarkets = marketsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (fetchedMarkets.length === 0) {
-          // If the collection hasn't been seeded yet, fallback to defaults
+        let fetchedMarkets = await getGlobalMarkets();
+        if (!fetchedMarkets || fetchedMarkets.length === 0) {
           fetchedMarkets = DEFAULT_MARKETS;
         }
 
         // 2. Fetch Products
-        const prodSnap = await getDocs(query(collection(db, 'products'), limit(100)));
-        const prodList = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const prodList = await getCatalog();
 
         // 3. Fetch Distributors
-        const wholeSnap = await getDocs(query(collection(db, 'wholesellers'), limit(50)));
-        const wholeList = wholeSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const wholeList = await getWholesalers(50);
 
         // 4. Fetch Orders for Revenue
-        const ordSnap = await getDocs(query(collection(db, 'orders'), limit(100)));
-        const ordList = ordSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Also fetch B2B orders for more complete revenue
-        const b2bSnap = await getDocs(query(collection(db, 'b2b_sales_orders'), limit(100)));
-        const b2bList = b2bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const { orders: ordList } = await getAllOrders({ limitCount: 100 });
+        const b2bList = await getB2BSalesOrders(100);
 
         setMarkets(fetchedMarkets);
-        setProducts(prodList);
-        setWholesalers(wholeList);
-        setOrders([...ordList, ...b2bList]);
+        setProducts(prodList || []);
+        setWholesalers(wholeList || []);
+        setOrders([...(ordList || []), ...(b2bList || [])]);
 
       } catch (err) {
         console.error('Failed to load Atlas data:', err);

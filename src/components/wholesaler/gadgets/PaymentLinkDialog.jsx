@@ -6,14 +6,8 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState } from 'react';
-
-
-
-
-
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../../firebase';
-
+import { generateOrderPaymentLink } from '../../../repositories/orderRepository';
+import { logger } from '../../../utils/logger';
 import Spinner from '../../ui/Spinner';
 import Card from '../../ui/Card';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,22 +25,22 @@ export default function PaymentLinkDialog({ order, onClose }) {
     setLoading(true);
     setError(null);
     try {
-      const generatePaymentLink = httpsCallable(functions, 'generatePaymentLink');
-      const result = await generatePaymentLink({
+      const url = await generateOrderPaymentLink({
         orderId: order.id,
         currency,
-        sendEmail
+        sendEmail,
       });
-      setSuccessLink(result.data.url);
+      setSuccessLink(url);
       // Invalidate the orders query so the list updates
       queryClient.invalidateQueries({ queryKey: ['managerOrders'] });
     } catch (err) {
-      console.error(err);
+      logger.error('Failed to generate payment link in dialog', { error: err.message });
       setError(err.message || 'Failed to generate link. Check permissions and total amount.');
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleCopy = () => {
     navigator.clipboard.writeText(successLink);

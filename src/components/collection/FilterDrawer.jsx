@@ -30,10 +30,17 @@ export default function FilterDrawer({
   return (
     <div className="col-drawer-overlay" onClick={onClose}>
       <div className="col-drawer-content" onClick={e => e.stopPropagation()}>
+        <div style={{
+          width: '36px',
+          height: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.18)',
+          borderRadius: '2px',
+          margin: '10px auto 0 auto',
+        }} />
         <div className="col-drawer-header">
           <h3>{title}</h3>
           <button onClick={onClose} className="col-drawer-close">
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
         <div className="col-drawer-body">

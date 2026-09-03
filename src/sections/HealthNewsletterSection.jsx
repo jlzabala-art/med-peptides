@@ -121,47 +121,41 @@ export default function HealthNewsletterSection() {
       }}
       aria-label="Newsletter subscription"
     >
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', margin: '0 auto', padding: '0 0.5rem' }}>
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 1, 
+        maxWidth: '820px', 
+        margin: '0 auto', 
+        padding: '1.75rem 1.5rem',
+        background: 'linear-gradient(135deg, rgba(0, 54, 102, 0.04) 0%, rgba(2, 132, 199, 0.06) 100%)',
+        border: '1px solid rgba(2, 132, 199, 0.18)',
+        borderRadius: '20px',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.02)'
+      }}>
 
-        {/* Header Block using global classes */}
-        <div className="section-header" style={{ marginBottom: '1.75rem', textAlign: 'center' }}>
-          <div className="section-eyebrow" style={{ color: '#1a73e8', borderColor: '#1a73e830', background: '#1a73e815', borderRadius: '4px' }}>
-            Weekly Research Digest
+        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.4rem', 
+            padding: '0.3rem 0.8rem', 
+            borderRadius: '999px', 
+            background: 'rgba(2, 132, 199, 0.1)', 
+            color: '#0284c7', 
+            fontSize: '0.72rem', 
+            fontWeight: 800,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            marginBottom: '0.5rem'
+          }}>
+            <Mail size={13} /> Weekly Research Digest
           </div>
-          <h2 className="section-title" style={{ color: 'white', fontWeight: 650, fontSize: '1.8rem', letterSpacing: '-0.02em', marginTop: '0.75rem' }}>
+          <h2 style={{ color: 'var(--text-main)', fontWeight: 800, fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)', letterSpacing: '-0.02em', margin: '0 0 0.35rem 0' }}>
             {copy.headline}
           </h2>
-          <p className="section-subtitle" style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem', maxWidth: '600px', margin: '0.5rem auto 0' }}>
-            Personalized to your research goals — curated by AI, delivered every Monday
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '520px', margin: '0 auto', lineHeight: 1.45 }}>
+            Personalized peptide & longevity research delivered directly to your inbox every Monday.
           </p>
-        </div>
-
-        {/* What you get */}
-        <div
-          style={{
-            display: 'flex', justifyContent: 'center',
-            gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap',
-          }}
-        >
-          {copy.examples.map((ex, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.4rem',
-                fontSize: '0.8rem', fontWeight: 550,
-                color: 'rgba(255,255,255,0.65)',
-              }}
-            >
-              <div style={{
-                width: 14, height: 14,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <Check size={12} color="#1a73e8" strokeWidth={3} />
-              </div>
-              {ex}
-            </div>
-          ))}
         </div>
 
         {/* Form or success */}
@@ -169,54 +163,45 @@ export default function HealthNewsletterSection() {
           {status === 'success' ? (
             <motion.div
               key="success"
-              initial={{ opacity: 0, scale: 0.98, y: 8 }}
+              initial={{ opacity: 0, scale: 0.98, y: 6 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.25 }}
               style={{
                 textAlign: 'center',
-                padding: '2rem',
-                borderRadius: '4px',
-                background: 'rgba(16,185,129,0.06)',
-                border: '1px solid rgba(16,185,129,0.2)',
-                maxWidth: '480px',
+                padding: '1.25rem',
+                borderRadius: '12px',
+                background: 'rgba(16,185,129,0.08)',
+                border: '1px solid rgba(16,185,129,0.25)',
+                maxWidth: '440px',
                 margin: '0 auto',
               }}
             >
-              <div style={{
-                width: 40, height: 40, borderRadius: '4px',
-                background: 'rgba(16,185,129,0.15)',
-                border: '1px solid rgba(16,185,129,0.4)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 1rem',
-              }}>
-                <Check size={20} color="var(--color-success)" strokeWidth={2.5} />
-              </div>
-              <h3 style={{ margin: '0 0 0.4rem', color: 'white', fontSize: '1.05rem', fontWeight: 700 }}>
-                Subscribed Successfully
+              <h3 style={{ margin: '0 0 0.25rem', color: '#15803d', fontSize: '0.95rem', fontWeight: 800 }}>
+                ✓ Subscribed Successfully
               </h3>
-              <p style={{ margin: 0, color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem' }}>
-                Your email has been registered. You will receive your first personalized digest next Monday.
+              <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                You will receive your first personalized digest next Monday.
               </p>
             </motion.div>
           ) : (
             <motion.form
               key="form"
               onSubmit={handleSubmit}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
+              exit={{ opacity: 0, y: -6 }}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.75rem',
+                gap: '0.65rem',
                 alignItems: 'center',
               }}
             >
               <div style={{
-                display: 'flex', width: '100%', maxWidth: 480,
+                display: 'flex', width: '100%', maxWidth: 440,
                 gap: '0.5rem', flexWrap: 'wrap',
               }}>
-                <div style={{ flex: 1, minWidth: 220, position: 'relative' }}>
+                <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
                   <input
                     type="email"
                     value={email}
@@ -225,11 +210,11 @@ export default function HealthNewsletterSection() {
                     required
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '4px',
-                      border: `1px solid ${errorMsg ? 'var(--color-danger)' : 'var(--color-text-primary)'}`,
-                      background: '#0f172a',
-                      color: 'white',
+                      padding: '0.65rem 1rem',
+                      borderRadius: '999px',
+                      border: `1.5px solid ${errorMsg ? 'var(--color-danger)' : 'rgba(0, 54, 102, 0.15)'}`,
+                      background: 'var(--surface)',
+                      color: 'var(--text-main)',
                       fontSize: '0.875rem',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -241,15 +226,16 @@ export default function HealthNewsletterSection() {
                   type="submit"
                   disabled={status === 'loading'}
                   style={{
-                    padding: '0.65rem 1.5rem',
-                    borderRadius: '4px', border: 'none',
-                    background: status === 'loading' ? 'var(--color-text-primary)' : '#1a73e8',
+                    padding: '0.65rem 1.4rem',
+                    borderRadius: '999px', border: 'none',
+                    background: 'var(--primary, #003666)',
                     color: 'white',
-                    fontWeight: 600, fontSize: '0.875rem',
+                    fontWeight: 700, fontSize: '0.875rem',
                     cursor: status === 'loading' ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', gap: '0.4rem',
                     whiteSpace: 'nowrap',
-                    boxShadow: 'none',
+                    boxShadow: '0 2px 8px rgba(0, 54, 102, 0.15)',
+                    transition: 'all 0.2s'
                   }}
                 >
                   {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
@@ -263,35 +249,15 @@ export default function HealthNewsletterSection() {
               )}
 
               <p style={{
-                margin: 0, fontSize: '0.7rem',
-                color: 'rgba(255,255,255,0.3)',
+                margin: 0, fontSize: '0.72rem',
+                color: 'var(--text-muted)',
+                opacity: 0.8
               }}>
-                No spam · Unsubscribe anytime · No account required
+                No spam · Unsubscribe anytime · Free weekly access
               </p>
             </motion.form>
           )}
         </AnimatePresence>
-
-        {/* Value bullets row */}
-        <div
-          style={{
-            display: 'flex', justifyContent: 'center', gap: '2rem',
-            marginTop: '2.5rem', flexWrap: 'wrap',
-          }}
-        >
-          {VALUE_BULLETS.map((b, i) => (
-            <div
-              key={i}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.45rem',
-                fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)',
-              }}
-            >
-              <span style={{ display: 'inline-flex', color: '#1a73e8' }}>{b.icon}</span>
-              {b.text}
-            </div>
-          ))}
-        </div>
 
       </div>
     </div>

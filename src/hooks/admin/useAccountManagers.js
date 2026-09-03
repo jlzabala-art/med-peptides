@@ -1,3 +1,5 @@
+"use client";
+
 import { useFirestorePaginatedCollection } from '../data/useFirestorePaginatedCollection';
 
 export function useAccountManagers(options = {}) {

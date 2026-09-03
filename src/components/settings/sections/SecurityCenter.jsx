@@ -9,15 +9,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { getAuth, updatePassword, signOut } from 'firebase/auth';
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
-
-
-
-
-
-
-
+import { subscribeUserSessions, deleteUserSession } from '../../../repositories/userRepository';
+import { logger } from '../../../utils/logger';
 import toast from 'react-hot-toast';
 import { Lock, Smartphone, ShieldAlert, Monitor, KeyRound, Loader2 } from '@/lib/icons';
 
@@ -34,16 +27,16 @@ export default function SecurityCenter() {
       setSessionsLoading(false);
       return;
     }
-    const q = query(collection(db, 'users', user.uid, 'sessions'), orderBy('lastActive', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      setSessions(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const unsub = subscribeUserSessions(user.uid, (data) => {
+      setSessions(data);
       setSessionsLoading(false);
     }, (err) => {
-      console.warn("Could not load sessions", err);
+      logger.warn("Could not load sessions in SecurityCenter", { error: err.message });
       setSessionsLoading(false);
     });
     return unsub;
   }, [user]);
+
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -79,13 +72,14 @@ export default function SecurityCenter() {
     if (!user?.uid) return;
     const loadingToast = toast.loading('Terminating session...');
     try {
-      await deleteDoc(doc(db, 'users', user.uid, 'sessions', sessionId));
+      await deleteUserSession(user.uid, sessionId);
       toast.success('Session terminated successfully.', { id: loadingToast });
     } catch (err) {
-      console.error('Error terminating session:', err);
+      logger.error('Error terminating session in SecurityCenter', { error: err.message });
       toast.error('Failed to terminate session.', { id: loadingToast });
     }
   };
+
 
   return (
     <div style={{ padding: '2rem' }}>

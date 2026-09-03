@@ -5,14 +5,8 @@ import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-
-
-
-
+import { fetchRecentAuditLogs } from '../../../services/auditLogService';
 
 const DEMO_LOGS = [
   {
@@ -56,34 +50,22 @@ export default function SystemAuditLogWidget({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchLogs() {
+    let isMounted = true;
+    async function loadLogs() {
       if (activeRole !== 'admin') return;
       try {
-        const q = query(
-          collection(db, 'system_audit_logs'),
-          orderBy('timestamp', 'desc'),
-          limit(10)
-        );
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          setLogs(
-            snap.docs.map((d) => ({
-              id: d.id,
-              ...d.data(),
-              timestamp: d.data().timestamp?.toDate() || new Date(),
-            }))
-          );
-        } else {
-          setLogs(DEMO_LOGS);
+        const result = await fetchRecentAuditLogs(10);
+        if (isMounted) {
+          setLogs(result.length > 0 ? result : DEMO_LOGS);
         }
-      } catch (err) {
-        console.error('Error fetching audit logs', err);
-        setLogs(DEMO_LOGS);
+      } catch {
+        if (isMounted) setLogs(DEMO_LOGS);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
-    fetchLogs();
+    loadLogs();
+    return () => { isMounted = false; };
   }, [activeRole]);
 
   if (activeRole !== 'admin') return null;

@@ -1,7 +1,6 @@
 "use client";
 
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -78,6 +77,7 @@ const DOCTOR_NAV_GROUPS = [
     id: 'clinical', label: 'Clinical Work', emoji: '🧬',
     items: [
       { id: 'patients',        label: 'My Patients',     icon: Users },
+      { id: 'leads',           label: 'Patient Leads',   icon: UserCheck },
       { id: 'appointments',    label: 'Appointments',    icon: Calendar },
       { id: 'lab-results',     label: 'Lab Results',     icon: Beaker },
       { id: 'recommendations', label: 'Recommendations', icon: ClipboardList },
@@ -104,7 +104,7 @@ const DOCTOR_NAV_GROUPS = [
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 import PanelShell from '../components/shell/PanelShell';
-import { LayoutDashboard, Users, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker } from '@/lib/icons';
+import { LayoutDashboard, Users, UserCheck, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker } from '@/lib/icons';
 
 export const DoctorContext = React.createContext({});
 

@@ -122,6 +122,16 @@ export function drawCoverPage(doc, { title, description, date, audience, tenantN
     doc.text(audienceLabel, PAGE_W - MARGIN, 73, { align: 'right' });
   }
 
+  // Interactive QR Code on Cover Page
+  if (tenantLogo && tenantLogo.startsWith('data:image')) {
+    try {
+      doc.addImage(tenantLogo, 'PNG', PAGE_W - MARGIN - 32, PAGE_H - MARGIN - 42, 32, 32);
+      doc.setFontSize(6.5);
+      doc.setTextColor(...COLORS.primary);
+      doc.text('📱 Scan for Live App', PAGE_W - MARGIN - 16, PAGE_H - MARGIN - 8, { align: 'center' });
+    } catch { /* skip */ }
+  }
+
   // Decorative vertical bar (left side)
   doc.setFillColor(...COLORS.accent);
   doc.rect(0, 0, 3, PAGE_H, 'F');

@@ -14,6 +14,7 @@ import Layers from "lucide-react/dist/esm/icons/layers";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sparkline } from '../ui/Sparkline';
 import './AdminOverviewTab.css';
 
@@ -49,6 +50,7 @@ export default function AdminOverviewTab({
   handleOpenEdit,
   SECTIONS,
 }) {
+  const router = useRouter();
   const [restockAmounts, setRestockAmounts] = useState({});
   const [skuStats, setSkuStats] = useState(null);
   const [agents, setAgents] = useState(null);
@@ -545,12 +547,17 @@ export default function AdminOverviewTab({
             {/* Tarjeta 1: Aprobaciones de Cuenta */}
             {pendingUsers > 0 && (
               <div
+                onClick={() => router.push('/admin/users?status=pending')}
                 style={{
                   border: '1px solid #fee2e2',
                   borderRadius: 'var(--radius-md)',
                   padding: '1.25rem',
                   background: 'var(--color-bg-surface)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
+                onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--error)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseOut={(e) => { e.currentTarget.style.borderColor = '#fee2e2'; e.currentTarget.style.transform = 'none' }}
               >
                 <div
                   style={{
@@ -671,12 +678,17 @@ export default function AdminOverviewTab({
             {/* Tarjeta 2: Stock Crítico */}
             {lowStockItems > 0 && (
               <div
+                onClick={() => router.push('/admin/catalog?stock=low')}
                 style={{
                   border: '1px solid #fef3c7',
                   borderRadius: 'var(--radius-md)',
                   padding: '1.25rem',
                   background: 'var(--color-bg-surface)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
                 }}
+                onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--warning)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseOut={(e) => { e.currentTarget.style.borderColor = '#fef3c7'; e.currentTarget.style.transform = 'none' }}
               >
                 <div
                   style={{

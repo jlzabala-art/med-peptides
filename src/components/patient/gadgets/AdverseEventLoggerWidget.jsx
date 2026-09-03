@@ -1,15 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { submitAdverseEvent } from '../../../services/patientHubService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle2, ShieldAlert } from '@/lib/icons';
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function AdverseEventLoggerWidget() {
   const { user, userProfile } = useAuth();
@@ -24,13 +20,11 @@ export default function AdverseEventLoggerWidget() {
     if (!symptoms.trim()) return;
     setLoading(true);
     try {
-      await addDoc(collection(db, 'adverse_events'), {
+      await submitAdverseEvent({
         patientId: user.uid,
         patientName: userProfile?.firstName ? `${userProfile.firstName} ${userProfile.lastName || ''}` : user.displayName || 'Patient',
         severity,
-        symptoms: symptoms.trim(),
-        status: 'new', // new, reviewed, resolved
-        createdAt: serverTimestamp()
+        symptoms: symptoms.trim()
       });
       setSuccess(true);
       setTimeout(() => {
@@ -39,8 +33,7 @@ export default function AdverseEventLoggerWidget() {
         setSymptoms('');
       }, 3500);
     } catch (err) {
-      console.error("Failed to log adverse event", err);
-      alert(t('patient.bloodwork.error_uploading') || "Hubo un error al reportar el evento.");
+      toast.error(t('patient.bloodwork.error_uploading') || "Hubo un error al reportar el evento.");
     } finally {
       setLoading(false);
     }

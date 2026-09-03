@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, HeartPulse, AlertCircle } from '@/lib/icons';
 import ClinicalProgressTracker from '../ClinicalProgressTracker';
 
-export default function ProtocolMonitoring({ protocol, onUpdate }) {
+export default function ProtocolMonitoring({ protocol, onUpdate, onEnrichMonitoring }) {
   
   const milestonesCount = protocol?.phases?.reduce((acc, phase) => acc + (phase.items?.length || 0), 0) || 0;
 
@@ -22,7 +22,7 @@ export default function ProtocolMonitoring({ protocol, onUpdate }) {
         <div style={{ background: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)', padding: '1.25rem', borderRadius: '16px', border: '1px solid #fef08a' }}>
           <div style={{ color: '#a16207', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Adverse Events</div>
           <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#713f12', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={24} /> Log
+            <AlertCircle size={24} /> {protocol?.side_effects?.length || 0} Known
           </div>
         </div>
       </div>
@@ -33,7 +33,7 @@ export default function ProtocolMonitoring({ protocol, onUpdate }) {
           <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem' }}>
              <HeartPulse size={18} color="var(--primary)" /> Progress Tracker
           </h4>
-          <ClinicalProgressTracker protocol={protocol} />
+          <ClinicalProgressTracker protocol={protocol} onEnrichMonitoring={onEnrichMonitoring} />
         </div>
       </div>
       

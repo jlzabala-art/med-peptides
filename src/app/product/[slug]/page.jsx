@@ -1,45 +1,73 @@
 import React from 'react';
 import ProductClientWrapper from './ProductClientWrapper';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
-
+import { adminDb } from '@/lib/firebaseAdmin';
+import { processProductVariants } from '@/utils/productVariantProcessing';
+import { sanitizeForClient } from '@/utils/sanitizeForClient';
 
 export async function generateMetadata({ params }) {
-  const slug = params?.slug;
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
   return {
-    title: `${slug ? slug.replace(/-/g, ' ').toUpperCase() : 'Product'} - RegenPept`,
+    title: `${slug ? slug.replace(/-/g, ' ').toUpperCase() : 'Product'} - Atlas App`,
     description: `View ${slug} details.`
   };
 }
 
 async function getProductBySlugServer(slug) {
-  if (!slug) return null;
+  if (!slug || !adminDb) return null;
   const targetSlug = slug.toLowerCase().trim();
 
-  // 1. Try exact doc ID match
-  let docRef = doc(db, 'products', targetSlug);
-  let docSnap = await getDoc(docRef);
+  // Helper to resolve variants: prefer embedded variants for 0ms subcollection overhead
+  const extractVariants = async (docRef, data) => {
+    if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
+      return data.variants;
+    }
+    try {
+      const variantsSnap = await docRef.collection('variants').get();
+      return variantsSnap.docs.map(v => ({ id: v.id, ...v.data() }));
+    } catch {
+      return [];
+    }
+  };
 
-  if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() };
+  // 1. Fast path: exact doc ID match
+  const docRef = adminDb.collection('products').doc(targetSlug);
+  const docSnap = await docRef.get();
+
+  if (docSnap.exists) {
+    const data = docSnap.data() || {};
+    const rawVariants = await extractVariants(docRef, data);
+    const productData = { id: docSnap.id, ...data, variants: rawVariants };
+    productData.processedHierarchy = processProductVariants(rawVariants);
+    return productData;
   }
 
-  // 2. Try 'slug' field match
-  const q1 = query(collection(db, 'products'), where('slug', '==', targetSlug));
-  const snap1 = await getDocs(q1);
-  if (!snap1.empty) {
-    return { id: snap1.docs[0].id, ...snap1.docs[0].data() };
+  // 2. Parallel fallback: 'slug' and 'canonicalName' queries
+  const [slugSnap, nameSnap] = await Promise.all([
+    adminDb.collection('products').where('slug', '==', targetSlug).limit(1).get().catch(() => ({ empty: true })),
+    adminDb.collection('products').where('canonicalName', '==', slug).limit(1).get().catch(() => ({ empty: true }))
+  ]);
+
+  const foundDoc = (!slugSnap.empty && slugSnap.docs) ? slugSnap.docs[0] : ((!nameSnap.empty && nameSnap.docs) ? nameSnap.docs[0] : null);
+  if (foundDoc) {
+    const data = foundDoc.data() || {};
+    const rawVariants = await extractVariants(foundDoc.ref, data);
+    const productData = { id: foundDoc.id, ...data, variants: rawVariants };
+    productData.processedHierarchy = processProductVariants(rawVariants);
+    return productData;
   }
 
   return null;
 }
 
 export default async function NextProductPage({ params }) {
-  const slug = params?.slug;
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
   const initialProduct = await getProductBySlugServer(slug);
+  const safeProduct = sanitizeForClient(initialProduct);
 
   return (
-    <ProductClientWrapper serverParams={params} initialProduct={initialProduct} />
+    <ProductClientWrapper serverParams={resolvedParams} initialProduct={safeProduct} />
   );
 }
 export const revalidate = 3600;

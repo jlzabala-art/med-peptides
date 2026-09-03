@@ -1,14 +1,6 @@
-"use client";
-
 import React, { useState } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { createBulkRestockOrder } from '../../../repositories/inventoryRepository';
 import { useAuth } from '../../../context/AuthContext';
-
-
-
-
 import { catalog } from '../../../data/v2/index.js';
 import { ShoppingCart, Plus, Minus, CheckCircle2 } from '@/lib/icons';
 
@@ -45,12 +37,11 @@ export default function BulkRestockPortalWidget() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'bulk_orders'), {
+      await createBulkRestockOrder({
         wholesalerId: user.uid,
         wholesalerName: user.displayName || 'Clinic',
         items: items,
         status: 'pending_admin_approval',
-        createdAt: serverTimestamp()
       });
       setSuccess(true);
       setTimeout(() => {

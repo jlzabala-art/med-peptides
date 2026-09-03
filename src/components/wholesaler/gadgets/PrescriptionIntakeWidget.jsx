@@ -14,24 +14,10 @@ import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import Activity from "lucide-react/dist/esm/icons/activity";
 import FileCheck from "lucide-react/dist/esm/icons/file-check";
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { getCatalog } from '../../../repositories/productRepository';
-
-
-
-
-
-
-
-
-
-
-
-
-
+import { createCompoundingRfq } from '../../../repositories/inventoryRepository';
+import { logger } from '../../../utils/logger';
 
 export default function PrescriptionIntakeWidget() {
   const { user } = useAuth();
@@ -44,7 +30,7 @@ export default function PrescriptionIntakeWidget() {
         const data = await getCatalog();
         setDbCatalog(data || []);
       } catch (err) {
-        console.error("Error loading catalog from Firestore:", err);
+        logger.error('Error loading catalog in PrescriptionIntakeWidget', { error: err.message });
       }
     }
     loadCatalog();
@@ -249,37 +235,37 @@ export default function PrescriptionIntakeWidget() {
   const handleSubmitRFQ = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'compounding_rfqs'), {
+      await createCompoundingRfq({
         wholesalerId: user?.uid || 'anonymous',
         wholesalerName: user?.displayName || user?.name || 'Partner Clinic',
-        catalogItems: catalogItems.map(item => ({
+        catalogItems: catalogItems.map((item) => ({
           productId: item.product?.id || item.product?.name || '',
           name: item.name,
-          quantity: item.quantity
+          quantity: item.quantity,
         })),
-        compoundedItems: compoundedItems.map(item => ({
+        compoundedItems: compoundedItems.map((item) => ({
           name: item.name,
           actives: item.actives,
           vehicle: item.vehicle,
           volume: item.volume || item.quantity,
-          specialInstructions: item.specialInstructions || ''
+          specialInstructions: item.specialInstructions || '',
         })),
         shippingAddress: shippingAddress || null,
         deliveryDate: deliveryDate ? new Date(deliveryDate) : null,
         notes: notes || '',
         status: 'pending_quotation',
-        createdAt: serverTimestamp()
       });
       setRfqSubmitted(true);
       setTimeout(() => {
         resetWidget();
       }, 5000);
     } catch (err) {
-      console.error("Error submitting RFQ:", err);
+      logger.error('Error submitting RFQ in PrescriptionIntakeWidget', { error: err.message });
     } finally {
       setLoading(false);
     }
   };
+
 
   const resetWidget = () => {
     setMode('select');

@@ -28,6 +28,7 @@ import { useProductSearch } from '../hooks/useProductSearch';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 import { useSearchProtocols } from '../hooks/data/useSearchProtocols';
 import { useSearchSupplements } from '../hooks/data/useSearchSupplements';
+import { getActiveProducts } from '../repositories/productRepository';
 
 // Cycling placeholder messages — shows users what the search can do
 const PLACEHOLDER_CYCLE = [
@@ -41,7 +42,7 @@ const PLACEHOLDER_CYCLE = [
 ];
 
 export default function SearchModal({ isOpen, onClose, onSelectProduct, products = [], protocolIndex = [], supplementCatalogue = [], initialTab = 'peptides', onQueryChange, isLoading = false, isProfessional = false, initialQuery = '' }) {
-  const { allFaqs } = useFirestoreData();
+  const { allFaqs, activeB2cSuppliers = [] } = useFirestoreData();
 
   const isMobile = useResponsive('(max-width: 768px)');
 
@@ -146,6 +147,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
     debounceMs: 300,
     hitsPerPage: 20
   });
+  const [internalProducts, setInternalProducts] = useState(products || []);
   const [showAll, setShowAll] = useState(false);
   const [selectedFaqId, setSelectedFaqId] = useState(null);
   const activeTab = 'unified';
@@ -159,7 +161,16 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
   const seenQueriesRef = useRef(new Map()); // query → count
   // Track whether we just opened the modal to block the auto-tab from overriding initialTab
   const justOpenedRef = useRef(false);
-  
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setInternalProducts(products);
+    } else {
+      getActiveProducts().then(p => {
+        if (p && p.length > 0) setInternalProducts(p);
+      }).catch(() => {});
+    }
+  }, [products]);
 
   useEffect(() => {
     if (isOpen) {
@@ -198,15 +209,87 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
   const faqIndex = useMemo(() => buildFAQIndex(allFaqs), [allFaqs]);
 
   const searchResults = useMemo(() => {
-    let res = algoliaProducts || [];
+    let res = (algoliaProducts && algoliaProducts.length > 0) ? algoliaProducts : [];
+    const pool = (products && products.length > 0) ? products : internalProducts;
+    if (res.length === 0 && searchTerm && searchTerm.trim()) {
+      const q = searchTerm.toLowerCase().trim();
+      res = (pool || []).filter(p => 
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.displayName || '').toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q) ||
+        (p.tags || []).some(t => t.toLowerCase().includes(q))
+      );
+    }
     if (activeClinicalFilters.route) {
       res = res.filter(p => (p.pharmacokinetics?.route || 'Subcutaneous') === activeClinicalFilters.route);
     }
     if (activeClinicalFilters.storage) {
       res = res.filter(p => (p.storage_conditions?.dry || 'Room Temperature').includes(activeClinicalFilters.storage));
     }
-    return res;
-  }, [algoliaProducts, activeClinicalFilters]);
+
+    // ── B2C Supplier Filtering ──
+    // Limit visible products to suppliers enabled for B2C when viewing as guest/patient
+    if (!isProfessional && activeB2cSuppliers && activeB2cSuppliers.length > 0) {
+      res = res.filter(p => {
+        const sup = (p.supplier || p.supplierId || '').toLowerCase().trim();
+        const supIds = (p.supplierIds || []).map(s => String(s).toLowerCase().trim());
+        if (!sup && supIds.length === 0) return true; // generic/unrestricted catalog product
+        return (sup && activeB2cSuppliers.includes(sup)) || supIds.some(id => activeB2cSuppliers.includes(id));
+      });
+    }
+
+    // ── Product Consolidation & Variant Aggregation ──
+    // Group identical supplier/dosage docs into single master product cards with variant ranges
+    const map = new Map();
+    res.forEach(p => {
+      const rawName = (p.name || p.displayName || p.title || '').trim();
+      if (!rawName) return;
+      const canonicalKey = rawName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      const doseStr = p.dosage || p.strength || p.dose || '';
+      const rawDoses = [];
+      if (doseStr) rawDoses.push(doseStr);
+      if (Array.isArray(p.variants)) {
+        p.variants.forEach(v => {
+          const vDose = v.dosage || v.strength || v.presentation || '';
+          if (vDose) rawDoses.push(vDose);
+        });
+      }
+
+      if (!map.has(canonicalKey)) {
+        map.set(canonicalKey, {
+          ...p,
+          name: rawName,
+          _allDosages: [...new Set(rawDoses)],
+          variantCount: Math.max(1, rawDoses.length),
+        });
+      } else {
+        const existing = map.get(canonicalKey);
+        const merged = [...new Set([...existing._allDosages, ...rawDoses])];
+        existing._allDosages = merged;
+        existing.variantCount = Math.max(existing.variantCount + 1, merged.length);
+        if (!existing.category && p.category) existing.category = p.category;
+        if (!existing.shortDescription && p.shortDescription) existing.shortDescription = p.shortDescription;
+      }
+    });
+
+    return Array.from(map.values()).map(prod => {
+      const dosages = prod._allDosages || [];
+      let subtitle = '';
+      if (dosages.length > 1) {
+        subtitle = `${dosages.slice(0, 4).join(' · ')}${dosages.length > 4 ? ' · +' + (dosages.length - 4) + ' more' : ''}`;
+      } else if (dosages.length === 1) {
+        subtitle = `${dosages[0]}`;
+      }
+      const cat = prod.category || prod.categoryId || 'Research Peptide';
+      const fullSubtitle = subtitle ? `${subtitle} · ${cat}` : (prod.shortDescription || cat);
+      return {
+        ...prod,
+        dosageSubtitle: fullSubtitle,
+        formattedDosages: dosages,
+      };
+    });
+  }, [algoliaProducts, products, internalProducts, searchTerm, activeClinicalFilters, isProfessional, activeB2cSuppliers]);
 
   const { protocols: searchedProtocols } = useSearchProtocols(searchTerm, showAll ? 50 : 5);
   const { supplements: searchedSupplements } = useSearchSupplements(searchTerm, showAll ? 50 : 5);
@@ -821,7 +904,7 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
               <DiscoveryMode 
                 isProfessional={isProfessional} 
                 THEME={THEME} 
-                setSearchTerm={setSearchTerm} 
+                setSearchTerm={handleSearchChange} 
                 isMobile={isMobile}
               />
             )}
@@ -907,6 +990,8 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct, products
                   intent: intent,
                   classification: classification.query_type
                 };
+                if (onClose) onClose();
+                useUIStore.getState().setActiveModal(null);
                 window.dispatchEvent(
                   new CustomEvent('open-clinical-ai', {
                     detail: { 
@@ -1057,8 +1142,26 @@ function PeptidesResults({ searchTerm, isLoading, results, focusedItem, onSelect
               <FlaskConical size={16} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: THEME.textPrimary, fontFamily: "var(--font-sans)", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
-              <div style={{ fontSize: '0.75rem', color: THEME.textSecondary, fontFamily: "var(--font-sans)", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.shortDescription || 'Research Peptide'}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                <span style={{ fontWeight: 600, fontSize: '0.9rem', color: THEME.textPrimary, fontFamily: "var(--font-sans)", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                {p.variantCount > 1 && (
+                  <span style={{ 
+                    fontSize: '0.68rem', 
+                    fontWeight: 600, 
+                    padding: '1px 6px', 
+                    borderRadius: '4px', 
+                    background: `${THEME.accentA}18`, 
+                    color: THEME.accentA,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}>
+                    {p.variantCount} variants
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: THEME.textSecondary, fontFamily: "var(--font-sans)", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {p.dosageSubtitle || p.shortDescription || 'Research Peptide'}
+              </div>
             </div>
             <ArrowRight size={14} style={{ color: `${THEME.accentA}80`, flexShrink: 0 }} />
           </div>
@@ -1374,6 +1477,8 @@ function SearchEmptyState({ query, THEME, onClose, isMobile }) {
       </div>
       <button
         onClick={() => {
+          if (onClose) onClose();
+          useUIStore.getState().setActiveModal(null);
           window.dispatchEvent(new CustomEvent('open-clinical-ai', { 
             detail: { autoSend: true, query: `Tell me about ${query} in a clinical context`, section: 'SearchModal.FooterCard' } 
           }));

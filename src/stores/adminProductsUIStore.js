@@ -30,4 +30,7 @@ export const useAdminProductsUIStore = create((set) => ({
 
   productsToBulkOrder: [],
   setProductsToBulkOrder: (val) => set({ productsToBulkOrder: val }),
+
+  inventoryMode: false,
+  setInventoryMode: (val) => set({ inventoryMode: val }),
 }));

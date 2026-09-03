@@ -31,6 +31,3 @@ const aiOperations = require("./src/http/aiOperations");
 exports.threeWayMatching = aiOperations.threeWayMatching;
 exports.analyzeRFQEndpoint = aiOperations.analyzeRFQEndpoint;
 
-// ── DataTable Semantic Search ─────────────────────────────────────────────────
-const tableSearch = require('./src/http/table_semantic_search');
-exports.tableSemanticSearch = tableSearch.tableSemanticSearch;

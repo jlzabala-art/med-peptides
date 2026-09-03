@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { db } from '../../firebase';
 
-export function useProductBySlug(slug) {
-  const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function useProductBySlug(slug, { initialData = null, enabled = true } = {}) {
+  const [product, setProduct] = useState(initialData || null);
+  const [isLoading, setIsLoading] = useState(!initialData && enabled);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!enabled || initialData) {
+      if (initialData) setProduct(initialData);
+      setIsLoading(false);
+      return;
+    }
     async function fetchProduct() {
       if (!slug) {
         setIsLoading(false);
@@ -25,7 +29,10 @@ export function useProductBySlug(slug) {
         let docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setProduct({ id: docSnap.id, ...docSnap.data() });
+          const productData = { id: docSnap.id, ...docSnap.data() };
+          const variantsSnap = await getDocs(collection(db, `products/${docSnap.id}/variants`));
+          productData.variants = variantsSnap.docs.map(v => ({ id: v.id, ...v.data() }));
+          setProduct(productData);
           return;
         }
 
@@ -33,7 +40,10 @@ export function useProductBySlug(slug) {
         const q1 = query(collection(db, 'products'), where('slug', '==', targetSlug));
         const snap1 = await getDocs(q1);
         if (!snap1.empty) {
-          setProduct({ id: snap1.docs[0].id, ...snap1.docs[0].data() });
+          const productData = { id: snap1.docs[0].id, ...snap1.docs[0].data() };
+          const variantsSnap = await getDocs(collection(db, `products/${snap1.docs[0].id}/variants`));
+          productData.variants = variantsSnap.docs.map(v => ({ id: v.id, ...v.data() }));
+          setProduct(productData);
           return;
         }
 

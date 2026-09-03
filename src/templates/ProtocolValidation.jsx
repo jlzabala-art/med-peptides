@@ -1,19 +1,11 @@
 "use client";
-import { useRouter } from 'next/navigation';
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Info from "lucide-react/dist/esm/icons/info";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import Lock from "lucide-react/dist/esm/icons/lock";
-/* eslint-disable no-unused-vars, react-hooks/set-state-in-effect */
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  ShieldCheck, AlertTriangle, AlertCircle, CheckCircle2, 
+  ArrowRight, ArrowLeft, Loader2, Info, ChevronRight, Lock 
+} from '@/lib/icons';
 import { Checkbox } from '../components/ui';
-import { useSearchParams } from 'next/navigation';
 
 
 

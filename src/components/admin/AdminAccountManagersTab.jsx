@@ -22,11 +22,12 @@ import Map from "lucide-react/dist/esm/icons/map";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import AppActionGroup from '../ui/AppActionGroup';
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import DataTable from '../ui/DataTable';
-import { StatusChip } from '../ui';
+import { StatusChip, CopyableId } from '../ui';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AppEntityCell from '../ui/AppEntityCell';
 import AppFilterBar from '../ui/AppFilterBar';
@@ -34,6 +35,7 @@ import { useAccountManagers } from '../../hooks/admin/useAccountManagers';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import PageHeader from '../ui/PageHeader';
+import EmptyState from '../ui/EmptyState';
 
 
 
@@ -56,46 +58,21 @@ import PageHeader from '../ui/PageHeader';
 
 
 
-import AccountManagerWizard from './AccountManagerWizard';
+import AccountManagerFormDrawer from './AccountManagerFormDrawer';
 import AccountManagerDrawer from './AccountManagerDrawer';
 import toast from 'react-hot-toast';
 import { useResponsive } from '../../hooks/useResponsive';
 import notifier from '../../services/NotificationService';
 
 const RowActions = ({ row, setSelectedManager, handleDelete }) => {
-  const [showMenu, setShowMenu] = useState(false);
   return (
-    <div style={{ position: 'relative', display: 'flex', justifyContent: 'flex-end' }}>
-      <button className="btn btn-icon btn-sm" onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }} title="Quick Actions">
-        <MoreVertical size={16} />
-      </button>
-      {showMenu && (
-        <>
-          <div style={{ position: 'fixed', inset: 0, zIndex: 90 }} onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
-          <div style={{ 
-            position: 'absolute', right: 0, top: '100%', marginTop: '4px', backgroundColor: 'var(--surface)', 
-            border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', 
-            zIndex: 100, minWidth: '160px', padding: '0.5rem 0', display: 'flex', flexDirection: 'column' 
-          }}>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-main)' }} onClick={(e) => { e.stopPropagation(); setShowMenu(false); setSelectedManager(row); }}>
-              <Eye size={14} /> View Profile
-            </button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-main)' }} onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}>
-              <MapPin size={14} /> Assign Territory
-            </button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-main)' }} onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}>
-              <Building2 size={14} /> Reassign Clinics
-            </button>
-            <div style={{ height: '1px', backgroundColor: 'var(--border)', margin: '0.25rem 0' }}></div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-warning)' }} onClick={(e) => { e.stopPropagation(); setShowMenu(false); }}>
-              <AlertCircle size={14} /> Deactivate
-            </button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-danger)' }} onClick={(e) => { e.stopPropagation(); setShowMenu(false); handleDelete(row.id); }}>
-              <Trash2 size={14} /> Delete
-            </button>
-          </div>
-        </>
-      )}
+    <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+      <AppActionGroup actions={[
+        { type: 'view', onClick: (e) => { e.stopPropagation(); setSelectedManager(row); }, label: 'View Profile' },
+        { type: 'custom', icon: MapPin, onClick: (e) => { e.stopPropagation(); /* MapPin Handle */ }, label: 'Assign Territory' },
+        { type: 'custom', icon: AlertCircle, onClick: (e) => { e.stopPropagation(); /* Deactivate Handle */ }, label: 'Deactivate', color: 'var(--color-warning)' },
+        { type: 'delete', onClick: (e) => { e.stopPropagation(); handleDelete(row.id); } }
+      ]} />
     </div>
   );
 };
@@ -176,25 +153,26 @@ export default function AdminAccountManagersTab() {
       key: 'name',
       sortKey: 'displayName',
       sortValue: (m) => m.displayName || m.email,
-      render: (row) => (
-        <AppEntityCell
-          title={row.displayName || row.name || row.email}
-          subtitle={row.email}
-          icon={
-            row.photoURL ? (
-              <img src={row.photoURL} alt="" style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
-            ) : (
-              <UserCircle size={20} />
-            )
-          }
-        />
-      ),
+      render: (row) => {
+        const name = row.displayName || row.name || 'Unknown';
+        return (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{row.email || 'No email'}</span>
+                <CopyableId value={row.id} iconOnly={true} />
+              </div>
+            </div>
+          </div>
+        );
+      },
     },
     {
       header: 'Territory',
       key: 'territory',
       render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 500 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 500 }}>
           <MapPin size={14} color="var(--text-muted)" /> {row.territories?.length ? `${row.territories.length} Territories Assigned` : 'Global Coverage'}
         </div>
       )
@@ -204,7 +182,7 @@ export default function AdminAccountManagersTab() {
       key: 'clinics',
       sortKey: 'assignedClinics',
       render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem' }}>
           <Building2 size={14} color="var(--text-muted)" /> {row.assignedClinics}
         </div>
       )
@@ -214,7 +192,7 @@ export default function AdminAccountManagersTab() {
       key: 'doctors',
       sortKey: 'assignedDoctors',
       render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontWeight: 500, fontSize: '0.85rem' }}>
           <UserCircle size={14} color="var(--text-muted)" /> {row.assignedDoctors}
         </div>
       )
@@ -247,7 +225,7 @@ export default function AdminAccountManagersTab() {
       header: 'Status',
       key: 'status',
       render: (row) => (
-        <StatusChip status={row.disabled ? 'inactive' : 'active'} label={row.disabled ? 'Suspended' : 'Active'} />
+        <StatusChip status={row.disabled ? 'disabled' : 'active'} />
       ),
     },
     {
@@ -280,14 +258,14 @@ export default function AdminAccountManagersTab() {
               <button className="btn btn-outline" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
                 <Mail size={16} /> <span className="hide-mobile">Invite Manager</span>
               </button>
-              <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+              <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)}>
                 <Plus size={16} /> Add Manager
               </button>
             </div>
           }
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ backgroundColor: 'var(--primary-light)', padding: '10px', borderRadius: '8px', color: 'var(--primary)' }}><Users size={20} /></div>
             <div>
@@ -393,16 +371,25 @@ export default function AdminAccountManagersTab() {
       {/* Table or Mobile Cards */}
       <div style={{ flex: 1, minHeight: 0, backgroundColor: 'var(--surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', overflowY: 'auto' }}>
         {filtered.length === 0 && !loading ? (
-          <div style={{ padding: '6rem 2rem', textAlign: 'center', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ backgroundColor: 'var(--color-bg-subtle)', padding: '2rem', borderRadius: '50%', marginBottom: '1.5rem' }}>
-              <Users size={64} style={{ color: 'var(--primary)', opacity: 0.8 }} />
-            </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.5rem' }}>No Account Managers Yet</h3>
-            <p style={{ maxWidth: '400px', margin: '0 auto 2rem auto', fontSize: '0.95rem' }}>Create your first account manager to start managing territories, clinics, and physicians effectively.</p>
+          <EmptyState
+            icon={Users}
+            title="No Account Managers Yet"
+            subtitle="Create your first account manager to start managing territories, clinics, and physicians effectively."
+          >
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
               <button className="btn btn-primary" onClick={() => setIsWizardOpen(true)}>
                 <Plus size={16} /> Create Manager
               </button>
+              {isWizardOpen && (
+                <AccountManagerFormDrawer 
+                  isOpen={isWizardOpen}
+                  onClose={() => setIsWizardOpen(false)}
+                  onSuccess={() => {
+                    setIsWizardOpen(false);
+                    fetchManagers();
+                  }}
+                />
+              )}
               <button className="btn btn-outline" onClick={() => setIsWizardOpen(true)}>
                 <Mail size={16} /> Invite Manager
               </button>
@@ -410,7 +397,7 @@ export default function AdminAccountManagersTab() {
                 <Download size={16} /> Import Managers
               </button>
             </div>
-          </div>
+          </EmptyState>
         ) : isMobile ? (
           <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {filtered.map(row => (
@@ -424,9 +411,6 @@ export default function AdminAccountManagersTab() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--color-bg-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {row.photoURL ? <img src={row.photoURL} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={24} color="var(--text-muted)" />}
-                    </div>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-main)' }}>{row.displayName || row.name || row.email}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{row.email}</div>

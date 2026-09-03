@@ -20,6 +20,7 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
   const [patientName, setPatientName] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [search, setSearch] = useState('');
+  const [hasPeptides, setHasPeptides] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -58,12 +59,13 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
     if (!protocolName || selectedItems.length === 0) return;
     // We create a custom protocol with 1 phase that holds all items
     const customProtocol = {
-      protocol_name: `${protocolName} (Custom Kit)`,
+      name: `${protocolName} (Custom Kit)`,
       therapeutic_category: 'Custom Patient Protocol',
       patient: patientName,
       status: 'active', // ready to be used
       created_at: new Date(),
       is_custom_composite: true, // Tag for Zoho
+      has_peptides: hasPeptides,
       phases: [
         {
           label: 'Phase 1: Custom Administration',
@@ -119,6 +121,19 @@ export default function CustomProtocolBuilder({ onSaved, onClose }) {
                 placeholder="e.g. John Doe"
                 style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.95rem' }}
               />
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <input 
+                type="checkbox" 
+                id="hasPeptides"
+                checked={hasPeptides}
+                onChange={(e) => setHasPeptides(e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <label htmlFor="hasPeptides" style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', cursor: 'pointer' }}>
+                Contains Peptides
+              </label>
             </div>
           </div>
 

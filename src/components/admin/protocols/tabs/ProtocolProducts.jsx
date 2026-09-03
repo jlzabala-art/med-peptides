@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { Package, Pill, Box, Zap, ChevronDown } from '@/lib/icons';
 import VialCalculator from '../VialCalculator';
 import AlgoliaProductPicker from './AlgoliaProductPicker';
+import { toast } from 'react-hot-toast';
 
 export default function ProtocolProducts({ protocol, onUpdate, onProductClick }) {
-  const [selectedPhaseId, setSelectedPhaseId] = useState(protocol?.phases?.[0]?.id || null);
+  const [selectedPhaseId, setSelectedPhaseId] = useState(protocol?.phases?.[0]?.id || protocol?.phases?.[0]?.phase_key || null);
   
   // Aggregate products/items from phases
   const allItems = protocol?.phases?.flatMap(phase => phase.items || []) || [];
@@ -19,12 +20,13 @@ export default function ProtocolProducts({ protocol, onUpdate, onProductClick })
     
     const targetPhaseId = selectedPhaseId || protocol?.phases?.[0]?.id;
     if (!targetPhaseId) {
-      alert("Please create a Phase in the Treatment Plan first.");
+      toast("Please create a Phase in the Treatment Plan first.");
       return;
     }
 
-    const newPhases = protocol.phases.map(phase => {
-      if (phase.id === targetPhaseId) {
+    const newPhases = protocol.phases.map((phase, index) => {
+      const currentPhaseId = phase.id || phase.phase_key || `phase-${index}`;
+      if (currentPhaseId === targetPhaseId) {
         // Create a new item mapped from the Algolia product
         const newItem = {
           id: Date.now().toString(),
@@ -111,9 +113,13 @@ export default function ProtocolProducts({ protocol, onUpdate, onProductClick })
                     outline: 'none',
                   }}
                 >
-                  {protocol.phases.map((phase, index) => (
-                    <option key={phase.id || `phase-${index}`} value={phase.id || `phase-${index}`}>{phase.name || 'Unnamed Phase'}</option>
-                  ))}
+                  {protocol.phases.map((phase, index) => {
+                    const phaseId = phase.id || phase.phase_key || `phase-${index}`;
+                    const phaseName = phase.name || 'Unnamed Phase';
+                    return (
+                      <option key={phaseId} value={phaseId}>{phaseName}</option>
+                    );
+                  })}
                 </select>
                 <ChevronDown size={16} color="var(--text-muted)" style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               </div>

@@ -1,10 +1,12 @@
 "use client";
 
 import React from 'react';
-import { Package, Copy, Check, DollarSign, Activity, Settings, Stethoscope } from '@/lib/icons';
+import { Package, Copy, Check, DollarSign, Activity, Settings, Stethoscope, Plus } from '@/lib/icons';
+import { useDrawer } from '../../../context/DrawerContext';
 
 function ProductGridCard({ product, onClick, isSelected, onToggleSelect }) {
   const [copied, setCopied] = React.useState(false);
+  const { openDrawer } = useDrawer();
 
   const handleCopyId = (e) => {
     e.stopPropagation();
@@ -120,6 +122,43 @@ function ProductGridCard({ product, onClick, isSelected, onToggleSelect }) {
         </div>
       </div>
       
+      {/* Action Area */}
+      <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            // Open the universal rx-builder with this product pre-added
+            openDrawer('rx-builder', 'new', {
+              initialItems: [{
+                id: product.id,
+                name: product.name || product.productName || 'Unnamed',
+                price: product.proVialPrice || product.price || 0,
+                quantity: 1,
+                sku: product.sku || '',
+              }],
+              sourceModule: 'product-catalog',
+            });
+          }}
+          style={{
+            flex: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+            padding: '0.6rem',
+            background: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--primary-dark)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--primary)'}
+        >
+          <Plus size={14} /> Add to Prescription
+        </button>
+      </div>
+
     </div>
   );
 }

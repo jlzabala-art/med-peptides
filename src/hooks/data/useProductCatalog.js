@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import * as fb from '../../firebase';
 const db = fb?.db;
-import { useAuth } from '../context/AuthContext';
-
+import { useRoleAccess } from '../useRoleAccess';
 /**
  * Hook unificado para obtener el catálogo de productos y aplicar 
  * reglas de negocio (precios dinámicos por rol).
@@ -15,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
  * - patient/ninguno: Retail pricing (B2C).
  */
 export default function useProductCatalog(options = {}) {
-  const { user, userProfile } = useAuth();
+  const { is, effectiveRole } = useRoleAccess();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,8 +25,8 @@ export default function useProductCatalog(options = {}) {
     search = ''
   } = options;
 
-  const role = userProfile?.role || 'guest';
-  const isAdmin = role === 'admin';
+  const role = effectiveRole;
+  const isAdmin = is('admin');
 
   useEffect(() => {
     let isMounted = true;
@@ -48,6 +47,20 @@ export default function useProductCatalog(options = {}) {
         }
 
         constraints.push(limit(limitCount));
+
+        // Si es B2C (no admin, no B2B), solo traer productos del supplier activo para B2C
+        let activeB2cSupplierName = null;
+        if (!isAdmin && !is('wholesaler') && !is('supplier') && !is('doctor') && !is('clinic')) {
+          const b2cQ = query(collection(db, 'wholesellers'), where('statusB2C', '==', 'active'), limit(1));
+          const b2cSnap = await getDocs(b2cQ);
+          if (!b2cSnap.empty) {
+            const data = b2cSnap.docs[0].data();
+            activeB2cSupplierName = data.companyName || data.name || null;
+          }
+          if (activeB2cSupplierName) {
+             constraints.push(where('supplier', '==', activeB2cSupplierName));
+          }
+        }
 
         const q = query(colRef, ...constraints);
         const snap = await getDocs(q);
@@ -72,10 +85,10 @@ export default function useProductCatalog(options = {}) {
             // Admin ve todos los precios, exponemos tier1 y tier2
             displayPrice = product.price;
             tier = 'admin_view';
-          } else if (role === 'wholesaler' || role === 'supplier') {
+          } else if (is('wholesaler') || is('supplier')) {
             displayPrice = product.tier1Price || product.price;
             tier = 'tier1';
-          } else if (role === 'doctor' || role === 'clinic') {
+          } else if (is('doctor') || is('clinic')) {
             displayPrice = product.tier2Price || product.price;
             tier = 'tier2';
           }

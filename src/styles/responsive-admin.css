@@ -1,0 +1,383 @@
+/* ============================================================
+   RESPONSIVE ADMIN — Mobile-first overrides for the Admin Panel
+   Imported last in master.css so rules win over all other styles.
+   All rules wrapped in @media (max-width: 768px) unless noted.
+   ============================================================ */
+
+/* ── Content area safe padding (clears bottom nav) ──────────── */
+@media (max-width: 768px) {
+  /* Main content scroll container in PortalLayout */
+  main {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom) + 1rem) !important;
+  }
+
+  /* Legacy admin root */
+  .admin-terminal-root {
+    padding-top: 0 !important; /* header is fixed — no extra top pad needed */
+    padding-bottom: calc(64px + env(safe-area-inset-bottom) + 1rem) !important;
+  }
+}
+
+/* ── Data module container padding ──────────────────────────── */
+@media (max-width: 768px) {
+  .data-module-container {
+    padding: 0.75rem 1rem !important;
+  }
+  .data-module-wrapper {
+    overflow-x: hidden;
+  }
+}
+
+/* ── Sidebar: completely hidden on mobile (drawer handles nav) ── */
+@media (max-width: 768px) {
+  .portal-sidebar,
+  .app-sidebar,
+  [class*="sidebar-gadget"] {
+    /* SidebarGadget handles its own visibility via isMobile prop.
+       This is a safety fallback. */
+    max-width: 100% !important;
+  }
+}
+
+/* ── Page header sticky on mobile ───────────────────────────── */
+@media (max-width: 768px) {
+  .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--color-bg-app, #f8fafc);
+    padding: 0.75rem 1rem !important;
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    margin-bottom: 0 !important;
+  }
+}
+
+/* ── Portal header on mobile: compact ───────────────────────── */
+@media (max-width: 768px) {
+  .portal-header {
+    padding: 0 0.75rem !important;
+    height: 56px !important;
+  }
+
+  /* Title & portal switcher: truncate */
+  .portal-header-title {
+    font-size: 0.875rem !important;
+    max-width: 120px;
+  }
+
+  /* CENTER search bar: hide on mobile (search lives in catalog) */
+  .portal-header-center {
+    display: none !important;
+  }
+
+  /* ── Mobile top bar: remove duplicate/noisy elements ────────────
+     Keep:    ☰ hamburger · page title · cart · avatar
+     Remove:  search icon (catalog has search) · bell (in bottom nav)
+              Sparkles/AI · any extra preferences pill               */
+  .portal-header-search-btn,
+  .portal-header-bell-wrap,
+  .portal-header-sparkles-btn,
+  .portal-header-prefs {
+    display: none !important;
+  }
+}
+
+
+/* ── Admin dashboard metric cards ───────────────────────────── */
+@media (max-width: 768px) {
+  .admin-metric-card {
+    padding: 0.875rem !important;
+  }
+
+  /* Dashboard action grid: single column on mobile */
+  .admin-action-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* ── GCP table container: no border/shadow on mobile (cards handle it) ── */
+@media (max-width: 768px) {
+  .admin-table-container,
+  .gcp-table-container:not(.force-table) {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow-x: visible !important;
+  }
+}
+
+/* ── Prevent fixed-width toolbars from overflowing ─────────── */
+@media (max-width: 768px) {
+  /* Any inline-flex toolbar that could escape viewport */
+  .ui-table-toolbar,
+  .data-module-toolbar,
+  [class*="toolbar"],
+  [class*="action-bar"] {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* ── Standard drawer: full-screen on mobile ─────────────────── */
+@media (max-width: 768px) {
+  /* StandardDrawer or any right-slide drawer */
+  [class*="standard-drawer"],
+  [class*="side-drawer"] {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* ── SearchableDropdown: full-width on mobile ───────────────── */
+@media (max-width: 768px) {
+  .searchable-dropdown,
+  [class*="searchable-dropdown"],
+  .multi-select-filter {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  /* Dropdown popover: don't exceed viewport */
+  .searchable-dropdown-popover,
+  [class*="dropdown-menu"],
+  [class*="popover-content"] {
+    max-width: calc(100vw - 2rem) !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+
+/* ── Goals coverage widget: full-width on mobile ────────────── */
+@media (max-width: 768px) {
+  .goals-coverage-pill,
+  [class*="goals-coverage"] > button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── SmartChips active filter row: horizontal scroll ─────────── */
+@media (max-width: 768px) {
+  .smart-chips-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem 0 0.5rem;
+  }
+  .smart-chips-bar::-webkit-scrollbar { display: none; }
+
+  .smart-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* ── Glass cards: reduce padding on mobile ───────────────────── */
+@media (max-width: 768px) {
+  .glass-card-premium,
+  [class*="glass-card"] {
+    padding: 1rem !important;
+  }
+}
+
+/* ── KPI scroll row: 2×2 compact grid ──────────────────────── */
+/* Already defined in ui.css (kpi-scroll-row) — this reinforces compact height */
+@media (max-width: 768px) {
+  .kpi-scroll-row {
+    /* Keep 2-col horizontal scroll from ui.css,
+       just reduce card gaps slightly */
+    gap: 0.625rem !important;
+  }
+}
+
+/* ── Filter row: hidden on mobile (MobileFiltersSheet replaces it) ── */
+@media (max-width: 768px) {
+  .filter-row {
+    display: none !important;
+  }
+  /* Show mobile-only filter trigger in its place */
+  .mobile-filter-row-wrapper {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 0 0.5rem;
+  }
+}
+
+/* ── DataTable mobile: hide header, show cards ───────────────── */
+@media (max-width: 768px) {
+  /* When DataTable is in mobileView=cards mode, ensure the table itself is hidden */
+  .ui-table-container table {
+    /* Table is conditionally not rendered in cards mode.
+       Safety net for any table that slips through: */
+    display: table !important; /* keep tables that opt-out with force-table */
+  }
+
+  /* Only hide tables inside gcp-table-container on mobile
+     (the card list replaces them) */
+  .gcp-table-container:not(.force-table) table,
+  .gcp-table-container:not(.force-table) thead,
+  .gcp-table-container:not(.force-table) tbody,
+  .gcp-table-container:not(.force-table) th,
+  .gcp-table-container:not(.force-table) td,
+  .gcp-table-container:not(.force-table) tr {
+    display: block;
+  }
+}
+
+/* ── MetricCard desktop minHeight (moved from inline style) ─────── */
+.metric-card {
+  min-height: 130px;
+}
+
+/* ── GlobalSearchBar: always full-width on mobile ─────────────── */
+@media (max-width: 768px) {
+  .search-bar-wrap,
+  .atlas-search-size-lg,
+  .atlas-search-size-md {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  /* Dropdown search results: constrained to viewport */
+  .search-bar-wrap [class*="dropdown"],
+  .search-bar-wrap [class*="results"] {
+    max-width: calc(100vw - 2rem) !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+
+/* ── AppActionGroup: 44px touch targets on mobile ─────────────── */
+@media (max-width: 768px) {
+  /* When inside a mobile record card footer, action buttons get larger touch targets */
+  .mobile-record-card-actions button,
+  .mobile-record-card-actions [role="button"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem;
+    border-radius: 8px !important;
+  }
+}
+
+/* ── Prevent action dropdown portals from escaping viewport on mobile ─ */
+@media (max-width: 768px) {
+  [data-action-dropdown],
+  [class*="action-dropdown"],
+  [class*="overflow-menu"] {
+    max-width: calc(100vw - 2rem) !important;
+  }
+}
+
+/* ── PageHeader actions: 2×2 grid on mobile ─────────────────────────── */
+@media (max-width: 768px) {
+  .page-header-actions-wrap {
+    display: grid !important;
+    /* 2 buttons per row; fallback to 1 if only 1 action exists */
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.4rem !important;
+    width: 100% !important;
+  }
+  /* Each action button fills its cell */
+  .page-header-actions-wrap > * {
+    width: 100% !important;
+    justify-content: center !important;
+    font-size: 0.73rem !important;
+    padding: 0.45rem 0.5rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 38px;
+  }
+  /* Primary CTA button: always spans full width (last in visual order) */
+  .page-header-actions-wrap > *:last-child:not(:nth-child(2n)) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── FilterRow pills (desktop-only): ensure labels visible at tablet edge ── */
+/* The atlas-search__filter-pill-btn font-size:0 in search.css is scoped
+   to GlobalSearchBar pills. FilterRow is desktop-only so these rarely show
+   at mobile widths, but at 769-1024px they must remain readable. */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .atlas-search__filter-pill-btn {
+    font-size: 0.72rem !important; /* Restore label text on tablet */
+  }
+}
+
+/* ── Catalog mobile actions: neutralize the generic 2-col grid ─── */
+/* The catalog injects its own .mobile-catalog-actions-row which has
+   its own flex layout. Prevent the generic page-header-actions-wrap
+   2-column grid from overriding it.                                 */
+@media (max-width: 768px) {
+  .page-header-actions-wrap:has(.catalog-actions-mobile-only) {
+    display: block !important;
+    grid-template-columns: unset !important;
+    width: 100%;
+  }
+
+  /* Ensure the wrapper itself is full-width */
+  .catalog-actions-mobile-only,
+  .catalog-actions-desktop-only {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   MOBILE UX IMPROVEMENTS (FASE 1 & 2)
+   Global resets and enhancements for native-like feel
+   ============================================================ */
+@media (max-width: 768px) {
+  /* 1. Remove grey tap highlights globally */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* 2. Prevent iOS Safari auto-zoom on inputs */
+  input, 
+  textarea, 
+  select,
+  .searchable-dropdown input,
+  .atlas-search input {
+    font-size: 16px !important;
+  }
+
+  /* 3. Estandarizar touch targets en botones de iconos */
+  button:has(> svg:only-child),
+  .mobile-catalog-actions-row button,
+  .ui-pagination-footer button {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .catalog-toolbar-actions button:has(> svg:only-child),
+  .catalog-header-actions-mobile button {
+    min-width: 38px !important;
+    min-height: 38px !important;
+  }
+
+  /* 4. Active state feedback for cards (native-like press) */
+  .mobile-card:active,
+  [class*="MobileRecordCard"]:active,
+  .gcp-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Utility to lock overscroll when modales/sheets are open */
+body.mobile-sheet-open {
+  overscroll-behavior: none !important;
+  /* Option for older iOS: */
+  /* overflow: hidden; */
+  /* position: fixed; width: 100%; */
+}

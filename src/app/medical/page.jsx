@@ -131,7 +131,7 @@ export default function MedicalOverviewPage() {
                   <div key={rx.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', borderRadius: '12px', background: 'var(--bg-app)' }}>
                     <div>
                       <div style={{ fontWeight: 700 }}>{rx.patientName || 'Unknown Patient'}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(rx.createdAt?.toDate?.() || Date.now()).toLocaleDateString()}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{new Date(rx.createdAt?.toDate?.() ?? 0).toLocaleDateString()}</div>
                     </div>
                     <div style={{ fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.5rem', borderRadius: '6px', background: '#ecfdf5', color: '#10b981' }}>
                       {rx.status || 'Active'}

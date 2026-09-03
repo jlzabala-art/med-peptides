@@ -1,6 +1,7 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import * as fb from '../firebase';
 const db = fb?.db;
+import logger from '../utils/logger.js';
 
 const AUDIT_COL = 'audit_logs';
 
@@ -38,6 +39,6 @@ export async function logAction(operatorId, operatorRole, action, targetId, meta
     };
     await addDoc(collection(db, AUDIT_COL), payload);
   } catch (err) {
-    console.error('[auditLogger] Failed to log action:', err);
+    logger.error('[auditLogger] Failed to log action:', err);
   }
 }

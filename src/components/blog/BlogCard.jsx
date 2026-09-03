@@ -54,15 +54,18 @@ export default function BlogCard({ post }) {
             </span>
           </div>
           
-          <h2 className="blog-card__title">{title}</h2>
-          <p className="blog-card__excerpt">{excerpt}</p>
+          <h2 className="blog-card__title" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: 'clamp(1rem, 2vw, 1.15rem)', fontWeight: 800, lineHeight: 1.3, marginBottom: '0.4rem' }}>
+            {title}
+          </h2>
+          <p className="blog-card__excerpt" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.45, marginBottom: '1rem' }}>
+            {excerpt}
+          </p>
           
-          <div className="blog-card__footer">
-            <div className="blog-card__author">
-              <div className="blog-card__avatar">MP</div>
-              <span className="blog-card__author-name">Atlas Health Team</span>
-            </div>
-            <span className="blog-card__cta">
+          <div className="blog-card__footer" style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>
+              {formattedDate} · {readTime || 6} min read
+            </span>
+            <span className="blog-card__cta" style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary, #003666)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
               <span>Read article</span>
               <i className="bi bi-arrow-right"></i>
             </span>

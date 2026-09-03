@@ -22,6 +22,7 @@ export default function EmptyState({
   subtitle,
   action,
   compact = false,
+  children,
 }) {
   return (
     <div
@@ -103,6 +104,12 @@ export default function EmptyState({
           {action.icon && <action.icon size={14} />}
           {action.label}
         </button>
+      )}
+
+      {children && (
+        <div style={{ marginTop: compact ? '0.5rem' : '1rem' }}>
+          {children}
+        </div>
       )}
     </div>
   );

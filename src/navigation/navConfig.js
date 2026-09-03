@@ -181,6 +181,13 @@ export const USER_MENU = {
       section: 'admin',
       domain: 'Operations',
     },
+    {
+      label: 'Pricing Engine',
+      path: '/admin?s=operations&t=pricing-engine',
+      icon: 'Calculator',
+      section: 'admin',
+      domain: 'Operations',
+    },
     // ── Architecture ──────────────────────────────────────────
     {
       label: 'Clinical AI Config',

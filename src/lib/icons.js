@@ -39,6 +39,10 @@ export { default as ClipboardList } from 'lucide-react/dist/esm/icons/clipboard-
 export { default as Clock } from 'lucide-react/dist/esm/icons/clock';
 export { default as CloudUpload } from 'lucide-react/dist/esm/icons/cloud-upload';
 export { default as CloudOff } from 'lucide-react/dist/esm/icons/cloud-off';
+export { default as Cloud } from 'lucide-react/dist/esm/icons/cloud';
+export { default as CloudRain } from 'lucide-react/dist/esm/icons/cloud-rain';
+export { default as CloudSnow } from 'lucide-react/dist/esm/icons/cloud-snow';
+export { default as CloudLightning } from 'lucide-react/dist/esm/icons/cloud-lightning';
 export { default as Command } from 'lucide-react/dist/esm/icons/command';
 export { default as Copy } from 'lucide-react/dist/esm/icons/copy';
 export { default as Cpu } from 'lucide-react/dist/esm/icons/cpu';
@@ -67,6 +71,7 @@ export { default as FileUp } from 'lucide-react/dist/esm/icons/file-up';
 export { default as Filter } from 'lucide-react/dist/esm/icons/filter';
 export { default as Flame } from 'lucide-react/dist/esm/icons/flame';
 export { default as FlaskConical } from 'lucide-react/dist/esm/icons/flask-conical';
+export { default as Folder } from 'lucide-react/dist/esm/icons/folder';
 export { default as Gift } from 'lucide-react/dist/esm/icons/gift';
 export { default as GitCompare } from 'lucide-react/dist/esm/icons/git-compare';
 export { default as Globe } from 'lucide-react/dist/esm/icons/globe';
@@ -103,6 +108,7 @@ export { default as MessageCircle } from 'lucide-react/dist/esm/icons/message-ci
 export { default as MessageSquare } from 'lucide-react/dist/esm/icons/message-square';
 export { default as MessageSquarePlus } from 'lucide-react/dist/esm/icons/message-square-plus';
 export { default as Mic } from 'lucide-react/dist/esm/icons/mic';
+export { default as MicOff } from 'lucide-react/dist/esm/icons/mic-off';
 export { default as Microscope } from 'lucide-react/dist/esm/icons/microscope';
 export { default as Minus } from 'lucide-react/dist/esm/icons/minus';
 export { default as Moon } from 'lucide-react/dist/esm/icons/moon';
@@ -127,6 +133,7 @@ export { default as Plus } from 'lucide-react/dist/esm/icons/plus';
 export { default as PlusCircle } from 'lucide-react/dist/esm/icons/plus-circle';
 export { default as PowerOff } from 'lucide-react/dist/esm/icons/power-off';
 export { default as Printer } from 'lucide-react/dist/esm/icons/printer';
+export { default as QrCode } from 'lucide-react/dist/esm/icons/qr-code';
 export { default as Receipt } from 'lucide-react/dist/esm/icons/receipt';
 export { default as RefreshCw } from 'lucide-react/dist/esm/icons/refresh-cw';
 export { default as Save } from 'lucide-react/dist/esm/icons/save';
@@ -240,4 +247,7 @@ export { default as ArrowDownRight } from 'lucide-react/dist/esm/icons/arrow-dow
 
 export { default as ShieldPlus } from 'lucide-react/dist/esm/icons/shield-plus';
 export { default as MailOpen } from 'lucide-react/dist/esm/icons/mail-open';
-
+export { default as Combine } from 'lucide-react/dist/esm/icons/combine';
+export { default as GitMerge } from 'lucide-react/dist/esm/icons/git-merge';
+export { default as Merge } from 'lucide-react/dist/esm/icons/merge';
+export { default as Warehouse } from 'lucide-react/dist/esm/icons/warehouse';

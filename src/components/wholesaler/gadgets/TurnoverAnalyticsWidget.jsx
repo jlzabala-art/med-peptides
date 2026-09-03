@@ -1,16 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { fetchWholesalerAnalytics } from '../../../repositories/inventoryRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { TrendingUp, DollarSign, Package, BarChart3, ArrowUpRight } from '@/lib/icons';
-
-
-
-
-
+import { logger } from '../../../utils/logger';
 
 export default function TurnoverAnalyticsWidget() {
   const { user } = useAuth();
@@ -23,47 +17,20 @@ export default function TurnoverAnalyticsWidget() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAnalytics() {
+    async function loadAnalytics() {
       if (!user?.uid) return;
       try {
-        // En un caso real, estas métricas se calcularían en backend o se agruparían de 'orders'
-        // Por la demo, mostraremos cómo se estructura el componente visual
-        const q = query(collection(db, 'orders'), where('wholesalerId', '==', user.uid));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          // Lógica básica de sumarización
-          let rev = 0;
-          let units = 0;
-          let active = 0;
-          snap.docs.forEach(d => {
-            const data = d.data();
-            rev += data.total || 0;
-            units += (data.items || []).reduce((acc, item) => acc + (item.quantity || 1), 0);
-            if (data.status === 'pending' || data.status === 'processing') active++;
-          });
-          setMetrics({
-            monthlyRevenue: rev,
-            unitsSold: units,
-            activeOrders: active,
-            growth: 12.5 // Mock growth
-          });
-        } else {
-          // Fallback para demo
-          setMetrics({
-            monthlyRevenue: 14500,
-            unitsSold: 450,
-            activeOrders: 8,
-            growth: 15.2
-          });
-        }
+        const data = await fetchWholesalerAnalytics(user.uid);
+        setMetrics(data);
       } catch (err) {
-        console.error("Error fetching analytics", err);
+        logger.error('Error fetching analytics', { error: err.message });
       } finally {
         setLoading(false);
       }
     }
-    fetchAnalytics();
+    loadAnalytics();
   }, [user]);
+
 
   return (
     <div className="card" style={{ padding: '1.5rem', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>

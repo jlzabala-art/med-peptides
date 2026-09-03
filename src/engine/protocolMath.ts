@@ -5,7 +5,10 @@
 
 export interface Item {
   productId?: string;
+  variantId?: string | null;
+  sku?: string;
   name?: string;
+  productName?: string;
   vialStrengthMg?: number;
   reconstitutionVolMl?: number;
   shelfLifeDays?: number;
@@ -24,6 +27,7 @@ export interface Phase {
 export interface Protocol {
   patient?: string;
   phases?: Phase[];
+  bom?: Item[];
 }
 
 export interface PhaseDetails {
@@ -38,6 +42,9 @@ export interface PhaseDetails {
 
 export interface ProtocolRequirement {
   id?: string;
+  productId?: string;
+  variantId?: string | null;
+  sku?: string;
   name: string;
   vialStrengthMg: number;
   reconstitutionVolMl: number;
@@ -59,6 +66,9 @@ export interface InventoryImpact extends ProtocolRequirement {
 
 export interface PrescriptionLine {
   id: string;
+  productId?: string;
+  variantId?: string | null;
+  sku?: string;
   product_name: string;
   dosage: string;
   frequency: string;
@@ -73,16 +83,24 @@ export interface PrescriptionLine {
  * @returns List of product requirements.
  */
 export function calculateProtocolRequirements(protocol: Protocol): ProtocolRequirement[] {
-  const allItems = protocol?.phases?.reduce((acc: Item[], phase) => {
-    return acc.concat(phase.items || phase.medications || []);
-  }, []) || [];
+  let allItems: Item[] = [];
+  if (protocol.bom && protocol.bom.length > 0) {
+    allItems = protocol.bom;
+  } else {
+    allItems = protocol?.phases?.reduce((acc: Item[], phase) => {
+      return acc.concat(phase.items || phase.medications || []);
+    }, []) || [];
+  }
 
   const groupedProducts = allItems.reduce((acc: Record<string, any>, item) => {
     const key = item.productId || item.name || 'Unknown Product';
     if (!acc[key]) {
       acc[key] = {
         id: item.productId, // Ensure we keep the ID for inventory
-        name: item.name || 'Unknown Product',
+        productId: item.productId,
+        variantId: item.variantId || null,
+        sku: item.sku || '',
+        name: item.productName || item.name || 'Unknown Product',
         vialStrengthMg: item.vialStrengthMg || 10,
         reconstitutionVolMl: item.reconstitutionVolMl || 2,
         shelfLifeDays: item.shelfLifeDays || 30,
@@ -166,7 +184,10 @@ export function generatePrescriptionLines(protocol: Protocol): PrescriptionLine[
         );
 
         lines.push({
-            id: req.id || Date.now().toString() + Math.random().toString(),
+            id: req.productId || req.id || Date.now().toString() + Math.random().toString(),
+            productId: req.productId || req.id,
+            variantId: req.variantId || null,
+            sku: req.sku || '',
             product_name: req.name,
             dosage: `${primaryPhase.doseMg} mg`,
             frequency: `${primaryPhase.frequencyPerWeek}x / week`,

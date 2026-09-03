@@ -1,6 +1,7 @@
  
 import { db } from '../firebase.js';
 import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import logger from '../utils/logger.js';
 
 const API_BASE = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
 
@@ -118,7 +119,7 @@ export async function getPubMedLiterature(product) {
     return await refreshPubMedCache(slug, baseName);
 
   } catch (error) {
-    console.error('PubMed Service Error:', error);
+    logger.error('[pubmedService] PubMed Service Error:', error);
     return cachedDoc?.articles || [];
   }
 }
@@ -154,7 +155,7 @@ async function refreshPubMedCache(slug, searchQuery) {
           lastUpdated: serverTimestamp()
         }, { merge: true });
       } catch (writeErr) {
-        console.warn('Failed to write empty pubmed_cache to Firestore:', writeErr);
+        logger.warn('[pubmedService] Failed to write empty pubmed_cache to Firestore:', writeErr);
       }
       MEMORY_CACHE.set(slug, articles);
       return articles;
@@ -190,14 +191,14 @@ async function refreshPubMedCache(slug, searchQuery) {
         lastUpdated: serverTimestamp()
       }, { merge: true });
     } catch (writeErr) {
-      console.warn('Failed to write pubmed_cache to Firestore:', writeErr);
+      logger.warn('[pubmedService] Failed to write pubmed_cache to Firestore:', writeErr);
     }
 
     MEMORY_CACHE.set(slug, articles);
     return articles;
 
   } catch (err) {
-    console.warn('Background Refresh Failed', err);
+    logger.warn('[pubmedService] Background Refresh Failed', err);
     return [];
   }
 }

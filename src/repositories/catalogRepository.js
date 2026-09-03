@@ -22,7 +22,9 @@ import { db } from '../firebase.js';
 import { validateCatalog, validateLeadRequest, emptyCatalog } from '../schemas/catalogSchema';
 
 const catalogsCol = () => collection(db, 'catalogs');
-const leadsCol = () => collection(db, 'catalogLeadRequests');
+// ── CANONICAL: all leads live in the top-level 'leads' collection ─────────────
+// Legacy: was 'catalogLeadRequests' — migrated to 'leads' (2026-08-23).
+const leadsCol = () => collection(db, 'leads');
 
 export const catalogRepository = {
   /**
@@ -161,7 +163,7 @@ export const catalogRepository = {
         throw new Error(`Lead Validation Failed: ${validation.errors.join(', ')}`);
       }
 
-      await setDoc(doc(db, 'catalogLeadRequests', id), cleanData);
+      await setDoc(doc(db, 'leads', id), cleanData);
 
       // Increment lead count on the catalog document
       if (cleanData.catalogId) {

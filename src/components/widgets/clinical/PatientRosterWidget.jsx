@@ -22,13 +22,13 @@ export default function PatientRosterWidget(props) {
         <div className="relative flex-1 mr-4">
           <input 
             type="text" 
-            placeholder="Buscar paciente..." 
+            placeholder="Search patient..." 
             className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
           />
         </div>
         <button className="flex items-center gap-2 px-3 py-2 bg-[#C0A062] hover:bg-[#a68850] text-black rounded-lg text-sm font-bold transition-colors">
           <UserPlus className="w-4 h-4" />
-          <span>Añadir</span>
+          <span>Add</span>
         </button>
       </div>
 

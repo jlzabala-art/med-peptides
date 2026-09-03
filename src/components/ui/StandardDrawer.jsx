@@ -1,7 +1,7 @@
 "use client";
 
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from '@/lib/icons';
 
 /**
@@ -29,18 +29,30 @@ export default function StandardDrawer({
   width = '500px',
   bodyPadding = '1.5rem',
   fullWorkspace = false,
+  hideHeader = false,
+  zIndex = 9999,
 }) {
-  // Prevent body scroll when open
+  const bodyRef = React.useRef(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent body scroll when open and reset drawer scroll to top
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      if (bodyRef.current) {
+        bodyRef.current.scrollTop = 0;
+      }
     } else {
       document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, title]);
 
   // Handle Escape key
   useEffect(() => {
@@ -51,14 +63,19 @@ export default function StandardDrawer({
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const drawerContent = (
     <div
       style={{
         position: 'fixed',
-        inset: 0,
-        zIndex: 9999, // Above almost everything
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: zIndex, // Support customized modal layering
         display: 'flex',
         justifyContent: 'flex-end',
         backgroundColor: 'rgba(0, 0, 0, 0.4)',
@@ -76,16 +93,31 @@ export default function StandardDrawer({
           position: 'relative',
           width: fullWorkspace ? undefined : width,
           maxWidth: '100%',
+          height: '100%',
+          maxHeight: '100vh',
           backgroundColor: 'var(--background, #fff)',
           boxShadow: '-4px 0 24px rgba(0,0,0,0.1)',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
+          overscrollBehavior: 'contain',
         }}
       >
+        {/* Mobile Drag Indicator Handle */}
+        <div className="drawer-mobile-handle" style={{
+          display: 'none',
+          width: '36px',
+          height: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.18)',
+          borderRadius: '2px',
+          margin: '10px auto 0 auto',
+        }} />
+
         {/* Header */}
-        <div
-          style={{
-            padding: 'max(1rem, env(safe-area-inset-top)) 1.5rem 1rem 1.5rem',
+        {!hideHeader && (
+          <div
+            style={{
+            padding: '1.25rem 1.5rem 1rem 1.5rem',
             borderBottom: '1px solid var(--border-color, #e5e7eb)',
             display: 'flex',
             justifyContent: 'space-between',
@@ -99,6 +131,7 @@ export default function StandardDrawer({
                 fontSize: '1.25rem',
                 fontWeight: 600,
                 color: 'var(--color-text, #111)',
+                lineHeight: '1.4',
               }}
             >
               {title}
@@ -109,6 +142,7 @@ export default function StandardDrawer({
                   margin: '0.25rem 0 0 0',
                   fontSize: '0.875rem',
                   color: 'var(--color-text-tertiary, #666)',
+                  lineHeight: '1.4',
                 }}
               >
                 {subtitle}
@@ -138,16 +172,20 @@ export default function StandardDrawer({
               }
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         </div>
+        )}
 
         {/* Body */}
         <div
+          ref={bodyRef}
+          className="drawer-condensed-layout"
           style={{
             flex: 1,
             overflowY: 'auto',
+            overscrollBehavior: 'contain',
             padding: bodyPadding,
             backgroundColor: 'var(--color-bg-app, #f9fafb)',
           }}
@@ -159,7 +197,7 @@ export default function StandardDrawer({
         {footer && (
           <div
             style={{
-              padding: '1rem 1.5rem',
+              padding: '1rem 1.5rem calc(1rem + env(safe-area-inset-bottom, 8px)) 1.5rem',
               borderTop: '1px solid var(--border-color, #e5e7eb)',
               backgroundColor: 'var(--bg-secondary, #fafafa)',
               display: 'flex',
@@ -189,6 +227,9 @@ export default function StandardDrawer({
           animation: drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @media (max-width: 768px) {
+          .drawer-mobile-handle {
+            display: block !important;
+          }
           .drawer-full-workspace {
             width: 100vw;
           }
@@ -207,4 +248,6 @@ export default function StandardDrawer({
       `}</style>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(drawerContent, document.body) : drawerContent;
 }

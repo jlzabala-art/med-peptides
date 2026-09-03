@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, FlaskConical } from '@/lib/icons';
 // Assuming generateFollowUpProposalAction is available
 import { generateFollowUpProposalAction } from '../../../actions/aiActions';
+import { toast } from 'react-hot-toast';
 
 function parseIntervalToDate(interval, startDate) {
   const match = interval.match(/(\d+)\s*(day|week|month|year)s?/i);
@@ -87,7 +88,7 @@ export default function FollowUpTab({ rx, onUpdateRx }) {
       }
     } catch (error) {
       console.error("Error saving follow-up proposal:", error);
-      alert("Failed to save the follow-up plan.");
+      toast.error("Failed to save the follow-up plan.");
     } finally {
       setIsSaving(false);
     }
@@ -382,7 +383,7 @@ function ManualFollowUpEditor({ rx, onUpdateRx, setProposalStatus }) {
 
   const handleSave = async () => {
     if (!date) {
-      alert("Please select a date");
+      toast("Please select a date");
       return;
     }
     setIsSaving(true);
@@ -420,7 +421,7 @@ function ManualFollowUpEditor({ rx, onUpdateRx, setProposalStatus }) {
       if (onUpdateRx) onUpdateRx({ ...rx, ...updates });
     } catch (err) {
       console.error(err);
-      alert("Error saving manual follow-up");
+      toast.error("Error saving manual follow-up");
     } finally {
       setIsSaving(false);
     }

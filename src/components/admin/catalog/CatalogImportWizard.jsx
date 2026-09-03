@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import GadgetImportTab from '../../../gadgets/GadgetImportTab';
 import { db } from '../../../firebase';
 
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, increment, writeBatch } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { X, UploadCloud, FileText, Database, Link, CheckCircle, Sparkles } from '@/lib/icons';
+import { batchCreateProducts } from '../../../repositories/productRepository';
 
 export default function CatalogImportWizard({ isOpen, onClose }) {
   const [step, setStep] = useState(2);
@@ -17,11 +18,20 @@ export default function CatalogImportWizard({ isOpen, onClose }) {
 
   const handleAISave = async (items) => {
     try {
-      for (const item of items) {
-        const docRef = doc(collection(db, 'products'));
-        // Clean up the confidence_score and _sourceFile before saving
+      // 1. Fetch wholesellers to map names to IDs
+      const suppliersSnap = await getDocs(collection(db, 'wholesellers'));
+      const wholesellers = [];
+      suppliersSnap.forEach(d => {
+        const data = d.data();
+        wholesellers.push({ id: d.id, name: (data.companyName || data.name || '').toLowerCase() });
+      });
+
+      const supplierCounts = {}; // Track how many we add to each
+
+      // Prepare clean items with supplier matching
+      const cleanItems = items.map(item => {
         const { confidence_score, _sourceFile, ...cleanItem } = item;
-        
+
         // Ensure SKU is unique if not provided
         if (!cleanItem.sku || cleanItem.sku.trim() === '') {
           const prefix = (cleanItem.name || 'UNK').replace(/[^a-zA-Z0-9]/g, '').substring(0, 3).toUpperCase().padEnd(3, 'X');
@@ -29,17 +39,45 @@ export default function CatalogImportWizard({ isOpen, onClose }) {
           cleanItem.sku = `SKU-${prefix}-${randomCode}`;
         }
 
-        await setDoc(docRef, {
-          ...cleanItem,
-          status: 'Active',
-          inventoryLevel: 0,
-          createdAt: new Date().toISOString()
-        });
+        // Match supplier
+        const supplierName = (cleanItem.supplierName || cleanItem.supplier || '').toLowerCase().trim();
+        if (supplierName) {
+          const match = wholesellers.find(w => w.name.includes(supplierName) || supplierName.includes(w.name));
+          if (match) {
+            cleanItem.supplierId = match.id;
+            supplierCounts[match.id] = (supplierCounts[match.id] || 0) + 1;
+          }
+        }
+
+        // Ensure status matches taxonomy
+        cleanItem.status = cleanItem.status || 'draft';
+
+        // Ensure canonical categoryId and type
+        cleanItem.categoryId = cleanItem.categoryId || cleanItem.category || 'peptide';
+        cleanItem.category = cleanItem.categoryId;
+        cleanItem.type = cleanItem.type || cleanItem.productType || 'finished_product';
+        cleanItem.productType = cleanItem.type;
+
+        return cleanItem;
+      });
+
+      // Delegate product creation to the repository (Write Guard + schema validation)
+      await batchCreateProducts(cleanItems, { strict: false });
+
+      // Update supplier counts in a separate batch (these are not products)
+      if (Object.keys(supplierCounts).length > 0) {
+        const supplierBatch = writeBatch(db);
+        for (const sId in supplierCounts) {
+          const sRef = doc(db, 'wholesellers', sId);
+          supplierBatch.update(sRef, { productsSupplied: increment(supplierCounts[sId]) });
+        }
+        await supplierBatch.commit();
       }
+
       setImportedCount(items.length);
       setStep(3);
     } catch (err) {
-      console.error("Save error: ", err);
+      console.error("[CatalogImportWizard] Save error:", err);
       throw new Error("Failed to write to database: " + err.message);
     }
   };

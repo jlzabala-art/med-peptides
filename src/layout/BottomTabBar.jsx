@@ -17,47 +17,47 @@ export default function BottomTabBar() {
         href="/" 
         className={`tab-item ${pathname === '/' ? 'active' : ''}`}
       >
-        <Home size={22} strokeWidth={2.5} />
-        <span>Inicio</span>
+        <Home size={20} strokeWidth={2.2} />
+        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Home</span>
       </Link>
 
       <Link 
-        href="/catalog" 
-        className={`tab-item ${pathname?.startsWith('/catalog') ? 'active' : ''}`}
+        href="/collection/peptides" 
+        className={`tab-item ${pathname?.startsWith('/collection') || pathname?.startsWith('/catalog') ? 'active' : ''}`}
       >
-        <Grid size={22} strokeWidth={2.5} />
-        <span>Catálogo</span>
+        <Grid size={20} strokeWidth={2.2} />
+        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Explore</span>
       </Link>
 
       <button 
         className="tab-item"
         onClick={() => setActiveModal('search')}
-        aria-label="Buscar"
+        aria-label="Search"
       >
-        <Search size={22} strokeWidth={2.5} />
-        <span>Buscar</span>
+        <Search size={20} strokeWidth={2.2} />
+        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Search</span>
       </button>
 
       <button 
         className="tab-item cart-tab"
         onClick={() => setActiveModal('cart')}
-        aria-label="Carrito"
+        aria-label="Orders"
       >
         <div className="cart-icon-wrapper">
-          <ShoppingBag size={22} strokeWidth={2.5} />
+          <ShoppingBag size={20} strokeWidth={2.2} />
           {cartCount > 0 && (
             <span className="cart-badge">{cartCount}</span>
           )}
         </div>
-        <span>Carrito</span>
+        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Orders</span>
       </button>
 
       <Link 
-        href="/dashboard" 
-        className={`tab-item ${pathname?.startsWith('/dashboard') || pathname?.startsWith('/patient') ? 'active' : ''}`}
+        href="/patient" 
+        className={`tab-item ${pathname?.startsWith('/patient') || pathname?.startsWith('/doctor') || pathname?.startsWith('/login') ? 'active' : ''}`}
       >
-        <User size={22} strokeWidth={2.5} />
-        <span>Perfil</span>
+        <User size={20} strokeWidth={2.2} />
+        <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Account</span>
       </Link>
     </nav>
   );

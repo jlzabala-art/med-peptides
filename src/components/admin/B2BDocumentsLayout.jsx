@@ -51,7 +51,7 @@ export default function B2BDocumentsLayout({
                 fontWeight: 600
               }}
             >
-              <Plus size={14} /> Nuevo
+              <Plus size={14} /> New
             </button>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -67,7 +67,7 @@ export default function B2BDocumentsLayout({
             }}>
               <Search size={14} color="var(--color-text-tertiary)" />
               <input 
-                placeholder="Buscar..."
+                placeholder="Search..."
                 style={{ border: 'none', background: 'none', outline: 'none', fontSize: '0.8rem', width: '100%', color: 'var(--color-text-primary)' }}
               />
             </div>

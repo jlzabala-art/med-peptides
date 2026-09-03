@@ -5,6 +5,14 @@ import PortalLayout from '../ui/PortalLayout';
 import { useAuth } from '../../context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { useNotificationContext } from '../../context/NotificationContext';
+import IOSPushBanner from '../ui/IOSPushBanner';
+
+const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
+const GlobalDrawerManager = dynamic(() => import('../shared/GlobalDrawerManager'), { ssr: false });
+const PushNotificationPrompt = dynamic(() => import('../ui/PushNotificationPrompt'), { ssr: false });
 
 /**
  * PanelShell
@@ -14,10 +22,7 @@ import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
  * 
  * It dynamically injects CSS variables for role-based theming via classes.
  */
-import '../../styles/themes/admin.css';
-import '../../styles/themes/doctor.css';
-import '../../styles/themes/patient.css';
-import '../../styles/themes/wholeseller.css';
+import '../../styles/themes/roles.css';
 
 export default function PanelShell({
   children,
@@ -76,10 +81,12 @@ export default function PanelShell({
           display: flex;
           flex-direction: column;
           height: 100vh;
-          width: 100vw;
+          width: 100%;
           overflow: hidden;
         }
       `}</style>
+      <IOSPushBanner />
+      <PushNotificationPrompt />
       <PortalLayout
         sidebarNavGroups={sidebarNavGroups}
         sidebarPinnedItems={sidebarPinnedItems}
@@ -92,6 +99,10 @@ export default function PanelShell({
       >
         {children}
       </PortalLayout>
+      <GlobalQuickCreateHandler />
+      <Suspense fallback={null}>
+        <GlobalDrawerManager />
+      </Suspense>
     </div>
   );
 }

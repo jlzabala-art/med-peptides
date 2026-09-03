@@ -26,8 +26,12 @@ import Package from "lucide-react/dist/esm/icons/package";
 import FileSearch from "lucide-react/dist/esm/icons/file-search";
 import Shield from "lucide-react/dist/esm/icons/shield";
 import Dna from "lucide-react/dist/esm/icons/dna";
-/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { TextField } from '../components/ui';
+import OrderSummary from '../components/checkout/OrderSummary';
+import ShippingForm from '../components/checkout/ShippingForm';
+import PaymentSection from '../components/checkout/PaymentSection';
+import { EXCHANGE_RATES as DEFAULT_EXCHANGE_RATES } from '../utils/currencies';
 
 
 
@@ -54,6 +58,8 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Select from 'react-select';
 import { useCart } from '../context/CartProvider';
+import { useFirestoreData } from '../hooks/useFirestoreData';
+import { useRegistration } from '../hooks/useRegistration';
 import { useOrderSubmit } from '../hooks/shared/useOrderSubmit';
 // import TermsOfSale from './snippets/TermsOfSale';
 import { useAuth } from '../context/AuthContext';
@@ -65,6 +71,7 @@ import { usePricingTier } from '../hooks/usePricingTier';
 // jsPDF and autoTable are loaded dynamically on demand (see downloadPDF)
 import { ALL_COUNTRIES } from '../data/countries';
 import { trackEvent } from '../hooks/useAnalytics';
+import { toast } from 'react-hot-toast';
 
 const selectStyles = {
   control: (b, s) => ({
@@ -84,68 +91,47 @@ const selectStyles = {
   }),
 };
 
-// PDF.js dynamic CDN loader
-const loadPdfJs = () => {
-  return new Promise((resolve, reject) => {
-    if (window.pdfjsLib) {
-      resolve(window.pdfjsLib);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
-    script.onload = () => {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-      resolve(window.pdfjsLib);
-    };
-    script.onerror = (err) => {
-      console.error("Failed to load PDF.js script:", err);
-      reject(err);
-    };
-    document.head.appendChild(script);
-  });
-};
+import { loadPdfJs, scanCatalogProducts } from '../utils/checkoutPdfScanner';
 
-const scanCatalogProducts = (text, productsList = []) => {
-  const found = [];
-  if (!text || !productsList || !productsList.length) return found;
+export default function Checkout({
+  cart: propCart,
+  cartMetadata: propCartMetadata,
+  updateCart: propUpdateCart,
+  region = 'AE',
+  isProfessional: propIsProfessional,
+  EXCHANGE_RATES = DEFAULT_EXCHANGE_RATES,
+  detectedCountry,
+  onBack,
+  onComplete,
+  products,
+  shippingCosts = { standard: 40, express: 80 },
+  selectedShipping: propSelectedShipping,
+  setSelectedShipping: propSetSelectedShipping,
+  cartOwnership: propCartOwnership
+}) {
+  const { user, userProfile, login, loginWithGoogle, updateProfileData } = useAuth();
+  const { register } = useRegistration();
+  const {
+    cart: contextCart,
+    cartMetadata: contextCartMetadata,
+    cartOwnership: contextCartOwnership,
+    updateCart: contextUpdateCart,
+    clearCart
+  } = useCart();
 
-  const textLower = text.toLowerCase();
-  productsList.forEach(prod => {
-    if (!prod || !prod.name) return;
-    const nameLower = prod.name.toLowerCase();
-    // Look for exact word match or standard contains to prevent false positives on very short names
-    const isShort = nameLower.length <= 3;
-    let matches = false;
-    if (isShort) {
-      const rx = new RegExp(`\\b${nameLower}\\b`, 'i');
-      matches = rx.test(textLower);
-    } else {
-      matches = textLower.includes(nameLower);
-    }
+  const cart = propCart || contextCart || {};
+  const cartMetadata = propCartMetadata || contextCartMetadata || {};
+  const cartOwnership = propCartOwnership || contextCartOwnership || {};
+  const updateCart = propUpdateCart || contextUpdateCart;
+  const isProfessional = propIsProfessional !== undefined ? propIsProfessional : (userProfile?.role === 'doctor' || userProfile?.role === 'wholesaler' || userProfile?.role === 'admin');
 
-    // Also match synonyms if available
-    if (!matches && prod.synonyms && Array.isArray(prod.synonyms)) {
-      matches = prod.synonyms.some(syn => {
-        const synLower = syn.toLowerCase();
-        return synLower.length <= 3 
-          ? new RegExp(`\\b${synLower}\\b`, 'i').test(textLower)
-          : textLower.includes(synLower);
-      });
-    }
-
-    if (matches) {
-      if (!found.some(f => f.id === prod.id || f.name === prod.name)) {
-        found.push(prod);
-      }
-    }
-  });
-  return found;
-};
-
-export default function Checkout({ cart, cartMetadata = {}, updateCart, region, isProfessional, EXCHANGE_RATES, detectedCountry, onBack, onComplete, products, shippingCosts = { standard: 40, express: 80 }, selectedShipping, setSelectedShipping, cartOwnership = {} }) {
-  const { user, userProfile, login, register, loginWithGoogle, updateProfileData } = useAuth();
-  const { clearCart } = useCart();
+  const [internalSelectedShipping, setInternalSelectedShipping] = useState('standard');
+  const selectedShipping = propSelectedShipping || internalSelectedShipping;
+  const setSelectedShipping = propSetSelectedShipping || setInternalSelectedShipping;
+  const rates = EXCHANGE_RATES || DEFAULT_EXCHANGE_RATES;
   const { tier: pricingTier, role: pricingRole } = usePricingTier();
+  const { catalogue } = useFirestoreData();
+  const allProducts = (products && products.length > 0) ? products : (catalogue || []);
   const [finalOrderData, setFinalOrderData] = useState(null);
 
   const [prescriptionFile, setPrescriptionFile] = useState(null);
@@ -210,7 +196,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       const frequencyRegex = /\b(?:weekly|daily|twice\s+a\s+week|every\s+other\s+day|subcutaneous|sub-q|sc)\b/i;
       const frequencyMatch = text.match(frequencyRegex);
 
-      const matches = scanCatalogProducts(text, products || []);
+      const matches = scanCatalogProducts(text, allProducts || []);
 
       const initialSelected = {};
       matches.forEach(prod => {
@@ -234,7 +220,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       });
     } catch (err) {
       console.error('Prescription scanning failed:', err);
-      alert(err.message || 'Error processing document.');
+      toast.error(err.message || 'Error processing document.');
     } finally {
       setIsScanningPrescription(false);
     }
@@ -254,7 +240,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
   const [showLogin, setShowLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  // P1 Fix 1.3 — inline errors/success instead of alert()
+  // P1 Fix 1.3 — inline errors/success instead of toast()
   const [inlineError, setInlineError] = useState(null);
   const [inlineSuccess, setInlineSuccess] = useState(null);
   const [formData, setFormData] = useState({
@@ -292,10 +278,10 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 
   useEffect(() => {
     if (prefillApplied) return;
-    const name = detectedCountry || EXCHANGE_RATES[region]?.name || 'United Arab Emirates';
+    const name = detectedCountry || (rates && rates[region]?.name) || 'United Arab Emirates';
     const found = countryOptions.find(c => c.value === name || c.value === detectedCountry);
     if (found) set({ country: found });
-  }, [region, detectedCountry, countryOptions, prefillApplied, set]);
+  }, [region, detectedCountry, countryOptions, prefillApplied, set, rates]);
 
   const scrollReset = () => {
     window.scrollTo(0, 0);
@@ -320,9 +306,9 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
 
   const activeRegion = useMemo(() => {
     if (!formData.country) return region;
-    const m = Object.entries(EXCHANGE_RATES).find(([, v]) => v.name === formData.country.value);
+    const m = rates ? Object.entries(rates).find(([, v]) => v.name === formData.country.value) : null;
     return m ? m[0] : 'row';
-  }, [formData.country, EXCHANGE_RATES, region]);
+  }, [formData.country, rates, region]);
 
   const cartItems = Object.entries(cart || {});
   
@@ -345,35 +331,144 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
   const totalItems = cartItems.reduce((a, [, q]) => a + q, 0);
 
   const resolveItem = useCallback((itemKey, qty) => {
-    let namePart = itemKey, dosagePart = null;
-    if (itemKey.includes('(')) {
+    const meta = cartMetadata[itemKey] || {};
+
+    // 1. Check if it is a protocol bundle
+    if (meta.isProtocol || meta.protocolId || itemKey.includes('-protocol-bundle') || itemKey.endsWith('-bundle')) {
+      const protocolName = meta.protocolName || meta.name || 'Clinical Protocol Bundle';
+      const bundleTotal = meta.bundleTotal ?? meta.estimatedCost ?? meta.price ?? 0;
+      const unitPrice = bundleTotal;
+      const lineTotal = unitPrice * qty;
+      const duration = meta.protocolDuration || meta.dosage || 'Full Cycle Supply';
+      const protocolVariantLabel = duration.toLowerCase().includes('protocol') ? duration : `Protocol · ${duration}`;
+      return {
+        itemKey,
+        qty,
+        name: protocolName,
+        namePart: protocolName,
+        dosagePart: protocolVariantLabel,
+        category: 'Protocol',
+        unitPrice,
+        lineTotal,
+        isProtocol: true,
+        productId: meta.protocolId || null,
+        variantId: null,
+        supplierId: meta.supplierId || null,
+      };
+    }
+
+    // 2. Parse compound identifiers
+    let rawProdId = meta.productId;
+    let rawVarId = meta.variantId;
+    let dosagePart = meta.dosage || null;
+
+    if (itemKey.includes('::')) {
+      const parts = itemKey.split('::');
+      if (!rawProdId) rawProdId = parts[0];
+      if (!rawVarId) rawVarId = parts[1];
+    } else if (itemKey.includes('(')) {
       const m = itemKey.match(/(.+) \((.+)\)/);
-      if (m) { namePart = m[1]; dosagePart = m[2]; }
+      if (m) {
+        if (!rawProdId) rawProdId = m[1].trim();
+        if (!dosagePart) dosagePart = m[2].trim();
+      }
+    } else if (!rawProdId) {
+      rawProdId = itemKey;
     }
-    const product = products.find(p => p.name === namePart);
-    if (!isProfessional && b2cTotals.items.length > 0) {
-       // Lookup B2C item
-       const b2cItem = b2cTotals.items.find(i => i.name === namePart || i.id === itemKey);
-       if (b2cItem) {
-          return { itemKey, qty, namePart, dosagePart, unitPrice: b2cItem.price, lineTotal: b2cItem.price * qty };
-       }
+
+    // 3. Match product from Firestore catalog
+    const product = (allProducts || []).find(p => 
+      p.id === rawProdId || 
+      p.slug === rawProdId || 
+      p.name?.toLowerCase() === rawProdId?.toLowerCase() ||
+      (p.id && meta.productId && p.id === meta.productId)
+    );
+
+    // 4. Match specific variant
+    let variant = null;
+    if (product && Array.isArray(product.variants) && product.variants.length > 0) {
+      if (rawVarId) {
+        variant = product.variants.find(v => 
+          v.id === rawVarId || 
+          v.sku === rawVarId || 
+          v.id?.toLowerCase() === rawVarId.toLowerCase() ||
+          rawVarId.toLowerCase().includes(v.id?.toLowerCase() || '___')
+        );
+      }
+      if (!variant && dosagePart) {
+        variant = product.variants.find(v => 
+          v.dosage?.toLowerCase() === dosagePart.toLowerCase() || 
+          v.strength?.toLowerCase() === dosagePart.toLowerCase() ||
+          (v.dosage && dosagePart.toLowerCase().includes(v.dosage.toLowerCase()))
+        );
+      }
+      if (!variant) {
+        variant = product.defaultVariant ?? product.variants[0] ?? null;
+      }
     }
-    let unitPrice = 0, lineTotal = 0;
-    if (product) {
-      const variant = dosagePart ? product.variants?.find(v => v.dosage === dosagePart || v.strength === dosagePart) : null;
-      const src = variant ?? product.defaultVariant ?? product.variants?.[0] ?? product;
-      const resolved = resolveVariantPrice(src, { tier: pricingTier });
-      unitPrice = resolved.perUnit ?? 0;
-      const kitPrice = resolved.kit ?? 0;
-      if (isProfessional && product.category !== 'Research Supplies' && kitPrice > 0 && qty >= 10) {
+
+    // 5. Build clean, human-readable display name and variant label (Category instead of Supplier)
+    const cleanProductName = product?.name || meta.productName || meta.name || rawProdId;
+    const category = product?.category || meta?.category || 'Peptides';
+    let cleanVariantLabel = variant?.dosage || variant?.strength || dosagePart || meta.dosage || null;
+    if (!cleanVariantLabel && variant?.format) {
+      cleanVariantLabel = variant.format.charAt(0).toUpperCase() + variant.format.slice(1);
+    }
+    if (category) {
+      cleanVariantLabel = cleanVariantLabel ? `${cleanVariantLabel} · ${category}` : category;
+    }
+
+    // 6. Price resolution via Data Model 2.0 resolver
+    let unitPrice = 0;
+    let lineTotal = 0;
+
+    const pricingSource = variant ?? product?.defaultVariant ?? product?.variants?.[0] ?? product ?? meta;
+    if (pricingSource) {
+      const tierToUse = isProfessional ? pricingTier : 'retail';
+      const resolved = resolveVariantPrice(pricingSource, { 
+        tier: tierToUse, 
+        countryCode: activeRegion 
+      });
+      
+      unitPrice = resolved.perUnit || resolved.unit_price || 0;
+      const kitPrice = resolved.kit || 0;
+      
+      // Fallback if resolved price is 0
+      if (unitPrice === 0) {
+        unitPrice = pricingSource.priceUSD || 
+                    pricingSource.perVialPriceUSD ||
+                    pricingSource.price || 
+                    pricingSource.unit_price || 
+                    pricingSource.perUnit || 
+                    pricingSource.cost_1 || 
+                    pricingSource.cost_tiers?.cost_1 ||
+                    meta.unitPrice ||
+                    meta.price || 
+                    0;
+      }
+
+      if (isProfessional && product?.category !== 'Research Supplies' && kitPrice > 0 && qty >= 10) {
         const kits = Math.floor(qty / 10);
         lineTotal = (kits * kitPrice) + ((qty % 10) * unitPrice);
       } else {
         lineTotal = unitPrice * qty;
       }
     }
-    return { itemKey, qty, namePart, dosagePart, unitPrice, lineTotal };
-  }, [products, pricingTier, isProfessional]);
+
+    return {
+      itemKey,
+      qty,
+      name: cleanProductName,
+      namePart: cleanProductName,
+      dosagePart: cleanVariantLabel,
+      unitPrice,
+      lineTotal,
+      isProtocol: false,
+      productId: product?.id || rawProdId || null,
+      variantId: variant?.id || rawVarId || null,
+      supplierId: variant?.supplierId || meta.supplierId || null
+    };
+  }, [allProducts, cartMetadata, pricingTier, isProfessional, activeRegion]);
 
   const enrichedCartItems = useMemo(() => cartItems.map(([k, q]) => resolveItem(k, q)), [cartItems, resolveItem]);
 
@@ -383,9 +478,9 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
     const bundles = cartMetadata.protocolBundles ?? [];
     // 1. Initialize groups from explicit bundles
     bundles.forEach(b => {
-      groups[b.id] = {
-        name: b.name,
-        goal: b.goal,
+      groups[b.id || b.protocolId || 'bundle'] = {
+        name: b.name || b.protocolName || 'Protocol Bundle',
+        goal: b.goal || null,
         bundleTotal: b.bundleTotal ?? b.estimatedCost ?? 0,
         products: b.products ?? [], 
         patientGuide: b.patientGuide ?? null,
@@ -399,11 +494,14 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       const pid = meta?.protocolId;
       if (pid && groups[pid]) {
         groups[pid].items.push({ itemKey, qty });
-      } else if (meta?.isProtocol || meta?.protocolId) {
-        // Fallback for ad-hoc protocols not in protocolBundles
-        const fallbackId = pid || 'protocol';
+      } else if (meta?.isProtocol || meta?.protocolId || itemKey.includes('-protocol-bundle')) {
+        const fallbackId = pid || itemKey;
         if (!groups[fallbackId]) {
-          groups[fallbackId] = { name: meta.protocolName || 'Protocol', items: [] };
+          groups[fallbackId] = { 
+            name: meta?.protocolName || meta?.name || 'Protocol Bundle', 
+            bundleTotal: meta?.bundleTotal ?? meta?.estimatedCost ?? meta?.price ?? 0,
+            items: [] 
+          };
         }
         groups[fallbackId].items.push({ itemKey, qty });
       }
@@ -413,22 +511,10 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
   const hasProtocols = Object.keys(protocolGroups).length > 0;
 
   const checkoutTotals = useMemo(() => {
-    if (!isProfessional) {
-      const shippingCost = shippingCosts[selectedShipping] ?? 40;
-      const subtotal = b2cTotals.subtotal || 0;
-      const total = subtotal + shippingCost;
-      const fmt = v => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      return { 
-        display: `${fmt(total.toFixed(0))}`, 
-        subtotal, 
-        shippingCost, 
-        subtext: null
-      };
-    }
     // 1. Sum individual items EXCLUDING protocol ones
     const individualItems = enrichedCartItems.filter(i => {
       const meta = cartMetadata[i.itemKey];
-      return !meta?.isProtocol && !meta?.protocolId;
+      return !meta?.isProtocol && !meta?.protocolId && !i.isProtocol;
     });
     let subtotal = individualItems.reduce((a, i) => a + i.lineTotal, 0);
 
@@ -438,10 +524,9 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       subtotal += (b.bundleTotal ?? b.estimatedCost ?? 0);
     });
 
-    // 3. Fallback: If there are protocol items but NO explicit bundles (edge case),
-    // we should still price them individually to avoid $0 subtotal.
-    if (bundles.length === 0 && enrichedCartItems.some(i => cartMetadata[i.itemKey]?.isProtocol)) {
-      const protocolItems = enrichedCartItems.filter(i => cartMetadata[i.itemKey]?.isProtocol);
+    // 3. Fallback: If there are protocol items in cart that were not part of an explicit bundle array
+    if (bundles.length === 0) {
+      const protocolItems = enrichedCartItems.filter(i => cartMetadata[i.itemKey]?.isProtocol || i.isProtocol);
       subtotal += protocolItems.reduce((a, i) => a + i.lineTotal, 0);
     }
 
@@ -452,7 +537,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
       display: `$${fmt(total.toFixed(0))}`, 
       subtotal, 
       shippingCost, 
-      subtext: null // Redundant subtext removed as requested
+      subtext: null
     };
   }, [enrichedCartItems, cartMetadata, shippingCosts, selectedShipping]);
 
@@ -1639,7 +1724,7 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
           {/* ── LEFT: Form ──────────────────────────────────────────── */}
           <form id="checkout-form" onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'2rem' }}>
 
-            {/* P1 Fix 1.3 — Inline error / success banners (replaces all alert() calls) */}
+            {/* P1 Fix 1.3 — Inline error / success banners (replaces all toast() calls) */}
             <AnimatePresence>
               {inlineError && (
                 <motion.div
@@ -2214,11 +2299,16 @@ export default function Checkout({ cart, cartMetadata = {}, updateCart, region, 
                                   ))}
                                 </div>
                                 <div style={{ marginTop:'0.5rem', fontSize:'0.75rem', color:'var(--color-text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                  {items.map((i, idx) => (
-                                    <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                      {i.itemKey}
-                                    </span>
-                                  ))}
+                                  {items.map((i, idx) => {
+                                    const itemResolved = enrichedCartItems.find(e => e.itemKey === i.itemKey);
+                                    const displayName = itemResolved?.name || itemResolved?.namePart || i.itemKey;
+                                    const displayVariant = itemResolved?.dosagePart ? ` (${itemResolved.dosagePart})` : '';
+                                    return (
+                                      <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        {displayName}{displayVariant}
+                                      </span>
+                                    );
+                                  })}
                                 </div>
                               </div>
 

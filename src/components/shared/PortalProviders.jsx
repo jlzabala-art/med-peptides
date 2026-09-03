@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { HelmetProvider } from 'react-helmet-async';
 import { CatalogProvider } from '../../components/CatalogProvider';
 import AppProviders from '../../providers/AppProviders';
 import NextProtectedRoute from '../auth/NextProtectedRoute';
@@ -31,19 +30,17 @@ export default function PortalProviders({ children, allowedRoles }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <CatalogProvider>
-          <AppProviders>
-            {allowedRoles ? (
-              <NextProtectedRoute allowedRoles={allowedRoles}>
-                {children}
-              </NextProtectedRoute>
-            ) : (
-              children
-            )}
-          </AppProviders>
-        </CatalogProvider>
-      </HelmetProvider>
+      <CatalogProvider>
+        <AppProviders>
+          {allowedRoles ? (
+            <NextProtectedRoute allowedRoles={allowedRoles}>
+              {children}
+            </NextProtectedRoute>
+          ) : (
+            children
+          )}
+        </AppProviders>
+      </CatalogProvider>
     </QueryClientProvider>
   );
 }

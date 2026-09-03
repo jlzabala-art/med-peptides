@@ -159,8 +159,15 @@ export default function ProductAutocomplete({ value, onChange, onSelect, placeho
               onMouseLeave={e => e.currentTarget.style.backgroundColor = 'white'}
             >
               <div>
-                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>
-                  {p.name} {p.dosage && <span style={{ color: '#64748b', fontWeight: 400 }}>({p.dosage})</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>
+                    {p.name} {p.dosage && <span style={{ color: '#64748b', fontWeight: 400 }}>({p.dosage})</span>}
+                  </span>
+                  {p.productType === 'api_raw_material' || p.product_type === 'api_raw_material' || p.category === 'raw_material' ? (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '1px 5px', borderRadius: 4, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>
+                      🧪 RAW API
+                    </span>
+                  ) : null}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
                   SKU: {p.sku || 'N/A'} • {p.category}

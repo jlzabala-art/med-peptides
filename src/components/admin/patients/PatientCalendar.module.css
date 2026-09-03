@@ -1,0 +1,40 @@
+.calendarWrapper {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.calendarWrapper :global(.fc) {
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.calendarWrapper :global(.fc-toolbar-title) {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--text-main);
+}
+
+.calendarWrapper :global(.fc-button-primary) {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.calendarWrapper :global(.fc-button-primary:not(:disabled):active),
+.calendarWrapper :global(.fc-button-primary:not(:disabled).fc-button-active) {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+}
+
+.calendarWrapper :global(.fc-daygrid-event) {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+}

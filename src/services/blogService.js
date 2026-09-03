@@ -2,6 +2,7 @@
 import { collection, addDoc } from 'firebase/firestore';
 import * as fb from '../firebase';
 const db = fb?.db;
+import logger from '../utils/logger.js';
 
 /**
  * Add a blog post to Firestore `blogPosts` collection.
@@ -10,10 +11,10 @@ const db = fb?.db;
 export const addBlogPost = async (post) => {
   try {
     const docRef = await addDoc(collection(db, 'blogPosts'), post);
-    console.log('Blog post added with ID:', docRef.id);
+    logger.info('[blogService] Blog post added with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('Error adding blog post:', error);
+    logger.error('[blogService] Error adding blog post:', error);
     throw error;
   }
 };

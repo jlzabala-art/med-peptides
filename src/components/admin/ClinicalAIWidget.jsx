@@ -47,7 +47,7 @@ function getItemCandidates(item, type) {
 
   if (type === 'protocol') {
     if (item.title) cands.add(item.title);
-    if (item.protocol_name) cands.add(item.protocol_name);
+    if (item.name) cands.add(item.name);
   } else {
     if (item.displayName) cands.add(item.displayName);
     else if (item.name) cands.add(item.name);
@@ -100,7 +100,7 @@ function precompileItems(items, type) {
   return items.map((item) => {
     const name =
       type === 'protocol'
-        ? item.title || item.protocol_name || item.name || item.id
+        ? item.title || item.name || item.name || item.id
         : item.displayName || item.name || item.id;
     const candidates = getItemCandidates(item, type);
     const regexes = candidates.map((cand) => {

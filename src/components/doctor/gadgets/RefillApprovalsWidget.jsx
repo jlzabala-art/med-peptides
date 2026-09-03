@@ -1,15 +1,9 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { subscribeToRefillRequests, approveRefillRequest, denyRefillRequest } from '../../../repositories/prescriptionRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { FileSignature, Check, X } from '@/lib/icons';
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function RefillApprovalsWidget() {
   const { t } = useTranslation();
@@ -19,14 +13,7 @@ export default function RefillApprovalsWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const q = query(
-      collection(db, 'refill_requests'),
-      where('doctorId', '==', user.uid),
-      where('status', '==', 'pending_approval')
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToRefillRequests(user.uid, (list) => {
       setRequests(list);
     });
 
@@ -36,26 +23,10 @@ export default function RefillApprovalsWidget() {
   const handleApprove = async (req) => {
     setLoadingId(req.id);
     try {
-      // 1. Update request status
-      await updateDoc(doc(db, 'refill_requests', req.id), {
-        status: 'approved',
-        approvedAt: serverTimestamp()
-      });
-
-      // 2. Create new recommendation for Admin to supply
-      await addDoc(collection(db, 'recommendations'), {
-        doctorId: user.uid,
-        doctorName: user.displayName || 'Médico Asignado',
-        patientId: req.patientId,
-        patientName: req.patientName,
-        productId: req.productId || 'custom',
-        productName: req.productName,
-        notes: 'Renovación automática aprobada por el médico.',
-        status: 'pending', // Trigger Admin Supply Notification
-        createdAt: serverTimestamp()
-      });
+      await approveRefillRequest(req, user?.displayName || 'Médico Asignado');
+      toast.success(t('doctor.approvals.approve_success', 'Renovación aprobada'));
     } catch (err) {
-      console.error(err);
+      toast.error('Error al aprobar la renovación');
     } finally {
       setLoadingId(null);
     }
@@ -64,12 +35,10 @@ export default function RefillApprovalsWidget() {
   const handleReject = async (reqId) => {
     setLoadingId(reqId);
     try {
-      await updateDoc(doc(db, 'refill_requests', reqId), {
-        status: 'rejected',
-        rejectedAt: serverTimestamp()
-      });
+      await denyRefillRequest(reqId, 'Rechazado por el médico');
+      toast.success(t('doctor.approvals.reject_success', 'Renovación rechazada'));
     } catch (err) {
-      console.error(err);
+      toast.error('Error al rechazar la renovación');
     } finally {
       setLoadingId(null);
     }

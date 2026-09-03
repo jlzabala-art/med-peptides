@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 import { Bug, ShieldCheck, Activity, User, FlaskConical } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 export default function DevAutoLogin() {
   const { login, logout, user } = useAuth();
@@ -55,7 +56,7 @@ export default function DevAutoLogin() {
       router.push('/');
     } catch (e) {
       console.error('AutoLogin failed:', e);
-      alert(`AutoLogin failed for ${email}. Make sure the user is seeded.`);
+      toast.error(`AutoLogin failed for ${email}. Make sure the user is seeded.`);
     }
   };
 

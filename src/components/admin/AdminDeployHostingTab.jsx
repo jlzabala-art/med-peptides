@@ -24,7 +24,7 @@ import toast from 'react-hot-toast';
 import DataTable from '../ui/DataTable';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
 
 export default function AdminDeployHostingTab() {
@@ -38,7 +38,6 @@ export default function AdminDeployHostingTab() {
   const [statusFilter, setStatusFilter] = useState('');
 
   const fetchBackups = async () => {
-    setLoadingBackups(true);
     try {
       let constraints = [];
       if (dateRange.start) {
@@ -66,7 +65,38 @@ export default function AdminDeployHostingTab() {
   };
 
   useEffect(() => {
-    fetchBackups();
+    let active = true;
+    const load = async () => {
+      try {
+        let constraints = [];
+        if (dateRange.start) {
+          constraints.push(where('timestamp', '>=', new Date(dateRange.start)));
+        }
+        if (dateRange.end) {
+          const endDate = new Date(dateRange.end);
+          endDate.setHours(23, 59, 59, 999);
+          constraints.push(where('timestamp', '<=', endDate));
+        }
+        const q = query(
+          collection(db, 'system_backups'), 
+          ...constraints, 
+          orderBy('timestamp', 'desc'), 
+          limit(20)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!active) return;
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setBackups(data);
+      } catch (err) {
+        console.error("Error fetching backups", err);
+      } finally {
+        if (active) setLoadingBackups(false);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
   }, [dateRange]);
 
   const handleManualDBBackup = async () => {
@@ -133,7 +163,7 @@ export default function AdminDeployHostingTab() {
     {
       key: 'status',
       header: 'Status',
-      render: (val) => <StatusBadge status={val} />
+      render: (val) => <StatusChip status={val} />
     },
     {
       key: 'details',
@@ -321,7 +351,7 @@ export default function AdminDeployHostingTab() {
         <GlobalSearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="Buscar backups por tipo, origen o detalles..."
+          placeholder="Search backups by type, origin or details..."
           resultCount={filteredBackups.length}
           namespace="admin-backups"
           size="lg"

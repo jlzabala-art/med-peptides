@@ -10,14 +10,9 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '../../firebase';
+import notifier from '../../services/NotificationService';
 
 import { collection, query, where, getDocs, addDoc, doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-
-
-
-
-
-
 
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
@@ -109,8 +104,9 @@ export default function DoctorAssistantsTab({ doctorId }) {
   };
 
   const handleRemove = (assistantId) => {
-    if (!window.confirm('Are you sure you want to unlink this assistant?')) return;
-    removeMutation.mutate(assistantId);
+    notifier.confirmCritical('Are you sure you want to unlink this assistant?', () => {
+      removeMutation.mutate(assistantId);
+    });
   };
 
   return (

@@ -11,8 +11,12 @@ import {
   where,
   orderBy,
   onSnapshot,
+  getDocs,
+  addDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { logger } from '../utils/logger';
 
 /**
  * Suscribe al conteo de mensajes no leídos en conversaciones.
@@ -43,7 +47,7 @@ export function subscribeToUnreadMessages({ userId, isAdmin }, onCount) {
 export function subscribeToInboxPending(onCount) {
   const q = query(
     collection(db, 'operations_queue'),
-    where('status', 'in', ['New', 'AI Processing', 'Awaiting Review', 'Awaiting Approval'])
+    where('status', 'in', ['New', 'AI Processing', 'pending', 'Awaiting Approval'])
   );
   return onSnapshot(q, (snap) => onCount(snap.size), () => onCount(0));
 }
@@ -79,8 +83,87 @@ export function subscribeToUpcomingCalendarEvents(userId, onEvents) {
   );
 }
 
+/**
+ * Fetches active doctor-patient relationships for messaging.
+ * @param {string} doctorId
+ * @returns {Promise<Array>}
+ */
+export async function getDoctorPatientRelationships(doctorId) {
+  try {
+    const q = query(
+      collection(db, 'doctor_patient_relationships'),
+      where('doctorId', '==', doctorId),
+      where('status', '==', 'active')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    logger.error('[conversationRepository] getDoctorPatientRelationships failed', { doctorId, error: err.message });
+    return [];
+  }
+}
+
+/**
+ * Fetches direct messages between a doctor and a patient.
+ * @param {string} doctorId
+ * @param {string} patientId
+ * @returns {Promise<Array>}
+ */
+export async function getDirectMessages(doctorId, patientId) {
+  try {
+    const q = query(
+      collection(db, 'secure_messages'),
+      where('doctorId', '==', doctorId),
+      where('patientId', '==', patientId),
+      orderBy('createdAt', 'asc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    try {
+      const qFallback = query(
+        collection(db, 'secure_messages'),
+        where('doctorId', '==', doctorId),
+        where('patientId', '==', patientId)
+      );
+      const snapF = await getDocs(qFallback);
+      const list = snapF.docs.map((d) => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => (a.createdAt?.toMillis ? a.createdAt.toMillis() : 0) - (b.createdAt?.toMillis ? b.createdAt.toMillis() : 0));
+      return list;
+    } catch (fallbackErr) {
+      logger.error('[conversationRepository] getDirectMessages fallback failed', { doctorId, patientId, error: fallbackErr.message });
+      return [];
+    }
+  }
+}
+
+/**
+ * Sends a direct message.
+ * @param {object} messageData
+ * @returns {Promise<string>}
+ */
+export async function sendDirectMessage(messageData) {
+  try {
+    const docRef = await addDoc(collection(db, 'secure_messages'), {
+      ...messageData,
+      createdAt: serverTimestamp(),
+    });
+    logger.info('[conversationRepository] Sent direct message', { id: docRef.id });
+    return docRef.id;
+  } catch (err) {
+    logger.error('[conversationRepository] sendDirectMessage failed', { error: err.message });
+    throw err;
+  }
+}
+
 export const conversationRepository = {
   subscribeToUnreadMessages,
   subscribeToInboxPending,
   subscribeToUpcomingCalendarEvents,
+  getDoctorPatientRelationships,
+  getDirectMessages,
+  sendDirectMessage,
 };
+
+export default conversationRepository;
+

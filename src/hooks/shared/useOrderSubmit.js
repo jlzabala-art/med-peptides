@@ -111,18 +111,22 @@ export function useOrderSubmit({
       const items = enrichedCartItems.map(i => {
         const meta = cartMetadata[i.itemKey] || {};
         return {
-          name: i.itemKey,
-          variant: i.dosagePart,
+          name: i.name || i.namePart || meta.productName || meta.protocolName || meta.name || i.itemKey,
+          variant: i.dosagePart || meta.dosage || null,
+          category: i.category || meta.category || (i.isProtocol ? 'Protocol' : 'Peptides'),
+          productKey: i.itemKey,
           quantity: i.qty,
-          unitPrice: i.unitPrice,
-          lineTotal: i.lineTotal,
-          productId: meta.productId || null,
-          variantId: meta.variantId || null,
-          supplierId: meta.supplierId || null
+          unitPrice: i.unitPrice ?? 0,
+          lineTotal: i.lineTotal ?? 0,
+          productId: i.productId || meta.productId || null,
+          variantId: i.variantId || meta.variantId || null,
+          supplierId: i.supplierId || meta.supplierId || null,
+          isProtocol: i.isProtocol || meta.isProtocol || false,
+          protocolId: meta.protocolId || null
         };
       });
 
-      const subtotal = enrichedCartItems.reduce((a, i) => a + i.lineTotal, 0);
+      const subtotal = checkoutTotals?.subtotal !== undefined ? checkoutTotals.subtotal : enrichedCartItems.reduce((a, i) => a + i.lineTotal, 0);
       const total = subtotal + shippingCost;
       const currency = EXCHANGE_RATES[activeRegion]?.currency || 'USD';
       const currencySymbol = currency === 'USD' ? '$' : '€';
@@ -169,7 +173,7 @@ export function useOrderSubmit({
         setOrderId(rfqId);
       } else {
         // Standard B2C Order creation (Matched exactly to Checkout.jsx)
-        await addDoc(collection(db, 'orders'), {
+        const orderRef = await addDoc(collection(db, 'orders'), {
           source: isProfessional ? 'b2b_portal' : 'b2c_home',
           customerType: isProfessional ? 'professional' : 'retail',
           // ── Identity & ownership ──
@@ -205,6 +209,60 @@ export function useOrderSubmit({
             verified: true
           } : null,
         });
+
+        // ── Cross-Integration: Clinic & Doctor Commission Recording ──
+        const activeDoctorOrClinicId = supervisingPhysicianId || (cartOwnership?.ownerType === 'doctor' ? cartOwnership?.ownerId : null);
+        if (activeDoctorOrClinicId) {
+          try {
+            const commissionRate = 0.15; // 15% standard practitioner referral margin
+            const commissionAmount = Math.round(subtotal * commissionRate * 100) / 100;
+            await addDoc(collection(db, 'clinic_commissions'), {
+              doctorId: activeDoctorOrClinicId,
+              clinicId: cartOwnership?.tenantId || null,
+              b2cOrderId: newId,
+              orderSubtotal: subtotal,
+              commissionRate,
+              commissionAmount,
+              currency,
+              status: 'pending',
+              createdAt: serverTimestamp()
+            });
+          } catch (commErr) {
+            console.warn('[B2C->B2B] Clinic commission recording error:', commErr);
+          }
+        }
+
+        // ── Cross-Integration: Automatic Dropship PO Generation for B2B Suppliers ──
+        try {
+          const supplierMap = {};
+          items.forEach(item => {
+            const sId = item.supplierId || 'direct_fulfillment';
+            if (!supplierMap[sId]) supplierMap[sId] = [];
+            supplierMap[sId].push(item);
+          });
+
+          const supplierEntries = Object.entries(supplierMap);
+          for (let idx = 0; idx < supplierEntries.length; idx++) {
+            const [sId, sItems] = supplierEntries[idx];
+            const sSubtotal = sItems.reduce((acc, it) => acc + (it.lineTotal || 0), 0);
+            await addDoc(collection(db, 'purchase_orders'), {
+              poNumber: `PO-${newId}-${idx + 1}`,
+              b2cOrderId: newId,
+              supplierId: sId,
+              items: sItems,
+              subtotal: sSubtotal,
+              currency,
+              fulfillmentType: 'dropship_b2c',
+              status: 'po_created',
+              shippingAddress: shippingAddressData,
+              customerName: customerData.fullName,
+              customerEmail: customerData.email,
+              createdAt: serverTimestamp()
+            });
+          }
+        } catch (poErr) {
+          console.warn('[B2C->B2B] Dropship PO generation error:', poErr);
+        }
       }
 
       if (currentUid && prescriptionSpecs) {

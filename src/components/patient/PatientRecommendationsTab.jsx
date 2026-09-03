@@ -4,45 +4,26 @@ import FileText from "lucide-react/dist/esm/icons/file-text";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, where, orderBy, getDocs, doc, updateDoc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { fetchPatientRecommendations, updateRecommendationStatus } from '../../services/patientTabsService';
+import { useToast } from '../../hooks/useToast';
+import notifier from '../../services/NotificationService';
 import Card from '../ui/Card';
 import DataTable from '../ui/DataTable';
-import StatusChip from '../ui/StatusChip';
+import { StatusChip } from '../ui';
 import Spinner from '../ui/Spinner';
-
-
-
-
+import AppActionGroup from '../ui/AppActionGroup';
 
 export default function PatientRecommendationsTab({ userId, acceptRecommendation }) {
   const queryClient = useQueryClient();
 
   const { data: recommendations = [], isLoading, isError } = useQuery({
     queryKey: ['patientRecommendations', userId],
-    queryFn: async () => {
-      if (!userId) return [];
-      const q = query(
-        collection(db, 'recommendations'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
+    queryFn: () => fetchPatientRecommendations(userId),
     enabled: !!userId,
   });
 
   const mutation = useMutation({
-    mutationFn: async ({ recId, status }) => {
-      const recRef = doc(db, 'recommendations', recId);
-      await updateDoc(recRef, {
-        status,
-        updatedAt: new Date().toISOString(),
-      });
-      return { recId, status };
-    },
+    mutationFn: ({ recId, status }) => updateRecommendationStatus(recId, status),
     onSuccess: (data) => {
       queryClient.invalidateQueries(['patientRecommendations', userId]);
       if (data.status === 'accepted' && acceptRecommendation) {
@@ -61,9 +42,9 @@ export default function PatientRecommendationsTab({ userId, acceptRecommendation
   };
 
   const handleDecline = (rec) => {
-    if (window.confirm('Are you sure you want to decline this recommendation?')) {
+    notifier.confirmCritical('Are you sure you want to decline this recommendation?', () => {
       mutation.mutate({ recId: rec.id, status: 'rejected' });
-    }
+    });
   };
 
   const columns = [
@@ -93,10 +74,7 @@ export default function PatientRecommendationsTab({ userId, acceptRecommendation
       header: 'Status',
       key: 'status',
       render: (row) => {
-        let color = 'warning';
-        if (row.status === 'accepted') color = 'success';
-        if (row.status === 'rejected') color = 'error';
-        return <StatusChip status={row.status || 'pending'} variant={color} />;
+        return <StatusChip status={row.status || 'pending'} />;
       }
     },
     {
@@ -106,54 +84,25 @@ export default function PatientRecommendationsTab({ userId, acceptRecommendation
       render: (row) => {
         if (row.status !== 'pending' && row.status) return null;
         return (
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => {
-                const itemNames = Array.isArray(row.peptides) ? row.peptides.join(', ') : row.peptides;
-                window.dispatchEvent(new CustomEvent('open-clinical-ai', {
-                  detail: {
-                    message: `Can you explain the recommendation "${row.title || row.protocolName || 'Custom Recommendation'}" from ${row.doctorName || 'my doctor'}? It includes: ${itemNames}. How will this help me?`,
-                    patientContext: true,
-                    autoSend: true
-                  }
-                }));
-              }}
-              title="Ask Atlas about this recommendation"
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.25rem',
-                padding: '0.4rem 0.75rem', borderRadius: '6px',
-                border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.1)', color: '#8b5cf6',
-                fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer'
-              }}
-            >
-              <Sparkles size={14} /> Ask Atlas
-            </button>
-            <button
-              onClick={() => handleAccept(row)}
-              disabled={mutation.isPending}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.25rem',
-                padding: '0.4rem 0.75rem', borderRadius: '6px',
-                border: 'none', background: 'var(--color-success)', color: 'white',
-                fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer'
-              }}
-            >
-              <Check size={14} /> Accept
-            </button>
-            <button
-              onClick={() => handleDecline(row)}
-              disabled={mutation.isPending}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.25rem',
-                padding: '0.4rem 0.75rem', borderRadius: '6px',
-                border: '1px solid #e2e8f0', background: 'white', color: 'var(--color-text-secondary)',
-                fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer'
-              }}
-            >
-              <X size={14} /> Decline
-            </button>
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={[
+              {
+                type: 'atlas',
+                onClick: () => {
+                  const itemNames = Array.isArray(row.peptides) ? row.peptides.join(', ') : row.peptides;
+                  window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                    detail: {
+                      message: `Can you explain the recommendation "${row.title || row.protocolName || 'Custom Recommendation'}" from ${row.doctorName || 'my doctor'}? It includes: ${itemNames}. How will this help me?`,
+                      patientContext: true,
+                      autoSend: true
+                    }
+                  }));
+                }
+              },
+              { type: 'approve', label: 'Accept', onClick: () => handleAccept(row) },
+              { type: 'reject', label: 'Decline', onClick: () => handleDecline(row) }
+            ]} maxVisible={3} />
           </div>
-        );
       }
     }
   ];

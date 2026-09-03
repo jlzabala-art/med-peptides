@@ -9,7 +9,6 @@ import Breadcrumbs from '../components/common/Breadcrumbs';
 import Skeleton from '../components/common/Skeleton';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useRoleAccess } from '../hooks/useRoleAccess';
-import { getAnalytics, logEvent } from 'firebase/analytics';
 import app from '../firebase';
 
 /**
@@ -21,6 +20,7 @@ import app from '../firebase';
 export default function ProductTemplate({ 
   products, 
   initialProduct,
+  processedHierarchy,
   region, 
   isProfessional, 
   cart, 
@@ -41,7 +41,10 @@ export default function ProductTemplate({
   const { is } = useRoleAccess();
   const isAdmin = is('admin');
 
-  const { product: fetchedProduct, isLoading: productLoadingFetch, error } = useProductBySlug(slug);
+  const { product: fetchedProduct, isLoading: productLoadingFetch, error } = useProductBySlug(slug, {
+    initialData: initialProduct,
+    enabled: !initialProduct,
+  });
   
   const product = initialProduct || fetchedProduct;
   const productLoading = !initialProduct && productLoadingFetch;
@@ -50,17 +53,25 @@ export default function ProductTemplate({
   useEffect(() => {
     if (product) {
       window.scrollTo(0, 0);
-      try {
-        const analytics = getAnalytics(app);
-        logEvent(analytics, 'view_item', {
-          items: [{
-            item_id: product.id || product.name,
-            item_name: product.name,
-            item_category: product.category
-          }]
-        });
-      } catch (err) {
-        console.warn('Analytics error on PDP load:', err);
+      if (typeof window !== 'undefined') {
+        import('firebase/analytics').then(({ getAnalytics, logEvent, isSupported }) => {
+          isSupported().then((supported) => {
+            if (supported && app) {
+              try {
+                const analytics = getAnalytics(app);
+                logEvent(analytics, 'view_item', {
+                  items: [{
+                    item_id: product.id || product.name,
+                    item_name: product.name,
+                    item_category: product.category
+                  }]
+                });
+              } catch (e) {
+                console.warn('[Analytics] Log event failed:', e);
+              }
+            }
+          }).catch(() => {});
+        }).catch(() => {});
       }
     }
   }, [product]);
@@ -156,22 +167,13 @@ export default function ProductTemplate({
         onAddToCart={onAddToCart}
         toggleCompare={toggleCompare}
         compareList={compareList}
+        allFaqs={allFaqs}
+        processedHierarchy={processedHierarchy}
         onBack={() => router.back()}
         onSelectCategory={(cat) => router.push(`/collection/${cat.toLowerCase().replace(/ /g, '-')}`)}
         onSelectProduct={(name) => {
-          const target = products.find(p => p.name === name);
+          const target = products?.find(p => p.name === name);
           if (target) {
-            // Analytics: Track selection
-            try {
-              const analytics = getAnalytics(app);
-              logEvent(analytics, 'peptide_view', {
-                peptide_name: target.name,
-                protocol_id: 'none'
-              });
-            } catch (err) {
-              console.warn('Analytics error:', err);
-            }
-
             const targetSlug = target.name
               ? target.name.toLowerCase().replace(/\s+/g, '-')
               : (target.slug || target.id || target.name);

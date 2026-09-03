@@ -45,5 +45,11 @@ med-peptides-app-*.json
 *.txt
 scratch/
 test-screenshots/
+*.png
+functions-ai/
+functions-cron/
+functions-finance/
+functions-triggers/
 .env*
 cloudrun_backend/
+.vercel

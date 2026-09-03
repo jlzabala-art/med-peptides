@@ -30,7 +30,7 @@ export default function ActivityTimeline({ document }) {
     events.push({ icon: Truck, color: '#d97706', bg: '#fef3c7', title: 'Manufacturing Started', time: new Date(Date.now() - 43200000), desc: 'PO generated and sent to supplier.' });
   }
 
-  if (document.financialStatus === 'Paid') {
+  if (document.financialStatus === 'completed') {
     events.push({ icon: DollarSign, color: '#059669', bg: '#d1fae5', title: 'Payment Received', time: new Date(Date.now() - 3600000), desc: 'Invoice paid in full.' });
   }
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CheckCircle, AlertTriangle, Heart, Activity, Smile, Moon, Droplets, Dumbbell, Bell, Users, TrendingUp, Sparkles, ChevronDown, ChevronUp } from '@/lib/icons';
+import EmptyState from '../../../ui/EmptyState';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const PHASE_COLORS = {
@@ -13,7 +14,7 @@ const PHASE_COLORS = {
 
 function buildJourneyFromProtocol(protocol) {
   const weeks    = protocol?.duration_weeks || 12;
-  const name     = protocol?.protocol_name || 'this protocol';
+  const name     = protocol?.name || 'this protocol';
   const category = (protocol?.therapeutic_category || '').toLowerCase();
 
   const isAntiAging    = category.includes('anti-aging') || category.includes('longevity');
@@ -297,7 +298,7 @@ export default function ProtocolPatientJourney({ protocol, onUpdate }) {
             Patient Experience Journey
           </div>
           <h2 style={{ margin: '0.25rem 0', fontSize: '1.4rem', fontWeight: 800 }}>
-            {protocol?.protocol_name || 'Protocol'} — {totalWeeks} Weeks
+            {protocol?.name || 'Protocol'} — {totalWeeks} Weeks
           </h2>
           <p style={{ margin: 0, opacity: 0.85, fontSize: '0.85rem' }}>
             What the patient will feel, see, and experience — week by week.
@@ -342,11 +343,11 @@ export default function ProtocolPatientJourney({ protocol, onUpdate }) {
 
       {/* Empty state if no phases */}
       {phases.length === 0 && (
-        <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          <Users size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-          <h3 style={{ margin: '0 0 0.5rem' }}>No Journey Data</h3>
-          <p style={{ fontSize: '0.85rem' }}>Set the protocol duration and therapeutic category to generate the patient journey automatically.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No Journey Data"
+          subtitle="Set the protocol duration and therapeutic category to generate the patient journey automatically."
+        />
       )}
     </div>
   );

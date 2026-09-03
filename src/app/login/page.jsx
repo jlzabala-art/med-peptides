@@ -1,13 +1,12 @@
 "use client";
 
-import React from 'react';
-import PortalProviders from '../../components/shared/PortalProviders';
+import React, { Suspense } from 'react';
 import AuthPage from '../../templates/AuthPage';
 
 export default function AuthPortalPage() {
   return (
-    <PortalProviders >
+    <Suspense fallback={<div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="global-spinner" /></div>}>
       <AuthPage onBack={() => window.history.back()} />
-    </PortalProviders>
+    </Suspense>
   );
 }

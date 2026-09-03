@@ -812,7 +812,7 @@ export default function FinanceBudget({ dashboardData }) {
                         <span
                           style={{
                             fontWeight: 600,
-                            display: 'flex',
+                            display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
                             fontSize: '0.75rem',

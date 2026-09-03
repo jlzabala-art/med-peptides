@@ -291,7 +291,10 @@ export default function CatalogPreviewAndShareModal({
                             const pName = prod.displayName || prod.name || '—';
                             const showPrices = publishOptions.showPrices;
                             const priceVal =
+                              prod.defaultVariant?.pricing?.retail?.kit ??
+                              prod.defaultVariant?.pricing?.retail?.perUnit ??
                               prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD ??
+                              prod.defaultVariant?.retailPrice ??
                               prod.price ??
                               prod.msrp;
                             const formattedPrice = priceVal

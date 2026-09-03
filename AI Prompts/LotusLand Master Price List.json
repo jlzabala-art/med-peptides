@@ -1,0 +1,834 @@
+[
+  {
+    "product": "Glutathione",
+    "dosage": "500 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "Retatrutide",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "Retatrutide",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 580,
+    "presentation": "vial"
+  },
+  {
+    "product": "Retatrutide",
+    "dosage": "20 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 130,
+    "perKitPriceUSD": 850,
+    "presentation": "vial"
+  },
+  {
+    "product": "Retatrutide",
+    "dosage": "30 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 170,
+    "perKitPriceUSD": 1200,
+    "presentation": "vial"
+  },
+  {
+    "product": "Retatrutide",
+    "dosage": "40 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 230,
+    "perKitPriceUSD": 1500,
+    "presentation": "vial"
+  },
+  {
+    "product": "Tirzepatide",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "Tirzepatide",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 390,
+    "presentation": "vial"
+  },
+  {
+    "product": "Tirzepatide",
+    "dosage": "15 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 500,
+    "presentation": "vial"
+  },
+  {
+    "product": "Tirzepatide",
+    "dosage": "30 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 140,
+    "perKitPriceUSD": 850,
+    "presentation": "vial"
+  },
+  {
+    "product": "Tirzepatide",
+    "dosage": "60 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 270,
+    "perKitPriceUSD": 1550,
+    "presentation": "vial"
+  },
+  {
+    "product": "Semaglutide",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "Semaglutide",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 38,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "Semaglutide",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 400,
+    "presentation": "vial"
+  },
+  {
+    "product": "AOD-9604",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "AOD-9604",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "ARA-290",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "BPC-157",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 15,
+    "perKitPriceUSD": 90,
+    "presentation": "vial"
+  },
+  {
+    "product": "BPC-157",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "BPC-157",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 45,
+    "perKitPriceUSD": 250,
+    "presentation": "vial"
+  },
+  {
+    "product": "BPC-157",
+    "dosage": "20 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 350,
+    "presentation": "vial"
+  },
+  {
+    "product": "BPC-157 + TB-500",
+    "dosage": "5 mg | 5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "BPC-157 + TB-500",
+    "dosage": "10 mg | 10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 130,
+    "perKitPriceUSD": 650,
+    "presentation": "vial"
+  },
+  {
+    "product": "CJC-1295 with DAC",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "5-Amino-1MQ",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "CJC-1295 without DAC",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 20,
+    "perKitPriceUSD": 100,
+    "presentation": "vial"
+  },
+  {
+    "product": "CJC-1295 without DAC",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 160,
+    "presentation": "vial"
+  },
+  {
+    "product": "CJC-1295 without DAC",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 50,
+    "perKitPriceUSD": 270,
+    "presentation": "vial"
+  },
+  {
+    "product": "CJC-1295 without DAC + Ipamorelin",
+    "dosage": "5 mg | 5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 480,
+    "presentation": "vial"
+  },
+  {
+    "product": "Cartalax",
+    "dosage": "25 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Cardiogen",
+    "dosage": "25 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymogen",
+    "dosage": "25 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Prostamax",
+    "dosage": "25 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Testagen",
+    "dosage": "25 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Cagrilintide",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 250,
+    "presentation": "vial"
+  },
+  {
+    "product": "Cagrilintide",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 450,
+    "presentation": "vial"
+  },
+  {
+    "product": "DSIP",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "DSIP",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "Epithalon",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "Epithalon",
+    "dosage": "30 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 420,
+    "presentation": "vial"
+  },
+  {
+    "product": "Epithalon",
+    "dosage": "50 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 120,
+    "perKitPriceUSD": 650,
+    "presentation": "vial"
+  },
+  {
+    "product": "Epithalon",
+    "dosage": "100 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 230,
+    "perKitPriceUSD": 950,
+    "presentation": "vial"
+  },
+  {
+    "product": "FST344",
+    "dosage": "1 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 150,
+    "perKitPriceUSD": 850,
+    "presentation": "vial"
+  },
+  {
+    "product": "FOX-04",
+    "dosage": "12 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 580,
+    "presentation": "vial"
+  },
+  {
+    "product": "GHK-Cu (Human Copper)",
+    "dosage": "50 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 130,
+    "presentation": "vial"
+  },
+  {
+    "product": "GHK-Cu (Human Copper)",
+    "dosage": "100 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "GHRP-2",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 18,
+    "perKitPriceUSD": 130,
+    "presentation": "vial"
+  },
+  {
+    "product": "GLOW (BPC-157 / TB-500 / GHK)",
+    "dosage": "10 mg | 10 mg | 75 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 120,
+    "perKitPriceUSD": 750,
+    "presentation": "vial"
+  },
+  {
+    "product": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+    "dosage": "10 mg | 10 mg | 75 mg | 10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 140,
+    "perKitPriceUSD": 850,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymosin Alpha 1 + Thymalin",
+    "dosage": "10 mg | 10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 140,
+    "perKitPriceUSD": 700,
+    "presentation": "vial"
+  },
+  {
+    "product": "hCG",
+    "dosage": "5000 IU / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 250,
+    "presentation": "vial"
+  },
+  {
+    "product": "hCG",
+    "dosage": "10000 IU / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 450,
+    "presentation": "vial"
+  },
+  {
+    "product": "Hexarelin",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 20,
+    "perKitPriceUSD": 100,
+    "presentation": "vial"
+  },
+  {
+    "product": "Hexarelin",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "HGH",
+    "dosage": "10 IU / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "HGH",
+    "dosage": "20 IU / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 50,
+    "perKitPriceUSD": 250,
+    "presentation": "vial"
+  },
+  {
+    "product": "HGH",
+    "dosage": "36 IU / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 450,
+    "presentation": "vial"
+  },
+  {
+    "product": "HMG",
+    "dosage": "75 IU / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 120,
+    "presentation": "vial"
+  },
+  {
+    "product": "IGF LR3",
+    "dosage": "0.1 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "IGF LR3",
+    "dosage": "1 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 150,
+    "perKitPriceUSD": 850,
+    "presentation": "vial"
+  },
+  {
+    "product": "Ipamorelin",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "Kisspeptin-10",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 250,
+    "presentation": "vial"
+  },
+  {
+    "product": "KPV",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "MK-677",
+    "dosage": "12 mg",
+    "quantity": "100 tabs / bottle",
+    "perVialPriceUSD": 120,
+    "perKitPriceUSD": 120,
+    "presentation": "bottle"
+  },
+  {
+    "product": "GW501516",
+    "dosage": "10 mg",
+    "quantity": "100 tabs / bottle",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 80,
+    "presentation": "bottle"
+  },
+  {
+    "product": "SLU-PP-332",
+    "dosage": "250 mcg / tablet",
+    "quantity": "90 tabs / bottle",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 80,
+    "presentation": "bottle"
+  },
+  {
+    "product": "LL-37",
+    "dosage": "12 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 580,
+    "presentation": "vial"
+  },
+  {
+    "product": "MOTS-C",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "MOTS-C",
+    "dosage": "40 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 180,
+    "perKitPriceUSD": 950,
+    "presentation": "vial"
+  },
+  {
+    "product": "MOTS-C",
+    "dosage": "60 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 260,
+    "perKitPriceUSD": 1350,
+    "presentation": "vial"
+  },
+  {
+    "product": "MT2",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "NAD+",
+    "dosage": "500 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "NAD+",
+    "dosage": "750 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 250,
+    "presentation": "vial"
+  },
+  {
+    "product": "NAD+",
+    "dosage": "1000 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 50,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "NMN",
+    "dosage": "50 mg / tablet",
+    "quantity": "90 tabs / bottle",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 60,
+    "presentation": "bottle"
+  },
+  {
+    "product": "Oxytocin Acetate",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "Oxytocin Acetate",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 580,
+    "presentation": "vial"
+  },
+  {
+    "product": "Pinealon",
+    "dosage": "16 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 300,
+    "presentation": "vial"
+  },
+  {
+    "product": "Pinealon",
+    "dosage": "25 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 480,
+    "presentation": "vial"
+  },
+  {
+    "product": "PE 22-28",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "PNC-27",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 420,
+    "presentation": "vial"
+  },
+  {
+    "product": "PEG-MGF",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 680,
+    "presentation": "vial"
+  },
+  {
+    "product": "PT-141",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "PT-141",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 45,
+    "perKitPriceUSD": 350,
+    "presentation": "vial"
+  },
+  {
+    "product": "PT-141",
+    "dosage": "20 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 650,
+    "presentation": "vial"
+  },
+  {
+    "product": "Selank",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 180,
+    "presentation": "vial"
+  },
+  {
+    "product": "Selank",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 50,
+    "perKitPriceUSD": 280,
+    "presentation": "vial"
+  },
+  {
+    "product": "Semax",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 40,
+    "perKitPriceUSD": 200,
+    "presentation": "vial"
+  },
+  {
+    "product": "Sermorelin",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 50,
+    "perKitPriceUSD": 270,
+    "presentation": "vial"
+  },
+  {
+    "product": "Sermorelin",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 90,
+    "perKitPriceUSD": 480,
+    "presentation": "vial"
+  },
+  {
+    "product": "Snap-8",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 30,
+    "perKitPriceUSD": 150,
+    "presentation": "vial"
+  },
+  {
+    "product": "SS-31",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "SS-31",
+    "dosage": "50 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 180,
+    "perKitPriceUSD": 1350,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymulin",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 70,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Tesamorelin",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 580,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymosin Alpha 1",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 80,
+    "perKitPriceUSD": 380,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymosin β4 (TB-500)",
+    "dosage": "2 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 25,
+    "perKitPriceUSD": 100,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymosin β4 (TB-500)",
+    "dosage": "5 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 35,
+    "perKitPriceUSD": 200,
+    "presentation": "vial"
+  },
+  {
+    "product": "Thymosin β4 (TB-500)",
+    "dosage": "10 mg / vial",
+    "quantity": "10 vial / kit",
+    "perVialPriceUSD": 60,
+    "perKitPriceUSD": 350,
+    "presentation": "vial"
+  },
+  {
+    "product": "Starter Kit (Syringe + Bac Water)",
+    "dosage": "N/A",
+    "quantity": "1 kit",
+    "perVialPriceUSD": null,
+    "perKitPriceUSD": null,
+    "presentation": "kit"
+  },
+  {
+    "product": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+    "dosage": "N/A",
+    "quantity": "1 box",
+    "perVialPriceUSD": 15,
+    "perKitPriceUSD": 15,
+    "presentation": "box"
+  },
+  {
+    "product": "Bac Water",
+    "dosage": "30 ml / bottle",
+    "quantity": "1 bottle",
+    "perVialPriceUSD": 20,
+    "perKitPriceUSD": 20,
+    "presentation": "bottle"
+  },
+  {
+    "product": "Bac Water",
+    "dosage": "3 ml × 10 bottles",
+    "quantity": "10 bottles / box",
+    "perVialPriceUSD": 5,
+    "perKitPriceUSD": 30,
+    "presentation": "box"
+  },
+  {
+    "product": "Syringe + Bac Water Bundle",
+    "dosage": "30 ml Bac Water + 100 syringes",
+    "quantity": "1 kit",
+    "perVialPriceUSD": null,
+    "perKitPriceUSD": 30,
+    "presentation": "kit"
+  }
+]

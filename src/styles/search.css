@@ -1,0 +1,281 @@
+/* ── Input wrapper ──────────────────────────────────────── */
+.search-bar-wrap {
+  width: 100%;
+}
+
+.atlas-search__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-bottom: 1.5px solid var(--color-border, #e2e8f0);
+  background: var(--color-bg-surface, #fff);
+  transition: all 0.2s ease;
+  cursor: text;
+  position: relative;
+}
+.atlas-search__input-wrap.has-active-filters {
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+.atlas-search__input-wrap:hover {
+  border-color: var(--color-primary-soft, #93c5fd);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.atlas-search__input-wrap.focused {
+  border-color: var(--color-primary, #2563eb);
+  box-shadow: 0 0 0 3px var(--color-primary-focus, rgba(37, 99, 235, 0.12));
+  background: var(--color-bg-surface, #fff);
+}
+
+/* ── Sizes ─────────────────────────────────────────────── */
+.atlas-search-size-sm .atlas-search__input-wrap { height: 34px; }
+.atlas-search-size-sm .atlas-search__input { font-size: 0.8rem; }
+.atlas-search-size-md .atlas-search__input-wrap { height: 40px; }
+.atlas-search-size-md .atlas-search__input { font-size: 0.875rem; }
+.atlas-search-size-lg .atlas-search__input-wrap { height: 48px; }
+.atlas-search-size-lg .atlas-search__input { font-size: 0.95rem; }
+
+/* ── Text input ─────────────────────────────────────────── */
+.atlas-search__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--color-text-primary, #0f172a);
+  min-width: 0;
+}
+.atlas-search__input::placeholder { color: var(--color-text-tertiary, #94a3b8); }
+
+/* ── Count badge ────────────────────────────────────────── */
+.atlas-search__count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-primary, #2563eb);
+  background: var(--color-primary-soft, #eff6ff);
+  padding: 2px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── ⌘K shortcut badge ──────────────────────────────────── */
+.atlas-search__shortcut {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  color: var(--color-text-tertiary, #94a3b8);
+  background: var(--color-bg-app, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 5px;
+  padding: 2px 5px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.atlas-search__shortcut:hover { border-color: var(--color-primary-soft, #93c5fd); }
+
+/* ── Clear button ───────────────────────────────────────── */
+.atlas-search__clear {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--color-text-tertiary, #94a3b8);
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.atlas-search__clear:hover {
+  background: var(--color-bg-app, #f1f5f9);
+  color: var(--color-text-primary, #0f172a);
+}
+
+/* ── Recent searches dropdown ──────────────────────────── */
+.atlas-search__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-bg-surface, #fff);
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px -4px rgba(0,0,0,0.12);
+  z-index: 100;
+  overflow: hidden;
+  animation: searchDropdownIn 0.15s ease;
+}
+@keyframes searchDropdownIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.atlas-search__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-primary, #0f172a);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.atlas-search__dropdown-item:hover { background: var(--color-bg-app, #f8fafc); }
+
+/* ── Spinner ────────────────────────────────────────────── */
+.atlas-search__spinner { animation: spin 0.8s linear infinite; flex-shrink: 0; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── Active filter chips zone ──────────────────────────── */
+.atlas-search__chips-zone {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem 0.6rem;
+  border: 1.5px solid var(--color-primary, #2563eb);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: var(--color-bg-surface, #fff);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
+  animation: chipsIn 0.15s ease;
+}
+@keyframes chipsIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.atlas-search__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: default;
+  transition: background 0.15s;
+}
+.atlas-search__chip:hover { background: rgba(37, 99, 235, 0.13); }
+.atlas-search__chip-label { color: #64748b; font-weight: 500; margin-right: 1px; }
+.atlas-search__chip-remove {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #60a5fa;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  transition: color 0.1s;
+  line-height: 1;
+}
+.atlas-search__chip-remove:hover { color: #1d4ed8; }
+
+/* ── Inline quick-filter pills (Segmented GCP / Datadog Standard) ── */
+.atlas-search__filter-pill {
+  position: relative;
+  flex-shrink: 0;
+}
+.atlas-search__filter-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 28px;
+  padding: 0 0.65rem;
+  background: var(--color-bg-subtle, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-primary, #334155);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.atlas-search__filter-pill-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+.atlas-search__filter-pill-btn.active {
+  border-color: var(--color-primary, #003666);
+  color: var(--color-primary, #003666);
+  background: rgba(0, 54, 102, 0.06);
+  font-weight: 600;
+}
+.atlas-search__filter-pill-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  left: auto;
+  min-width: 150px;
+  background: var(--color-bg-surface, #fff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px -4px rgba(0,0,0,0.12);
+  z-index: 200;
+  overflow: hidden;
+  animation: searchDropdownIn 0.12s ease;
+}
+.atlas-search__filter-pill-option {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8rem;
+  color: var(--color-text-primary, #334155);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.atlas-search__filter-pill-option:hover { background: var(--color-bg-app, #f8fafc); }
+.atlas-search__filter-pill-option.selected {
+  color: var(--color-primary, #2563eb);
+  font-weight: 600;
+  background: rgba(37,99,235,0.05);
+}
+
+/* ── Divider between input and filter pills ─────────────── */
+.atlas-search__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border, #e2e8f0);
+  flex-shrink: 0;
+}
+
+/* ── Mobile responsiveness ──────────────────────────────── */
+@media (max-width: 768px) {
+  .atlas-search__filter-pill-btn {
+    font-size: 0;
+    padding: 0.3rem;
+    gap: 0;
+    border-radius: 6px;
+  }
+  .atlas-search__filter-pill-btn svg {
+    margin: 0 0.15rem;
+  }
+  .atlas-search__count {
+    display: none;
+  }
+  .atlas-search__shortcut {
+    display: none;
+  }
+  .atlas-search__chips-zone {
+    padding: 0.5rem;
+    font-size: 0.65rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+  }
+  .atlas-search__chips-zone::-webkit-scrollbar {
+    display: none;
+  }
+}

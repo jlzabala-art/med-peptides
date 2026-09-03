@@ -1,26 +1,20 @@
-"use client";
-
-import Plus from "lucide-react/dist/esm/icons/plus";
-import Search from "lucide-react/dist/esm/icons/search";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { getDoctorPatientRelationships } from '../../../repositories/conversationRepository';
+import { getCustomProtocolsByDoctor } from '../../../repositories/protocolRepository';
+import { createRecommendation } from '../../../repositories/recommendationRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { catalog } from '../../../data/v2/index.js';
-
-
-
-
+import { toast } from 'react-hot-toast';
+import Plus from "lucide-react/dist/esm/icons/plus";
+import FileText from "lucide-react/dist/esm/icons/file-text";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 
 export default function PrescriptionGeneratorWidget() {
   const { user } = useAuth();
   const [patients, setPatients] = useState([]);
   const [protocols, setProtocols] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState(''); // can be a catalog product ID or a protocol ID
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [dose, setDose] = useState('');
   const [durationDays, setDurationDays] = useState(30);
   const [loading, setLoading] = useState(false);
@@ -31,12 +25,12 @@ export default function PrescriptionGeneratorWidget() {
     async function fetchData() {
       if (!user?.uid) return;
       try {
-        const qPatients = query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', user.uid), where('status', '==', 'active'));
-        const snapP = await getDocs(qPatients);
-        setPatients(snapP.docs.map(d => ({ id: d.id, ...d.data() })));
-        const qProtocols = query(collection(db, 'custom_protocols'), where('doctorId', '==', user.uid));
-        const snapProt = await getDocs(qProtocols);
-        setProtocols(snapProt.docs.map(d => ({ id: d.id, ...d.data() })));
+        const [snapP, snapProt] = await Promise.all([
+          getDoctorPatientRelationships(user.uid),
+          getCustomProtocolsByDoctor(user.uid),
+        ]);
+        setPatients(snapP);
+        setProtocols(snapProt);
       } catch (err) {
         console.error("Error fetching data for generator", err);
       }
@@ -46,7 +40,7 @@ export default function PrescriptionGeneratorWidget() {
 
   const handlePrescribe = async () => {
     if (!selectedPatient || !selectedProduct || !dose || !durationDays || durationDays <= 0) {
-      alert("Please fill all fields with valid data.");
+      toast("Please fill all fields with valid data.");
       return;
     }
     setLoading(true);
@@ -60,7 +54,7 @@ export default function PrescriptionGeneratorWidget() {
       const customProt = protocols.find(x => x.id === selectedProduct);
       if (customProt) {
         productName = `Protocolo: ${customProt.name}`;
-        peptidesList = customProt.products.map(prod => prod.id);
+        peptidesList = (customProt.products || []).map(prod => prod.id);
         if (customProt.instructions) {
           instructions = `${dose} | Notas del Protocolo: ${customProt.instructions}`;
         }
@@ -71,22 +65,21 @@ export default function PrescriptionGeneratorWidget() {
       // Calculate dates
       const now = new Date();
       const endD = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
-      // Alert 10 days before the end date to account for shipping
       const alertD = new Date(endD.getTime() - (10 * 24 * 60 * 60 * 1000));
-      await addDoc(collection(db, 'recommendations'), {
+
+      await createRecommendation({
         doctorId: user.uid,
         doctorName: user.displayName || 'Physician',
-        patientId: p.patientId,
-        patientName: p.patientName,
-        patientEmail: p.patientEmail,
+        patientId: p?.patientId || selectedPatient,
+        patientName: p?.patientName || 'Patient',
+        patientEmail: p?.patientEmail || '',
         peptides: peptidesList,
         productName: productName,
         notes: instructions,
         durationDays: Number(durationDays),
-        estimatedEndDate: Timestamp.fromDate(endD),
-        refillAlertDate: Timestamp.fromDate(alertD),
-        status: 'pending', // Key trigger for Admin supply
-        createdAt: serverTimestamp()
+        estimatedEndDate: endD.toISOString(),
+        refillAlertDate: alertD.toISOString(),
+        status: 'pending',
       });
       setSuccess(true);
       setTimeout(() => {
@@ -98,7 +91,7 @@ export default function PrescriptionGeneratorWidget() {
       }, 3000);
     } catch (err) {
       console.error("Error prescribing", err);
-      alert("Failed to issue prescription.");
+      toast.error("Failed to issue prescription.");
     } finally {
       setLoading(false);
     }

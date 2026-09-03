@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DataTable from '../../ui/DataTable';
-import StatusBadge from '../../ui/StatusBadge';
+import StatusChip from '../../ui/StatusChip';
 
 import { calculateDetailedAIScore } from './LeadUtils';
 import RFQItemsTab from './RFQItemsTab';
@@ -713,7 +713,7 @@ export default function LeadProfileDrawer({
                   {
                     key: 'status',
                     header: 'Status',
-                    render: (r) => <StatusBadge status="active" label={r.status} />,
+                    render: (r) => <StatusChip status="active" label={r.status} />,
                   },
                 ]}
               />
@@ -856,7 +856,7 @@ export default function LeadProfileDrawer({
                   {
                     key: '_stock',
                     header: 'Stock Availability',
-                    render: () => <StatusBadge status="active" label="In Stock (240 available)" />,
+                    render: () => <StatusChip status="active" label="In Stock (240 available)" />,
                   },
                   {
                     key: '_supplier',

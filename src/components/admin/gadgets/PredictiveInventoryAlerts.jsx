@@ -33,7 +33,9 @@ export default function PredictiveInventoryAlerts({ products = [], onOpenProduct
       flexDirection: 'column',
       gap: '0.75rem',
       marginBottom: '1rem',
-      boxShadow: 'var(--shadow-sm)'
+      boxShadow: 'var(--shadow-sm)',
+      minWidth: 0,
+      width: '100%'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

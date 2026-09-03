@@ -48,6 +48,7 @@ const db = fb?.db;
 
 
 import { RX_STATUS, RX_STATUS_META } from '../../config/prescriptionConfig';
+import { toast } from 'react-hot-toast';
 
 // ── Mini status badge ─────────────────────────────────────────────────────────
 function RxBadge({ status }) {
@@ -221,10 +222,10 @@ function PrescriptionCard({ rx, onPay, onViewPdf }) {
               <button onClick={handlePay} disabled={paying} style={{
                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
                 padding: '0.9rem', borderRadius: '12px',
-                background: 'linear-gradient(135deg, #003666, #005599)',
+                background: 'linear-gradient(135deg, var(--color-primary, #7c3aed), var(--color-primary-hover, #6d28d9))',
                 color: 'var(--color-bg-surface)', fontWeight: 800, fontSize: '0.88rem',
                 border: 'none', cursor: paying ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-                boxShadow: '0 4px 16px rgba(0,54,102,0.3)',
+                boxShadow: '0 4px 16px rgba(124,58,237,0.3)',
                 transition: 'all 0.15s', opacity: paying ? 0.7 : 1,
               }}
               onMouseEnter={e => !paying && (e.currentTarget.style.transform = 'translateY(-1px)')}
@@ -297,7 +298,7 @@ function PrescriptionCard({ rx, onPay, onViewPdf }) {
                         timestamp: new Date().toISOString(),
                       }],
                     });
-                    alert('Refill request sent to your doctor.');
+                    toast('Refill request sent to your doctor.');
                   } catch (err) {
                     console.error('Error requesting refill:', err);
                   }

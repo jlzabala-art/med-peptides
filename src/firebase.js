@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, memoryLocalCache } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
@@ -19,7 +19,20 @@ let firestoreDb;
 
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
-  firestoreDb = getFirestore(app);
+  if (typeof window !== 'undefined') {
+    try {
+      firestoreDb = initializeFirestore(app, {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      });
+    } catch (e) {
+      console.warn('[Firebase] Fallback to standard Firestore instance:', e?.message || e);
+      firestoreDb = getFirestore(app);
+    }
+  } else {
+    firestoreDb = getFirestore(app);
+  }
 } else {
   app = getApp();
   firestoreDb = getFirestore(app);
@@ -29,6 +42,19 @@ export const auth = getAuth(app);
 export const db = firestoreDb;
 export const functions = getFunctions(app, 'europe-west3');
 export const storage = getStorage(app);
+
+// Messaging (only supported in browsers)
+let messagingInstance = null;
+if (typeof window !== 'undefined') {
+  import('firebase/messaging').then(({ getMessaging, isSupported }) => {
+    isSupported().then((supported) => {
+      if (supported) {
+        messagingInstance = getMessaging(app);
+      }
+    });
+  });
+}
+export const getMessagingInstance = () => messagingInstance;
 
 // Mock analytics for server-side
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;

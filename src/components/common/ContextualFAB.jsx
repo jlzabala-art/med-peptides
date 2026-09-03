@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { useFABStore } from '../../stores/useFABStore';
 
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
@@ -209,12 +210,164 @@ const getContextConfig = (pathname) => {
       id: 'users',
       theme: '#0284c7', // Sky
       icon: <Plus size={20} />,
-      label: 'Add Member',
+      label: 'User Actions',
       actions: [
         {
+          id: 'invite_whatsapp',
+          label: 'Invite Practitioner (WhatsApp)',
+          icon: <MessageSquarePlus size={16} color="#16a34a" />,
+          bg: '#dcfce7',
+        },
+        {
+          id: 'ai_scribe',
+          label: 'AI Clinical Scribe',
+          icon: <Zap size={16} color="#0d9488" />,
+          bg: '#ccfbf1',
+        },
+        {
+          id: 'open_workspace',
+          label: 'Workspace Buffer & Quotes',
+          icon: <ShoppingCart size={16} color="#0284c7" />,
+          bg: '#e0f2fe',
+        },
+        {
           id: 'new_user',
-          label: 'Create User',
+          label: 'Create User Profile',
           icon: <Plus size={16} color="#0284c7" />,
+          bg: '#e0f2fe',
+        },
+      ],
+    };
+  }
+
+  // Generic Admin Fallback (always provide 4 thumb actions)
+  if (isMatch('/admin')) {
+    return {
+      id: 'admin_general',
+      theme: '#003666',
+      icon: <Zap size={20} />,
+      label: 'Quick Actions',
+      actions: [
+        {
+          id: 'ai_scribe',
+          label: 'AI Clinical Scribe',
+          icon: <Zap size={16} color="#0d9488" />,
+          bg: '#ccfbf1',
+        },
+        {
+          id: 'invite_whatsapp',
+          label: 'Invite Practitioner (WhatsApp)',
+          icon: <MessageSquarePlus size={16} color="#16a34a" />,
+          bg: '#dcfce7',
+        },
+        {
+          id: 'open_workspace',
+          label: 'Workspace Buffer & Quotes',
+          icon: <ShoppingCart size={16} color="#0284c7" />,
+          bg: '#e0f2fe',
+        },
+        {
+          id: 'ask_atlas',
+          label: 'Ask Atlas AI Copilot',
+          icon: <Bot size={16} color="#7c3aed" />,
+          bg: '#f3e8ff',
+        },
+      ],
+    };
+  }
+
+  if (isMatch('/doctor')) {
+    return {
+      id: 'doctor',
+      theme: '#0d9488',
+      icon: <Plus size={20} />,
+      label: 'Clinical Actions',
+      actions: [
+        {
+          id: 'new_prescription_manual',
+          label: 'New Prescription',
+          icon: <FilePlus size={16} color="#0d9488" />,
+          bg: '#ccfbf1',
+        },
+        {
+          id: 'ai_scribe',
+          label: 'AI Clinical Scribe',
+          icon: <Zap size={16} color="#0d9488" />,
+          bg: '#ccfbf1',
+        },
+        {
+          id: 'ask_atlas',
+          label: 'Clinical Intelligence',
+          icon: <Bot size={16} color="#0d9488" />,
+          bg: '#ccfbf1',
+        },
+      ],
+    };
+  }
+
+  if (isMatch('/patient')) {
+    return {
+      id: 'patient',
+      theme: '#7c3aed',
+      icon: <Zap size={20} />,
+      label: 'Patient Care',
+      actions: [
+        {
+          id: 'new_order',
+          label: '1-Click Refill',
+          icon: <ShoppingCart size={16} color="#7c3aed" />,
+          bg: '#ede9fe',
+        },
+        {
+          id: 'ask_atlas',
+          label: 'Ask Protocol AI',
+          icon: <Bot size={16} color="#7c3aed" />,
+          bg: '#ede9fe',
+        },
+      ],
+    };
+  }
+
+  if (isMatch('/wholesaler')) {
+    return {
+      id: 'wholesaler',
+      theme: '#c2410c',
+      icon: <ShoppingCart size={20} />,
+      label: 'Wholesale Actions',
+      actions: [
+        {
+          id: 'new_order',
+          label: 'New Bulk Order',
+          icon: <ShoppingCart size={16} color="#c2410c" />,
+          bg: '#ffedd5',
+        },
+        {
+          id: 'create_quote',
+          label: 'New B2B Quote',
+          icon: <FileText size={16} color="#c2410c" />,
+          bg: '#ffedd5',
+        },
+      ],
+    };
+  }
+
+  if (isMatch('/supplier')) {
+    return {
+      id: 'supplier',
+      theme: '#0284c7',
+      icon: <Box size={20} />,
+      label: 'Supplier Actions',
+      actions: [
+        {
+          id: 'new_product',
+          label: 'Add API Batch',
+          icon: <Box size={16} color="#0284c7" />,
+          bg: '#e0f2fe',
+        },
+        {
+          id: 'request_rfq',
+          label: 'Respond to RFQs',
+          icon: <FileText size={16} color="#0284c7" />,
           bg: '#e0f2fe',
         },
       ],
@@ -244,87 +397,75 @@ const getContextConfig = (pathname) => {
       ],
     };
   }
-
-  // Admin Default Fallback
-  return {
-    id: 'default',
-    theme: '#0f172a', // Slate 900
-    icon: <Plus size={20} />,
-    label: 'New Action',
-    actions: [
-      {
-        id: 'quick_action',
-        label: 'Quick Command',
-        icon: <Zap size={16} color="#8b5cf6" />,
-        bg: '#f5f3ff',
-      },
-      {
-        id: 'search',
-        label: 'Global Search',
-        icon: <Search size={16} color="#0ea5e9" />,
-        bg: '#e0f2fe',
-      },
-    ],
-  };
-};
+  return null;
+}
 
 export default function ContextualFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { isAtTop, scrollDirection } = useScrollDirection();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(false);
+  const setFabConfig = useFABStore((state) => state.setFabConfig);
 
   useEffect(() => {
+    setIsMobile(window.innerWidth <= 768);
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close speed dial when navigating or scrolling
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsOpen(false);
-  }, [pathname, scrollDirection]);
-
   const config = getContextConfig(pathname);
-  // Show label if scrolling up, at top, or on desktop (always show on desktop)
+
+  // Sync to global store for PageHeader (Desktop)
+  useEffect(() => {
+    setFabConfig(config);
+    setIsOpen(false);
+  }, [pathname, setFabConfig]); // config depends on pathname
+
   const showLabel = !isMobile || isAtTop || scrollDirection === 'up';
+
+  if (!config) return null;
 
   const handleActionClick = (actionId) => {
     setIsOpen(false);
     console.log(`[FAB Action Clicked] ${actionId}`);
 
-    if (actionId === 'new_prescription_manual') {
-      router.push('/admin/products');
-    } else if (actionId === 'import_pdf') {
-      router.push('/admin/prescription-intake');
-    } else if (actionId === 'open_ai_copilot') {
-      window.dispatchEvent(
-        new CustomEvent('open-clinical-ai', {
-          detail: { query: 'Hi, I need help with my research.', autoSend: false },
-        })
-      );
-    } else if (actionId === 'open_personalization') {
-      window.dispatchEvent(new Event('open-research-drawer'));
+    if (actionId === 'ai_scribe') {
+      window.dispatchEvent(new CustomEvent('OPEN_AI_CLINICAL_SCRIBE'));
+    } else if (actionId === 'invite_whatsapp') {
+      window.dispatchEvent(new CustomEvent('OPEN_INVITE_USER_MODAL'));
+    } else if (actionId === 'open_workspace') {
+      window.dispatchEvent(new CustomEvent('open-cart'));
+    } else if (actionId === 'new_user') {
+      router.push('/admin/physicians?action=new');
+    } else if (actionId === 'new_product') {
+      router.push('/admin/master-catalog?action=new');
+    } else if (actionId === 'new_supplier') {
+      router.push('/admin/suppliers?action=new');
     } else if (actionId === 'new_msg') {
       window.dispatchEvent(new Event('open-compose-menu'));
+    } else if (actionId === 'quick_action' || actionId === 'search') {
+      window.dispatchEvent(new Event('OPEN_COMMAND_PALETTE'));
+    } else if (actionId === 'ask_atlas') {
+      window.dispatchEvent(new CustomEvent('ATLAS_PREFILL_QUERY', { detail: { query: '' } }));
+    } else if (actionId === 'create_task') {
+      window.dispatchEvent(new CustomEvent('OPEN_COMMAND_PALETTE'));
     }
   };
 
-  // On desktop, the Messaging UI has its own compose button, so hide FAB
-  if (!isMobile && config.id === 'messages') {
+  // Hide the default FAB entirely on protocols page
+  if (pathname.includes('/admin/protocols')) {
     return null;
   }
 
-  // Hide the default FAB entirely on protocols page to avoid UI clutter
-  if (pathname.includes('/admin/protocols')) {
+  // Hide on Desktop (Desktop uses PageHeader instead)
+  if (!isMobile) {
     return null;
   }
 
   return (
     <>
-      {/* Dim overlay when open */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -343,10 +484,73 @@ export default function ContextualFAB() {
         )}
       </AnimatePresence>
 
+      {/* Bottom Sheet Drawer for Mobile */}
+      <AnimatePresence>
+        {isOpen && isMobile && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: '#fff',
+              borderTopLeftRadius: '24px',
+              borderTopRightRadius: '24px',
+              padding: '24px 16px',
+              zIndex: 9999,
+              boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
+            }}
+          >
+            <div style={{
+              width: '40px',
+              height: '4px',
+              background: '#e2e8f0',
+              borderRadius: '2px',
+              margin: '0 auto 20px',
+            }} />
+            <h3 style={{ margin: '0 0 16px', fontSize: '1.2rem', color: '#1e293b' }}>
+              {config.label}
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {config.actions.map((action) => (
+                <button
+                  key={action.id}
+                  onClick={() => handleActionClick(action.id)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    width: '100%',
+                    padding: '16px',
+                    border: 'none',
+                    background: '#f8fafc',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    fontWeight: 500,
+                    color: '#334155',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                >
+                  <div style={{ background: action.bg, padding: '8px', borderRadius: '50%', display: 'flex' }}>
+                    {action.icon}
+                  </div>
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div
         style={{
           position: 'fixed',
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
           right: '16px',
           zIndex: 9999,
           display: 'flex',
@@ -354,61 +558,6 @@ export default function ContextualFAB() {
           alignItems: 'flex-end',
         }}
       >
-        {/* Speed Dial Actions */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-                marginBottom: '16px',
-                alignItems: 'flex-end',
-              }}
-            >
-              {config.actions.map((action, idx) => (
-                <motion.button
-                  key={action.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => handleActionClick(action.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    background: '#fff',
-                    border: 'none',
-                    borderRadius: '24px',
-                    padding: '8px 16px',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  }}
-                >
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>
-                    {action.label}
-                  </span>
-                  <div
-                    style={{
-                      background: action.bg,
-                      padding: '8px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                    }}
-                  >
-                    {action.icon}
-                  </div>
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Primary FAB Button */}
         <motion.button
           layout
           onClick={() => setIsOpen(!isOpen)}
@@ -435,7 +584,7 @@ export default function ContextualFAB() {
             animate={{ rotate: isOpen ? 45 : 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
           >
-            {isOpen ? <Plus size={24} /> : config.icon}
+            <Plus size={24} />
           </motion.div>
 
           <AnimatePresence mode="popLayout">

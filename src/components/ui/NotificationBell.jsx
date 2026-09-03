@@ -1,49 +1,22 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-
-
-
-
 import React, { useState, useEffect, useRef } from 'react';
-
-
-
-
-import { collection, query, where, orderBy, limit, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
-import { db } from '../../firebase';
-
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../hooks/data/useNotifications';
+import './NotificationBell.css';
+import { Bell, Check } from '@/lib/icons';
 
-import './NotificationBell.css'; // Use external CSS instead of Tailwind
-import { Bell, Check, Trash2, X } from '@/lib/icons';
-
+/**
+ * NotificationBell — Presentation component.
+ * All Firestore logic lives in useNotifications().
+ */
 const NotificationBell = () => {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState([]);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const menuRef = useRef(null);
   const router = useRouter();
-
-  useEffect(() => {
-    if (!user) return;
-
-    const q = query(
-      collection(db, 'notifications'),
-      where('recipientId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setNotifications(notifs);
-      setUnreadCount(notifs.filter(n => !n.read).length);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -52,32 +25,9 @@ const NotificationBell = () => {
         setIsOpen(false);
       }
     };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
-
-  const markAsRead = async (id, e) => {
-    if (e) e.stopPropagation();
-    try {
-      await updateDoc(doc(db, 'notifications', id), { read: true });
-    } catch (err) {
-      console.error("Error marking notification as read", err);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      const batch = writeBatch(db);
-      notifications.filter(n => !n.read).forEach(n => {
-        batch.update(doc(db, 'notifications', n.id), { read: true });
-      });
-      await batch.commit();
-    } catch (err) {
-      console.error("Error marking all as read", err);
-    }
-  };
 
   const handleNotificationClick = (notif) => {
     if (!notif.read) markAsRead(notif.id);
@@ -91,7 +41,7 @@ const NotificationBell = () => {
 
   return (
     <div className="notif-bell-container" ref={menuRef}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="notif-bell-btn"
         aria-label="Notifications"
@@ -124,7 +74,7 @@ const NotificationBell = () => {
             ) : (
               <div className="notif-list">
                 {notifications.map(notif => (
-                  <div 
+                  <div
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
                     className={`notif-item ${!notif.read ? 'notif-unread' : ''}`}
@@ -133,15 +83,18 @@ const NotificationBell = () => {
                       <p className="notif-title">{notif.title}</p>
                       <p className="notif-message">{notif.message}</p>
                       <p className="notif-time">
-                        {notif.createdAt?.toDate ? notif.createdAt.toDate().toLocaleString(undefined, {
-                          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                        }) : 'Just now'}
+                        {notif.createdAt?.toDate
+                          ? notif.createdAt.toDate().toLocaleString(undefined, {
+                              month: 'short', day: 'numeric',
+                              hour: '2-digit', minute: '2-digit'
+                            })
+                          : 'Just now'}
                       </p>
                     </div>
                     {!notif.read && (
                       <div className="notif-actions">
-                        <button 
-                          onClick={(e) => markAsRead(notif.id, e)}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); markAsRead(notif.id); }}
                           className="notif-action-btn"
                           title="Mark as read"
                         >

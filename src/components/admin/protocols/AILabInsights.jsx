@@ -3,21 +3,24 @@ import { BrainCircuit, FlaskConical, AlertTriangle, CheckCircle, Info, TestTube,
 import DataTable from '../../ui/DataTable';
 import EmptyState from '../../ui/EmptyState';
 
-export default function AILabInsights({ protocol }) {
+export default function AILabInsights({ protocol, onProductClick }) {
   const rationale = protocol?.overview_summary || protocol?.clinical_rationale || 'No clinical rationale provided for this protocol.';
   const expectedOutcomes = protocol?.expected_outcomes || protocol?.metadata?.expected_outcomes || 'No expected outcomes specified.';
   const contraindications = protocol?.contraindications || (protocol?.eligibility_rules?.contraindications || []).join(', ') || 'No contraindications or interactions documented.';
   
-  const rawLabs = protocol?.required_labs || protocol?.monitoring_plan?.baseline_required || [];
+  // Support both the old format (required_labs string array) and the new format (lab_schedule object array)
+  const rawLabs = protocol?.lab_schedule || protocol?.required_labs || protocol?.monitoring_plan?.baseline_required || [];
   const labMonitoring = rawLabs.map((l, i) => ({
     id: String(i),
     week: l.timing || l.time_point || 'Baseline',
     type: l.type || 'Required',
-    tests: typeof l === 'string' ? l : (l.name || l.test || l.panel || ''),
+    tests: typeof l === 'string' ? l : (l.tests || l.name || l.test || l.panel || ''),
   }));
 
   const allProducts = protocol?.phases?.flatMap((phase) => phase.items) || [];
-  const uniqueProducts = Array.from(new Map(allProducts.map(p => [p.productId, p])).values());
+  const uniqueProducts = Array.from(
+    new Map(allProducts.map(p => [p.productId, p])).values()
+  ).filter(p => p && p.productId);
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
@@ -47,9 +50,18 @@ export default function AILabInsights({ protocol }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--text-main)', fontWeight: 600 }}>
               <CheckCircle size={18} color="var(--success, #10b981)" /> Expected Outcomes
             </div>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              {expectedOutcomes}
-            </p>
+            <div style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              {typeof expectedOutcomes === 'object' && expectedOutcomes !== null ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {expectedOutcomes.qualitative && <div><strong>Qualitative:</strong> {expectedOutcomes.qualitative}</div>}
+                  {expectedOutcomes.time_to_onset_weeks && <div><strong>Time to Onset:</strong> {expectedOutcomes.time_to_onset_weeks}</div>}
+                  {expectedOutcomes.responder_rate_pct && <div><strong>Responder Rate:</strong> {expectedOutcomes.responder_rate_pct}</div>}
+                  {expectedOutcomes.notes && <div><strong>Notes:</strong> {expectedOutcomes.notes}</div>}
+                </div>
+              ) : (
+                expectedOutcomes
+              )}
+            </div>
           </div>
 
           {/* Contraindications */}
@@ -77,8 +89,13 @@ export default function AILabInsights({ protocol }) {
           </div>
           
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
-            {uniqueProducts.length > 0 ? uniqueProducts.map(p => (
-              <div key={p.productId} style={{ 
+            {uniqueProducts.length > 0 ? uniqueProducts.map((p, i) => (
+              <div 
+                key={p.productId} 
+                onClick={() => {
+                  if (onProductClick) onProductClick(p);
+                }}
+                style={{ 
                 background: 'var(--surface)', 
                 border: '1px solid var(--border)', 
                 borderRadius: '8px', 
@@ -89,10 +106,19 @@ export default function AILabInsights({ protocol }) {
                 boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
-              }}>
+                gap: '0.5rem',
+                cursor: onProductClick ? 'pointer' : 'default',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={e => {
+                if (onProductClick) e.currentTarget.style.background = 'var(--primary-light, #e0e7ff)';
+              }}
+              onMouseOut={e => {
+                if (onProductClick) e.currentTarget.style.background = 'var(--surface)';
+              }}
+              >
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--primary)' }}></div>
-                {p.productName}
+                {p.productName || p.name || 'Unknown'}
               </div>
             )) : (
               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>No peptides found in the phases.</p>

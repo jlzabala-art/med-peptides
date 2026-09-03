@@ -7,7 +7,7 @@ export const algoliaConfig = {
   },
   defaultSearchOptions: {
     hitsPerPage: 20,
-    typoTolerance: 'min', // Faster exact-ish matching
+    typoTolerance: true, 
     attributesToHighlight: ['name', 'sku', 'supplier', 'category'],
   }
 };

@@ -1,24 +1,19 @@
 "use client";
 
-import Building2 from "lucide-react/dist/esm/icons/building-2";
+import { Building2, Search, Filter, Server, Download, Mail, Phone, ExternalLink, Calendar, MapPin, Database, RefreshCw, FolderOpen, Users } from 'lucide-react';
+import EmptyState from '@/components/ui/EmptyState';
 import User from "lucide-react/dist/esm/icons/user";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import Mail from "lucide-react/dist/esm/icons/mail";
-import MapPin from "lucide-react/dist/esm/icons/map-pin";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Users from "lucide-react/dist/esm/icons/users";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import Crown from "lucide-react/dist/esm/icons/crown";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
 import ChevronUp from "lucide-react/dist/esm/icons/chevron-up";
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import Search from "lucide-react/dist/esm/icons/search";
 import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import Link2 from "lucide-react/dist/esm/icons/link-2";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import DataTable from '../../ui/DataTable';
+import AppActionGroup from '../../ui/AppActionGroup';
 // { useState, useEffect, useCallback } from 'react';
 import {
   doc,
@@ -32,6 +27,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';
+import { toast } from 'react-hot-toast';
 
 
 
@@ -610,7 +606,7 @@ export default function AdminZohoCRMWidget({
       }
     } catch (err) {
       console.error('[Incorporate Error]', err);
-      alert('Failed to incorporate and assign client.');
+      toast.error('Failed to incorporate and assign client.');
     } finally {
       setIncorporating(false);
     }
@@ -949,18 +945,12 @@ export default function AdminZohoCRMWidget({
                   {error}
                 </div>
               ) : filteredCustomers.length === 0 ? (
-                <div
-                  style={{
-                    padding: '2.5rem',
-                    textAlign: 'center',
-                    color: '#5f6368',
-                    fontSize: '0.8rem',
-                  }}
-                >
-                  {filter || typeFilter !== 'all'
-                    ? 'No clients found matching the filter.'
-                    : 'No data loaded. Force sync to retrieve.'}
-                </div>
+                <EmptyState
+                  icon={FolderOpen}
+                  title={filter || typeFilter !== 'all' ? 'No clients found' : 'No data loaded'}
+                  subtitle={filter || typeFilter !== 'all' ? 'Try adjusting your filters.' : 'Force sync to retrieve CRM data.'}
+                  action={!filter && typeFilter === 'all' ? { label: 'Force Sync', onClick: handleRefresh } : undefined}
+                />
               ) : (
                 <div
                   style={{ overflowX: 'auto', border: '1px solid #dadce0', borderRadius: '4px' }}
@@ -1545,49 +1535,18 @@ export default function AdminZohoCRMWidget({
                         align: 'center',
                         render: (contact) => (
                           <div
-                            style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}
+                            style={{ display: 'inline-flex', gap: '0.5rem', justifyContent: 'center' }}
                           >
-                            <button
-                              onClick={() => {
+                            <AppActionGroup actions={[
+                              { type: 'custom', label: selectedPendingContact?.id === contact.id ? 'Cancel' : 'Assign / Onboard', onClick: () => {
                                 if (selectedPendingContact?.id === contact.id) {
                                   setSelectedPendingContact(null);
                                 } else {
                                   setSelectedPendingContact(contact);
                                 }
-                              }}
-                              style={{
-                                padding: '0.3rem 0.75rem',
-                                border: '1px solid #dadce0',
-                                backgroundColor: 'var(--color-bg-surface)',
-                                borderRadius: '4px',
-                                fontWeight: 600,
-                                fontSize: '0.72rem',
-                                color: '#1a73e8',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              {selectedPendingContact?.id === contact.id
-                                ? 'Cancel'
-                                : 'Assign / Onboard'}
-                            </button>
-                            <a
-                              href={contact.zohoLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                padding: '0.3rem',
-                                border: '1px solid #dadce0',
-                                backgroundColor: 'var(--color-bg-surface)',
-                                borderRadius: '4px',
-                                color: '#5f6368',
-                                textDecoration: 'none',
-                              }}
-                              title="Open in Zoho Books"
-                            >
-                              <ExternalLink size={12} />
-                            </a>
+                              }},
+                              { type: 'custom', icon: ExternalLink, label: '', title: "Open in Zoho Books", href: contact.zohoLink, target: '_blank', color: '#5f6368' }
+                            ]} />
                           </div>
                         )
                       }

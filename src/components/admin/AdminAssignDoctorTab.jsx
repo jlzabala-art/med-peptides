@@ -10,8 +10,7 @@ import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { getUsers } from '../../repositories/userRepository';
 import {
   createRelationship,
   getAllRelationships,
@@ -23,6 +22,7 @@ import PageHeader from '../ui/PageHeader';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
 import DataTable from '../ui/DataTable';
 import MetricCard from '../ui/MetricCard';
+import AppActionGroup from '../ui/AppActionGroup';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const displayName = (u) =>
@@ -72,8 +72,8 @@ export default function AdminAssignPhysicianTab({ adminUid, isSubTab = false }) 
     (async () => {
       setLoadingUsers(true);
       try {
-        const snap = await getDocs(collection(db, 'users'));
-        setUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        const { users: allUsers } = await getUsers({ limitCount: 500 });
+        setUsers(allUsers);
       } catch (e) {
         console.error('AdminAssignPhysicianTab: fetch users', e);
       } finally {
@@ -189,27 +189,18 @@ export default function AdminAssignPhysicianTab({ adminUid, isSubTab = false }) 
     },
     {
       key: 'actions',
-      header: '',
-      render: (val, row) => (
-        row.status !== 'revoked' ? (
-          <button
-            onClick={() => handleRevoke(row.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--color-danger)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-            }}
-          >
-            <XCircle size={14} /> Revoke
-          </button>
-        ) : null
-      )
+      header: 'Actions',
+      align: 'right',
+      render: (val, row) => {
+        if (row.status === 'revoked') return null;
+        return (
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={[
+              { type: 'revoke', onClick: () => handleRevoke(row.id) }
+            ]} />
+          </div>
+        );
+      }
     }
   ], [users]);
 
@@ -229,7 +220,7 @@ export default function AdminAssignPhysicianTab({ adminUid, isSubTab = false }) 
       )}
 
       {/* KPI Cards (Rule #22) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+      <div className="kpi-scroll-row">
         <MetricCard
           title="Total Assignments"
           value={relationships.length}
@@ -248,6 +239,12 @@ export default function AdminAssignPhysicianTab({ adminUid, isSubTab = false }) 
           icon={Clock}
           color="var(--color-warning)"
           alert={relationships.filter(r => r.status === 'pending').length > 0}
+        />
+        <MetricCard
+          title="Inactive Assignments"
+          value={relationships.filter(r => r.status === 'inactive').length}
+          icon={UserMinus}
+          color="var(--color-danger)"
         />
       </div>
 

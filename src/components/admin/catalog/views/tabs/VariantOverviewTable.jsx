@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import React, { useState, useMemo } from 'react';
 
 import { calculateVariantHealthScore } from '../../useVariantHealthScore';
@@ -130,9 +131,9 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
       key: 'displaySku',
       header: <span onClick={() => handleSort('displaySku')} style={{ cursor: 'pointer' }}>SKU{getSortIcon('displaySku')}</span>,
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {row.image ? <img src={row.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} /> : <span style={{ fontSize: '10px', color: '#94a3b8' }}>Img</span>}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ position: 'relative', width: '24px', height: '24px', borderRadius: '4px', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {row.image ? <Image src={row.image} alt="" fill sizes="24px" style={{ objectFit: 'cover', borderRadius: '4px' }} /> : <span style={{ fontSize: '10px', color: '#94a3b8' }}>Img</span>}
           </div>
           <span style={{ fontWeight: 500 }}>{val}</span>
         </div>
@@ -160,17 +161,11 @@ export default function VariantOverviewTable({ variants, parentProduct, onAction
       key: 'actions',
       header: 'Actions',
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); if (onAction) onAction('ai_variant', parentProduct, row); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px', background: 'rgba(99,102,241,0.1)', border: 'none', borderRadius: '4px', cursor: 'pointer', color: '#6366f1', fontSize: '0.75rem', fontWeight: 600 }}
-            title="Atlas AI"
-          >
-            <Sparkles size={12} /> Atlas
-          </button>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
           <AppActionGroup
-            maxVisible={3}
+            maxVisible={4}
             actions={[
+              { type: 'atlas', onClick: () => onAction && onAction('ai_variant', parentProduct, row) },
               { type: 'clone', onClick: () => onAction && onAction('clone_variant', parentProduct, row) },
               { type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'overview') },
               { type: 'delete', onClick: () => onAction && onAction('delete_variant', parentProduct, row) },

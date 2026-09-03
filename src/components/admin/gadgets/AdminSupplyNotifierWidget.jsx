@@ -1,13 +1,6 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { subscribeToPendingRecommendations, updateRecommendationStatus } from '../../../repositories/recommendationRepository';
 import { AlertCircle, ArrowRight, Package } from '@/lib/icons';
-
-
-
 
 export default function AdminSupplyNotifierWidget({
   ownerId = 'admin',
@@ -19,13 +12,8 @@ export default function AdminSupplyNotifierWidget({
   const [loadingId, setLoadingId] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'recommendations'), where('status', '==', 'pending'));
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToPendingRecommendations((list) => {
       setPendingReqs(list);
-    }, (err) => {
-      console.warn("Could not load recommendations:", err);
     });
 
     return () => unsub();
@@ -34,9 +22,7 @@ export default function AdminSupplyNotifierWidget({
   async function handleProcess(id) {
     setLoadingId(id);
     try {
-      await updateDoc(doc(db, 'recommendations', id), {
-        status: 'processing',
-      });
+      await updateRecommendationStatus(id, 'processing');
     } catch (err) {
       console.error('Error processing supply', err);
     } finally {

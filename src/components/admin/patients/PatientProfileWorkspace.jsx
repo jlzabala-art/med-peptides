@@ -1,500 +1,157 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-
-import { Tabs, StatusChip } from '../../ui';
-import GlobalRelationshipPanel from '../../shared/GlobalRelationshipPanel';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { Tabs, StatusChip, CopyableId } from '../../ui';
 import styles from './PatientProfileWorkspace.module.css';
-import UniversalTimeline from '../../shared/UniversalTimeline';
+import UniversalPrescriptionsTable from '../../shared/UniversalPrescriptionsTable';
+import PatientCalendar from './PatientCalendar';
+import BiomarkersPanel from './BiomarkersPanel';
 import TasksEngine from '../../shared/TasksEngine';
 import CommunicationHub from '../../shared/CommunicationHub';
-import RevenueWidget from '../../shared/RevenueWidget';
-import ClinicalTimeline from './ClinicalTimeline';
 import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
+import { useDrawer } from '../../../context/DrawerContext';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
-import UniversalOrderBuilder from '../../shared/order-builder/UniversalOrderBuilder';
-import { X, User, MapPin, Phone, Mail, Activity, FileText, ShoppingCart, ShieldPlus, Dna, Clock, MailOpen, AlertCircle, ShieldCheck, ShieldAlert, Search, ExternalLink } from '@/lib/icons';
+import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase } from '@/lib/icons';
 import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
-import { db } from '../../../firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 
-// --- Sub-components ---
+import { patientRepository } from '../../../repositories/patientRepository';
+import { UniversalForm } from '../../shared/UniversalFormDrawer';
+import notifier from '../../../services/NotificationService';
+import { logger } from '../../../utils/logger';
 
-function PatientJourney({ status }) {
-  const steps = ['Lead', 'Assessment', 'Program', 'Follow-Up', 'Retention'];
-  const currentIndex = steps.indexOf(status) > -1 ? steps.indexOf(status) : 2;
+import EntityLink from '../../ui/EntityLink';
+import ClinicPicker from './ClinicPicker';
+import PhysicianPicker from './PhysicianPicker';
+import { fetchPatientDetailsBundleAction } from '../../../actions/patientsActions';
 
-  return (
-    <div className={styles.journeyContainer}>
-      <h3
-        style={{
-          margin: '0 0 1rem 0',
-          fontSize: '0.85rem',
-          color: 'var(--text-muted)',
-          textTransform: 'uppercase',
-          fontWeight: 800,
-        }}
-      >
-        Clinical Journey
-      </h3>
-      <div className={styles.journeySteps}>
-        <div
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '20px',
-            right: '20px',
-            height: '2px',
-            backgroundColor: 'var(--border)',
-            zIndex: 0,
-            minWidth: '400px', // Ensures the line doesn't crush too small on horizontal scroll
-          }}
-        ></div>
-        <div
-          style={{
-            position: 'absolute',
-            top: '12px',
-            left: '20px',
-            width: `${(currentIndex / (steps.length - 1)) * 100}%`,
-            height: '2px',
-            backgroundColor: 'var(--primary)',
-            zIndex: 0,
-            transition: 'width 0.4s',
-            minWidth: `${(currentIndex / (steps.length - 1)) * 400}px`,
-          }}
-        ></div>
-        {steps.map((step, idx) => {
-          const isCompleted = idx <= currentIndex;
-          const isCurrent = idx === currentIndex;
-          return (
-            <div
-              key={step}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                position: 'relative',
-                zIndex: 1,
-                gap: '0.5rem',
-                minWidth: '80px', // Ensures text has space when scrolling
-              }}
-            >
-              <div
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  backgroundColor: isCompleted ? 'var(--primary)' : 'var(--background)',
-                  border: `2px solid ${isCompleted ? 'var(--primary)' : 'var(--border)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {isCompleted && (
-                  <div
-                    style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'white' }}
-                  ></div>
-                )}
-              </div>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: isCurrent ? 700 : 500,
-                  color: isCurrent ? 'var(--text-main)' : 'var(--text-muted)',
-                  textAlign: 'center',
-                }}
-              >
-                {step}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function DigitalTwin({ patient }) {
-  return (
-    <div className={styles.digitalTwinCard}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              margin: 0,
-              color: 'var(--text-main)',
-              fontSize: '1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Dna size={20} color="var(--primary)" /> Patient Digital Twin
-          </h2>
-          <p style={{ margin: '0.25rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            Live metabolic indicators and protocol adherence
-          </p>
-        </div>
-        <div
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#eff6ff',
-            borderRadius: '8px',
-            border: '1px solid #bfdbfe',
-          }}
-        >
-          <span
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: '#1d4ed8',
-              textTransform: 'uppercase',
-            }}
-          >
-            Biological Age
-          </span>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1e3a8a' }}>
-            {patient.age - 4} <span style={{ fontSize: '1rem', color: '#3b82f6' }}>yrs</span>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.metricGrid}>
-        {/* Metric 1 */}
-        <div
-          style={{ padding: '1.25rem', border: '1px solid var(--border)', borderRadius: '12px' }}
-        >
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              marginBottom: '0.5rem',
-            }}
-          >
-            HbA1c
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            5.2% <span style={{ fontSize: '0.8rem', color: '#16a34a' }}>↓ 0.3%</span>
-          </div>
-          <div
-            style={{
-              width: '100%',
-              height: '4px',
-              backgroundColor: '#f1f5f9',
-              borderRadius: '2px',
-              marginTop: '0.75rem',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ width: '40%', height: '100%', backgroundColor: '#16a34a' }}></div>
-          </div>
-        </div>
-
-        {/* Metric 2 */}
-        <div
-          style={{ padding: '1.25rem', border: '1px solid var(--border)', borderRadius: '12px' }}
-        >
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              marginBottom: '0.5rem',
-            }}
-          >
-            Testosterone (Free)
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            14.2 <span style={{ fontSize: '0.8rem', color: '#16a34a' }}>↑ 2.1</span>
-          </div>
-          <div
-            style={{
-              width: '100%',
-              height: '4px',
-              backgroundColor: '#f1f5f9',
-              borderRadius: '2px',
-              marginTop: '0.75rem',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ width: '70%', height: '100%', backgroundColor: '#16a34a' }}></div>
-          </div>
-        </div>
-
-        {/* Metric 3 */}
-        <div
-          style={{ padding: '1.25rem', border: '1px solid var(--border)', borderRadius: '12px' }}
-        >
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-muted)',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              marginBottom: '0.5rem',
-            }}
-          >
-            Inflammation (hs-CRP)
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            0.8 <span style={{ fontSize: '0.8rem', color: '#16a34a' }}>↓ 1.2</span>
-          </div>
-          <div
-            style={{
-              width: '100%',
-              height: '4px',
-              backgroundColor: '#f1f5f9',
-              borderRadius: '2px',
-              marginTop: '0.75rem',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ width: '20%', height: '100%', backgroundColor: '#16a34a' }}></div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3
-          style={{
-            fontSize: '0.85rem',
-            color: 'var(--text-muted)',
-            textTransform: 'uppercase',
-            marginBottom: '1rem',
-          }}
-        >
-          Active Protocol Regimen
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div
-            style={{
-              padding: '1rem',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 600 }}>Tirzepatide 5mg</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Weekly • Subcutaneous
-              </div>
-            </div>
-            <div
-              style={{
-                padding: '4px 12px',
-                backgroundColor: '#f0fdf4',
-                color: '#16a34a',
-                borderRadius: '16px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-              }}
-            >
-              Adherence: 100%
-            </div>
-          </div>
-          <div
-            style={{
-              padding: '1rem',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 600 }}>NAD+ 200mg</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Bi-Weekly • Subcutaneous
-              </div>
-            </div>
-            <div
-              style={{
-                padding: '4px 12px',
-                backgroundColor: '#fefce8',
-                color: '#ca8a04',
-                borderRadius: '16px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-              }}
-            >
-              Adherence: 80%
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// --- Portal Access Panel ---
-
-function PortalAccessPanel({ patient, onLinked }) {
+// --- Portal Access Subcomponent ---
+function PortalAccessPanel({ patient }) {
   const [linkedUser, setLinkedUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [candidates, setCandidates] = useState([]);
-  const [searching, setSearching] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [linking, setLinking] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
-  // Load linked user on mount
   useEffect(() => {
-    let cancelled = false;
+    if (!patient?.id) return;
     setLoading(true);
-    findLinkedUser(patient)
-      .then(u => { if (!cancelled) setLinkedUser(u); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [patient.id, patient.linkedUserId]);
+    findLinkedUser(patient.id)
+      .then(user => setLinkedUser(user))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [patient?.id]);
 
-  async function handleSearch() {
-    if (!search.trim()) return;
-    setSearching(true);
+  const handleSearchCandidates = async () => {
+    setShowSearch(true);
+    setLoading(true);
     try {
-      // Search by displayName or email (basic Firestore contains-like via prefix)
-      const snap = await getDocs(collection(db, 'users'));
-      const term = search.trim().toLowerCase();
-      const results = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(u =>
-          (u.displayName || '').toLowerCase().includes(term) ||
-          (u.email || '').toLowerCase().includes(term)
-        )
-        .slice(0, 8);
-      setCandidates(results);
+      const users = await findLinkedUser(patient.id, true);
+      setCandidates(Array.isArray(users) ? users : []);
+    } catch (e) {
+      console.error(e);
     } finally {
-      setSearching(false);
+      setLoading(false);
     }
-  }
+  };
 
-  async function handleLink(user) {
+  const handleLink = async (user) => {
     setLinking(true);
     try {
       await linkPatientToUser(patient.id, user.id);
       setLinkedUser(user);
-      setCandidates([]);
-      setSearch('');
-      if (onLinked) onLinked(user);
+      setShowSearch(false);
+      notifier.success(`Linked to user ${user.email || user.displayName}`);
+    } catch (err) {
+      notifier.error(err.message || 'Linking failed');
     } finally {
       setLinking(false);
     }
-  }
+  };
 
-  async function handleUnlink() {
+  const handleUnlink = async () => {
     if (!linkedUser) return;
-    if (!window.confirm(`Desvincular el acceso al portal de ${patient.name}?`)) return;
     setLinking(true);
     try {
       await unlinkPatientFromUser(patient.id, linkedUser.id);
       setLinkedUser(null);
+      notifier.success('User unlinked from patient chart');
+    } catch (err) {
+      notifier.error(err.message || 'Unlink failed');
     } finally {
       setLinking(false);
     }
-  }
-
-  const cardStyle = {
-    border: '1px solid var(--color-border)',
-    borderRadius: '12px',
-    padding: '1.25rem',
-    backgroundColor: 'var(--color-bg-surface)',
   };
 
-  if (loading) return <div style={cardStyle}><span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Checking portal access…</span></div>;
-
   return (
-    <div style={cardStyle}>
-      <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <ShieldCheck size={16} /> Portal Access
-      </h3>
+    <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.25rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', margin: 0 }}>
+          Patient Portal Access
+        </h3>
+        {linkedUser ? (
+          <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '12px', backgroundColor: '#f0fdf4', color: '#16a34a', fontWeight: 700 }}>
+            Active Portal Account
+          </span>
+        ) : (
+          <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '12px', backgroundColor: '#fef2f2', color: '#dc2626', fontWeight: 700 }}>
+            Unlinked
+          </span>
+        )}
+      </div>
 
-      {linkedUser ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ShieldCheck size={18} color="var(--color-success)" />
-            </div>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{linkedUser.displayName || linkedUser.email}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{linkedUser.email} · {linkedUser.role}</div>
-            </div>
+      {loading ? (
+        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Checking portal status...</div>
+      ) : linkedUser ? (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>{linkedUser.displayName || linkedUser.email}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{linkedUser.email} · Role: {linkedUser.role || 'patient'}</div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <a
-              href={`/admin/users?search=${encodeURIComponent(linkedUser.email)}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}
-            >
-              <ExternalLink size={14} /> Ver en Users
-            </a>
-            <button
-              onClick={handleUnlink}
-              disabled={linking}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-danger)', background: 'none', border: '1px solid var(--color-danger)', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer' }}
-            >
-              <ShieldAlert size={14} /> Desvincular
-            </button>
-          </div>
+          <button
+            onClick={handleUnlink}
+            disabled={linking}
+            style={{ fontSize: '0.75rem', color: '#dc2626', background: 'none', border: '1px solid #fecaca', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontWeight: 600 }}
+          >
+            Unlink
+          </button>
         </div>
       ) : (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <ShieldAlert size={16} color="var(--text-muted)" />
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sin acceso al portal vinculado.</span>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              placeholder="Buscar usuario por nombre o email…"
-              style={{ flex: 1, border: '1px solid var(--color-border)', borderRadius: '6px', padding: '0.4rem 0.75rem', fontSize: '0.85rem', outline: 'none', color: 'var(--text-main)', backgroundColor: 'var(--color-bg-app)' }}
-            />
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: '0 0 0.75rem 0' }}>
+            No auth user account linked to this patient registry record.
+          </p>
+          {!showSearch ? (
             <button
-              onClick={handleSearch}
-              disabled={searching}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'white', backgroundColor: 'var(--primary)', border: 'none', borderRadius: '6px', padding: '0.4rem 0.85rem', cursor: 'pointer', fontWeight: 600 }}
+              onClick={handleSearchCandidates}
+              style={{ fontSize: '0.78rem', color: 'var(--primary, #0d9488)', background: 'none', border: '1px solid var(--primary, #0d9488)', borderRadius: '6px', padding: '0.35rem 0.75rem', cursor: 'pointer', fontWeight: 700 }}
             >
-              <Search size={14} /> {searching ? 'Buscando…' : 'Buscar'}
+              Search & Link User Account
             </button>
-          </div>
-          {candidates.length > 0 && (
-            <div style={{ marginTop: '0.5rem', border: '1px solid var(--color-border)', borderRadius: '8px', overflow: 'hidden' }}>
-              {candidates.map(u => (
-                <div
-                  key={u.id}
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-surface)' }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.displayName || '—'}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email} · {u.role}</div>
-                  </div>
-                  <button
-                    onClick={() => handleLink(u)}
-                    disabled={linking}
-                    style={{ fontSize: '0.78rem', color: 'var(--primary)', background: 'none', border: '1px solid var(--primary)', borderRadius: '6px', padding: '0.25rem 0.6rem', cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Vincular
-                  </button>
+          ) : (
+            <div>
+              {candidates.length === 0 ? (
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No matching user accounts found by email.</div>
+              ) : (
+                <div style={{ border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                  {candidates.map(u => (
+                    <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border)', backgroundColor: '#fff' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.82rem' }}>{u.displayName || u.email}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                      </div>
+                      <button
+                        onClick={() => handleLink(u)}
+                        disabled={linking}
+                        style={{ fontSize: '0.75rem', color: '#0d9488', background: 'none', border: '1px solid #0d9488', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        Link
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
@@ -503,327 +160,327 @@ function PortalAccessPanel({ patient, onLinked }) {
   );
 }
 
-// --- Main Workspace ---
+// --- Main Patient Profile Workspace ---
+export default function PatientProfileWorkspace({ patient: initialPatient, initialTab: propInitialTab, onClose }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialTab = propInitialTab || searchParams?.get('tab') || 'overview';
 
-export default function PatientProfileWorkspace({ patient, onClose }) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const { openDrawer } = useDrawer();
+  const [patient, setPatient] = useState(initialPatient || {});
+  const [serverBundle, setServerBundle] = useState(null);
+  const [isEditingCareTeam, setIsEditingCareTeam] = useState(false);
 
-  // Fetch transactions for this patient
-  const { prescriptions, loading: loadingPrescriptions } = usePrescriptions({
+  useEffect(() => {
+    if (initialPatient) {
+      setPatient(initialPatient);
+    }
+  }, [initialPatient]);
+
+  // Load server-accelerated data bundle
+  useEffect(() => {
+    const patientId = initialPatient?.id || patient?.id;
+    if (!patientId) return;
+
+    let isMounted = true;
+    fetchPatientDetailsBundleAction(patientId).then(bundle => {
+      if (isMounted && bundle) {
+        setServerBundle(bundle);
+        if (bundle.patient) {
+          setPatient(prev => ({ ...bundle.patient, ...prev }));
+        }
+      }
+    }).catch(err => {
+      console.warn('[PatientProfileWorkspace] bundle load error:', err);
+    });
+
+    return () => { isMounted = false; };
+  }, [initialPatient?.id, patient?.id]);
+
+  useEffect(() => {
+    const tab = searchParams?.get('tab');
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const patientSchema = [
+    { name: 'name', label: 'Full Name', type: 'text', required: true },
+    { name: 'email', label: 'Email', type: 'email', required: true },
+    { name: 'phone', label: 'Phone', type: 'text', required: false },
+    { name: 'age', label: 'Age', type: 'text', required: false },
+    { name: 'gender', label: 'Gender', type: 'select', options: [{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Other', label: 'Other' }] },
+    { name: 'country', label: 'Country / City', type: 'text', required: false },
+    { name: 'nationalId', label: 'National ID / Emirates ID', type: 'text', required: false },
+    { name: 'address', label: 'Street Address', type: 'text', required: false },
+    { name: 'notes', label: 'Clinical Intake Notes', type: 'textarea', required: false },
+  ];
+
+  const handleUpdatePatient = async (formData) => {
+    try {
+      if (!patient?.id) return;
+      await patientRepository.updatePatient(patient.id, formData);
+      setPatient((prev) => ({ ...prev, ...formData }));
+      notifier.success('Patient chart updated successfully.');
+    } catch (err) {
+      logger.error('Failed to update patient details in PatientProfileWorkspace', { error: err.message });
+      notifier.error('Failed to update patient details.');
+      throw err;
+    }
+  };
+
+
+  // Real data fetching for this patient (instant fallback from serverBundle)
+  const { prescriptions: clientPrescriptions, loading: loadingPrescriptions } = usePrescriptions({
     whereConditions: [['patientId', '==', patient.id]],
-    limitCount: 20,
+    limitCount: 50,
   });
 
-  const { data: orders, isLoading: loadingOrders } = useFirestoreCollection('orders', {
+  const { data: clientOrders, isLoading: loadingOrders } = useFirestoreCollection('orders', {
     whereConditions: [['patientId', '==', patient.id]],
     orderByFields: [['createdAt', 'desc']],
-    limitCount: 20,
+    limitCount: 50,
   });
 
-  // Mocks for relationships
-  const mockPhysician = { id: 'phy_1', name: patient.physician };
-  const mockClinic = { id: 'cln_1', name: patient.clinic };
-  const mockManager = { id: 'mgr_1', name: patient.manager };
+  const prescriptions = (clientPrescriptions && clientPrescriptions.length > 0) 
+    ? clientPrescriptions 
+    : (serverBundle?.prescriptions || []);
+
+  const orders = (clientOrders && clientOrders.length > 0) 
+    ? clientOrders 
+    : (serverBundle?.orders || []);
+
+  const displayName = patient?.name || `${patient?.firstName || ''} ${patient?.lastName || ''}`.trim() || patient?.email || 'Patient';
 
   const tabs = [
     {
       id: 'overview',
-      label: 'Overview',
+      label: 'Patient Profile & Clinical Info',
+      icon: User,
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <PatientJourney status="Program" />
-          <div className={styles.overviewGrid}>
-            <div className={`${styles.infoCard} ${styles.colSpan4}`}>
-              <h3
-                style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <User size={16} /> Basic Info
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                  <div
+        <div className={styles.overviewGrid}>
+          {/* Left Column: Demographics Form (colSpan5) */}
+          <div className={styles.colSpan5} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className={styles.infoCard}>
+              <UniversalForm
+                schema={patientSchema}
+                initialData={patient}
+                initialMode="view"
+                onSubmit={handleUpdatePatient}
+                submitLabel="Save Changes"
+                customHeader={
+                  <h3
                     style={{
-                      fontSize: '0.7rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 800,
                       color: 'var(--text-muted)',
                       textTransform: 'uppercase',
+                      marginBottom: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
                     }}
                   >
-                    Email
-                  </div>
-                  <div style={{ fontWeight: 600 }}>{patient.email}</div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: '0.7rem',
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Phone
-                  </div>
-                  <div style={{ fontWeight: 600 }}>{patient.phone || '—'}</div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: '0.7rem',
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    National ID
-                  </div>
-                  <div style={{ fontWeight: 600 }}>{patient.nationalId || '—'}</div>
-                </div>
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <div
-                    style={{
-                      fontSize: '0.7rem',
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Address
-                  </div>
-                  <div style={{ fontWeight: 600 }}>{patient.address || '—'}</div>
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: '0.7rem',
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    Age / Gender
-                  </div>
-                  <div style={{ fontWeight: 600 }}>
-                    {patient.age || '—'} / {patient.gender || '—'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className={`${styles.aiCard} ${styles.colSpan8}`}>
-              <h3
-                style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  color: '#0369a1',
-                  textTransform: 'uppercase',
-                  marginBottom: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <Activity size={16} /> AI Insights
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                  <AlertCircle size={14} color="#0284c7" style={{ marginTop: '2px' }} />
-                  <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
-                    Program compliance is high. Ready for peptide protocol up-sell.
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                  <Clock size={14} color="#0284c7" style={{ marginTop: '2px' }} />
-                  <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
-                    Blood work is due in 14 days. Automated reminder scheduled.
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Relationship Graph inside Overview */}
-            <div className={styles.colSpan12}>
-              <GlobalRelationshipPanel
-                patient={patient}
-                physician={mockPhysician}
-                clinic={mockClinic}
-                manager={mockManager}
-                activeEntity="patient"
+                    <User size={16} /> Demographics & Contact
+                  </h3>
+                }
               />
             </div>
 
-            {/* Portal Access */}
-            <div className={styles.colSpan12}>
-              <PortalAccessPanel patient={patient} />
-            </div>
+            {/* Portal Link */}
+            <PortalAccessPanel patient={patient} />
+          </div>
 
-            {/* Revenue and Risk Score */}
-            <div className={styles.colSpan8} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <RevenueWidget entityId={patient.id} entityType="patient" />
-            </div>
-
-            
-            <div className={`${styles.infoCard} ${styles.colSpan4}`} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div
-                style={{
-                  fontSize: '0.7rem',
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  fontWeight: 700,
-                  marginBottom: '0.5rem'
-                }}
-              >
-                Overall Risk Score
+          {/* Right Column: Clinical Status, Care Team & AI Summary (colSpan7) */}
+          <div className={styles.colSpan7} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Care Team & Clinic Card */}
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+                  Clinic Assignment & Care Team
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingCareTeam(!isEditingCareTeam)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '0.75rem',
+                    color: isEditingCareTeam ? '#dc2626' : '#0284c7',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  {isEditingCareTeam ? <><X size={12} /> Done</> : <><Edit2 size={12} /> Edit Assignment</>}
+                </button>
               </div>
-              <div
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 800,
-                  color: patient.riskScore === 'High' ? 'var(--color-danger)' : 'var(--color-success)',
-                }}
-              >
-                {patient.riskScore}
-              </div>
+
+              {isEditingCareTeam ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#f8fafc', padding: '0.875rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Primary Clinic</label>
+                    <ClinicPicker
+                      value={patient.clinicId || patient.clinic}
+                      clinicName={patient.clinic}
+                      onChange={async (selected) => {
+                        if (selected) {
+                          await handleUpdatePatient({
+                            clinicId: selected.clinicId || '',
+                            clinic: selected.clinicName || '',
+                            clinicName: selected.clinicName || ''
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Attending Physician</label>
+                    <PhysicianPicker
+                      value={patient.physicianId || patient.physician}
+                      physicianName={patient.physician}
+                      clinicFilter={patient.clinicId || patient.clinic}
+                      onChange={async (selected) => {
+                        if (selected) {
+                          await handleUpdatePatient({
+                            physicianId: selected.physicianId || '',
+                            physician: selected.physicianName || '',
+                            physicianName: selected.physicianName || ''
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', alignItems: 'center' }}>
+                  {patient.clinic && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 12px', backgroundColor: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
+                      🏥 {patient.clinic}
+                    </span>
+                  )}
+                  {patient.physicianId ? (
+                    <EntityLink type="physician" id={patient.physicianId} label={patient.physician || 'View Primary Doctor'} size="md" />
+                  ) : patient.physician ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 12px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
+                      🩺 {patient.physician}
+                    </span>
+                  ) : null}
+                  {prescriptions && prescriptions.length > 0 && (
+                    <EntityLink type="prescription" id={prescriptions[0].id} label={`Latest Rx: ${prescriptions[0].protocolName || 'View'}`} size="md" />
+                  )}
+                  {!patient.clinic && !patient.physician && (!prescriptions || prescriptions.length === 0) && (
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No clinic or doctor assigned yet</span>
+                  )}
+                </div>
+              )}
             </div>
 
+            {/* AI Clinical Summary & Active Status */}
+            <div className={styles.aiCard}>
+              <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Activity size={16} /> Clinical Prescription Status
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {prescriptions && prescriptions.length > 0 ? (
+                  <>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      <FileText size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
+                        {prescriptions.length} prescription(s) registered. Last on {prescriptions[0]?.createdAt?.seconds ? new Date(prescriptions[0].createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}.
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      <Clock size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
+                        Current status: <strong>{prescriptions[0]?.status || 'pending'}</strong>.
+                      </span>
+                    </div>
+                    <button
+                      style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('open-ai-chat', { 
+                          detail: { 
+                            mode: 'patient', 
+                            context: { 
+                              patientId: patient.id, 
+                              name: displayName,
+                              clinic: patient.clinic,
+                              prescriptionCount: prescriptions.length,
+                              lastPrescriptionStatus: prescriptions[0]?.status
+                            } 
+                          } 
+                        }));
+                      }}
+                    >
+                      <Activity size={14} /> Open AI Clinical Analysis
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      <AlertCircle size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
+                        No prescriptions on record. You can draft an initial protocol.
+                      </span>
+                    </div>
+                    <button
+                      style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
+                      onClick={() => openDrawer('rx-builder', 'new', { initialPatient: { id: patient.id, name: displayName, email: patient.email } })}
+                    >
+                      <FilePlus size={14} /> Create First Prescription
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       ),
     },
     {
       id: 'records',
-      label: 'Clinical Records',
+      label: 'Prescriptions & Orders',
+      icon: FileText,
       content: (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              border: '1px solid var(--border)',
-              padding: '1.5rem',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3
-                style={{
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  margin: 0
-                }}
-              >
-                <FileText size={16} /> Prescriptions
-              </h3>
-              <button 
-                className="gcp-btn-primary" 
-                style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
-                onClick={() => setIsBuilderOpen(true)}
-              >
-                New
-              </button>
-            </div>
-            {loadingPrescriptions ? (
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                Loading prescriptions...
-              </div>
-            ) : prescriptions && prescriptions.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {prescriptions.map((rx) => (
-                  <div
-                    key={rx.id}
-                    style={{
-                      padding: '1rem',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      <span style={{ fontWeight: 600 }}>{rx.id.slice(0, 8)}</span>
-                      <StatusChip status={rx.status || 'Active'} />
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      {(rx.items || []).length} items prescribed
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                No prescriptions found.
-              </div>
-            )}
-          </div>
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              border: '1px solid var(--border)',
-              padding: '1.5rem',
-            }}
-          >
-            <h3
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <ShoppingCart size={16} /> Orders
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Universal Prescriptions Table */}
+          <UniversalPrescriptionsTable
+            patientId={patient.id}
+            title="Prescriptions"
+            subtitle={`All medical prescriptions on file for ${displayName}`}
+            hideHeader={false}
+            readOnly={false}
+          />
+
+          {/* Real Pharmacy Orders */}
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShoppingCart size={16} /> Pharmacy Orders & Tracking
             </h3>
             {loadingOrders ? (
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                Loading orders...
-              </div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading orders...</div>
             ) : orders && orders.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {orders.map((order) => (
-                  <div
-                    key={order.id}
-                    style={{
-                      padding: '1rem',
-                      border: '1px solid var(--border)',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      <span style={{ fontWeight: 600 }}>{order.id.slice(0, 8)}</span>
-                      <StatusChip status={order.status || 'Processing'} />
+                  <div key={order.id} style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <CopyableId value={order.id} displayValue={order.id.slice(0, 8)} />
+                      <StatusChip status={order.status || 'processing'} />
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      Total: ${order.total || order.amount || 0}
+                      Total: ${order.total || order.amount || 0} · Date: {order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                No orders found.
+                No pharmacy orders logged yet for this patient.
               </div>
             )}
           </div>
@@ -831,163 +488,201 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
       ),
     },
     {
-      id: 'activity',
-      label: 'Timeline',
+      id: 'biomarkers',
+      label: 'Lab & Biomarkers',
+      icon: FlaskConical || Activity,
       content: (
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            border: '1px solid var(--border)',
-            padding: '2rem',
-          }}
-        >
-          <ClinicalTimeline patientId={patient.id} patientName={patient.name} patientCreatedAt={patient.createdAt} />
-        </div>
-      ),
-    },
-    {
-      id: 'tasks',
-      label: 'Tasks',
-      content: (
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            border: '1px solid var(--border)',
-            height: '600px',
-          }}
-        >
-          <TasksEngine entityId={patient.id} />
-        </div>
-      ),
-    },
-    {
-      id: 'communications',
-      label: 'Communications',
-      content: (
-        <div style={{ height: '600px' }}>
-          <CommunicationHub
-            entityId={patient.id}
-            entityType="patient"
-            entityName={patient.name}
-            email={patient.email}
-            phone={patient.phone}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <BiomarkersPanel 
+            patientId={patient.id} 
+            patientName={displayName} 
+            prescriptions={prescriptions || []} 
           />
         </div>
       ),
     },
     {
-      id: 'digital-twin',
-      label: 'Digital Twin',
-      content: <DigitalTwin patient={patient} />,
-    },
-    {
-      id: 'programs',
-      label: 'Programs',
+      id: 'activity',
+      label: 'Appointments & Tasks',
+      icon: CalendarIcon,
       content: (
-        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Program management view goes here.
-        </div>
-      ),
-    },
-    {
-      id: 'orders',
-      label: 'Orders',
-      content: (
-        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Commercial order history goes here.
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <PatientCalendar 
+            patient={patient} 
+            prescriptions={prescriptions || []} 
+            orders={orders || []} 
+          />
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
+              Clinical Tasks & Reminders
+            </h3>
+            <div style={{ height: '400px' }}>
+              <TasksEngine entityId={patient.id} />
+            </div>
+          </div>
         </div>
       ),
     },
   ];
 
+
   return (
     <div className={styles.workspaceContainer}>
-      {/* Header */}
+      {/* Clean Single Header */}
       <div className={styles.workspaceHeader}>
         <div className={styles.headerPatientInfo}>
           <div
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              backgroundColor: 'var(--color-bg-hover)',
-              color: 'var(--primary)',
+              width: 52,
+              height: 52,
+              borderRadius: '12px',
+              backgroundColor: 'rgba(13, 148, 136, 0.1)',
+              color: '#0d9488',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.5rem',
+              fontSize: '1.3rem',
               fontWeight: 800,
+              flexShrink: 0
             }}
           >
-            {patient.name.substring(0, 2).toUpperCase()}
+            {displayName.substring(0, 2).toUpperCase()}
           </div>
           <div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                marginBottom: '0.25rem',
-              }}
-            >
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: '1.5rem',
-                  fontWeight: 800,
-                  color: 'var(--text-main)',
-                }}
-              >
-                {patient.name}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+              <h1 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                {displayName}
               </h1>
-              <StatusChip status={patient.status} />
+              <StatusChip status={patient.status || 'active'} />
             </div>
-            <div
-              style={{
-                display: 'flex',
-                gap: '1rem',
-                fontSize: '0.85rem',
-                color: 'var(--text-muted)',
-                flexWrap: 'wrap',
-              }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <MapPin size={14} /> {patient.clinic}
+            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.82rem', color: 'var(--text-muted)', flexWrap: 'wrap', alignItems: 'center' }}>
+              {patient.phone && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Phone size={13} /> {patient.phone}
+                </span>
+              )}
+              {patient.email && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Mail size={13} /> {patient.email}
+                </span>
+              )}
+              {patient.clinic && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#0369a1', fontWeight: 600 }}>
+                  🏥 {patient.clinic}
+                </span>
+              )}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                ID: <CopyableId value={patient.id} />
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <Activity size={14} /> {patient.program}
-              </span>
-              <span>Patient ID: {patient.id}</span>
             </div>
           </div>
         </div>
+
         <div className={styles.headerActions}>
           <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open-ai-chat', { 
+                detail: { 
+                  mode: 'patient',
+                  moduleMode: 'patient',
+                  productMode: false,
+                  clearHistory: true,
+                  context: { 
+                    patientId: patient.id, 
+                    name: displayName,
+                    patientName: displayName,
+                    clinic: patient.clinic || '',
+                    physician: patient.physician || '',
+                    mode: 'patient',
+                    isPatientContext: true
+                  } 
+                } 
+              }));
+            }}
             className="gcp-btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#0d9488', color: '#0d9488' }}
+            title="Ask Patient Copilot"
           >
-            <MailOpen size={16} /> Contact
+            <Activity size={15} /> Ask Patient AI
           </button>
+
           <button
-            className="gcp-btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            onClick={() => {
+              const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
+              setWorkspaceIntent('sell', activeWorkspaceId);
+              setTargetEntity(activeWorkspaceId, {
+                id: patient.id,
+                name: displayName,
+                email: patient.email || '',
+                type: 'patient'
+              });
+              setDrawerOpen(true);
+              notifier.success(`Configured Workspace for Patient "${displayName}"!`);
+            }}
+            className="gcp-btn-secondary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}
+            title="Stage and prescribe compounds in Workspace (⌥W)"
           >
-            <ShoppingCart size={16} /> New Order
+            <Briefcase size={15} /> Stage in Workspace
           </button>
+
+          <button
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open-quotation-wizard', {
+                detail: {
+                  type: 'patient',
+                  patientId: patient.id,
+                  patientName: displayName,
+                  clinicName: patient.clinic || '',
+                  doctorName: patient.physician || ''
+                }
+              }));
+            }}
+            className="gcp-btn-secondary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            title="Create commercial quotation for this patient"
+          >
+            <FileText size={15} /> Create Quote
+          </button>
+
+          <button
+            onClick={() => {
+              openDrawer('rx-builder', 'new', {
+                initialPatient: { id: patient.id, name: displayName, email: patient.email },
+                sourceModule: 'patient-profile',
+              });
+            }}
+            className="gcp-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: '#0d9488', borderColor: '#0d9488' }}
+          >
+            <FilePlus size={15} /> New Prescription
+          </button>
+
           <button
             onClick={onClose}
+            title="Close patient chart"
             style={{
-              padding: '0.5rem',
+              padding: '0.45rem',
               background: 'none',
               border: '1px solid var(--border)',
               borderRadius: '8px',
               cursor: 'pointer',
               color: 'var(--text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#fef2f2';
+              e.currentTarget.style.color = '#ef4444';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--text-muted)';
             }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
       </div>
@@ -998,16 +693,6 @@ export default function PatientProfileWorkspace({ patient, onClose }) {
           <Tabs activeTab={activeTab} onChange={setActiveTab} tabs={tabs} />
         </div>
       </div>
-
-      {isBuilderOpen && (
-        <PrescriptionBuilder 
-          onClose={() => setIsBuilderOpen(false)}
-          onComplete={() => {
-            setIsBuilderOpen(false);
-          }}
-          patient={patient}
-        />
-      )}
     </div>
   );
 }

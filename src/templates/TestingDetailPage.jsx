@@ -1,7 +1,6 @@
 "use client";
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import React, { useMemo, useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { getSupplementWithVariants } from '../repositories/supplementRepository';
 import { trackRecentView } from '../utils/recentViews';

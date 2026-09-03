@@ -6,7 +6,7 @@ import * as fb from '../firebase';
 const db = fb?.db;
 import { useAuth } from '../context/AuthContext';
 import { Calendar, Clock, Globe, CheckCircle2, CalendarDays, ArrowRight, Info, Beaker, AlertTriangle, RefreshCw, X } from '@/lib/icons';
-
+import notifier from '../services/NotificationService';
 
 
 
@@ -69,9 +69,10 @@ export default function PatientAppointments() {
   };
 
   const handleDisconnectCalendar = () => {
-    if (!window.confirm("Disconnect Google Calendar sync?")) return;
-    setCalendarConnected(false);
-    localStorage.removeItem(`gcal_connected_patient_${uid}`);
+    notifier.confirmCritical("Disconnect Google Calendar sync?", () => {
+      setCalendarConnected(false);
+      localStorage.removeItem(`gcal_connected_patient_${uid}`);
+    });
   };
 
   const mockAppointments = [

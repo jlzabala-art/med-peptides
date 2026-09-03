@@ -1,34 +1,37 @@
 /**
- * Utility for triggering haptic feedback on mobile devices.
- * Supports different patterns based on vibration API.
+ * Haptic Feedback & Touch Micro-Interactions Utility
+ * Uses navigator.vibrate where available with silent graceful fallback.
  */
-export const triggerHaptic = (type = 'light') => {
-  if (typeof window === 'undefined' || !window.navigator || !window.navigator.vibrate) {
-    return; // Haptics not supported or disabled
+
+export function triggerHaptic(type = 'light') {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined' || !navigator.vibrate) {
+    return;
   }
 
   try {
     switch (type) {
       case 'light':
-        window.navigator.vibrate(10);
+      case 'tap':
+        navigator.vibrate(10); // 10ms subtle tick
         break;
       case 'medium':
-        window.navigator.vibrate(20);
-        break;
-      case 'heavy':
-        window.navigator.vibrate(30);
+      case 'select':
+        navigator.vibrate(20); // 20ms click feel
         break;
       case 'success':
-        window.navigator.vibrate([10, 30, 20]);
+      case 'copy':
+        navigator.vibrate([15, 40, 15]); // double pulse
+        break;
+      case 'warning':
+        navigator.vibrate([30, 50, 30]);
         break;
       case 'error':
-        window.navigator.vibrate([20, 40, 20, 40, 30]);
+        navigator.vibrate([50, 60, 50, 60, 50]);
         break;
       default:
-        window.navigator.vibrate(15);
+        navigator.vibrate(15);
     }
-  } catch (error) {
-    // Ignore errors for permissions/hardware absence
-    console.warn('Haptics failed', error);
+  } catch {
+    // Non-critical, ignore if permissions/device do not support
   }
-};
+}

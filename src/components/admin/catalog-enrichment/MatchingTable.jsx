@@ -4,7 +4,7 @@ import { CheckCircle, HelpCircle, Loader2 } from '@/lib/icons';
 import DataTable from '../../ui/DataTable';
 import DataTableSkeleton from '../../ui/skeletons/DataTableSkeleton';
 import EmptyState from '../../ui/EmptyState';
-import StatusBadge from '../../ui/StatusBadge';
+import StatusChip from '../../ui/StatusChip';
 
 export default function MatchingTable({ auditResults, loading, onRowClick }) {
   const getConfidenceColor = (conf) => {
@@ -34,7 +34,7 @@ export default function MatchingTable({ auditResults, loading, onRowClick }) {
       align: 'center',
       sortValue: (r) => r.confidence,
       render: (r) => r.confidence > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
           <span style={{ fontWeight: 700, color: getConfidenceColor(r.confidence) }}>{r.confidence}%</span>
           <div style={{ width: '60px', height: '4px', backgroundColor: 'var(--border)', borderRadius: '2px' }}>
             <div style={{ width: `${r.confidence}%`, height: '100%', backgroundColor: getConfidenceColor(r.confidence), borderRadius: '2px' }} />
@@ -61,14 +61,14 @@ export default function MatchingTable({ auditResults, loading, onRowClick }) {
       header: 'Zoho Status',
       render: (r) => {
         const statusMap = { Ready: 'active', 'Needs Review': 'pending', Error: 'error', 'Missing in DB': 'error' };
-        return <StatusBadge status={statusMap[r.zohoStatus] || 'inactive'} label={r.zohoStatus || 'Unknown'} />;
+        return <StatusChip status={statusMap[r.zohoStatus] || 'inactive'} label={r.zohoStatus || 'Unknown'} />;
       }
     },
     {
       key: '_action',
       header: 'Action',
       render: (r) => r.confidence >= 90 ? (
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-success)', fontSize: '0.8rem', fontWeight: 600 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-success)', fontSize: '0.8rem', fontWeight: 600 }}>
           <CheckCircle size={14} /> Synced
         </span>
       ) : r.confidence > 0 ? (

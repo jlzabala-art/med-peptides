@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Tabs, Toggle, TextField, StatusChip } from '../ui';
+import { Tabs, Toggle, TextField, StatusChip, CopyableId } from '../ui';
 import X from "lucide-react/dist/esm/icons/x";
 import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import Map from "lucide-react/dist/esm/icons/map";
@@ -88,25 +88,37 @@ export default function AccountManagerDrawer({ manager, wholesellers, onUpdate, 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="#16a34a" /> <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>Dubai</span>
                 </div>
-                <StatusChip status="active" label="Covered" />
+                <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <StatusChip status="active" />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Covered</span>
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="#16a34a" /> <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>Abu Dhabi</span>
                 </div>
-                <StatusChip status="active" label="Covered" />
+                <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <StatusChip status="active" />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Covered</span>
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <AlertCircle size={16} color="#d97706" /> <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>Sharjah</span>
                 </div>
-                <StatusChip status="warning" label="Unassigned" />
+                <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <StatusChip status="pending" />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Unassigned</span>
+                </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <CheckCircle2 size={16} color="#16a34a" /> <span style={{ fontWeight: 500, fontSize: '0.9rem' }}>Northern Emirates</span>
                 </div>
-                <StatusChip status="active" label="Covered" />
+                <span style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <StatusChip status="active" />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Covered</span>
+                </span>
               </div>
             </div>
             <button className="btn btn-outline" style={{ width: '100%', marginTop: '1rem' }}>Manage Territories</button>

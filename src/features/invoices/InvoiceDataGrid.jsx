@@ -13,8 +13,8 @@ import { CloudLightning, Phone, MessageSquare, ExternalLink } from '@/lib/icons'
 export default function InvoiceDataGrid({ invoices, onSelect, selectedInvoice }) {
   const getStatusColor = (status) => {
     switch(status) {
-      case 'Paid': return { bg: '#dcfce7', text: '#166534' };
-      case 'Overdue': return { bg: '#fef2f2', text: '#b91c1c' };
+      case 'completed': return { bg: '#dcfce7', text: '#166534' };
+      case 'error': return { bg: '#fef2f2', text: '#b91c1c' };
       case 'Partially Paid': return { bg: '#fef3c7', text: '#854d0e' };
       case 'Sent': return { bg: '#eff6ff', text: '#1d4ed8' };
       default: return { bg: '#f1f5f9', text: '#475569' }; // Draft

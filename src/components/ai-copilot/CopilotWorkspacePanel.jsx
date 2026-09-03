@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -11,18 +11,12 @@ import { useCatalogStore } from '../../store/useCatalogStore';
 import { usePatientStore } from '../../store/usePatientStore';
 import { useOrderStore } from '../../store/useOrderStore';
 import { useLeadStore } from '../../store/useLeadStore';
-
-import { X, Command, Activity, HeartPulse, Target, Briefcase, User, MessageSquare, Mic, ChevronRight, AlertTriangle, CheckCircle2, Zap, DollarSign, Package, ChevronDown, Clock, BrainCircuit, ShieldAlert, ArrowRight, ActivitySquare } from '@/lib/icons';
+import { useAtlasChat } from '../../hooks/useAtlasChat';
+import { Mic, Send, Zap, Command, X, Search, FileText, BrainCircuit, Users, Stethoscope, Briefcase, Pill, Target, ActivitySquare } from 'lucide-react';
+import StatusChip from '../ui/StatusChip';
+import GenUIRenderer from './GenUIRenderer';
 
 // Subcomponents moved OUTSIDE the main render to satisfy React Hooks ESLint rules.
-
-const StatusBadge = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fef2f2', padding: '4px 10px', borderRadius: '12px', border: '1px solid #fecaca' }}>
-    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }} />
-    <span style={{ fontSize: '11px', fontWeight: 700, color: '#b91c1c', textTransform: 'uppercase' }}>Critical</span>
-  </div>
-);
-
 const TimelineItem = ({ time, text }) => (
   <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
     <div style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8', width: '40px' }}>{time}</div>
@@ -36,135 +30,70 @@ const AlertChip = ({ alert, onClick }) => (
   </div>
 );
 
-// Motor de Contexto
-function generateAtlasContext(role, screen, record) {
-  // Base default context for each role
-  const baseContexts = {
-    ceo: {
-      recommendation: {
-        what: 'Revenue increased 18%. Magenta represents 22% of monthly revenue.',
-        why: 'High customer concentration introduces strategic risk.',
-        action: 'Review customer concentration & diversify pipeline.',
-        impact: 'Risk mitigation across AED 1.2M MRR',
-        timeSaved: '4 hours of analyst work',
-        buttons: ['Review Account', 'Review Risk', 'Schedule Meeting']
-      },
-      whyThinks: ['Revenue concentration > 20% triggers strategic review.', 'Historical churn of Top 5 clients impact is severe.', 'Confidence 94%'],
-      alerts: [{ id: 1, icon: '⚠', label: '2 Strategic Risks Detected', bg: '#fef2f2', color: '#b91c1c', border: '#fecaca', details: ['Magenta dependency', 'Lotusland supply chain'] }],
-      memory: ['Pending strategic meeting: Fagron', 'Last CEO review: 2 days ago'],
-      feed: [{ time: '09:00', text: 'Executive brief compiled' }],
-      timeline: [{ time: '09:00', text: 'Quarterly review started' }, { time: '11:30', text: 'Magenta revenue flagged' }],
-      suggestedQuestions: ['Review Magenta account', 'Analyze growth constraints', 'Show revenue by region']
+function generateAtlasContext(role, pathname, record) {
+  const { storeData } = record || {};
+  const data = {
+    recommendation: {
+      what: 'No immediate action required.',
+      why: 'All systems operational and KPIs are within normal ranges.',
+      action: 'Explore dashboard or ask me anything.',
+      impact: 'Maintain current velocity',
+      timeSaved: '0 hrs',
+      buttons: ['Review Metrics', 'Ask Atlas', 'Dismiss']
     },
-    operations: {
-      recommendation: {
-        what: '3 supplier bills pending, 2 shipments delayed.',
-        why: 'AED 120,000 blocked in procurement. Delays affect inventory buffers.',
-        action: 'Approve supplier bills to release holds.',
-        impact: '+AED 120k liquidity freed',
-        timeSaved: '45 mins of manual reconciliation',
-        buttons: ['Approve', 'Review Shipment', 'Assign']
-      },
-      whyThinks: ['Supplier Lotusland requires upfront payment.', 'Shipment #8922 is stuck at customs.', 'Confidence 98%'],
-      alerts: [{ id: 1, icon: '📦', label: '2 Shipments Delayed', bg: '#fffbeb', color: '#b45309', border: '#fde68a', details: ['Shipment #8922 (HK)', 'Shipment #8923 (EU)'] }],
-      memory: ['Magenta Batch 2 awaiting HK arrival', 'Critical supplier: Lotusland'],
-      feed: [{ time: '08:15', text: 'Customs alert received' }],
-      timeline: [{ time: '08:15', text: 'Shipment delayed at HK' }, { time: '10:00', text: 'Supplier bill #441 pending' }],
-      suggestedQuestions: ['Analyze peptide inventory', 'Show shipment risks', 'Open supplier approvals']
-    },
-    medical: {
-      recommendation: {
-        what: '2 peptide formulations require review. 1 protocol pending.',
-        why: 'Clinical trials cannot proceed without QA sign-off.',
-        action: 'Review protocol package for BPC-157.',
-        impact: 'Unblocks 3 clinical trial enrollments',
-        timeSaved: '2 days of regulatory delay',
-        buttons: ['Review', 'Approve', 'Assign']
-      },
-      whyThinks: ['BPC-157 protocol lacks secondary safety signature.', 'Confidence 99%'],
-      alerts: [{ id: 1, icon: '⚕️', label: '4 Safety Documents Pending', bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', details: ['BPC-157 Safety Profile', 'TB-500 Tox Report'] }],
-      memory: ['BPC-157 protocol updated 2 days ago', 'Dr. Smith requested review'],
-      feed: [{ time: '07:30', text: 'Protocol draft submitted' }],
-      timeline: [{ time: '09:00', text: 'Formulation 1A tested' }, { time: '11:15', text: 'Protocol review requested' }],
-      suggestedQuestions: ['Review clinical trials', 'Check interactions BPC-157', 'Validate safety profiles']
-    },
-    commercial: {
-      recommendation: {
-        what: '5 RFQs require response. 3 quotations expire this week.',
-        why: 'Potential revenue of AED 340,000 at risk of expiration.',
-        action: 'Follow up on high-value quotations immediately.',
-        impact: 'AED 340,000 Pipeline secured',
-        timeSaved: '1.5 hrs of CRM tracking',
-        buttons: ['Open RFQs', 'Review Quotations', 'Assign']
-      },
-      whyThinks: ['Quotation #102 for Magenta expires in 48h.', 'Historical win rate for this segment is 68%.', 'Confidence 85%'],
-      alerts: [{ id: 1, icon: '💰', label: '3 Expiring Quotations', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', details: ['Quote #102 - Magenta', 'Quote #104 - Fagron'] }],
-      memory: ['Magenta expressed interest in Bulk BPC-157', 'Target margin: 42%'],
-      feed: [{ time: '10:10', text: 'Client opened quotation #102' }],
-      timeline: [{ time: '08:00', text: 'New RFQ received' }, { time: '10:10', text: 'Client opened Quote #102' }],
-      suggestedQuestions: ['Review delayed quotations', 'Analyze pipeline velocity', 'Show top leads']
-    },
-    executive: {
-      recommendation: {
-        what: 'Revenue up 18%. Ops delays may affect 2 strategic clients.',
-        why: 'Cross-functional bottleneck: Sales promised delivery, Ops is delayed.',
-        action: 'Resolve logistics bottleneck & alert clients.',
-        impact: 'Prevents churn of Top 5 clients',
-        timeSaved: '3 hrs of crisis management',
-        buttons: ['View Analysis', 'Schedule Review', 'Assign']
-      },
-      whyThinks: ['Magenta (Top 5) is expecting Delivery #8922.', 'Delivery #8922 is delayed at HK.', 'Confidence 92%'],
-      alerts: [{ id: 1, icon: '📊', label: '1 Cross-functional Bottleneck', bg: '#fef2f2', color: '#b91c1c', border: '#fecaca', details: ['Sales/Ops misalignment on HK batch'] }],
-      memory: ['Strategic goal: 99% SLA compliance', 'Magenta SLA is currently 96%'],
-      feed: [{ time: '09:00', text: 'Executive dashboard compiled' }],
-      timeline: [{ time: '09:00', text: 'SLA alert triggered' }, { time: '12:00', text: 'Cross-functional review suggested' }],
-      suggestedQuestions: ['Show SLA compliance', 'Analyze cross-functional risks', 'Review Magenta SLA']
-    },
-    finance: {
-      recommendation: {
-        what: 'Outstanding receivables: AED 320,000. 3 bills overdue.',
-        why: 'Receivables gap threatens 30-day liquidity buffer.',
-        action: 'Collect Magenta payment & hold supplier bills.',
-        impact: '+AED 320k cash flow restored',
-        timeSaved: '2 hrs of dunning',
-        buttons: ['Review Receivables', 'Send Reminder', 'Hold Bills']
-      },
-      whyThinks: ['Magenta invoice #992 is 15 days overdue.', 'Cash flow forecast requires minimum AED 500k.', 'Confidence 96%'],
-      alerts: [{ id: 1, icon: '💵', label: 'AED 320k Overdue', bg: '#fef2f2', color: '#b91c1c', border: '#fecaca', details: ['Magenta: AED 250k', 'Other: AED 70k'] }],
-      memory: ['Pending payment: USD 26,281 (Magenta)', 'Liquidity buffer target: AED 500k'],
-      feed: [{ time: '11:00', text: 'Bank reconciliation failed for 2 txs' }],
-      timeline: [{ time: '08:00', text: 'Daily cash sweep completed' }, { time: '11:00', text: 'AR aging report generated' }],
-      suggestedQuestions: ['Show pending payments', 'Explain cash flow forecast', 'Review AR aging']
-    }
+    whyThinks: ['No critical alerts detected in the current module.'],
+    alerts: [],
+    memory: [],
+    feed: [],
+    timeline: [],
+    suggestedQuestions: ['What are my top priorities today?', 'Summarize recent activity']
   };
 
-  const currentContext = baseContexts[role] || baseContexts['ceo'];
+  if (!storeData) return data;
 
-  // Override logic based on context (screen/record)
-  // Dynamic Override based on actual Store Data
-  const { storeData } = record || {};
-  if (storeData) {
-    if (storeData.pendingOrders > 0 && role === 'operations') {
-      currentContext.recommendation.what = `${storeData.pendingOrders} orders are currently pending review.`;
-      currentContext.recommendation.action = 'Review and approve pending orders to maintain SLA.';
-      currentContext.recommendation.impact = 'Prevents delivery delays';
-      currentContext.alerts = [{ id: 1, icon: '📦', label: `${storeData.pendingOrders} Pending Orders`, bg: '#fffbeb', color: '#b45309', border: '#fde68a', details: ['Action required'] }];
-    }
-    if (storeData.activeLeads > 0 && role === 'commercial') {
-      currentContext.recommendation.what = `${storeData.activeLeads} active leads require follow-up.`;
-      currentContext.recommendation.action = 'Engage with top priority leads in your pipeline.';
-      currentContext.alerts = [{ id: 1, icon: '💰', label: `${storeData.activeLeads} Active Leads`, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', details: ['High priority'] }];
-    }
+  // Context-aware logic based on active module and role
+  const isOrders = pathname?.includes('/orders');
+  const isPatients = pathname?.includes('/patients');
+  const isLeads = pathname?.includes('/leads');
+
+  if (isOrders || (storeData.pendingOrders > 0 && role === 'operations')) {
+    data.recommendation.what = `${storeData.pendingOrders} orders are currently pending review.`;
+    data.recommendation.why = 'Pending orders directly impact SLA and customer satisfaction.';
+    data.recommendation.action = 'Review and approve pending orders to maintain SLA.';
+    data.recommendation.impact = 'Prevents delivery delays';
+    data.alerts = [{ id: 1, icon: '📦', label: `${storeData.pendingOrders} Pending Orders`, bg: '#fffbeb', color: '#b45309', border: '#fde68a', details: ['Action required'] }];
+    data.whyThinks = ['SLA drops below 98% if orders remain pending for >24h.'];
+    data.suggestedQuestions = ['Show pending orders', 'Approve all orders'];
+  } else if (isLeads || (storeData.activeLeads > 0 && role === 'commercial')) {
+    data.recommendation.what = `${storeData.activeLeads} active leads require follow-up.`;
+    data.recommendation.why = 'Lead conversion drops significantly after 48h of inactivity.';
+    data.recommendation.action = 'Engage with top priority leads in your pipeline.';
+    data.recommendation.impact = 'Increases conversion rate';
+    data.alerts = [{ id: 1, icon: '💰', label: `${storeData.activeLeads} Active Leads`, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', details: ['High priority'] }];
+    data.suggestedQuestions = ['Who should I call next?', 'Summarize new leads'];
+  } else if (isPatients && role === 'medical') {
+    data.recommendation.what = `You have ${storeData.totalPatients} active patients.`;
+    data.recommendation.why = 'Regular monitoring ensures better clinical outcomes.';
+    data.recommendation.action = 'Review patients with recent lab results.';
+    data.recommendation.impact = 'Improved patient care';
+    data.alerts = [];
+    data.suggestedQuestions = ['Which patients need protocol adjustments?', 'Analyze recent blood tests'];
+  } else if (role === 'ceo' || role === 'executive') {
+    data.recommendation.what = `Platform Overview: ${storeData.totalOrders} Orders, ${storeData.activeLeads} Active Leads.`;
+    data.recommendation.why = 'High-level metrics indicate stable growth but operations may need attention.';
+    data.recommendation.action = 'Review order fulfillment metrics.';
+    data.alerts = storeData.pendingOrders > 0 ? [{ id: 1, icon: '⚠', label: `${storeData.pendingOrders} Ops Delays`, bg: '#fef2f2', color: '#b91c1c', border: '#fecaca', details: ['Fulfillment bottleneck'] }] : [];
   }
 
-  return currentContext;
+  return data;
 }
 
 export default function CopilotWorkspacePanel() {
-  const { isOpen, closeCopilot, contextData, mode, setMode } = useCopilot();
+  const { isOpen, closeCopilot, openCopilot, contextData, mode, setMode, isPinned, setIsPinned } = useCopilot();
   const [query, setQuery] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { messages: chatMessages, sendMessage, isProcessing } = useAtlasChat();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Inject real context from Zustand Stores
   const { products } = useCatalogStore();
@@ -172,9 +101,10 @@ export default function CopilotWorkspacePanel() {
   const { orders } = useOrderStore();
   const { leads } = useLeadStore();
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -205,45 +135,65 @@ export default function CopilotWorkspacePanel() {
         activeLeads: leads?.filter(l => l.status === 'new' || l.status === 'contacted')?.length || 0
       }
     };
-
+  // Listen for Ask Atlas events from anywhere (e.g. DataTable)
+  useEffect(() => {
+    const handleAtlasQuery = (e) => {
+      const { query: q, record } = e.detail;
+      if (!isOpen && openCopilot) {
+        openCopilot();
+      }
+      setQuery(q);
+      // Wait for states to update, then execute
+      setTimeout(() => {
+        const fakeBtn = document.getElementById('atlas-execute-btn');
+        if (fakeBtn) fakeBtn.click();
+      }, 100);
+    };
+    window.addEventListener('ATLAS_PREFILL_QUERY', handleAtlasQuery);
+    return () => window.removeEventListener('ATLAS_PREFILL_QUERY', handleAtlasQuery);
+  }, [isOpen]);
   // Generate Data from Engine with dynamic storeData
-  const data = generateAtlasContext(mode, contextData?.screen, { ...contextData?.record, storeData: richContext.storeData });
+  const data = generateAtlasContext(mode, pathname, { ...contextData?.record, storeData: richContext.storeData });
 
   const handleExecute = async (overrideQuery) => {
     const text = overrideQuery || query;
     if (!text.trim()) return;
-    setIsProcessing(true);
-
-    const toastId = toast.loading('Atlas AI processing command...', { icon: '⚡' });
-    try {
-      await askCatalogAssistant({ message: text, catalogContext: richContext, history: [] });
-      toast.success('Command Executed', { id: toastId });
-      setQuery('');
-    } catch (e) {
-      toast.error('Execution failed', { id: toastId });
-    } finally {
-      setIsProcessing(false);
-    }
+    
+    setQuery('');
+    
+    // Using new real chat logic
+    await sendMessage(text, contextData?.record);
   };
 
   const handleActionClick = (actionName) => {
-    toast.success(`Action Triggered: ${actionName}`);
+    if (actionName === 'Review Metrics') {
+        router.push('/admin/analytics');
+    } else {
+        toast.success(`Action Triggered: ${actionName}`);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15 }}
         style={{
-          position: 'fixed', inset: 0, zIndex: 99999,
+          position: isPinned ? 'fixed' : 'fixed',
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: isPinned ? 'auto' : 0,
+          width: isPinned ? '400px' : '100%',
+          zIndex: isPinned ? 90 : 99999, // Lower z-index if pinned so topbar is clickable if we want, but actually 90 is above main layout
           backgroundColor: '#f8fafc',
           display: 'flex', flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: isPinned ? '-4px 0 20px rgba(0,0,0,0.05)' : 'none',
+          borderLeft: isPinned ? '1px solid #e2e8f0' : 'none',
         }}
       >
         {/* HEADER */}
@@ -258,7 +208,14 @@ export default function CopilotWorkspacePanel() {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <StatusBadge />
+            {!isPinned && <StatusChip />}
+            <button 
+              onClick={() => setIsPinned(!isPinned)} 
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: isPinned ? '#0f172a' : '#64748b', padding: 0 }}
+              title={isPinned ? "Unpin Panel" : "Pin to Side"}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+            </button>
             <button onClick={closeCopilot} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 0 }}>
               <X size={20} />
             </button>
@@ -287,10 +244,11 @@ export default function CopilotWorkspacePanel() {
         </div>
 
         {/* WORKSPACE CONTENT */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'row', overflowY: isMobile ? 'auto' : 'hidden', overflowX: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: isMobile || isPinned ? 'column' : 'row', overflowY: isMobile || isPinned ? 'auto' : 'hidden', overflowX: 'hidden' }}>
           
-          {/* LEFT: MAIN WORKSPACE */}
-          <div style={{ width: isMobile ? '100%' : '70%', height: isMobile ? 'auto' : '100%', overflowY: isMobile ? 'visible' : 'auto', background: '#f8fafc', padding: isMobile ? '16px' : '32px', display: 'flex', flexDirection: 'column', gap: '24px', flexShrink: 0 }}>
+          {/* LEFT: MAIN WORKSPACE (Hidden if Pinned) */}
+          {!isPinned && (
+            <div style={{ width: isMobile ? '100%' : '70%', height: isMobile ? 'auto' : '100%', overflowY: isMobile ? 'visible' : 'auto', background: '#f8fafc', padding: isMobile ? '16px' : '32px', display: 'flex', flexDirection: 'column', gap: '24px', flexShrink: 0 }}>
             
             {/* Top Recommendation Block */}
             <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: isMobile ? '20px' : '32px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -383,9 +341,10 @@ export default function CopilotWorkspacePanel() {
               </div>
             )}
           </div>
+          )}
 
           {/* RIGHT: CONTEXT PANEL */}
-          <div style={{ width: isMobile ? '100%' : '30%', height: isMobile ? 'auto' : '100%', borderLeft: isMobile ? 'none' : '1px solid #e2e8f0', background: isMobile ? '#f8fafc' : '#fff', display: 'flex', flexDirection: 'column', padding: '0', overflowY: isMobile ? 'visible' : 'auto', flexShrink: 0 }}>
+          <div style={{ width: isMobile || isPinned ? '100%' : '30%', height: isMobile ? 'auto' : '100%', borderLeft: isMobile || isPinned ? 'none' : '1px solid #e2e8f0', background: isMobile ? '#f8fafc' : '#fff', display: 'flex', flexDirection: 'column', padding: '0', overflowY: isMobile ? 'visible' : 'auto', flexShrink: 0 }}>
             
             {/* Desktop: Render components normally. Mobile: Render as accordions or stack */}
             <div style={{ padding: isMobile ? '0 16px 16px' : '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -460,6 +419,44 @@ export default function CopilotWorkspacePanel() {
                 )}
               </div>
 
+              {/* Chat History */}
+              {chatMessages.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '16px', flex: 1 }}>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Conversation</div>
+                  {chatMessages.map(msg => (
+                    <div key={msg.id} style={{ display: 'flex', gap: '12px', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                      {msg.role === 'atlas' && (
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Zap size={14} color="#fff" />
+                        </div>
+                      )}
+                      <div style={{ 
+                        background: msg.role === 'user' ? '#e2e8f0' : '#f8fafc', 
+                        padding: '12px 16px', 
+                        borderRadius: '12px', 
+                        border: msg.role === 'atlas' ? '1px solid #e2e8f0' : 'none',
+                        color: '#0f172a',
+                        fontSize: '14px',
+                        maxWidth: '85%',
+                        lineHeight: 1.5
+                      }}>
+                        <GenUIRenderer text={msg.text} />
+                      </div>
+                    </div>
+                  ))}
+                  {isProcessing && (
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-start' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Zap size={14} color="#fff" />
+                      </div>
+                      <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0', color: '#64748b', fontSize: '14px' }}>
+                        Thinking...
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
           </div>
         </div>
@@ -480,12 +477,11 @@ export default function CopilotWorkspacePanel() {
           <button style={{ width: 40, height: 40, borderRadius: '50%', background: '#f1f5f9', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', cursor: 'pointer', flexShrink: 0 }}>
             <Mic size={18} />
           </button>
-          <button onClick={() => handleExecute()} style={{ width: 40, height: 40, borderRadius: '50%', background: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', flexShrink: 0 }}>
+          <button id="atlas-execute-btn" onClick={() => handleExecute()} style={{ width: 40, height: 40, borderRadius: '50%', background: '#0f172a', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', flexShrink: 0 }}>
             <Zap size={18} />
           </button>
         </div>
 
       </motion.div>
-    </AnimatePresence>
-  );
+    );
 }

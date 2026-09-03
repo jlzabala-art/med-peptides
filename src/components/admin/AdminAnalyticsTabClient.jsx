@@ -553,11 +553,11 @@ function TopList({ icon: Icon, title, items, emptyLabel, accentColor = 'var(--se
 }
 
 /* ── Main Component ──────────────────────────────────────────── */
-export default function AdminAnalyticsTabClient({ isSubTab }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function AdminAnalyticsTabClient({ isSubTab, initialData }) {
+  const [data, setData] = useState(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState(null);
-  const [lastRefresh, setLastRefresh] = useState(null);
+  const [lastRefresh, setLastRefresh] = useState(initialData ? new Date() : null);
   const [days, setDays] = useState(7);
   const abortRef = useRef(null);
 
@@ -761,7 +761,7 @@ export default function AdminAnalyticsTabClient({ isSubTab }) {
 
 
       {/* ── Metric Cards Grid ── */}
-      <div className="metrics-grid">
+      <div className="kpi-scroll-row" style={{ marginBottom: '1.5rem' }}>
         <MetricCard
           icon={Users}
           iconBg="rgba(59,130,246,0.1)"
@@ -775,20 +775,6 @@ export default function AdminAnalyticsTabClient({ isSubTab }) {
           iconColor="var(--secondary)"
           label="Protocol Views"
           value={metrics.protocolViews}
-        />
-        <MetricCard
-          icon={FlaskConical}
-          iconBg="rgba(139,92,246,0.1)"
-          iconColor="#8b5cf6"
-          label="Peptide Analysis"
-          value={metrics.peptideViews}
-        />
-        <MetricCard
-          icon={ShoppingCart}
-          iconBg="rgba(245,158,11,0.1)"
-          iconColor="#f59e0b"
-          label="Cart Interest"
-          value={metrics.addToCart}
         />
         <MetricCard
           icon={TrendingUp}

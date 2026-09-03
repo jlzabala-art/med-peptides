@@ -56,10 +56,14 @@
 @import './legal.css';
 
 /* 12. Mobile overrides (must be last so specificity wins on small screens) */
-@import './mobile.css';
+/* @import './mobile.css'; — moved to bottom */
 
 /* 13. Admin Terminal styles */
 @import './admin.css';
+
+/* 14. Mobile overrides — mobile.css LAST for maximum specificity */
+@import './mobile.css';
+/* responsive-admin.css is imported in src/index.css directly */
 
 /* ============================================================
    GLOBAL PAGE SHELL PRIMITIVES

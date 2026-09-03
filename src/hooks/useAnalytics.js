@@ -246,3 +246,5 @@ export function useAnalytics() {
     setAnalyticsUserRole,
   };
 }
+
+export default useAnalytics;

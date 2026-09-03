@@ -10,6 +10,7 @@ import { resolveCatalogContact } from '../utils/contactRouter';
 import UniversalProductCard from '../components/universal/UniversalProductCard';
 import { Search, MessageSquare, Send, X, Phone, Mail, ChevronDown, HelpCircle, Shield, Check, ExternalLink, FileText } from '@/lib/icons';
 import { useCart } from '../context/CartProvider';
+import { toast } from 'react-hot-toast';
 
 
 
@@ -183,7 +184,7 @@ export default function PublicCatalogView() {
       setLeadPhone('');
       setLeadMessage('');
     } catch (err) {
-      alert(`Error submitting request: ${err.message}`);
+      toast.error(`Error submitting request: ${err.message}`);
     } finally {
       setLeadSubmitting(false);
     }
@@ -376,7 +377,12 @@ export default function PublicCatalogView() {
                   const activeTemplate = catalog.pdfTemplate || catalog.publishOptions?.pdfTemplate || 'standard';
                   const pName = prod.displayName || prod.name || '—';
                   const showPrices = catalog.pricingVisible ?? true;
-                  const priceVal = prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD;
+                  const priceVal =
+                    prod.defaultVariant?.pricing?.retail?.kit ??
+                    prod.defaultVariant?.pricing?.retail?.perUnit ??
+                    prod.defaultVariant?.pricing?.retailPrice?.base?.kitUSD ??
+                    prod.defaultVariant?.retailPrice ??
+                    prod.price;
                   const formattedPrice = priceVal
                     ? `$${(priceVal * (1 + (catalog.pricingMargin || 0) / 100)).toFixed(2)}`
                     : 'Request Pricing';

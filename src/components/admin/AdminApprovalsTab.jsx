@@ -10,9 +10,10 @@ import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/f
 import { db } from '../../firebase';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
 import DataTable from '../ui/DataTable';
+import AppActionGroup from '../ui/AppActionGroup';
 import { Card } from '../ui/Card';
 import toast from 'react-hot-toast';
 import notifier from '../../services/NotificationService';
@@ -82,21 +83,35 @@ export default function AdminApprovalsTab({ isSubTab }) {
     });
   };
 
-  const handleReject = async (id, type) => {
-    const reason = window.prompt('Motivo del rechazo:');
-    if (!reason) return;
-    try {
-      const collectionName = type === 'Purchase Order' ? 'purchaseOrders' : 'purchaseBills';
-      const rejectedStatus = type === 'Purchase Order' ? 'closed' : 'void';
-      await updateDoc(doc(db, collectionName, id), { 
-        rejectReason: reason,
-        status: rejectedStatus
-      });
-      toast.success('Documento rechazado.');
-    } catch (e) {
-      console.error(e);
-      toast.error('Error al rechazar');
-    }
+  const handleReject = (id, type) => {
+    let reason = '';
+    notifier.confirmCritical(
+      <div>
+        <p style={{ marginBottom: '0.5rem', fontWeight: 500 }}>Rejection reason:</p>
+        <textarea
+          autoFocus
+          rows={3}
+          style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.9rem', resize: 'vertical' }}
+          placeholder="Enter rejection reason…"
+          onChange={(e) => { reason = e.target.value; }}
+        />
+      </div>,
+      async () => {
+        if (!reason.trim()) { toast.error('Please enter a rejection reason.'); return; }
+        try {
+          const collectionName = type === 'Purchase Order' ? 'purchaseOrders' : 'purchaseBills';
+          const rejectedStatus = type === 'Purchase Order' ? 'closed' : 'void';
+          await updateDoc(doc(db, collectionName, id), {
+            rejectReason: reason.trim(),
+            status: rejectedStatus
+          });
+          toast.success('Documento rechazado.');
+        } catch (e) {
+          console.error(e);
+          toast.error('Error al rechazar');
+        }
+      }
+    );
   };
 
   const handleRunAiAudit = async (billId, poId) => {
@@ -148,7 +163,7 @@ export default function AdminApprovalsTab({ isSubTab }) {
     {
       key: 'docType',
       header: 'Tipo',
-      render: (r) => <StatusBadge status={r.docType === 'Purchase Order' ? 'po_created' : 'pending'} label={r.docType} />
+      render: (r) => <StatusChip status={r.docType === 'Purchase Order' ? 'po_created' : 'pending'} label={r.docType} />
     },
     {
       key: 'supplierName',
@@ -178,28 +193,34 @@ export default function AdminApprovalsTab({ isSubTab }) {
     },
     {
       key: 'actions',
-      header: 'Acciones',
+      header: 'Actions',
       align: 'right',
-      render: (r) => (
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-          {r.docType === 'Bill' && r.linkedPoId && (
-            <button 
-              onClick={() => handleRunAiAudit(r.id, r.linkedPoId)} 
-              disabled={runningAiId === r.id}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.3rem 0.6rem', border: '1px solid #6366f1', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-            >
-              {runningAiId === r.id ? <Loader2 size={14} className="spin" /> : <Bot size={14} />} 
-              Auditar
-            </button>
-          )}
-          <button onClick={() => handleApprove(r.id, r.docType)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.3rem 0.6rem', border: 'none', background: '#16a34a', color: 'white', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
-            <CheckCircle size={14} /> Aprobar
-          </button>
-          <button onClick={() => handleReject(r.id, r.docType)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.3rem 0.6rem', border: '1px solid #ef4444', background: '#fff', color: '#ef4444', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
-            <XCircle size={14} /> Rechazar
-          </button>
-        </div>
-      )
+      render: (r) => {
+        const actions = [];
+        if (r.docType === 'Bill' && r.linkedPoId) {
+          actions.push({
+            type: 'audit_ai',
+            onClick: () => handleRunAiAudit(r.id, r.linkedPoId)
+          });
+        }
+        actions.push({
+          type: 'approve',
+          onClick: () => handleApprove(r.id, r.docType)
+        });
+        actions.push({
+          type: 'reject',
+          onClick: () => handleReject(r.id, r.docType)
+        });
+        return (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+            {runningAiId === r.id ? (
+              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Auditing...</span>
+            ) : (
+              <AppActionGroup actions={actions} />
+            )}
+          </div>
+        );
+      }
     }
   ];
 
@@ -218,7 +239,7 @@ export default function AdminApprovalsTab({ isSubTab }) {
         <GlobalSearchBar
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Buscar por proveedor, número de documento..."
+          placeholder="Search by supplier, document number..."
           resultCount={loading ? undefined : filteredDocs.length}
           namespace="admin-approvals"
           size="lg"

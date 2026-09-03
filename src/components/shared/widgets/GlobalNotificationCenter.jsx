@@ -8,6 +8,8 @@ import Database from "lucide-react/dist/esm/icons/database";
 import X from "lucide-react/dist/esm/icons/x";
 import Settings from "lucide-react/dist/esm/icons/settings";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
+import EmptyState from '../../ui/EmptyState';
 import React, { useState, useRef, useEffect } from 'react';
 
 
@@ -154,11 +156,12 @@ export default function GlobalNotificationCenter() {
           {/* List */}
           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {notifications.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
-                <CheckCircle2 size={32} color="#10b981" style={{ margin: '0 auto 8px auto' }} />
-                <p style={{ margin: 0, fontWeight: 500 }}>All caught up!</p>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>No pending actions required.</p>
-              </div>
+              <EmptyState
+                icon={CheckCircle2}
+                title="All caught up!"
+                subtitle="No pending actions required."
+                compact={true}
+              />
             ) : (
               notifications.map((notif) => {
                 const Icon = notif.icon;

@@ -1,27 +1,29 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { Plus, UserPlus, Stethoscope, ClipboardList, FileText, HeartPulse, Receipt, ShoppingBag, CheckCircle, CheckSquare, Users, Building, ActivitySquare, Factory, Database, Truck, Navigation, CreditCard, ShieldCheck, MessageSquare, Package } from '@/lib/icons';
+import { useDrawer } from '../../../context/DrawerContext';
 
 const QUICK_CREATE_MAP = {
   admin: [
     { label: 'New Patient', icon: UserPlus, action: 'new-patient' },
     { label: 'New Doctor', icon: Stethoscope, action: 'new-doctor' },
     { label: 'New Protocol', icon: ClipboardList, action: 'new-protocol' },
-    { label: 'New Prescription', icon: FileText, action: 'new-prescription' },
+    { label: 'New Prescription', icon: FileText, action: 'rx-builder' },
     { label: 'New Quotation', icon: FileText, action: 'new-quotation' },
     { label: 'New Purchase Order', icon: ShoppingBag, action: 'new-purchase-order' },
   ],
   doctor: [
     { label: 'New Patient', icon: UserPlus, action: 'new-patient' },
-    { label: 'New Prescription', icon: FileText, action: 'new-prescription' },
+    { label: 'New Prescription', icon: FileText, action: 'rx-builder' },
     { label: 'New Treatment', icon: HeartPulse, action: 'new-treatment' },
     { label: 'New Quotation', icon: FileText, action: 'new-quotation' },
   ],
   medical_director: [
     { label: 'New Protocol', icon: ClipboardList, action: 'new-protocol' },
-    { label: 'New Prescription', icon: FileText, action: 'new-prescription' },
+    { label: 'New Prescription', icon: FileText, action: 'rx-builder' },
     { label: 'Clinical Review', icon: CheckCircle, action: 'clinical-review' },
     { label: 'Doctor Approval', icon: CheckSquare, action: 'doctor-approval' },
   ],
@@ -67,62 +69,81 @@ const QUICK_CREATE_MAP = {
 export default function QuickCreateDropdown({ onNavigate }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
   const { activeRole } = useAuth();
+  const [dropdownStyles, setDropdownStyles] = useState({});
+  const [mounted, setMounted] = useState(false);
+  const { openDrawer } = useDrawer();
 
   const currentRole = activeRole || 'admin';
-  // Default to admin or empty if role is not mapped
-  const actions = QUICK_CREATE_MAP[currentRole] || QUICK_CREATE_MAP['admin'] || [];
+  const actions = (QUICK_CREATE_MAP[currentRole] || QUICK_CREATE_MAP['admin'] || []).slice(0, 5);
 
   useEffect(() => {
+    setMounted(true);
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
+    
+    function handleScroll() {
+      if (isOpen) setIsOpen(false);
+    }
+    
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    window.addEventListener('scroll', handleScroll, true); // capture scroll in any container
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownStyles({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        background: 'white',
+        border: '1px solid var(--border)',
+        borderRadius: '8px',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+        zIndex: 999999,
+        padding: '8px 0',
+        overflow: 'hidden'
+      });
+    }
+  }, [isOpen]);
 
   if (actions.length === 0) return null;
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', width: '100%', padding: '0 12px 16px' }}>
+    <div style={{ width: '100%', padding: '0 12px 16px' }}>
       <button 
+        ref={buttonRef}
         className="sb-quick-create" 
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-          width: '100%', padding: '10px', background: 'var(--primary-color)',
-          color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer',
-          fontWeight: 600, fontSize: '14px', transition: 'all 0.2s'
-        }}
       >
         <Plus size={16} strokeWidth={2.5} />
         Quick Create
       </button>
 
-      {isOpen && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: '12px',
-          right: '12px',
-          marginTop: '4px',
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '8px',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-          zIndex: 1000,
-          padding: '8px 0',
-          overflow: 'hidden'
-        }}>
+      {isOpen && mounted && document.body && createPortal(
+        <div ref={dropdownRef} style={dropdownStyles}>
           {actions.map((action, idx) => {
             const Icon = action.icon;
             return (
               <button
                 key={idx}
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent('open-quick-create', { detail: { type: action.action } }));
+                  if (action.action === 'rx-builder') {
+                    openDrawer('rx-builder', 'new');
+                  } else {
+                    window.dispatchEvent(new CustomEvent('open-quick-create', { detail: { type: action.action } }));
+                  }
                   setIsOpen(false);
                 }}
                 style={{
@@ -146,7 +167,8 @@ export default function QuickCreateDropdown({ onNavigate }) {
               </button>
             )
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

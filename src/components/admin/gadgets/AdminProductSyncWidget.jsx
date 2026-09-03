@@ -34,11 +34,10 @@ import {
   query,
   where,
   onSnapshot,
-  doc,
-  updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';
+import { updateProduct } from '../../../repositories/productRepository';
 
 
 
@@ -58,47 +57,12 @@ import { db, auth } from '../../../firebase';
 
 import { Card, CardHeader, CardContent } from '../../ui/Card';
 import Button from '../../ui/Button';
+import StatusChip from '../../ui/StatusChip';
 
 // ── Cloud Function endpoint ───────────────────────────────────────────────────
 const SKU_SYNC_URL = 'https://europe-west1-med-peptides-app.cloudfunctions.net/skuSyncAgent';
 
-// ── Status badge ──────────────────────────────────────────────────────────────
-function StatusChip({ status }) {
-  const map = {
-    pending_review: {
-      label: 'Pending Review',
-      color: '#f59e0b',
-      bg: 'var(--color-warning-bg)',
-      emoji: '⏳',
-    },
-    active: { label: 'Active', color: 'var(--color-success)', bg: '#ecfdf5', emoji: '✅' },
-    rejected: {
-      label: 'Rejected',
-      color: 'var(--color-danger)',
-      bg: 'var(--color-danger-bg)',
-      emoji: '❌',
-    },
-    draft: { label: 'Draft', color: 'var(--color-text-tertiary)', bg: '#f1f5f9', emoji: '📝' },
-  };
-  const m = map[status] || map.draft;
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.25rem',
-        padding: '0.2rem 0.6rem',
-        borderRadius: 'var(--radius-sm)',
-        background: m.bg,
-        color: m.color,
-        fontSize: '0.65rem',
-        fontWeight: 800,
-      }}
-    >
-      {m.emoji} {m.label}
-    </span>
-  );
-}
+// ── Cloud Function endpoint ───────────────────────────────────────────────────
 
 // ── Product validation card ────────────────────────────────────────────────────
 function PendingProductCard({ product, onApprove, onReject }) {
@@ -210,7 +174,7 @@ function PendingProductCard({ product, onApprove, onReject }) {
           </div>
         </div>
 
-        <StatusChip status={product.status || 'pending_review'} />
+        <StatusChip status={product.status === 'pending_review' ? 'pending' : (product.status || 'draft')} />
         {expanded ? (
           <ChevronUp size={14} color="var(--color-border)" />
         ) : (
@@ -466,21 +430,16 @@ export default function AdminProductSyncWidget() {
 
   // Approve product
   const handleApprove = useCallback(async (productId, note) => {
-    await updateDoc(doc(db, 'products', productId), {
+    await updateProduct(productId, {
       status: 'active',
-      reviewNote: note || '',
-      reviewedAt: serverTimestamp(),
-      publishedAt: serverTimestamp(),
-    });
+    }, { strict: false });
   }, []);
 
   // Reject product
   const handleReject = useCallback(async (productId, note) => {
-    await updateDoc(doc(db, 'products', productId), {
-      status: 'rejected',
-      reviewNote: note || '',
-      reviewedAt: serverTimestamp(),
-    });
+    await updateProduct(productId, {
+      status: 'archived',
+    }, { strict: false });
   }, []);
 
   // SKU Sync

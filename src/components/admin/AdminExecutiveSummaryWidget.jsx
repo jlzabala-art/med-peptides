@@ -239,7 +239,7 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
           {renderContextualButtons()}
           <button
             className={`${styles.actionBtn} ${styles.askAtlasBtn}`}
-            onClick={() => router.push('/admin/reports')}
+            onClick={() => router.push('/admin/analytics')}
           >
             Ask Atlas AI
           </button>

@@ -15,12 +15,15 @@ export default function CompetitorAnalysisWidget({ matchData, selectedTier = 're
   const myPPM = myPPMs[selectedTier];
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-      gap: '1rem',
-      marginTop: '1rem'
-    }}>
+    <div style={{ padding: '0.5rem 0' }}>
+      <div style={{ marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+        Proveedores Externos (Análisis de Mercado)
+      </div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+        gap: '1rem'
+      }}>
       {matchData.map((comp, i) => {
         const compPPM = comp.ppm;
         let isCheaper = false;
@@ -92,6 +95,7 @@ export default function CompetitorAnalysisWidget({ matchData, selectedTier = 're
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

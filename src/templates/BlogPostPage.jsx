@@ -3,7 +3,8 @@ import { useRouter } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { trackBlogView } from '../utils/analytics';
-import { useParams, Link } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 
 
@@ -149,7 +150,7 @@ const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
     // Fallback to simple link card if data not found
     return (
       <Link
-        to={link.url}
+        href={link.url || '#'}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -206,7 +207,7 @@ const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
             margin: 0,
             lineHeight: '1.25'
           }}>
-            <Link to={link.url} style={{ color: 'inherit', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = accentColor} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
+          <Link href={link.url || '#'} style={{ color: 'inherit', textDecoration: 'none' }} onMouseOver={e => e.currentTarget.style.color = accentColor} onMouseOut={e => e.currentTarget.style.color = 'inherit'}>
               {isProtocol ? item.title : item.name}
             </Link>
           </h4>
@@ -291,7 +292,7 @@ const InteractiveResourceCard = ({ link, accentColor, bgColor }) => {
           ) : null}
 
           <Link
-            to={link.url}
+            href={link.url}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -505,7 +506,7 @@ useEffect(() => {
         }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <Link 
-            to="/blog" 
+            href="/blog" 
             style={{ 
               display: 'inline-flex', 
               alignItems: 'center', 
@@ -1082,7 +1083,7 @@ Use the article context below to ground your recommendations:${articleContext}${
                       {relPost.category}
                     </span>
                     <h3 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '0.75rem', lineHeight: '1.4' }}>
-                      <Link to={`/blog/${relPost.slug}`} style={{ color: 'var(--text-main)', textDecoration: 'none' }}>
+                      <Link href={`/blog/${relPost.slug}`} style={{ color: 'var(--text-main)', textDecoration: 'none' }}>
                         {relPost.title}
                       </Link>
                     </h3>
@@ -1090,7 +1091,7 @@ Use the article context below to ground your recommendations:${articleContext}${
                       {relPost.excerpt}
                     </p>
                     <Link 
-                      to={`/blog/${relPost.slug}`} 
+                      href={`/blog/${relPost.slug}`} 
                       style={{ 
                         display: 'inline-flex', 
                         alignItems: 'center', 

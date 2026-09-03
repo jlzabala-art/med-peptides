@@ -81,22 +81,22 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
           <Beaker size={22} />
         </div>
         <div>
-          <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary)' }}>Calculadora de Reconstitución</h4>
-          <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Simulación visual de jeringa para su dosificación</p>
+          <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary)' }}>Reconstitution Calculator</h4>
+          <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Visual syringe simulation for dosing</p>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
         {/* Vial specs summary banner */}
         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'var(--section-alt, #EEF4FA)', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>
-          <span style={{ color: 'var(--text-muted)' }}>Contenido del Vial:</span>
+          <span style={{ color: 'var(--text-muted)' }}>Vial Content:</span>
           <span style={{ color: 'var(--primary)' }}>{vialMg} mg ({results.totalMcg.toLocaleString()} mcg)</span>
         </div>
 
         {/* Inputs row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Diluyente (BAC Water)</label>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Diluent (BAC Water)</label>
             <div style={{ position: 'relative' }}>
               <input 
                 type="range"
@@ -115,7 +115,7 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Dosis Objetivo (mcg)</label>
+            <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Target Dose (mcg)</label>
             <div style={{ position: 'relative' }}>
               <input 
                 type="range"
@@ -136,7 +136,7 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
 
         {/* Syringe selector */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-          <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Capacidad de la Jeringa</label>
+          <label style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>Syringe Capacity</label>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             {['0.3ml', '0.5ml', '1.0ml'].map((type) => (
               <button
@@ -229,34 +229,34 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
         {/* Calculations / Info Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <div>
-            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Volumen Requerido</span>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Required Volume</span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginTop: '0.15rem' }}>
               <span style={{ fontSize: '2.2rem', fontWeight: 900, color: results.isExceeded ? 'var(--error)' : 'var(--primary)', fontFamily: 'var(--font-heading)' }}>
                 {results.cappedUnits}
               </span>
-              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>Unidades</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-main)' }}>Units</span>
             </div>
             {results.isExceeded && (
               <span style={{ fontSize: '0.68rem', color: 'var(--error)', fontWeight: 700 }}>
-                ⚠️ ¡Excede la capacidad de {syringeConfig.label}!
+                ⚠️ Exceeds the capacity of {syringeConfig.label}!
               </span>
             )}
           </div>
 
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.78rem', fontWeight: 600 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Líquido en jeringa:</span>
+              <span style={{ color: 'var(--text-muted)' }}>Liquid in syringe:</span>
               <span style={{ color: 'var(--text-main)' }}>{results.volumeMl} ml</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Concentración:</span>
+              <span style={{ color: 'var(--text-muted)' }}>Concentration:</span>
               <span style={{ color: 'var(--text-main)' }}>{results.mcgPerMl.toLocaleString()} mcg/ml</span>
             </div>
           </div>
 
           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'flex-start', gap: '0.35rem', lineHeight: 1.35 }}>
             <Info size={12} style={{ flexShrink: 0, marginTop: '0.05rem' }} />
-            <span>Extraiga hasta la marca de {results.cappedUnits} unidades. 100 unidades equivalen a 1.0 ml.</span>
+            <span>Draw up to the {results.cappedUnits} unit mark. 100 units equal 1.0 ml.</span>
           </div>
         </div>
       </div>
@@ -266,7 +266,7 @@ export default function ReconstitutionGuide({ product, selectedVariant }) {
           onClick={() => { setDiluent(2); setDesiredDose(250); setSyringeType('1.0ml'); }}
           style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
         >
-          <RefreshCw size={12} /> Restablecer valores
+          <RefreshCw size={12} /> Reset values
         </button>
       </div>
     </div>

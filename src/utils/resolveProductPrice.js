@@ -71,6 +71,9 @@ function extractVariants(product) {
  * @returns {boolean}
  */
 function variantHasPricing(variant, tier) {
+  // New canonical schema: flat unit_price field
+  if (variant?.unit_price != null) return true;
+  // Legacy: nested pricing object
   const pricing = variant?.pricing;
   if (!pricing) return false;
   const entry = pricing[tier] ?? pricing[`${tier}Price`]; // handle both schemas

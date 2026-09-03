@@ -79,6 +79,7 @@ export default function CollectionTemplate({
     return (
       <RestrictedCatalogRoute catalogName="products">
         <PeptideCollectionPage
+          initialProducts={products || []}
           onNavigate={(productSlug) => router.push(`/product/${productSlug}`)}
           onBack={() => router.back()}
           toggleCompare={toggleCompare}

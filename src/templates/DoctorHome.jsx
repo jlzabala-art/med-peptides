@@ -40,13 +40,15 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 
 
 import { Card, MetricCard, Button } from '../components/ui';
+import PageHeader from '../components/ui/PageHeader';
 import PanelShell from '../components/shell/PanelShell';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
+import dynamic from 'next/dynamic';
 
-
-
-import MessagingWidget from '../components/messaging/MessagingWidget';
-import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
+const DoctorPatientsTab = dynamic(() => import('../components/admin/DoctorPatientsTab'), { ssr: false });
+const UniversalProtocolsTable = dynamic(() => import('../components/shared/UniversalProtocolsTable'), { ssr: false });
+const MessagingWidget = dynamic(() => import('../components/messaging/MessagingWidget'), { ssr: false });
+const ClinicalAIWidget = dynamic(() => import('../components/admin/ClinicalAIWidget'), { ssr: false });
 
 // ── Agents relevant to doctors ───────────────────────────────────────────────
 const CLINICAL_AGENTS = [
@@ -209,7 +211,7 @@ export default function DoctorHome() {
     : user?.displayName?.split(' ')[0] || 'Dr.';
 
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [metrics, setMetrics]       = useState({ patients: 0, protocols: 0, pendingLabs: 2, appointments: 3 });
+  const [metrics, setMetrics]       = useState({ patients: 0, protocols: 0, pendingLabs: 0, appointments: 0 });
   const [agentStatuses, setAgentStatuses] = useState(
     Object.fromEntries(CLINICAL_AGENTS.map(a => [a.key, a.key === 'clinical_data' ? 'pending' : 'active']))
   );
@@ -291,47 +293,17 @@ export default function DoctorHome() {
     <div style={{ maxWidth: 1200, margin: '0 auto', paddingBottom: '4rem' }}>
       {/* ── Welcome + Status Bar ── */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-          <div>
-            <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.2rem)', fontWeight: 900, color: '#0f172a',
-              margin: '0 0 0.35rem', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Stethoscope size={28} color="var(--color-primary)" />
-              Welcome, {doctorName}
-            </h1>
-            <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 500 }}>
-              Your clinical intelligence hub. AI Agents ready to assist you.
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            {/* Time Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5f6368' }}>TIME RANGE</label>
-              <select 
-                value={timeFilter} 
-                onChange={(e) => setTimeFilter(e.target.value)}
-                style={{ padding: '0.45rem', borderRadius: '4px', border: '1px solid #dadce0', fontSize: '0.8rem', backgroundColor: '#f8f9fa', outline: 'none' }}
-              >
-                <option value="1d">Today</option>
-                <option value="7d">Last 7 Days</option>
-                <option value="30d">Last Month</option>
-                <option value="90d">Last 3 Months</option>
-                <option value="all">All Time</option>
-              </select>
-            </div>
-
-            {/* Agent live badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.6rem 1.1rem', borderRadius: '999px',
-              background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--color-success)',
-                animation: 'dotPulse 2s infinite' }} />
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--color-success)' }}>
-                {activeCount} active agent{activeCount !== 1 ? 's' : ''}
-              </span>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title={`Welcome, ${doctorName}`}
+          subtitle="Your clinical intelligence hub. AI Agents ready to assist you."
+          icon={Stethoscope}
+          role="doctor"
+          primaryAction={{
+            label: `${activeCount} Active Agents`,
+            icon: Zap,
+            onClick: () => openClinicalAI()
+          }}
+        />
 
         {/* Quick AI input bar */}
         <form onSubmit={handleQuickAI} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center',
@@ -435,6 +407,19 @@ export default function DoctorHome() {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
+      case 'my-patients':
+      case 'patients':
+        return (
+          <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading patients module...</div>}>
+            <DoctorPatientsTab doctorId={doctorId} />
+          </React.Suspense>
+        );
+      case 'protocols':
+        return (
+          <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading clinical protocols...</div>}>
+            <UniversalProtocolsTable role="doctor" isSubTab={true} />
+          </React.Suspense>
+        );
       case 'messages':
         return (
           <div style={{ height: 'calc(100vh - 80px)', margin: '-2rem' }}>

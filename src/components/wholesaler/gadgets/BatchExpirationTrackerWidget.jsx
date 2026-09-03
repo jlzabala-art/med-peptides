@@ -5,14 +5,9 @@ import Calendar from "lucide-react/dist/esm/icons/calendar";
 import PackageSearch from "lucide-react/dist/esm/icons/package-search";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { fetchExpiringBatches } from '../../../repositories/inventoryRepository';
 import { useAuth } from '../../../context/AuthContext';
-
-
-
-
+import { logger } from '../../../utils/logger';
 
 // Demo data fallback for illustration
 const DEMO_BATCHES = [
@@ -27,35 +22,29 @@ export default function BatchExpirationTrackerWidget() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchBatches() {
+    async function loadBatches() {
       if (!user?.uid) return;
       try {
-        // En una app real, los lotes de B2B se guardarían bajo b2b_inventory
-        const q = query(
-          collection(db, 'b2b_inventory'), 
-          where('wholesalerId', '==', user.uid),
-          orderBy('expiryDate', 'asc'),
-          limit(10)
-        );
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          setBatches(snap.docs.map(d => ({ 
-            id: d.id, 
-            ...d.data(),
-            expiryDate: d.data().expiryDate?.toDate() || new Date()
+        const rawBatches = await fetchExpiringBatches(user.uid, 10);
+        if (rawBatches && rawBatches.length > 0) {
+          setBatches(rawBatches.map((d) => ({
+            id: d.id,
+            ...d,
+            expiryDate: d.expiryDate?.toDate ? d.expiryDate.toDate() : (d.expiryDate ? new Date(d.expiryDate) : new Date()),
           })));
         } else {
           setBatches(DEMO_BATCHES); // fallback for UI demonstration
         }
       } catch (err) {
-        console.error("Error fetching batches", err);
+        logger.error('Error fetching batches', { error: err.message });
         setBatches(DEMO_BATCHES);
       } finally {
         setLoading(false);
       }
     }
-    fetchBatches();
+    loadBatches();
   }, [user]);
+
 
   const getDaysUntilExpiry = (date) => {
     const diff = date.getTime() - new Date().getTime();

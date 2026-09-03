@@ -5,13 +5,12 @@ import PageHeader from '../ui/PageHeader';
 import BillsWidget from '../widgets/purchase/BillsWidget';
 import { useBillAggregates } from '../../hooks/data/useBillAggregates';
 import { MetricCard } from '../ui';
-import DataModule from '../ui/DataModule';
-
+import { MetricCard } from '../ui';
 export default function AdminBillsTab() {
   const { data: kpis, isLoading } = useBillAggregates();
 
   const kpiSection = (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+    <div className="kpi-scroll-row">
       <MetricCard
         title="Total Bills"
         value={isLoading ? '...' : kpis?.totalBills || 0}
@@ -37,11 +36,14 @@ export default function AdminBillsTab() {
   );
 
   return (
-    <DataModule
-      header={<PageHeader title="Supplier Bills" subtitle="Manage incoming invoices and bills from suppliers." icon={Receipt} />}
-      kpis={kpiSection}
-    >
-      <BillsWidget collectionName="purchaseBills" readOnly={false} compact={false} />
-    </DataModule>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <PageHeader title="Supplier Bills" subtitle="Manage incoming invoices and bills from suppliers." />
+      <div className="tab-container" style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
+        {kpiSection}
+        <div style={{ marginTop: '1.5rem' }}>
+          <BillsWidget collectionName="purchaseBills" readOnly={false} compact={false} />
+        </div>
+      </div>
+    </div>
   );
 }

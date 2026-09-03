@@ -24,7 +24,7 @@ export default function ProductFiltersBar({
       alignItems: 'center', 
       padding: '0.75rem 1rem', 
       borderBottom: '1px solid var(--border)',
-      backgroundColor: '#f8fafc',
+      backgroundColor: '#1e293b',
       gap: '1rem',
       flexWrap: 'wrap'
     }}>
@@ -38,7 +38,7 @@ export default function ProductFiltersBar({
           <select
             value={filterCategory}
             onChange={e => setFilterCategory(e.target.value)}
-            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: 'var(--text-main)' }}
+            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#0f172a', cursor: 'pointer', color: 'var(--text-main)' }}
           >
             <option value="All">All Categories</option>
             {facetsLoading && <option value="" disabled>Loading...</option>}
@@ -53,7 +53,7 @@ export default function ProductFiltersBar({
           <select
             value={filterSupplier}
             onChange={e => setFilterSupplier(e.target.value)}
-            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: 'var(--text-main)' }}
+            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#0f172a', cursor: 'pointer', color: 'var(--text-main)' }}
           >
             <option value="All">All Suppliers</option>
             {facetsLoading && <option value="" disabled>Loading...</option>}
@@ -68,7 +68,7 @@ export default function ProductFiltersBar({
           <select
             value={filterWarehouse}
             onChange={e => setFilterWarehouse(e.target.value)}
-            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: 'var(--text-main)' }}
+            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#0f172a', cursor: 'pointer', color: 'var(--text-main)' }}
           >
             <option value="All">All Warehouses</option>
             {facetsLoading && <option value="" disabled>Loading...</option>}
@@ -83,7 +83,7 @@ export default function ProductFiltersBar({
           <select
             value={filterStatus}
             onChange={e => setFilterStatus(e.target.value)}
-            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: 'var(--text-main)' }}
+            style={{ height: '32px', border: '1.5px solid var(--border)', borderRadius: '8px', padding: '0 0.75rem', fontSize: '0.8rem', background: '#0f172a', cursor: 'pointer', color: 'var(--text-main)' }}
           >
             <option value="All">All Statuses</option>
             <option value="Active">Active Only</option>

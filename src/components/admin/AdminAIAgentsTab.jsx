@@ -19,51 +19,8 @@ import { useAIAgents } from '../../hooks/admin/useAIAgents';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
+import { StatusChip, CopyableId } from '../ui';
 // Default agents are now managed in useAIAgents
-
-// ── Status badge ─────────────────────────────────────────────────────────────
-function StatusChip({ status }) {
-  const map = {
-    active: {
-      label: 'Active',
-      color: 'var(--color-success)',
-      bg: 'rgba(16,185,129,0.1)',
-      Icon: CheckCircle,
-    },
-    pending: { label: 'Pending', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', Icon: Clock },
-    disabled: {
-      label: 'Disabled',
-      color: 'var(--color-danger)',
-      bg: 'rgba(239,68,68,0.1)',
-      Icon: XCircle,
-    },
-    error: {
-      label: 'Error',
-      color: 'var(--color-danger)',
-      bg: 'rgba(239,68,68,0.1)',
-      Icon: AlertTriangle,
-    },
-  };
-  const { label, color, bg, Icon } = map[status] || map.pending;
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.3rem',
-        padding: '0.25rem 0.65rem',
-        borderRadius: 'var(--radius-sm)',
-        background: bg,
-        color,
-        fontSize: '0.72rem',
-        fontWeight: 800,
-      }}
-    >
-      <Icon size={11} />
-      {label}
-    </span>
-  );
-}
 
 // ── Model badge ───────────────────────────────────────────────────────────────
 function ModelBadge({ model }) {

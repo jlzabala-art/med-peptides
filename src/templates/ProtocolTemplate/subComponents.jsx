@@ -3,8 +3,7 @@
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight } from '@/lib/icons';
-import { FlaskConical, Info, Box } from '@/lib/icons';
+import { ChevronRight, FlaskConical, Info, Box, AlertCircle } from '@/lib/icons';
 
 export function ProtocolSkeleton() {
   return (
@@ -59,6 +58,8 @@ export function IncludedPeptideCard({ peptide, onClick }) {
         display: 'flex',
         flexDirection: 'column',
         gap: '0.55rem',
+        minWidth: '280px',
+        flex: '1 1 0',
       }}
     >
       {/* Accent dot + name */}

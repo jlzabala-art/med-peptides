@@ -1,0 +1,374 @@
+# Antigravity Prompt – Professional Peptide Catalogue PDF Export
+
+## Objective
+
+Redesign the PDF export system to generate a professional commercial catalogue suitable for physicians, clinics, distributors, and international partners.
+
+The document should resemble the catalogue of a premium pharmaceutical or biotechnology company rather than a simple database export.
+
+The export engine must **only display data stored in Firebase**. It must **never perform calculations** or modify any values during export.
+
+---
+
+# 1. Export Configuration
+
+Before generating the PDF, display an **Export Options** dialog where the user can customize the catalogue.
+
+## Layout
+
+- Compact
+- Standard
+- Premium (larger product cards, ideal for presentations to physicians)
+
+---
+
+## Grouping
+
+- None
+- Group by Goal
+- Group by Category
+- Group by Product Type
+
+---
+
+## Sorting
+
+Allow selecting **two independent sorting criteria**.
+
+### Primary Sort
+
+- Goal
+- Product Name (A-Z)
+- SKU
+- Category
+- Product Type
+
+### Secondary Sort
+
+- Product Name (A-Z)
+- SKU
+- None
+
+Examples:
+
+Goal → Product Name
+
+Weight Management
+
+- AOD9604
+- Cagrilintide
+- Retatrutide
+- Semaglutide
+- Tirzepatide
+
+Longevity
+
+- Epitalon
+- MOTS-C
+- SS-31
+- Thymalin
+
+Hair
+
+- GHK-Cu
+- PTD-DBM
+
+or
+
+Product Name (A-Z)
+
+- AOD9604
+- ARA-290
+- BPC-157
+- Cagrilintide
+- ...
+
+---
+
+# 2. Optional Fields
+
+The following fields should be configurable.
+
+## Show Supplier
+
+Checkbox
+
+Default: OFF
+
+If disabled, the Supplier field must not appear anywhere in the PDF.
+
+If enabled, display the Supplier in:
+
+- Product cards
+- Summary table (optional)
+
+---
+
+## Show Kit Price
+
+Checkbox
+
+Default: ON
+
+Important:
+
+The PDF must **never calculate prices**.
+
+The Kit Price must be read directly from Firebase exactly as stored.
+
+No calculations such as:
+
+Unit Price × 10
+
+should ever be performed.
+
+If the option is disabled, simply hide the field.
+
+---
+
+# 3. Professional Header
+
+Each page should contain:
+
+- Company Logo
+- Catalogue Title
+
+Precision Peptide Portfolio
+
+- Subtitle
+
+Commercial Catalogue
+
+- Generation Date
+- Page Number
+
+---
+
+# 4. Automatic Table of Contents
+
+Generate a clickable table of contents at the beginning.
+
+Example
+
+Contents
+
+Weight Management ............ 3
+
+Longevity ............ 8
+
+Muscle Growth ............ 15
+
+Hair Restoration ............ 21
+
+Sexual Health ............ 26
+
+Products A–Z ............ 31
+
+---
+
+# 5. Section Cover Pages
+
+If grouping is enabled, insert a cover page before each section.
+
+Example
+
+---
+
+# Weight Management
+
+High-quality peptides for obesity, metabolic syndrome and body composition.
+
+---
+
+The next page begins the products of that section.
+
+---
+
+# 6. Product Card Design
+
+Each product should appear inside a clean, modern card.
+
+Suggested layout
+
+------------------------------------------------
+
+RETATRUTIDE
+
+SKU
+
+SLU-PP-220
+
+Goal
+
+Weight Management
+
+Presentation
+
+10 mg Lyophilized Vial
+
+Kit
+
+10 Vials
+
+Kit Price
+
+$780
+
+------------------------------------------------
+
+Use generous spacing.
+
+Avoid crowded layouts.
+
+Maintain excellent readability.
+
+---
+
+# 7. Colour Palette
+
+Use only a professional pharmaceutical colour scheme.
+
+Primary colours:
+
+- White
+- Light Grey
+- Dark Blue
+
+Avoid bright colours.
+
+---
+
+# 8. Goal Icons
+
+Optionally display a small icon next to each Goal.
+
+Examples
+
+⚖️ Weight Management
+
+🧬 Longevity
+
+💇 Hair Restoration
+
+❤️ Sexual Health
+
+💪 Muscle Growth
+
+🩹 Recovery
+
+⏳ Healthy Ageing
+
+Icons should be discreet and elegant.
+
+---
+
+# 9. Footer
+
+Every page should include
+
+Confidential Commercial Catalogue
+
+For Healthcare Professionals Only
+
+---
+
+# 10. Summary Table
+
+Optionally generate a summary table at the end.
+
+Columns
+
+- SKU
+- Product Name
+- Goal
+- Category
+- Presentation
+- Kit
+- Kit Price
+
+The table should follow the selected sorting order.
+
+---
+
+# 11. Export Options
+
+Provide the following checkboxes before export.
+
+Layout
+
+- Compact
+- Standard
+- Premium
+
+Grouping
+
+- Group by Goal
+- Group by Category
+- Group by Product Type
+
+Sorting
+
+- Primary Sort
+- Secondary Sort
+
+Display Options
+
+☐ Show Index
+
+☐ Show Short Description
+
+☐ Show Product Images
+
+☐ Show SKU
+
+☐ Show Presentation
+
+☐ Show Category
+
+☐ Show Kit Price
+
+☐ Show Supplier
+
+☐ Show Generation Date
+
+☐ Show Page Numbers
+
+☐ Add Front Cover
+
+☐ Add Section Covers
+
+☐ Add Summary Table
+
+---
+
+# 12. Print Quality
+
+The generated PDF should be suitable for professional printing.
+
+Requirements
+
+- A4 format
+- Wide margins
+- Consistent typography
+- Smart page breaks
+- Never split a product card across pages
+- Proper alignment
+- Excellent whitespace usage
+
+---
+
+# 13. Visual Style
+
+The catalogue should be inspired by premium pharmaceutical and biotechnology companies.
+
+It should communicate:
+
+- Scientific credibility
+- Premium quality
+- Professionalism
+- Trust
+- Elegance
+
+The final result should never look like a raw database export.
+
+Instead, it should be a polished commercial catalogue ready to be sent to physicians, clinics, hospitals, distributors, and international partners.

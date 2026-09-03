@@ -22,6 +22,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
 import { useProductSearch } from '../hooks/useProductSearch';
 import { algoliaConfig } from '../services/algolia/config';
 import PaginationControl from '../components/common/PaginationControl';
+import DataTable from '../components/ui/DataTable';
 import { ArrowLeft, Info, FlaskConical, Beaker, Zap, Activity, HelpCircle, BookOpen, ChevronRight, Bot } from '@/lib/icons';
 
 export default function CategoryDetailView({ 
@@ -188,119 +189,103 @@ export default function CategoryDetailView({
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden', border: 'none', boxShadow: 'var(--shadow-lg)' }}>
-        <div style={{ overflowX: 'auto' }}>
-          {/* Desktop View */}
-          <table className="responsive-table desktop-only" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '950px' }}>
-            <thead style={{ backgroundColor: 'var(--background)', borderBottom: '2px solid var(--border)' }}>
-              <tr>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Research Peptide</th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase', width: '30%' }}>Description</th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Research Strengths</th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'center', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Scientific Tools</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groupedProducts.map((product, idx) => (
-                <tr key={idx} style={{ 
-                  borderBottom: '1px solid var(--border)',
-                  backgroundColor: idx % 2 === 0 ? 'white' : 'var(--background)'
-                }}>
-                  <td style={{ padding: '1.25rem 1.5rem' }}>
-                    <div onClick={() => onSelectProduct(product.name)} style={{ fontWeight: 700, color: 'var(--primary)', cursor: 'pointer', fontSize: '1.05rem' }}>{product.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>CAS: {product.cas || 'Not Listed'}</div>
-                  </td>
-                  <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                    {product.desc}
-                  </td>
-                  <td style={{ padding: '1.25rem 1.5rem' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                      {product.allStrengths.map((s, sIdx) => (
-                        <span key={sIdx} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', border: '1px solid var(--border)' }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                      <button 
-                        onClick={() => {
-                          try {
-                            localStorage.removeItem('clinical_ai_messages_v2');
-                            sessionStorage.removeItem('clinical_ai_messages');
-                          } catch {}
-                          window.dispatchEvent(new CustomEvent('open-clinical-ai', {
-                            detail: {
-                              action: 'ask_about_entity',
-                              entityName: product.name || '',
-                              section: 'CategoryDetailView.Row',
-                              autoSend: true
-                            }
-                          }));
-                        }}
-                        title="Ask ClinicAI"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          padding: '0.5rem 0.85rem',
-                          fontSize: '0.8rem',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(0, 163, 224, 0.2)',
-                          background: 'rgba(0, 163, 224, 0.05)',
-                          color: 'var(--primary)',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                          e.currentTarget.style.background = 'rgba(0, 163, 224, 0.12)';
-                          e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.4)';
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.background = 'rgba(0, 163, 224, 0.05)';
-                          e.currentTarget.style.borderColor = 'rgba(0, 163, 224, 0.2)';
-                        }}
-                      >
-                        <Bot size={14} /> ClinicAI
-                      </button>
-                      <button 
-                        onClick={() => handleOpenPubMed(product)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.85rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'white', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer' }}
-                      >
-                        <BookOpen size={14} /> PubMed
-                      </button>
-                      <button 
-                        onClick={() => onSelectProduct(product.name)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.85rem', fontSize: '0.8rem', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 600, cursor: 'pointer' }}
-                      >
-                        View Profile <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile View */}
-        <div className="mobile-only" style={{ 
-          padding: '1rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '1rem'
-        }}>
-          {groupedProducts.map((product, idx) => (
-            <UniversalProductCard 
-              key={idx}
-              product={product}
-              onClick={() => onSelectProduct(product.name)}
-              viewMode="grid"
-            />
-          ))}
-        </div>
+      <div className="card" style={{ padding: '1rem', overflow: 'hidden', border: 'none', boxShadow: 'var(--shadow-lg)', background: 'var(--color-bg-surface)' }}>
+        <DataTable
+          columns={[
+            {
+              key: 'name',
+              header: 'Research Peptide',
+              width: '25%',
+              render: (row) => (
+                <div>
+                  <div onClick={() => onSelectProduct(row.name)} style={{ fontWeight: 700, color: 'var(--primary)', cursor: 'pointer', fontSize: '1.05rem' }}>{row.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>CAS: {row.cas || 'Not Listed'}</div>
+                </div>
+              )
+            },
+            {
+              key: 'desc',
+              header: 'Description',
+              width: '35%',
+              render: (row) => (
+                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  {row.desc}
+                </div>
+              )
+            },
+            {
+              key: 'strengths',
+              header: 'Research Strengths',
+              width: '20%',
+              render: (row) => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                  {row.allStrengths?.map((s, sIdx) => (
+                    <span key={sIdx} style={{ padding: '0.25rem 0.5rem', backgroundColor: '#f1f5f9', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)', border: '1px solid var(--border)' }}>
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )
+            },
+            {
+              key: 'actions',
+              header: 'Scientific Tools',
+              width: '20%',
+              render: (row) => (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  <button 
+                    onClick={() => {
+                      try {
+                        localStorage.removeItem('clinical_ai_messages_v2');
+                        sessionStorage.removeItem('clinical_ai_messages');
+                      } catch {}
+                      window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                        detail: {
+                          action: 'ask_about_entity',
+                          entityName: row.name || '',
+                          section: 'CategoryDetailView.Row',
+                          autoSend: true
+                        }
+                      }));
+                    }}
+                    title="Ask ClinicAI"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.4rem 0.65rem',
+                      fontSize: '0.75rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(0, 163, 224, 0.2)',
+                      background: 'rgba(0, 163, 224, 0.05)',
+                      color: 'var(--primary)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Bot size={13} /> ClinicAI
+                  </button>
+                  <button 
+                    onClick={() => handleOpenPubMed(row)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.65rem', fontSize: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'white', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    <BookOpen size={13} /> PubMed
+                  </button>
+                  <button 
+                    onClick={() => onSelectProduct(row.name)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.4rem 0.65rem', fontSize: '0.75rem', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    View <ChevronRight size={13} />
+                  </button>
+                </div>
+              )
+            }
+          ]}
+          data={groupedProducts}
+          keyField="name"
+          searchPlaceholder="Filter category peptides..."
+          emptyTitle="No peptides found in this category"
+        />
       </div>
       
       <PaginationControl 

@@ -116,3 +116,7 @@ export const VARIANT_REF_TYPE = Object.freeze({
   EXACT:    'exact',    // Points to a specific variantId — maximum clinical precision
   RESOLVED: 'resolved', // Engine picks the best available variant by route+dose at runtime
 });
+
+// ── Dosage Units ─────────────────────────────────────────────────────────────
+export { DOSAGE_UNITS, VALID_DOSAGE_UNITS } from './dosageUnits.js';
+

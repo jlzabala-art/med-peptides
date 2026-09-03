@@ -23,10 +23,11 @@ export const PORTAL_CONFIG = {
     { id: 'users', label: 'User Directory', icon: Users, path: '/admin/users', category: 'Commercial CRM' },
     
     // Supply Chain & Sourcing
-    { id: 'wholesellers', label: 'Sourcing & SRM', icon: Layers, path: '/admin/wholesellers', category: 'Supply Chain' },
-    { id: 'purchase-rfqs', label: 'Purchase RFQs', icon: FileText, path: '/admin/purchase-rfqs', category: 'Supply Chain' },
-    { id: 'purchase-orders', label: 'Purchase Orders', icon: Truck, path: '/admin/purchase-orders', category: 'Supply Chain' },
-    { id: 'purchase-bills', label: 'Supplier Bills (AP)', icon: CreditCard, path: '/admin/purchase-bills', category: 'Supply Chain' },
+    { id: 'suppliers', label: 'Suppliers', icon: Layers, path: '/admin/suppliers', category: 'Sourcing & Distribution' },
+    { id: 'wholesellers', label: 'Wholesellers', icon: Truck, path: '/admin/wholesellers', category: 'Sourcing & Distribution' },
+    { id: 'purchase-rfqs', label: 'Purchase RFQs', icon: FileText, path: '/admin/purchase-rfqs', category: 'Sourcing & Distribution' },
+    { id: 'purchase-orders', label: 'Purchase Orders', icon: Truck, path: '/admin/purchase-orders', category: 'Sourcing & Distribution' },
+    { id: 'purchase-bills', label: 'Supplier Bills (AP)', icon: CreditCard, path: '/admin/purchase-bills', category: 'Sourcing & Distribution' },
     
     // Inventory & Sales
     { id: 'products', label: 'Products Catalog', icon: Package, path: '/admin/products', category: 'Inventory & Sales' },

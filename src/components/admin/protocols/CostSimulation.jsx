@@ -1,122 +1,80 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { DollarSign, TrendingUp, Download, PieChart } from '@/lib/icons';
+import React, { useMemo } from 'react';
+import { DollarSign, TrendingUp, Download, PieChart, Truck } from '@/lib/icons';
 import DataTable from '@/components/ui/DataTable';
+import { calculateProtocolCostBreakdown } from '@/services/protocolCostEngine';
 
 export default function CostSimulation({ protocol }) {
-  const [costs, setCosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // In a real scenario, this fetches actual pricing from products collection
-    const allItems = protocol?.phases?.reduce((acc, phase) => acc.concat(phase.items || phase.medications || []), []) || [];
-    
-    // Group by product
-    const groupedProducts = allItems.reduce((acc, item) => {
-      const key = item.productId || item.name || 'Unknown Product';
-      if (!acc[key]) {
-        acc[key] = {
-          name: item.name || 'Unknown Product',
-          vialStrengthMg: item.vialStrengthMg || 10,
-          doseMg: item.doseMg || 0.5,
-          totalMg: 0,
-        };
-      }
-      const injections = (item.frequencyPerWeek || 5) * (item.durationWeeks || 4);
-      acc[key].totalMg += injections * acc[key].doseMg;
-      return acc;
-    }, {});
-
-    const mockPricingData = Object.values(groupedProducts).map(p => {
-      const vialsRequired = Math.ceil(p.totalMg / p.vialStrengthMg);
-      
-      // Mock Prices
-      const pharmacyCostPerVial = 150 + Math.floor(Math.random() * 100);
-      const recommendedRetailPerVial = pharmacyCostPerVial * 3; // 3x markup
-      
-      const totalCost = pharmacyCostPerVial * vialsRequired;
-      const totalRetail = recommendedRetailPerVial * vialsRequired;
-      
-      return {
-        ...p,
-        vialsRequired,
-        pharmacyCostPerVial,
-        recommendedRetailPerVial,
-        totalCost,
-        totalRetail,
-        margin: totalRetail - totalCost,
-        marginPct: ((totalRetail - totalCost) / totalRetail) * 100
-      };
-    });
-
-    setCosts(mockPricingData);
-    setLoading(false);
+  const breakdown = useMemo(() => {
+    return calculateProtocolCostBreakdown(protocol);
   }, [protocol]);
 
-  if (loading) return <div>Loading cost simulations...</div>;
-  
+  const costs = breakdown.items;
+
   if (costs.length === 0) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Add products to the protocol to run cost simulations.
+        Add peptides to the protocol to run real-time supplier cost simulations.
       </div>
     );
   }
 
-  const grandTotalCost = costs.reduce((acc, c) => acc + c.totalCost, 0);
-  const grandTotalRetail = costs.reduce((acc, c) => acc + c.totalRetail, 0);
-  const grandTotalMargin = grandTotalRetail - grandTotalCost;
-  const overallMarginPct = (grandTotalMargin / grandTotalRetail) * 100;
+  const grandTotalCost = breakdown.totalWholesaleCost;
+  const grandTotalRetail = breakdown.totalRetailPrice;
+  const grandTotalMargin = breakdown.totalMargin;
+  const overallMarginPct = breakdown.marginPercentage;
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '2rem' }}>
-      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '1rem' }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.5rem' }}>Cost & Margin Simulation</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>
-            Simulate the total cost of the protocol for the clinic vs retail pricing for the patient.
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', margin: '0 0 0.25rem 0' }}>
+            Supplier Cost & Margin Simulation
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: 0 }}>
+            Real-time compounding economics based on lowest supplier wholesale tiers vs recommended patient pricing.
           </p>
         </div>
-        <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Download size={16} /> Export Quote
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#eff6ff', padding: '0.4rem 0.8rem', borderRadius: '8px', color: '#1d4ed8', fontSize: '0.82rem', fontWeight: 600 }}>
+          <Truck size={14} /> Best Sourcing: {breakdown.cheapestSupplier}
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 600 }}>
-            <DollarSign size={18} /> Total Clinic Cost
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>
+            <DollarSign size={16} /> Total Clinic Cost (B2B)
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)' }}>
-            AED {grandTotalCost.toLocaleString()}
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            $ {grandTotalCost.toLocaleString()} USD
           </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-            Pharmacy / Wholesale Price
-          </div>
-        </div>
-
-        <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 600 }}>
-            <TrendingUp size={18} /> Recommended Patient Price
-          </div>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)' }}>
-            AED {grandTotalRetail.toLocaleString()}
-          </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-            Suggested MSRP
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+            Cheapest Wholesale Option
           </div>
         </div>
 
-        <div style={{ background: 'var(--primary)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 10px 15px -3px rgba(var(--primary-rgb), 0.3)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'rgba(255,255,255,0.8)', marginBottom: '1rem', fontWeight: 600 }}>
-            <PieChart size={18} /> Expected Gross Margin
+        <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>
+            <TrendingUp size={16} /> Recommended Retail (B2C)
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 700 }}>
-            AED {grandTotalMargin.toLocaleString()}
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            $ {grandTotalRetail.toLocaleString()} USD
           </div>
-          <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', marginTop: '0.5rem' }}>
-            {overallMarginPct.toFixed(1)}% Margin
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+            Suggested Patient Price
+          </div>
+        </div>
+
+        <div style={{ background: 'linear-gradient(135deg, var(--color-primary, #003666) 0%, #0284c7 100%)', color: '#fff', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem', boxShadow: '0 8px 20px -6px rgba(0, 54, 102, 0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'rgba(255,255,255,0.85)', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>
+            <PieChart size={16} /> Estimated Gross Profit
+          </div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800 }}>
+            $ {grandTotalMargin.toLocaleString()} USD
+          </div>
+          <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', marginTop: '0.25rem' }}>
+            {overallMarginPct}% Profit Margin
           </div>
         </div>
       </div>
@@ -126,33 +84,47 @@ export default function CostSimulation({ protocol }) {
           columns={[
             {
               key: 'name',
-              header: 'Product Breakdown',
-              render: (val) => <span style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.95rem' }}>{val}</span>
+              header: 'Product / Peptide',
+              render: (row) => (
+                <div>
+                  <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.9rem' }}>{row.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Supplier: {row.supplier}</div>
+                </div>
+              )
             },
             {
-              key: 'vialsRequired',
+              key: 'quantity',
               header: 'Vials',
-              render: (val) => <div style={{ textAlign: 'right', fontSize: '0.95rem' }}>{val}</div>
+              align: 'right',
+              render: (row) => <div style={{ textAlign: 'right', fontSize: '0.9rem', fontWeight: 600 }}>{row.quantity}</div>
             },
             {
-              key: 'pharmacyCostPerVial',
-              header: 'Unit Cost',
-              render: (val) => <div style={{ textAlign: 'right', fontSize: '0.95rem', color: 'var(--text-muted)' }}>AED {val}</div>
+              key: 'unitCost',
+              header: 'Wholesale / Vial',
+              align: 'right',
+              render: (row) => <div style={{ textAlign: 'right', fontSize: '0.88rem', color: 'var(--text-muted)' }}>${row.unitCost}</div>
             },
             {
               key: 'totalCost',
               header: 'Total Cost',
-              render: (val) => <div style={{ textAlign: 'right', fontWeight: 600 }}>AED {val}</div>
+              align: 'right',
+              render: (row) => <div style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.9rem' }}>${row.totalCost}</div>
             },
             {
-              key: 'recommendedRetailPerVial',
-              header: 'Unit Retail',
-              render: (val) => <div style={{ textAlign: 'right', fontSize: '0.95rem', color: 'var(--text-muted)' }}>AED {val}</div>
+              key: 'unitRetail',
+              header: 'Suggested Retail',
+              align: 'right',
+              render: (row) => <div style={{ textAlign: 'right', fontSize: '0.88rem', color: 'var(--text-muted)' }}>${row.unitRetail}</div>
             },
             {
-              key: 'totalRetail',
-              header: 'Total Retail',
-              render: (val) => <div style={{ textAlign: 'right', fontWeight: 600, color: 'var(--primary)' }}>AED {val}</div>
+              key: 'margin',
+              header: 'Est. Margin',
+              align: 'right',
+              render: (row) => (
+                <div style={{ textAlign: 'right', fontWeight: 700, color: '#16a34a', fontSize: '0.9rem' }}>
+                  +${row.margin} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400 }}>({Math.round(row.marginPct)}%)</span>
+                </div>
+              )
             }
           ]}
           data={costs}
@@ -162,3 +134,4 @@ export default function CostSimulation({ protocol }) {
     </div>
   );
 }
+

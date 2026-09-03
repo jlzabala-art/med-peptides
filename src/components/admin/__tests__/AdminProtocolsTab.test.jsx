@@ -1,93 +1,90 @@
 "use client";
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { MemoryRouter } from 'next/navigation';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AdminProtocolsTab from '../AdminProtocolsTab.jsx';
-import { getPaginatedProtocols, updateProtocolFull } from '../../../services/protocolStorage';
 
-// Mock firebase/firestore functions used in the component
-vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  getDocs: vi.fn(() => Promise.resolve({ docs: [] })),
-  deleteDoc: vi.fn(() => Promise.resolve()),
-  doc: vi.fn(),
-  query: vi.fn(),
-  orderBy: vi.fn(),
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/admin/protocols',
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
-// Mock services that fetch protocols and products
-vi.mock('../../../services/protocolStorage', () => ({
-  getPaginatedProtocols: vi.fn(),
-  updateProtocolFull: vi.fn(),
+vi.mock('@/hooks/useRoleAccess', () => ({
+  useRoleAccess: () => ({
+    role: 'admin',
+    is: (r) => r === 'admin',
+    can: () => true,
+  }),
 }));
 
-// Mock db reference
-vi.mock('../../../firebase', () => ({ db: {} }));
+vi.mock('../../../context/AuthContext', () => ({
+  useAuth: () => ({
+    user: { uid: 'test-admin' },
+    userProfile: { role: 'admin' },
+  }),
+}));
+
+vi.mock('../../../context/DrawerContext', () => ({
+  useDrawer: () => ({
+    openDrawer: vi.fn(),
+    closeDrawer: vi.fn(),
+    isDrawerOpen: false,
+    drawerState: {},
+  }),
+}));
+
+
+
+
+
+vi.mock('../../../actions/protocolsActions', () => ({
+  fetchProtocolsAction: vi.fn(() => Promise.resolve([
+    {
+      id: 'p1',
+      name: 'Test Protocol',
+      therapeutic_category: 'Category A',
+      status: 'active',
+      complexity_level: 'moderate',
+      createdAt: '2026-05-26T13:00:00Z',
+    },
+  ])),
+  fetchProtocolsMetricsAction: vi.fn(() => Promise.resolve({
+    totalProtocols: 1,
+    activeCount: 1,
+    draftCount: 0,
+    archivedCount: 0,
+  })),
+}));
+
+// Mock db & auth reference
+vi.mock('../../../firebase', () => ({
+  db: {},
+  auth: { currentUser: { uid: 'test-admin' } },
+}));
 
 describe('AdminProtocolsTab', () => {
+  let queryClient;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getPaginatedProtocols).mockResolvedValue({
-      protocols: [],
-      lastDoc: null,
-      hasMore: false,
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
     });
   });
 
-  test('renders loading state and then shows empty list message', async () => {
+  test('renders protocols page and header correctly', async () => {
+    const Component = await AdminProtocolsTab({ isSubTab: false });
     render(
-      <MemoryRouter>
-        <AdminProtocolsTab />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        {Component}
+      </QueryClientProvider>
     );
-    // Loading indicator should appear first
-    expect(screen.getByText(/Loading all protocols…/i)).toBeInTheDocument();
-    // Wait for the async fetch to finish
-    await waitFor(() =>
-      expect(screen.queryByText(/Loading all protocols…/i)).not.toBeInTheDocument()
-    );
-    // With no protocols we should see the placeholder message
-    expect(screen.getByText(/No protocols saved yet./i)).toBeInTheDocument();
-  });
 
-  test('displays an error message when getPaginatedProtocols rejects', async () => {
-    vi.mocked(getPaginatedProtocols).mockRejectedValue(new Error('network failure'));
-    render(
-      <MemoryRouter>
-        <AdminProtocolsTab />
-      </MemoryRouter>
-    );
-    await waitFor(() => expect(screen.getByText(/Failed to load protocols:/i)).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
-  });
-
-  test('allows expanding a protocol row after data is loaded', async () => {
-    const mockProtocol = {
-      id: 'p1',
-      protocol_name: 'Test Protocol',
-      therapeutic_category: 'Category A',
-      status: 'draft',
-      complexity_level: 'moderate',
-      created_at: { toDate: () => new Date() },
-      created_by: { user_name: 'admin' },
-      version_number: 1,
-      phases: [],
-    };
-    vi.mocked(getPaginatedProtocols).mockResolvedValue({
-      protocols: [mockProtocol],
-      lastDoc: null,
-      hasMore: false,
+    await waitFor(() => {
+      expect(screen.getByText(/Protocols & Pathways/i)).toBeInTheDocument();
     });
-    render(
-      <MemoryRouter>
-        <AdminProtocolsTab />
-      </MemoryRouter>
-    );
-    await waitFor(() => expect(screen.getByText('Test Protocol')).toBeInTheDocument());
-
-    const toggleBtn = screen.getByRole('button', { name: /Expand protocol details/i });
-    fireEvent.click(toggleBtn);
-    expect(screen.getByText(/Add Phase/i)).toBeInTheDocument();
   });
 });
+

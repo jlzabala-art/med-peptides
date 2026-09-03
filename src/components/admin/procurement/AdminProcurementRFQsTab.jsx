@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
-import { Card, DataTable, StatusChip, StandardDrawer } from '../../ui';
+import { Card, DataTable, StatusChip, CopyableId, StandardDrawer, AppActionGroup } from '../../ui';
 import PageHeader from '../../ui/PageHeader';
 import GlobalSearchBar from '../../ui/GlobalSearchBar';
 import DataTableSkeleton from '../../ui/skeletons/DataTableSkeleton';
 import { useProcurementManager } from '../../../hooks/data/useProcurementManager';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
+import notifier from '../../../services/NotificationService';
 import { FileText, Loader2, CheckCircle, X, Search } from '@/lib/icons';
 
 export default function AdminProcurementRFQsTab() {
@@ -18,7 +19,7 @@ export default function AdminProcurementRFQsTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRfq, setSelectedRfq] = useState(null);
   
-  const { convertPurchaseRFQToPO } = useProcurementManager();
+  const { convertPurchaseRFQToPO, createPurchaseRFQ } = useProcurementManager();
 
   const loadRfqs = async () => {
     setLoading(true);
@@ -36,18 +37,42 @@ export default function AdminProcurementRFQsTab() {
     loadRfqs();
   }, []);
 
-  const handleConvertPO = async (rfq) => {
-    if (!window.confirm("Are you sure you want to accept this quote and convert to a Purchase Order?")) return;
-    
+  const handleCloneRFQ = async (rfq) => {
     try {
-      await convertPurchaseRFQToPO(rfq.id);
-      toast.success("Successfully converted to Purchase Order!");
-      setSelectedRfq(null);
+      const clonedItems = (rfq.items || []).map(i => ({
+        productId: i.productId || '',
+        productName: i.productName || i.name || 'Item',
+        dosage: i.dosage || '',
+        qty: i.qty || i.quantity || 1,
+        proposedUnitPrice: i.proposedUnitPrice || i.targetPrice || i.unitPrice || 0,
+      }));
+      await createPurchaseRFQ({
+        supplierId: rfq.supplierId || '',
+        items: clonedItems,
+        notes: rfq.notes ? `Cloned from #${rfq.id.slice(0, 6)}: ${rfq.notes}` : `Cloned from #${rfq.id.slice(0, 6)}`,
+        proposedDiscount: rfq.proposedDiscount || 0,
+        shippingAddress: rfq.shippingAddress || null,
+      });
+      toast.success("RFQ cloned successfully!");
       loadRfqs();
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to convert to PO");
+      console.error("Clone RFQ error:", err);
+      toast.error("Failed to clone RFQ: " + err.message);
     }
+  };
+
+  const handleConvertPO = async (rfq) => {
+    notifier.confirmCritical("Are you sure you want to accept this quote and convert to a Purchase Order?", async () => {
+      try {
+        await convertPurchaseRFQToPO(rfq.id);
+        toast.success("Successfully converted to Purchase Order!");
+        setSelectedRfq(null);
+        loadRfqs();
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to convert to PO");
+      }
+    });
   };
 
   const filteredRfqs = rfqs.filter(r => 
@@ -66,7 +91,7 @@ export default function AdminProcurementRFQsTab() {
     {
       key: 'id',
       header: 'RFQ #',
-      render: (r) => <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{r.id.slice(0,8).toUpperCase()}</span>
+      render: (r) => <CopyableId value={r.id} displayValue={r.id.slice(0,8).toUpperCase()} />
     },
     {
       key: 'supplierName',
@@ -88,16 +113,27 @@ export default function AdminProcurementRFQsTab() {
     },
     {
       key: 'actions',
-      header: 'Action',
+      header: 'Actions',
       align: 'right',
       render: (r) => (
-        <button 
-          onClick={() => setSelectedRfq(r)}
-          className="btn btn-outline"
-          style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
-        >
-          View Details
-        </button>
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+          <AppActionGroup
+            maxVisible={3}
+            actions={[
+              { type: 'view', label: 'View RFQ', onClick: () => setSelectedRfq(r) },
+              {
+                type: 'clone',
+                label: 'Clone RFQ (Re-quote Items)',
+                onClick: () => handleCloneRFQ(r)
+              },
+              {
+                type: 'create_order',
+                label: 'Convert to PO',
+                onClick: () => handleConvertPO(r)
+              }
+            ]}
+          />
+        </div>
       )
     }
   ];
@@ -141,7 +177,7 @@ export default function AdminProcurementRFQsTab() {
         <StandardDrawer
           isOpen={true}
           onClose={() => setSelectedRfq(null)}
-          title={`RFQ: ${selectedRfq.id.slice(0,8).toUpperCase()}`}
+          title={<span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>RFQ: <CopyableId value={selectedRfq.id} displayValue={selectedRfq.id.slice(0,8).toUpperCase()} /></span>}
           subtitle={`Supplier: ${selectedRfq.supplierName}`}
           width="800px"
           footer={

@@ -30,6 +30,7 @@ import { usePageMeta } from '../hooks/usePageMeta';
 
 
 import { useRouter, usePathname } from 'next/navigation';
+import { useCart } from '../context/CartProvider';
 import { getActiveProducts } from '../repositories/productRepository';
 import '../styles/collection_shared.css';
 import CollectionHeader from '../components/collection/CollectionHeader';
@@ -350,8 +351,8 @@ function consolidateByAdminRoute(peptides) {
   return Array.from(map.values());
 }
 
-export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompare }) {
-  const navigate = useRouter();
+export default function PeptideCollectionPage({ initialProducts = [], onNavigate, onBack, toggleCompare }) {
+  const router = useRouter();
   const location = usePathname();
 
   usePageMeta({
@@ -368,11 +369,33 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
     },
   });
 
-  const [peptides, setPeptides] = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [peptides, setPeptides] = useState(initialProducts || []);
+  const [loading, setLoading]   = useState(!initialProducts || initialProducts.length === 0);
   const [viewMode, setViewMode] = useState('grid');
   const [page, setPage]         = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Multi-tier cache hydration (SSR -> RAM -> localStorage -> Firestore)
+  useEffect(() => {
+    let isMounted = true;
+    if (initialProducts && initialProducts.length > 0) {
+      setPeptides(initialProducts);
+      setLoading(false);
+      return;
+    }
+    
+    getActiveProducts().then(allProds => {
+      if (isMounted && allProds && allProds.length > 0) {
+        setPeptides(allProds);
+        setLoading(false);
+      }
+    }).catch(err => {
+      console.warn('[PeptideCollectionPage] cache load:', err);
+      if (isMounted) setLoading(false);
+    });
+
+    return () => { isMounted = false; };
+  }, [initialProducts]);
 
   /* Lock body scroll while drawer is open */
   useEffect(() => {
@@ -389,26 +412,57 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
 
   // Algolia Search State
   const [hitsPerPage, setHitsPerPage] = useState(25);
-  const { query: algoliaQuery, setQuery: setAlgoliaQuery, results: fetchedResults, totalHits, hasMore: hasMoreResults, loadMore, isSearching } = useProductSearch({
+  const { results: fetchedResults, totalHits, hasMore: hasMoreResults, loadMore, isSearching } = useProductSearch({
     indexName: algoliaConfig.indices.products,
+    query: activeFilters.search || '',
     hitsPerPage: hitsPerPage,
-    filters: buildAlgoliaFilters(activeFilters)
+    filters: buildAlgoliaFilters(activeFilters),
+    alwaysFetch: true
   });
 
-  // Keep debouncing local search input to Algolia query
-  useEffect(() => {
-    setAlgoliaQuery(activeFilters.search || '');
-  }, [activeFilters.search, setAlgoliaQuery]);
+  // High-performance display with instant local and Algolia search integration
+  const displayPeptides = useMemo(() => {
+    let source = (fetchedResults && fetchedResults.length > 0 && !activeFilters.search)
+      ? fetchedResults
+      : peptides;
 
-  const displayPeptides = fetchedResults;
+    let filtered = source;
+    if (activeFilters.category) {
+      filtered = filtered.filter(p => (p.category === activeFilters.category || p.categoryId === activeFilters.category));
+    }
+    if (activeFilters.tags && activeFilters.tags.length > 0) {
+      filtered = filtered.filter(p => activeFilters.tags.every(t => (p.tags || []).includes(t)));
+    }
+    if (activeFilters.search) {
+      const q = activeFilters.search.toLowerCase().trim();
+      filtered = filtered.filter(p => 
+        (p.name || '').toLowerCase().includes(q) || 
+        (p.displayName || '').toLowerCase().includes(q) ||
+        (p.description || '').toLowerCase().includes(q) ||
+        (p.tags || []).some(t => t.toLowerCase().includes(q))
+      );
+    }
+    return filtered;
+  }, [fetchedResults, peptides, activeFilters]);
 
   const categoryOptions = useMemo(() => {
-    return Object.keys(CATEGORY_COLOR).map(cat => [cat, 0]);
-  }, []);
+    const counts = {};
+    peptides.forEach(p => {
+      const cat = p.category || p.categoryId;
+      if (cat) counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return Object.keys(CATEGORY_COLOR).map(cat => [cat, counts[cat] || 0]);
+  }, [peptides]);
 
   const tagOptions = useMemo(() => {
-    return [];
-  }, []);
+    const tagMap = {};
+    peptides.forEach(p => {
+      (p.tags || []).forEach(t => {
+        if (t) tagMap[t] = (tagMap[t] || 0) + 1;
+      });
+    });
+    return Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  }, [peptides]);
 
   const toggleCategory = (cat) => {
     setActiveFilters(prev => ({ ...prev, category: prev.category === cat ? null : cat }));
@@ -426,9 +480,26 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
     setActiveFilters({ category: null, tags: [], search: '', sort: 'name-asc' });
   };
 
+  const cartContext = useCart();
+  const updateCart = cartContext?.updateCart;
+
+  const handleQuickAdd = (p, e) => {
+    if (e) e.stopPropagation();
+    const defaultVariant = (p.variants && p.variants[0]) ? p.variants[0] : p;
+    const target = {
+      ...defaultVariant,
+      productId: p.id,
+      variantId: defaultVariant.id || defaultVariant.variantId || p.id,
+      name: p.name,
+      price: defaultVariant.unit_price || defaultVariant.price || defaultVariant.retailPrice || 15.00
+    };
+    if (typeof updateCart === 'function') {
+      updateCart(target, 1);
+    }
+    window.dispatchEvent(new CustomEvent('open-cart'));
+  };
+
   const handleCardClick = (p) => {
-    // Derive URL slug from name (e.g. "Semax" → "semax") to match ProductTemplate's resolver.
-    // p.slug is the Firestore document ID (e.g. "Semax-30mg-vial") which ProductTemplate does NOT use for URL matching.
     const nameSlug = p.name ? p.name.toLowerCase().replace(/\s+/g, '-') : p.slug;
     if (onNavigate) onNavigate(nameSlug);
     else router.push(`/product/${nameSlug}`);
@@ -493,6 +564,109 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
         </CollectionSidebar>
 
         <main className="col-main">
+          {/* ── Active Filter Chips Bar (Horizontal scroll on mobile) ── */}
+          {hasActiveFilters && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              padding: '0.25rem 0 1rem 0',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              flexWrap: 'nowrap'
+            }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                Active:
+              </span>
+
+              {activeFilters.search && (
+                <button
+                  onClick={() => setActiveFilters(prev => ({ ...prev, search: '' }))}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                    border: '1px solid rgba(56, 189, 248, 0.35)',
+                    color: '#38bdf8',
+                    borderRadius: '20px',
+                    padding: '4px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  "{activeFilters.search}" <X size={12} strokeWidth={2.5} />
+                </button>
+              )}
+
+              {activeFilters.category && (
+                <button
+                  onClick={() => setActiveFilters(prev => ({ ...prev, category: null }))}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    backgroundColor: `${getCategoryColor(activeFilters.category)}22`,
+                    border: `1px solid ${getCategoryColor(activeFilters.category)}55`,
+                    color: getCategoryColor(activeFilters.category),
+                    borderRadius: '20px',
+                    padding: '4px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {activeFilters.category} <X size={12} strokeWidth={2.5} />
+                </button>
+              )}
+
+              {activeFilters.tags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.16)',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '20px',
+                    padding: '4px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  #{tag} <X size={12} strokeWidth={2.5} />
+                </button>
+              ))}
+
+              <button
+                onClick={clearAllFilters}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+
           {/* ── Category Focus Panel (Phase 1) ── */}
           <AnimatePresence mode="wait">
             {activeFilters.category && (
@@ -529,7 +703,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
                 {CATEGORY_PATHWAYS[activeFilters.category] && (
                   <div className="pc-pathway-container">
                     <h4 style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: getCategoryColor(activeFilters.category), marginBottom: '0.75rem', textAlign: 'left' }}>
-                      Vía de Señalización Biológica Investigada
+                      Biological Signaling Pathway Under Investigation
                     </h4>
                     <div className="pc-pathway-flow">
                       {CATEGORY_PATHWAYS[activeFilters.category].map((step, idx) => (
@@ -598,6 +772,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
                         viewMode={viewMode}
                         onClick={() => handleCardClick(p)}
                         onCompareClick={toggleCompare ? () => toggleCompare(p) : undefined}
+                        onQuickAdd={(e) => handleQuickAdd(p, e)}
                       />
                     </motion.div>
                   ))
@@ -611,7 +786,7 @@ export default function PeptideCollectionPage({ onNavigate, onBack, toggleCompar
               <p className="pc-empty-title">No peptides match your filters</p>
               <p className="pc-empty-sub">Try adjusting your search or clearing some filters.</p>
               {hasActiveFilters && (
-                <button className="pc-load-more-btn" onClick={clearFilters}>
+                <button className="pc-load-more-btn" onClick={clearAllFilters}>
                   Clear filters
                 </button>
               )}

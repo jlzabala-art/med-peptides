@@ -1,8 +1,7 @@
 "use client";
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 /* eslint-disable no-unused-vars */
 import React, { useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 
 /**

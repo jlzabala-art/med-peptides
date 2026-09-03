@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Upload, X, FileText, AlertCircle } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 
 
@@ -93,7 +94,7 @@ export default function BulkInviteModal({ onClose }) {
 
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border)', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
            <button className="gcp-btn-secondary" onClick={onClose}>Cancel</button>
-           <button className="gcp-btn-primary" disabled={!file} onClick={() => alert('Bulk upload will be processed in the backend.')}>Process File</button>
+           <button className="gcp-btn-primary" disabled={!file} onClick={() => toast('Bulk upload will be processed in the backend.')}>Process File</button>
         </div>
 
       </div>

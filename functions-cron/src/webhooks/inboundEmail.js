@@ -1,6 +1,75 @@
 const { onRequest } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 const { GoogleGenAI } = require('@google/genai');
+const { z } = require("zod");
+
+const emailZodSchema = z.object({
+  intent: z.enum(["CUSTOMER_RFQ", "SUPPLIER_QUOTATION", "PRICE_LIST", "PRESCRIPTION", "COA", "INQUIRY", "PURCHASE_ORDER", "LOGISTICS", "REGULATORY"]),
+  confidenceScore: z.number().optional(),
+  extractedData: z.object({
+    supplierOrCustomer: z.string().optional(),
+    requestDate: z.string().optional(),
+    requestedBy: z.string().optional(),
+    requestedTo: z.string().optional(),
+    deliveryLocation: z.string().optional(),
+    urgency: z.enum(["Urgent", "Normal", "Low"]).optional(),
+    prescriptionDetails: z.object({
+      date: z.string().optional(),
+      doctorName: z.string().optional(),
+      doctorContact: z.string().optional(),
+      patientName: z.string().optional(),
+      patientDOB: z.string().optional(),
+      patientGender: z.string().optional(),
+      patientAge: z.string().optional(),
+      duration: z.string().optional(),
+      formulaType: z.string().optional(),
+      diagnosis: z.string().optional()
+    }).optional().nullable(),
+    products: z.array(z.object({
+      name: z.string().optional(),
+      quantity: z.string().optional(),
+      concentration: z.string().optional(),
+      dosage: z.string().optional(),
+      frequency: z.string().optional(),
+      instructions: z.string().optional(),
+      unitPrice: z.string().optional(),
+      totalPrice: z.string().optional()
+    })).optional().default([]),
+    prescriptions: z.array(z.object({
+      prescriptionDetails: z.object({
+        date: z.string().optional(),
+        doctorName: z.string().optional(),
+        doctorContact: z.string().optional(),
+        patientName: z.string().optional(),
+        patientDOB: z.string().optional(),
+        patientGender: z.string().optional(),
+        patientAge: z.string().optional(),
+        duration: z.string().optional(),
+        formulaType: z.string().optional(),
+        diagnosis: z.string().optional()
+      }).optional().nullable(),
+      products: z.array(z.object({
+        name: z.string().optional(),
+        quantity: z.string().optional(),
+        unit: z.string().optional(),
+        concentration: z.string().optional(),
+        dosage: z.string().optional(),
+        frequency: z.string().optional(),
+        duration: z.string().optional(),
+        instructions: z.string().optional(),
+        form: z.string().optional(),
+        unitPrice: z.string().optional(),
+        totalPrice: z.string().optional()
+      })).optional().default([])
+    })).optional().default([]),
+    financialDetails: z.object({
+      subtotal: z.string().optional(),
+      discount: z.string().optional(),
+      commission: z.string().optional(),
+      grandTotal: z.string().optional()
+    }).optional().nullable()
+  }).optional().nullable()
+});
 
 // Ensure firebase app is initialized
 if (!admin.apps.length) {
@@ -408,6 +477,7 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
                       frequency: { type: Type.STRING, description: "How often to administer (e.g., once daily, twice a week, 5 nights per week)" },
                       duration: { type: Type.STRING, description: "Treatment duration for this specific product (e.g., 8 weeks, 1 month)" },
                       instructions: { type: Type.STRING, description: "The complete, unabridged clinical instructions (e.g., Inject 0.1 mL once daily subcutaneously. 2 days are free...)" },
+                      form: { type: Type.STRING, description: "The physical form, group, or vehicle of the product (e.g., 'Cream', 'Capsules', 'Supplements', 'Injectable', 'Lotion'). Used to group APIs belonging to the same formula." },
                       unitPrice: { type: Type.STRING },
                       totalPrice: { type: Type.STRING }
                     }
@@ -467,7 +537,8 @@ async function processEmailWorkflow(messageId, textBody, subject, fromEmail, add
 
     const response = await callGeminiWithRetry(ai, aiContents, emailSchema);
     const aiResultText = response.text;
-    aiResultJson = JSON.parse(aiResultText);
+    const rawAiResultJson = JSON.parse(aiResultText);
+    aiResultJson = emailZodSchema.parse(rawAiResultJson);
   } catch (e) {
     console.error("Failed to call Gemini or parse JSON after all retries:", e);
     throw e;

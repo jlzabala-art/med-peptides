@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Next.js App Router: metadata exports must live in page/layout files */
 import React from 'react';
 import HomeClientWrapper from './HomeClientWrapper';
 import { getFeaturedProductsServer } from '../repositories/productRepository';
@@ -7,13 +8,11 @@ export const metadata = {
   description: 'Atlas Health provides high-purity research peptides and advanced research protocols for scientific professionals. Global logistics and verified analytical standards.',
 };
 
+import { sanitizeForClient } from '../utils/sanitizeForClient';
+
 export default async function HomePage() {
-  // Fetch a lightweight subset of products natively on the server for the home page
   const catalog = await getFeaturedProductsServer();
-  // Next.js Server Components require absolutely plain JSON objects to pass to Client Components.
-  // Using JSON.parse(JSON.stringify()) ensures all prototype methods (like Firestore Timestamp's toJSON)
-  // are completely stripped and safely passed.
-  const serializedCatalog = JSON.parse(JSON.stringify(catalog));
+  const serializedCatalog = sanitizeForClient(catalog || []);
   
   return (
     <HomeClientWrapper initialProducts={serializedCatalog} />

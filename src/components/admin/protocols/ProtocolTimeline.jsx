@@ -1,29 +1,36 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Target, ArrowRight, Package, Clock, Activity, Zap, CheckCircle2 } from '@/lib/icons';
+import React, { useState } from 'react';
+import { Target, ArrowRight, Package, Clock, Activity, Zap, CheckCircle2, Sparkles } from '@/lib/icons';
 import { motion, AnimatePresence } from 'framer-motion';
+import EmptyState from '../../ui/EmptyState';
+import { openProtocolAI } from '../../../utils/openModuleAI';
 
-export default function ProtocolTimeline({ protocol }) {
+export default function ProtocolTimeline({ protocol, onProductClick, onEnrichTreatment }) {
   const phases = protocol?.phases || [];
+  const [isGenerating, setIsGenerating] = React.useState(false);
   const [selectedPhase, setSelectedPhase] = useState(0); // Default to first phase
+  const [aiQueryFired, setAiQueryFired] = useState(false);
+
+  const protocolName = protocol?.name || protocol?.title || 'this protocol';
 
   // If no phases exist
   if (phases.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', background: 'var(--surface)', borderRadius: '24px', border: '1px dashed var(--border)' }}>
-        <div style={{ width: '64px', height: '64px', background: 'var(--bg-main)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
-          <Activity size={32} color="var(--text-muted)" />
-        </div>
-        <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)', fontSize: '1.2rem' }}>No Phases Defined</h4>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: 0 }}>Add phases to construct the visual patient journey.</p>
+      <div style={{ padding: '2rem 0' }}>
+        <EmptyState
+          icon={Activity}
+          title="No Phases Defined"
+          subtitle="Add phases to construct the visual patient journey."
+        />
       </div>
     );
   }
 
-  const totalWeeks = phases.reduce((acc, p) => acc + (p.durationWeeks || 0), 0) || 1;
+  const calculatedTotalWeeks = phases.reduce((acc, p) => acc + (p.durationWeeks || p.duration_weeks || p.durationInWeeks || 0), 0);
+  void (protocol?.protocol_duration_weeks || protocol?.duration_weeks || calculatedTotalWeeks || 1); // total for reference
 
-  // Modern gradients for phases
+    // Modern gradients for phases
   const getPhaseStyle = (index) => {
     const styles = [
       { from: '#3b82f6', to: '#2563eb', shadow: 'rgba(59, 130, 246, 0.4)' },
@@ -35,7 +42,37 @@ export default function ProtocolTimeline({ protocol }) {
     return styles[index % styles.length];
   };
 
-  let cumulativeWeeks = 0;
+  const handleAskAI = (phase, idx) => {
+    const phaseLabel = phase.label || `Phase ${idx + 1}`;
+    const compounds = (phase.items || phase.medications || [])
+      .map(i => i.name).filter(Boolean).join(', ') || 'the prescribed compounds';
+    const query = `Analyze ${phaseLabel} of the "${protocolName}" protocol. This phase lasts ${phase.durationWeeks || '?'} weeks and uses: ${compounds}. What are the key clinical objectives, expected outcomes, and safety considerations?`;
+    
+    // We pass the full protocol context so RULE 2 (Protocol Mode) has complete data.
+    openProtocolAI({
+      ...protocol,
+      activePhase: phaseLabel,
+      compounds,
+    }, {
+      autoGenerate: false, // Wait for the specific query
+      displayText: `Analyze ${phaseLabel}`,
+    });
+
+    // Small delay so context sets before send fires
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('ATLAS_PREFILL_QUERY', { detail: { query, autoSend: true } }));
+    }, 100);
+    
+    setAiQueryFired(true);
+    setTimeout(() => setAiQueryFired(false), 3000);
+  };
+
+  // Pre-compute cumulative week ranges — purely functional, no mutation inside render
+  const phaseWeekRanges = phases.reduce((acc, p) => {
+    const dur = p.durationWeeks || p.duration_weeks || p.durationInWeeks || 0;
+    const prev = acc.length > 0 ? acc[acc.length - 1].end : 0;
+    return [...acc, { start: prev, end: prev + dur, dur }];
+  }, []);
 
   return (
     <div style={{ margin: '0 auto', paddingBottom: '2rem', width: '100%' }}>
@@ -63,10 +100,7 @@ export default function ProtocolTimeline({ protocol }) {
           {phases.map((phase, idx) => {
             const isSelected = selectedPhase === idx;
             const style = getPhaseStyle(idx);
-            
-            const startWeek = cumulativeWeeks;
-            cumulativeWeeks += (phase.durationWeeks || 0);
-            const endWeek = cumulativeWeeks;
+            const { start: startWeek, end: endWeek, dur: phaseDur } = phaseWeekRanges[idx];
 
             return (
               <motion.div 
@@ -82,7 +116,7 @@ export default function ProtocolTimeline({ protocol }) {
                   alignItems: 'center',
                   cursor: 'pointer',
                   zIndex: isSelected ? 10 : 1,
-                  flex: phase.durationWeeks || 1
+                  flex: phaseDur || 1
                 }}
               >
                 {/* Active connection line overlay - only draw if not the last phase */}
@@ -184,6 +218,33 @@ export default function ProtocolTimeline({ protocol }) {
                   </div>
                 </div>
               </div>
+
+              {/* Ask AI about this phase */}
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={(e) => { e.stopPropagation(); handleAskAI(phases[selectedPhase], selectedPhase); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.55rem 1rem',
+                  borderRadius: '10px',
+                  border: `1px solid ${getPhaseStyle(selectedPhase).from}40`,
+                  background: `linear-gradient(135deg, ${getPhaseStyle(selectedPhase).from}15, ${getPhaseStyle(selectedPhase).to}0a)`,
+                  color: getPhaseStyle(selectedPhase).from,
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  flexShrink: 0,
+                  boxShadow: aiQueryFired ? `0 0 0 3px ${getPhaseStyle(selectedPhase).from}30` : 'none'
+                }}
+                title={`Ask AI Atlas to analyze ${phases[selectedPhase].label || `Phase ${selectedPhase + 1}`}`}
+              >
+                <Sparkles size={15} />
+                <span>{aiQueryFired ? 'Sent to AI ✓' : 'Ask AI Atlas'}</span>
+              </motion.button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', position: 'relative', zIndex: 2 }}>
@@ -194,7 +255,34 @@ export default function ProtocolTimeline({ protocol }) {
                   <CheckCircle2 size={18} color={getPhaseStyle(selectedPhase).from} /> Phase Objectives
                 </h5>
                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-                  {phases[selectedPhase].objective || 'No specific clinical objectives defined for this phase.'}
+                  {phases[selectedPhase].objective || (
+                    <span style={{ display: 'block' }}>
+                      No specific clinical objectives defined for this phase.
+                      {onEnrichTreatment && (
+                        <button
+                          onClick={() => {
+                            setIsGenerating(true);
+                            onEnrichTreatment();
+                            setTimeout(() => setIsGenerating(false), 3000);
+                          }}
+                          disabled={isGenerating}
+                          className="gcp-btn-secondary"
+                          style={{
+                            marginTop: '0.75rem',
+                            padding: '0.4rem 0.8rem',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.4rem',
+                            fontSize: '0.8rem',
+                            opacity: isGenerating ? 0.7 : 1
+                          }}
+                        >
+                          {isGenerating ? 'Working...' : '✨ Generate Objectives via AI'}
+                        </button>
+                      )}
+                    </span>
+                  )}
                 </p>
 
                 {phases[selectedPhase].doseChanges && (
@@ -215,7 +303,12 @@ export default function ProtocolTimeline({ protocol }) {
                 </h5>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {!(phases[selectedPhase].items || phases[selectedPhase].medications)?.length ? (
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>No active compounds registered for this phase.</div>
+                    <EmptyState
+                      icon={Package}
+                      title="No Compounds"
+                      subtitle="No active compounds registered for this phase."
+                      compact={true}
+                    />
                   ) : (
                     (phases[selectedPhase].items || phases[selectedPhase].medications).map((item, i) => (
                       <div key={i} style={{ 
@@ -224,7 +317,23 @@ export default function ProtocolTimeline({ protocol }) {
                         display: 'flex', flexDirection: 'column', gap: '0.5rem',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
                       }}>
-                        <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-main)' }}>{item.name || 'Unknown Product'}</div>
+                        <div 
+                          style={{ 
+                            fontWeight: 700, 
+                            fontSize: '1rem', 
+                            color: onProductClick ? 'var(--primary)' : 'var(--text-main)', 
+                            cursor: onProductClick ? 'pointer' : 'default',
+                            textDecoration: onProductClick ? 'underline' : 'none',
+                            textUnderlineOffset: '2px'
+                          }}
+                          onClick={() => {
+                            if (onProductClick && (item.product_id || item.id)) {
+                              onProductClick({ id: item.product_id || item.id, name: item.name });
+                            }
+                          }}
+                        >
+                          {item.name || 'Unknown Product'}
+                        </div>
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
                           <div>
                             <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '0.2rem' }}>Dosage</div>

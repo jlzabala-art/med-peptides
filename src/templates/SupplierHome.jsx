@@ -1,14 +1,9 @@
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
-import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
-import Globe from "lucide-react/dist/esm/icons/globe";
-import History from "lucide-react/dist/esm/icons/history";
-import Settings from "lucide-react/dist/esm/icons/settings";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Package from "lucide-react/dist/esm/icons/package";
-import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
+import { 
+  LayoutDashboard, ShoppingBag, Globe, History, Settings, 
+  LogOut, Package, MessageSquare 
+} from '@/lib/icons';
 import { useAuth } from '../context/AuthContext';
 
 

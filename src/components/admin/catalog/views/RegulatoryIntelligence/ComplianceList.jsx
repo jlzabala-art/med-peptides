@@ -6,7 +6,7 @@ import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import XCircle from 'lucide-react/dist/esm/icons/x-circle';
 
-const StatusChip = ({ label, status }) => {
+const ComplianceChip = ({ label, status }) => {
   const isValid = status === 'Active' || status === 'Valid';
   return (
     <div
@@ -152,11 +152,11 @@ export function ComplianceList({ profiles, onSelectProfile }) {
                           </div>
 
                           <div style={{ flex: '2', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            <StatusChip label="REG" status={p.status.registration} />
-                            <StatusChip label="COA" status={p.status.coa} />
-                            <StatusChip label="GMP" status={p.status.gmp} />
-                            <StatusChip label="IMP" status={p.status.importPermit} />
-                            <StatusChip label="CPP" status={p.status.cpp} />
+                            <ComplianceChip label="REG" status={p.status.registration} />
+                            <ComplianceChip label="COA" status={p.status.coa} />
+                            <ComplianceChip label="GMP" status={p.status.gmp} />
+                            <ComplianceChip label="IMP" status={p.status.importPermit} />
+                            <ComplianceChip label="CPP" status={p.status.cpp} />
                           </div>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

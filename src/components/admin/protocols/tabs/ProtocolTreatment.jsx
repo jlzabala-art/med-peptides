@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { Plus, Settings, Activity, Clock, ShieldCheck, Target } from '@/lib/icons';
 import ProtocolTimeline from '../ProtocolTimeline';
 import ClinicalProgressTracker from '../ClinicalProgressTracker';
-
-export default function ProtocolTreatment({ protocol, onUpdate }) {
+export default function ProtocolTreatment({ protocol, onUpdate, onProductClick, onEnrichTreatment, onEnrichMonitoring }) {
   const [isEditingPhases, setIsEditingPhases] = useState(false);
   const phases = protocol?.phases || [];
 
@@ -148,8 +147,8 @@ export default function ProtocolTreatment({ protocol, onUpdate }) {
 
       {/* Embedded Deep Components */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', marginTop: '1rem' }}>
-        <ProtocolTimeline protocol={protocol} />
-        <ClinicalProgressTracker protocol={protocol} />
+        <ProtocolTimeline protocol={protocol} onProductClick={onProductClick} onEnrichTreatment={onEnrichTreatment} />
+        <ClinicalProgressTracker protocol={protocol} onEnrichMonitoring={onEnrichMonitoring} />
       </div>
       
     </div>

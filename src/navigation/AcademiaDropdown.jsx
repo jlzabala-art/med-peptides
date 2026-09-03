@@ -66,7 +66,7 @@ function NavItem({ label, path, onClose }) {
   const [hovered, setHovered] = useState(false);
   return (
     <Link
-      to={path}
+      href={path}
       style={{
         ...S.item,
         background: hovered ? 'var(--background, #f5f5f5)' : 'transparent',

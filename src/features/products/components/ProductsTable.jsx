@@ -1,12 +1,15 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { Copy, Download, UploadCloud, Percent, ArrowUpRight, XCircle, Eye, BookOpen, Package, ClipboardList, ShoppingCart } from '@/lib/icons';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../../../firebase';
+import { toast } from 'react-hot-toast';
+import notifier from '../../../services/NotificationService';
 
 import { useAuth } from '../../../context/AuthContext';
+import { useDrawer } from '../../../context/DrawerContext';
 
 // UI Components
 import DataModule from '../../../components/ui/DataModule';
@@ -22,6 +25,7 @@ import ProductContextSwitcher from '../../../components/admin/ProductContextSwit
 import { useAdminProductsUIStore } from '../../../stores/adminProductsUIStore';
 import { getAdminProductsColumns } from '../../../components/admin/AdminProductsColumns';
 import VariantRow from '../../../components/admin/VariantRow';
+import { Box, Activity, RefreshCw, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import MetricCard from '../../../components/ui/MetricCard';
 
 // Hooks
@@ -38,24 +42,36 @@ import { useAlgoliaSearch } from '../../../hooks/data/useAlgoliaSearch';
 // Lazy-loaded heavy modals
 import dynamic from 'next/dynamic';
 const ProductMicrosite = dynamic(() => import('../../../components/admin/products/ProductMicrosite'));
-const CreateProductModal = dynamic(() => import('../../../components/admin/CreateProductModal'));
+const ProductFormDrawer = dynamic(() => import('../../../components/admin/ProductFormDrawer'));
 const BulkOrderSelectionModal = dynamic(() => import('../../../components/admin/BulkOrders/BulkOrderSelectionModal'));
 
 export default function ProductsTable({
   role = 'admin',
   initialProducts = [],
+  globalMetrics = null,
   readOnly = false,
   hideCosts = false,
   allowedCategories = ['All'],
   isWholesaler = false,
+  isSubTab = false,
 }) {
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const { openDrawer } = useDrawer();
 
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const basePanel = pathname?.split('/')[1] || 'admin';
   const initialSearch = searchParams.get('search') || '';
   const initialNew = searchParams.get('new') === 'true';
+
+  const updateUrlParam = (key, value) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== 'All') params.set(key, value);
+    else params.delete(key);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const [linkedSupplier, setLinkedSupplier] = useState(null);
 
@@ -69,20 +85,61 @@ export default function ProductsTable({
     bulkCategory, setBulkCategory,
     migrating, setMigrating,
     isBulkOrderModalOpen, setIsBulkOrderModalOpen,
-    productsToBulkOrder, setProductsToBulkOrder
+    productsToBulkOrder, setProductsToBulkOrder,
+    inventoryMode
   } = useAdminProductsUIStore();
 
+  const [bulkInventoryMode, setBulkInventoryMode] = useState(null); // 'set_stock', 'add_stock', 'set_min'
+  const [bulkInventoryValue, setBulkInventoryValue] = useState('');
+
   const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [globalSuppliers, setGlobalSuppliers] = useState([]);
+
+  useEffect(() => {
+    getDocs(collection(db, 'wholesellers'))
+      .then(snap => {
+        const suppliers = snap.docs.map(d => ({
+          id: d.id,
+          name: d.data().name || d.data().companyName || d.id
+        }));
+        setGlobalSuppliers(suppliers.sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(err => console.error('Error loading global suppliers for filter:', err));
+  }, []);
 
   useEffect(() => {
     if (initialNew) setIsCreateProductModalOpen(true);
   }, [initialNew, setIsCreateProductModalOpen]);
 
-  // Firestore paginated data
-  const { products, loading, loadingMore, fetchProducts, loadMore, hasMore, totalCount } =
-    useProducts(allowedCategories, { initialData: initialProducts, pageSize: rowsPerPage });
+  // Compat with URL filter field names
+  const filterCategory = searchParams.get('category') || 'All';
+  const setFilterCategory = (v) => updateUrlParam('category', v);
+  const filterSupplier = searchParams.get('supplier') || 'All'; // Now this will hold the ID (e.g. 'pod-poland')
+  const setFilterSupplier = (v) => updateUrlParam('supplier', v);
+  const filterStatus = searchParams.get('isActive') || 'All';
+  const setFilterStatus = (v) => updateUrlParam('isActive', v);
+  const filterWarehouse = searchParams.get('warehouse') || 'All';
+  const setFilterWarehouse = (v) => updateUrlParam('warehouse', v);
+  const filterStock = searchParams.get('stock') || 'All';
+  const setFilterStock = (v) => updateUrlParam('stock', v);
+  const filterApiPlaceholder = searchParams.get('apiPlaceholder') || 'All';
+  const setFilterApiPlaceholder = (v) => updateUrlParam('apiPlaceholder', v);
 
-  // Fuzzy search + filters
+  // Firestore paginated data (with server-side filters pushed down)
+  const { products, loading, loadingMore, fetchProducts, loadMore, hasMore, totalCount } =
+    useProducts(allowedCategories, { 
+      initialData: initialProducts, 
+      pageSize: rowsPerPage,
+      filters: {
+        category: filterCategory,
+        supplier: filterSupplier, // Pass the ID directly
+        isActive: filterStatus,
+        warehouse: filterWarehouse,
+        apiPlaceholder: filterApiPlaceholder
+      }
+    });
+
+  // Fuzzy search + filters (client-side for remaining results)
   const {
     searchTerm,
     setSearchTerm,
@@ -110,33 +167,98 @@ export default function ProductsTable({
     initialSearch: initialSearch,
   });
 
-  // Compat with old filter field names
-  const filterCategory = filters.category;
-  const setFilterCategory = (v) => setFilter('category', v);
-  const filterSupplier = filters.supplier;
-  const setFilterSupplier = (v) => setFilter('supplier', v);
-  const filterStatus = filters.isActive;
-  const setFilterStatus = (v) => setFilter('isActive', v);
-  const filterWarehouse = filters.warehouse;
-  const setFilterWarehouse = (v) => setFilter('warehouse', v);
+  useEffect(() => {
+    // Sync URL state to useDataFilters state if needed
+    setFilter('category', filterCategory);
+    setFilter('supplier', filterSupplier); // Use filterSupplier which is now the ID
+    setFilter('isActive', filterStatus);
+    setFilter('warehouse', filterWarehouse);
+    setFilter('apiPlaceholder', filterApiPlaceholder);
+  }, [filterCategory, filterSupplier, filterStatus, filterWarehouse, filterApiPlaceholder, setFilter]);
 
-  // Algolia Setup
+  // Algolia Setup with Facets and Numeric Filters
   const facetFilters = [];
   if (filterCategory !== 'All') facetFilters.push(`category:${filterCategory}`);
   if (filterSupplier !== 'All') facetFilters.push(`supplier:${filterSupplier}`);
   if (filterWarehouse !== 'All') facetFilters.push(`warehouse:${filterWarehouse}`);
   if (filterStatus !== 'All') facetFilters.push(`isActive:${filterStatus === 'Active'}`);
 
-  const { hits: algoliaHits, isAlgoliaActive, loading: algoliaLoading } = useAlgoliaSearch(
+  const numericFilters = [];
+  if (filterStock === 'In Stock') numericFilters.push('stock_level > 0');
+  if (filterStock === 'Out of Stock') numericFilters.push('stock_level = 0');
+
+  const { hits: algoliaHits, isAlgoliaActive, loading: algoliaLoading, error: algoliaError } = useAlgoliaSearch(
     'products',
     searchTerm,
-    { hitsPerPage: 100, facetFilters },
+    { 
+      hitsPerPage: 100, 
+      facetFilters: facetFilters.length > 0 ? facetFilters : undefined,
+      numericFilters: numericFilters.length > 0 ? numericFilters : undefined
+    },
     300
   );
 
-  const baseFilteredProducts = isAlgoliaActive && searchTerm.trim()
-    ? algoliaHits.map(h => products.find(p => p.id === h.objectID) || { ...h, id: h.objectID }).filter(Boolean)
-    : filteredProducts;
+  const baseFilteredProducts = (() => {
+    let localHits = filteredProducts;
+
+    if (searchTerm && searchTerm.trim()) {
+      localHits = localHits.filter(p => {
+        const lower = searchTerm.toLowerCase();
+        return (p.name && p.name.toLowerCase().includes(lower)) || 
+               (p.sku && p.sku.toLowerCase().includes(lower)) || 
+               (p.supplier && p.supplier.toLowerCase().includes(lower)) || 
+               (p.supplierName && p.supplierName.toLowerCase().includes(lower));
+      });
+    }
+
+    // Apply Stock Filter
+    if (filterStock !== 'All') {
+      localHits = localHits.filter(p => {
+        const stock = p.stock_level || 0;
+        const min = p.stock_min_threshold || 0;
+        if (filterStock === 'Out of Stock') return stock === 0;
+        if (filterStock === 'Low Stock') return stock > 0 && stock <= min;
+        if (filterStock === 'In Stock') return stock > min;
+        return true;
+      });
+    }
+
+    if (!searchTerm || !searchTerm.trim()) {
+      return localHits;
+    }
+
+    const algoliaMapped = isAlgoliaActive && !algoliaError
+      ? algoliaHits.map(h => {
+          const matched = products.find(p => p.id === (h.objectID || h.id));
+          return matched ? { ...matched, _highlightResult: h._highlightResult } : { ...h, id: h.objectID || h.id };
+        }).filter(Boolean)
+      : [];
+
+    if (isAlgoliaActive && !algoliaError) {
+      if (algoliaLoading && algoliaHits.length === 0) return localHits;
+      
+      let combined = [...algoliaMapped];
+      
+      // Re-apply stock filter to algolia hits if needed
+      if (filterStock !== 'All') {
+        combined = combined.filter(p => {
+          const stock = p.stock_level || 0;
+          const min = p.stock_min_threshold || 0;
+          if (filterStock === 'Out of Stock') return stock === 0;
+          if (filterStock === 'Low Stock') return stock > 0 && stock <= min;
+          if (filterStock === 'In Stock') return stock > min;
+          return true;
+        });
+      }
+
+      const algoliaIds = new Set(combined.map(p => p.id));
+      for (const p of localHits) {
+        if (!algoliaIds.has(p.id)) combined.push(p);
+      }
+      return combined;
+    }
+    return localHits;
+  })();
 
   // Group flat product list by name for table display
   const filteredGroups = useMemo(() => {
@@ -161,7 +283,6 @@ export default function ProductsTable({
   }, [baseFilteredProducts]);
 
   const [filterProductType, setFilterProductType] = useState('All');
-  const [filterStock, setFilterStock] = useState('All');
   const [filterZoho, setFilterZoho] = useState('All');
   const [filterSource, setFilterSource] = useState('All');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -219,7 +340,7 @@ export default function ProductsTable({
   };
 
   const {
-    selectedIds: selectedProductIds,
+    selectedArray: selectedProductIds,
     handleSelectRow,
     clearSelection,
   } = useBulkSelection(filteredGroups.flatMap((g) => g.variants));
@@ -300,39 +421,83 @@ export default function ProductsTable({
       return;
     }
 
-    if (!window.confirm(`Apply adjustment to ${affectedProducts.length} products?`)) return;
-
-    try {
-      const val = parseFloat(bulkValue);
-      for (const p of affectedProducts) {
-        let updates = {};
-        if (bulkMode === 'percent') {
-          const factor = 1 + val / 100;
-          updates = {
-            guestVialPrice: (p.guestVialPrice * factor).toFixed(2),
-            guestKitPrice: (p.guestKitPrice * factor).toFixed(2),
-            proVialPrice: (p.proVialPrice * factor).toFixed(2),
-            proKitPrice: (p.proKitPrice * factor).toFixed(2),
-          };
-        } else if (bulkMode === 'fixed') {
-          updates = {
-            guestVialPrice: (p.guestVialPrice + val).toFixed(2),
-            guestKitPrice: (p.guestKitPrice + val).toFixed(2),
-            proVialPrice: (p.proVialPrice + val).toFixed(2),
-            proKitPrice: (p.proKitPrice + val).toFixed(2),
-          };
+    notifier.confirmCritical(`Apply adjustment to ${affectedProducts.length} products?`, async () => {
+      try {
+        const val = parseFloat(bulkValue);
+        for (const p of affectedProducts) {
+          let updates = {};
+          if (bulkMode === 'percent') {
+            const factor = 1 + val / 100;
+            updates = {
+              guestVialPrice: (p.guestVialPrice * factor).toFixed(2),
+              guestKitPrice: (p.guestKitPrice * factor).toFixed(2),
+              proVialPrice: (p.proVialPrice * factor).toFixed(2),
+              proKitPrice: (p.proKitPrice * factor).toFixed(2),
+            };
+          } else if (bulkMode === 'fixed') {
+            updates = {
+              guestVialPrice: (p.guestVialPrice + val).toFixed(2),
+              guestKitPrice: (p.guestKitPrice + val).toFixed(2),
+              proVialPrice: (p.proVialPrice + val).toFixed(2),
+              proKitPrice: (p.proKitPrice + val).toFixed(2),
+            };
+          }
+          await updateDoc(doc(db, 'products', p.id), { ...updates, updatedAt: new Date().toISOString() });
         }
-        await updateDoc(doc(db, 'products', p.id), { ...updates, updatedAt: new Date().toISOString() });
+        toast.success('Bulk adjustment complete!');
+        fetchProducts();
+        setBulkMode(null);
+        setBulkValue('');
+        clearSelection();
+      } catch (err) {
+        console.error('Bulk adjust error:', err);
+        toast.error('Error applying bulk adjustments.');
       }
-      toast.success('Bulk adjustment complete!');
-      fetchProducts();
-      setBulkMode(null);
-      setBulkValue('');
-      clearSelection();
-    } catch (err) {
-      console.error('Bulk adjust error:', err);
-      toast.error('Error applying bulk adjustments.');
+    });
+  }
+
+  async function handleBulkInventoryAdjust() {
+    if (readOnly) return;
+    if (bulkInventoryValue === '' || isNaN(bulkInventoryValue)) {
+      toast.warning('Please enter a valid number.');
+      return;
     }
+
+    const affectedProducts = products.filter(
+      (p) =>
+        (bulkCategory === 'All' || p.category === bulkCategory) &&
+        (selectedProductIds.length === 0 || selectedProductIds.includes(p.id))
+    );
+
+    if (affectedProducts.length === 0) {
+      toast.warning('No products found in the selected category/selection.');
+      return;
+    }
+
+    notifier.confirmCritical(`Apply inventory adjustment to ${affectedProducts.length} products?`, async () => {
+      try {
+        const val = parseInt(bulkInventoryValue, 10);
+        for (const p of affectedProducts) {
+          let updates = {};
+          if (bulkInventoryMode === 'set_stock') {
+            updates = { stock_level: val };
+          } else if (bulkInventoryMode === 'add_stock') {
+            updates = { stock_level: (p.stock_level || 0) + val };
+          } else if (bulkInventoryMode === 'set_min') {
+            updates = { stock_min_threshold: val };
+          }
+          await updateDoc(doc(db, 'products', p.id), { ...updates, updatedAt: new Date().toISOString() });
+        }
+        toast.success('Bulk inventory adjustment complete!');
+        fetchProducts();
+        setBulkInventoryMode(null);
+        setBulkInventoryValue('');
+        clearSelection();
+      } catch (err) {
+        console.error('Bulk inventory error:', err);
+        toast.error('Error applying bulk inventory adjustments.');
+      }
+    });
   }
 
   async function handleAddToCatalog(catalog) {
@@ -367,7 +532,7 @@ export default function ProductsTable({
     ? [...new Set(products.map((p) => p.category).filter(Boolean))]
     : allowedCategories;
 
-  const suppliersToShow = [...new Set(products.map((p) => p.supplier).filter(Boolean))];
+  const suppliersToShow = [...new Set([...products.map((p) => p.supplier).filter(Boolean), ...globalSuppliers])].sort();
 
   const baseColumns = useMemo(() => getAdminProductsColumns({
     isAdmin,
@@ -377,6 +542,7 @@ export default function ProductsTable({
     navigate: router.push,
     updateProduct,
     handleDeleteProduct: deleteProduct,
+    inventoryMode,
     handleScrapeCompetitor: async (p) => {
       toast.info(`Buscando precios para ${p.name}...`);
       try {
@@ -392,7 +558,7 @@ export default function ProductsTable({
         toast.error('Error al buscar precios.');
       }
     }
-  }), [isAdmin, user, readOnly, savingProduct, router, updateProduct, deleteProduct]);
+  }), [isAdmin, user, readOnly, savingProduct, router, updateProduct, deleteProduct, inventoryMode]);
 
   const columns = useMemo(() => {
     return baseColumns.map(col => {
@@ -449,45 +615,15 @@ export default function ProductsTable({
     );
   };
 
-  const renderCustomFilters = () => (
-    <>
-      {categoriesToShow.length > 0 && (
-        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="gcp-filter-select">
-          <option value="All">Category: All</option>
-          {categoriesToShow.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-        </select>
-      )}
-      {suppliersToShow.length > 0 && (
-        <select value={filterSupplier} onChange={(e) => setFilterSupplier(e.target.value)} className="gcp-filter-select">
-          <option value="All">Supplier: All</option>
-          {suppliersToShow.map(sup => <option key={sup} value={sup}>{sup}</option>)}
-        </select>
-      )}
-      <select value={filterProductType} onChange={(e) => setFilterProductType(e.target.value)} className="gcp-filter-select">
-        <option value="All">Type: All</option>
-        <option value="Peptides">Peptides (Finished)</option>
-        <option value="API Peptides">API Peptides</option>
-        <option value="API Supplements">API Supplements</option>
-        <option value="Other">Other</option>
-      </select>
-      <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="gcp-filter-select">
-        <option value="All">Status: All</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-      <select value={filterWarehouse} onChange={(e) => setFilterWarehouse(e.target.value)} className="gcp-filter-select">
-        <option value="All">Warehouse: All</option>
-        <option value="Poland">Poland</option>
-        <option value="UK">UK</option>
-        <option value="USA">USA</option>
-        <option value="Greece">Greece</option>
-      </select>
-    </>
-  );
+  // Custom filters are now integrated into DataModule's filterOptions
 
   const bulkActionsList = [
     { label: 'Add to Bulk Order', icon: ShoppingCart, onClick: () => { setProductsToBulkOrder(products.filter(p => selectedProductIds.includes(p.id))); setIsBulkOrderModalOpen(true); } },
-    { label: 'Create Prescription', icon: ClipboardList, onClick: () => router.push(`/admin/prescriptions/new?items=${selectedProductIds.join(',')}`) },
+    { label: 'New Prescription', icon: ClipboardList, onClick: () => {
+        const selectedProducts = products.filter(p => selectedProductIds.includes(p.id));
+        openDrawer('rx-builder', 'new', { initialProducts: selectedProducts });
+      }
+    },
     { label: 'Deactivate', icon: XCircle, onClick: () => { performBulkUpdate({ ids: selectedProductIds, updates: { isActive: false }, actionName: 'Deactivate' }); clearSelection(); } },
     { label: 'Export Selected', icon: Download, onClick: handleExportCSV },
     ...(!readOnly ? [
@@ -500,7 +636,10 @@ export default function ProductsTable({
             .finally(() => setLoadingCatalogs(false));
         }
       },
-      { label: 'Manage Visibility', icon: Eye, onClick: () => handleManageVisibility(selectedProductIds) }
+      { label: 'Manage Visibility', icon: Eye, onClick: () => handleManageVisibility(selectedProductIds) },
+      ...(inventoryMode ? [
+        { label: 'Bulk Inventory Update', icon: Package, onClick: () => setBulkInventoryMode('set_stock') }
+      ] : [])
     ] : [])
   ];
 
@@ -509,6 +648,8 @@ export default function ProductsTable({
       title="Items & Catalog"
       subtitle="Manage all products, APIs, supplements, and services"
       icon={Package}
+      hideHeader={isSubTab}
+      isSubModule={isSubTab}
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder="Search catalog by name, sku, category (Algolia)..."
@@ -524,18 +665,117 @@ export default function ProductsTable({
       onSelectionChange={handleSelectRow}
       bulkActions={bulkActionsList}
       expandableRender={renderExpandedRow}
+      filterOptions={[
+        ...(categoriesToShow.length > 0 ? [{
+          key: 'category',
+          label: 'Category',
+          value: filterCategory === 'All' ? '' : filterCategory,
+          options: [{ label: 'All Categories', value: '' }, ...categoriesToShow.map(c => ({ label: c, value: c }))],
+          onChange: (v) => setFilterCategory(v || 'All')
+        }] : []),
+        ...(globalSuppliers.length > 0 ? [{
+          key: 'supplier',
+          label: 'Supplier',
+          value: filterSupplier === 'All' ? '' : filterSupplier,
+          options: [
+            { label: 'All Suppliers', value: '' },
+            ...globalSuppliers.map(s => ({ label: s.name, value: s.id }))
+          ],
+          onChange: (v) => setFilterSupplier(v || 'All')
+        }] : []),
+        {
+          key: 'status',
+          label: 'Status',
+          value: filterStatus === 'All' ? '' : filterStatus,
+          options: [
+            { label: 'All Statuses', value: '' },
+            { label: 'Active', value: 'Active' },
+            { label: 'Inactive', value: 'Inactive' }
+          ],
+          onChange: (v) => setFilterStatus(v || 'All')
+        },
+        {
+          key: 'warehouse',
+          label: 'Warehouse',
+          value: filterWarehouse === 'All' ? '' : filterWarehouse,
+          options: [
+            { label: 'All Warehouses', value: '' },
+            { label: 'Poland', value: 'Poland' },
+            { label: 'UK', value: 'UK' },
+            { label: 'USA', value: 'USA' },
+            { label: 'Greece', value: 'Greece' }
+          ],
+          onChange: (v) => setFilterWarehouse(v || 'All')
+        },
+        ...(inventoryMode ? [{
+          key: 'stock',
+          label: 'Stock Level',
+          value: filterStock === 'All' ? '' : filterStock,
+          options: [
+            { label: 'All Stock Levels', value: '' },
+            { label: 'In Stock', value: 'In Stock' },
+            { label: 'Low Stock', value: 'Low Stock' },
+            { label: 'Out of Stock', value: 'Out of Stock' }
+          ],
+          onChange: (v) => setFilterStock(v || 'All')
+        }] : []),
+        {
+          key: 'apiPlaceholder',
+          label: 'API Type',
+          value: filterApiPlaceholder === 'All' ? '' : filterApiPlaceholder,
+          options: [
+            { label: 'All Items', value: '' },
+            { label: 'Only APIs', value: 'Only APIs' },
+            { label: 'Real Products', value: 'Real Products' }
+          ],
+          onChange: (v) => setFilterApiPlaceholder(v || 'All')
+        }
+      ]}
+      filters={[
+        filterCategory !== 'All' && { key: 'category', label: 'Category', value: filterCategory, onRemove: () => setFilterCategory('All') },
+        filterSupplier !== 'All' && { key: 'supplier', label: 'Supplier', value: filterSupplier, onRemove: () => setFilterSupplier('All') },
+        filterStatus !== 'All' && { key: 'status', label: 'Status', value: filterStatus, onRemove: () => setFilterStatus('All') },
+        filterWarehouse !== 'All' && { key: 'warehouse', label: 'Warehouse', value: filterWarehouse, onRemove: () => setFilterWarehouse('All') },
+        filterStock !== 'All' && { key: 'stock', label: 'Stock Level', value: filterStock, onRemove: () => setFilterStock('All') },
+        filterApiPlaceholder !== 'All' && { key: 'apiPlaceholder', label: 'API Type', value: filterApiPlaceholder, onRemove: () => setFilterApiPlaceholder('All') }
+      ].filter(Boolean)}
       emptyState={{
         title: "Catalog Empty",
         description: "No products match the selected filters or search criteria."
       }}
       kpis={
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '1rem', minWidth: 0 }}>
           {globalMetrics && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <MetricCard title="Total Products" value={globalMetrics.total} color="blue" />
-              <MetricCard title="Active" value={globalMetrics.active} color="green" />
-              <MetricCard title="Drafts" value={globalMetrics.drafts} color="amber" />
-              <MetricCard title="Out of Stock" value={globalMetrics.outOfStock} color={globalMetrics.outOfStock > 0 ? "red" : "slate"} alert={globalMetrics.outOfStock > 0} />
+              <MetricCard 
+                title="Total Products" 
+                value={globalMetrics.total} 
+                color="var(--color-primary)" 
+                icon={Package} 
+                onClick={() => { setFilterStatus('All'); setFilterStock('All'); }}
+              />
+              <MetricCard 
+                title="Active" 
+                value={globalMetrics.active} 
+                color="var(--color-success)" 
+                icon={CheckCircle} 
+                onClick={() => { setFilterStatus('active'); }}
+              />
+              <MetricCard 
+                title="Drafts" 
+                value={globalMetrics.drafts} 
+                color="var(--color-warning)" 
+                icon={Clock} 
+                onClick={() => { setFilterStatus('draft'); }}
+              />
+              <MetricCard 
+                title="Out of Stock" 
+                value={globalMetrics.outOfStock} 
+                color={globalMetrics.outOfStock > 0 ? "var(--color-danger)" : "var(--color-text-muted)"} 
+                alert={globalMetrics.outOfStock > 0} 
+                icon={AlertTriangle} 
+                onClick={() => { setFilterStock('Out of Stock'); }}
+              />
             </div>
           )}
           <ProductContextSwitcher searchTerm={searchTerm} currentTab="products" onClear={() => setSearchTerm('')} />
@@ -547,12 +787,9 @@ export default function ProductsTable({
           )}
         </div>
       }
-      filtersBar={
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: '1rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {renderCustomFilters()}
-          </div>
-          {!readOnly && (
+      {...(!readOnly ? {
+        filtersBar: (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 1rem 1rem 1rem', borderBottom: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={handleDownloadTemplate} className="gcp-btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
                 <Copy size={14} style={{ marginRight: '0.25rem' }} /> TEMPLATE
@@ -562,9 +799,9 @@ export default function ProductsTable({
                 <input type="file" accept=".csv" onChange={handleImportCSV} style={{ display: 'none' }} disabled={importing} />
               </label>
             </div>
-          )}
-        </div>
-      }
+          </div>
+        )
+      } : {})}
     >
       {/* Dynamic Panels inside DataModule content area */}
       {!readOnly && bulkMode && (
@@ -586,6 +823,32 @@ export default function ProductsTable({
             </div>
             <div style={{ width: '200px' }}><TextField label={bulkMode === 'percent' ? 'Percentage (e.g. 5 or -10)' : 'Amount (e.g. 10 or -5)'} type="number" value={bulkValue} onChange={(e) => setBulkValue(e.target.value)} placeholder="0" /></div>
             <button onClick={handleBulkAdjust} className="gcp-btn-primary" style={{ padding: '0.6rem 1.5rem' }}>
+              Apply to {products.filter((p) => (bulkCategory === 'All' || p.category === bulkCategory) && (selectedProductIds.length === 0 || selectedProductIds.includes(p.id))).length} Items
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!readOnly && bulkInventoryMode && (
+        <div style={{ padding: '1.5rem', margin: '0 1rem 1rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--primary)', backgroundColor: 'white', animation: 'slideDown 0.3s ease-out' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Package size={20} /> Bulk Inventory Adjustment
+            </h3>
+            <XCircle size={20} style={{ cursor: 'pointer', color: 'var(--text-muted)' }} onClick={() => setBulkInventoryMode(null)} />
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <Select label="Apply to Category:" value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} options={[{ value: "All", label: "All Categories" }, ...categoriesToShow.map(cat => ({ value: cat, label: cat }))]} />
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Action:</label>
+              <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+                <button onClick={() => setBulkInventoryMode('set_stock')} style={{ padding: '0.6rem 1rem', border: 'none', backgroundColor: bulkInventoryMode === 'set_stock' ? 'var(--primary)' : 'white', color: bulkInventoryMode === 'set_stock' ? 'white' : 'var(--text-main)', cursor: 'pointer' }}>Set Stock</button>
+                <button onClick={() => setBulkInventoryMode('add_stock')} style={{ padding: '0.6rem 1rem', border: 'none', backgroundColor: bulkInventoryMode === 'add_stock' ? 'var(--primary)' : 'white', color: bulkInventoryMode === 'add_stock' ? 'white' : 'var(--text-main)', cursor: 'pointer' }}>Add/Remove Stock</button>
+                <button onClick={() => setBulkInventoryMode('set_min')} style={{ padding: '0.6rem 1rem', border: 'none', backgroundColor: bulkInventoryMode === 'set_min' ? 'var(--primary)' : 'white', color: bulkInventoryMode === 'set_min' ? 'white' : 'var(--text-main)', cursor: 'pointer' }}>Set Min Threshold</button>
+              </div>
+            </div>
+            <div style={{ width: '200px' }}><TextField label={bulkInventoryMode === 'add_stock' ? 'Amount to adjust (+/-)' : 'New Value'} type="number" value={bulkInventoryValue} onChange={(e) => setBulkInventoryValue(e.target.value)} placeholder="0" /></div>
+            <button onClick={handleBulkInventoryAdjust} className="gcp-btn-primary" style={{ padding: '0.6rem 1.5rem' }}>
               Apply to {products.filter((p) => (bulkCategory === 'All' || p.category === bulkCategory) && (selectedProductIds.length === 0 || selectedProductIds.includes(p.id))).length} Items
             </button>
           </div>
@@ -619,7 +882,7 @@ export default function ProductsTable({
 
       {/* Modals */}
       <BulkOrderSelectionModal isOpen={isBulkOrderModalOpen} onClose={() => { setIsBulkOrderModalOpen(false); clearSelection(); }} selectedProducts={productsToBulkOrder} />
-      <CreateProductModal isOpen={isCreateProductModalOpen} onClose={() => setIsCreateProductModalOpen(false)} onCreated={() => { setIsCreateProductModalOpen(false); fetchProducts(); }} />
+      <ProductFormDrawer isOpen={isCreateProductModalOpen} onClose={() => setIsCreateProductModalOpen(false)} onCreated={() => { setIsCreateProductModalOpen(false); fetchProducts(); }} />
       <SupplierDetailDrawer isOpen={!!linkedSupplier} onClose={() => setLinkedSupplier(null)} supplier={linkedSupplier} />
     </DataModule>
   );

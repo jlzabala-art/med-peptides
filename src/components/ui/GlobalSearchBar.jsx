@@ -1,6 +1,10 @@
 "use client";
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Search, X, Command, Loader, Clock, ChevronDown } from '@/lib/icons';
+import { Search, X, Command, Loader, Clock, ChevronDown, Filter } from '@/lib/icons';
+import '../../styles/search.css';
+import MultiSelectFilter from './MultiSelectFilter';
+import SingleSelectFilter from './SingleSelectFilter';
+import MobileFiltersSheet from '../mobile/MobileFiltersSheet';
 
 /**
  * GlobalSearchBar
@@ -74,6 +78,8 @@ export default function GlobalSearchBar({
 }) {
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(`atlas-search-${namespace}`) || '[]');
@@ -83,6 +89,13 @@ export default function GlobalSearchBar({
   });
   const [showDropdown, setShowDropdown] = useState(false);
   const [openFilterKey, setOpenFilterKey] = useState(null); // For filter dropdowns
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // ⌘K / Ctrl+K global shortcut to focus search
   useEffect(() => {
@@ -146,7 +159,9 @@ export default function GlobalSearchBar({
       setRecentSearches(updated);
       try {
         localStorage.setItem(`atlas-search-${namespace}`, JSON.stringify(updated));
-      } catch {}
+      } catch (err) {
+        console.debug('Failed to save recent search:', err);
+      }
     },
     [recentSearches, namespace]
   );
@@ -177,7 +192,9 @@ export default function GlobalSearchBar({
     setRecentSearches([]);
     try {
       localStorage.removeItem(`atlas-search-${namespace}`);
-    } catch {}
+    } catch (err) {
+      console.debug('Failed to clear recent searches:', err);
+    }
     setShowDropdown(false);
   }, [namespace]);
 
@@ -186,266 +203,18 @@ export default function GlobalSearchBar({
     md: { height: '40px', fontSize: '0.875rem', iconSize: 17 },
     lg: { height: '48px', fontSize: '0.95rem',  iconSize: 20 },
   };
-  const { height, fontSize, iconSize } = sizeConfig[size] || sizeConfig.md;
+  const { height, iconSize } = sizeConfig[size] || sizeConfig.md;
 
   const hasActiveFilters = filters && filters.length > 0;
   const hasFilterOptions  = filterOptions && filterOptions.length > 0;
 
   return (
-    <div className="search-bar-wrap" style={{ width: '100%' }}>
-      <style>{`
-        /* ── Input wrapper ──────────────────────────────────────── */
-        .atlas-search__input-wrap {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          width: 100%;
-          height: ${height};
-          padding: 0 0.75rem;
-          border-radius: ${hasActiveFilters ? '10px 10px 0 0' : '10px'};
-          border: 1.5px solid var(--border, #e2e8f0);
-          border-bottom: ${hasActiveFilters ? '1px solid var(--border, #e2e8f0)' : '1.5px solid var(--border, #e2e8f0)'};
-          background: var(--color-bg-app, #fff);
-          transition: all 0.2s ease;
-          cursor: text;
-          position: relative;
-        }
-        .atlas-search__input-wrap:hover {
-          border-color: var(--primary-soft, #93c5fd);
-          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        }
-        .atlas-search__input-wrap.focused {
-          border-color: var(--primary, #2563eb);
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-          background: #fff;
-        }
-        /* ── Text input ─────────────────────────────────────────── */
-        .atlas-search__input {
-          flex: 1;
-          border: none;
-          background: transparent;
-          outline: none;
-          font-size: ${fontSize};
-          color: var(--text-main, #0f172a);
-          min-width: 0;
-        }
-        .atlas-search__input::placeholder { color: var(--text-muted, #94a3b8); }
-        /* ── Count badge ────────────────────────────────────────── */
-        .atlas-search__count {
-          font-size: 0.72rem;
-          font-weight: 600;
-          color: var(--primary, #2563eb);
-          background: var(--primary-soft, #eff6ff);
-          padding: 2px 8px;
-          border-radius: 100px;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        /* ── ⌘K shortcut badge ──────────────────────────────────── */
-        .atlas-search__shortcut {
-          display: flex;
-          align-items: center;
-          gap: 2px;
-          font-size: 0.7rem;
-          color: var(--text-muted, #94a3b8);
-          background: var(--color-bg-subtle, #f8fafc);
-          border: 1px solid var(--border, #e2e8f0);
-          border-radius: 5px;
-          padding: 2px 5px;
-          flex-shrink: 0;
-          cursor: pointer;
-          user-select: none;
-        }
-        .atlas-search__shortcut:hover { border-color: var(--primary-soft, #93c5fd); }
-        /* ── Clear button ───────────────────────────────────────── */
-        .atlas-search__clear {
-          background: none;
-          border: none;
-          padding: 2px;
-          cursor: pointer;
-          color: var(--text-muted, #94a3b8);
-          display: flex;
-          align-items: center;
-          border-radius: 50%;
-          transition: background 0.15s;
-          flex-shrink: 0;
-        }
-        .atlas-search__clear:hover {
-          background: var(--color-bg-subtle, #f1f5f9);
-          color: var(--text-main, #0f172a);
-        }
-        /* ── Recent searches dropdown ──────────────────────────── */
-        .atlas-search__dropdown {
-          position: absolute;
-          top: calc(100% + 4px);
-          left: 0;
-          right: 0;
-          background: var(--color-bg-app, #fff);
-          border: 1.5px solid var(--border, #e2e8f0);
-          border-radius: 10px;
-          box-shadow: 0 8px 24px -4px rgba(0,0,0,0.12);
-          z-index: 100;
-          overflow: hidden;
-          animation: searchDropdownIn 0.15s ease;
-        }
-        @keyframes searchDropdownIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .atlas-search__dropdown-item {
-          display: flex;
-          align-items: center;
-          gap: 0.6rem;
-          padding: 0.6rem 1rem;
-          font-size: 0.85rem;
-          color: var(--text-main, #0f172a);
-          cursor: pointer;
-          transition: background 0.1s;
-        }
-        .atlas-search__dropdown-item:hover { background: var(--color-bg-subtle, #f8fafc); }
-        /* ── Spinner ────────────────────────────────────────────── */
-        .atlas-search__spinner { animation: spin 0.8s linear infinite; flex-shrink: 0; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        /* ── Active filter chips zone ──────────────────────────── */
-        .atlas-search__chips-zone {
-          display: flex;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-          padding: 0.5rem 0.75rem 0.6rem;
-          border: 1.5px solid var(--primary, #2563eb);
-          border-top: none;
-          border-radius: 0 0 10px 10px;
-          background: var(--color-bg-app, #fff);
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
-          animation: chipsIn 0.15s ease;
-        }
-        @keyframes chipsIn {
-          from { opacity: 0; transform: translateY(-4px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .atlas-search__chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3rem;
-          padding: 0.2rem 0.55rem;
-          background: rgba(37, 99, 235, 0.08);
-          color: #1d4ed8;
-          border: 1px solid rgba(37, 99, 235, 0.2);
-          border-radius: 100px;
-          font-size: 0.72rem;
-          font-weight: 600;
-          white-space: nowrap;
-          cursor: default;
-          transition: background 0.15s;
-        }
-        .atlas-search__chip:hover { background: rgba(37, 99, 235, 0.13); }
-        .atlas-search__chip-label { color: #64748b; font-weight: 500; margin-right: 1px; }
-        .atlas-search__chip-remove {
-          background: none;
-          border: none;
-          padding: 0;
-          cursor: pointer;
-          color: #60a5fa;
-          display: flex;
-          align-items: center;
-          border-radius: 50%;
-          transition: color 0.1s;
-          line-height: 1;
-        }
-        .atlas-search__chip-remove:hover { color: #1d4ed8; }
-        /* ── Inline quick-filter pills ─────────────────────────── */
-        .atlas-search__filter-pill {
-          position: relative;
-          flex-shrink: 0;
-        }
-        .atlas-search__filter-pill-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.25rem;
-          padding: 0.2rem 0.55rem;
-          background: var(--color-bg-subtle, #f8fafc);
-          border: 1px solid var(--border, #e2e8f0);
-          border-radius: 100px;
-          font-size: 0.72rem;
-          font-weight: 600;
-          color: var(--text-main, #334155);
-          cursor: pointer;
-          white-space: nowrap;
-          transition: border-color 0.15s, background 0.15s;
-          user-select: none;
-        }
-        .atlas-search__filter-pill-btn:hover,
-        .atlas-search__filter-pill-btn.active {
-          border-color: var(--primary, #2563eb);
-          color: #1d4ed8;
-          background: rgba(37,99,235,0.06);
-        }
-        .atlas-search__filter-pill-menu {
-          position: absolute;
-          top: calc(100% + 5px);
-          left: 0;
-          min-width: 140px;
-          background: var(--color-bg-app, #fff);
-          border: 1.5px solid var(--border, #e2e8f0);
-          border-radius: 8px;
-          box-shadow: 0 6px 20px -4px rgba(0,0,0,0.1);
-          z-index: 200;
-          overflow: hidden;
-          animation: searchDropdownIn 0.12s ease;
-        }
-        .atlas-search__filter-pill-option {
-          padding: 0.55rem 0.85rem;
-          font-size: 0.8rem;
-          color: var(--text-main, #334155);
-          cursor: pointer;
-          transition: background 0.1s;
-        }
-        .atlas-search__filter-pill-option:hover { background: var(--color-bg-subtle, #f8fafc); }
-        .atlas-search__filter-pill-option.selected {
-          color: var(--primary, #2563eb);
-          font-weight: 600;
-          background: rgba(37,99,235,0.05);
-        }
-        /* ── Divider between input and filter pills ─────────────── */
-        .atlas-search__divider {
-          width: 1px;
-          height: 18px;
-          background: var(--border, #e2e8f0);
-          flex-shrink: 0;
-        }
-        
-        /* ── Mobile responsiveness ──────────────────────────────── */
-        @media (max-width: 768px) {
-          .atlas-search__filter-pill-btn {
-            font-size: 0;
-            padding: 0.3rem;
-            gap: 0;
-            border-radius: 6px;
-          }
-          .atlas-search__filter-pill-btn svg {
-            margin: 0 0.15rem;
-          }
-          .atlas-search__count {
-            display: none;
-          }
-          .atlas-search__shortcut {
-            display: none;
-          }
-          .atlas-search__chips-zone {
-            padding: 0.5rem;
-            font-size: 0.65rem;
-          }
-        }
-      `}</style>
-
-      {/* ── Main container ──────────────────────────────────────────────── */}
-      <div className={`atlas-search ${className}`} style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
+    <>
+      <div className={`search-bar-wrap atlas-search-size-${size} ${className}`} style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
 
         {/* ── INPUT ROW ──────────────────────────────────────────────────── */}
         <div
-          className={`atlas-search__input-wrap ${isFocused ? 'focused' : ''}`}
-          style={{ borderRadius: hasActiveFilters ? '10px 10px 0 0' : '10px' }}
+          className={`atlas-search__input-wrap ${isFocused ? 'focused' : ''} ${hasActiveFilters ? 'has-active-filters' : ''}`}
           onClick={() => inputRef.current?.focus()}
         >
           {/* Search icon / spinner */}
@@ -488,39 +257,77 @@ export default function GlobalSearchBar({
           {hasFilterOptions && (
             <>
               <div className="atlas-search__divider" />
-              {filterOptions.map((fo) => (
-                <div key={fo.key} className="atlas-search__filter-pill">
-                  <button
-                    className={`atlas-search__filter-pill-btn ${fo.value ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenFilterKey(openFilterKey === fo.key ? null : fo.key);
-                    }}
-                  >
-                    {fo.value
-                      ? (fo.options?.find(o => o.value === fo.value)?.label || fo.label)
-                      : fo.label}
-                    <ChevronDown size={10} />
-                  </button>
-                  {openFilterKey === fo.key && fo.options && (
-                    <div className="atlas-search__filter-pill-menu">
-                      {fo.options.map((opt) => (
-                        <div
-                          key={opt.value}
-                          className={`atlas-search__filter-pill-option ${fo.value === opt.value ? 'selected' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            fo.onChange?.(opt.value);
-                            setOpenFilterKey(null);
-                          }}
-                        >
-                          {opt.label}
-                        </div>
-                      ))}
-                    </div>
+              {isMobile ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMobileSheetOpen(true);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.35rem 0.65rem',
+                    borderRadius: '8px',
+                    backgroundColor: hasActiveFilters ? '#eff6ff' : '#f1f5f9',
+                    border: hasActiveFilters ? '1px solid #93c5fd' : '1px solid #cbd5e1',
+                    color: hasActiveFilters ? '#1e40af' : '#475569',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  <Filter size={13} color={hasActiveFilters ? '#1e40af' : '#64748b'} />
+                  <span>Filters</span>
+                  {filters.length > 0 && (
+                    <span style={{
+                      background: '#2563eb',
+                      color: '#fff',
+                      borderRadius: '50%',
+                      width: '18px',
+                      height: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.65rem'
+                    }}>
+                      {filters.length}
+                    </span>
                   )}
-                </div>
-              ))}
+                </button>
+              ) : (
+                filterOptions.map((fo, idx) => {
+                  const uniqueKey = fo.id || fo.key || fo.label || `fo-${idx}`;
+
+                  // Multi-select mode — uses MultiSelectFilter component
+                  if (fo.multiSelect) {
+                    return (
+                      <MultiSelectFilter
+                        key={uniqueKey}
+                        label={fo.label}
+                        values={fo.values || []}
+                        options={fo.options || []}
+                        onChange={fo.onChange}
+                        maxWidth={fo.maxWidth || 240}
+                      />
+                    );
+                  }
+
+                  // Modern single-select pill with portal & micro-badges
+                  return (
+                    <SingleSelectFilter
+                      key={uniqueKey}
+                      label={fo.label}
+                      value={fo.value || ''}
+                      options={fo.options || []}
+                      onChange={fo.onChange}
+                      maxWidth={fo.maxWidth || 200}
+                    />
+                  );
+                })
+              )}
             </>
           )}
 
@@ -543,10 +350,10 @@ export default function GlobalSearchBar({
             style={{ position: 'absolute', top: height, left: 0, right: 0, zIndex: 10 }}
           >
             <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginRight: '0.25rem', flexShrink: 0 }}>
-              Filtros:
+              ACTIVE FILTERS:
             </span>
-            {filters.map((filter) => filter && (
-              <span key={filter.key} className="atlas-search__chip">
+            {filters.map((filter, idx) => filter && (
+              <span key={filter.key || filter.id || `filter-${idx}`} className="atlas-search__chip">
                 {filter.label && <span className="atlas-search__chip-label">{filter.label}:</span>}
                 {filter.value}
                 {filter.onRemove && (
@@ -582,6 +389,24 @@ export default function GlobalSearchBar({
 
       {/* Spacer so content below accounts for the chips zone height */}
       {hasActiveFilters && <div style={{ height: '38px' }} />}
-    </div>
+
+      {/* Mobile Filters Bottom Sheet */}
+      {isMobile && hasFilterOptions && (
+        <MobileFiltersSheet
+          isOpen={isMobileSheetOpen}
+          onClose={() => setIsMobileSheetOpen(false)}
+          filterOptions={filterOptions}
+          activeFilters={filters}
+          onResetAll={() => {
+            filters.forEach(f => f?.onRemove?.());
+            filterOptions.forEach(fo => {
+              if (fo.multiSelect) fo.onChange?.([]);
+              else fo.onChange?.('');
+            });
+            setIsMobileSheetOpen(false);
+          }}
+        />
+      )}
+    </>
   );
 }

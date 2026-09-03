@@ -33,7 +33,7 @@ export default function AtlasLoadingScreen() {
         Atlas Health
       </p>
       <p style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 500 }}>
-        {t('common.loading') || 'Loading...'}
+        {t('common.loading', { defaultValue: 'Iniciando Atlas App...' })}
       </p>
 
       {/* Shimmer bar */}

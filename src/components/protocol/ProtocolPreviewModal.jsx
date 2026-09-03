@@ -32,6 +32,7 @@ import ProtocolTimeline from './ProtocolTimeline';
 import { safeStr, humanize, displayDuration, displayPhases } from '../../utils/textUtils';
 import EligibilityBlock from './EligibilityBlock';
 import { useProtocolPDF } from '../../hooks/useProtocolPDF';
+import DataTable from '../ui/DataTable';
 const fmt = (v) => safeStr(v);
 
 
@@ -547,45 +548,86 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                 </div>
 
                 {/* Per-compound reconstitution table */}
-                <div style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem', minWidth: 640 }}>
-                    <thead>
-                      <tr style={{ background: 'var(--color-primary)' }}>
-                        {['Compound', 'Vial Spec.', 'Recon. Vol.', 'Diluent', 'Draw Vol.', 'Procedure', 'Syringe'].map(h => (
-                          <th key={h} style={{
-                            padding: '0.5rem 0.65rem', color: 'var(--color-bg-surface)', fontWeight: 700,
-                            fontSize: '0.67rem', textAlign: 'left', whiteSpace: 'nowrap',
-                            letterSpacing: '0.04em',
-                          }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {compounds.map((d, i) => {
-                        const vial     = d.vial_strength_used || d.selected_strength || d.strength || '5 mg';
-                        const reconVol = getReconVol(vial);
-                        const drawVol  = calcDrawVol(d, reconVol);
-                        const name     = d.product_title || d.name || 'Compound';
-                        return (
-                          <tr key={i} style={{ background: i % 2 === 0 ? 'var(--color-bg-surface)' : 'var(--color-bg-app)' }}>
-                            <td style={{ padding: '0.5rem 0.65rem', fontWeight: 700, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>{name}</td>
-                            <td style={{ padding: '0.5rem 0.65rem', color: 'var(--color-text-primary)', textAlign: 'center' }}>{vial}</td>
-                            <td style={{ padding: '0.5rem 0.65rem', color: 'var(--color-text-primary)', textAlign: 'center', whiteSpace: 'nowrap' }}>{reconVol}</td>
-                            <td style={{ padding: '0.5rem 0.65rem', color: 'var(--color-text-secondary)' }}>
-                              Bacteriostatic Water for Injection (BWfI) 0.9% Benzyl Alcohol
-                            </td>
-                            <td style={{ padding: '0.5rem 0.65rem', fontWeight: 700, color: '#0369a1', textAlign: 'center', whiteSpace: 'nowrap' }}>{drawVol}</td>
-                            <td style={{ padding: '0.5rem 0.65rem', color: 'var(--color-text-secondary)', fontSize: '0.68rem' }}>
-                              Direct diluent stream to vial wall; swirl gently ×10 s. Do NOT vortex or shake. Allow ≥60 s dissolution before aspirating.
-                            </td>
-                            <td style={{ padding: '0.5rem 0.65rem', color: 'var(--color-text-primary)', whiteSpace: 'nowrap', fontSize: '0.68rem' }}>
-                              U-100 Insulin Syringe<br/><span style={{ color: 'var(--color-text-tertiary)' }}>(31G × 6 mm, 0.5 mL)</span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                <div className="rounded-lg border border-slate-200 overflow-hidden">
+                  <DataTable
+                    data={compounds}
+                    keyField="product_title"
+                    columns={[
+                      {
+                        id: 'compound',
+                        header: 'Compound',
+                        width: '18%',
+                        render: (d) => (
+                          <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
+                            {d.product_title || d.name || 'Compound'}
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'vial',
+                        header: 'Vial Spec.',
+                        width: '12%',
+                        render: (d) => (
+                          <span style={{ color: 'var(--color-text-primary)' }}>
+                            {d.vial_strength_used || d.selected_strength || d.strength || '5 mg'}
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'reconVol',
+                        header: 'Recon. Vol.',
+                        width: '12%',
+                        render: (d) => {
+                          const vial = d.vial_strength_used || d.selected_strength || d.strength || '5 mg';
+                          return <span>{getReconVol(vial)}</span>;
+                        }
+                      },
+                      {
+                        id: 'diluent',
+                        header: 'Diluent',
+                        width: '18%',
+                        render: () => (
+                          <span style={{ color: 'var(--color-text-secondary)' }}>
+                            Bacteriostatic Water for Injection (BWfI) 0.9% Benzyl Alcohol
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'drawVol',
+                        header: 'Draw Vol.',
+                        width: '12%',
+                        render: (d) => {
+                          const vial = d.vial_strength_used || d.selected_strength || d.strength || '5 mg';
+                          const reconVol = getReconVol(vial);
+                          return (
+                            <span style={{ fontWeight: 700, color: '#0369a1' }}>
+                              {calcDrawVol(d, reconVol)}
+                            </span>
+                          );
+                        }
+                      },
+                      {
+                        id: 'procedure',
+                        header: 'Procedure',
+                        width: '16%',
+                        render: () => (
+                          <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.68rem' }}>
+                            Direct diluent stream to vial wall; swirl gently ×10 s. Do NOT vortex or shake. Allow ≥60 s dissolution before aspirating.
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'syringe',
+                        header: 'Syringe',
+                        width: '12%',
+                        render: () => (
+                          <span style={{ color: 'var(--color-text-primary)', fontSize: '0.68rem' }}>
+                            U-100 Insulin Syringe<br/><span style={{ color: 'var(--color-text-tertiary)' }}>(31G × 6 mm, 0.5 mL)</span>
+                          </span>
+                        )
+                      }
+                    ]}
+                  />
                 </div>
 
                 {/* Storage reminder */}
@@ -659,64 +701,100 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
 
                     {/* Compounds table */}
                     {drugs.length > 0 && (
-                      <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.79rem' }}>
-                          <thead>
-                            <tr style={{ background: 'rgba(79,70,229,0.04)' }}>
-                              {['Compound', 'Starting Dose', 'Frequency', 'Vials Required', 'Route'].map(h => (
-                                <th key={h} style={{ padding: '0.5rem 0.9rem', textAlign: 'left', fontWeight: 700, color: '#4338ca', borderBottom: '1px solid #e2e8f0', whiteSpace: 'nowrap', fontSize: '0.7rem' }}>{h}</th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {drugs.map((d, dIdx) => {
-                              const dl   = d.dose_logic || {};
-                              const dose = dl.starting_weekly_dose != null
-                                ? `${dl.starting_weekly_dose} ${dl.dose_unit || ''}`.trim()
-                                : dl.dose_per_administration != null
-                                ? `${dl.dose_per_administration} ${dl.dose_unit || ''}`.trim()
-                                : dl.default_weekly_dose != null
-                                ? `${dl.default_weekly_dose} ${dl.dose_unit || ''}`.trim()
-                                : safeStr(d.weekly_dose ?? d.dose);
-                              const maxDose  = dl.max_weekly_dose || dl.possible_next_step_dose;
-                              const freq  = safeStr(dl.administration_frequency || d.frequency || d.frequency_of_use).replace(/_/g, ' ');
-                              const route = safeStr(d.route || dl.route_of_administration || d.administration_route || d.route_of_administration);
-                              const timing = dl.timing_hint ? dl.timing_hint.replace(/_/g, ' ') : (
-                                dl.administration_days_default?.join(', ') || '—'
-                              );
-                              const isSC = route.toLowerCase().includes('sub') || route.toLowerCase() === 'sc';
-                              return (
-                                <tr key={dIdx} style={{ background: dIdx % 2 === 0 ? 'var(--color-bg-surface)' : '#fafbff' }}>
-                                  <td style={{ padding: '0.55rem 0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                                    {safeStr(d.product_title || d.name)}
+                      <div className="overflow-hidden border-t border-slate-200">
+                        <DataTable
+                          data={drugs}
+                          keyField="product_title"
+                          columns={[
+                            {
+                              id: 'compound',
+                              header: 'Compound',
+                              width: '32%',
+                              render: (d) => {
+                                const dl = d.dose_logic || {};
+                                const maxDose = dl.max_weekly_dose || dl.possible_next_step_dose;
+                                return (
+                                  <div>
+                                    <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                                      {safeStr(d.product_title || d.name)}
+                                    </span>
                                     {maxDose && (
                                       <span style={{ fontSize: '0.62rem', color: '#6366f1', marginLeft: '0.35rem', fontWeight: 600 }}>
                                         → up to {safeStr(maxDose)} {dl.dose_unit || ''}
                                       </span>
                                     )}
-                                  </td>
-                                  <td style={{ padding: '0.55rem 0.9rem', fontFamily: 'monospace', color: '#0369a1', fontWeight: 700 }}>{safeStr(dose)}</td>
-                                  <td style={{ padding: '0.55rem 0.9rem', color: 'var(--color-text-secondary)', textTransform: 'capitalize' }}>{safeStr(freq)}</td>
-                                  <td style={{ padding: '0.55rem 0.9rem', color: 'var(--color-text-primary)', fontWeight: 600 }}>
-                                    {(() => {
-                                      // Replicate SupplyEngine logic for visual consistency
-                                      const weeklyDose = dl.starting_weekly_dose || dl.default_weekly_dose || 0;
-                                      const totalNeeded = weeklyDose * dur;
-                                      const strength = parseFloat((d.product_strength || '5').replace(/[^0-9.]/g, '')) || 5;
-                                      const qty = Math.ceil(totalNeeded / strength) || 1;
-                                      return `${qty} vial${qty > 1 ? 's' : ''}`;
-                                    })()}
-                                  </td>
-                                  <td style={{ padding: '0.55rem 0.9rem' }}>
-                                    <span style={{ fontSize: '0.67rem', fontWeight: 600, borderRadius: 4, padding: '0.15rem 0.45rem', background: isSC ? 'rgba(99,102,241,0.1)' : 'rgba(0,54,102,0.08)', color: isSC ? '#4f46e5' : 'var(--color-primary)' }}>
-                                      {route}
-                                    </span>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                                  </div>
+                                );
+                              }
+                            },
+                            {
+                              id: 'startingDose',
+                              header: 'Starting Dose',
+                              width: '20%',
+                              render: (d) => {
+                                const dl = d.dose_logic || {};
+                                const dose = dl.starting_weekly_dose != null
+                                  ? `${dl.starting_weekly_dose} ${dl.dose_unit || ''}`.trim()
+                                  : dl.dose_per_administration != null
+                                  ? `${dl.dose_per_administration} ${dl.dose_unit || ''}`.trim()
+                                  : dl.default_weekly_dose != null
+                                  ? `${dl.default_weekly_dose} ${dl.dose_unit || ''}`.trim()
+                                  : safeStr(d.weekly_dose ?? d.dose);
+                                return (
+                                  <span style={{ fontFamily: 'monospace', color: '#0369a1', fontWeight: 700 }}>
+                                    {safeStr(dose)}
+                                  </span>
+                                );
+                              }
+                            },
+                            {
+                              id: 'frequency',
+                              header: 'Frequency',
+                              width: '20%',
+                              render: (d) => {
+                                const dl = d.dose_logic || {};
+                                const freq = safeStr(dl.administration_frequency || d.frequency || d.frequency_of_use).replace(/_/g, ' ');
+                                return (
+                                  <span style={{ color: 'var(--color-text-secondary)', textTransform: 'capitalize' }}>
+                                    {safeStr(freq)}
+                                  </span>
+                                );
+                              }
+                            },
+                            {
+                              id: 'vialsRequired',
+                              header: 'Vials Required',
+                              width: '14%',
+                              render: (d) => {
+                                const dl = d.dose_logic || {};
+                                const weeklyDose = dl.starting_weekly_dose || dl.default_weekly_dose || 0;
+                                const totalNeeded = weeklyDose * dur;
+                                const strength = parseFloat((d.product_strength || '5').replace(/[^0-9.]/g, '')) || 5;
+                                const qty = Math.ceil(totalNeeded / strength) || 1;
+                                return (
+                                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>
+                                    {`${qty} vial${qty > 1 ? 's' : ''}`}
+                                  </span>
+                                );
+                              }
+                            },
+                            {
+                              id: 'route',
+                              header: 'Route',
+                              width: '14%',
+                              render: (d) => {
+                                const dl = d.dose_logic || {};
+                                const route = safeStr(d.route || dl.route_of_administration || d.administration_route || d.route_of_administration);
+                                const isSC = route.toLowerCase().includes('sub') || route.toLowerCase() === 'sc';
+                                return (
+                                  <span style={{ fontSize: '0.67rem', fontWeight: 600, borderRadius: 4, padding: '0.15rem 0.45rem', background: isSC ? 'rgba(99,102,241,0.1)' : 'rgba(0,54,102,0.08)', color: isSC ? '#4f46e5' : 'var(--color-primary)' }}>
+                                    {route}
+                                  </span>
+                                );
+                              }
+                            }
+                          ]}
+                        />
                       </div>
                     )}
 
@@ -860,53 +938,59 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                   </div>
                 )}
                 {checkpoints.length > 0 && (
-                  <div style={{ overflowX: 'auto', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem' }}>
-                      <thead>
-                        <tr style={{ background: '#0f7490' }}>
-                          {['Wk', 'Type', 'Tests / Labs', 'Notes'].map(h => (
-                            <th key={h} style={{
-                              padding: '0.5rem 0.75rem', color: 'var(--color-bg-surface)',
-                              fontWeight: 700, fontSize: '0.63rem',
-                              textAlign: 'left', whiteSpace: 'nowrap',
-                              letterSpacing: '0.05em', textTransform: 'uppercase',
-                            }}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {checkpoints.map((cp, i) => {
-                          const week  = cp.week ?? cp.week_number ?? i;
-                          const type  = cp.label || cp.type?.replace(/_/g, ' ') || 'Check-in';
-                          const labs  = cp.labs || cp.tests || [];
-                          const note  = cp.purpose || cp.notes || cp.note || '';
-                          return (
-                            <tr key={i} style={{ background: i % 2 === 0 ? 'var(--color-bg-surface)' : '#f0f9ff', borderBottom: '1px solid #e2e8f0' }}>
-                              <td style={{ padding: '0.5rem 0.75rem', fontWeight: 800, color: '#0891b2', fontSize: '0.82rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                                {week}
-                              </td>
-                              <td style={{ padding: '0.5rem 0.75rem', fontWeight: 600, color: '#0e7490', textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-                                {type}
-                              </td>
-                              <td style={{ padding: '0.5rem 0.75rem' }}>
-                                {labs.length > 0 ? (
-                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.2rem' }}>
-                                    {labs.map((l, li) => (
-                                      <span key={li} style={{ fontSize: '0.65rem', color: 'var(--color-text-primary)', background: '#e0f2fe', borderRadius: 3, padding: '0.07rem 0.32rem' }}>
-                                        {l.replace(/_/g, ' ')}
-                                      </span>
-                                    ))}
-                                  </div>
-                                ) : <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>}
-                              </td>
-                              <td style={{ padding: '0.5rem 0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.69rem', lineHeight: 1.4 }}>
-                                {note || <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <div className="rounded-lg border border-slate-200 overflow-hidden">
+                    <DataTable
+                      data={checkpoints}
+                      keyField="week"
+                      columns={[
+                        {
+                          id: 'week',
+                          header: 'Wk',
+                          width: '10%',
+                          render: (cp, i) => (
+                            <span style={{ fontWeight: 800, color: '#0891b2', fontSize: '0.82rem', textAlign: 'center' }}>
+                              {cp.week ?? cp.week_number ?? i}
+                            </span>
+                          )
+                        },
+                        {
+                          id: 'type',
+                          header: 'Type',
+                          width: '20%',
+                          render: (cp) => (
+                            <span style={{ fontWeight: 600, color: '#0e7490', textTransform: 'capitalize' }}>
+                              {cp.label || cp.type?.replace(/_/g, ' ') || 'Check-in'}
+                            </span>
+                          )
+                        },
+                        {
+                          id: 'tests',
+                          header: 'Tests / Labs',
+                          width: '40%',
+                          render: (cp) => {
+                            const labs = cp.labs || cp.tests || [];
+                            return labs.length > 0 ? (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.2rem' }}>
+                                {labs.map((l, li) => (
+                                  <span key={li} style={{ fontSize: '0.65rem', color: 'var(--color-text-primary)', background: '#e0f2fe', borderRadius: 3, padding: '0.07rem 0.32rem' }}>
+                                    {l.replace(/_/g, ' ')}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : <span style={{ color: 'var(--color-text-tertiary)' }}>—</span>;
+                          }
+                        },
+                        {
+                          id: 'notes',
+                          header: 'Notes',
+                          width: '30%',
+                          render: (cp) => {
+                            const note = cp.purpose || cp.notes || cp.note || '';
+                            return <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.69rem', lineHeight: 1.4 }}>{note || '—'}</span>;
+                          }
+                        }
+                      ]}
+                    />
                   </div>
                 )}
               </div>
@@ -998,69 +1082,89 @@ export function ProtocolPreviewModal({ protocol, onClose, updateCart, stickyTota
                 </div>
 
                 {/* Table */}
-                <div style={{ overflowX: 'auto', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem' }}>
-                    <thead>
-                      <tr style={{ background: '#0f172a', color: 'var(--color-bg-surface)' }}>
-                        {['Phase', 'Compound', 'Weeks', 'Vials', 'Unit Price', 'Line Total'].map((h, i) => (
-                          <th key={h} style={{
-                            padding: '0.55rem 0.75rem',
-                            fontWeight: 700, fontSize: '0.67rem',
-                            letterSpacing: '0.06em', textTransform: 'uppercase',
-                            textAlign: i >= 2 ? 'center' : 'left',
-                            whiteSpace: 'nowrap',
-                          }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {procRows.map((row, i) => {
-                        const accent = PHASE_ACCENTS[row.phaseIdx % PHASE_ACCENTS.length];
-                        return (
-                          <tr key={i} style={{
-                            background: i % 2 === 0 ? 'var(--color-bg-app)' : 'var(--color-bg-surface)',
-                            borderBottom: '1px solid #e2e8f0',
-                          }}>
-                            <td style={{ padding: '0.55rem 0.75rem', whiteSpace: 'nowrap' }}>
-                              <span style={{
-                                fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-bg-surface)',
-                                background: accent, borderRadius: 3,
-                                padding: '0.1rem 0.45rem',
-                              }}>{row.phase}</span>
-                            </td>
-                            <td style={{ padding: '0.55rem 0.75rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                              {row.compound}
-                            </td>
-                            <td style={{ padding: '0.55rem 0.75rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-                              {row.weeks}
-                            </td>
-                            <td style={{ padding: '0.55rem 0.75rem', textAlign: 'center', fontWeight: 700, color: '#0f172a' }}>
-                              {row.vials}
-                            </td>
-                            <td style={{ padding: '0.55rem 0.75rem', textAlign: 'right', color: 'var(--color-text-secondary)' }}>
-                              {row.unitPrice != null ? `$${row.unitPrice.toFixed(2)}` : '—'}
-                            </td>
-                            <td style={{ padding: '0.55rem 0.75rem', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>
-                              {row.lineTotal != null ? `$${row.lineTotal.toFixed(2)}` : '—'}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                    {grandTotal > 0 && (
-                      <tfoot>
-                        <tr style={{ background: '#f1f5f9', borderTop: '2px solid #0f172a' }}>
-                          <td colSpan={4} />
-                          <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Grand Total
-                          </td>
-                          <td style={{ padding: '0.65rem 0.75rem', textAlign: 'right', fontSize: '0.82rem', fontWeight: 800, color: 'var(--color-primary)' }}>
-                            ${grandTotal.toFixed(2)}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    )}
-                  </table>
+                <div className="rounded-lg border border-slate-200 overflow-hidden">
+                  <DataTable
+                    data={procRows}
+                    keyField="compound"
+                    columns={[
+                      {
+                        id: 'phase',
+                        header: 'Phase',
+                        width: '20%',
+                        render: (row) => {
+                          const accent = PHASE_ACCENTS[row.phaseIdx % PHASE_ACCENTS.length];
+                          return (
+                            <span style={{
+                              fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-bg-surface)',
+                              background: accent, borderRadius: 3,
+                              padding: '0.1rem 0.45rem',
+                              whiteSpace: 'nowrap'
+                            }}>{row.phase}</span>
+                          );
+                        }
+                      },
+                      {
+                        id: 'compound',
+                        header: 'Compound',
+                        width: '30%',
+                        render: (row) => (
+                          <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                            {row.compound}
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'weeks',
+                        header: 'Weeks',
+                        width: '12%',
+                        render: (row) => (
+                          <span style={{ color: 'var(--color-text-secondary)', textAlign: 'center', display: 'block' }}>
+                            {row.weeks}
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'vials',
+                        header: 'Vials',
+                        width: '12%',
+                        render: (row) => (
+                          <span style={{ textAlign: 'center', display: 'block', fontWeight: 700, color: '#0f172a' }}>
+                            {row.vials}
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'unitPrice',
+                        header: 'Unit Price',
+                        width: '13%',
+                        render: (row) => (
+                          <span style={{ textAlign: 'right', display: 'block', color: 'var(--color-text-secondary)' }}>
+                            {row.unitPrice != null ? `$${row.unitPrice.toFixed(2)}` : '—'}
+                          </span>
+                        )
+                      },
+                      {
+                        id: 'lineTotal',
+                        header: 'Line Total',
+                        width: '13%',
+                        render: (row) => (
+                          <span style={{ textAlign: 'right', display: 'block', fontWeight: 700, color: '#0f172a' }}>
+                            {row.lineTotal != null ? `$${row.lineTotal.toFixed(2)}` : '—'}
+                          </span>
+                        )
+                      }
+                    ]}
+                  />
+                  {grandTotal > 0 && (
+                    <div style={{ background: '#f1f5f9', borderTop: '2px solid #0f172a', padding: '0.65rem 1rem', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Grand Total
+                      </span>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--color-primary)' }}>
+                        ${grandTotal.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Supplies footnote */}

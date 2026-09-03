@@ -1,25 +1,26 @@
+/* eslint-disable react-refresh/only-export-components -- Next.js App Router: metadata exports must live in page/layout files */
 import React from 'react';
-import { getProductsByCategoryServer } from '../../../repositories/productRepository';
+import { fetchProductsAction } from '../../../actions/productsActions';
 import CollectionClientWrapper from './CollectionClientWrapper';
-
-// export const revalidate = 3600; // Un-comment to enable Incremental Static Regeneration
+import { sanitizeForClient } from '../../../utils/sanitizeForClient';
 
 export async function generateMetadata({ params }) {
-  const slug = params?.slug;
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
   return {
-    title: `${slug ? slug.toUpperCase() : 'Catalog'} - RegenPept`,
+    title: `${slug ? slug.toUpperCase() : 'Catalog'} - Atlas App`,
     description: `Browse our ${slug} catalog.`
   };
 }
 
 export default async function NextCollectionPage({ params }) {
-  // 1. Fetch only products for this category on the server for SEO and fast LCP
-  const catalog = await getProductsByCategoryServer(params?.slug);
-  const safeCatalog = JSON.parse(JSON.stringify(catalog));
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  const catalog = await fetchProductsAction({ limitCount: 150 });
+  const safeCatalog = sanitizeForClient(catalog || []);
 
-  // 2. Pass to Client Wrapper for interactivity
   return (
-    <CollectionClientWrapper serverParams={params} initialProducts={safeCatalog} />
+    <CollectionClientWrapper serverParams={resolvedParams} initialProducts={safeCatalog} />
   );
 }
-export const revalidate = 3600;
+export const revalidate = 60;

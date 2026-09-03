@@ -1,110 +1,66 @@
-import { useState, useEffect, useMemo } from 'react';
-import { collection, query, where, getDocs, limit, startAfter, orderBy, onSnapshot } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
-import { useAuth } from '../../context/AuthContext';
+'use client';
+/**
+ * hooks/data/useSupplierProducts.js
+ *
+ * Migrado a React Query + supplierRepository.
+ * Sin imports directos de firebase/firestore.
+ */
+
+import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { getProductsBySupplier } from '@/repositories/supplierRepository';
+import { queryKeys } from './queryKeys';
+import { useAuth } from '@/context/AuthContext';
 
 /**
- * Hook for Suppliers to manage their own products/catalog.
- * Uses the Golden Rule: Required limit() and lazy loading.
+ * Hook de productos del supplier autenticado.
+ * Primera página (sin infinite scroll) — para widgets y dashboards.
+ *
+ * @param {{ limitCount?: number, enabled?: boolean }} opts
  */
-export function useSupplierProducts(options = {}) {
-  const { 
-    pageSize = 50, 
-    realtime = true 
-  } = options;
-  
+export function useSupplierProducts(opts = {}) {
+  const { limitCount = 50, enabled = true } = opts;
   const { user } = useAuth();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastDoc, setLastDoc] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
+  const supplierId = user?.uid;
 
-  useEffect(() => {
-    if (!user?.uid) {
-      setLoading(false);
-      return;
-    }
+  const queryClient = useQueryClient();
 
-    setLoading(true);
-    // Base query: Products where supplierId == user.uid
-    const qBase = query(
-      collection(db, 'products'),
-      where('supplierId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(pageSize)
-    );
+  const query = useQuery({
+    queryKey: queryKeys.suppliers.products(supplierId, { limitCount }),
+    queryFn: async () => {
+      const res = await getProductsBySupplier(supplierId, { limitCount });
+      return res.products;
+    },
+    staleTime: 1000 * 60 * 15, // Productos cambian menos frecuentemente
+    enabled: enabled && !!supplierId,
+  });
 
-    if (realtime) {
-      // Real-time listener
-      const unsubscribe = onSnapshot(qBase, (snapshot) => {
-        const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProducts(fetched);
-        
-        if (snapshot.docs.length > 0) {
-          setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-        }
-        setHasMore(snapshot.docs.length === pageSize);
-        setLoading(false);
-      }, (err) => {
-        console.error("Error fetching supplier products:", err);
-        setError(err.message);
-        setLoading(false);
-      });
-
-      return () => unsubscribe();
-    } else {
-      // One-time fetch
-      getDocs(qBase).then((snapshot) => {
-        const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProducts(fetched);
-        
-        if (snapshot.docs.length > 0) {
-          setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-        }
-        setHasMore(snapshot.docs.length === pageSize);
-        setLoading(false);
-      }).catch(err => {
-        console.error("Error fetching supplier products:", err);
-        setError(err.message);
-        setLoading(false);
-      });
-    }
-  }, [user?.uid, pageSize, realtime]);
-
-  const loadMore = async () => {
-    if (!hasMore || loading || !lastDoc || !user?.uid) return;
-    
-    setLoading(true);
-    try {
-      const qNext = query(
-        collection(db, 'products'),
-        where('supplierId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        startAfter(lastDoc),
-        limit(pageSize)
-      );
-      
-      const snapshot = await getDocs(qNext);
-      const nextProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
-      setProducts(prev => [...prev, ...nextProducts]);
-      setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
-      setHasMore(snapshot.docs.length === pageSize);
-    } catch (err) {
-      console.error("Error loading more supplier products:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: queryKeys.suppliers.products(supplierId, {}) });
 
   return {
-    products,
-    loading,
-    error,
-    hasMore,
-    loadMore
+    ...query,
+    products: query.data ?? [],
+    invalidate,
   };
+}
+
+/**
+ * Infinite scroll variant — para la tabla completa de productos del supplier.
+ *
+ * @param {{ limitCount?: number, enabled?: boolean }} opts
+ */
+export function useInfiniteSupplierProducts(opts = {}) {
+  const { limitCount = 50, enabled = true } = opts;
+  const { user } = useAuth();
+  const supplierId = user?.uid;
+
+  return useInfiniteQuery({
+    queryKey: queryKeys.suppliers.products(supplierId, { limitCount, infinite: true }),
+    queryFn: async ({ pageParam = null }) => {
+      return await getProductsBySupplier(supplierId, { limitCount, lastDoc: pageParam });
+    },
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.lastDoc : undefined,
+    initialPageParam: null,
+    staleTime: 1000 * 60 * 15,
+    enabled: enabled && !!supplierId,
+  });
 }

@@ -9,14 +9,14 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { usePreferences } from '../../../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
-import { Globe, DollarSign, List, Maximize2, Check, Settings2 } from '@/lib/icons';
+import { Globe, DollarSign, List, Maximize2, Check, Settings2, Cloud, Eye, EyeOff } from '@/lib/icons';
 
 export default function GlobalPreferencesDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
-  const { currency, updateCurrency, density, updateDensity } = usePreferences();
+  const { currency, updateCurrency, density, updateDensity, weatherDisplay, updateWeatherDisplay } = usePreferences();
   const { i18n } = useTranslation();
 
   // Close on outside click
@@ -181,6 +181,35 @@ export default function GlobalPreferencesDropdown() {
                         background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
                         color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                         cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.75rem',
+                      }}
+                    >
+                      <Icon size={14} /> {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Weather Display */}
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Weather Widget</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.25rem' }}>
+                {[
+                  { id: 'automatic', label: 'Auto', Icon: Cloud },
+                  { id: 'visible',   label: 'Show', Icon: Eye },
+                  { id: 'hidden',    label: 'Hide', Icon: EyeOff },
+                ].map(({ id, label, Icon }) => {
+                  const active = weatherDisplay === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => updateWeatherDisplay(id)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
+                        padding: '0.5rem', border: 'none', borderRadius: '6px',
+                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
+                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.7rem',
                       }}
                     >
                       <Icon size={14} /> {label}

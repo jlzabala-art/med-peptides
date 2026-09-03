@@ -12,40 +12,64 @@ import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Settings from "lucide-react/dist/esm/icons/settings";
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from 'react';
-import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import {
+  getCompetitorKPIs,
+  getCompetitorAnalysisSettings,
+  saveCompetitorAnalysisSettings,
+  getCompetitorAnalysisResults,
+  scheduleCompetitorScrape
+} from '../../services/settingsService';
+import { getProduct } from '../../repositories/productRepository';
 import PageHeader from '../ui/PageHeader';
-import GlobalSearchBar from '../ui/GlobalSearchBar';
+import AlgoliaProductPicker from './protocols/tabs/AlgoliaProductPicker';
+import DataTable from '../ui/DataTable';
+import EmptyState from '../ui/EmptyState';
+import StatusBadge from '../ui/StatusBadge';
+import CopyableId from '../ui/CopyableId';
 import { useToast } from '../../hooks/useToast';
 import CompetitorAnalysisWidget from './CompetitorAnalysisWidget';
+import AlgoliaCompetitorBadge from './competitors/AlgoliaCompetitorBadge';
+import Search from "lucide-react/dist/esm/icons/search";
 
-export default function AdminCompetitorsTab({ isSubTab = false }) {
-  const [cacheData, setCacheData] = useState({ matches: [], lastUpdated: null });
-  const [loading, setLoading] = useState(true);
+export default function AdminCompetitorsTab({ isSubTab = false, initialSearch = '', product = null }) {
+  const [matches, setMatches] = useState([]);
+  const [productDetails, setProductDetails] = useState(null);
+  const [kpis, setKpis] = useState({ totalMatches: 0, highlyCompetitive: 0, needsAdjustment: 0, lastUpdated: null });
+  const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [selectedTier, setSelectedTier] = useState('retail');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState(product ? { id: product.id, name: product.canonicalName || product.name || product.id, ...product } : null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (product) {
+      setSelectedProduct({ id: product.id, name: product.canonicalName || product.name || product.id, ...product });
+    } else if (initialSearch && !selectedProduct) {
+      setSelectedProduct({ id: initialSearch, name: initialSearch, canonicalName: initialSearch });
+    }
+  }, [product, initialSearch]);
 
   // Settings State
   const [showSettings, setShowSettings] = useState(false);
   const [competitorUrls, setCompetitorUrls] = useState([
-    { name: "UAE Peptides", url: "https://uaepeptides.com/collections/all" }
+    { name: "Peptide Sciences", url: "https://www.peptidesciences.com/" },
+    { name: "Limitless Life", url: "https://limitlesslifenootropics.com/" },
+    { name: "Core Peptides", url: "https://corepeptides.com/" }
   ]);
   const [scrapeFrequency, setScrapeFrequency] = useState("Diario");
   const [newCompName, setNewCompName] = useState('');
   const [newCompUrl, setNewCompUrl] = useState('');
 
   const fetchData = React.useCallback(async () => {
-    setLoading(true);
     try {
-      const cacheDoc = await getDoc(doc(db, 'settings', 'competitor_cache'));
-      if (cacheDoc.exists()) {
-        setCacheData(cacheDoc.data());
+      // 1. Fetch KPIs from server
+      const kpisData = await getCompetitorKPIs();
+      if (kpisData) {
+        setKpis(kpisData);
       }
-      const settingsDoc = await getDoc(doc(db, 'settings', 'competitor_analysis'));
-      if (settingsDoc.exists()) {
-        const data = settingsDoc.data();
+
+      // 2. Fetch settings
+      const data = await getCompetitorAnalysisSettings();
+      if (data && Object.keys(data).length > 0) {
         if (data.urls) setCompetitorUrls(data.urls);
         else if (data.targetUrls) {
           setCompetitorUrls(data.targetUrls.map(url => ({ name: new URL(url).hostname.replace('www.',''), url })));
@@ -56,28 +80,71 @@ export default function AdminCompetitorsTab({ isSubTab = false }) {
     } catch (err) {
       console.error('Error fetching competitor data', err);
       toast?.error('Error fetching competitor data');
-    } finally {
-      setLoading(false);
     }
-  }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    async function fetchProductCompetitors() {
+      if (!selectedProduct) {
+        setMatches([]);
+        setProductDetails(null);
+        return;
+      }
+      setLoading(true);
+      try {
+        const pId = selectedProduct.id || selectedProduct.objectID;
+        
+        // Fetch full product for variants
+        const prod = await getProduct(pId);
+        if (prod) {
+          setProductDetails(prod);
+        } else {
+          setProductDetails(null);
+        }
+
+        const compResult = await getCompetitorAnalysisResults(pId);
+        if (compResult) {
+          setMatches([compResult]);
+        } else {
+          setMatches([]);
+        }
+      } catch (err) {
+        console.error('Error fetching product competitors:', err);
+        toast?.error('Error fetching competitor data for this product');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProductCompetitors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProduct]);
+
   const forceScan = async () => {
     setScanning(true);
     try {
-      toast?.info("Background Scan Triggered. This may take a minute.");
+      toast?.info("Background Scan Triggered. This may take 1-2 minutes.");
       const projectId = "med-peptides-app"; 
-      const url = `https://us-central1-${projectId}.cloudfunctions.net/forceScrapeCompetitors`;
+      const pId = selectedProduct ? (selectedProduct.id || selectedProduct.objectID) : null;
+      const url = `https://us-central1-${projectId}.cloudfunctions.net/forceScrapeCompetitors${pId ? `?productId=${pId}` : ''}`;
       await fetch(url, { method: 'POST' });
-      setTimeout(() => {
-        fetchData();
+      // Scraping multiple sites takes time; poll after 60s
+      setTimeout(async () => {
+        if (selectedProduct) {
+          const pDocId = selectedProduct.id || selectedProduct.objectID;
+          const compResult = await getCompetitorAnalysisResults(pDocId);
+          if (compResult) {
+            setMatches([compResult]);
+          }
+        }
+        await fetchData();
         setScanning(false);
         toast?.success("Scan completed. Data refreshed.");
-      }, 7000); 
-
+      }, 60000); 
     } catch (err) {
       console.error(err);
       toast?.error('Error triggering scan');
@@ -85,12 +152,30 @@ export default function AdminCompetitorsTab({ isSubTab = false }) {
     }
   };
 
+  const scheduleNightlyScan = async () => {
+    if (!selectedProduct) return;
+    try {
+      const pId = selectedProduct.id || selectedProduct.objectID;
+      await scheduleCompetitorScrape(pId, {
+        productId: pId,
+        productName: selectedProduct.canonicalName || selectedProduct.name,
+        scheduledAt: new Date().toISOString(),
+        status: 'pending',
+        targetUrls: competitorUrls.map(c => c.url)
+      });
+      toast?.success(`"${selectedProduct.name}" scheduled for tonight's automated competitor scan.`);
+    } catch (e) {
+      console.error('Failed to schedule nightly scan:', e);
+      toast?.error('Failed to schedule nightly scan: ' + e.message);
+    }
+  };
+
   const handleSaveSettings = async () => {
     try {
-      await setDoc(doc(db, 'settings', 'competitor_analysis'), {
+      await saveCompetitorAnalysisSettings({
         urls: competitorUrls,
         frequency: scrapeFrequency
-      }, { merge: true });
+      });
       setShowSettings(false);
       toast?.success('Settings saved successfully!');
     } catch (err) {
@@ -110,54 +195,122 @@ export default function AdminCompetitorsTab({ isSubTab = false }) {
     setCompetitorUrls(competitorUrls.filter((_, i) => i !== idx));
   };
 
-  const kpiStats = useMemo(() => {
-    let cheaperCount = 0;
-    let expensiveCount = 0;
-    let totalMatches = cacheData.matches ? cacheData.matches.length : 0;
+  const toggleCompetitor = (idx) => {
+    const updated = [...competitorUrls];
+    updated[idx].active = updated[idx].active === false ? true : false;
+    setCompetitorUrls(updated);
+  };
 
-    (cacheData.matches || []).forEach(match => {
-      const myPPM = match.myPPMs ? match.myPPMs[selectedTier] : null;
-      let isOverallCheaper = true;
-      let isOverallExpensive = true;
-      if (!myPPM) return;
+  const competitorColumns = [
+    {
+      key: 'name',
+      header: 'Store Name',
+      width: '25%',
+      render: (row) => <div style={{ fontWeight: 700 }}>{row.name}</div>
+    },
+    {
+      key: 'url',
+      header: 'Target URL',
+      width: '45%',
+      render: (row) => <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{row.url}</div>
+    },
+    {
+      key: 'active',
+      header: 'Scrape Status',
+      width: '15%',
+      render: (row, idx) => (
+        <div onClick={() => toggleCompetitor(idx)} style={{ cursor: 'pointer', display: 'inline-block' }}>
+          <StatusBadge status={row.active !== false ? 'active' : 'inactive'} label={row.active !== false ? 'Active' : 'Ignored'} />
+        </div>
+      )
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: '10%',
+      render: (_, idx) => (
+        <button onClick={() => removeCompetitor(idx)} style={{ color: 'var(--text-muted)', background: 'var(--bg-default)', border: '1px solid var(--border)', cursor: 'pointer', padding: '0.5rem', borderRadius: '8px', transition: 'all 0.2s' }}><X size={16} /></button>
+      )
+    }
+  ];
 
-      match.competitors.forEach(comp => {
-        const compPPM = comp.ppm;
-        if (!compPPM) return;
-        const diff = myPPM - compPPM;
-        if (diff > 0.05) isOverallCheaper = false; // We are more expensive
-        if (diff < -0.05) isOverallExpensive = false; // We are cheaper
-      });
+  const lastUpdatedStr = kpis.lastUpdated ? new Date(kpis.lastUpdated).toLocaleString() : 'Never';
 
-      if (isOverallCheaper && !isOverallExpensive) cheaperCount++;
-      if (isOverallExpensive && !isOverallCheaper) expensiveCount++;
-    });
-
-    return { cheaperCount, expensiveCount, totalMatches };
-  }, [cacheData, selectedTier]);
-
-  // Inject AI Context
-  useEffect(() => {
-    const contextStr = (cacheData.matches || []).map(m => {
-      const myPPM = m.myPPMs ? m.myPPMs[selectedTier] : 0;
-      const comps = m.competitors.map(c => `${c.competitor_name} ($${c.ppm ? c.ppm.toFixed(2) : 0}/mg)`).join(', ');
-      return `Product: ${m.productName} (Our ${selectedTier} PPM: $${myPPM ? myPPM.toFixed(2) : 0}). Competitors: ${comps}`;
-    }).join('; ');
-
-    window.dispatchEvent(new CustomEvent('admin-context-update', {
-      detail: {
-        page: 'competitor_analysis',
-        summary: `Competitor pricing analysis active for tier ${selectedTier}. Found matches for ${kpiStats.totalMatches} products. We are cheaper on ${kpiStats.cheaperCount} products and more expensive on ${kpiStats.expensiveCount}. Detail: ${contextStr}`,
-        suggestedActions: [
-          `Based on competitors, suggest optimal pricing for our expensive products in the ${selectedTier} tier.`,
-          'Summarize our market positioning.',
-          'Are there any competitors undercutting our prices?'
-        ]
+  const sourcingColumns = [
+    {
+      key: 'sku',
+      header: 'SKU / ID',
+      width: '25%',
+      render: (row) => <CopyableId value={row.sku || row.id} />
+    },
+    {
+      key: 'name',
+      header: 'Supplier',
+      width: '30%',
+      render: (row) => <div style={{ fontWeight: 600 }}>{row.supplierName || 'Unknown'}</div>
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      width: '25%',
+      render: (row) => (
+        <span style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', background: 'var(--bg-light)', borderRadius: '4px', color: 'var(--text-secondary)' }}>
+          {row.isRawPowder ? 'Raw Powder' : 'Finished Vial'}
+        </span>
+      )
+    },
+    {
+      key: 'cost',
+      header: 'Cost / mg',
+      width: '20%',
+      render: (row) => {
+        const cost = row.pricePerMg || row.kitPricePerMg;
+        return <div style={{ fontWeight: 700, color: 'var(--primary)' }}>{cost ? `$${parseFloat(cost).toFixed(2)}` : 'N/A'}</div>;
       }
-    }));
-  }, [cacheData, selectedTier, kpiStats]);
+    }
+  ];
 
-  const lastUpdatedStr = cacheData.lastUpdated ? new Date(cacheData.lastUpdated).toLocaleString() : 'Never';
+  const marketColumns = [
+    {
+      key: 'store',
+      header: 'Store Name',
+      width: '35%',
+      render: (row) => <div style={{ fontWeight: 600 }}>{row.competitor_name}</div>
+    },
+    {
+      key: 'product',
+      header: 'Product Match',
+      width: '45%',
+      render: (row) => (
+        <div>
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{row.product_name}</div>
+          <a href={row.competitor_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#3b82f6', textDecoration: 'none' }}>Ver URL ↗</a>
+        </div>
+      )
+    },
+    {
+      key: 'ppm',
+      header: 'Price / mg',
+      width: '20%',
+      render: (row) => (
+        <div style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>
+          {row.ppm ? `$${row.ppm.toFixed(2)}` : 'N/A'}
+        </div>
+      )
+    }
+  ];
+
+  const matchData = matches.length > 0 ? matches[0] : null;
+  const historyData = matchData?.history || [];
+  
+  // Quick trend calculation
+  let priceTrend = 'stable';
+  if (historyData.length > 1) {
+    const latest = historyData[historyData.length - 1].avgPpm;
+    const previous = historyData[historyData.length - 2].avgPpm;
+    if (latest > previous + 0.05) priceTrend = 'up';
+    if (latest < previous - 0.05) priceTrend = 'down';
+  }
 
   return (
     <div style={{ marginBottom: '2rem', animation: 'fadeIn 0.3s ease-in-out' }}>
@@ -175,54 +328,60 @@ export default function AdminCompetitorsTab({ isSubTab = false }) {
         }
       />
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <GlobalSearchBar
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Search competitors, products, or price comparisons..."
-          namespace="admin-competitors"
-          size="lg"
-        />
+      <div style={{ marginBottom: '1.5rem', position: 'relative', zIndex: 100 }}>
+        <AlgoliaProductPicker onProductSelect={setSelectedProduct} />
+        {selectedProduct && (
+           <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+               <span style={{ fontWeight: 600 }}>Selected Product:</span>
+               <span>{selectedProduct.name}</span>
+             </div>
+             <button onClick={() => setSelectedProduct(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+           </div>
+        )}
       </div>
 
-      {/* KPI Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      {/* KPI Dashboard - Rendered from Server Data */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Total Matches</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.5rem', borderRadius: '8px' }}><Activity size={20} /></div>
-            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpiStats.totalMatches}</span>
+            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpis.totalMatches}</span>
           </div>
         </div>
         <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Highly Competitive</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '0.5rem', borderRadius: '8px' }}><CheckCircle size={20} /></div>
-            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpiStats.cheaperCount}</span>
+            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpis.highlyCompetitive}</span>
           </div>
         </div>
         <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Needs Adjustment</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.5rem', borderRadius: '8px' }}><AlertCircle size={20} /></div>
-            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpiStats.expensiveCount}</span>
+            <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{kpis.needsAdjustment}</span>
           </div>
         </div>
+        {/* Algolia Real-Time Market Benchmark KPI */}
+        {selectedProduct && (
+          <div style={{ background: 'linear-gradient(135deg, #eff6ff, #f0fdf4)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+            <span style={{ color: '#1e40af', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Algolia Benchmark</span>
+            <div style={{ marginTop: '0.25rem' }}>
+              <AlgoliaCompetitorBadge
+                productName={selectedProduct.canonicalName || selectedProduct.name || ''}
+                ourPrice={selectedProduct.myPPMs?.retail || 0}
+                dosageMg={selectedProduct.variants?.[0]?.dosage || 5}
+              />
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#3b82f6', marginTop: '0.15rem' }}>vs. {competitorUrls.length} competitors</span>
+          </div>
+        )}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <select 
-            value={selectedTier} 
-            onChange={(e) => setSelectedTier(e.target.value)}
-            style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', border: '1px solid var(--primary)', background: 'rgba(59, 130, 246, 0.05)', color: 'var(--primary)', fontWeight: 700, outline: 'none' }}
-          >
-            <option value="retail">Compare: RETAIL Price</option>
-            <option value="clinic">Compare: CLINIC Price</option>
-            <option value="wholesaler">Compare: WHOLESALER Price</option>
-            <option value="distributor">Compare: DISTRIBUTOR Price</option>
-            <option value="master">Compare: MASTER Price</option>
-          </select>
 
           <button 
             onClick={forceScan}
@@ -274,29 +433,21 @@ export default function AdminCompetitorsTab({ isSubTab = false }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', position: 'relative' }}>
             <h4 style={{ fontSize: '0.95rem', margin: '0 0 0.5rem 0' }}>URLs de Competidores</h4>
-            {competitorUrls.map((comp, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', padding: '1rem 1.25rem', borderRadius: '12px', transition: 'all 0.2s', ':hover': { borderColor: 'var(--primary)', transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' } }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--bg-default)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', fontSize: '1rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                    {comp.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.15rem' }}>{comp.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{comp.url}</div>
-                  </div>
-                </div>
-                <button onClick={() => removeCompetitor(idx)} style={{ color: 'var(--text-muted)', background: 'var(--bg-default)', border: '1px solid var(--border)', cursor: 'pointer', padding: '0.5rem', borderRadius: '8px', transition: 'all 0.2s' }}><X size={16} /></button>
-              </div>
-            ))}
+            <DataTable 
+              columns={competitorColumns} 
+              data={competitorUrls} 
+              keyExtractor={(item, idx) => idx.toString()} 
+              pageSize={10}
+            />
           </div>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', background: 'rgba(255,255,255,0.01)', padding: '1.25rem', borderRadius: '12px', border: '1px dashed var(--border)', position: 'relative' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Store Name</label>
-              <TextField type="text" value={newCompName} onChange={e => setNewCompName(e.target.value)} placeholder="e.g. Acme Peptides" />
+              <input className="gcp-input" type="text" value={newCompName} onChange={e => setNewCompName(e.target.value)} placeholder="e.g. Acme Peptides" />
             </div>
             <div style={{ flex: 2 }}>
               <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target URL</label>
-              <TextField type="text" value={newCompUrl} onChange={e => setNewCompUrl(e.target.value)} placeholder="https://..." />
+              <input className="gcp-input" type="text" value={newCompUrl} onChange={e => setNewCompUrl(e.target.value)} placeholder="https://..." />
             </div>
             <button onClick={addCompetitor} className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem', display: 'flex', gap: '0.5rem', borderRadius: '8px', fontWeight: 700, alignItems: 'center' }}>
               <Plus size={16} /> Add Store
@@ -315,59 +466,180 @@ export default function AdminCompetitorsTab({ isSubTab = false }) {
           <div className="spinner-border text-primary" style={{ width: '2rem', height: '2rem' }}></div>
           Loading rapid analysis...
         </div>
-      ) : (!cacheData.matches || cacheData.matches.length === 0) ? (
-        <div style={{ textAlign: 'center', padding: '5rem 2rem', background: 'var(--bg-surface)', borderRadius: '12px', border: '1px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <ShieldAlert size={48} color="var(--text-muted)" style={{ opacity: 0.3, marginBottom: '1.5rem' }} />
-          <h3 style={{ margin: '0 0 0.5rem 0', fontWeight: 700 }}>No Match Data Found</h3>
-          <p style={{ color: 'var(--text-muted)', maxWidth: '400px' }}>Try forcing a scan to retrieve the latest competitor pricing, or verify that your product names align with standard nomenclature.</p>
+      ) : (!selectedProduct) ? (
+        <EmptyState 
+          icon={Search}
+          title="No Product Selected"
+          subtitle="Search and select a product using the Algolia search bar above to view its competitor analysis."
+        />
+      ) : (!matches || matches.length === 0) ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Algolia Instant Benchmark — shown ALWAYS when no scrape data yet */}
+          <div style={{
+            background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)',
+            border: '1px solid #bfdbfe',
+            borderRadius: '14px',
+            padding: '1.5rem',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, background: '#003666', color: '#fff', padding: '2px 8px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>⚡ Algolia Live Benchmark</span>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Datos de mercado en tiempo real (sin necesidad de scraping)</span>
+            </div>
+            <AlgoliaCompetitorBadge
+              productName={selectedProduct.canonicalName || selectedProduct.name || ''}
+              ourPrice={selectedProduct.myPPMs?.retail || 0}
+              dosageMg={selectedProduct.variants?.[0]?.dosage || 5}
+            />
+          </div>
+
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            padding: '2.5rem 1.5rem',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1rem',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
+          }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              backgroundColor: '#eff6ff',
+              color: '#0284c7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Globe size={24} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.35rem 0' }}>
+                No Live Scrape Data Found for {selectedProduct.name}
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, maxWidth: '480px' }}>
+                We haven't gathered live market pricing yet. Trigger an immediate scan or schedule an automated crawl for tonight. While you wait, Algolia provides instant benchmark data above.
+              </p>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 0.85rem',
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              fontSize: '0.78rem',
+              color: '#475569'
+            }}>
+              <span>Configured Target Stores:</span>
+              <strong style={{ color: '#0f172a' }}>
+                {competitorUrls.map(c => c.name).join(', ')}
+              </strong>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button
+                onClick={scheduleNightlyScan}
+                className="gcp-btn-secondary"
+                style={{ padding: '0.6rem 1.25rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                🌙 Schedule Nightly Web Scan
+              </button>
+              <button
+                onClick={forceScan}
+                disabled={scanning}
+                className="gcp-btn-primary"
+                style={{ padding: '0.6rem 1.25rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <RefreshCw size={15} className={scanning ? 'spin' : ''} />
+                {scanning ? 'Scanning Market...' : '⚡ Force Immediate Scan'}
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '1.5rem' }}>
-          {cacheData.matches.map((match, idx) => {
-            const myPPM = match.myPPMs ? match.myPPMs[selectedTier] : 0;
-            return (
-              <div key={idx} style={{ 
-                background: 'var(--bg-surface)', 
-                borderRadius: '12px', 
-                border: '1px solid var(--border)', 
-                overflow: 'hidden',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
-                transition: 'transform 0.2s',
-              }}>
-                <div style={{ 
-                  padding: '1.25rem 1.5rem', 
-                  background: 'linear-gradient(to right, rgba(0,0,0,0.02), transparent)', 
-                  borderBottom: '1px solid var(--border)', 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center' 
-                }}>
-                  <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: 700 }}>{match.productName}</h4>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Base Dosage: {match.myMg ? `${match.myMg}mg` : 'N/A'}</span>
-                  </div>
-                  <div style={{ 
-                    background: 'linear-gradient(135deg, var(--primary), #00BCD4)', 
-                    color: 'white', 
-                    padding: '0.4rem 1rem', 
-                    borderRadius: '999px', 
-                    fontSize: '0.85rem', 
-                    fontWeight: 700,
-                    boxShadow: '0 2px 8px rgba(0, 188, 212, 0.3)'
-                  }}>
-                    Our {selectedTier.toUpperCase()} PPM: ${myPPM ? myPPM.toFixed(2) : '0'}/mg
-                  </div>
-                </div>
-                <div style={{ padding: '1rem 1.5rem' }}>
-                  <CompetitorAnalysisWidget 
-                    matchData={match.competitors} 
-                    selectedTier={selectedTier}
-                    myPPMs={match.myPPMs}
-                  />
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'slideUp 0.3s ease-out' }}>
+          
+          {/* Detail Header Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Costo Proveedor Promedio</span>
+              <span style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                {matchData?.myAverageCost ? `$${matchData.myAverageCost.toFixed(2)}` : 'N/A'}/mg
+              </span>
+            </div>
+            
+            <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Precio Mercado Promedio</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--primary)' }}>
+                  {historyData.length > 0 ? `$${historyData[historyData.length - 1].avgPpm.toFixed(2)}` : 'N/A'}/mg
+                </span>
+                {priceTrend === 'up' && <span style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: 600 }}>↑ Subiendo</span>}
+                {priceTrend === 'down' && <span style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: 600 }}>↓ Bajando</span>}
+                {priceTrend === 'stable' && <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>— Estable</span>}
               </div>
-            );
-          })}
+            </div>
+
+            <div style={{ background: 'var(--bg-surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Margen Bruto (Retail)</span>
+              {matchData?.myPPMs?.retail && historyData.length > 0 ? (
+                <span style={{ fontSize: '1.75rem', fontWeight: 700, color: matchData.myPPMs.retail < historyData[historyData.length - 1].avgPpm ? '#10b981' : '#ef4444' }}>
+                  {((historyData[historyData.length - 1].avgPpm - matchData.myPPMs.retail) / historyData[historyData.length - 1].avgPpm * 100).toFixed(1)}%
+                </span>
+              ) : (
+                <span style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>N/A</span>
+              )}
+            </div>
+          </div>
+
+          {/* Dual Tables */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            
+            {/* Mis Proveedores */}
+            <div style={{ background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-light)' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Mis Proveedores (Sourcing)</h3>
+              </div>
+              {productDetails?.variants?.length > 0 ? (
+                <DataTable 
+                  columns={sourcingColumns} 
+                  data={productDetails.variants} 
+                  globalSearch={false}
+                  pageSize={10}
+                />
+              ) : (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No hay proveedores (variants) registrados para este producto.
+                </div>
+              )}
+            </div>
+
+            {/* Competidores Externos */}
+            <div style={{ background: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-light)' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>Competidores Externos (Mercado)</h3>
+              </div>
+              {matchData?.competitors?.length > 0 ? (
+                <DataTable 
+                  columns={marketColumns} 
+                  data={matchData.competitors.sort((a,b) => (a.ppm || 999) - (b.ppm || 999))} 
+                  globalSearch={false}
+                  pageSize={10}
+                />
+              ) : (
+                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  No se encontraron competidores externos. Fuerza un escaneo si es un producto nuevo.
+                </div>
+              )}
+            </div>
+            
+          </div>
         </div>
       )}
     </div>

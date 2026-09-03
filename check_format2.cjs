@@ -1,0 +1,15 @@
+require('dotenv').config({ path: '.env.local' });
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+const app = getApps().length === 0 ? initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) }) : getApps()[0];
+const db = getFirestore(app);
+
+async function check() {
+  const snap = await db.collection('products').get();
+  const pens = snap.docs.filter(d => JSON.stringify(d.data()).toLowerCase().includes('vanilla') || JSON.stringify(d.data()).toLowerCase().includes('magenta') || JSON.stringify(d.data()).toLowerCase().includes('pen'));
+  pens.forEach(d => console.log("Product:", d.id, d.data().canonicalName));
+}
+check().then(() => process.exit(0));

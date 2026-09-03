@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { collection, query, where, onSnapshot, orderBy, limit, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, limit, doc, updateDoc, writeBatch, or } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { useNotificationStore } from '../stores/notificationStore';
@@ -16,7 +16,10 @@ export function useNotificationListener() {
 
     const q = query(
       collection(db, 'notifications'),
-      where('userId', '==', user.uid),
+      or(
+        where('userId', '==', user.uid),
+        where('targetRoles', 'array-contains', user.role || 'unknown')
+      ),
       orderBy('createdAt', 'desc'),
       limit(50)
     );

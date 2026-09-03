@@ -3,8 +3,9 @@ import { StatusChip } from '../../ui';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Target, TrendingUp, Activity, CheckCircle } from '@/lib/icons';
 
-export default function ClinicalProgressTracker({ protocol }) {
+export default function ClinicalProgressTracker({ protocol, onEnrichMonitoring }) {
   const biomarkerData = protocol?.clinical_biomarker_data;
+  const [isGenerating, setIsGenerating] = React.useState(false);
   
   if (!biomarkerData) {
     return (
@@ -12,6 +13,30 @@ export default function ClinicalProgressTracker({ protocol }) {
         <Activity size={32} style={{ opacity: 0.3, margin: '0 auto 1rem' }} />
         <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', color: '#334155' }}>Clinical Target Pending</h3>
         <p style={{ margin: 0, fontSize: '0.85rem' }}>The primary biomarker trajectory for this protocol is currently pending clinical enrichment via Atlas AI.</p>
+        
+        {onEnrichMonitoring && (
+          <button
+            onClick={() => {
+              setIsGenerating(true);
+              onEnrichMonitoring();
+              // Reset the loading state after a few seconds in case it finishes quickly
+              setTimeout(() => setIsGenerating(false), 3000);
+            }}
+            disabled={isGenerating}
+            className="gcp-btn-primary"
+            style={{ 
+              marginTop: '1.5rem', 
+              padding: '0.6rem 1.25rem', 
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              opacity: isGenerating ? 0.7 : 1
+            }}
+          >
+            {isGenerating ? 'Working...' : '✨ Generate Trajectory'}
+          </button>
+        )}
       </div>
     );
   }

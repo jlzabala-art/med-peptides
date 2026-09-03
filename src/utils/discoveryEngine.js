@@ -20,14 +20,22 @@ const PRODUCT_NAME_ALIASES = {
   '5-amino 1mq':                            '5-amino-1mq',
   '5-amino-1mq':                            '5-amino-1mq',
   'cjc-1295 without dac (modified grf 1-29)': 'cjc-1295 without dac',
-  'fst-344 (follistatin)':                   'fst-344',
-  'hgh':                                     'hgh 10iu',
-  'igf-1 lr3':                               'igf-lr3',
+  'fst-344 (follistatin)':                   'fst344',
+  'hgh':                                     'hgh',
+  'igf-1 lr3':                               'igf lr3',
   'mk-677 (ibutamoren)':                     'mk-677',
   'mt2 (melanotan ii)':                      'mt2',
+  'melanotan ii':                            'mt2',
   'pt-141 (bremelanotide)':                  'pt-141',
-  'tb-500 (thymosin β4)':                    'thymosin b4 (tb-500)',
-  'thymosin b4 (tb-500)':                    'thymosin b4 (tb-500)',
+  'tb-500 (thymosin β4)':                    'thymosin β4 (tb-500)',
+  'thymosin beta-4':                         'thymosin β4 (tb-500)',
+  'thymosin beta 4':                         'thymosin β4 (tb-500)',
+  'glow':                                    'glow (bpc-157 / tb-500 / ghk)',
+  'klow':                                    'klow (bpc-157 / tb-500 / ghkcu / kpv)',
+  'ghk-cu':                                  'ghk-cu (human copper)',
+  'insulin syringes':                        'insulin syringes 1/2 ml - 31g x 8 mm 100 counts',
+  'bacteriostatic water':                    'bac water',
+  'syringe and bac water bundle':            'syringe + bac water bundle'
 };
 
 /**

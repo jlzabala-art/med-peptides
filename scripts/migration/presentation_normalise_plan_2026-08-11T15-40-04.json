@@ -1,0 +1,2156 @@
+{
+  "toUpdate": [
+    {
+      "id": "17-a-estradiol-default",
+      "productId": "17-a-estradiol",
+      "productName": "17-a Estradiol",
+      "label": "17-a Estradiol",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "24genetics-ai-subscription-annual-default",
+      "productId": "24genetics-ai-subscription-annual",
+      "productName": "24Genetics AI Connect Subscription (Annual)",
+      "label": "Annual",
+      "raw": "Digital Subscription",
+      "canonical": "digital",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-ai-subscription-monthly-default",
+      "productId": "24genetics-ai-subscription-monthly",
+      "productName": "24Genetics AI Connect Subscription (Monthly)",
+      "label": "Monthly",
+      "raw": "Digital Subscription",
+      "canonical": "digital",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-all-in-one-default",
+      "productId": "24genetics-all-in-one",
+      "productName": "24Genetics All in One DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "default",
+      "productId": "24genetics-all-in-one",
+      "productName": "24Genetics All in One DNA Test",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-all-in-one-plus-default",
+      "productId": "24genetics-all-in-one-plus",
+      "productName": "24Genetics All in One Plus DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-ancestry-default",
+      "productId": "24genetics-ancestry",
+      "productName": "24Genetics Ancestry DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-health-default",
+      "productId": "24genetics-health",
+      "productName": "24Genetics Health DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-nutrigenetics-default",
+      "productId": "24genetics-nutrigenetics",
+      "productName": "24Genetics Nutrigenetics DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-personality-default",
+      "productId": "24genetics-personality",
+      "productName": "24Genetics Personality & Talent DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-pharmacogenetics-default",
+      "productId": "24genetics-pharmacogenetics",
+      "productName": "24Genetics Pharmacogenetics Plus DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-skin-default",
+      "productId": "24genetics-skin",
+      "productName": "24Genetics Skin & Hair DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "24genetics-sport-default",
+      "productId": "24genetics-sport",
+      "productName": "24Genetics Sport DNA Test",
+      "label": "1 Kit",
+      "raw": "Saliva Collection Kit",
+      "canonical": "kit",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "europeptides-5-amino-1-50-mg-pre-filled-pen-1-default",
+      "productId": "5-amino-1-50-mg",
+      "productName": "5 Amino-1",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "bioniq_5_amino_1mq_single_use_pen_100_mg-default",
+      "productId": "5-amino-1mq",
+      "productName": "5-Amino-1MQ",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "acetilcystein-n-acetyl-l-cystein-default",
+      "productId": "acetilcystein-n-acetyl-l-cystein",
+      "productName": "Acetilcystein (N-Acetyl L-Cystein)",
+      "label": "Acetilcystein (N-Acetyl L-Cystein)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "acetylcystein-n-acetyl-l-cysteine-default",
+      "productId": "acetylcystein-n-acetyl-l-cysteine",
+      "productName": "Acetylcystein (N-Acetyl L-Cysteine)",
+      "label": "Acetylcystein (N-Acetyl L-Cysteine)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "acetylhexapeptide-default",
+      "productId": "acetylhexapeptide",
+      "productName": "Acetylhexapeptide",
+      "label": "Acetylhexapeptide",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-adipotide-2mg-pre-filled-pen-3-default",
+      "productId": "adipotide-2mg",
+      "productName": "Adipotide",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-aicar-50-mg-pre-filled-pen-7-default",
+      "productId": "aicar-50-mg",
+      "productName": "AICAR",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "all-in-one-dna-test-default",
+      "productId": "all-in-one-dna-test",
+      "productName": "All in One DNA Test",
+      "label": "All in One DNA Test",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "FCgkT88xQyJYOjcBrUhY-default",
+      "productId": "aod-9604",
+      "productName": "AOD-9604",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "europeptides-aod-9064-5mg-pre-filled-pen-11-default",
+      "productId": "aod-9604-5mg",
+      "productName": "AOD-9604",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-ara-290-10mg-pre-filled-pen-13-default",
+      "productId": "ara-290-10mg",
+      "productName": "Ara-290",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "arginine-default",
+      "productId": "arginine",
+      "productName": "Arginine",
+      "label": "Arginine",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "astaxanthin-default",
+      "productId": "astaxanthin",
+      "productName": "Astaxanthin",
+      "label": "Astaxanthin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_anti_aging_and_immunity_bundle_bundle-default",
+      "productId": "bioniq_anti_aging_and_immunity_bundle_bundle",
+      "productName": "Anti-Aging and Immunity Bundle",
+      "label": "Default Variant",
+      "raw": "Bundle",
+      "canonical": "bundle",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_bpc_157_kpv_capsule-default",
+      "productId": "bioniq_bpc_157_kpv_capsule",
+      "productName": "BPC-157 + KPV",
+      "label": "Default Variant",
+      "raw": "Capsule",
+      "canonical": "capsule",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_bpc_157_tb500_single_use_pen_15_mg-default",
+      "productId": "bioniq_bpc_157_tb500_single_use_pen_15_mg",
+      "productName": "BPC-157 + TB500",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_cellular_repair_and_energy_bundle_bundle-default",
+      "productId": "bioniq_cellular_repair_and_energy_bundle_bundle",
+      "productName": "Cellular Repair and Energy Bundle",
+      "label": "Default Variant",
+      "raw": "Bundle",
+      "canonical": "bundle",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_cjc_1295_no_dac_ipamorelin_single_use_pen_15_mg-default",
+      "productId": "bioniq_cjc_1295_no_dac_ipamorelin_single_use_pen_15_mg",
+      "productName": "CJC 1295 No Dac + Ipamorelin",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_glow_stack_bundle-default",
+      "productId": "bioniq_glow_stack_bundle",
+      "productName": "Glow Stack",
+      "label": "Default Variant",
+      "raw": "Bundle",
+      "canonical": "bundle",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_glp_3_single_use_pen_30_mg-default",
+      "productId": "bioniq_glp_3_single_use_pen_30_mg",
+      "productName": "GLP-3",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_health_optimisation_bundle_bundle-default",
+      "productId": "bioniq_health_optimisation_bundle_bundle",
+      "productName": "Health Optimisation Bundle",
+      "label": "Default Variant",
+      "raw": "Bundle",
+      "canonical": "bundle",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_igf_1_lr3_single_use_pen_3_mg-default",
+      "productId": "bioniq_igf_1_lr3_single_use_pen_3_mg",
+      "productName": "IGF 1 LR3",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_kisspeptin_single_use_pen_15_mg-default",
+      "productId": "bioniq_kisspeptin_single_use_pen_15_mg",
+      "productName": "Kisspeptin",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_oxytocin_methylene_blue_nasal_spray-default",
+      "productId": "bioniq_oxytocin_methylene_blue_nasal_spray",
+      "productName": "Oxytocin + Methylene Blue",
+      "label": "Default Variant",
+      "raw": "Nasal Spray",
+      "canonical": "nasal_spray",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_pt_141_oxytocin_nasal_spray-default",
+      "productId": "bioniq_pt_141_oxytocin_nasal_spray",
+      "productName": "PT-141 + Oxytocin",
+      "label": "Default Variant",
+      "raw": "Nasal Spray",
+      "canonical": "nasal_spray",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_skin_tissue_regeneration_stack_bundle-default",
+      "productId": "bioniq_skin_tissue_regeneration_stack_bundle",
+      "productName": "Skin & Tissue Regeneration Stack",
+      "label": "Default Variant",
+      "raw": "Bundle",
+      "canonical": "bundle",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_tb_500_thymosin_beta_4_single_use_pen_15_mg-default",
+      "productId": "bioniq_tb_500_thymosin_beta_4_single_use_pen_15_mg",
+      "productName": "TB 500 / Thymosin Beta 4",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "bioniq_wolverine_repair_bundle_bundle-default",
+      "productId": "bioniq_wolverine_repair_bundle_bundle",
+      "productName": "Wolverine Repair Bundle",
+      "label": "Default Variant",
+      "raw": "Bundle",
+      "canonical": "bundle",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-bpc-10mg-tb-10mg-pre-filled-pen-15-default",
+      "productId": "bpc-10mg-tb-10mg",
+      "productName": "BPC 10mg + TB",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "Gj78j8u7I7TNODwcBXCt-default",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "bioniq_bpc_157_single_use_pen_15_mg-default",
+      "productId": "bpc-157",
+      "productName": "BPC-157",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "T0UvcumT0UnXvMDd49U1-default",
+      "productId": "bpc-157-tb-500",
+      "productName": "BPC-157 + TB-500",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "pod-pen-003-default",
+      "productId": "bpc-157-tb-500-blend",
+      "productName": "BPC-157 / TB-500 Blend",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "vallida_bpc-157-10mg_tb-500-10mg_ghk-cu-50mg_prefilled_pen_pen_3ml-default",
+      "productId": "bpc-157-tb-500-ghk-cu",
+      "productName": "BPC-157 + TB-500 + GHK-Cu",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-vallida"
+    },
+    {
+      "id": "europeptides-bpc-5-mg-tb-5-mg-pre-filled-pen-19-default",
+      "productId": "bpc-5-mgtb-5-mg",
+      "productName": "BPC 5 mg+TB",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "cafeisome-tm-default",
+      "productId": "cafeisome-tm",
+      "productName": "CafeiSome TM",
+      "label": "CafeiSome TM",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "caffeine-default",
+      "productId": "caffeine",
+      "productName": "Caffeine",
+      "label": "Caffeine",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "cetirizine-hcl-default",
+      "productId": "cetirizine-hcl",
+      "productName": "Cetirizine Hcl",
+      "label": "Cetirizine Hcl",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "cianocobalamin-vitamin-b12-default",
+      "productId": "cianocobalamin-vitamin-b12",
+      "productName": "Cianocobalamin (Vitamin B12)",
+      "label": "Cianocobalamin (Vitamin B12)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "magenta-cjc-3mg-ipamorelin-6mg-3ml-pre-filled-pen-11-default",
+      "productId": "cjc",
+      "productName": "CJC",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "FwvuSpF8QKaojvnF7Cvz-default",
+      "productId": "cjc-1295",
+      "productName": "CJC-1295",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "pod-pen-005-default",
+      "productId": "cjc-1295-ipamorelin-blend",
+      "productName": "CJC-1295 / Ipamorelin Blend",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "vallida_cjc-1295-no-dac-3mg_prefilled_pen_pen_3ml-default",
+      "productId": "cjc-1295-no-dac",
+      "productName": "CJC-1295 No DAC",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-vallida"
+    },
+    {
+      "id": "bioniq_cjc_1295_no_dac_single_use_pen_30_mg-default",
+      "productId": "cjc-1295-no-dac-10mg-vial",
+      "productName": "CJC 1295 NO DAC",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "vallida_cjc-1295-no-dac-3mg_ipamorelin-6mg_prefilled_pen_pen_3ml-default",
+      "productId": "cjc-1295-no-dac-ipamorelin",
+      "productName": "CJC-1295 No DAC + Ipamorelin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-vallida"
+    },
+    {
+      "id": "europeptides-cjc-1295-with-dac-5mg-pre-filled-pen-29-default",
+      "productId": "cjc-1295-with-dac-5mg",
+      "productName": "CJC-1295 with DAC",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-cjc-1295-without-dac-2mg-pre-filled-pen-33-default",
+      "productId": "cjc-1295-without-dac-2mg",
+      "productName": "CJC-1295 without DAC",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-cjc-1295-without-dac-5mg-ipa-5mg-pre-filled-pen-37-default",
+      "productId": "cjc-1295-without-dac-5mg-ipa-5mg",
+      "productName": "CJC-1295 without DAC 5mg + IPA",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-cjc1295-dac-2-mg-vial-pre-filled-pen-39-default",
+      "productId": "cjc1295dac-2-mg",
+      "productName": "CJC1295/DAC",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "clobetasol-propionato-clobetasol-propionate-default",
+      "productId": "clobetasol-propionato-clobetasol-propionate",
+      "productName": "Clobetasol Propionato [Clobetasol Propionate]",
+      "label": "Clobetasol Propionato [Clobetasol Propionate]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "cloral-hidratado-chloral-hydrate-default",
+      "productId": "cloral-hidratado-chloral-hydrate",
+      "productName": "Cloral Hidratado [Chloral Hydrate]",
+      "label": "Cloral Hidratado [Chloral Hydrate]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "clotrimazole-default",
+      "productId": "clotrimazole",
+      "productName": "Clotrimazole",
+      "label": "Clotrimazole",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "coenzyme-q10-default",
+      "productId": "coenzyme-q10",
+      "productName": "Coenzyme Q10",
+      "label": "Coenzyme Q10",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "colecalciferol-vit-d3-default",
+      "productId": "colecalciferol-vit-d3",
+      "productName": "Colecalciferol (Vit. D3)",
+      "label": "Colecalciferol (Vit. D3)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "cortisol-test-default",
+      "productId": "cortisol-test",
+      "productName": "Cortisol Test",
+      "label": "Cortisol Test",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-bloodo"
+    },
+    {
+      "id": "cycloastragenol-default",
+      "productId": "cycloastragenol",
+      "productName": "Cycloastragenol",
+      "label": "Cycloastragenol",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "cystine-default",
+      "productId": "cystine",
+      "productName": "Cystine",
+      "label": "Cystine",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "d-panthenol-default",
+      "productId": "d-panthenol",
+      "productName": "D-Panthenol",
+      "label": "D-Panthenol",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_dihexa_capsule-default",
+      "productId": "dihexa",
+      "productName": "DIHEXA",
+      "label": "Default Variant",
+      "raw": "Capsule",
+      "canonical": "capsule",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "dna-health-kit-default",
+      "productId": "dna-health-kit",
+      "productName": "DNA Health Kit",
+      "label": "DNA Health Kit",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "dna-origins-test-default",
+      "productId": "dna-origins-test",
+      "productName": "DNA Origins Test",
+      "label": "DNA Origins Test",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "dna-sports-test-default",
+      "productId": "dna-sports-test",
+      "productName": "DNA Sports Test",
+      "label": "DNA Sports Test",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "ALI9wEeUQJylT32DHpCw-default",
+      "productId": "dsip",
+      "productName": "DSIP",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "bioniq_dsip_nasal_spray-default",
+      "productId": "dsip",
+      "productName": "DSIP",
+      "label": "Default Variant",
+      "raw": "Nasal Spray",
+      "canonical": "nasal_spray",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-dsip-5mg-pre-filled-pen-43-default",
+      "productId": "dsip-5mg",
+      "productName": "DSIP",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "dutasterida-dutasteride-default",
+      "productId": "dutasterida-dutasteride",
+      "productName": "Dutasterida [Dutasteride]",
+      "label": "Dutasterida [Dutasteride]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "dutasteride-default",
+      "productId": "dutasteride",
+      "productName": "Dutasteride",
+      "label": "Dutasteride",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "e9URhAeNH7ygDWzvrf83-default",
+      "productId": "e9URhAeNH7ygDWzvrf83",
+      "productName": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "label": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "raw": "(missing)",
+      "canonical": "box",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "Hyq6jRQMfhFtvSG2idOV-default",
+      "productId": "epitalon",
+      "productName": "Epitalon",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "bioniq_epitalon_single_use_pen_30_mg-default",
+      "productId": "epitalon",
+      "productName": "Epitalon",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-epithalon-10-mg-anti-aging-pre-filled-pen-45-default",
+      "productId": "epithalon-10-mg-anti-aging",
+      "productName": "Epithalon 10 mg anti aging",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "estradiol-pellet-default",
+      "productId": "estradiol-pellet",
+      "productName": "Estradiol Pellet",
+      "label": "Estradiol Pellet",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "var_eterna-epigenetic-test",
+      "productId": "eterna-epigenetic-age-test",
+      "productName": "ETERNA® Epigenetic Age Test",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-fagron-genomics"
+    },
+    {
+      "id": "eternadx-agescan-advanced-default",
+      "productId": "eternadx-agescan-advanced",
+      "productName": "Eterna DX AgeScan Advanced",
+      "label": "Advanced Panel",
+      "raw": "blood analysis",
+      "canonical": "blood_test",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-agescan-basic-default",
+      "productId": "eternadx-agescan-basic",
+      "productName": "Eterna DX AgeScan Basic",
+      "label": "Standard Analysis",
+      "raw": "blood analysis",
+      "canonical": "blood_test",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-bio-age-organ-pro-default",
+      "productId": "eternadx-bio-age-organ-pro",
+      "productName": "Eterna DX Biological Age by Organ (Pro)",
+      "label": "1000 Proteins Analysis",
+      "raw": "blood draw kit",
+      "canonical": "blood_test",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-genetic-test-duo",
+      "productId": "eternadx-genetic-test",
+      "productName": "Eterna DX Genetic Test",
+      "label": "Dúo Pack (2 kits)",
+      "raw": "saliva collection kit x2",
+      "canonical": "kit",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-genetic-test-family",
+      "productId": "eternadx-genetic-test",
+      "productName": "Eterna DX Genetic Test",
+      "label": "Family Pack (4 kits)",
+      "raw": "saliva collection kit x4",
+      "canonical": "kit",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-genetic-test-individual",
+      "productId": "eternadx-genetic-test",
+      "productName": "Eterna DX Genetic Test",
+      "label": "Individual Kit",
+      "raw": "saliva collection kit",
+      "canonical": "kit",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-pro-subscription-annual-default",
+      "productId": "eternadx-pro-subscription-annual",
+      "productName": "Eterna DX Pro Subscription (Annual)",
+      "label": "Annual",
+      "raw": "Digital Subscription",
+      "canonical": "digital",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternadx-pro-subscription-monthly-default",
+      "productId": "eternadx-pro-subscription-monthly",
+      "productName": "Eterna DX Pro Subscription (Monthly)",
+      "label": "Monthly",
+      "raw": "Digital Subscription",
+      "canonical": "digital",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "eternarx-longevity-blood-panel-default",
+      "productId": "eternarx-longevity-blood-panel",
+      "productName": "EternaRx Longevity Blood Panel",
+      "label": "EternaRx Longevity Blood Panel",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-eternadx"
+    },
+    {
+      "id": "var_B8VLZHgjpnXXav8LZVhz",
+      "productId": "fagron-sportgen",
+      "productName": "Fagron SportGen™",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "dna_test",
+      "supplierId": "supplier-fagron-genomics"
+    },
+    {
+      "id": "var_LkLU8GjVeCKhZTLeng4d",
+      "productId": "fagron-trichotest",
+      "productName": "Fagron TrichoTest™",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "dna_test",
+      "supplierId": "supplier-fagron-genomics"
+    },
+    {
+      "id": "finasterida-finasteride-default",
+      "productId": "finasterida-finasteride",
+      "productName": "Finasterida [Finasteride]",
+      "label": "Finasterida [Finasteride]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "finasteride-default",
+      "productId": "finasteride",
+      "productName": "Finasteride",
+      "label": "Finasteride",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "folic-acid-vitamin-b9-default",
+      "productId": "folic-acid-vitamin-b9",
+      "productName": "Folic Acid (Vitamin B9)",
+      "label": "Folic Acid (Vitamin B9)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_follistatin_344_single_use_pen_3_mg-default",
+      "productId": "follistatin-344-1mg-vial",
+      "productName": "Follistatin 344",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-foxo4-10-mg-pre-filled-pen-47-default",
+      "productId": "foxo4-10-mg",
+      "productName": "FOXO4",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "genetic-skin-and-hair-test-default",
+      "productId": "genetic-skin-and-hair-test",
+      "productName": "Genetic Skin and Hair Test",
+      "label": "Genetic Skin and Hair Test",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "gestrinone-pellet-default",
+      "productId": "gestrinone-pellet",
+      "productName": "Gestrinone Pellet",
+      "label": "Gestrinone Pellet",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "VJ1l6wjx8X0z7kZHSqvF-default",
+      "productId": "ghk-cu",
+      "productName": "GHK-Cu",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "bioniq_ghk_cu_single_use_pen_100_mg-default",
+      "productId": "ghk-cu",
+      "productName": "GHK-Cu",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-ghk-cu-50-mg-pre-filled-pen-51-default",
+      "productId": "ghk-cu-50-mg",
+      "productName": "GHK-Cu",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-ghrp-2-5mg-vial-pre-filled-pen-53-default",
+      "productId": "ghrp-2-5mg",
+      "productName": "GHRP-2",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-ghrp-6-5mg-vial-pre-filled-pen-55-default",
+      "productId": "ghrp-6-5mg",
+      "productName": "GHRP-6",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "ginseng-default",
+      "productId": "ginseng",
+      "productName": "Ginseng",
+      "label": "Ginseng",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "magenta-glow-triple-peptide-bpc-157-6mg-thymosin-beta-9mg-ghk-cu-30mg-3ml-pre-filled-pen-25-default",
+      "productId": "glow",
+      "productName": "GLOW",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "pod-pen-009-default",
+      "productId": "glow-ghk-cu-bpc-157-tb-500",
+      "productName": "GLOW (GHK-Cu / BPC-157 / TB-500)",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "glutathione-default",
+      "productId": "glutathione",
+      "productName": "Glutathione",
+      "label": "Default Variant",
+      "raw": "Capsule",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "lnAnh3Qhkd0OZ0wWZSAk",
+      "productId": "glutathione",
+      "productName": "Glutathione",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-gonadorrlin-acetate-2mg-pre-filled-pen-57-default",
+      "productId": "gonadorelin-acetate-2mg",
+      "productName": "Gonadorelin Acetate",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-hcg-5000iu-pre-filled-pen-59-default",
+      "productId": "hcg-5000iu",
+      "productName": "HCG",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "hemoglobin-a1c-hba1c-test-default",
+      "productId": "hemoglobin-a1c-hba1c-test",
+      "productName": "Hemoglobin A1c (HbA1c) Test",
+      "label": "Hemoglobin A1c (HbA1c) Test",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-bloodo"
+    },
+    {
+      "id": "europeptides-hexarelin-2mg-pre-filled-pen-61-default",
+      "productId": "hexarelin-2mg",
+      "productName": "Hexarelin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-hexarelin-5mg-pre-filled-pen-65-default",
+      "productId": "hexarelin-5mg",
+      "productName": "Hexarelin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-hgh-frag-176-191-5-mg-pre-filled-pen-67-default",
+      "productId": "hgh-frag-176-191-5-mg",
+      "productName": "HGH frag 176-191",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "N1f4KwiroNShi2S6Y6XB-default",
+      "productId": "hgh-fragment",
+      "productName": "HGH Fragment",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "europeptides-hmg-75iu-pre-filled-pen-69-default",
+      "productId": "hmg-75iu",
+      "productName": "HMG",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "magenta-humanin-30mg-3ml-pre-filled-pen-71-default",
+      "productId": "humanin",
+      "productName": "Humanin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "magenta-igf-1-lr3-300mcg-3ml-pre-filled-pen-27-default",
+      "productId": "igf-1",
+      "productName": "IGF-1",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "europeptides-igf-1-lr3-1mg-pre-filled-pen-73-default",
+      "productId": "igf-1-lr3-1mg",
+      "productName": "IGF-1 LR3",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "igrantine-f1-tm-default",
+      "productId": "igrantine-f1-tm",
+      "productName": "IGrantine-F1 TM",
+      "label": "IGrantine-F1 TM",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_ipamorelin_single_use_pen_15_mg-default",
+      "productId": "ipamorelin",
+      "productName": "Ipamorelin",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-ipamorelin-5mg-pre-filled-pen-77-default",
+      "productId": "ipamorelin-5mg",
+      "productName": "Ipamorelin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "ketoconazole-default",
+      "productId": "ketoconazole",
+      "productName": "Ketoconazole",
+      "label": "Ketoconazole",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "27sxHXcBdS8jmtXPDhkB-default",
+      "productId": "kisspeptin-10",
+      "productName": "Kisspeptin-10",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "europeptides-kisspeptin-10-mg-pre-filled-pen-79-default",
+      "productId": "kisspeptin-10-mg",
+      "productName": "Kisspeptin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "magenta-klow-peptide-bpc-157-6mg-thymosin-beta-6mg-ghk-cu-30mg-kpv-6mg-3ml-pre-filled-pen-33-default",
+      "productId": "klow",
+      "productName": "KLOW",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "Ky9bEOdndvUlQNuD1Tb3-default",
+      "productId": "kpv",
+      "productName": "KPV",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "bioniq_kpv_single_use_pen_15_mg-default",
+      "productId": "kpv",
+      "productName": "KPV",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "l-carnitine-l-tartrate-default",
+      "productId": "l-carnitine-l-tartrate",
+      "productName": "L-Carnitine L-tartrate",
+      "label": "L-Carnitine L-tartrate",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "lanolina-anhidra-anhydrous-lanolin-default",
+      "productId": "lanolina-anhidra-anhydrous-lanolin",
+      "productName": "Lanolina Anhidra [Anhydrous Lanolin]",
+      "label": "Lanolina Anhidra [Anhydrous Lanolin]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "latanoprost-fagron-default",
+      "productId": "latanoprost-fagron",
+      "productName": "Latanoprost Fagron",
+      "label": "Latanoprost Fagron",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-fagron-genomics"
+    },
+    {
+      "id": "ldn-0-5mg",
+      "productId": "ldn",
+      "productName": "LDN",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "ldn-1-5mg",
+      "productId": "ldn",
+      "productName": "LDN",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "ldn-2-5mg",
+      "productId": "ldn",
+      "productName": "LDN",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "ldn-4-5mg",
+      "productId": "ldn",
+      "productName": "LDN",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "lion-s-mane-mushroom-default",
+      "productId": "lions-mane-mushroom",
+      "productName": "Lion's Mane Mushroom",
+      "label": "Lion's Mane Mushroom",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-ll37-5mg-pre-filled-pen-83-default",
+      "productId": "ll37-5mg",
+      "productName": "LL37",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "bioniq_melanotan_ii_single_use_pen_30_mg-default",
+      "productId": "melanotan-ii",
+      "productName": "Melanotan II",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-melanotan-ii-10mg-vial-pre-filled-pen-85-default",
+      "productId": "melanotan-ii-10mg",
+      "productName": "Melanotan II",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "melatonin-default",
+      "productId": "melatonin",
+      "productName": "Melatonin",
+      "label": "Melatonin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "metformin-default",
+      "productId": "metformin",
+      "productName": "Metformin",
+      "label": "Metformin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "magenta-mgf-2-4mg-2-4ml-pre-filled-pen-65-default",
+      "productId": "mgf",
+      "productName": "MGF",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "europeptides-mgf-2-mg-pre-filled-pen-87-default",
+      "productId": "mgf-2-mg",
+      "productName": "MGF",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-mgf-peg-2mg-pre-filled-pen-89-default",
+      "productId": "mgf-peg-2mg",
+      "productName": "MGF-PEG",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "minoxidil-default",
+      "productId": "minoxidil",
+      "productName": "Minoxidil",
+      "label": "Minoxidil",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "miodesin-default",
+      "productId": "miodesin",
+      "productName": "Miodesin",
+      "label": "Miodesin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_mots_c_single_use_pen_15_mg-default",
+      "productId": "mots-c",
+      "productName": "MOTS-C",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-mots-c-10mg-vial-pre-filled-pen-91-default",
+      "productId": "mots-c-10mg",
+      "productName": "MOTS-C",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-mt-1-10mg-pre-filled-pen-93-default",
+      "productId": "mt-1-10mg",
+      "productName": "MT-1",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "9fMlGwau0aNqCzYfVaCL-default",
+      "productId": "nad",
+      "productName": "NAD+",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "bioniq_nad_nasal_spray-default",
+      "productId": "nad",
+      "productName": "NAD+",
+      "label": "Default Variant",
+      "raw": "Nasal Spray",
+      "canonical": "nasal_spray",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-nad-100mg-pre-filled-pen-95-default",
+      "productId": "nad-100mg",
+      "productName": "NAD+",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "nad-level-test-default",
+      "productId": "nad-level-test",
+      "productName": "NAD Level Test",
+      "label": "NAD Level Test",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-bloodo"
+    },
+    {
+      "id": "nistatina-nystatin-default",
+      "productId": "nistatina-nystatin",
+      "productName": "Nistatina [Nystatin]",
+      "label": "Nistatina [Nystatin]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "nutrigenetics-test-default",
+      "productId": "nutrigenetics-test",
+      "productName": "Nutrigenetics Test",
+      "label": "Nutrigenetics Test",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-fagron-genomics"
+    },
+    {
+      "id": "omega-3-default",
+      "productId": "omega-3",
+      "productName": "Omega 3",
+      "label": "Omega 3",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "omega-ratio-test-default",
+      "productId": "omega-ratio-test",
+      "productName": "Omega Ratio Test",
+      "label": "Omega Ratio Test",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-bloodo"
+    },
+    {
+      "id": "oral-astaxanthin-default",
+      "productId": "oral-astaxanthin",
+      "productName": "Oral Astaxanthin",
+      "label": "Oral Astaxanthin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-coenzyme-q10-default",
+      "productId": "oral-coenzyme-q10",
+      "productName": "Oral Coenzyme Q10",
+      "label": "Oral Coenzyme Q10",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-dutasteride-default",
+      "productId": "oral-dutasteride",
+      "productName": "Oral Dutasteride",
+      "label": "Oral Dutasteride",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-finasteride-man-default",
+      "productId": "oral-finasteride-man",
+      "productName": "Oral Finasteride (man)",
+      "label": "Oral Finasteride (man)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-finasteride-woman-default",
+      "productId": "oral-finasteride-woman",
+      "productName": "Oral Finasteride (woman)",
+      "label": "Oral Finasteride (woman)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-ginkgo-biloba-default",
+      "productId": "oral-ginkgo-biloba",
+      "productName": "Oral Ginkgo Biloba",
+      "label": "Oral Ginkgo Biloba",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-green-tea-greenselect-default",
+      "productId": "oral-green-tea-greenselect",
+      "productName": "Oral Green Tea (GreenSelect)",
+      "label": "Oral Green Tea (GreenSelect)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-minoxidil-man-default",
+      "productId": "oral-minoxidil-man",
+      "productName": "Oral Minoxidil (man)",
+      "label": "Oral Minoxidil (man)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-minoxidil-woman-default",
+      "productId": "oral-minoxidil-woman",
+      "productName": "Oral Minoxidil (woman)",
+      "label": "Oral Minoxidil (woman)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-pomage-default",
+      "productId": "oral-pomage",
+      "productName": "Oral Pomage",
+      "label": "Oral Pomage",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-siliciumax-tm-default",
+      "productId": "oral-siliciumax-tm",
+      "productName": "Oral SiliciuMax TM",
+      "label": "Oral SiliciuMax TM",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "oral-vitamin-c-default",
+      "productId": "oral-vitamin-c",
+      "productName": "Oral Vitamin C",
+      "label": "Oral Vitamin C",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-oxytocin-acetate-10mg-pre-filled-pen-97-default",
+      "productId": "oxytocin-acetate",
+      "productName": "Oxytocin Acetate",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "pharmacogenetics-plus-dna-test-default",
+      "productId": "pharmacogenetics-plus-dna-test",
+      "productName": "Pharmacogenetics Plus DNA Test",
+      "label": "Pharmacogenetics Plus DNA Test",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "pinetonin-default",
+      "productId": "pinetonin",
+      "productName": "Pinetonin",
+      "label": "Pinetonin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "piperin-default",
+      "productId": "piperin",
+      "productName": "Piperin",
+      "label": "Piperin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "pomage-default",
+      "productId": "pomage",
+      "productName": "Pomage",
+      "label": "Pomage",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "potassium-acetate-default",
+      "productId": "potassium-acetate",
+      "productName": "Potassium Acetate",
+      "label": "Potassium Acetate",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "var_progen-longevity-test",
+      "productId": "progen-longevity-dna-test",
+      "productName": "ProGen Longevity DNA Test",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-fagron-genomics"
+    },
+    {
+      "id": "progesterona-progesterone-default",
+      "productId": "progesterona-progesterone",
+      "productName": "Progesterona [Progesterone]",
+      "label": "Progesterona [Progesterone]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "prostaquinon-tm-default",
+      "productId": "prostaquinon-tm",
+      "productName": "Prostaquinon TM",
+      "label": "Prostaquinon TM",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "magenta-pt-141-20mg-2ml-pre-filled-pen-41-default",
+      "productId": "pt",
+      "productName": "PT",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "bioniq_pt_141_single_use_pen_15_mg-default",
+      "productId": "pt-141-10mg-vial",
+      "productName": "PT-141",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-pt-141-bremelanotide-10mg-vial-pre-filled-pen-103-default",
+      "productId": "pt-141-bremelanotide-10mg",
+      "productName": "PT-141 (Bremelanotide)",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "pycnogenol-pinus-pinaster-default",
+      "productId": "pycnogenol-pinus-pinaster",
+      "productName": "Pycnogenol (Pinus pinaster)",
+      "label": "Pycnogenol (Pinus pinaster)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "resveratrol-default",
+      "productId": "resveratrol",
+      "productName": "Resveratrol",
+      "label": "Resveratrol",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "XXZrOaKx70b1nsauKnum-default",
+      "productId": "retatrutide",
+      "productName": "Retatrutide",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "retinol-palmitate-default",
+      "productId": "retinol-palmitate",
+      "productName": "Retinol palmitate",
+      "label": "Retinol palmitate",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "retrotrotide-magistral-default",
+      "productId": "retrotrotide-magistral",
+      "productName": "Retrotrotide (Magistral)",
+      "label": "Retrotrotide (Magistral)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "saw-palmetto-default",
+      "productId": "saw-palmetto",
+      "productName": "Saw Palmetto",
+      "label": "Saw Palmetto",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_selank_nasal_spray-default",
+      "productId": "selank",
+      "productName": "SELANK",
+      "label": "Default Variant",
+      "raw": "Nasal Spray",
+      "canonical": "nasal_spray",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "selenium-yeast-default",
+      "productId": "selenium-yeast",
+      "productName": "Selenium yeast",
+      "label": "Selenium yeast",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-semaglutide-10mg-pre-filled-pen-109-default",
+      "productId": "semaglutide",
+      "productName": "Semaglutide",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "bioniq_semax_nasal_spray-default",
+      "productId": "semax",
+      "productName": "SEMAX",
+      "label": "Default Variant",
+      "raw": "Nasal Spray",
+      "canonical": "nasal_spray",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-sermorelin-5-mg-pre-filled-pen-117-default",
+      "productId": "sermorelin-5-mg",
+      "productName": "Sermorelin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "serrapeptase-300-000spu-default",
+      "productId": "serrapeptase-300000spu",
+      "productName": "Serrapeptase 300,000SPU",
+      "label": "Serrapeptase 300,000SPU",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "siliciumax-tm-default",
+      "productId": "siliciumax-tm",
+      "productName": "SiliciuMax TM",
+      "label": "SiliciuMax TM",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "silimarin-default",
+      "productId": "silimarin",
+      "productName": "Silimarin",
+      "label": "Silimarin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-snap-8-10-mg-cosmetic-pre-filled-pen-119-default",
+      "productId": "snap-8-10-mg-cosmetic",
+      "productName": "Snap 8 - 10 mg cosmetic",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "spironolactone-default",
+      "productId": "spironolactone",
+      "productName": "Spironolactone",
+      "label": "Spironolactone",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "bioniq_ss_31_single_use_pen_30_mg-default",
+      "productId": "ss-31",
+      "productName": "SS-31",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "lecl9Q3309quhEwVkLNi-default",
+      "productId": "ss-31",
+      "productName": "SS-31",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-pod-poland"
+    },
+    {
+      "id": "europeptides-ss-31-elamipretide-10mg-vial-pre-filled-pen-121-default",
+      "productId": "ss-31-elamipretide-10mg",
+      "productName": "SS-31 (Elamipretide)",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "magenta-ss31-10mg-3ml-pre-filled-pen-67-default",
+      "productId": "ss31",
+      "productName": "SS31",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "europeptides-survodutide-10mg-pre-filled-pen-123-default",
+      "productId": "survodutide-10mg",
+      "productName": "Survodutide",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-tb-10-mg-bpc-10-mg-ghk-50-mg-pre-filled-pen-125-default",
+      "productId": "tb-10-mg-bpc-10-mg-ghk-50-mg",
+      "productName": "TB 10 mg + BPC 10 mg + GHK",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-tb500-thymosin-b4-acetate-5mg-pre-filled-pen-129-default",
+      "productId": "tb-500-thymosin-b4-acetate-5mg",
+      "productName": "TB-500 (Thymosin B4 Acetate)",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "bioniq_tesamorelin_single_use_pen_30_mg-default",
+      "productId": "tesamorelin",
+      "productName": "Tesamorelin",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-tesamorelin-2mg-pre-filled-pen-133-default",
+      "productId": "tesamorelin-2mg",
+      "productName": "Tesamorelin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "test-microbiome-default",
+      "productId": "test-microbiome",
+      "productName": "Test Microbiome",
+      "label": "Test Microbiome",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-24genetics"
+    },
+    {
+      "id": "testosterone-test-default",
+      "productId": "testosterone-test",
+      "productName": "Testosterone+ Test",
+      "label": "Testosterone+ Test",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-bloodo"
+    },
+    {
+      "id": "europeptides-thymalin-10-mg-pre-filled-pen-135-default",
+      "productId": "thymalin-10-mg",
+      "productName": "Thymalin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "bioniq_thymalin_single_use_pen_30_mg-default",
+      "productId": "thymalin-5mg-vial",
+      "productName": "Thymalin",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "magenta-thymosin-alpha-9mg-3ml-pre-filled-pen-49-default",
+      "productId": "thymosin",
+      "productName": "Thymosin",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-magenta"
+    },
+    {
+      "id": "bioniq_thymosin_alpha_1_single_use_pen_30_mg-default",
+      "productId": "thymosin-alpha-1",
+      "productName": "Thymosin Alpha 1",
+      "label": "Default Variant",
+      "raw": "Single Use Pen",
+      "canonical": "pen",
+      "supplierId": "supplier-bioniq"
+    },
+    {
+      "id": "europeptides-thymosin-alpha-1-5-mg-pre-filled-pen-137-default",
+      "productId": "thymosin-alpha-1-5-mg",
+      "productName": "Thymosin Alpha - 1",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "europeptides-tirzepatide-10mg-pre-filled-pen-139-default",
+      "productId": "tirzepatide",
+      "productName": "Tirzepatide",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "tretinoin-default",
+      "productId": "tretinoin",
+      "productName": "Tretinoin",
+      "label": "Tretinoin",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "trichocond-default",
+      "productId": "trichocond",
+      "productName": "TrichoCond",
+      "label": "TrichoCond",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "trichofoam-default",
+      "productId": "trichofoam",
+      "productName": "TrichoFoam",
+      "label": "TrichoFoam",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "trichooil-default",
+      "productId": "trichooil",
+      "productName": "TrichoOil",
+      "label": "TrichoOil",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "trichoserum-default",
+      "productId": "trichoserum",
+      "productName": "TrichoSerum",
+      "label": "TrichoSerum",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "trichosol-default",
+      "productId": "trichosol",
+      "productName": "TrichoSol",
+      "label": "TrichoSol",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "trichowash-default",
+      "productId": "trichowash",
+      "productName": "TrichoWash",
+      "label": "TrichoWash",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "turmeric-dry-extract-default",
+      "productId": "turmeric-dry-extract",
+      "productName": "Turmeric dry extract",
+      "label": "Turmeric dry extract",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "europeptides-vip-10-mg-pre-filled-pen-141-default",
+      "productId": "vip-10-mg",
+      "productName": "VIP",
+      "label": "Default Variant",
+      "raw": "pre-filled pen",
+      "canonical": "pen",
+      "supplierId": "supplier-europeptides"
+    },
+    {
+      "id": "vit-d3-10-000iu-k2",
+      "productId": "vit-d3",
+      "productName": "Vit. D3",
+      "label": "",
+      "raw": "(missing)",
+      "canonical": "capsule",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamin-b12-cyanocobalamin-default",
+      "productId": "vitamin-b12-cyanocobalamin",
+      "productName": "Vitamin B12 (Cyanocobalamin)",
+      "label": "Vitamin B12 (Cyanocobalamin)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamin-b7-biotin-default",
+      "productId": "vitamin-b7-biotin",
+      "productName": "Vitamin B7 (Biotin)",
+      "label": "Vitamin B7 (Biotin)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamin-b9-folate-default",
+      "productId": "vitamin-b9-folate",
+      "productName": "Vitamin B9 (Folate)",
+      "label": "Vitamin B9 (Folate)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamin-d-default",
+      "productId": "vitamin-d",
+      "productName": "Vitamin D",
+      "label": "Vitamin D",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamin-d-test-default",
+      "productId": "vitamin-d-test",
+      "productName": "Vitamin D Test",
+      "label": "Vitamin D Test",
+      "raw": "(missing)",
+      "canonical": "blood_test",
+      "supplierId": "supplier-bloodo"
+    },
+    {
+      "id": "vitamin-e-tocoferol-default",
+      "productId": "vitamin-e-tocoferol",
+      "productName": "Vitamin E (Tocoferol)",
+      "label": "Vitamin E (Tocoferol)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamin-e-tocopherol-default",
+      "productId": "vitamin-e-tocopherol",
+      "productName": "Vitamin E (Tocopherol)",
+      "label": "Vitamin E (Tocopherol)",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "vitamina-e-acetato-50-polvo-tocopheryl-acetate-50-powder-default",
+      "productId": "vitamina-e-acetato-50-polvo-tocopheryl-acetate-50-powder",
+      "productName": "Vitamina E Acetato 50% Polvo [Tocopheryl Acetate 50% Powder]",
+      "label": "Vitamina E Acetato 50% Polvo [Tocopheryl Acetate 50% Powder]",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    },
+    {
+      "id": "zinc-acetate-default",
+      "productId": "zinc-acetate",
+      "productName": "Zinc acetate",
+      "label": "Zinc acetate",
+      "raw": "Vial",
+      "canonical": "vial",
+      "supplierId": "supplier-nplabs"
+    }
+  ],
+  "unknown": []
+}

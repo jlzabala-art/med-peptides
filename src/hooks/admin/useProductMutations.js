@@ -3,6 +3,7 @@ import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import * as fb from '../../firebase';
 const db = fb?.db;
 import { useToast } from '../../hooks/useToast';
+import { invalidateCatalogFacetsCache } from './useCatalogFacets';
 
 export function useUpdateProduct() {
   const { toast } = useToast();
@@ -22,6 +23,9 @@ export function useUpdateProduct() {
       // queryClient.setQueryData(['admin-products'], (old) => old.map(p => p.id === data.id ? { ...p, ...data.updates } : p));
       toast.success('Product updated successfully');
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      invalidateCatalogFacetsCache();
+      // Background trigger to keep catalog facets fresh
+      fetch('/api/admin/recalculate-facets', { method: 'POST' }).catch(() => {});
     },
     onError: (err) => {
       console.error('Error updating product:', err);
@@ -36,21 +40,20 @@ export function useDeleteProduct() {
 
   return useMutation({
     mutationFn: async (id) => {
-      if (!window.confirm('Are you sure you want to delete this product?')) {
-        throw new Error('Cancelled');
-      }
+      // Confirmation must happen at the call site (e.g. notifier.confirmCritical)
+      // before invoking this mutation. Never put side-effects inside mutationFn.
       await deleteDoc(doc(db, 'products', id));
       return id;
     },
     onSuccess: (id) => {
-      toast.success('Product deleted successfully');
+      toast.success('Product deleted successfully.');
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      invalidateCatalogFacetsCache();
+      fetch('/api/admin/recalculate-facets', { method: 'POST' }).catch(() => {});
     },
     onError: (err) => {
-      if (err.message !== 'Cancelled') {
-        console.error('Error deleting product:', err);
-        toast.error('Failed to delete product.');
-      }
+      console.error('Error deleting product:', err);
+      toast.error('Failed to delete product.');
     },
   });
 }
@@ -74,6 +77,8 @@ export function useBulkUpdateProduct() {
     onSuccess: ({ actionName }) => {
       toast.success(`${actionName} successful`);
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      invalidateCatalogFacetsCache();
+      fetch('/api/admin/recalculate-facets', { method: 'POST' }).catch(() => {});
     },
     onError: (err, { actionName }) => {
       console.error(`Error during ${actionName}:`, err);

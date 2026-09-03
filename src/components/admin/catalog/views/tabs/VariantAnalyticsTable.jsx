@@ -92,7 +92,7 @@ export default function VariantAnalyticsTable({ variants, parentProduct, onActio
       key: 'actions',
       header: 'Actions',
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
           <AppActionGroup
             maxVisible={3}
             actions={[

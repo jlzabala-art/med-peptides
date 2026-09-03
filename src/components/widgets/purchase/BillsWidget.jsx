@@ -8,17 +8,10 @@ import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
-import * as fb from '../../../firebase';
-const db = fb?.db;
+import { subscribeToBills, saveBill } from '../../../services/procurementService';
 import DataTable from '../../ui/DataTable';
-
-
-
-
-
-
-
+import AppActionGroup from '../../ui/AppActionGroup';
+import { toast } from 'react-hot-toast';
 
 const STATUS_OPTIONS = ['unpaid', 'paid', 'void'];
 const STATUS_STYLE = {
@@ -41,15 +34,14 @@ export default function BillsWidget({
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snap => {
-      let data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToBills((rawList) => {
+      let data = rawList;
       if (filterFn) data = data.filter(filterFn);
       setBills(data);
       setLoading(false);
     });
     return () => unsub();
-  }, [collectionName, filterFn]);
+  }, [filterFn]);
 
   const openCreate = () => { setEditing(null); setShowForm(true); };
   const openEdit   = (bill) => {
@@ -156,19 +148,14 @@ function BillForm({ bill, collectionName, onClose }) {
   const removeItem = idx => setItems(items.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
-    if (!supplierName) return alert('Supplier Name is required');
+    if (!supplierName) return toast('Supplier Name is required');
     setSaving(true);
-    const payload = { supplierName, billNumber, poReference, status, items, totalAmount, updatedAt: serverTimestamp() };
+    const payload = { supplierName, billNumber, poReference, status, items, totalAmount };
     try {
-      if (bill?.id) {
-        await updateDoc(doc(db, collectionName, bill.id), payload);
-      } else {
-        await addDoc(collection(db, collectionName), { ...payload, createdAt: serverTimestamp() });
-      }
+      await saveBill(payload, bill?.id || null);
       onClose();
     } catch (e) {
-      console.error(e);
-      alert('Failed to save Bill');
+      toast.error('Failed to save Bill');
     }
     setSaving(false);
   };
@@ -260,11 +247,11 @@ function BillForm({ bill, collectionName, onClose }) {
                 },
                 {
                   key: 'actions',
-                  header: '',
+                  header: 'Actions',
                   render: (val, row, idx) => (
-                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+                      <AppActionGroup actions={[{ type: 'delete', onClick: () => removeItem(idx) }]} />
+                    </div>
                   ),
                 },
               ]}

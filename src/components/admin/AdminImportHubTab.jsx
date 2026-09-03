@@ -8,11 +8,14 @@ import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { collection, writeBatch, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useCatalogStore } from '../../store/useCatalogStore';
 import { AtlasImportAgent } from '../../services/AtlasImportAgent';
 import toast from 'react-hot-toast';
+import {
+  updateProduct as repoUpdateProduct,
+  batchCreateProducts,
+} from '../../repositories/productRepository';
 
 export default function AdminImportHubTab({ isSubTab = false }) {
   const [step, setStep] = useState(1);
@@ -59,25 +62,20 @@ export default function AdminImportHubTab({ isSubTab = false }) {
   const handleApproveAll = async () => {
     toast.loading("Writing to database...", { id: "import" });
     try {
-      const batch = writeBatch(db);
-      
-      // Batch update prices
-      analysisResults.priceChanges.forEach(change => {
-        const ref = doc(db, 'products', change.id);
-        batch.update(ref, { price: change.newPrice });
-      });
+      // Update prices through the repository (validated)
+      for (const change of (analysisResults.priceChanges || [])) {
+        await repoUpdateProduct(change.id, { price: change.newPrice }, { strict: false });
+      }
 
-      // Batch create products
-      analysisResults.newProducts.forEach(prod => {
-        const ref = doc(collection(db, 'products'));
-        batch.set(ref, {
+      // Batch create new products through the repository (schema-validated)
+      if (analysisResults.newProducts?.length > 0) {
+        const cleanProducts = analysisResults.newProducts.map(prod => ({
           ...prod,
-          createdAt: new Date(),
-          status: 'active'
-        });
-      });
+          status: prod.status || 'draft',
+        }));
+        await batchCreateProducts(cleanProducts, { strict: false });
+      }
 
-      await batch.commit();
       toast.success("AI Import complete! Changes synced to Firestore.", { id: "import" });
       
       // Invalidate cache so other tabs reflect changes instantly

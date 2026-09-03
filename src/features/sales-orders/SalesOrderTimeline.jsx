@@ -66,7 +66,7 @@ export default function SalesOrderTimeline({ order }) {
     });
   }
 
-  if (order.financialStatus === 'Paid') {
+  if (order.financialStatus === 'completed') {
     events.push({
       id: 5,
       title: 'Invoice Paid',
@@ -78,7 +78,7 @@ export default function SalesOrderTimeline({ order }) {
   } else if (order.financialStatus === 'Unpaid' && order.commercialStatus === 'Accepted') {
     events.push({
       id: 6,
-      title: 'Awaiting Payment',
+      title: 'awaiting payment',
       description: 'Invoice sent to customer, awaiting wire transfer.',
       date: new Date(),
       user: 'System',

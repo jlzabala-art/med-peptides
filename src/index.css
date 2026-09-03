@@ -5,6 +5,21 @@
 
 @import './styles/theme.css';
 @import './styles/master.css';
+@import './styles/tailwind-shims.css';
+/* Responsive admin overrides — imported last for highest specificity (Tailwind v4 @import fix) */
+@import './styles/responsive-admin.css';
+
+/* --- Global Resets & Layout Fixes --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
 
 /* --- Start Here Section --- */
 .start-here-grid {
@@ -776,39 +791,56 @@
 /* Protocol Template Layout */
 .pt-grid {
   display: grid;
-  grid-template-columns: 260px 1fr 340px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2.5rem;
   align-items: start;
 }
 
-.pt-toc-col {
-  position: sticky;
-  top: 90px;
-  height: calc(100vh - 110px);
-  overflow-y: auto;
-  scrollbar-width: thin;
+.proto-detail__main {
+  min-width: 0;
+  width: 100%;
 }
 
-.pt-ai-col {
-  position: sticky;
-  top: 90px;
-  height: calc(100vh - 110px);
+.pt-ai-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: var(--color-bg-surface, #fff);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
-@media (max-width: 1200px) {
-  .pt-grid { grid-template-columns: 220px 1fr 300px; gap: 2rem; }
+.pt-ai-drawer.open {
+  transform: translateX(0);
 }
-@media (max-width: 1024px) {
-  .pt-grid { grid-template-columns: 220px 1fr; gap: 2rem; }
-  .pt-ai-col { display: none; }
+
+.pt-ai-drawer__header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border, #eee);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-bg-surface, #fff);
 }
+
+.pt-ai-drawer__content {
+  flex: 1;
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .pt-grid {
     display: flex;
     flex-direction: column;
     gap: 2rem;
   }
-  .pt-toc-col { display: none; }
 }
 
 /* ── Bottom Tab Bar (Mobile) ───────────────────────── */
@@ -817,8 +849,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: calc(64px + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -977,4 +1009,19 @@
 @keyframes fade-out {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Golden Rule: KPI Grid (4 columns desktop, 2x2 mobile) */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

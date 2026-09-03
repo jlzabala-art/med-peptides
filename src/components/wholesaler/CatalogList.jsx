@@ -21,6 +21,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
+import notifier from '../../services/NotificationService';
 
 
 
@@ -41,11 +42,12 @@ import { catalogRepository } from '../../repositories/catalogRepository';
 
 
 import { getProtocolTemplates } from '../../repositories/protocolRepository';
-import { getDocs, collection } from 'firebase/firestore';
-import { db } from '../../firebase';
+
 
 import ExpandableTableRow from '../common/ExpandableTableRow';
 import { FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock, ChevronDown, ChevronUp } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
+import StatusChip from '../ui/StatusChip';
 
 export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelectCatalogToEdit }) {
   const [catalogs, setCatalogs] = useState([]);
@@ -84,28 +86,29 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   };
 
   const handleDuplicate = async (catalog) => {
-    if (!window.confirm(`Duplicate "${catalog.title}"?`)) return;
-    try {
-      const isPublicClone = catalog.ownerId !== ownerId;
-      const duplicated = {
-        ...catalog,
-        id: '', // repo will auto-gen
-        title: isPublicClone ? `${catalog.title} (My Clone)` : `${catalog.title} (Copy)`,
-        slug: `${catalog.slug}-copy-${Math.floor(Math.random() * 10000)}`,
-        views: 0,
-        leadCaptureCount: 0,
-        ownerId: ownerId,           // Assign to current user
-        ownerType: ownerType,       // Assign to current role
-        visibility: 'private',      // Clones are private by default
-        pricingTier: null,          // Clear specific pricing so user's default applies
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      await catalogRepository.saveCatalog(duplicated);
-      loadCatalogs();
-    } catch (e) {
-      alert(`Error duplicating catalog: ${e.message}`);
-    }
+    notifier.confirmCritical(`Duplicate "${catalog.title}"?`, async () => {
+      try {
+        const isPublicClone = catalog.ownerId !== ownerId;
+        const duplicated = {
+          ...catalog,
+          id: '', // repo will auto-gen
+          title: isPublicClone ? `${catalog.title} (My Clone)` : `${catalog.title} (Copy)`,
+          slug: `${catalog.slug}-copy-${Math.floor(Math.random() * 10000)}`,
+          views: 0,
+          leadCaptureCount: 0,
+          ownerId: ownerId,           // Assign to current user
+          ownerType: ownerType,       // Assign to current role
+          visibility: 'private',      // Clones are private by default
+          pricingTier: null,          // Clear specific pricing so user's default applies
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        await catalogRepository.saveCatalog(duplicated);
+        loadCatalogs();
+      } catch (e) {
+        toast.error(`Error duplicating catalog: ${e.message}`);
+      }
+    });
   };
 
   const handleCopyLink = (catalog) => {
@@ -122,13 +125,14 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this catalog? This action cannot be undone.')) return;
-    try {
-      await catalogRepository.deleteCatalog(id);
-      loadCatalogs();
-    } catch (e) {
-      alert(`Error deleting catalog: ${e.message}`);
-    }
+    notifier.confirmCritical('Are you sure you want to delete this catalog? This action cannot be undone.', async () => {
+      try {
+        await catalogRepository.deleteCatalog(id);
+        loadCatalogs();
+      } catch (e) {
+        toast.error(`Error deleting catalog: ${e.message}`);
+      }
+    });
   };
 
   const handleViewLeads = async (catalog) => {
@@ -333,13 +337,7 @@ function ExpandableCatalogRow({
 
   const subContent = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
-      <span style={{
-        ...statusBadgeStyle,
-        backgroundColor: catalog.status === 'published' ? '#e6f4ea' : '#f1f3f4',
-        color: catalog.status === 'published' ? '#137333' : '#5f6368'
-      }}>
-        {catalog.status}
-      </span>
+      <StatusChip status={catalog.status} />
       {catalog.visibility === 'public' ? (
         <span style={{...badgeStyle, backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'inline-flex', alignItems: 'center'}}>
           <Globe size={12} style={{marginRight: 4}}/> Public

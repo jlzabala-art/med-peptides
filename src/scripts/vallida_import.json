@@ -1,0 +1,452 @@
+{
+  "import_version": "1.0",
+  "import_type": "supplier_product_pricing",
+  "supplier": {
+    "supplier_name": "Vallida",
+    "supplier_type": "Compounding Pharmacy",
+    "country": "United Arab Emirates",
+    "default_source_currency": "AED",
+    "status": "active",
+    "upsert_supplier": true
+  },
+  "currency_conversion": {
+    "source_currency": "AED",
+    "comparison_currency": "USD",
+    "aed_per_usd": 3.6725,
+    "formula": "USD = AED / 3.6725",
+    "usd_rounding_decimals": 2
+  },
+  "tax_policy": {
+    "source_price_label": "B2B Price (AED)",
+    "vat_status": "unknown",
+    "vat_included": null,
+    "requires_vat_confirmation": true,
+    "instruction": "Use the listed B2B price provisionally. Do not deduct VAT until Vallida confirms whether VAT is included."
+  },
+  "source": {
+    "source_type": "image",
+    "source_name": "Vallida B2B peptide price list",
+    "source_currency": "AED"
+  },
+  "products": [
+    {
+      "supplier_sku": "VALLIDA-BPC157-6MG-PEN-3ML",
+      "product_name": "BPC-157",
+      "source_description": "BPC-157 6mg 3ml Pen",
+      "components": [
+        {
+          "name": "BPC-157",
+          "amount": 6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 6,
+      "concentration_mg_per_ml": 2,
+      "listed_price_aed": 405,
+      "provisional_price_usd": 110.28,
+      "provisional_price_usd_per_mg": 18.38,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-BPC157-10MG-VIAL-5ML",
+      "product_name": "BPC-157",
+      "source_description": "BPC-157 10mg 5ml Vial",
+      "components": [
+        {
+          "name": "BPC-157",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "presentation": "vial",
+      "container_volume_ml": 5,
+      "total_active_mg": 10,
+      "concentration_mg_per_ml": 2,
+      "listed_price_aed": 600,
+      "provisional_price_usd": 163.38,
+      "provisional_price_usd_per_mg": 16.34,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": false
+    },
+    {
+      "supplier_sku": "VALLIDA-BPC157-6MG-TB500-9MG-PEN-3ML",
+      "product_name": "BPC-157 + TB-500",
+      "source_description": "BPC-157 + TB-500 6mg + 9mg 3ml Pen",
+      "components": [
+        {
+          "name": "BPC-157",
+          "amount": 6,
+          "unit": "mg"
+        },
+        {
+          "name": "TB-500",
+          "amount": 9,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_combined_active_mg": 15,
+      "listed_price_aed": 670,
+      "provisional_price_usd": 182.44,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-BPC157-10MG-TB500-10MG-GHKCU-50MG-PEN-3ML",
+      "product_name": "BPC-157 + TB-500 + GHK-Cu",
+      "source_description": "BPC-157 + TB-500 + GHK-Cu 10mg + 10mg + 50mg 3ml Pen",
+      "components": [
+        {
+          "name": "BPC-157",
+          "amount": 10,
+          "unit": "mg"
+        },
+        {
+          "name": "TB-500",
+          "amount": 10,
+          "unit": "mg"
+        },
+        {
+          "name": "GHK-Cu",
+          "amount": 50,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_combined_active_mg": 70,
+      "listed_price_aed": 1150,
+      "provisional_price_usd": 313.14,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-IPAMORELIN-6MG-PEN-3ML",
+      "product_name": "Ipamorelin",
+      "source_description": "Ipamorelin 6mg 3ml Pen",
+      "components": [
+        {
+          "name": "Ipamorelin",
+          "amount": 6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 6,
+      "concentration_mg_per_ml": 2,
+      "listed_price_aed": 450,
+      "provisional_price_usd": 122.53,
+      "provisional_price_usd_per_mg": 20.42,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-IPAMORELIN-10MG-VIAL-5ML",
+      "product_name": "Ipamorelin",
+      "source_description": "Ipamorelin 10mg 5ml Vial",
+      "components": [
+        {
+          "name": "Ipamorelin",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "presentation": "vial",
+      "container_volume_ml": 5,
+      "total_active_mg": 10,
+      "concentration_mg_per_ml": 2,
+      "listed_price_aed": 700,
+      "provisional_price_usd": 190.61,
+      "provisional_price_usd_per_mg": 19.06,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": false
+    },
+    {
+      "supplier_sku": "VALLIDA-CJC1295-NODAC-3MG-PEN-3ML",
+      "product_name": "CJC-1295 No DAC",
+      "source_description": "CJC 1295 (No Dac) 3mg 3ml Pen",
+      "components": [
+        {
+          "name": "CJC-1295 No DAC",
+          "amount": 3,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 3,
+      "concentration_mg_per_ml": 1,
+      "listed_price_aed": 440,
+      "provisional_price_usd": 119.81,
+      "provisional_price_usd_per_mg": 39.94,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-CJC1295-NODAC-5MG-VIAL-5ML",
+      "product_name": "CJC-1295 No DAC",
+      "source_description": "CJC 1295 (No Dac) 5mg 5ml Vial",
+      "components": [
+        {
+          "name": "CJC-1295 No DAC",
+          "amount": 5,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "presentation": "vial",
+      "container_volume_ml": 5,
+      "total_active_mg": 5,
+      "concentration_mg_per_ml": 1,
+      "listed_price_aed": 685,
+      "provisional_price_usd": 186.52,
+      "provisional_price_usd_per_mg": 37.30,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": false
+    },
+    {
+      "supplier_sku": "VALLIDA-CJC1295-NODAC-3MG-IPAMORELIN-6MG-PEN-3ML",
+      "product_name": "CJC-1295 No DAC + Ipamorelin",
+      "source_description": "CJC 1295 (No Dac) + Ipamorelin 3mg + 6mg 3ml Pen",
+      "components": [
+        {
+          "name": "CJC-1295 No DAC",
+          "amount": 3,
+          "unit": "mg"
+        },
+        {
+          "name": "Ipamorelin",
+          "amount": 6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_combined_active_mg": 9,
+      "listed_price_aed": 610,
+      "provisional_price_usd": 166.10,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-CJC1295-NODAC-5MG-IPAMORELIN-10MG-VIAL-5ML",
+      "product_name": "CJC-1295 No DAC + Ipamorelin",
+      "source_description": "CJC 1295 (No Dac) + Ipamorelin 5mg + 10mg 5ml Vial",
+      "components": [
+        {
+          "name": "CJC-1295 No DAC",
+          "amount": 5,
+          "unit": "mg"
+        },
+        {
+          "name": "Ipamorelin",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "presentation": "vial",
+      "container_volume_ml": 5,
+      "total_combined_active_mg": 15,
+      "listed_price_aed": 900,
+      "provisional_price_usd": 245.06,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": false
+    },
+    {
+      "supplier_sku": "VALLIDA-GHKCU-30MG-PEN-3ML",
+      "product_name": "GHK-Cu",
+      "source_description": "GHK-Cu 30mg 3ml Pen",
+      "components": [
+        {
+          "name": "GHK-Cu",
+          "amount": 30,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 30,
+      "concentration_mg_per_ml": 10,
+      "listed_price_aed": 405,
+      "provisional_price_usd": 110.28,
+      "provisional_price_usd_per_mg": 3.68,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-MOTSC-15MG-PEN-3ML",
+      "product_name": "MOTS-C",
+      "source_description": "MOTS-C 15mg 3ml Pen",
+      "components": [
+        {
+          "name": "MOTS-C",
+          "amount": 15,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 15,
+      "concentration_mg_per_ml": 5,
+      "listed_price_aed": 1250,
+      "provisional_price_usd": 340.37,
+      "provisional_price_usd_per_mg": 22.69,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-MOTSC-25MG-VIAL-5ML",
+      "product_name": "MOTS-C",
+      "source_description": "MOTS-C 25mg 5ml Vial",
+      "components": [
+        {
+          "name": "MOTS-C",
+          "amount": 25,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "presentation": "vial",
+      "container_volume_ml": 5,
+      "total_active_mg": 25,
+      "concentration_mg_per_ml": 5,
+      "listed_price_aed": 1450,
+      "provisional_price_usd": 394.83,
+      "provisional_price_usd_per_mg": 15.79,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": false
+    },
+    {
+      "supplier_sku": "VALLIDA-MOTSC-30MG-PEN-3ML",
+      "product_name": "MOTS-C",
+      "source_description": "MOTS-C 30mg 3ml Pen",
+      "components": [
+        {
+          "name": "MOTS-C",
+          "amount": 30,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 30,
+      "concentration_mg_per_ml": 10,
+      "listed_price_aed": 1550,
+      "provisional_price_usd": 422.06,
+      "provisional_price_usd_per_mg": 14.07,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-TB500-6MG-PEN-3ML",
+      "product_name": "TB-500",
+      "source_description": "TB-500 6mg 3ml Pen",
+      "components": [
+        {
+          "name": "TB-500",
+          "amount": 6,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 6,
+      "concentration_mg_per_ml": 2,
+      "listed_price_aed": 350,
+      "provisional_price_usd": 95.30,
+      "provisional_price_usd_per_mg": 15.88,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-TB500-9MG-PEN-3ML",
+      "product_name": "TB-500",
+      "source_description": "TB-500 9mg 3ml Pen",
+      "components": [
+        {
+          "name": "TB-500",
+          "amount": 9,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "prefilled_pen",
+      "presentation": "pen",
+      "pen_configuration": null,
+      "container_volume_ml": 3,
+      "total_active_mg": 9,
+      "concentration_mg_per_ml": 3,
+      "listed_price_aed": 475,
+      "provisional_price_usd": 129.34,
+      "provisional_price_usd_per_mg": 14.37,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": true
+    },
+    {
+      "supplier_sku": "VALLIDA-TB500-10MG-VIAL-5ML",
+      "product_name": "TB-500",
+      "source_description": "TB-500 10mg 5ml Vial",
+      "components": [
+        {
+          "name": "TB-500",
+          "amount": 10,
+          "unit": "mg"
+        }
+      ],
+      "dosage_form": "vial",
+      "presentation": "vial",
+      "container_volume_ml": 5,
+      "total_active_mg": 10,
+      "concentration_mg_per_ml": 2,
+      "listed_price_aed": 520,
+      "provisional_price_usd": 141.59,
+      "provisional_price_usd_per_mg": 14.16,
+      "vat_included": null,
+      "requires_vat_confirmation": true,
+      "requires_presentation_confirmation": false
+    }
+  ]
+}

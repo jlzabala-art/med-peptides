@@ -9,7 +9,7 @@ import PageHeader from '../../ui/PageHeader';
 import DataTable from '../../ui/DataTable';
 import DataTableSkeleton from '../../ui/skeletons/DataTableSkeleton';
 import EmptyState from '../../ui/EmptyState';
-import StatusBadge from '../../ui/StatusBadge';
+import StatusChip from '../../ui/StatusChip';
 import CopyableId from '../../ui/CopyableId';
 
 export default function AdminImportHistoryTab() {
@@ -38,7 +38,7 @@ export default function AdminImportHistoryTab() {
       header: 'Date',
       sortValue: (r) => r.timestamp?.seconds || 0,
       render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
           <Calendar size={14} color="var(--text-muted)" />
           {r.timestamp ? format(r.timestamp.toDate(), 'PPpp') : 'Unknown'}
         </div>
@@ -53,7 +53,7 @@ export default function AdminImportHistoryTab() {
       key: 'fileName',
       header: 'File Name',
       render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500, color: 'var(--color-primary)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500, color: 'var(--color-primary)' }}>
           <FileText size={16} />
           {r.fileName}
         </div>
@@ -62,7 +62,7 @@ export default function AdminImportHistoryTab() {
     {
       key: 'context',
       header: 'Type',
-      render: (r) => <StatusBadge status="po_created" label={r.context || r.importType} />
+      render: (r) => <StatusChip status="po_created" label={r.context || r.importType} />
     },
     {
       key: 'itemsCount',
@@ -75,7 +75,7 @@ export default function AdminImportHistoryTab() {
       key: 'adminEmail',
       header: 'Admin',
       render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
           <User size={14} />
           {r.adminEmail || 'Unknown'}
         </div>
@@ -84,7 +84,7 @@ export default function AdminImportHistoryTab() {
     {
       key: 'status',
       header: 'Status',
-      render: () => <StatusBadge status="active" label="Success" />
+      render: () => <StatusChip status="active" label="Success" />
     }
   ];
 

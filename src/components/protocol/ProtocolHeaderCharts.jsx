@@ -1370,7 +1370,7 @@ export default function ProtocolHeaderCharts({ protocol, onChartRef }) {
         }
         .phc-snap-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           gap: 0.5rem;
         }
         @media (max-width: 480px) {

@@ -289,30 +289,19 @@
 
 /* ── Active States (Single active pattern) ───────────────────────────────────── */
 .sb-item.active {
-  background: var(--sb-active-bg);
-  color: var(--sb-active-color);
+  background: var(--color-primary, #0f172a);
+  color: #ffffff;
   font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
 }
 
 .sb-item.active .sb-item-icon {
-  color: var(--sb-icon-active);
+  color: #ffffff;
 }
 
-/* Left indicator */
+/* Left indicator removed since we have full background */
 .sb-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0; /* Attach to edge of item bg */
-  top: 50%;
-  transform: translateY(-50%);
-  height: 60%;
-  width: 3px;
-  background: var(--sb-active-color);
-  border-radius: 0 4px 4px 0;
-}
-
-.app-sidebar.collapsed .sb-item.active::before {
-  left: -8px; /* Move indicator to edge of sidebar */
+  display: none;
 }
 
 /* ── Section Separators ──────────────────────────────────────────────────────── */

@@ -2,8 +2,10 @@ import React from 'react';
 import { FileText, Download } from '@/lib/icons';
 import BaseWidget from '../core/BaseWidget';
 
+import { useRoleAccess } from '../../../hooks/useRoleAccess';
+
 export default function BillingInvoicesWidget(props) {
-  const { role = 'admin' } = props;
+  const { is } = useRoleAccess();
 
   // Mock data for widget preview, in real app would use useFinanceData hook
   const invoices = [
@@ -14,7 +16,7 @@ export default function BillingInvoicesWidget(props) {
 
   return (
     <BaseWidget 
-      title={role === 'patient' ? "Mis Facturas" : "Facturación B2B"} 
+      title={is('patient') ? "Mis Facturas" : "Facturación B2B"} 
       icon={FileText} 
       {...props}
     >
@@ -44,7 +46,7 @@ export default function BillingInvoicesWidget(props) {
           </div>
         ))}
       </div>
-      {role === 'admin' && (
+      {is('admin') && (
         <button className="w-full mt-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm font-medium transition-colors">
           Ver todas las facturas
         </button>

@@ -1,23 +1,32 @@
- 
 /**
  * productRepository.js
  *
  * Single data-access layer for the canonical Firestore product model.
  *
- * Schema:
- *   products/{productId}                    — product-level data
- *     variants/{variantId}                  — SKU: dosage × route × supplier
- *   suppliers/{supplierId}                  — supplier master data
+ * @typedef {Object} PricingTier
+ * @property {number} base - Base unit price
+ * @property {Record<string, number>} [byCountry] - Optional country overrides
  *
- * Pricing tiers on each variant:
- *   pricing.masterPrice    — supplier cost  (ADMIN ONLY)
- *   pricing.retailPrice    — public web price
- *   pricing.clinicPrice    — clinic price
- *   pricing.wholesalePrice — pro/reseller price
- *   Each tier has { base, byCountry } for country overrides.
+ * @typedef {Object} ProductVariant
+ * @property {string} id - Variant unique identifier
+ * @property {string} productId - Parent product identifier
+ * @property {string} [dosage] - Clinical dosage (e.g. '10mg', '5mg/ml')
+ * @property {string} [route] - Administration route (e.g. 'subcutaneous', 'nasal')
+ * @property {string} [supplierId] - Supplier identifier
+ * @property {Object} [pricing]
+ * @property {PricingTier} [pricing.masterPrice] - Supplier cost (Admin Only)
+ * @property {PricingTier} [pricing.retailPrice] - Public retail price
+ * @property {PricingTier} [pricing.clinicPrice] - Clinic price
+ * @property {PricingTier} [pricing.wholesalePrice] - Wholesaler tier price
  *
- * All callers should import from this module — never query Firestore directly
- * from UI components.
+ * @typedef {Object} Product
+ * @property {string} id - Product document ID
+ * @property {string} name - Chemical/commercial peptide name
+ * @property {string} [slug] - URL friendly slug
+ * @property {string} [category] - Clinical category
+ * @property {string} [cas] - CAS registry number
+ * @property {Array<ProductVariant>} [variants] - Associated variant records
+ * @property {boolean} [isActive] - Active status
  */
 
 import {
@@ -25,6 +34,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -35,114 +48,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { normalizeProduct } from './mappers';
-
-// Build a lookup map from normalised product name → local enrichment fields.
-// This is built once at module load time (O(n), tiny dataset).
-// Maps a v2 canonical product to the enrichment shape used by _resolveLocalEnrich.
-// v2 stores search fields in classification.* and science.*
-const _buildEnrichEntry = (p) => ({
-  goals:            p.classification?.goals            ?? p.goals            ?? [],
-  secondaryFactors: p.classification?.secondaryFactors ?? p.secondaryFactors  ?? [],
-  tags:             p.classification?.tags             ?? p.tags             ?? [],
-  mechanisms:       p.classification?.mechanisms       ?? p.mechanisms       ?? [],
-  semanticKeywords: p.classification?.semanticKeywords ?? p.semanticKeywords ?? [],
-  synonyms:         p.synonyms                        ?? [],
-  objective:        p.science?.objective               ?? p.objective        ?? '',
-  desc:             p.science?.desc                   ?? p.desc             ?? '',
-  searchAliases:    p.searchAliases                   ?? [],
-  scientificName:   p.science?.iupacName              ?? p.scientificName   ?? '',
-  displayName:      p.displayName                     || p.name             || '',
-  name:             p.name                            ?? '',
-  aiContent:        p.aiContent                       ?? null,
-  pharmacology:     p.pharmacology                    ?? null,
-});
-
-// Primary key: exact normalised name (e.g. "tb-500 (thymosin β4)")
-let _localEnrichmentByName = null;
-let _localEnrichmentBySlug = null;
-
-async function _initEnrichmentMaps() {
-  if (_localEnrichmentByName && _localEnrichmentBySlug) return;
-
-  const { catalog: localProducts } = await import('../data/v2/index.js');
-  
-  _localEnrichmentByName = new Map(
-    localProducts.map((p) => [(p.name ?? '').toLowerCase().trim(), _buildEnrichEntry(p)])
-  );
-
-  _localEnrichmentBySlug = new Map();
-  for (const p of localProducts) {
-    const full = (p.name ?? '').toLowerCase().trim();
-    const baseSlug = full.replace(/\s*[(/|].*$/, '').trim();
-    if (baseSlug && baseSlug !== full && !_localEnrichmentBySlug.has(baseSlug)) {
-      _localEnrichmentBySlug.set(baseSlug, _buildEnrichEntry(p));
-    }
-    for (const alias of (p.searchAliases ?? [])) {
-      const aliasKey = alias.toLowerCase().trim();
-      if (aliasKey && !_localEnrichmentBySlug.has(aliasKey)) {
-        _localEnrichmentBySlug.set(aliasKey, _buildEnrichEntry(p));
-      }
-    }
-  }
-}
-
-/**
- * Resolve local enrichment for a Firestore product doc using multiple fallback
- * strategies so that partial or differently-formatted names still match.
- *
- * Priority:
- *   1. Exact name match
- *   2. Base slug match (name before first parenthesis)
- *   3. Alias index match
- *   4. Prefix substring match (Firestore name starts with a local product name token)
- */
-function _resolveLocalEnrich(firestoreName, firestoreId) {
-  if (!_localEnrichmentByName || !_localEnrichmentBySlug) return {};
-
-  const nameKey = (firestoreName ?? '').toLowerCase().trim();
-
-  // 1. Exact match
-  if (_localEnrichmentByName.has(nameKey)) return _localEnrichmentByName.get(nameKey);
-
-  // 2. Base-slug match (strip parenthetical from Firestore name too)
-  const baseKey = nameKey.replace(/\s*[(/|].*$/, '').trim();
-  if (baseKey && _localEnrichmentByName.has(baseKey)) return _localEnrichmentByName.get(baseKey);
-  if (baseKey && _localEnrichmentBySlug.has(baseKey)) return _localEnrichmentBySlug.get(baseKey);
-
-  // 3. Alias / secondary slug index
-  if (_localEnrichmentBySlug.has(nameKey)) return _localEnrichmentBySlug.get(nameKey);
-
-  // 4. Doc ID heuristic: Firestore IDs are often slug-like (e.g. "tb-500-2mg")
-  const idKey = (firestoreId ?? '').toLowerCase()
-    .replace(/-\d+(\.\d+)?(mg|mcg|iu|ml|g|kg|unit|vial|kit|pack|tab|cap|amp).*$/i, '')
-    .trim();
-  if (idKey && _localEnrichmentByName.has(idKey)) return _localEnrichmentByName.get(idKey);
-  if (idKey && _localEnrichmentBySlug.has(idKey)) return _localEnrichmentBySlug.get(idKey);
-
-  // 5. Partial prefix: any local product whose name starts with our key
-  for (const [localName, enrich] of _localEnrichmentByName) {
-    if (localName.startsWith(nameKey) || nameKey.startsWith(localName.replace(/\s*[(].*$/, '').trim())) {
-      return enrich;
-    }
-  }
-
-  // No match found — warn in dev so mismatches are easy to spot exactly once
-  if (process.env.NODE_ENV === 'development' && (firestoreName || firestoreId)) {
-    const warnKey = `${firestoreName}_${firestoreId}`;
-    if (!globalThis.__warnedMismatches) {
-      globalThis.__warnedMismatches = new Set();
-    }
-    if (!globalThis.__warnedMismatches.has(warnKey)) {
-      globalThis.__warnedMismatches.add(warnKey);
-      // console.warn(
-      //   `[productRepository] No local enrichment found for Firestore product: name="${firestoreName}", id="${firestoreId}". ` +
-      //   `Search scoring will rely on Firestore fields only. Add an entry to src/data/products.js to fix.`
-      // );
-    }
-  }
-
-  return {}; // no match
-}
+import {
+  validateProductWrite,
+  validateVariantWrite,
+  ProductValidationError,
+} from './productWriteGuard';
+import { deriveProductTypes } from '../schemas/firestoreProductSchema.js';
 
 import { createCacheManager } from '../utils/cacheManager';
 
@@ -152,7 +63,7 @@ const variantsCol  = (productId) => collection(db, 'products', productId, 'varia
 const suppliersCol = ()          => collection(db, 'suppliers');
 
 // ── Module-level cache (dual-layer: memory + localStorage) ────────────────────────
-const PRODUCTS_CACHE_KEY = 'regenpept_products_cache_v2';
+const PRODUCTS_CACHE_KEY = 'regenpept_products_cache_v4';
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes (Firestore is source of truth)
 
 const cache = createCacheManager(PRODUCTS_CACHE_KEY, CACHE_TTL_MS);
@@ -160,6 +71,8 @@ const cache = createCacheManager(PRODUCTS_CACHE_KEY, CACHE_TTL_MS);
 export function invalidateProductsCache() {
   cache.invalidate();
 }
+
+export const invalidateCatalogCache = invalidateProductsCache;
 
 // ── Product-level queries ─────────────────────────────────────────────────────
 
@@ -212,8 +125,10 @@ export async function getProductsByCategoryServer(categorySlug) {
     
     const target = categorySlug.toLowerCase().replace(/-/g, '');
     return products.filter(p => {
-      if (!p.category) return false;
-      const catNorm = p.category.toLowerCase().replace(/[^a-z0-9]/g, '');
+      // categoryId is authoritative (Phase 1 migration); category kept as fallback
+      const cat = p.categoryId || p.category || '';
+      if (!cat) return false;
+      const catNorm = cat.toLowerCase().replace(/[^a-z0-9]/g, '');
       return catNorm.includes(target) || target.includes(catNorm);
     });
     
@@ -240,12 +155,53 @@ export async function getAllProducts() {
 }
 
 /**
- * Fetch only active products.
- * - Returns from cache if data is < 5 minutes old.
- * - Fetches the full collection and filters client-side so that:
- *   (a) No composite Firestore index is required.
- *   (b) Documents missing both `isActive` and `status` fields are treated as
- *       active (permissive default) rather than silently excluded.
+ * Fetch multiple products by their IDs en un batch eficiente.
+ * Cross-entity: usado por protocolos para cargar sus productos asociados,
+ * y por prescripciones para enriquecer líneas con datos del producto.
+ *
+ * Firestore limita `in` a 30 IDs — se hace chunking automático.
+ *
+ * @param {string[]} ids — Array de product IDs
+ * @returns {Promise<Record<string, object>>} — mapa productId → producto
+ */
+export async function getProductsByIds(ids = []) {
+  if (!ids.length) return {};
+  const unique = [...new Set(ids.filter(Boolean))];
+  const CHUNK = 30;
+  const chunks = [];
+  for (let i = 0; i < unique.length; i += CHUNK) {
+    chunks.push(unique.slice(i, i + CHUNK));
+  }
+  const results = {};
+  await Promise.all(
+    chunks.map(async (chunk) => {
+      const q = query(productsCol(), where('__name__', 'in', chunk));
+      const snap = await getDocs(q);
+      snap.forEach((d) => {
+        results[d.id] = normalizeProduct(d.data(), d.id);
+      });
+    })
+  );
+  return results;
+}
+
+/**
+ * Fetch only active/published products.
+ *
+ * Performance strategy:
+ *   Layer 1 — In-memory module cache (30 min TTL).
+ *   Layer 2 — localStorage via cacheManager.
+ *   Layer 3 — Firestore (only when both caches are cold or forceRefresh=true).
+ *
+ * Instead of a single limit(10000) that can read thousands of docs atomically
+ * and block the main thread, we use a paginated cursor loop (300 docs/batch).
+ * This keeps each individual request small and allows the event loop to breathe
+ * between pages.
+ *
+ * Filter logic (permissive default):
+ *   A document is treated as INACTIVE only when explicitly flagged:
+ *     isActive === false  OR  status ∈ {'inactive','draft','archived','hidden'}
+ *   Documents without these fields default to ACTIVE.
  */
 export async function getActiveProducts({ forceRefresh = false } = {}) {
   if (!forceRefresh) {
@@ -253,27 +209,33 @@ export async function getActiveProducts({ forceRefresh = false } = {}) {
     if (cached) return cached;
   }
 
+  const PAGE_SIZE = 300; // Safe per-batch read budget
+  const results = [];
+  let cursor = null;
+
   try {
-    // Soft limit of 200 to prevent runaway reads as per Golden Rule,
-    // while still returning enough to group variants in getCatalog().
-    const q = query(productsCol(), limit(200));
-    const snap = await getDocs(q);
+    do {
+      const q = cursor
+        ? query(productsCol(), orderBy('__name__'), startAfter(cursor), limit(PAGE_SIZE))
+        : query(productsCol(), orderBy('__name__'), limit(PAGE_SIZE));
 
-    const results = [];
-    for (const d of snap.docs) {
-      const data = d.data();
+      const snap = await getDocs(q);
 
-      // Treat a document as "inactive" only when explicitly flagged:
-      //   isActive === false  OR  status === 'inactive' | 'draft' | 'archived'
-      // Documents that have neither field are considered active.
-      const explicitlyInactive =
-        data.isActive === false ||
-        (data.status && !['active', 'published'].includes(data.status));
+      for (const d of snap.docs) {
+        const data = d.data();
 
-      if (!explicitlyInactive) {
-        results.push({ id: d.id, ...data });
+        // Treat a document as "inactive" only when explicitly flagged.
+        const explicitlyInactive =
+          data.isActive === false ||
+          (data.status && !['active', 'published'].includes(data.status));
+
+        if (!explicitlyInactive) {
+          results.push(normalizeProduct(data, d.id));
+        }
       }
-    }
+
+      cursor = snap.docs.length === PAGE_SIZE ? snap.docs[snap.docs.length - 1] : null;
+    } while (cursor);
 
     cache.write(results);
     return results;
@@ -335,6 +297,32 @@ export async function getProduct(productId) {
   }
 }
 
+
+/**
+ * Fetch a single product by name (or canonicalName).
+ * Returns the first matched doc as the base product.
+ */
+export async function getProductByName(name) {
+  try {
+    const q1 = query(collection(db, 'products'), where('name', '==', name));
+    let snap = await getDocs(q1);
+    
+    if (snap.empty) {
+      const q2 = query(collection(db, 'products'), where('canonicalName', '==', name));
+      snap = await getDocs(q2);
+    }
+    
+    // Find the one marked as default, or fallback to the first one
+    const docs = snap.docs;
+    if (docs.length === 0) return null;
+    let baseDoc = docs.find(d => d.data().isDefault) || docs[0];
+    return normalizeProduct(baseDoc.data(), baseDoc.id);
+  } catch (err) {
+    console.error('[productRepository] getProductByName:', err);
+    throw err;
+  }
+}
+
 // ── Variant-level queries ─────────────────────────────────────────────────────
 
 /**
@@ -342,23 +330,11 @@ export async function getProduct(productId) {
  */
 export async function getVariants(productId) {
   try {
-    const q = query(variantsCol(productId), orderBy('sortOrder', 'asc'));
+    const q = query(variantsCol(productId));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    const docs = snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    return docs.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   } catch (err) {
-    // Firestore throws when `sortOrder` field doesn't exist on some docs
-    // (requires a composite index). Fall back to unordered fetch + client sort.
-    if (err?.code === 'failed-precondition' || err?.message?.includes('index')) {
-      console.warn(`[productRepository] getVariants(${productId}): index missing, falling back to client-side sort`);
-      try {
-        const snap = await getDocs(variantsCol(productId));
-        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        return docs.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-      } catch (fallbackErr) {
-        console.error(`[productRepository] getVariants fallback(${productId}):`, fallbackErr);
-        return []; // never block the parent query
-      }
-    }
     console.error(`[productRepository] getVariants(${productId}):`, err);
     return []; // return empty array instead of throwing so getCatalog can continue
   }
@@ -371,11 +347,11 @@ export async function getAvailableVariants(productId) {
   try {
     const q = query(
       variantsCol(productId),
-      where('stock.available', '==', true),
-      orderBy('sortOrder', 'asc')
+      where('stock.available', '==', true)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    const docs = snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    return docs.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   } catch (err) {
     console.error(`[productRepository] getAvailableVariants(${productId}):`, err);
     throw err;
@@ -445,8 +421,10 @@ export async function getCatalog() {
   try {
     const products = await getActiveProducts();
 
-    // Load variants for every product doc
-    const enriched = await Promise.all(
+    // Load variants for every product doc and build catalog directly.
+    // All enrichment data (pharmacology, mechanisms, scientificName, etc.)
+    // now lives directly in Firestore — no local JSON merge needed (Phase 6E).
+    const catalog = await Promise.all(
       products.map(async (product) => {
         const subcollectionVariants = await getVariants(product.id);
 
@@ -460,85 +438,44 @@ export async function getCatalog() {
           isProfessional: v.isProfessional !== undefined ? v.isProfessional : (product.isProfessional || false),
         }));
 
-        return { ...product, variants };
+        // Sort variants by numeric dosage value (lowest first)
+        variants.sort((a, b) => {
+          const numA = parseFloat((a.dosage || a.strength || '0').replace(/[^0-9.]/g, '')) || 0;
+          const numB = parseFloat((b.dosage || b.strength || '0').replace(/[^0-9.]/g, '')) || 0;
+          return numA - numB;
+        });
+
+        const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0] ?? null;
+
+        const resolvedName        = product.name        || product.id || '';
+        const resolvedDisplayName = product.displayName || resolvedName;
+
+        return {
+          ...product,
+          name:             resolvedName,
+          canonicalName:    product.canonicalName || resolvedName,
+          displayName:      resolvedDisplayName,
+          // ── Canonical fields — explicit so callers can rely on them ──
+          productType:      product.productType ?? 'peptide',
+          aiContent:        product.aiContent    ?? null,
+          pharmacology:     product.pharmacology ?? null,
+          typeData:         product.typeData     ?? null,
+          // ── Search-enrichment fields (all from Firestore) ──
+          goals:            product.goals            ?? [],
+          secondaryFactors: product.secondaryFactors ?? [],
+          tags:             product.tags             ?? [],
+          mechanisms:       product.mechanisms       ?? [],
+          semanticKeywords: product.semanticKeywords ?? [],
+          synonyms:         product.synonyms         ?? [],
+          objective:        product.objective        ?? '',
+          desc:             product.desc             ?? '',
+          searchAliases:    product.searchAliases    ?? [],
+          scientificName:   product.scientificName   ?? '',
+          variants,
+          defaultVariant,
+        };
       })
     );
-
-    // ── Group products that share the same `name` ───────────────────────────
-    // Key = canonical name (trimmed). For each group, keep the metadata from
-    // the "isDefault" doc (or the first one) and merge all variants together.
-    const groups = new Map(); // name → { base product, variants[] }
-
-    for (const product of enriched) {
-      const key = (product.name ?? product.id ?? '').trim() || product.id || `_unknown_${Math.random()}`;
-
-      if (!groups.has(key)) {
-        groups.set(key, { base: product, variants: [] });
-      }
-
-      const group = groups.get(key);
-
-      // Prefer the doc explicitly marked isDefault as the base metadata carrier
-      if (product.isDefault && !group.base.isDefault) {
-        group.base = product;
-      }
-
-      group.variants.push(...product.variants);
-    }
-
-    // ── Build the final catalog array ───────────────────────────────────────
-    await _initEnrichmentMaps();
-    const catalog = [];
-
-    for (const { base, variants } of groups.values()) {
-      // Sort variants by numeric dosage value (lowest first)
-      variants.sort((a, b) => {
-        const numA = parseFloat((a.dosage || a.strength || '0').replace(/[^0-9.]/g, '')) || 0;
-        const numB = parseFloat((b.dosage || b.strength || '0').replace(/[^0-9.]/g, '')) || 0;
-        return numA - numB;
-      });
-
-      const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0] ?? null;
-      // ── Merge local search enrichment ──────────────────────────────────
-      // Firestore product docs rarely carry goals/semanticKeywords/etc.
-      // We merge them from the local products.js master list using a multi-
-      // strategy lookup that handles name mismatches (e.g. "TB-500" in Firestore
-      // vs "TB-500 (Thymosin β4)" locally).
-      const localEnrich = _resolveLocalEnrich(base.name, base.id);
-
-      // If local enrichment resolved a name/displayName and Firestore lacks one,
-      // use it so the search engine always has something to score against.
-      const resolvedName        = base.name        || localEnrich.name        || base.id || '';
-      const resolvedDisplayName = base.displayName || localEnrich.displayName || resolvedName;
-
-      catalog.push({
-        ...base,
-        name:             resolvedName,
-        displayName:      resolvedDisplayName,
-        // ── Canonical Phase 5-7 fields — explicit so callers can rely on them ──
-        // productType is stamped by migrations and by supplementRepository; default 'peptide'
-        productType:      base.productType ?? 'peptide',
-        // aiContent: clinicalBrief, contraindications, synergies (Phase 10)
-        aiContent:        base.aiContent   || localEnrich.aiContent || null,
-        // pharmacology: halfLife, receptorTargets (Phase 10)
-        pharmacology:     base.pharmacology || localEnrich.pharmacology || null,
-        // typeData: type-specific metadata block (Phase 7)
-        typeData:         base.typeData    ?? null,
-        // ── Search-enrichment fields: local data wins if Firestore lacks them ──
-        goals:            base.goals?.length            ? base.goals            : localEnrich.goals            ?? [],
-        secondaryFactors: base.secondaryFactors?.length  ? base.secondaryFactors  : localEnrich.secondaryFactors  ?? [],
-        tags:             base.tags?.length             ? base.tags             : localEnrich.tags             ?? [],
-        mechanisms:       base.mechanisms?.length       ? base.mechanisms       : localEnrich.mechanisms       ?? [],
-        semanticKeywords: base.semanticKeywords?.length ? base.semanticKeywords : localEnrich.semanticKeywords ?? [],
-        synonyms:         base.synonyms?.length         ? base.synonyms         : localEnrich.synonyms         ?? [],
-        objective:        base.objective  || localEnrich.objective  || '',
-        desc:             base.desc       || localEnrich.desc       || '',
-        searchAliases:    base.searchAliases?.length    ? base.searchAliases    : localEnrich.searchAliases    ?? [],
-        scientificName:   base.scientificName || localEnrich.scientificName || '',
-        variants,
-        defaultVariant,
-      });
-    }
 
     // Sort by category then displayName
     return catalog.sort((a, b) => {
@@ -568,7 +505,10 @@ export async function getTestingCatalog(filters = {}) {
     const catalog = await getCatalog();
     
     // Filter down to testing products only
-    let testingProducts = catalog.filter((p) => p.category === 'Testing' || p.productType === 'testing');
+    let testingProducts = catalog.filter((p) => {
+      const cat = (p.categoryId || p.category || '').toLowerCase();
+      return cat === 'diagnostic_test' || cat === 'testing' || p.productType === 'testing';
+    });
     
     // Apply additional filters if provided
     if (filters.sampleKitType) {
@@ -608,11 +548,11 @@ export async function getVariantsByRoute(productId, route) {
     const q = query(
       variantsCol(productId),
       where('route', '==', route),
-      where('isActive', '==', true),
-      orderBy('sortOrder', 'asc')
+      where('isActive', '==', true)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    const docs = snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    return docs.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   } catch (err) {
     console.error(`[productRepository] getVariantsByRoute(${productId}, ${route}):`, err);
     throw err;
@@ -631,11 +571,11 @@ export async function getVariantsBySupplier(productId, supplierId) {
     const q = query(
       variantsCol(productId),
       where('supplierId', '==', supplierId),
-      where('isActive', '==', true),
-      orderBy('sortOrder', 'asc')
+      where('isActive', '==', true)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    const docs = snap.docs.map((d) => normalizeProduct(d.data(), d.id));
+    return docs.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   } catch (err) {
     console.error(`[productRepository] getVariantsBySupplier(${productId}, ${supplierId}):`, err);
     throw err;
@@ -774,10 +714,359 @@ export async function importCatalogs(catalogRecords) {
   await batch.commit();
 }
 
+// ── Write Operations (Phase 6B — Guard-protected) ─────────────────────────────
+// ALL product/variant writes MUST go through these functions.
+// Direct setDoc/updateDoc to 'products' is FORBIDDEN.
+
+/**
+ * Create a new product in Firestore.
+ * Data is validated and normalized through the productWriteGuard before writing.
+ *
+ * @param {Object}  data      - Product data (must include name, type, categoryId)
+ * @param {Object}  [opts]    - Options
+ * @param {string}  [opts.id] - Optional custom document ID; auto-generated if omitted
+ * @param {boolean} [opts.strict=true] - Strip unknown fields
+ * @returns {Promise<{ id: string, data: Object }>} The created product id and data
+ * @throws {ProductValidationError} If validation fails
+ */
+export async function createProduct(data, opts = {}) {
+  const { id: customId, strict = true } = opts;
+  const rawVariants = Array.isArray(data?.variants) ? [...data.variants] : [];
+  const dataWithoutVariants = { ...data };
+  delete dataWithoutVariants.variants;
+
+  const validated = validateProductWrite(dataWithoutVariants, { isUpdate: false, strict });
+
+  // Stamp timestamps & variantsCount
+  validated.createdAt = serverTimestamp();
+  validated.updatedAt = serverTimestamp();
+  validated.variantsCount = rawVariants.length;
+
+  let docRef;
+  if (customId) {
+    docRef = doc(productsCol(), customId);
+    await setDoc(docRef, validated);
+  } else {
+    docRef = await addDoc(productsCol(), validated);
+  }
+
+  // If initial variants were passed, create them directly in the sub-collection
+  if (rawVariants.length > 0) {
+    try {
+      const batch = writeBatch(db);
+      for (const v of rawVariants) {
+        const vId = v.id || `var_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const vRef = doc(variantsCol(docRef.id), vId);
+        const valV = validateVariantWrite(v, { isUpdate: false, strict: false });
+        valV.productId = docRef.id;
+        valV.createdAt = serverTimestamp();
+        valV.updatedAt = serverTimestamp();
+        batch.set(vRef, valV);
+      }
+      await batch.commit();
+    } catch (varErr) {
+      console.warn('[productRepository] createProduct: failed to write sub-collection variants:', varErr);
+    }
+  }
+
+  invalidateProductsCache();
+  return { id: docRef.id, data: validated };
+}
+
+/**
+ * Update an existing product in Firestore.
+ * Only the provided fields are updated (merge); all fields are validated.
+ *
+ * @param {string} productId - The Firestore document ID
+ * @param {Object} data      - Partial product data to update
+ * @param {Object} [opts]    - Options
+ * @param {boolean} [opts.strict=false] - Strip unknown fields
+ * @returns {Promise<{ id: string, data: Object }>}
+ * @throws {ProductValidationError}
+ */
+export async function updateProduct(productId, data, opts = {}) {
+  if (!productId || typeof productId !== 'string') {
+    throw new ProductValidationError(['productId is required for updates']);
+  }
+  const { strict = false } = opts;
+  const validated = validateProductWrite(data, { isUpdate: true, strict });
+
+  validated.updatedAt = serverTimestamp();
+
+  const docRef = doc(productsCol(), productId);
+  await updateDoc(docRef, validated);
+
+  invalidateProductsCache();
+  return { id: productId, data: validated };
+}
+
+/**
+ * Delete a product and all its sub-collection variants from Firestore.
+ *
+ * @param {string} productId - The Firestore document ID
+ * @returns {Promise<void>}
+ */
+export async function deleteProduct(productId) {
+  if (!productId || typeof productId !== 'string') {
+    throw new ProductValidationError(['productId is required for deletion']);
+  }
+
+  // First, delete all variants in the sub-collection
+  const varSnap = await getDocs(variantsCol(productId));
+  if (!varSnap.empty) {
+    const batch = writeBatch(db);
+    varSnap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+  }
+
+  // Then delete the product document itself
+  await deleteDoc(doc(productsCol(), productId));
+  invalidateProductsCache();
+}
+
+/**
+ * Create a new variant under a product.
+ *
+ * @param {string} productId - Parent product ID
+ * @param {Object} data      - Variant data (must include supplierId)
+ * @param {Object} [opts]
+ * @param {string} [opts.id] - Optional custom variant ID
+ * @param {boolean} [opts.strict=true]
+ * @returns {Promise<{ id: string, data: Object }>}
+ * @throws {ProductValidationError}
+ */
+export async function createVariant(productId, data, opts = {}) {
+  if (!productId) {
+    throw new ProductValidationError(['productId is required to create a variant']);
+  }
+  const { id: customId, strict = true } = opts;
+  const validated = validateVariantWrite(data, { isUpdate: false, strict });
+
+  validated.createdAt = serverTimestamp();
+  validated.updatedAt = serverTimestamp();
+
+  let docRef;
+  if (customId) {
+    docRef = doc(variantsCol(productId), customId);
+    await setDoc(docRef, validated);
+  } else {
+    docRef = await addDoc(variantsCol(productId), validated);
+  }
+
+  // Denormalize: update parent supplierIds, availableTypes, price range, etc.
+  await syncVariantDenorm(productId);
+
+  invalidateProductsCache();
+  return { id: docRef.id, data: validated };
+}
+
+/**
+ * Update an existing variant.
+ *
+ * @param {string} productId - Parent product ID
+ * @param {string} variantId - Variant document ID
+ * @param {Object} data      - Partial variant data
+ * @param {Object} [opts]
+ * @param {boolean} [opts.strict=false]
+ * @returns {Promise<{ id: string, data: Object }>}
+ * @throws {ProductValidationError}
+ */
+export async function updateVariant(productId, variantId, data, opts = {}) {
+  if (!productId || !variantId) {
+    throw new ProductValidationError(['productId and variantId are required for updates']);
+  }
+  const { strict = false } = opts;
+  const validated = validateVariantWrite(data, { isUpdate: true, strict });
+
+  validated.updatedAt = serverTimestamp();
+
+  const docRef = doc(variantsCol(productId), variantId);
+  await setDoc(docRef, validated, { merge: true });
+
+  // Re-sync parent's denormalized list, availableTypes, presentations, min/max prices
+  await syncVariantDenorm(productId);
+
+  invalidateProductsCache();
+  return { id: variantId, data: validated };
+}
+
+/**
+ * Delete a variant from a product.
+ *
+ * @param {string} productId - Parent product ID
+ * @param {string} variantId - Variant document ID
+ * @returns {Promise<void>}
+ */
+export async function deleteVariant(productId, variantId) {
+  if (!productId || !variantId) {
+    throw new ProductValidationError(['productId and variantId are required for deletion']);
+  }
+  await deleteDoc(doc(variantsCol(productId), variantId));
+
+  // Re-sync parent's supplierIds after deletion
+  await syncVariantDenorm(productId);
+  invalidateProductsCache();
+}
+
+/**
+ * Internal: Re-compute and update the parent product's `supplierIds` array
+ * by reading all current variants. This keeps the denormalized field in sync.
+ * @private
+ */
+async function syncVariantDenorm(productId) {
+  try {
+    const snap = await getDocs(variantsCol(productId));
+    const activeVariants = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(v => v.isActive !== false && !['inactive', 'archived', 'draft'].includes(v.status));
+
+    const supplierIds = [...new Set(activeVariants.map(v => v.supplierId || v.supplier).filter(Boolean))];
+    const presentations = [...new Set(activeVariants.map(v => v.presentation || v.format).filter(Boolean))];
+
+    const prices = activeVariants
+      .map(v => typeof v.unit_price === 'number' ? v.unit_price : (typeof v.price === 'number' ? v.price : parseFloat(v.price)))
+      .filter(p => !isNaN(p) && p > 0);
+
+    const minPrice = prices.length > 0 ? Math.min(...prices) : null;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : null;
+
+    const allVariants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const derived = deriveProductTypes(allVariants);
+
+    await updateDoc(doc(productsCol(), productId), {
+      supplierIds,
+      presentations,
+      minPrice,
+      maxPrice,
+      variantsCount: snap.size,
+      availableTypes: derived.availableTypes,
+      primaryType: derived.primaryType,
+      isHybrid: derived.isHybrid,
+      type: derived.primaryType,
+      productType: derived.primaryType,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (err) {
+    console.error(`[productRepository] syncVariantDenorm(${productId}):`, err);
+  }
+}
+
+/**
+ * Create multiple products in a single Firestore batch.
+ * Each product data is validated via `validateProductWrite`.
+ * Firestore batches support max 500 operations per commit.
+ *
+ * @param {Array<Object>} items - Array of product data objects
+ * @param {Object} [opts]
+ * @param {boolean} [opts.strict=false] - Strip unknown fields
+ * @returns {Promise<Array<{ id: string, data: Object }>>}
+ */
+export async function batchCreateProducts(items, opts = {}) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const { strict = false } = opts;
+
+  const results = [];
+  // Firestore batch limit is 500 operations; chunk accordingly
+  const BATCH_LIMIT = 400;
+  for (let i = 0; i < items.length; i += BATCH_LIMIT) {
+    const chunk = items.slice(i, i + BATCH_LIMIT);
+    const batch = writeBatch(db);
+
+    for (const item of chunk) {
+      let validated;
+      try {
+        validated = validateProductWrite(item, { isUpdate: false, strict });
+      } catch {
+        // If validation fails in non-strict mode, skip the item
+        console.warn('[productRepository] batchCreateProducts: skipping invalid item', item);
+        continue;
+      }
+      validated.createdAt = serverTimestamp();
+      validated.updatedAt = serverTimestamp();
+
+      const docRef = doc(productsCol());
+      batch.set(docRef, validated);
+      results.push({ id: docRef.id, data: validated });
+    }
+
+    await batch.commit();
+  }
+
+  invalidateProductsCache();
+  return results;
+}
+
+import { collectionGroup } from 'firebase/firestore';
+
+/**
+ * Obtiene productos y sus variantes aplanadas por un arreglo de IDs de productos.
+ * Utilizado por flujos de creación de catálogos y drawers de cotización.
+ * @param {string[]} productIds
+ * @returns {Promise<Array<object>>} Arreglo de variantes con metadata de producto padre
+ */
+export async function fetchProductsWithVariantsByIds(productIds = []) {
+  if (!productIds || productIds.length === 0) return [];
+  const fetchedVariants = [];
+
+  try {
+    for (let i = 0; i < productIds.length; i += 10) {
+      const chunk = productIds.slice(i, i + 10);
+
+      // Fetch parent products
+      const q = query(collection(db, 'products'), where('__name__', 'in', chunk));
+      const snap = await getDocs(q);
+      const rawProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      // Fetch variants
+      const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
+      const vSnap = await getDocs(vQ);
+      const allVariants = vSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      const variantsByProduct = {};
+      allVariants.forEach((v) => {
+        if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
+        variantsByProduct[v.productId].push(v);
+      });
+
+      rawProducts.forEach((p) => {
+        const vars = variantsByProduct[p.id] || [];
+        if (vars.length > 0) {
+          vars.forEach((v, idx) => {
+            fetchedVariants.push({
+              ...v,
+              id: v.id || `${p.id}-var-${idx}`,
+              productId: p.id,
+              productName: p.name,
+              name: `${p.name} - ${v.format || ''} ${v.size || ''}`.trim(),
+              supplier: v.supplier || p.supplier || 'Unassigned',
+              rawVariant: v,
+              rawProduct: p,
+            });
+          });
+        } else {
+          fetchedVariants.push({
+            id: `${p.id}-default`,
+            productId: p.id,
+            productName: p.name,
+            name: p.name,
+            supplier: p.supplier || 'Unassigned',
+            rawProduct: p,
+          });
+        }
+      });
+    }
+    return fetchedVariants;
+  } catch (err) {
+    logger.error('[productRepository] fetchProductsWithVariantsByIds failed', { error: err.message });
+    return [];
+  }
+}
+
 // ── Legacy compatibility shim ─────────────────────────────────────────────────
 // Keeps existing code that imports { productRepository } working.
 
 export const productRepository = {
+  // Reads
   getAllProducts,
   getActiveProducts,
   getProduct,
@@ -787,7 +1076,6 @@ export const productRepository = {
   getProductWithVariants,
   getCatalog,
   getTestingCatalog,
-  // Phase 1 additions:
   getVariantsByRoute,
   getVariantsBySupplier,
   getDefaultVariantByRoute,
@@ -799,4 +1087,14 @@ export const productRepository = {
   getProductEnrichment,
   getFeaturedProductsServer,
   getProductsByCategoryServer,
+  fetchProductsWithVariantsByIds,
+  // Writes (Phase 6B — guard-protected)
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createVariant,
+  updateVariant,
+  deleteVariant,
+  invalidateProductsCache,
 };
+

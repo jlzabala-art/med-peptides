@@ -19,12 +19,30 @@ import { auth, db, functions, storage } from '../firebase';
 
 
 import { setAnalyticsUserId, setUserProperties, setAnalyticsUserRole } from '../hooks/useAnalytics';
+import { setInsightsUserToken } from '../services/algoliaInsights';
 import { getActiveTenantForResolution } from '../utils/resolvePrice';
 
 const AuthContext = createContext(null);
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    return {
+      user: null,
+      userProfile: null,
+      activeRole: 'guest',
+      isAdmin: false,
+      isProfessional: false,
+      isClinicAdmin: false,
+      loading: false,
+      permissions: {},
+      tenant: null,
+      logout: async () => {},
+      login: async () => {},
+      register: async () => {},
+    };
+  }
+  return ctx;
 }
 
 export const ADMIN_EMAILS = ['jose@mediluxem.com', 'kasia@mediluxem.com', 'jose@mediluxeme.com', 'kasia@mediluxeme.com', 'business@mediluxeme.com', 'admin@regenpept.test'];
@@ -98,8 +116,21 @@ export const DEFAULT_ROLE_PERMISSIONS = {
 
 export function AuthProvider({ children, serverUser = null }) {
   const [user, setUser] = useState(serverUser);
-  const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(!serverUser);
+  const [userProfile, setUserProfile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('regenpept_userProfile');
+        return cached ? JSON.parse(cached) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+  
+  // If we have a serverUser (session cookie via middleware) AND a cached profile,
+  // we can completely skip the global loading screen and start rendering instantly.
+  const [loading, setLoading] = useState(!(serverUser && userProfile));
   const [manualActiveRole, setManualActiveRole] = useState(() => (typeof window !== 'undefined' ? sessionStorage.getItem('activeRole') : null));
   const [rolePermissions, setRolePermissions] = useState(DEFAULT_ROLE_PERMISSIONS);
   const [isMfaEnrolled, setIsMfaEnrolled] = useState(serverUser ? serverUser.mfaEnrolled : false);
@@ -142,6 +173,7 @@ export function AuthProvider({ children, serverUser = null }) {
 
         setIsMfaEnrolled(firebaseUser.multiFactor?.enrolledFactors?.length > 0);
         setAnalyticsUserId(firebaseUser.uid);
+        setInsightsUserToken(firebaseUser.uid);
         // Fetch the user's profile from Firestore
         try {
           const docRef = doc(db, 'users', firebaseUser.uid);
@@ -150,6 +182,9 @@ export function AuthProvider({ children, serverUser = null }) {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setUserProfile(data);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('regenpept_userProfile', JSON.stringify(data));
+            }
 
             // Set User Properties for GA4
             const gaRole = data.role === 'admin' ? 'admin'
@@ -181,9 +216,13 @@ export function AuthProvider({ children, serverUser = null }) {
         }
 
         setUserProfile(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('regenpept_userProfile');
+        }
         setIsMfaEnrolled(false);
         setAnalyticsUserId(null); // Clear on logout
         setAnalyticsUserRole('guest', null); // Reset to guest role
+        setInsightsUserToken(null);
       }
       setLoading(false);
     });
@@ -296,7 +335,8 @@ export function AuthProvider({ children, serverUser = null }) {
   }, [user, userProfile, isProfessional, isVerified, loading, userRole, baseRole, activePermissions]);
 
   const login = async (email, password) => {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const safeEmail = email ? email.trim() : email;
+    const cred = await signInWithEmailAndPassword(auth, safeEmail, password);
     const docRef = doc(db, 'users', cred.user.uid);
     const docSnap = await getDoc(docRef);
     let profile = null;

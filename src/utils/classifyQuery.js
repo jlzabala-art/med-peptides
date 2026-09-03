@@ -340,6 +340,7 @@ export function classifyQuery(query, options = {}) {
  * @returns {Array<{ name, slug, productType, aliases, searchTerms }>}
  */
 export function buildCatalogIndex(products = []) {
+  if (!Array.isArray(products)) return [];
   return products.map(p => ({
     name:        p.displayName || p.name || '',
     slug:        p.slug || p.id || null,

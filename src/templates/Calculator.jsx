@@ -288,7 +288,7 @@ export default function Calculator() {
           <div className="calc-pip">
             <div className="calc-pip__visuals" style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', marginBottom: '1rem' }}>
               <VialVisualizer waterAmount={bacWater} />
-              <ChevronRight size={24} color="rgba(255,255,255,0.3)" />
+              <ChevronRight size={24} color="#94a3b8" />
               <SyringeVisualizer units={units} />
             </div>
             <div className="calc-pip__result">
@@ -319,13 +319,13 @@ export default function Calculator() {
             <InputField
               label="Bacteriostatic Water"
               unit="ml"
-              hint={`e.g. ${bacWater} ml added to vial`}
+              hint={`e.g. ${bacWater} ml BAC water`}
               value={bacWater}
               onChange={handleChange(setBacWater)}
               invalid={invalid.ml}
             />
             <InputField
-              label="Desired Dose"
+              label="Desired Research Dose"
               unit="mcg"
               hint={`e.g. ${desiredDosageMcg} mcg per injection`}
               value={desiredDosageMcg}
@@ -357,25 +357,25 @@ export default function Calculator() {
                   gap: '2.5rem', 
                   margin: '2rem 0',
                   justifyContent: 'center',
-                  background: 'rgba(255,255,255,0.03)',
+                  background: '#f8fafc',
                   padding: '2rem',
                   borderRadius: '24px',
-                  border: '1px solid rgba(255,255,255,0.05)'
+                  border: '1px solid #e2e8f0'
                 }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 1: Reconstitute</div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 1: Reconstitute</div>
                     <VialVisualizer waterAmount={bacWater} />
                   </div>
                   <motion.div 
                     animate={{ x: [0, 5, 0] }} 
                     transition={{ repeat: Infinity, duration: 2 }}
-                    style={{ color: 'rgba(255,255,255,0.2)' }}
+                    style={{ color: '#94a3b8' }}
                   >
                     <ChevronRight size={32} strokeWidth={1} />
                   </motion.div>
 
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 2: Draw Dose</div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Step 2: Draw Dose</div>
                     <SyringeVisualizer units={units} />
                   </div>
                 </div>
@@ -445,7 +445,7 @@ export default function Calculator() {
               <li className="calc-guide-list__item">
                 <span className="calc-guide-list__num">1</span>
                 <span>
-                  Use <Link to="/product/bacteriostatic-water" className="calc-guide-link">Bacteriostatic Water</Link> for multi-dose research vials.
+                  Use <Link href="/product/bacteriostatic-water" className="calc-guide-link">Bacteriostatic Water</Link> for multi-dose research vials.
                 </span>
               </li>
               <li className="calc-guide-list__item">
@@ -463,7 +463,7 @@ export default function Calculator() {
               <li className="calc-guide-list__item">
                 <span className="calc-guide-list__num">4</span>
                 <span>
-                  <Link to="/product/precision-insulin-syringes" className="calc-guide-link">U-100 syringes</Link> have <strong>100 units per 1ml</strong>. Each unit = 0.01 ml.
+                  <Link href="/product/precision-insulin-syringes" className="calc-guide-link">U-100 syringes</Link> have <strong>100 units per 1ml</strong>. Each unit = 0.01 ml.
                 </span>
               </li>
             </ul>
@@ -472,7 +472,7 @@ export default function Calculator() {
 
         {/* ── Supply CTAs ──────────────────────────────────────────────────── */}
         <div className={`calc-ctas${isMobile ? ' calc-ctas--mobile' : ''}`}>
-          <Link to="/product/bacteriostatic-water" className="calc-cta calc-cta--water">
+          <Link href="/product/bacteriostatic-water" className="calc-cta calc-cta--water">
             <div className="calc-cta__left">
               <span className="calc-cta__emoji">💧</span>
               <div>
@@ -483,7 +483,7 @@ export default function Calculator() {
             <ChevronRight size={17} className="calc-cta__arrow" />
           </Link>
 
-          <Link to="/product/precision-insulin-syringes" className="calc-cta calc-cta--syringe">
+          <Link href="/product/precision-insulin-syringes" className="calc-cta calc-cta--syringe">
             <div className="calc-cta__left">
               <span className="calc-cta__emoji">💉</span>
               <div>

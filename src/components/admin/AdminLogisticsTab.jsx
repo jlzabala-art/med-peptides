@@ -17,8 +17,9 @@ import KittingRiskAnalysis from './KittingRiskAnalysis';
 import notifier from '../../services/NotificationService';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
+import AppActionGroup from '../ui/AppActionGroup';
 
 export default function AdminLogisticsTab() {
   const [activeTab, setActiveTab] = useState('supplier_shipments'); // 'supplier_shipments' or 'agency_rfqs'
@@ -112,7 +113,7 @@ export default function AdminLogisticsTab() {
     { 
       key: 'status', 
       header: 'Status', 
-      render: (val) => <StatusBadge status={val} />
+      render: (val) => <StatusChip status={val} />
     },
     ...(activeTab === 'supplier_shipments' ? [
       { key: 'trackingNumber', header: 'Tracking' },
@@ -126,14 +127,15 @@ export default function AdminLogisticsTab() {
     { 
       key: 'actions', 
       header: 'Actions', 
+      align: 'right',
       render: (_, item) => (
-      <button 
-        onClick={() => setEditingItem(item)}
-        style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', background: 'white', cursor: 'pointer' }}
-      >
-        Manage
-      </button>
-    )}
+        <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+          <AppActionGroup actions={[
+            { type: 'edit', onClick: () => setEditingItem(item) }
+          ]} />
+        </div>
+      )
+    }
   ], [activeTab]);
 
   const activeFilters = [];

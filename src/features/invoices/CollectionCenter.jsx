@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { AlertTriangle, Clock, TrendingDown, Users, ShieldAlert } from '@/lib/icons';
+import StatusChip from '../../components/ui/StatusChip';
 
 
 
@@ -13,8 +14,8 @@ import { AlertTriangle, Clock, TrendingDown, Users, ShieldAlert } from '@/lib/ic
 
 export default function CollectionCenter({ invoices, onSelect }) {
   // Mock aggregations for the Collection Center based on invoices
-  const overdueInvoices = invoices.filter(i => i.status === 'Overdue');
-  const highRiskCustomers = invoices.filter(i => i.status === 'Overdue' || i.status === 'Partially Paid');
+  const overdueInvoices = invoices.filter(i => i.status === 'error');
+  const highRiskCustomers = invoices.filter(i => i.status === 'error' || i.status === 'Partially Paid');
   const topOutstanding = [...invoices]
     .sort((a, b) => ((Number(b.grandTotal) || 0) - (Number(a.grandTotal) || 0)))
     .slice(0, 5);
@@ -73,7 +74,7 @@ export default function CollectionCenter({ invoices, onSelect }) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>€{Number(inv.grandTotal || 0).toLocaleString()}</p>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: inv.status === 'Overdue' ? '#dc2626' : 'var(--color-text-secondary)' }}>{inv.status}</p>
+                    <StatusChip status={inv.status} />
                   </div>
                 </div>
               ))

@@ -1,12 +1,16 @@
 export const getCategorySchema = (product, variant) => {
   const format = (variant?.format || product?.format || '').toLowerCase();
-  const type = (product?.type || product?.category || '').toLowerCase();
+  const variantType = (variant?.type || variant?.productType || '').toLowerCase();
+  const productType = (product?.primaryType || product?.type || product?.productType || product?.category || '').toLowerCase();
+  const availableTypes = Array.isArray(product?.availableTypes) ? product.availableTypes : [];
 
   if (
+    variantType === 'raw_material' ||
+    variantType.includes('api') ||
     format.includes('api') ||
     format.includes('powder') ||
-    type.includes('api') ||
-    type.includes('raw')
+    productType.includes('api') ||
+    productType.includes('raw_material')
   ) {
     return API_PEPTIDES_SCHEMA;
   }
@@ -14,20 +18,23 @@ export const getCategorySchema = (product, variant) => {
     format.includes('bottle') ||
     format.includes('cap') ||
     format.includes('tab') ||
-    type.includes('capsule') ||
-    type.includes('tablet')
+    productType.includes('capsule') ||
+    productType.includes('tablet')
   ) {
     return CAPSULES_SCHEMA;
   }
   if (
+    variantType === 'diagnostic' ||
     format.includes('dna') ||
     format.includes('swab') ||
-    type.includes('dna') ||
-    type.includes('test')
+    productType.includes('dna') ||
+    productType.includes('diagnostic') ||
+    productType.includes('test') ||
+    availableTypes.includes('diagnostic')
   ) {
     return DNA_KITS_SCHEMA;
   }
-  if (format.includes('inject') || type.includes('injectable') || type.includes('liquid')) {
+  if (format.includes('inject') || productType.includes('injectable') || productType.includes('liquid')) {
     return INJECTABLES_SCHEMA;
   }
 
@@ -38,9 +45,16 @@ export const getCategorySchema = (product, variant) => {
 // Common fields across all schemas
 const COMMON_COMMERCIAL = [
   { name: 'cost', label: 'Cost Price ($)', type: 'number', required: false },
+  { name: 'supplierCost10', label: 'Cost Price (10 Kits) ($)', type: 'number', required: false },
   { name: 'wholesalePrice', label: 'Wholesale Price ($)', type: 'number', required: false },
+  { name: 'wholesale10', label: 'Wholesale Price (10 Kits) ($)', type: 'number', required: false },
   { name: 'clinicPrice', label: 'Clinic Price ($)', type: 'number', required: false },
+  { name: 'clinic10', label: 'Clinic Price (10 Kits) ($)', type: 'number', required: false },
   { name: 'msrp', label: 'Selling Price (MSRP) ($)', type: 'number', required: false },
+  { name: 'retail10', label: 'Selling Price (MSRP) (10 Kits) ($)', type: 'number', required: false },
+  { name: 'competitorAvgPrice', label: 'Market Avg Price ($)', type: 'number', required: false },
+  { name: 'competitorMinPrice', label: 'Market Min Price ($)', type: 'number', required: false },
+  { name: 'marketPpm', label: 'Market Price/mg ($/mg)', type: 'number', required: false },
 ];
 
 const COMMON_REGULATORY = [
@@ -62,7 +76,23 @@ const COMMON_REGULATORY = [
 ];
 
 const COMMON_INVENTORY = [
-  { name: 'inventory', label: 'Total Stock', type: 'number', required: false },
+  {
+    name: 'stockType',
+    label: 'Supply & Stock Model',
+    type: 'select',
+    options: ['On Demand', 'In Stock', 'Pre-Order'],
+    defaultValue: 'On Demand',
+    required: false,
+  },
+  {
+    name: 'leadTime',
+    label: 'Synthesis / Lead Time',
+    type: 'text',
+    defaultValue: '3-7 business days',
+    placeholder: 'e.g. 3-7 business days',
+    required: false,
+  },
+  { name: 'inventory', label: 'Local Safety Stock (Optional)', type: 'number', required: false },
   {
     name: 'warehouseStock',
     label: 'Warehouse Stock Distribution',

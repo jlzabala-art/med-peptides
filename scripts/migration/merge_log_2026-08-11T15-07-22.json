@@ -1,0 +1,27 @@
+{
+  "completedAt": "2026-08-11T15:07:22.629Z",
+  "groupsMerged": 61,
+  "docsDeleted": 177,
+  "variantsMoved": 244,
+  "singletonsCleaned": 333,
+  "errors": [
+    "⚠️  fox-04: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  fst344: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  ghk-cu-human-copper: expected 5 variants, found 4 — SKIPPING delete",
+    "⚠️  igf-lr3: expected 5 variants, found 4 — SKIPPING delete",
+    "⚠️  ll-37: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  mk-677: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  mt2: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  nmn: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  pe-22-28: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  peg-mgf: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  pinealon: expected 5 variants, found 4 — SKIPPING delete",
+    "⚠️  pnc-27: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  prostamax: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  snap-8: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  testagen: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  thymogen: expected 4 variants, found 3 — SKIPPING delete",
+    "⚠️  thymosin-alpha-1-thymalin: expected 3 variants, found 2 — SKIPPING delete",
+    "⚠️  thymulin: expected 3 variants, found 2 — SKIPPING delete"
+  ]
+}

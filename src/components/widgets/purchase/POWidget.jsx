@@ -10,19 +10,17 @@ import Package from "lucide-react/dist/esm/icons/package";
 import Link from "lucide-react/dist/esm/icons/link";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, increment } from 'firebase/firestore';
-import * as fb from '../../../firebase';
-const db = fb?.db;
+import {
+  subscribeToPurchaseOrders,
+  savePurchaseOrder,
+  updatePurchaseOrder,
+  convertPOToBillAndIncrementStock
+} from '../../../services/procurementService';
 import DataTable from '../../ui/DataTable';
-
-
-
-
-
-
-
-
-
+import AppActionGroup from '../../ui/AppActionGroup';
+import InlineEditableCell from '../../ui/InlineEditableCell';
+import notifier from '../../../services/NotificationService';
+import { toast } from 'react-hot-toast';
 
 const STATUS_OPTIONS = ['open', 'sent', 'closed'];
 const STATUS_STYLE = {
@@ -45,9 +43,8 @@ export default function POWidget({
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, snap => {
-      let data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToPurchaseOrders(collectionName, (rawList) => {
+      let data = rawList;
       if (filterFn) data = data.filter(filterFn);
       setPos(data);
       setLoading(false);
@@ -65,6 +62,15 @@ export default function POWidget({
 
   const st = (s) => STATUS_STYLE[s] || { bg: '#f1f5f9', color: '#475569' };
 
+  const handleUpdateField = async (poId, field, value) => {
+    try {
+      await updatePurchaseOrder(poId, { [field]: value });
+      notifier.success(`Updated ${field}`);
+    } catch (e) {
+      notifier.error(`Failed to update ${field}`);
+    }
+  };
+
   const columns = [
     {
       key: 'createdAt',
@@ -74,7 +80,18 @@ export default function POWidget({
     {
       key: 'poNumber',
       header: 'PO Number',
-      render: (val) => <span style={{ fontWeight: 600, color: '#0f172a' }}>{val}</span>,
+      render: (val, row) => (
+        <span style={{ fontWeight: 600, color: '#0f172a' }}>
+          {readOnly ? val : (
+            <InlineEditableCell 
+              value={val || ''}
+              type="text"
+              placeholder="PO-XXXX"
+              onSave={(v) => handleUpdateField(row.id, 'poNumber', v)}
+            />
+          )}
+        </span>
+      ),
     },
     {
       key: 'supplierName',
@@ -90,10 +107,21 @@ export default function POWidget({
       key: 'status',
       header: 'Status',
       render: (val, row) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-start' }}>
-          <span style={{ padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: st(val).bg, color: st(val).color }}>
-            {(val || 'open').toUpperCase()}
-          </span>
+        <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-start' }}>
+          {readOnly ? (
+            <span style={{ padding: '0.2rem 0.5rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700, backgroundColor: st(val).bg, color: st(val).color }}>
+              {(val || 'open').toUpperCase()}
+            </span>
+          ) : (
+            <div style={{ backgroundColor: st(val).bg, color: st(val).color, padding: '0 0.5rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
+              <InlineEditableCell 
+                value={val || 'open'}
+                type="select"
+                options={STATUS_OPTIONS.map(o => ({ label: o.toUpperCase(), value: o }))}
+                onSave={(v) => handleUpdateField(row.id, 'status', v)}
+              />
+            </div>
+          )}
           {row.approvalStatus === 'pending_approval' && (
             <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca' }}>PENDING APPROVAL</span>
           )}
@@ -161,7 +189,7 @@ function POForm({ po, collectionName, onClose }) {
   const removeItem = idx => setItems(items.filter((_, i) => i !== idx));
 
   const handleSave = async () => {
-    if (!supplierName) return alert('Supplier Name is required');
+    if (!supplierName) return toast('Supplier Name is required');
     setSaving(true);
     let newApprovalStatus = po?.approvalStatus;
     if (totalAmount >= 10000 && (!po || po.approvalStatus !== 'approved')) {
@@ -177,66 +205,34 @@ function POForm({ po, collectionName, onClose }) {
       items, 
       totalAmount, 
       approvalStatus: newApprovalStatus || 'approved',
-      updatedAt: serverTimestamp() 
     };
     try {
-      if (po?.id) {
-        await updateDoc(doc(db, collectionName, po.id), payload);
-      } else {
-        await addDoc(collection(db, collectionName), { ...payload, createdAt: serverTimestamp() });
-      }
+      await savePurchaseOrder(payload, po?.id || null);
       onClose();
     } catch (e) {
-      console.error(e);
-      alert('Failed to save PO');
+      toast.error('Failed to save PO');
     }
     setSaving(false);
   };
 
   const handleConvertToBill = async () => {
     if (!po?.id) return;
-    if (!window.confirm('Convert this PO to a Supplier Bill? This will generate a new Bill.')) return;
-    setSaving(true);
-    try {
-      // 1. Create a Bill with the same items
-      const billPayload = {
-        vendorName: supplierName,
-        billNumber: `BILL-${Date.now().toString().slice(-6)}`,
-        linkedPoId: po.id,
-        linkedPoNumber: poNumber,
-        status: 'open',
-        items,
-        totalAmount,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-      await addDoc(collection(db, 'purchaseBills'), billPayload);
-
-      // 2. Update this PO to 'closed' status
-      await updateDoc(doc(db, collectionName, po.id), { status: 'closed', updatedAt: serverTimestamp() });
-      // 3. Increment Inventory
-      if (items && items.length > 0) {
-        for (const item of items) {
-          const itemName = item.name || item.itemName;
-          if (!itemName) continue;
-          const q = query(collection(db, 'products'), where('name', '==', itemName));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            const productDoc = snap.docs[0];
-            await updateDoc(doc(db, 'products', productDoc.id), {
-              stock: increment(parseInt(item.quantity || 1))
-            });
-          }
-        }
+    notifier.confirmCritical('Convert this PO to a Supplier Bill? This will generate a new Bill.', async () => {
+      setSaving(true);
+      try {
+        await convertPOToBillAndIncrementStock({
+          id: po.id,
+          poNumber,
+          supplierName,
+          items
+        }, collectionName);
+        toast.success('Bill successfully created and stock updated!');
+        onClose();
+      } catch (e) {
+        toast.error('Failed to convert to Bill');
       }
-
-      alert('Bill successfully created and stock updated!');
-      onClose();
-    } catch (e) {
-      console.error(e);
-      alert('Failed to convert to Bill');
-    }
-    setSaving(false);
+      setSaving(false);
+    });
   };
 
   return (
@@ -320,11 +316,11 @@ function POForm({ po, collectionName, onClose }) {
                 },
                 {
                   key: 'actions',
-                  header: '',
+                  header: 'Actions',
                   render: (val, row, idx) => (
-                    <button onClick={() => removeItem(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+                      <AppActionGroup actions={[{ type: 'delete', onClick: () => removeItem(idx) }]} />
+                    </div>
                   ),
                 },
               ]}
@@ -387,7 +383,7 @@ function POForm({ po, collectionName, onClose }) {
                 onClick={() => {
                   const url = `${window.location.origin}/b2b-po/${po.id}`;
                   navigator.clipboard.writeText(url);
-                  alert('Enlace del Portal de Proveedor copiado:\n' + url);
+                  toast('Enlace del Portal de Proveedor copiado:\n' + url);
                 }} 
                 style={{ 
                   display: 'flex', alignItems: 'center', gap: '6px', 

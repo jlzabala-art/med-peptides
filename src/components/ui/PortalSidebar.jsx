@@ -73,8 +73,8 @@ export default function PortalSidebar() {
         {/* Header / Logo */}
         <div style={{ padding: '2rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
-            <h2 style={{ color: 'var(--primary)', margin: 0, fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
-              RegenPept
+            <h2 style={{ color: 'var(--primary)', margin: 0, fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              Atlas Health
             </h2>
           </Link>
           <button 

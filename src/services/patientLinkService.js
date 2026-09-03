@@ -24,7 +24,7 @@ import {
   addDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '../firebase.js';
 
 const PATIENTS_COL = 'patients';
 const USERS_COL = 'users';
@@ -125,26 +125,61 @@ export async function unlinkPatientFromUser(patientId, userId) {
 // ── Query ─────────────────────────────────────────────────────────────────────
 
 /**
- * Find the portal user linked to a patient (by linkedUserId field).
- * Returns null if not linked.
+ * Find the portal user linked to a patient (by linkedUserId field or email).
+ * Supports passing either a patient object or a patient ID string.
  *
- * @param {Object} patient - Patient document with optional `linkedUserId` and `email`
- * @returns {Promise<{id: string, email: string, displayName: string}|null>}
+ * @param {Object|string} patient - Patient document or patient ID string
+ * @param {boolean} searchCandidates - If true, returns an array of potential matching user accounts
+ * @returns {Promise<{id: string, email: string, displayName: string}|Array|null>}
  */
-export async function findLinkedUser(patient) {
+export async function findLinkedUser(patient, searchCandidates = false) {
+  if (!patient) return searchCandidates ? [] : null;
+
+  let pData = typeof patient === 'string' ? null : patient;
+  const { getDoc } = await import('firebase/firestore');
+
+  if (typeof patient === 'string') {
+    try {
+      const snap = await getDoc(doc(db, PATIENTS_COL, patient));
+      if (snap.exists()) {
+        pData = { id: snap.id, ...snap.data() };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!pData && typeof patient === 'string') {
+    pData = { id: patient };
+  }
+
+  // If looking for candidates list
+  if (searchCandidates) {
+    const email = pData?.email?.trim()?.toLowerCase();
+    if (email) {
+      const q = query(collection(db, USERS_COL), where('email', '==', email));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    // Fallback: get top active users
+    const q = query(collection(db, USERS_COL));
+    const snap = await getDocs(q);
+    return snap.docs.slice(0, 10).map(d => ({ id: d.id, ...d.data() }));
+  }
+
   // Primary: use linkedUserId field
-  if (patient.linkedUserId) {
-    const { getDoc } = await import('firebase/firestore');
-    const snap = await getDoc(doc(db, USERS_COL, patient.linkedUserId));
+  if (pData?.linkedUserId) {
+    const snap = await getDoc(doc(db, USERS_COL, pData.linkedUserId));
     if (snap.exists()) return { id: snap.id, ...snap.data() };
   }
 
   // Fallback: try email match
-  if (patient.email) {
-    const q = query(collection(db, USERS_COL), where('email', '==', patient.email.toLowerCase()));
+  if (pData?.email) {
+    const q = query(collection(db, USERS_COL), where('email', '==', pData.email.toLowerCase()));
     const snap = await getDocs(q);
     if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
   }
 
   return null;
 }
+

@@ -13,8 +13,8 @@ function fmtCurrency(amount) {
 export default function FinancialKPIHeader({ invoices }) {
   // Mock calculations based on invoices
   const totalRevenue = invoices.reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
-  const outstanding = invoices.filter(i => i.status !== 'Paid').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
-  const overdue = invoices.filter(i => i.status === 'Overdue').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
+  const outstanding = invoices.filter(i => i.status !== 'completed').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
+  const overdue = invoices.filter(i => i.status === 'error').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
   
   // Real calculations would require due dates, assume 30% of outstanding is due in 7 days, 60% in 30 days
   const exp7Days = outstanding * 0.3;

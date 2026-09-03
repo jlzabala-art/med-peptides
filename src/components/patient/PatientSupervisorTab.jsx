@@ -8,17 +8,17 @@ import Send from "lucide-react/dist/esm/icons/send";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import {
+  fetchDoctorPatientRelationships,
+  fetchAvailableDoctors,
+  fetchUserProfile,
+  requestSupervisor,
+  acceptRelationship,
+  declineRelationship
+} from '../../services/patientTabsService';
 import Card from '../ui/Card';
 import Spinner from '../ui/Spinner';
-
-
-
-
-
-
+import EmptyState from '../ui/EmptyState';
 
 export default function PatientSupervisorTab({ userId }) {
   const queryClient = useQueryClient();
@@ -30,23 +30,14 @@ export default function PatientSupervisorTab({ userId }) {
   // Fetch all relationships for this patient
   const { data: relationships = [], isLoading: relLoading } = useQuery({
     queryKey: ['doctorPatientRels', userId],
-    queryFn: async () => {
-      if (!userId) return [];
-      const q = query(collection(db, 'doctor_patient_relationships'), where('patientId', '==', userId));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
+    queryFn: () => fetchDoctorPatientRelationships(userId),
     enabled: !!userId,
   });
 
   // Fetch available doctors
   const { data: doctors = [] } = useQuery({
     queryKey: ['availableDoctors'],
-    queryFn: async () => {
-      const q = query(collection(db, 'users'), where('role', '==', 'doctor'));
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
+    queryFn: () => fetchAvailableDoctors(),
   });
 
   // Derived state
@@ -57,11 +48,7 @@ export default function PatientSupervisorTab({ userId }) {
   // Fetch supervisor profile if active
   const { data: supervisorProfile, isLoading: supLoading } = useQuery({
     queryKey: ['userProfile', activeRel?.doctorId],
-    queryFn: async () => {
-      if (!activeRel?.doctorId) return null;
-      const snap = await getDocs(query(collection(db, 'users'), where('__name__', '==', activeRel.doctorId)));
-      return snap.docs.length ? { id: snap.docs[0].id, ...snap.docs[0].data() } : null;
-    },
+    queryFn: () => fetchUserProfile(activeRel?.doctorId),
     enabled: !!activeRel?.doctorId,
   });
 
@@ -69,14 +56,11 @@ export default function PatientSupervisorTab({ userId }) {
     mutationFn: async ({ doctorId, notes }) => {
       const docObj = doctors.find(d => d.id === doctorId);
       const docName = docObj ? (docObj.displayName || `${docObj.firstName || ''} ${docObj.lastName || ''}`.trim()) : 'Doctor';
-      await addDoc(collection(db, 'doctor_patient_relationships'), {
+      return requestSupervisor({
         patientId: userId,
         doctorId,
         doctorName: docName,
-        status: 'pending',
-        initiatedBy: 'patient',
-        notes,
-        createdAt: serverTimestamp(),
+        notes
       });
     },
     onSuccess: () => {
@@ -90,23 +74,12 @@ export default function PatientSupervisorTab({ userId }) {
   });
 
   const acceptMutation = useMutation({
-    mutationFn: async ({ relId, doctorId }) => {
-      await updateDoc(doc(db, 'doctor_patient_relationships', relId), {
-        status: 'accepted',
-        updatedAt: serverTimestamp()
-      });
-      // Also update the user document with the doctor ID
-      await updateDoc(doc(db, 'users', userId), {
-        assignedPhysicianIds: [doctorId]
-      });
-    },
+    mutationFn: ({ relId, doctorId }) => acceptRelationship(relId, doctorId, userId),
     onSuccess: () => queryClient.invalidateQueries(['doctorPatientRels', userId])
   });
 
   const declineMutation = useMutation({
-    mutationFn: async (relId) => {
-      await deleteDoc(doc(db, 'doctor_patient_relationships', relId));
-    },
+    mutationFn: (relId) => declineRelationship(relId),
     onSuccess: () => queryClient.invalidateQueries(['doctorPatientRels', userId])
   });
 
@@ -229,13 +202,11 @@ export default function PatientSupervisorTab({ userId }) {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div style={{ textAlign: 'center', padding: '2.5rem 0 1.5rem' }}>
-            <div style={{ fontSize: '3.5rem', marginBottom: '1.25rem' }}>🩺</div>
-            <h3 style={{ fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem' }}>No Supervisor Assigned</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: '380px', margin: '0 auto' }}>
-              Your supervising physician will appear here once assigned. Request clinical supervision below to link your account.
-            </p>
-          </div>
+          <EmptyState
+            icon={Stethoscope}
+            title="No Supervisor Assigned"
+            subtitle="Your supervising physician will appear here once assigned. Request clinical supervision below to link your account."
+          />
 
           <div style={{ padding: '2rem', backgroundColor: 'rgba(0, 75, 135, 0.02)', border: '1px solid var(--border)', borderRadius: '24px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

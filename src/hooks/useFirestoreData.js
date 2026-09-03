@@ -66,6 +66,33 @@ export function useFirestoreData() {
     staleTime: 1000 * 60 * 60, // 1 hour — aligns with protocolRepository cache TTL
   });
 
+  // ── Active B2C Suppliers (Cached via React Query) ──────────────────────────
+  const { data: activeB2cSuppliers = [] } = useQuery({
+    queryKey: ['activeB2cSuppliers'],
+    queryFn: async () => {
+      try {
+        const [supSnap, wholeSnap] = await Promise.all([
+          getDocs(query(collection(db, 'suppliers'), where('statusB2C', '==', 'active'))),
+          getDocs(query(collection(db, 'wholesellers'), where('statusB2C', '==', 'active')))
+        ]);
+        const list = [];
+        supSnap.forEach((d) => {
+          const data = d.data();
+          list.push(d.id, data.name, data.companyName, data.displayName, data.slug);
+        });
+        wholeSnap.forEach((d) => {
+          const data = d.data();
+          list.push(d.id, data.name, data.companyName, data.displayName, data.slug);
+        });
+        return [...new Set(list.filter(Boolean).map((s) => s.toLowerCase().trim()))];
+      } catch (err) {
+        console.warn('[useFirestoreData] Active B2C suppliers check failed:', err);
+        return [];
+      }
+    },
+    staleTime: 1000 * 60 * 30, // 30 mins
+  });
+
   // Expose empty products array to not break any legacy code expecting it
-  return { products: [], setProducts: () => {}, allFaqs, protocolIndex, loadingProducts: false, supplementCatalogue };
+  return { products: [], setProducts: () => {}, allFaqs, protocolIndex, loadingProducts: false, supplementCatalogue, activeB2cSuppliers };
 }

@@ -1,4 +1,7 @@
+"use client";
+
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import {
   collection,
   query,
@@ -8,243 +11,10 @@ import {
   startAfter,
   getDocs,
   getCountFromServer,
+  getAggregateFromServer,
 } from 'firebase/firestore';
 import * as fb from '../../firebase';
 const db = fb?.db;
-
-/**
- * useFirestorePaginatedCollection
- * ─────────────────────────────────────────────────────────────────────────────
- * Generic hook for paginated Firestore collection fetching.
- * Uses cursor-based pagination (startAfter) which is the correct approach
- * for Firestore — never fetches all documents at once.
- *
- * Supports:
- *  - limit-based pagination (page size)
- *  - cursor navigation (next/prev pages)
- *  - where clauses (equality, range, etc.)
- *  - orderBy fields (IMPORTANT: must match Firestore composite index)
- *  - auto-refresh on option changes
- *
- * Firestore Index Requirements:
- *  When using both orderBy AND where on different fields, you MUST create a
- *  composite index in Firebase Console:
- *  https://console.firebase.google.com/project/med-peptides-app/firestore/indexes
- *
- *  Common required indexes for this app:
- *  - products: orderBy('name') — single field, auto-indexed ✓
- *  - products: where('category', '==', x) + orderBy('name') → composite index needed
- *  - prescriptions: where('doctorId', '==', x) + orderBy('createdAt', 'desc') → composite index needed
- *
- * @param {string} collectionPath — Firestore collection path (e.g. 'products')
- * @param {Object} options
- * @param {Array}  options.whereConditions — e.g. [['category', '==', 'Peptides'], ['isActive', '==', true]]
- * @param {Array}  options.orderByFields   — e.g. [['name', 'asc']] or [['createdAt', 'desc']]
- * @param {number} options.pageSize        — Items per page. Default: 50
- * @param {boolean} options.enabled        — If false, query won't run. Default: true
- * @param {Function} options.onDataLoaded  — Optional callback after each successful fetch
- *
- * @returns {Object} { data, isLoading, isFetchingMore, hasMore, error, totalCount,
- *                     loadMore, refresh, goToPage, currentPage }
- *
- * @example
- * const { data, isLoading, hasMore, loadMore } = useFirestorePaginatedCollection('products', {
- *   orderByFields: [['name', 'asc']],
- *   pageSize: 50,
- * });
- *
- * @example With filters (requires composite Firestore index)
- * const { data, isLoading } = useFirestorePaginatedCollection('prescriptions', {
- *   whereConditions: [['doctorId', '==', userId], ['status', '!=', 'archived']],
- *   orderByFields: [['createdAt', 'desc']],
- *   pageSize: 25,
- * });
- */
-export function useFirestorePaginatedCollection(collectionPath, options = {}) {
-  const {
-    whereConditions = [],
-    orderByFields = [['createdAt', 'desc']],
-    pageSize = 50,
-    enabled = true,
-    initialData = null,
-    onDataLoaded,
-  } = options;
-
-  // Memoize array conditions to prevent infinite loops when arrays are passed inline
-  const whereConditionsStr = JSON.stringify(whereConditions);
-  const orderByFieldsStr = JSON.stringify(orderByFields);
-
-  const memoizedWhere = useMemo(() => JSON.parse(whereConditionsStr), [whereConditionsStr]);
-  const memoizedOrder = useMemo(() => JSON.parse(orderByFieldsStr), [orderByFieldsStr]);
-
-  const onDataLoadedRef = useRef(onDataLoaded);
-  useEffect(() => {
-    onDataLoadedRef.current = onDataLoaded;
-  }, [onDataLoaded]);
-
-  const [data, setData] = useState(initialData || []);
-  const [isLoading, setIsLoading] = useState(initialData ? false : true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState(null);
-  const [totalCount, setTotalCount] = useState(null); // From Firestore count query
-
-  // Cursor stack: allows going back to previous pages
-  const cursorsRef = useRef([]); // Array of lastVisible docs per page
-  const currentPageRef = useRef(0);
-
-  /** Build the base Firestore query from options */
-  const buildQuery = useCallback(
-    (startAfterDoc = null, limitOverride = null) => {
-      let q = collection(db, collectionPath);
-
-      memoizedWhere.forEach(([field, op, value]) => {
-        if (value !== undefined && value !== null) {
-          q = query(q, where(field, op, value));
-        }
-      });
-
-      memoizedOrder.forEach(([field, direction = 'asc']) => {
-        q = query(q, orderBy(field, direction));
-      });
-
-      if (startAfterDoc) {
-        q = query(q, startAfter(startAfterDoc));
-      }
-
-      q = query(q, limit(limitOverride || pageSize));
-
-      return q;
-    },
-    [collectionPath, memoizedWhere, memoizedOrder, pageSize]
-  );
-
-  /** Initial fetch (page 1) */
-  const fetchInitial = useCallback(async () => {
-    if (!enabled || !collectionPath) return;
-
-    setIsLoading(true);
-    setError(null);
-    cursorsRef.current = [];
-    currentPageRef.current = 0;
-
-    try {
-      const q = buildQuery(null);
-      const snap = await getDocs(q);
-
-      const docs = snap.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...normalizeTimestamps(docSnap.data()),
-        _ref: docSnap, // Keep reference for cursor pagination
-      }));
-
-      setData(docs);
-      setHasMore(snap.docs.length === pageSize);
-
-      if (snap.docs.length > 0) {
-        cursorsRef.current = [snap.docs[snap.docs.length - 1]];
-      }
-
-      // Get total count (non-blocking, for display)
-      fetchTotalCount();
-
-      onDataLoadedRef.current?.(docs);
-    } catch (err) {
-      console.error(`[useFirestorePaginatedCollection] Error fetching ${collectionPath}:`, err);
-      // If it's an index error, provide a helpful message
-      if (err.code === 'failed-precondition') {
-        setError(
-          `Firestore index required. Please create a composite index for "${collectionPath}". ` +
-          `Fields: ${orderByFields.map(([f]) => f).join(', ')}. ` +
-          `Check the Firebase Console: https://console.firebase.google.com`
-        );
-      } else {
-        setError(err.message || 'Error loading data');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [enabled, collectionPath, buildQuery, pageSize]);
-
-  /** Load next page (append mode for infinite scroll) */
-  const loadMore = useCallback(async () => {
-    if (!hasMore || isFetchingMore || isLoading) return;
-
-    const lastCursor = cursorsRef.current[cursorsRef.current.length - 1];
-    if (!lastCursor) return;
-
-    setIsFetchingMore(true);
-    try {
-      const q = buildQuery(lastCursor);
-      const snap = await getDocs(q);
-
-      const newDocs = snap.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...normalizeTimestamps(docSnap.data()),
-        _ref: docSnap,
-      }));
-
-      setData((prev) => [...prev, ...newDocs]);
-      setHasMore(snap.docs.length === pageSize);
-
-      if (snap.docs.length > 0) {
-        cursorsRef.current = [...cursorsRef.current, snap.docs[snap.docs.length - 1]];
-      }
-
-      onDataLoadedRef.current?.(newDocs);
-    } catch (err) {
-      console.error(`[useFirestorePaginatedCollection] Error loading more from ${collectionPath}:`, err);
-    } finally {
-      setIsFetchingMore(false);
-    }
-  }, [hasMore, isFetchingMore, isLoading, buildQuery, pageSize, collectionPath]);
-
-  /** Get total count (for UI display) — uses Firestore count aggregate */
-  const fetchTotalCount = useCallback(async () => {
-    try {
-      let q = collection(db, collectionPath);
-      memoizedWhere.forEach(([field, op, value]) => {
-        if (value !== undefined && value !== null) {
-          q = query(q, where(field, op, value));
-        }
-      });
-      const snapshot = await getCountFromServer(q);
-      setTotalCount(snapshot.data().count);
-    } catch {
-      // Count queries may fail on older Firestore setups — non-critical
-    }
-  }, [collectionPath, memoizedWhere]);
-
-  /** Re-run the initial fetch (e.g. after a mutation) */
-  const refresh = useCallback(() => {
-    fetchInitial();
-  }, [fetchInitial]);
-
-  // Auto-fetch on mount and when key options change
-  useEffect(() => {
-    // If we have initialData and this is the very first render, skip the fetch
-    // to avoid overriding Server-Side fetched data.
-    if (initialData && data.length > 0 && data[0] === initialData[0] && !cursorsRef.current.length) {
-      if (initialData.length > 0) {
-        cursorsRef.current = []; // We don't have the firestore document reference for cursors when data comes from server, 
-        // so pagination will require a new fetch or we can just fetch the first page from firestore when they click 'Load More'
-      }
-      return;
-    }
-    fetchInitial();
-  }, [fetchInitial, initialData]);
-
-  return {
-    data,
-    isLoading,
-    isFetchingMore,
-    hasMore,
-    error,
-    totalCount,
-    loadMore,
-    refresh,
-  };
-}
 
 /** Normalize Firestore Timestamp fields to ISO strings */
 function normalizeTimestamps(data) {
@@ -256,3 +26,212 @@ function normalizeTimestamps(data) {
   });
   return normalized;
 }
+
+/**
+ * useFirestorePaginatedCollection
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Refactored to use @tanstack/react-query for multi-level caching.
+ */
+export function useFirestorePaginatedCollection(collectionPath, options = {}) {
+  const {
+    whereConditions = [],
+    orderByFields = [['createdAt', 'desc']],
+    pageSize = 50,
+    enabled = true,
+    initialData = null,
+    onDataLoaded,
+    aggregations = null,
+  } = options;
+
+
+  const queryClient = useQueryClient();
+
+  const memoizedWhere = useMemo(() => whereConditions, [JSON.stringify(whereConditions)]);
+  const memoizedOrder = useMemo(() => orderByFields, [JSON.stringify(orderByFields)]);
+
+  const queryKey = useMemo(() => [
+    'firestore',
+    collectionPath,
+    { where: memoizedWhere, order: memoizedOrder, pageSize }
+  ], [collectionPath, memoizedWhere, memoizedOrder, pageSize]);
+  
+  const cacheKey = `__rg_paginated_${collectionPath}_${JSON.stringify(memoizedWhere)}_${JSON.stringify(memoizedOrder)}_${pageSize}_v3`;
+
+  const {
+    data: queryData,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    refetch,
+    status
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn: async ({ pageParam = null }) => {
+      const buildQuery = (skipOrder = false) => {
+        let q = collection(db, collectionPath);
+        memoizedWhere.forEach(([field, op, value]) => {
+          if (value !== undefined && value !== null) {
+            q = query(q, where(field, op, value));
+          }
+        });
+        
+        if (!skipOrder) {
+          memoizedOrder.forEach(([field, direction = 'asc']) => {
+            q = query(q, orderBy(field, direction));
+          });
+        }
+        
+        if (pageParam && typeof pageParam.data === 'function') {
+          q = query(q, startAfter(pageParam));
+        }
+        
+        q = query(q, limit(pageSize));
+        return q;
+      };
+
+      let snap;
+      try {
+        snap = await getDocs(buildQuery(false));
+      } catch (err) {
+        // failed-precondition usually means missing composite index
+        if (err.code === 'failed-precondition' || String(err).includes('index')) {
+          console.warn(`[Firestore] Query failed due to missing index on ${collectionPath}. Retrying without orderBy. Original error: ${err.message}`);
+          snap = await getDocs(buildQuery(true));
+        } else {
+          throw err;
+        }
+      }
+
+      const docs = snap.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...normalizeTimestamps(docSnap.data()),
+      }));
+
+      return {
+        docs,
+        lastDoc: snap.docs.length > 0 ? snap.docs[snap.docs.length - 1] : null,
+        hasMore: snap.docs.length === pageSize
+      };
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.hasMore && lastPage.lastDoc) {
+        return lastPage.lastDoc;
+      }
+      return undefined;
+    },
+    initialData: () => {
+      if (initialData) {
+        return {
+          pages: [{ docs: initialData, lastDoc: null, hasMore: initialData.length === pageSize }],
+          pageParams: [null],
+        };
+      }
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Date.now() - parsed.ts < 30 * 60 * 1000) { // 30 min TTL
+              return {
+                pages: [{ docs: parsed.data, lastDoc: null, hasMore: parsed.hasMore, fromCache: true }],
+                pageParams: [null]
+              };
+            }
+          }
+        } catch (e) {}
+      }
+      return undefined;
+    },
+    enabled: enabled && !!collectionPath,
+    staleTime: 1000 * 60 * 5, // 5 minutes fresh
+    retry: false, // Prevent hanging loops on missing index errors
+  });
+
+  // Sync first page to LocalStorage for zero-latency load on refresh
+  useEffect(() => {
+    if (queryData?.pages?.[0] && !queryData.pages[0].fromCache && typeof window !== 'undefined') {
+      try {
+        const firstPage = queryData.pages[0];
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data: firstPage.docs,
+          hasMore: firstPage.hasMore,
+          ts: Date.now()
+        }));
+      } catch (e) {}
+    }
+  }, [queryData, cacheKey]);
+
+  const flatData = useMemo(() => {
+    if (!queryData) return initialData || [];
+    return queryData.pages.flatMap(page => page.docs);
+  }, [queryData, initialData]);
+
+  // Backward compatibility state for metrics/aggregations
+  // (Preferably these should be handled by Server Actions, but we keep this for older consumers)
+  const [totalCount, setTotalCount] = useState(null);
+  const [metrics, setMetrics] = useState(null);
+
+  useEffect(() => {
+    // Skip client-side aggregation when initialData is provided.
+    // KPIs already come from the RSC via serverKPIs prop — no duplicate query needed.
+    if (!enabled || !collectionPath) return;
+    if (initialData && initialData.length > 0) return;
+
+    let isMounted = true;
+    const fetchMetrics = async () => {
+      try {
+        let q = collection(db, collectionPath);
+        memoizedWhere.forEach(([field, op, value]) => {
+          if (value !== undefined && value !== null) {
+            q = query(q, where(field, op, value));
+          }
+        });
+        
+        if (aggregations) {
+          const snapshot = await getAggregateFromServer(q, aggregations);
+          if (isMounted) setMetrics(snapshot.data());
+        } else {
+          const snapshot = await getCountFromServer(q);
+          if (isMounted) setTotalCount(snapshot.data().count);
+        }
+      } catch (err) {
+        console.warn(`[useFirestorePaginatedCollection] Aggregation failed on ${collectionPath}:`, err);
+      }
+    };
+    
+    fetchMetrics();
+    return () => { isMounted = false; };
+  }, [collectionPath, memoizedWhere, aggregations, enabled, initialData]);
+
+
+  // Simulate onDataLoaded
+  const onDataLoadedRef = useRef(onDataLoaded);
+  useEffect(() => {
+    onDataLoadedRef.current = onDataLoaded;
+  }, [onDataLoaded]);
+
+  useEffect(() => {
+    if (queryData && onDataLoadedRef.current) {
+      const lastPage = queryData.pages[queryData.pages.length - 1];
+      if (lastPage) {
+        onDataLoadedRef.current(lastPage.docs);
+      }
+    }
+  }, [queryData]);
+
+  return {
+    data: flatData,
+    isLoading: status === 'pending' || (isFetching && !isFetchingNextPage),
+    isFetchingMore: isFetchingNextPage,
+    hasMore: hasNextPage,
+    error: error?.message || null,
+    totalCount,
+    metrics,
+    loadMore: fetchNextPage,
+    refresh: refetch,
+  };
+}
+
+export default useFirestorePaginatedCollection;

@@ -10,14 +10,13 @@ import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Info from "lucide-react/dist/esm/icons/info";
 import Check from "lucide-react/dist/esm/icons/check";
 import React, { useState, useCallback } from 'react';
-import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-
+import { getProduct, updateProduct } from '../../repositories/productRepository';
 import { useAuth } from '../../context/AuthContext';
 import DataTable from '../ui/DataTable';
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTableSkeleton from '../ui/skeletons/DataTableSkeleton';
+import AppActionGroup from '../ui/AppActionGroup';
 import { useSemanticProducts } from '../../hooks/admin/useSemanticProducts';
 
 const CANONICAL_GOALS = [
@@ -112,10 +111,9 @@ export default function AdminSemanticTabClient({ readOnly = false, initialProduc
         currentMechanisms: product.mechanisms || [],
       });
 
-      const docRef = doc(db, 'products', product.id);
-      const updatedSnap = await getDoc(docRef);
-      if (updatedSnap.exists()) {
-        updateProductInline(product.id, updatedData);
+      const updatedProduct = await getProduct(product.id);
+      if (updatedProduct) {
+        updateProductInline(product.id, updatedProduct);
       }
       addLog(`Refined "${product.name}" successfully!`, 'success');
     } catch (err) {
@@ -167,8 +165,6 @@ export default function AdminSemanticTabClient({ readOnly = false, initialProduc
     if (!editingProduct) return;
 
     try {
-      const docRef = doc(db, 'products', editingProduct.id);
-
       const cleanGoals = editingProduct.goals.filter((g) => CANONICAL_GOALS.includes(g));
       const cleanSecondary = editingProduct.secondaryFactors
         .map((tag) => tag.trim().toLowerCase())
@@ -181,10 +177,9 @@ export default function AdminSemanticTabClient({ readOnly = false, initialProduc
         goals: cleanGoals,
         secondaryFactors: cleanSecondary,
         mechanisms: cleanMechanisms,
-        updatedAt: serverTimestamp(),
       };
 
-      await updateDoc(docRef, updatePayload);
+      await updateProduct(editingProduct.id, updatePayload);
 
       updateProductInline(editingProduct.id, {
         ...updatePayload,
@@ -240,7 +235,7 @@ export default function AdminSemanticTabClient({ readOnly = false, initialProduc
       header: 'Primary Goals',
       key: 'goals',
       render: (p) => (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+        <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
           {p.goals && p.goals.length > 0 ? (
             p.goals.slice(0, 2).map((goal) => (
               <span
@@ -287,58 +282,35 @@ export default function AdminSemanticTabClient({ readOnly = false, initialProduc
       render: (p) => {
         const isRefining = refiningIds.has(p.id);
         return (
-          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-            <button
-              title="Edit manually"
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingProduct({
-                  ...p,
-                  goals: p.goals || [],
-                  secondaryFactors: p.secondaryFactors || [],
-                  mechanisms: p.mechanisms || [],
-                });
-              }}
-              disabled={isRefining || readOnly}
-              style={{
-                padding: '4px',
-                borderRadius: '4px',
-                border: '1px solid var(--color-border)',
-                background: 'var(--color-bg-surface)',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Edit2 size={13} />
-            </button>
-            <button
-              title="Refine with AI"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSingleRefine(p);
-              }}
-              disabled={isRefining || readOnly}
-              style={{
-                padding: '4px',
-                borderRadius: '4px',
-                border: '1px solid var(--color-border)',
-                background: 'var(--color-bg-surface)',
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={[
+              {
+                type: 'custom',
+                icon: Edit2,
+                label: 'Edit manually',
+                disabled: isRefining || readOnly,
+                onClick: (e) => {
+                  e.stopPropagation();
+                  setEditingProduct({
+                    ...p,
+                    goals: p.goals || [],
+                    secondaryFactors: p.secondaryFactors || [],
+                    mechanisms: p.mechanisms || [],
+                  });
+                }
+              },
+              {
+                type: 'custom',
+                icon: isRefining ? Loader2 : Sparkles,
+                label: 'Refine with AI',
+                disabled: isRefining || readOnly,
                 color: 'var(--color-primary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {isRefining ? (
-                <Loader2 size={13} className="spinner-small" />
-              ) : (
-                <Sparkles size={13} />
-              )}
-            </button>
+                onClick: (e) => {
+                  e.stopPropagation();
+                  handleSingleRefine(p);
+                }
+              }
+            ]} />
           </div>
         );
       },

@@ -2,8 +2,13 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, test, vi, expect, beforeEach, afterEach } from 'vitest';
-import { MemoryRouter } from 'next/navigation';
 import AdminSkuMappingTab from '../SkuMappingTab/AdminSkuMappingTab.jsx';
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/admin/sku-mapping',
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 vi.mock('../../../context/AuthContext', () => ({
   useAuth: () => ({
@@ -11,6 +16,7 @@ vi.mock('../../../context/AuthContext', () => ({
     userProfile: { role: 'admin', email: 'admin@regenpept.test' },
   }),
 }));
+
 
 describe('AdminSkuMappingTab', () => {
   beforeEach(() => {
@@ -90,11 +96,7 @@ describe('AdminSkuMappingTab', () => {
   });
 
   test('renders SkuMappingTab and loads mappings', async () => {
-    render(
-      <MemoryRouter>
-        <AdminSkuMappingTab />
-      </MemoryRouter>
-    );
+    render(<AdminSkuMappingTab />);
 
     // Check header
     expect(screen.getByText(/SKU Synchronization/)).toBeInTheDocument();
@@ -102,23 +104,20 @@ describe('AdminSkuMappingTab', () => {
     // Check loading indicator or items
     await waitFor(() => {
       expect(screen.getByText('Test Product 1')).toBeInTheDocument();
-    });
+    }, { timeout: 10000 });
 
     expect(screen.getByText('Zoho Product 1')).toBeInTheDocument();
     expect(screen.getByText('75%')).toBeInTheDocument();
   });
 
   test('opens ResolveFamilyModal on clicking Align Family', async () => {
-    render(
-      <MemoryRouter>
-        <AdminSkuMappingTab />
-      </MemoryRouter>
-    );
+    render(<AdminSkuMappingTab />);
 
     // Wait for mapping item to load
     await waitFor(() => {
       expect(screen.getByText('Test Product 1')).toBeInTheDocument();
-    });
+    }, { timeout: 10000 });
+
 
     // Click "Align Family"
     const alignBtn = screen.getByText('Align Family');

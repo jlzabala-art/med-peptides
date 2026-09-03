@@ -15,6 +15,7 @@ import * as XLSX from 'xlsx';
 import { Card } from '../../ui';
 import { Upload, Loader2, Sparkles, CheckCircle, AlertTriangle } from '@/lib/icons';
 import DataTable from '../../ui/DataTable';
+import { toast } from 'react-hot-toast';
 
 export default function SupplierPriceListUpdater() {
   const [isParsing, setIsParsing] = useState(false);
@@ -42,11 +43,11 @@ export default function SupplierPriceListUpdater() {
       if (response.data.success) {
         setParsedItems(response.data.items);
       } else {
-        alert("Failed to parse Price List: " + response.data.error);
+        toast.error("Failed to parse Price List: " + response.data.error);
       }
     } catch (err) {
       console.error("Parse Error:", err);
-      alert("Error parsing document.");
+      toast.error("Error parsing document.");
     }
     setIsParsing(false);
   };
@@ -74,11 +75,11 @@ export default function SupplierPriceListUpdater() {
         setSuccessMsg(`Successfully updated base costs for ${updatesCount} products.`);
         setParsedItems(null);
       } else {
-        alert("No matched products to update.");
+        toast("No matched products to update.");
       }
     } catch (err) {
       console.error("Update Error:", err);
-      alert("Error updating products.");
+      toast.error("Error updating products.");
     }
     setIsSaving(false);
   };
@@ -134,7 +135,7 @@ export default function SupplierPriceListUpdater() {
                   key: 'productId',
                   header: 'Matched Catalog ID',
                   render: (val) => val ? (
-                    <span style={{ color: 'var(--color-success, #4ade80)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle style={{ width: '0.75rem', height: '0.75rem' }}/> {val}</span>
+                    <span style={{ color: 'var(--color-success, #4ade80)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><CheckCircle style={{ width: '0.75rem', height: '0.75rem' }}/> {val}</span>
                   ) : (
                     <span style={{ color: 'var(--color-warning, #facc15)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }}/> Requires Creation</span>
                   )

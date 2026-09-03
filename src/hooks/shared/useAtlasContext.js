@@ -117,6 +117,17 @@ export function useAtlasContext() {
         break;
     }
 
+    // Global Product Page Override (Rule #1: NO admin cards on product/supplement pages)
+    if (pathname.includes('/product/') || pathname.includes('/supplements/')) {
+      contextActions = [];
+      suggestedPrompts = [
+        { label: '🔬 Scientific Mechanism of Action' },
+        { label: '💊 Recommended Research Dosage' },
+        { label: '✨ Is this right for me?' },
+        { label: '🧊 Reconstitution & Storage Guide' }
+      ];
+    }
+
     return {
       themeAccent,
       themeBgActive,

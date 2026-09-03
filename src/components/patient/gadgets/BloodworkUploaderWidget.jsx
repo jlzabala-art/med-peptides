@@ -1,15 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { fetchPatientActivePhysicians, submitBloodworkResult } from '../../../services/bloodworkService';
 import { FileUp, FileText, CheckCircle2 } from '@/lib/icons';
-
-
-
+import { toast } from 'react-hot-toast';
 
 export default function BloodworkUploaderWidget() {
   const { user } = useAuth();
@@ -24,40 +20,29 @@ export default function BloodworkUploaderWidget() {
   useEffect(() => {
     async function fetchPhysicians() {
       if (!user?.uid) return;
-      try {
-        const q = query(collection(db, 'doctor_patient_relationships'), where('patientId', '==', user.uid), where('status', '==', 'active'));
-        const snap = await getDocs(q);
-        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setPhysicians(list);
-        if (list.length === 1) setSelectedPhysician(list[0].doctorId);
-      } catch (err) {
-        console.error(err);
-      }
+      const list = await fetchPatientActivePhysicians(user.uid);
+      setPhysicians(list);
+      if (list.length === 1) setSelectedPhysician(list[0].doctorId);
     }
     fetchPhysicians();
   }, [user]);
 
   const handleUpload = async () => {
     if (!selectedPhysician || !fileAttached) {
-      alert(t('patient.bloodwork.alert_missing_fields') || "Por favor, selecciona un médico y adjunta el archivo.");
+      toast.error(t('patient.bloodwork.alert_missing_fields') || "Por favor, selecciona un médico y adjunta el archivo.");
       return;
     }
     setLoading(true);
     try {
       const docRel = doctors.find(d => d.doctorId === selectedPhysician);
-      // Simulate file upload logic by creating a record in Firestore
-      // In a real scenario, we would upload to Firebase Storage first and get the URL.
-      await addDoc(collection(db, 'lab_results'), {
+      await submitBloodworkResult({
         patientId: user.uid,
         patientName: user.displayName || 'Patient',
         doctorId: selectedPhysician,
         doctorName: docRel?.doctorName || 'Médico',
-        type: 'bloodwork',
         notes: notes,
-        fileUrl: 'simulated_storage_url_123.pdf', 
-        fileName: 'analiticas_recientes.pdf',
-        status: 'pending_review',
-        uploadedAt: serverTimestamp()
+        fileUrl: 'simulated_storage_url_123.pdf',
+        fileName: 'analiticas_recientes.pdf'
       });
       setSuccess(true);
       setTimeout(() => {
@@ -66,8 +51,7 @@ export default function BloodworkUploaderWidget() {
         setNotes('');
       }, 4000);
     } catch (err) {
-      console.error(err);
-      alert(t('patient.bloodwork.error_uploading') || "Error al enviar los resultados.");
+      toast.error(t('patient.bloodwork.error_uploading') || "Error al enviar los resultados.");
     } finally {
       setLoading(false);
     }

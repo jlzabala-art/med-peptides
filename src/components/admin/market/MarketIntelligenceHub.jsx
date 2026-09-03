@@ -1,8 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from "../../../firebase.js";
+import { getCompetitorCache } from '../../../services/settingsService';
 import MarketKPIHeader from './MarketKPIHeader';
 import MarketAlertCenter from './MarketAlertCenter';
 import MarketOpportunitiesScanner from './MarketOpportunitiesScanner';
@@ -17,9 +14,9 @@ export default function MarketIntelligenceHub() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const cacheDoc = await getDoc(doc(db, 'settings', 'competitor_cache'));
-      if (cacheDoc.exists()) {
-        setCacheData(cacheDoc.data());
+      const data = await getCompetitorCache();
+      if (data && Object.keys(data).length > 0) {
+        setCacheData(data);
       }
     } catch (err) {
       console.error('Error fetching competitor data', err);

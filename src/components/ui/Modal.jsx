@@ -77,6 +77,9 @@ export default function Modal({
         tabIndex={-1}
         style={{ maxWidth: mw }}
       >
+        {/* Mobile Drag Handle */}
+        <div className="modal-drag-handle" />
+
         {/* Header */}
         {title && (
           <div className="gcp-header modal-header">
@@ -136,7 +139,11 @@ export default function Modal({
         }
         .modal-footer {
           padding: 1.25rem;
+          padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
           border-top: 1px solid var(--gcp-border);
+        }
+        .modal-drag-handle {
+          display: none;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -151,7 +158,18 @@ export default function Modal({
             max-height: 95vh;
             border-bottom-left-radius: 0;
             border-bottom-right-radius: 0;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
             animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+          .modal-drag-handle {
+            display: block;
+            width: 40px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin: 12px auto 0;
           }
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }

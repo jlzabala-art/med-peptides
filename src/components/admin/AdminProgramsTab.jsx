@@ -6,12 +6,13 @@ import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Dna from "lucide-react/dist/esm/icons/dna";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
+import Archive from "lucide-react/dist/esm/icons/archive";
 import React, { useState, useMemo } from 'react';
 
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import DataTable from '../ui/DataTable';
-import StatusBadge from '../ui/StatusBadge';
+import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
 import MetricCard from '../ui/MetricCard';
 
@@ -24,41 +25,41 @@ const MOCK_PROGRAMS = [
 
 export default function AdminProgramsTab({ isSubTab = false }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState([]); // string[]
 
-  const activeFilters = [];
-  if (typeFilter) {
-    activeFilters.push({
-      key: 'type',
-      label: 'Type',
-      value: typeFilter,
-      onRemove: () => setTypeFilter('')
-    });
-  }
+  const ALL_TYPES = [
+    { label: 'Anti-Aging',   value: 'Anti-Aging' },
+    { label: 'Weight Loss',  value: 'Weight Loss' },
+    { label: 'Performance',  value: 'Performance' },
+    { label: 'Aesthetics',   value: 'Aesthetics' },
+  ];
+
+  const activeFilters = typeFilter.map(val => ({
+    key: `type-${val}`,
+    label: 'Type',
+    value: val,
+    onRemove: () => setTypeFilter(prev => prev.filter(v => v !== val))
+  }));
 
   const filterOptions = [
     {
       key: 'type',
       label: 'Program Type',
-      options: [
-        { label: 'All', value: '' },
-        { label: 'Anti-Aging', value: 'Anti-Aging' },
-        { label: 'Weight Loss', value: 'Weight Loss' },
-        { label: 'Performance', value: 'Performance' },
-        { label: 'Aesthetics', value: 'Aesthetics' }
-      ],
-      value: typeFilter,
+      multiSelect: true,
+      values: typeFilter,
+      options: ALL_TYPES.map(t => ({
+        ...t,
+        count: MOCK_PROGRAMS.filter(p => p.type === t.value).length || null,
+      })),
       onChange: setTypeFilter
     }
   ];
 
   const filtered = useMemo(() => {
-    let result = MOCK_PROGRAMS;
-    if (typeFilter) {
-      result = result.filter(p => p.type === typeFilter);
-    }
-    return result;
+    if (typeFilter.length === 0) return MOCK_PROGRAMS;
+    return MOCK_PROGRAMS.filter(p => typeFilter.includes(p.type));
   }, [typeFilter]);
+
 
   const columns = useMemo(() => [
     {
@@ -93,7 +94,7 @@ export default function AdminProgramsTab({ isSubTab = false }) {
     {
       key: 'status',
       header: 'Status',
-      render: (val) => <StatusBadge status={val} />
+      render: (val) => <StatusChip status={val} />
     }
   ], []);
 
@@ -120,7 +121,7 @@ export default function AdminProgramsTab({ isSubTab = false }) {
       />
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div className="kpi-scroll-row" style={{ marginBottom: '2rem' }}>
         <MetricCard
           title="Active Programs"
           value={MOCK_PROGRAMS.filter(p => p.status === 'active').length}
@@ -138,6 +139,12 @@ export default function AdminProgramsTab({ isSubTab = false }) {
           value={`$${(MOCK_PROGRAMS.reduce((acc, p) => acc + p.revenue, 0) / 1000000).toFixed(1)}M`}
           icon={DollarSign}
           color="var(--color-warning)"
+        />
+        <MetricCard
+          title="Draft / Archived"
+          value={MOCK_PROGRAMS.filter(p => p.status === 'draft' || p.status === 'archived').length}
+          icon={Archive}
+          color="var(--color-danger)"
         />
       </div>
 

@@ -414,7 +414,32 @@ function CollectionCard({ collection, isOpen, onToggle, onItemClick, onSeedSearc
                 </div>
 
                 {/* Dual Action Buttons */}
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0, flexWrap: 'nowrap' }}>
+                <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const slug = toSlug(item.name);
+                      if (item.badge === 'Supplement' || item.name.toLowerCase() === 'berberine' || item.name.toLowerCase() === 'nmn') {
+                        router.push(`/supplements/${slug}`);
+                      } else {
+                        router.push(`/product/${slug}`);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '4px',
+                      fontSize: '0.75rem', fontWeight: 700, padding: '0.4rem 0.85rem',
+                      borderRadius: '999px', background: 'var(--primary, #003666)',
+                      color: '#ffffff', border: 'none',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                      boxShadow: '0 2px 8px rgba(0, 54, 102, 0.15)'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    View Details <ArrowRight size={13} />
+                  </button>
+
                   <button
                     type="button"
                     onClick={(e) => {
@@ -429,44 +454,16 @@ function CollectionCard({ collection, isOpen, onToggle, onItemClick, onSeedSearc
                       }
                     }}
                     style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '6px',
-                      fontSize: '0.72rem', fontWeight: 800, padding: '0.4rem 0.9rem',
-                      borderRadius: '20px', background: 'rgba(0, 150, 204, 0.08)',
-                      color: 'var(--secondary, #0096cc)', border: '1px solid rgba(0, 150, 204, 0.2)',
+                      display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      fontSize: '0.72rem', fontWeight: 700, padding: '0.4rem 0.8rem',
+                      borderRadius: '999px', background: 'rgba(14, 165, 233, 0.08)',
+                      color: '#0284c7', border: '1px solid rgba(14, 165, 233, 0.25)',
                       cursor: 'pointer', transition: 'all 0.2s',
-                      textTransform: 'uppercase', letterSpacing: '0.04em'
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0, 150, 204, 0.15)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0, 150, 204, 0.08)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.15)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(14, 165, 233, 0.08)'; }}
                   >
-                    <Bot size={12} strokeWidth={2.5} /> Análisis IA
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const slug = toSlug(item.name);
-                      if (item.badge === 'Supplement' || item.name.toLowerCase() === 'berberine' || item.name.toLowerCase() === 'nmn') {
-                        router.push(`/supplements/${slug}`);
-                      } else if (item.name.toLowerCase() === 'eterna-longevity-platform') {
-                        router.push(`/testing/${slug}`);
-                      } else {
-                        router.push(`/product/${slug}`);
-                      }
-                    }}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '6px',
-                      fontSize: '0.72rem', fontWeight: 800, padding: '0.4rem 0.9rem',
-                      borderRadius: '20px', background: 'var(--border-light)',
-                      color: 'var(--text-main)', border: '1px solid var(--border)',
-                      cursor: 'pointer', transition: 'all 0.2s',
-                      textTransform: 'uppercase', letterSpacing: '0.04em'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--border)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--border-light)'; }}
-                  >
-                    Ver Detalles <ArrowRight size={12} strokeWidth={2.5} />
+                    <Sparkles size={11} /> Ask Atlas AI
                   </button>
                 </div>
               </div>
@@ -506,21 +503,21 @@ export default function BeginnerCollections({ onItemClick, onSeedSearch, onOpenS
       <div style={{ position: 'relative', zIndex: 1 }}>
 
         {/* Header */}
-        <div className="section-header">
-          <div className="section-eyebrow">
+        <div className="section-header" style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 2rem' }}>
+          <div className="section-eyebrow" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.85rem', borderRadius: '999px', background: 'rgba(14, 165, 233, 0.08)', color: '#0284c7', fontSize: '0.72rem', fontWeight: 800 }}>
             <Sparkles size={13} />
-            CURATED — START HERE
+            CURATED STARTING POINTS
           </div>
 
           <h2
             id="beginner-collections-heading"
             className="section-title"
+            style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.3rem)', fontWeight: 850, letterSpacing: '-0.02em', margin: '0.6rem 0 0.4rem' }}
           >
-            Not Sure Where To Begin?
+            Not Sure Where to Begin?
           </h2>
-          <p className="section-subtitle">
-            Curated collections — not a catalog dump. Each list includes only the most researched
-            peptides for that goal, with clear explanations of why researchers explore them.
+          <p className="section-subtitle" style={{ fontSize: 'clamp(0.92rem, 1.8vw, 1.05rem)', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 auto' }}>
+            Explore curated starting points based on your goals.
           </p>
         </div>
 
@@ -529,8 +526,8 @@ export default function BeginnerCollections({ onItemClick, onSeedSearch, onOpenS
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '1rem',
-            maxWidth: 800,
+            gap: '0.75rem',
+            maxWidth: 780,
             margin: '0 auto',
           }}
         >
@@ -551,10 +548,10 @@ export default function BeginnerCollections({ onItemClick, onSeedSearch, onOpenS
         <p style={{
           textAlign: 'center',
           color: 'var(--text-light)',
-          fontSize: '0.8rem',
-          marginTop: '3rem',
+          fontSize: '0.75rem',
+          marginTop: '2rem',
           fontWeight: 500,
-          opacity: 0.8,
+          opacity: 0.7,
         }}>
           These collections represent common research starting points — not medical recommendations.
         </p>

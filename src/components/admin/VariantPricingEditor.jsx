@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-
-
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-
 import { getVariants } from '../../repositories/productRepository';
 import { RefreshCw, CheckCircle } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
+import InlineEditableCell from '../ui/InlineEditableCell';
+import notifier from '../../services/NotificationService';
 
 export default function VariantPricingEditor({ product, categoryDiscount }) {
   const [variants, setVariants] = useState([]);
@@ -37,8 +36,7 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
     const variant = variants.find(v => v.id === variantId);
     if (!variant) return;
 
-    // Check if changed
-    const currentPrice = variant.pricing?.[field]?.base || 0;
+    const currentPrice = variant.pricing?.[field] || 0;
     if (currentPrice === priceVal) return;
 
     const targetKey = `${variantId}-${field}`;
@@ -46,75 +44,48 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
 
     try {
       const variantRef = doc(db, 'products', product.id, 'variants', variantId);
-      // We assume pricing structure: { pricing: { retailPrice: { base: X }, clinicPrice: { base: Y, override: true } } }
       const updateData = {
-        [`pricing.${field}.base`]: priceVal,
-        [`pricing.${field}.override`]: field === 'clinicPrice' || field === 'wholesalePrice' ? true : undefined,
+        [`pricing.${field}`]: priceVal,
         updatedAt: new Date().toISOString()
       };
-      await updateDoc(variantRef, updateData);
-
-      setVariants(prev => prev.map(v => {
-        if (v.id === variantId) {
-          return {
-            ...v,
-            pricing: {
-              ...v.pricing,
-              [field]: { ...(v.pricing?.[field] || {}), base: priceVal, override: field === 'clinicPrice' || field === 'wholesalePrice' ? true : undefined }
-            }
-          };
-        }
-        return v;
-      }));
-
-      setSavedTarget(targetKey);
-      setTimeout(() => setSavedTarget(null), 2000);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSavingTarget(null);
-    }
-  };
-
-  const handleToggleOverride = async (variantId, field, isOverride) => {
-    const targetKey = `${variantId}-${field}-toggle`;
-    setSavingTarget(targetKey);
-
-    try {
-      const variantRef = doc(db, 'products', product.id, 'variants', variantId);
-      const updateData = {
-        [`pricing.${field}.override`]: isOverride ? true : false,
-        updatedAt: new Date().toISOString()
-      };
-      // If switching back to Auto, recalculate base price immediately
-      if (!isOverride) {
-        const variant = variants.find(v => v.id === variantId);
-        const retail = variant?.pricing?.retailPrice?.base || 0;
-        const computed = parseFloat((retail * (1 - categoryDiscount / 100)).toFixed(2));
-        updateData[`pricing.${field}.base`] = computed;
+      
+      // If updating retail, also auto-update clinic and wholesale if they are missing or if we just want to apply discount
+      if (field === 'retail') {
+         const computedClinic = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+         const computedWholesale = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+         updateData[`pricing.clinic`] = computedClinic;
+         updateData[`pricing.wholesale`] = computedWholesale;
+      } else if (field === 'retail10') {
+         const computedClinic10 = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+         const computedWholesale10 = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+         updateData[`pricing.clinic10`] = computedClinic10;
+         updateData[`pricing.wholesale10`] = computedWholesale10;
       }
+      
       await updateDoc(variantRef, updateData);
 
       setVariants(prev => prev.map(v => {
         if (v.id === variantId) {
-          const newBase = !isOverride 
-            ? parseFloat(((v.pricing?.retailPrice?.base || 0) * (1 - categoryDiscount / 100)).toFixed(2)) 
-            : v.pricing?.[field]?.base;
-          return {
-            ...v,
-            pricing: {
-              ...v.pricing,
-              [field]: { ...(v.pricing?.[field] || {}), base: newBase, override: isOverride }
-            }
-          };
+          const newPricing = { ...v.pricing, [field]: priceVal };
+          if (field === 'retail') {
+             newPricing.clinic = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+             newPricing.wholesale = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+          } else if (field === 'retail10') {
+             newPricing.clinic10 = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+             newPricing.wholesale10 = parseFloat((priceVal * (1 - categoryDiscount / 100)).toFixed(2));
+          }
+          return { ...v, pricing: newPricing };
         }
         return v;
       }));
 
       setSavedTarget(targetKey);
+      notifier.success('Price updated');
       setTimeout(() => setSavedTarget(null), 2000);
     } catch (err) {
       console.error(err);
+      notifier.error('Failed to update price');
+      throw err;
     } finally {
       setSavingTarget(null);
     }
@@ -123,62 +94,30 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
   if (loading) return <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Loading variants...</div>;
   if (!variants.length) return <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No variants found for this product.</div>;
 
-  const renderInput = (v, field, val, isOverride) => {
-    const targetKey = `${v.id}-${field}`;
-    const isSaving = savingTarget === targetKey;
-    const isSaved = savedTarget === targetKey;
-    const isToggleSaving = savingTarget === `${v.id}-${field}-toggle`;
-    const isB2B = field === 'clinicPrice' || field === 'wholesalePrice';
-
+  const renderInput = (v, field, field10, val, val10) => {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
-        {isB2B && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.65rem' }}>
-            {isToggleSaving && <RefreshCw size={10} className="animate-spin" color="var(--text-muted)" />}
-            <button
-              onClick={() => handleToggleOverride(v.id, field, !isOverride)}
-              style={{
-                background: isOverride ? 'var(--warning-light, rgba(255,170,0,0.1))' : 'var(--surface-raised)',
-                border: `1px solid ${isOverride ? 'var(--warning)' : 'var(--border)'}`,
-                borderRadius: '12px',
-                padding: '0.1rem 0.4rem',
-                cursor: 'pointer',
-                color: isOverride ? 'var(--warning-dark, #b37700)' : 'var(--text-muted)',
-                fontWeight: 600,
-                transition: 'all 0.2s',
-              }}
-            >
-              {isOverride ? 'Manual' : 'Auto'}
-            </button>
-          </div>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
-          {isSaving && <RefreshCw size={12} className="animate-spin" color="var(--text-muted)" />}
-          {isSaved && <CheckCircle size={12} color="var(--success)" />}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>1x</span>
           <span style={{ color: 'var(--text-muted)' }}>$</span>
-          <input
-            type="number"
-            step="0.01"
-            defaultValue={val}
-            key={`${field}-${val}`} // Force re-render when base value updates from toggle
-            disabled={isB2B && !isOverride}
-            onBlur={(e) => handlePriceChange(v.id, field, e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handlePriceChange(v.id, field, e.target.value);
-            }}
-            style={{
-              width: '80px',
-              padding: '0.3rem 0.4rem',
-              border: isSaved ? '1px solid var(--success)' : (isOverride ? '1px solid var(--warning)' : '1px solid var(--border)'),
-              borderRadius: '4px',
-              textAlign: 'right',
-              backgroundColor: isOverride ? 'var(--warning-light, rgba(255, 170, 0, 0.1))' : (isB2B && !isOverride ? 'var(--surface-raised)' : 'transparent'),
-              color: isB2B && !isOverride ? 'var(--text-muted)' : 'var(--text-main)',
-              fontWeight: 600,
-              opacity: isB2B && !isOverride ? 0.7 : 1
-            }}
-            title={isOverride ? "Manual override active" : "Auto-calculated from discount"}
-          />
+          <div style={{ minWidth: '80px', textAlign: 'right', fontWeight: 600 }}>
+            <InlineEditableCell
+              value={val || 0}
+              type="number"
+              onSave={(newVal) => handlePriceChange(v.id, field, newVal)}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>10x</span>
+          <span style={{ color: 'var(--text-muted)' }}>$</span>
+          <div style={{ minWidth: '80px', textAlign: 'right', fontWeight: 600 }}>
+            <InlineEditableCell
+              value={val10 || 0}
+              type="number"
+              onSave={(newVal) => handlePriceChange(v.id, field10, newVal)}
+            />
+          </div>
         </div>
       </div>
     );
@@ -188,15 +127,15 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
     <div style={{ width: '100%', overflowX: 'auto', paddingBottom: '1rem' }}>
       <DataTable
         data={variants.map(v => {
-          const retail = v.pricing?.retailPrice?.base || 0;
-          const clinic = v.pricing?.clinicPrice?.base || parseFloat((retail * (1 - categoryDiscount / 100)).toFixed(2));
-          const wholesale = v.pricing?.wholesalePrice?.base || parseFloat((retail * (1 - categoryDiscount / 100)).toFixed(2));
-          const master = v.pricing?.masterPrice?.base || 0;
-
-          const isClinicOverride = v.pricing?.clinicPrice?.override;
-          const isWholesaleOverride = v.pricing?.wholesalePrice?.override;
-          
-          return { ...v, retail, clinic, wholesale, master, isClinicOverride, isWholesaleOverride };
+          const retail = v.pricing?.retail || 0;
+          const clinic = v.pricing?.clinic || parseFloat((retail * (1 - categoryDiscount / 100)).toFixed(2));
+          const wholesale = v.pricing?.wholesale || parseFloat((retail * (1 - categoryDiscount / 100)).toFixed(2));
+          const supplierCost = v.pricing?.supplierCost || 0;
+          const retail10 = v.pricing?.retail10 || 0;
+          const clinic10 = v.pricing?.clinic10 || parseFloat((retail10 * (1 - categoryDiscount / 100)).toFixed(2));
+          const wholesale10 = v.pricing?.wholesale10 || parseFloat((retail10 * (1 - categoryDiscount / 100)).toFixed(2));
+          const supplierCost10 = v.pricing?.supplierCost10 || 0;
+          return { ...v, retail, clinic, wholesale, supplierCost, retail10, clinic10, wholesale10, supplierCost10 };
         })}
         columns={[
           {
@@ -212,24 +151,24 @@ export default function VariantPricingEditor({ product, categoryDiscount }) {
             )
           },
           {
-            key: 'masterPrice',
-            header: <div style={{ textAlign: 'right' }}>Master Price (Cost)</div>,
-            render: (r) => renderInput(r, 'masterPrice', r.master, false)
+            key: 'supplierCost',
+            header: <div style={{ textAlign: 'right' }}>Supplier Cost</div>,
+            render: (r) => renderInput(r, 'supplierCost', 'supplierCost10', r.supplierCost, r.supplierCost10)
           },
           {
-            key: 'retailPrice',
-            header: <div style={{ textAlign: 'right' }}>Retail Price (Base)</div>,
-            render: (r) => renderInput(r, 'retailPrice', r.retail, false)
+            key: 'retail',
+            header: <div style={{ textAlign: 'right' }}>Retail Price</div>,
+            render: (r) => renderInput(r, 'retail', 'retail10', r.retail, r.retail10)
           },
           {
-            key: 'clinicPrice',
+            key: 'clinic',
             header: <div style={{ textAlign: 'right' }}>Clinic Price (B2B)</div>,
-            render: (r) => renderInput(r, 'clinicPrice', r.clinic, r.isClinicOverride)
+            render: (r) => renderInput(r, 'clinic', 'clinic10', r.clinic, r.clinic10)
           },
           {
-            key: 'wholesalePrice',
+            key: 'wholesale',
             header: <div style={{ textAlign: 'right' }}>Wholesale Price</div>,
-            render: (r) => renderInput(r, 'wholesalePrice', r.wholesale, r.isWholesaleOverride)
+            render: (r) => renderInput(r, 'wholesale', 'wholesale10', r.wholesale, r.wholesale10)
           }
         ]}
       />

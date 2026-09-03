@@ -14,8 +14,11 @@
 
 
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight, Eye, FlaskConical, Beaker, Zap, Activity, ShieldCheck, Bot } from '@/lib/icons';
+import { ArrowRight, Eye, FlaskConical, Beaker, Zap, Activity, ShieldCheck, Bot, Plus, Check } from '@/lib/icons';
+import ProductCardActions from '../product/ProductCardActions';
 
 export default function ProductCard({
   title,
@@ -29,11 +32,25 @@ export default function ProductCard({
   onClick,           // primary action (navigate to detail page)
   onSecondaryClick,  // secondary action (navigate to detail page)
   onCompareClick,    // compare action
-  primaryLabel   = 'ClinicAI',
+  onQuickAdd,        // quick add to cart
+  primaryLabel   = 'ClinicalAI',
   secondaryLabel = 'Details',
   additionalCapabilities = null,
 }) {
+  const router = useRouter();
   const isList = viewMode === 'list';
+  const [added, setAdded] = useState(false);
+
+  const handleMouseEnter = () => {
+    try {
+      if (title) {
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        router?.prefetch?.(`/product/${slug}`);
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   // Support string badge or object
   const badgeText = typeof badge === 'string' ? badge : badge?.text;
@@ -66,6 +83,7 @@ export default function ProductCard({
       style={{ '--card-accent': color, position: 'relative' }}
       role="article"
       aria-label={`Product card for ${title}`}
+      onMouseEnter={handleMouseEnter}
     >
       <div className="col-card-accent" />
       {/* Hover Overlay Actions */}
@@ -160,27 +178,12 @@ export default function ProductCard({
       </div>
 
       <div className="col-card-footer">
-        <div className="col-card-footer-actions" style={{ display: 'flex', gap: '0.4rem', width: '100%' }}>
-          <button
-            type="button"
-            className="col-card-btn col-card-btn--ghost"
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '0.72rem', flex: 1, padding: '0.45rem' }}
-            onClick={handleOpenAI}
-            aria-label={`Ask ClinicAI about ${title}`}
-            title={`Ask ClinicAI about ${title}`}
-          >
-            <Bot size={12} strokeWidth={2.5} /> ClinicAI
-          </button>
-          <button
-            type="button"
-            className="col-card-btn col-card-btn--accent"
-            style={{ '--btn-accent': color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '0.72rem', flex: 1, padding: '0.45rem' }}
-            onClick={handleDetailsClick}
-            aria-label={`View details for ${title}`}
-          >
-            Details <ArrowRight size={12} strokeWidth={2.5} />
-          </button>
-        </div>
+        <ProductCardActions 
+          title={title} 
+          color={color} 
+          onDetailsClick={handleDetailsClick} 
+          onQuickAdd={onQuickAdd} 
+        />
       </div>
     </motion.article>
   );

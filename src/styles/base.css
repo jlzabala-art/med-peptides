@@ -1,7 +1,40 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOBILE OVERFLOW PREVENTION — Golden Rule
+   Must be first — ensures no element can ever cause horizontal page overflow.
+   ───────────────────────────────────────────────────────────────────────────── */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* min-width:0 prevents flex/grid children from overflowing their parent.
+   Without this, a flex child's natural content width ignores the container width. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
 /* Typography styles */
 .text-center { text-align: center; }
 .subtitle { font-size: 1.125rem; color: var(--text-muted); margin-bottom: 3rem; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.7; }
 .badge { display: inline-block; padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background-color: rgba(0, 163, 224, 0.08); color: var(--secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.25rem; border: 1px solid rgba(0, 163, 224, 0.15); }
+
+/* Layout Container */
+.container {
+  width: 100%;
+  max-width: var(--container-max, 1440px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding, 1.5rem);
+  padding-right: var(--container-padding, 1.5rem);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
 
 /* Buttons */
 .btn {
@@ -18,6 +51,7 @@
   font-size: 1rem;
   letter-spacing: 0.01em;
   min-height: 48px; /* Proper mobile touch target */
+  gap: 0.5rem;
 }
 
 .btn-primary {
@@ -26,10 +60,126 @@
   box-shadow: 0 4px 12px rgba(0, 54, 102, 0.15);
 }
 
+.btn-danger:hover {
+  background-color: var(--danger-hover);
+}
+
+.btn-group {
+  display: inline-flex;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
 .btn-primary:hover {
   background-color: var(--primary-light);
   transform: scale(1.02) translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 54, 102, 0.25), 0 0 16px rgba(0, 163, 224, 0.2);
+}
+
+/* Data Module Structural Classes */
+.data-module-wrapper {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0.5rem;
+  background-color: var(--color-bg-app, #f8fafc);
+  min-width: 0;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .data-module-wrapper {
+    padding: 0.5rem;
+    gap: 0.75rem;
+  }
+}
+
+.data-module-wrapper.is-sub-module {
+  padding: 0;
+  background-color: transparent;
+  height: auto;
+}
+
+.data-module-container {
+  flex: 1;
+  background-color: var(--color-bg-panel, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-border, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+}
+
+.data-module-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+@media (max-width: 768px) {
+  .data-module-content {
+    padding: 0.5rem;
+  }
+}
+
+/* Page Header Dropdown Classes */
+.page-header-dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.page-header-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--color-bg-panel, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 100;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.page-header-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-light, #f1f5f9);
+  cursor: pointer;
+  text-align: left;
+  color: var(--color-text-main, #334155);
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.page-header-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.page-header-dropdown-item:hover {
+  background-color: var(--color-bg-hover, #f8fafc);
+}
+
+.page-header-dropdown-icon {
+  color: var(--color-primary, #003666);
 }
 
 .btn-secondary {
@@ -453,6 +603,20 @@ button:focus-visible, a:focus-visible {
     box-sizing: border-box;
     white-space: normal !important;
     word-break: break-word;
+  }
+
+  table.gcp-table td::before, .gcp-table td::before {
+    content: attr(data-label);
+    position: static !important;
+    display: block !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: var(--text-muted, #64748b) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 0.35rem !important;
+    width: 100% !important;
+    text-align: left !important;
   }
 
   table.gcp-table td:last-child, .gcp-table td:last-child {
@@ -999,4 +1163,41 @@ button:focus-visible, a:focus-visible {
     gap: 0.2rem !important;
     padding-left: 0.85rem !important;
   }
+}
+
+/* Condensed Drawer Layout Rule */
+.drawer-condensed-layout {
+  font-size: 0.85rem !important;
+  line-height: 1.4 !important;
+}
+
+.drawer-condensed-layout h1, 
+.drawer-condensed-layout h2, 
+.drawer-condensed-layout h3, 
+.drawer-condensed-layout h4, 
+.drawer-condensed-layout h5 {
+  margin-bottom: 0.35rem !important;
+  font-size: 0.95em;
+}
+
+.drawer-condensed-layout p {
+  margin-bottom: 0.5rem !important;
+}
+
+.drawer-condensed-layout .gap-1,
+.drawer-condensed-layout .gap-2,
+.drawer-condensed-layout .gap-3,
+.drawer-condensed-layout .gap-4,
+.drawer-condensed-layout [style*="gap"] {
+  gap: 0.5rem !important;
+}
+
+.drawer-condensed-layout [style*="padding"] {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+/* Let the top container have standard body padding but dense internals */
+.drawer-condensed-layout > div {
+  gap: 0.75rem !important;
 }

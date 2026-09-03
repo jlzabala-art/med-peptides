@@ -1,35 +1,42 @@
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import ClipboardList from "lucide-react/dist/esm/icons/clipboard-list";
-import BookOpen from "lucide-react/dist/esm/icons/book-open";
-import Bot from "lucide-react/dist/esm/icons/bot";
 import React from 'react';
-
-
-
-
+import { ShieldCheck, Globe, BookOpen, Bot } from '@/lib/icons';
 import { useTranslation } from 'react-i18next';
 import '../../styles/trust_row.css';
 
 export default function TrustRow() {
   const { t } = useTranslation();
   return (
-    <div className="trust-row">
-      <div className="trust-container">
-        <span className="trust-item">
-          <ShieldCheck size={16} color="#34d399" />
-          {t('hero.trust.evidence', 'Evidence-guided')}
+    <div className="trust-row trust-row--mobile-clean">
+      <div 
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.6rem 0.85rem',
+          fontSize: '0.8rem',
+          color: '#64748b',
+          fontWeight: 500,
+          padding: '0 0.5rem',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <ShieldCheck size={14} color="#0ea5e9" />
+          {t('hero.trust.tested', 'Third-Party Tested')}
         </span>
-        <span className="trust-item">
-          <ClipboardList size={16} color="#38bdf8" />
-          {t('hero.trust.prescriptionAware', 'Prescription-aware')}
+        <span style={{ opacity: 0.3 }}>•</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <BookOpen size={14} color="#0ea5e9" />
+          {t('hero.trust.coa', 'COA Included')}
         </span>
-        <span className="trust-item">
-          <BookOpen size={16} color="#f472b6" />
-          {t('hero.trust.documentation', 'Documentation available')}
-        </span>
-        <span className="trust-item">
-          <Bot size={16} color="#818cf8" />
-          {t('hero.trust.ai', 'AI-assisted')}
+        <span style={{ opacity: 0.3 }}>•</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <Bot size={14} color="#0ea5e9" />
+          {t('hero.trust.clinicalAi', 'Atlas AI Guided')}
         </span>
       </div>
     </div>

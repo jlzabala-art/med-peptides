@@ -17,6 +17,7 @@ import ProtocolDayBadge from './ProtocolDayBadge';
 import { useAuth } from '../../context/AuthContext';
 import CalendarContextDrawer from './CalendarContextDrawer';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
+import { toast } from 'react-hot-toast';
 
 // Detect mobile viewport
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768;
@@ -1002,7 +1003,7 @@ export default function RegeneraCalendar({ viewMode = 'all' }) {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
-                  alert('Invitation sent');
+                  toast('Invitation sent');
                   setShareModalOpen(false);
                 }}
               >

@@ -33,7 +33,7 @@ export default function ResourcesDropdown({ onClose }) {
           return (
             <Link
               key={item.path}
-              to={item.path}
+              href={item.path}
               className="dropdown-rich-item"
               onClick={onClose}
             >

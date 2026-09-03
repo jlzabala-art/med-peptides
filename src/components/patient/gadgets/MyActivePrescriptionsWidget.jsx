@@ -1,16 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { subscribeToActivePrescriptions, submitRefillRequest } from '../../../services/patientHubService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Pill, Clock, AlertTriangle, RefreshCw } from '@/lib/icons';
-
-
-
-
+import StatusChip from '../../ui/StatusChip';
 
 export default function MyActivePrescriptionsWidget() {
   const { user } = useAuth();
@@ -21,38 +16,28 @@ export default function MyActivePrescriptionsWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const q = query(
-      collection(db, 'recommendations'),
-      where('patientId', '==', user.uid),
-      where('status', 'in', ['active', 'processing', 'pending'])
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToActivePrescriptions(user.uid, (list) => {
       setPrescriptions(list);
     });
-
     return () => unsub();
   }, [user]);
 
   const handleQuickRefill = async (rx) => {
     setLoadingRefill(rx.id);
     try {
-      await addDoc(collection(db, 'refill_requests'), {
+      await submitRefillRequest({
         patientId: user.uid,
         patientName: user.displayName || 'Patient',
         originalRxId: rx.id,
         doctorId: rx.doctorId,
-        productName: rx.productName,
-        status: 'pending_approval',
-        createdAt: serverTimestamp()
+        productName: rx.productName
       });
       setSuccessRefill(rx.id);
       setTimeout(() => {
         setSuccessRefill(null);
       }, 4000);
     } catch (err) {
-      console.error(err);
+      // logged in service
     } finally {
       setLoadingRefill(null);
     }
@@ -88,13 +73,7 @@ export default function MyActivePrescriptionsWidget() {
                   <h4 style={{ margin: 0, fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>{p.productName || t('patient.prescriptions.formula_comp')}</h4>
                   <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>{t('patient.prescriptions.prescribed_by', { doctor: p.doctorName })}</div>
                 </div>
-                <span style={{ 
-                  fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '8px', fontWeight: 700, textTransform: 'uppercase',
-                  background: p.status === 'active' ? '#dcfce7' : '#fef3c7',
-                  color: p.status === 'active' ? '#166534' : '#92400e'
-                }}>
-                  {p.status}
-                </span>
+                <StatusChip status={p.status} />
               </div>
               <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Clock size={14} color="var(--color-text-secondary)" /> {p.notes || t('patient.prescriptions.default_dosage')}

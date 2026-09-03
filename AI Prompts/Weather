@@ -1,0 +1,196 @@
+Add a visually attractive weather component to the Atlas AI portal.
+
+OBJECTIVE
+
+Display the current weather at the user’s approximate location, automatically determined from the client’s public IP address. The component should make the application feel more personalized and visually engaging without occupying excessive dashboard space.
+
+WEATHER PROVIDER
+
+Use the OpenWeather Current Weather API:
+
+Base endpoint:
+<https://api.openweathermap.org/data/2.5/weather>
+
+The API key must be stored securely as a server-side environment variable:
+
+OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY
+API key a6596408c9f67fc4cb79c418a1796a67
+API key a6596408c9f67fc4cb79c418a1796a67Never expose or hardcode the OpenWeather API key in frontend code, public JavaScript bundles, GitHub repositories, logs, or browser network requests.
+
+The frontend must call an internal backend endpoint such as:
+
+GET /api/weather/current
+
+The backend will then make the request to OpenWeather.
+
+LOCATION DETECTION
+
+1. Detect the user’s approximate city and country from the public client IP.
+2. Perform the IP geolocation lookup on the server side whenever possible.
+3. Use trusted proxy headers only when the application infrastructure has been configured correctly:
+   - CF-Connecting-IP
+   - X-Forwarded-For
+   - X-Real-IP
+4. Never use localhost, private-network, or proxy IP addresses as the location.
+5. Convert the IP location into latitude and longitude.
+6. Request weather from OpenWeather using geographic coordinates:
+
+<https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&units=metric&lang=en&appid={OPENWEATHER_API_KEY}>
+
+Do not rely only on the city name because geographic coordinates are more accurate.
+
+PRIVACY
+
+IP-based location must only be used temporarily to determine approximate weather conditions.
+
+Do not permanently store:
+
+- The complete IP address
+- Precise geographic coordinates
+- The user’s location history
+
+Do not display a precise address. Display only the city and country.
+
+BACKEND RESPONSE
+
+The internal endpoint should return a normalized response such as:
+
+{
+  "location": {
+    "city": "Madrid",
+    "country": "ES"
+  },
+  "weather": {
+    "temperatureC": 28,
+    "feelsLikeC": 29,
+    "condition": "Clear sky",
+    "icon": "01d",
+    "humidity": 35,
+    "windSpeed": 3.2
+  },
+  "updatedAt": "2026-07-30T08:30:00Z"
+}
+
+Do not send the OpenWeather API key to the frontend.
+
+USER INTERFACE
+
+Create a compact weather card for the main dashboard header.
+
+The card should include:
+
+- Current city and country
+- Current temperature in Celsius
+- Weather condition
+- Weather icon
+- “Feels like” temperature
+- Optional humidity and wind speed
+- Small “Updated X minutes ago” indicator
+
+Suggested visual structure:
+
+[Weather icon]  28°C
+Clear sky
+Madrid, Spain
+Feels like 29°C
+
+DESIGN
+
+Follow the existing Atlas AI design system.
+
+The weather component should:
+
+- Look modern, professional, and premium
+- Use rounded corners and subtle shadows
+- Support light and dark modes
+- Be responsive on desktop, tablet, and mobile
+- Use subtle weather-related gradients or illustrations
+- Avoid looking like a large consumer weather application
+- Remain secondary to the portal’s medical and business information
+
+Consider changing the visual background subtly according to the condition:
+
+- Clear
+- Cloudy
+- Rain
+- Snow
+- Thunderstorm
+- Night
+
+Use the OpenWeather icon code or map it to the portal’s existing icon library.
+
+PLACEMENT
+
+Desktop:
+Place the component in the upper-right area of the dashboard header, near the welcome message, date, or user profile.
+
+Mobile:
+Show it as a compact horizontal card below the welcome message.
+
+LOADING AND ERROR STATES
+
+While loading:
+
+- Display a skeleton placeholder
+- Do not cause layout shifts
+
+If IP location cannot be determined:
+
+- Use the user profile’s registered city, when available
+- Otherwise use the organization or clinic location
+- As a final fallback, display Madrid, Spain
+- Clearly label fallback weather only when necessary
+
+If the weather service is temporarily unavailable:
+
+- Hide detailed weather data
+- Display a neutral message such as “Weather currently unavailable”
+- Do not interrupt the rest of the dashboard
+
+CACHING
+
+Cache weather results by approximate city or rounded coordinates for 15 to 30 minutes.
+
+Do not make a new OpenWeather request on every page navigation or component render.
+
+Use server-side caching or the application’s existing caching layer.
+
+SECURITY AND RELIABILITY
+
+- Validate latitude and longitude before calling OpenWeather
+- Add a request timeout
+- Handle HTTP 401, 404, 429, and 5xx responses
+- Add rate-limit protection to the internal weather endpoint
+- Do not log the API key
+- Do not expose detailed third-party API errors to users
+- Sanitize all returned values before displaying them
+
+SETTINGS
+
+Add an optional user preference:
+
+Weather display:
+
+- Automatic
+- Visible
+- Hidden
+
+Default: Automatic
+
+If the user manually selects a preferred city in their profile, prioritize that city over IP-based detection.
+
+DELIVERABLES
+
+Implement:
+
+1. Secure server-side OpenWeather integration
+2. IP-based approximate location detection
+3. GET /api/weather/current endpoint
+4. Responsive weather dashboard card
+5. Loading, error, and fallback states
+6. Server-side caching
+7. Environment variable configuration
+8. Light and dark mode support
+9. Tests for successful, unavailable, and rate-limited API responses
+
+Do not expose the OpenWeather API key in any client-side code.

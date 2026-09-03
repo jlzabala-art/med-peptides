@@ -2,7 +2,7 @@ import React from 'react';
 import { BrainCircuit, TestTube, ArrowUpRight } from '@/lib/icons';
 import AILabInsights from '../AILabInsights';
 
-export default function ProtocolLabs({ protocol, onUpdate }) {
+export default function ProtocolLabs({ protocol, onUpdate, onProductClick }) {
   
   // Example dummy calculation or KPI extraction
   const requiredBiomarkers = protocol?.biomarkers?.length || 5;
@@ -31,7 +31,7 @@ export default function ProtocolLabs({ protocol, onUpdate }) {
       {/* Embedded Deep Components */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', marginTop: '1rem' }}>
         <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-          <AILabInsights protocol={protocol} onUpdate={onUpdate} />
+          <AILabInsights protocol={protocol} onUpdate={onUpdate} onProductClick={onProductClick} />
         </div>
       </div>
       

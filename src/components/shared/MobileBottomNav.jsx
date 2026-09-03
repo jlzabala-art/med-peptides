@@ -29,7 +29,7 @@ export default function MobileBottomNav({ activeId, onNavigate, navGroups = [] }
   }
 
   return (
-    <div className="mobile-bottom-nav">
+    <div className="mobile-bottom-nav bottom-nav">
       {displayItems.map((item) => {
         const Icon = item.icon || Home;
         return (

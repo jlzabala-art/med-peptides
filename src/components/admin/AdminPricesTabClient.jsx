@@ -10,9 +10,16 @@ import BookOpen from "lucide-react/dist/esm/icons/book-open";
 import TrendingDown from "lucide-react/dist/esm/icons/trending-down";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
 import Minus from "lucide-react/dist/esm/icons/minus";
+import Edit3 from "lucide-react/dist/esm/icons/edit-3";
+import AppActionGroup from '../ui/AppActionGroup';
 import React, { useState, useEffect } from 'react';
-import { collection, doc, getDocs, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { toast } from 'react-hot-toast';
+import {
+  getGlobalSettings,
+  updateGlobalSettings,
+  saveCategoryDiscountsAndVariants,
+  getCompetitorCache
+} from '../../services/settingsService';
 
 import { useSearchParams } from 'next/navigation';
 import { getCatalog, getVariants } from '../../repositories/productRepository';
@@ -31,18 +38,18 @@ import AppEntityCell from '../ui/AppEntityCell';
 import ProductContextSwitcher from './ProductContextSwitcher';
 import VariantPricingEditor from './VariantPricingEditor';
 
-export default function AdminPricesTabClient({ isSubTab = false, initialProducts = null, initialDiscounts = null }) {
+export default function AdminPricesTabClient({ isSubTab = false, initialProducts = null, initialDiscounts = null, initialSearch = '' }) {
   const router = useRouter();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState(initialProducts || []);
   const [discounts, setDiscounts] = useState(initialDiscounts || {});
   const [competitorData, setCompetitorData] = useState([]);
   const [loading, setLoading] = useState(!initialProducts);
   const [savingStatus, setSavingStatus] = useState({ type: null, target: null, status: null });
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('sku') || '');
+  const [searchTerm, setSearchTerm] = useState(initialSearch || searchParams?.get('sku') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
   // Auto-expand the product row when coming from the Products tab via ?productId=
-  const autoExpandProductId = searchParams.get('productId') || null;
+  const autoExpandProductId = searchParams?.get('productId') || null;
   const [expandedRowIds, setExpandedRowIds] = useState(() => autoExpandProductId ? new Set([autoExpandProductId]) : new Set());
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -64,14 +71,9 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
       // 1. Fetch products via Repository cache
       const productsList = await getCatalog();
 
-      // 2. Fetch global settings for discounts
-      const globalRef = doc(db, 'settings', 'global');
-      const globalSnap = await getDoc(globalRef);
-      let loadedDiscounts = {};
-
-      if (globalSnap.exists()) {
-        loadedDiscounts = globalSnap.data().categoryDiscounts || {};
-      }
+      // 2. Fetch global settings for discounts via settingsService
+      const globalData = await getGlobalSettings();
+      let loadedDiscounts = globalData.categoryDiscounts || {};
 
       // Establish defaults (15%) for any categories that exist on products but not in settings
       const uniqueCategories = [...new Set(productsList.map((p) => p.category).filter(Boolean))];
@@ -80,28 +82,23 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
 
       uniqueCategories.forEach((cat) => {
         if (updatedDiscounts[cat] === undefined) {
-          updatedDiscounts[cat] = 15; // default 15% discount
+          updatedDiscounts[cat] = 15;
           neededSave = true;
         }
       });
 
       if (neededSave) {
-        await setDoc(globalRef, { categoryDiscounts: updatedDiscounts }, { merge: true });
+        await updateGlobalSettings({ categoryDiscounts: updatedDiscounts });
       }
 
-      // 3. Fetch competitor cache
-      const compCacheRef = doc(db, 'settings', 'competitor_cache');
-      const compCacheSnap = await getDoc(compCacheRef);
-      if (compCacheSnap.exists()) {
-        const cache = compCacheSnap.data();
-        if (cache.matches) {
-          setCompetitorData(cache.matches);
-        }
+      // 3. Fetch competitor cache via settingsService
+      const compCache = await getCompetitorCache();
+      if (compCache.matches) {
+        setCompetitorData(compCache.matches);
       }
 
       setProducts(productsList);
       setDiscounts(updatedDiscounts);
-      // Inject data context for Atlas AI
       window.dispatchEvent(new CustomEvent('admin-context-update', {
         detail: {
           page: 'prices',
@@ -125,65 +122,27 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
     if (discountVal < 0) discountVal = 0;
     if (discountVal > 100) discountVal = 100;
 
-    // Check if changed
     if (discounts[category] === discountVal) return;
 
     setSavingStatus({ type: 'discount', target: category, status: 'saving' });
 
     try {
-      const updatedDiscounts = {
-        ...discounts,
-        [category]: discountVal,
-      };
+      const updatedDiscounts = { ...discounts, [category]: discountVal };
 
-      // 1. Save global settings
-      const globalRef = doc(db, 'settings', 'global');
-      await setDoc(globalRef, { categoryDiscounts: updatedDiscounts }, { merge: true });
-
-      // 2. Recalculate and update variants for products in this category
+      // Build flat list of variants for settingsService batch
       const affectedProducts = products.filter((p) => p.category === category);
-
-      let batch = writeBatch(db);
-      let batchCount = 0;
-      let totalUpdated = 0;
-
+      const affectedVariants = [];
       for (const p of affectedProducts) {
-         const variants = await getVariants(p.id);
-         for (const v of variants) {
-            const retail = v.pricing?.retailPrice?.base || 0;
-            const computedClinic = parseFloat((retail * (1 - discountVal / 100)).toFixed(2));
-            const computedWholesale = parseFloat((retail * (1 - discountVal / 100)).toFixed(2));
-            const updates = {};
-            if (!v.pricing?.clinicPrice?.override) {
-               updates['pricing.clinicPrice.base'] = computedClinic;
-            }
-            if (!v.pricing?.wholesalePrice?.override) {
-               updates['pricing.wholesalePrice.base'] = computedWholesale;
-            }
-            if (Object.keys(updates).length > 0) {
-               updates.updatedAt = new Date().toISOString();
-               const vRef = doc(db, 'products', p.id, 'variants', v.id);
-               batch.update(vRef, updates);
-               batchCount++;
-               totalUpdated++;
-
-               if (batchCount >= 400) {
-                 await batch.commit();
-                 batch = writeBatch(db);
-                 batchCount = 0;
-               }
-            }
-         }
+        const variants = await getVariants(p.id);
+        for (const v of variants) {
+          affectedVariants.push({ productId: p.id, variantId: v.id, retail: v.pricing?.retail || 0 });
+        }
       }
 
-      if (batchCount > 0) {
-        await batch.commit();
-      }
+      const totalUpdated = await saveCategoryDiscountsAndVariants(updatedDiscounts, affectedVariants, discountVal);
       console.log(`Successfully updated ${totalUpdated} variants for category ${category}`);
 
-      // Update state
       setDiscounts(updatedDiscounts);
-
       setSavingStatus({ type: 'discount', target: category, status: 'saved' });
       setTimeout(() => setSavingStatus({ type: null, target: null, status: null }), 3000);
     } catch (err) {
@@ -229,9 +188,12 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
   const uniqueCategories = [...new Set(products.map((p) => p.category).filter(Boolean))];
 
   const filteredProducts = products.filter((p) => {
-    const matchSearch =
-      (p?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p?.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+    const term = searchTerm.toLowerCase();
+    const matchSearch = !term ||
+      (p?.name         || '').toLowerCase().includes(term) ||
+      (p?.canonicalName|| '').toLowerCase().includes(term) ||
+      (p?.displayName  || '').toLowerCase().includes(term) ||
+      (p?.sku          || '').toLowerCase().includes(term);
     const matchCategory = selectedCategory === 'All' || p?.category === selectedCategory;
     return matchSearch && matchCategory;
   });
@@ -312,21 +274,24 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
         </div>
       )}
 
-      <ProductContextSwitcher 
-        searchTerm={searchTerm} 
-        productId={autoExpandProductId}
-        currentTab="prices" 
-        onClear={() => {
-          setSearchTerm('');
-          router.push('/admin/prices', { replace: true });
-        }} 
-      />
+      {!isSubTab && (
+        <ProductContextSwitcher 
+          searchTerm={searchTerm} 
+          productId={autoExpandProductId}
+          currentTab="prices" 
+          onClear={() => {
+            setSearchTerm('');
+            router.push('/admin/prices', { replace: true });
+          }} 
+        />
+      )}
 
       {/* 1. Global Category Wholesale Discounts */}
-      <div
-        className="card"
-        style={{ padding: '2rem', marginBottom: '2.5rem', border: '1px solid var(--border)' }}
-      >
+      {!isSubTab && (
+        <div
+          className="card"
+          style={{ padding: '2rem', marginBottom: '2.5rem', border: '1px solid var(--border)' }}
+        >
         <div
           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}
         >
@@ -470,6 +435,7 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
           ]}
         />
       </div>
+      )}
 
       {/* 2. Products Pricing Matrix */}
       <div
@@ -486,7 +452,7 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
               header: 'Product / Category',
               sortValue: (p) => p.name || '',
               render: (p) => (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                   <AppEntityCell
                     title={p.name}
                     subtitle={
@@ -561,23 +527,47 @@ export default function AdminPricesTabClient({ isSubTab = false, initialProducts
             },
             {
               key: 'actions',
-              header: '',
+              header: 'Actions',
               align: 'right',
               render: (p) => (
-                <button
-                  style={{
-                    padding: '0.4rem 0.8rem',
-                    backgroundColor: 'var(--surface-raised)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'var(--text-main)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Edit Variants
-                </button>
+                <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+                  <AppActionGroup
+                    maxVisible={3}
+                    actions={[
+                      {
+                        type: 'clone',
+                        label: 'Duplicate Pricing Rule',
+                        onClick: () => {
+                          const catDiscount = discounts[p.category] ?? 15;
+                          navigator?.clipboard?.writeText(JSON.stringify({
+                            productName: p.name,
+                            category: p.category,
+                            discountPercent: catDiscount,
+                            vialPrice: p.guestVialPrice || 0
+                          }, null, 2));
+                          toast.success(`Pricing configuration for "${p.name}" copied to clipboard!`);
+                        }
+                      },
+                      {
+                        type: 'edit',
+                        label: 'Edit Pricing & Tiers',
+                        onClick: () => {
+                          setExpandedRowIds(prev => {
+                            const next = new Set(prev);
+                            if (next.has(p.id)) next.delete(p.id);
+                            else next.add(p.id);
+                            return next;
+                          });
+                        }
+                      },
+                      {
+                        type: 'view',
+                        label: 'View in Products Catalog',
+                        onClick: () => router.push(`/admin/products?search=${encodeURIComponent(p.sku || p.name)}`)
+                      }
+                    ]}
+                  />
+                </div>
               )
             }
           ]}

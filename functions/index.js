@@ -7,6 +7,7 @@ initializeApp();
 // ── Triggers ─────────────────────────────────────────────────────────────────
 // Moved to functions-triggers
 exports.generateImpersonationToken = require("./src/users/impersonate").generateImpersonationToken;
+exports.onPrescriptionStatusChange = require("./src/triggers/pushNotifications").onPrescriptionStatusChange;
 
 
 // ── HTTP Handlers ────────────────────────────────────────────────────────────
@@ -96,8 +97,8 @@ exports.syncSupplierBillToZoho = onCall(async (request) => {
 
 // ── Webhooks ────────────────────────────────────────────────────────────────
 // zohoWebhooks moved to functions-finance
-exports.processInboundEmail = require('./src/webhooks/inboundEmail').processInboundEmail;
-exports.triggerAiOnEmailWorker = require('./src/webhooks/inboundEmail').triggerAiOnEmailWorker;
+// exports.processInboundEmail = require('./src/webhooks/inboundEmail').processInboundEmail;
+// exports.triggerAiOnEmailWorker = require('./src/webhooks/inboundEmail').triggerAiOnEmailWorker;
 exports.reprocessEmail = require('./src/http/reprocessEmail').reprocessEmail;
 exports.acceptPrescription = require('./src/http/acceptPrescription').acceptPrescription;
 
@@ -106,3 +107,19 @@ exports.calculateRevenueAttribution = require("./src/http/calculateRevenueAttrib
 
 // ── Strategic Upgrade (Phase 4) ─────────────────────────────────────────────
 // Timeline triggers moved to functions-triggers
+exports.onOrderCompletedUpdateInventory = require("./src/triggers/inventory");
+
+// ── PDF Generation Worker (Firestore Trigger) ─────────────────────────────────
+// Triggered when a quotation document is created with status: 'pending'
+const { generateQuotationPdf } = require('./src/triggers/pdfGenerator');
+exports.generateQuotationPdf = generateQuotationPdf;
+
+// ── Supplier Products Sync (Firestore Trigger) ────────────────────────────────
+// Triggered on any write to products/{productId} — keeps wholesellers.productsSupplied in sync
+const { syncProductsSupplied } = require('./src/triggers/supplierProductsSync');
+exports.syncProductsSupplied = syncProductsSupplied;
+
+// ── Price List Parser Function ──────────────────────────────────────────────
+const { parsePriceListImage } = require('./src/http/parse_price_list_image');
+exports.parsePriceListImage = parsePriceListImage;
+

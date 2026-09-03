@@ -1,14 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import * as fb from '../../../firebase';
-const db = fb?.db;
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { fetchMedicalTeam } from '../../../services/patientHubService';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { Stethoscope, MessageSquare } from '@/lib/icons';
-
-
 
 export default function MyMedicalTeamWidget() {
   const { user } = useAuth();
@@ -18,9 +14,7 @@ export default function MyMedicalTeamWidget() {
   useEffect(() => {
     async function fetchTeam() {
       if (!user?.uid) return;
-      const q = query(collection(db, 'doctor_patient_relationships'), where('patientId', '==', user.uid), where('status', '==', 'active'));
-      const snap = await getDocs(q);
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const list = await fetchMedicalTeam(user.uid);
       setTeam(list);
     }
     fetchTeam();

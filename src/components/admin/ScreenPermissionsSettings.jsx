@@ -11,7 +11,7 @@ import DataTable from '../ui/DataTable';
 
 
 
-const AVAILABLE_ROLES = ['admin', 'clinic', 'doctor', 'wholeseller', 'sales_agent', 'staff', 'patient', 'guest', 'support', 'agency', 'logistics'];
+const AVAILABLE_ROLES = ['admin', 'clinic', 'doctor', 'wholesaler', 'sales_agent', 'staff', 'patient', 'guest', 'support', 'agency', 'logistics'];
 
 const DEFAULT_TABS = [
   'dashboard', 'my-profile', 'messages', 'calendar', 'leads', 'orders', 

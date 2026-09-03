@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import * as fb from '../../firebase';
 const db = fb?.db;
 import { resolveVariantPrice } from '../../utils/resolvePrice';
@@ -38,6 +38,15 @@ export function useB2CPricing(cartItemEntries = []) {
         // In a real high-traffic environment, this should ideally be done in a Cloud Function
         // or bundled via an 'in' query. For B2C checkout security, live-fetch is correct.
         
+        // Fetch active B2C supplier for pricing context
+        let activeB2cTenantId = 'lotusland'; // fallback
+        const b2cQ = query(collection(db, 'wholesellers'), where('statusB2C', '==', 'active'), limit(1));
+        const supplierSnap = await getDocs(b2cQ);
+        if (!supplierSnap.empty) {
+           const activeSupplier = supplierSnap.docs[0].data();
+           activeB2cTenantId = activeSupplier.id || activeSupplier.companyName?.toLowerCase().replace(/\s+/g, '-') || 'lotusland';
+        }
+        
         for (const entry of cartItemEntries) {
           const { id, quantity = 1, type, name, products = [] } = entry;
           
@@ -64,12 +73,11 @@ export function useB2CPricing(cartItemEntries = []) {
                 const snap = await getDoc(docRef);
                 if (snap.exists()) {
                   const freshProduct = snap.data();
-                  // Force Lotusland Retail
+                  // Force Active B2C Supplier as Tenant
                   const resolved = resolveVariantPrice(freshProduct, {
                     tier: 'retail',
-                    tenant: { id: 'lotusland' }, // Force Lotusland
-                    // Country code can also be forced if Lotusland relies on it:
-                    // countryCode: 'LL' 
+                    tenant: { id: activeB2cTenantId },
+                    // Country code can also be forced if tenant relies on it:
                   });
                   
                   const retailPrice = resolved.perUnit || 0;
@@ -97,7 +105,7 @@ export function useB2CPricing(cartItemEntries = []) {
                 
                 const resolved = resolveVariantPrice(freshProduct, {
                   tier: 'retail',
-                  tenant: { id: 'lotusland' } // Force Lotusland
+                  tenant: { id: activeB2cTenantId } // Force Active B2C Supplier
                 });
                 
                 const retailPrice = resolved.perUnit || 0;

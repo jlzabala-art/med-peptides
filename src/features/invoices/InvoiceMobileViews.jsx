@@ -27,12 +27,12 @@ function fmtShortDate(date) {
 export default function InvoiceMobileViews({ invoices, selectedInvoice, onSelect }) {
   const [activeTab, setActiveTab] = useState('overview');
 
-  const outstanding = invoices.filter(i => i.status !== 'Paid').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
-  const overdue = invoices.filter(i => i.status === 'Overdue').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
+  const outstanding = invoices.filter(i => i.status !== 'completed').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
+  const overdue = invoices.filter(i => i.status === 'error').reduce((acc, inv) => acc + (inv.grandTotal || 0), 0);
 
   if (selectedInvoice) {
-    const isOverdue = selectedInvoice.status === 'Overdue';
-    const isPaid = selectedInvoice.status === 'Paid';
+    const isOverdue = selectedInvoice.status === 'error';
+    const isPaid = selectedInvoice.status === 'completed';
     const total = selectedInvoice.grandTotal || 0;
     const paid = isPaid ? total : (selectedInvoice.amountPaid || 0);
     const balance = total - paid;
@@ -179,9 +179,9 @@ export default function InvoiceMobileViews({ invoices, selectedInvoice, onSelect
             const status = invoice.status || 'Draft';
             let statusBg = '#f1f5f9';
             let statusColor = '#64748b';
-            if (status === 'Paid') { statusBg = '#d1fae5'; statusColor = '#059669'; }
+            if (status === 'completed') { statusBg = '#d1fae5'; statusColor = '#059669'; }
             else if (status === 'Sent') { statusBg = '#eff6ff'; statusColor = '#2563eb'; }
-            else if (status === 'Overdue') { statusBg = '#fee2e2'; statusColor = '#dc2626'; }
+            else if (status === 'error') { statusBg = '#fee2e2'; statusColor = '#dc2626'; }
             else if (status === 'Partially Paid') { statusBg = '#fef3c7'; statusColor = '#d97706'; }
 
             return (

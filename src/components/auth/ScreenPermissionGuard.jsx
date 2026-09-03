@@ -1,8 +1,6 @@
 import ShieldAlert from "lucide-react/dist/esm/icons/shield-alert";
 import React from 'react';
-import { redirect } from 'next/navigation';
-import { usePermissions } from '../../context/PermissionsContext';
-
+import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { useTranslation } from 'react-i18next';
 
 const AccessDenied = () => {
@@ -20,25 +18,33 @@ const AccessDenied = () => {
   );
 };
 
-const TAB_TO_PERMISSION_MAP = {
+const TAB_TO_ACTION_MAP = {
   // Admin Panel mappings
-  'dashboard': 'canAccessAdminDashboard',
-  'finance': 'canAccessAdminDashboard',
-  'users': 'manageStaff',
-  'invitations': 'manageStaff',
-  'logistics': 'canBulkOrder',
-  'custom-synthesis': 'customSynthesis',
-  'catalogs': 'canAccessAdminDashboard',
-  'ai-builder': 'canAccessAdminDashboard',
-  'access-levels': 'canAccessAdminDashboard',
-  // General views
-  'my-profile': 'canAccessAdminDashboard', // Everyone with admin access
-  'messages': 'canAccessAdminDashboard',
-  'calendar': 'canAccessAdminDashboard',
-  'products': 'canAccessAdminDashboard',
-  'stock': 'canAccessAdminDashboard',
-  'variants': 'canAccessAdminDashboard',
-  'shipping': 'canAccessAdminDashboard',
+  'dashboard': 'view:admin',
+  'finance': 'view:admin',
+  'users': 'manage:staff',
+  'invitations': 'manage:staff',
+  'logistics': 'view:admin',
+  'custom-synthesis': 'view:admin',
+  'catalogs': 'view:admin',
+  'ai-builder': 'view:admin',
+  'access-levels': 'view:admin',
+  
+  // Clinical / Doctor mapping
+  'patients': 'view:patients',
+  'new-prescription': 'create:prescriptions',
+  'prescriptions-history': 'view:prescriptions',
+  'protocols': 'view:protocols',
+  
+  // Universal
+  'my-profile': '*', // Everyone can view their profile
+  'messages': '*',
+  'calendar': '*',
+  'products': 'view:products',
+  'stock': 'view:products',
+  'variants': 'view:products',
+  'shipping': 'view:orders',
+  'orders': 'view:orders',
 };
 
 /**
@@ -47,22 +53,18 @@ const TAB_TO_PERMISSION_MAP = {
  * @param {React.ReactNode} children - The component to render if permitted.
  */
 export default function ScreenPermissionGuard({ tabId, children }) {
-  const { hasPermission, loadingPermissions } = usePermissions();
+  const { can, is } = useRoleAccess();
 
-  if (loadingPermissions) {
-    return (
-      <div style={{ padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-          <div style={{ height: '2rem', width: '2rem', backgroundColor: 'var(--color-border)', borderRadius: '9999px', marginBottom: '1rem' }}></div>
-          <div style={{ height: '1rem', width: '8rem', backgroundColor: 'var(--color-border)', borderRadius: '0.25rem' }}></div>
-        </div>
-      </div>
-    );
+  // If the user is an admin, always allow access to tabs inside panels.
+  if (is('admin')) {
+    return children;
   }
 
-  const permissionKey = TAB_TO_PERMISSION_MAP[tabId] || 'canAccessAdminDashboard'; // default safe
-
-  if (!hasPermission(permissionKey)) {
+  const requiredAction = TAB_TO_ACTION_MAP[tabId];
+  
+  // If no specific action is mapped, we allow it to render, 
+  // relying on PanelShell to block unauthorized panels globally.
+  if (requiredAction && requiredAction !== '*' && !can(requiredAction)) {
     return <AccessDenied />;
   }
 

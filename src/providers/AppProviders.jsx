@@ -12,14 +12,16 @@ import { AuthProvider } from '../context/AuthContext';
 import { TenantProvider } from '../context/TenantContext';
 import { ShopProvider } from '../context/ShopProvider';
 import { CartProvider } from '../context/CartProvider';
-import { PermissionsProvider } from '../context/PermissionsContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import { NotificationProvider } from '../context/NotificationContext';
 import { PreferencesProvider } from '../context/PreferencesContext';
 import { HeaderProvider } from '../context/HeaderContext';
 import { CopilotProvider } from '../context/CopilotContext';
-
 import { ModalProvider } from '../hooks/ui/useModalStack.jsx';
+import { DrawerProvider } from '../context/DrawerContext';
+import { JobQueueProvider } from '../context/JobQueueContext';
+import GlobalDrawerManager from '../components/shared/GlobalDrawerManager';
+import Omnibar from '../components/ui/Omnibar';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,17 +36,39 @@ const queryClient = new QueryClient({
 
 const persister = createAsyncStoragePersister({
   storage: {
-    getItem: async (key) => await get(key),
-    setItem: async (key, value) => await set(key, value),
-    removeItem: async (key) => await del(key),
+    getItem: async (key) => {
+      if (typeof window === 'undefined') return null;
+      try {
+        const val = await get(key);
+        return val ?? null;
+      } catch {
+        try { return localStorage.getItem(key); } catch { return null; }
+      }
+    },
+    setItem: async (key, value) => {
+      if (typeof window === 'undefined') return;
+      try {
+        await set(key, value);
+      } catch {
+        try { localStorage.setItem(key, value); } catch {}
+      }
+    },
+    removeItem: async (key) => {
+      if (typeof window === 'undefined') return;
+      try {
+        await del(key);
+      } catch {
+        try { localStorage.removeItem(key); } catch {}
+      }
+    },
   },
+  maxAge: 1000 * 60 * 60 * 24, // 24 hours
 });
 
 export default function AppProviders({ children }) {
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <AuthProvider>
-        <PermissionsProvider>
           <TenantProvider>
             <ShopProvider>
               <CartProvider>
@@ -55,7 +79,15 @@ export default function AppProviders({ children }) {
                         <PreferencesProvider>
                           <CopilotProvider>
                             <HeaderProvider>
-                              <ModalProvider>{children}</ModalProvider>
+                              <ModalProvider>
+                                <JobQueueProvider>
+                                  <DrawerProvider>
+                                    {children}
+                                    <GlobalDrawerManager />
+                                    <Omnibar />
+                                  </DrawerProvider>
+                                </JobQueueProvider>
+                              </ModalProvider>
                             </HeaderProvider>
                           </CopilotProvider>
                         </PreferencesProvider>
@@ -66,7 +98,6 @@ export default function AppProviders({ children }) {
               </CartProvider>
             </ShopProvider>
           </TenantProvider>
-        </PermissionsProvider>
       </AuthProvider>
     </PersistQueryClientProvider>
   );

@@ -1,0 +1,809 @@
+[
+  {
+    "baseName": "Adipotide",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "adipotide-2mg",
+      "name": "Adipotide 2mg"
+    },
+    "merged": [
+      {
+        "id": "adipotide-5mg",
+        "name": "Adipotide 5mg",
+        "variantsMoved": [
+          "var_europeptides-adipotide-5mg-pre-filled-pen-5",
+          "var_europeptides-adipotide-5mg-vial-4"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "AOD-9604",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "aod-9604-5mg",
+      "name": "AOD-9604 5mg"
+    },
+    "merged": [
+      {
+        "id": "aod-9604-10mg",
+        "name": "AOD-9604 10mg",
+        "variantsMoved": [
+          "var_europeptides-aod-9064-10mg-pre-filled-pen-9",
+          "var_europeptides-aod-9064-10mg-vial-8"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "AOD-9604",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "aod-9604-2-mg-vial",
+      "name": "AOD-9604 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "aod-9604-5-mg-vial",
+        "name": "AOD-9604 5 mg / vial",
+        "variantsMoved": [
+          "var_tiL0yJSQE9OJiv6FyUGB"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Bac Water",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "bac-water-30-ml-bottle",
+      "name": "Bac Water 30 ml / bottle"
+    },
+    "merged": [
+      {
+        "id": "bac-water-3-ml-10-bottles",
+        "name": "Bac Water 3 ml × 10 bottles",
+        "variantsMoved": [
+          "var_xVa33N2GQnslyRnT45o4"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "BPC-157",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "bpc-157-2-mg-vial",
+      "name": "BPC-157 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "bpc-157-5-mg-vial",
+        "name": "BPC-157 5 mg / vial",
+        "variantsMoved": [
+          "var_aNJz5AGFL5B65XPUQyZy"
+        ]
+      },
+      {
+        "id": "bpc-157-10-mg-vial",
+        "name": "BPC-157 10 mg / vial",
+        "variantsMoved": [
+          "var_DT8extU35TfmebnyQFsw"
+        ]
+      },
+      {
+        "id": "bpc-157-20-mg-vial",
+        "name": "BPC-157 20 mg / vial",
+        "variantsMoved": [
+          "var_8HgBWE9YqPOGhs7KSrg4"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Cagrilintide",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "cagrilintide-5-mg-vial",
+      "name": "Cagrilintide 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "cagrilintide-10-mg-vial",
+        "name": "Cagrilintide 10 mg / vial",
+        "variantsMoved": [
+          "var_E4WlHT54ouMuRo01eLtv"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "CJC-1295 without DAC",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "cjc-1295-without-dac-2-mg-vial",
+      "name": "CJC-1295 without DAC 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "cjc-1295-without-dac-5-mg-vial",
+        "name": "CJC-1295 without DAC 5 mg / vial",
+        "variantsMoved": [
+          "var_nQkEp7UK4Kyd35n2ovGq"
+        ]
+      },
+      {
+        "id": "cjc-1295-without-dac-10-mg-vial",
+        "name": "CJC-1295 without DAC 10 mg / vial",
+        "variantsMoved": [
+          "var_yy7QiKCe8fsqNtXKzAaw"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "CJC-1295 without DAC",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "cjc-1295-without-dac-2mg",
+      "name": "CJC-1295 without DAC 2mg"
+    },
+    "merged": [
+      {
+        "id": "cjc-1295-without-dac-5mg",
+        "name": "CJC-1295 without DAC 5mg",
+        "variantsMoved": [
+          "var_europeptides-cjc-1295-without-dac-5mg-pre-filled-pen-35",
+          "var_europeptides-cjc-1295-without-dac-5mg-vial-34"
+        ]
+      },
+      {
+        "id": "cjc-1295-without-dac-10mg",
+        "name": "CJC-1295 without DAC 10mg",
+        "variantsMoved": [
+          "var_europeptides-cjc-1295-without-dac-10mg-pre-filled-pen-31",
+          "var_europeptides-cjc-1295-without-dac-10mg-vial-30"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "DSIP",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "dsip-5-mg-vial",
+      "name": "DSIP 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "dsip-10-mg-vial",
+        "name": "DSIP 10 mg / vial",
+        "variantsMoved": [
+          "var_J8a7L3YtqO3AHz1HZmqV"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "DSIP",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "dsip-5mg",
+      "name": "DSIP 5mg"
+    },
+    "merged": [
+      {
+        "id": "dsip-10mg",
+        "name": "DSIP 10mg",
+        "variantsMoved": [
+          "var_europeptides-dsip-10mg-pre-filled-pen-41",
+          "var_europeptides-dsip-10mg-vial-40"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Epithalon",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "epithalon-10-mg-vial",
+      "name": "Epithalon 10 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "epithalon-30-mg-vial",
+        "name": "Epithalon 30 mg / vial",
+        "variantsMoved": [
+          "var_OmaEXNjIjKuEu9A7hAuw"
+        ]
+      },
+      {
+        "id": "epithalon-50-mg-vial",
+        "name": "Epithalon 50 mg / vial",
+        "variantsMoved": [
+          "var_PQzyphMEs1SwFgGh9EKW"
+        ]
+      },
+      {
+        "id": "epithalon-100-mg-vial",
+        "name": "Epithalon 100 mg / vial",
+        "variantsMoved": [
+          "var_DRI44PiVpSDvYXs6HVbv"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "GHK-Cu -",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "ghk-cu-50-mg",
+      "name": "GHK-Cu - 50 mg"
+    },
+    "merged": [
+      {
+        "id": "ghk-cu-100-mg",
+        "name": "GHK-Cu - 100 mg",
+        "variantsMoved": [
+          "var_europeptides-ghk-cu-100-mg-pre-filled-pen-49",
+          "var_europeptides-ghk-cu-100-mg-vial-48"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "GHK-Cu (Human Copper)",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "ghk-cu-human-copper-50-mg-vial",
+      "name": "GHK-Cu (Human Copper) 50 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "ghk-cu-human-copper-100-mg-vial",
+        "name": "GHK-Cu (Human Copper) 100 mg / vial",
+        "variantsMoved": [
+          "var_fpHWxjFrIbQzcmvmYFC6"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "hCG",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "hcg-5000-iu-vial",
+      "name": "hCG 5000 IU / vial"
+    },
+    "merged": [
+      {
+        "id": "hcg-10000-iu-vial",
+        "name": "hCG 10000 IU / vial",
+        "variantsMoved": [
+          "var_QIDSWfnYDlcMIxSj5rf3"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Hexarelin",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "hexarelin-5mg",
+      "name": "Hexarelin 5mg"
+    },
+    "merged": [
+      {
+        "id": "hexarelin-10mg",
+        "name": "Hexarelin 10mg",
+        "variantsMoved": [
+          "var_europeptides-hexarelin-10mg-pre-filled-pen-63",
+          "var_europeptides-hexarelin-10mg-vial-62"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Hexarelin",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "hexarelin-2-mg-vial",
+      "name": "Hexarelin 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "hexarelin-5-mg-vial",
+        "name": "Hexarelin 5 mg / vial",
+        "variantsMoved": [
+          "var_nnaBICeSZiOwMiKA4nfL"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "HGH",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "hgh-10-iu-vial",
+      "name": "HGH 10 IU / vial"
+    },
+    "merged": [
+      {
+        "id": "hgh-20-iu-vial",
+        "name": "HGH 20 IU / vial",
+        "variantsMoved": [
+          "var_pPJkgCs7PximPRvxaWwc"
+        ]
+      },
+      {
+        "id": "hgh-36-iu-vial",
+        "name": "HGH 36 IU / vial",
+        "variantsMoved": [
+          "var_ZDclRmaZuvtwgzH4CnyU"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "IGF-1 LR3",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "igf-1-lr3-1mg",
+      "name": "IGF-1 LR3 1mg"
+    },
+    "merged": [
+      {
+        "id": "igf-1-lr3-01mg",
+        "name": "IGF-1 LR3 0.1mg",
+        "variantsMoved": [
+          "var_europeptides-igf-1-lr3-0-1mg-pre-filled-pen-71",
+          "var_europeptides-igf-1-lr3-0-1mg-vial-70"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "IGF LR3",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "igf-lr3-1-mg-vial",
+      "name": "IGF LR3 1 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "igf-lr3-01-mg-vial",
+        "name": "IGF LR3 0.1 mg / vial",
+        "variantsMoved": [
+          "var_oQwUKkaRXbi0nQLf1q9d"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Ipamorelin",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "ipamorelin-5mg",
+      "name": "Ipamorelin 5mg"
+    },
+    "merged": [
+      {
+        "id": "ipamorelin-10mg",
+        "name": "Ipamorelin 10mg",
+        "variantsMoved": [
+          "var_europeptides-ipamorelin-10mg-pre-filled-pen-75",
+          "var_europeptides-ipamorelin-10mg-vial-74"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "LDN",
+    "category": "Immune Support",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "ldn",
+      "name": "LDN"
+    },
+    "merged": [
+      {
+        "id": "ldn-05mg",
+        "name": "LDN 0.5mg",
+        "variantsMoved": [
+          "var_ldn-0-5mg"
+        ]
+      },
+      {
+        "id": "ldn-15mg",
+        "name": "LDN 1.5mg",
+        "variantsMoved": [
+          "var_ldn-1-5mg"
+        ]
+      },
+      {
+        "id": "ldn-25mg",
+        "name": "LDN 2.5mg",
+        "variantsMoved": [
+          "var_ldn-2-5mg"
+        ]
+      },
+      {
+        "id": "ldn-45mg",
+        "name": "LDN 4.5mg",
+        "variantsMoved": [
+          "var_ldn-4-5mg"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "MOTS-C",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "mots-c-10-mg-vial",
+      "name": "MOTS-C 10 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "mots-c-40-mg-vial",
+        "name": "MOTS-C 40 mg / vial",
+        "variantsMoved": [
+          "var_J57OUGjjRxlGtwOMn39J"
+        ]
+      },
+      {
+        "id": "mots-c-60-mg-vial",
+        "name": "MOTS-C 60 mg / vial",
+        "variantsMoved": [
+          "var_tiiK77wk0fxdFiv6AP5s"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "NAD+",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "nad-500-mg-vial",
+      "name": "NAD+ 500 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "nad-750-mg-vial",
+        "name": "NAD+ 750 mg / vial",
+        "variantsMoved": [
+          "var_5V2tUaa8mlVpjtgHOZfo"
+        ]
+      },
+      {
+        "id": "nad-1000-mg-vial",
+        "name": "NAD+ 1000 mg / vial",
+        "variantsMoved": [
+          "var_O1OVZrsZBxLfDB04c9fv"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Oxytocin Acetate",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "oxytocin-acetate-2-mg-vial",
+      "name": "Oxytocin Acetate 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "oxytocin-acetate-10-mg-vial",
+        "name": "Oxytocin Acetate 10 mg / vial",
+        "variantsMoved": [
+          "var_dYfPngGRyqCYrByu5wnb"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Pinealon",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "pinealon-16-mg-vial",
+      "name": "Pinealon 16 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "pinealon-25-mg-vial",
+        "name": "Pinealon 25 mg / vial",
+        "variantsMoved": [
+          "var_AYEMpk5YoBwoqCecS43X"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "PT-141",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "pt-141-5-mg-vial",
+      "name": "PT-141 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "pt-141-10-mg-vial",
+        "name": "PT-141 10 mg / vial",
+        "variantsMoved": [
+          "var_E3rHioKpzTQwTW7dls82"
+        ]
+      },
+      {
+        "id": "pt-141-20-mg-vial",
+        "name": "PT-141 20 mg / vial",
+        "variantsMoved": [
+          "var_ni25GTZnfloDOMrccLs3"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Retatrutide",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "retatrutide-5-mg-vial",
+      "name": "Retatrutide 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "retatrutide-10-mg-vial",
+        "name": "Retatrutide 10 mg / vial",
+        "variantsMoved": [
+          "var_IPtAZObESNHyzykD2SNO"
+        ]
+      },
+      {
+        "id": "retatrutide-20-mg-vial",
+        "name": "Retatrutide 20 mg / vial",
+        "variantsMoved": [
+          "var_kIo2z2xs1BBjjCY7cr2f"
+        ]
+      },
+      {
+        "id": "retatrutide-30-mg-vial",
+        "name": "Retatrutide 30 mg / vial",
+        "variantsMoved": [
+          "var_LpN4RmUWBiLlMzHJ2YCM"
+        ]
+      },
+      {
+        "id": "retatrutide-40-mg-vial",
+        "name": "Retatrutide 40 mg / vial",
+        "variantsMoved": [
+          "var_wD0BLe1wWbjcCh9ANfak"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Selank",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "selank-5-mg-vial",
+      "name": "Selank 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "selank-10-mg-vial",
+        "name": "Selank 10 mg / vial",
+        "variantsMoved": [
+          "var_xtSPr35V2oSnrbqVwT0u"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Semaglutide",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "semaglutide-2-mg-vial",
+      "name": "Semaglutide 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "semaglutide-5-mg-vial",
+        "name": "Semaglutide 5 mg / vial",
+        "variantsMoved": [
+          "var_BjttoFe0eUK1AC755o9P"
+        ]
+      },
+      {
+        "id": "semaglutide-10-mg-vial",
+        "name": "Semaglutide 10 mg / vial",
+        "variantsMoved": [
+          "var_v2Y2eQfVgeeflxOH8PXf"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Sermorelin",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "sermorelin-5-mg",
+      "name": "Sermorelin 5 mg"
+    },
+    "merged": [
+      {
+        "id": "sermorelin-10-mg",
+        "name": "Sermorelin 10 mg",
+        "variantsMoved": [
+          "var_europeptides-sermorelin-10-mg-pre-filled-pen-115",
+          "var_europeptides-sermorelin-10-mg-vial-114"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Sermorelin",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "sermorelin-5-mg-vial",
+      "name": "Sermorelin 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "sermorelin-10-mg-vial",
+        "name": "Sermorelin 10 mg / vial",
+        "variantsMoved": [
+          "var_yF8ZSxAUsgNfQm8VuFqV"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "SS-31",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "ss-31-10-mg-vial",
+      "name": "SS-31 10 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "ss-31-50-mg-vial",
+        "name": "SS-31 50 mg / vial",
+        "variantsMoved": [
+          "var_f6zybiInVr657tiVEPLf"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "TB-500 (Thymosin B4 Acetate)",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "tb-500-thymosin-b4-acetate-5mg",
+      "name": "TB-500 (Thymosin B4 Acetate) 5mg"
+    },
+    "merged": [
+      {
+        "id": "tb-500-thymosin-b4-acetate-10mg",
+        "name": "TB-500 (Thymosin B4 Acetate) 10mg",
+        "variantsMoved": [
+          "var_europeptides-tb500-thymosin-b4-acetate-10mg-pre-filled-pen-127",
+          "var_europeptides-tb500-thymosin-b4-acetate-10mg-vial-126"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Tesamorelin",
+    "category": "unknown",
+    "supplierId": "supplier-europeptides",
+    "keeper": {
+      "id": "tesamorelin-2mg",
+      "name": "Tesamorelin 2mg"
+    },
+    "merged": [
+      {
+        "id": "tesamorelin-10mg",
+        "name": "Tesamorelin 10mg",
+        "variantsMoved": [
+          "var_europeptides-tesamorelin-10mg-pre-filled-pen-131",
+          "var_europeptides-tesamorelin-10mg-vial-130"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Thymosin β4 (TB-500)",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "thymosin-4-tb-500-2-mg-vial",
+      "name": "Thymosin β4 (TB-500) 2 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "thymosin-4-tb-500-5-mg-vial",
+        "name": "Thymosin β4 (TB-500) 5 mg / vial",
+        "variantsMoved": [
+          "var_JRbeZsSdLnZy1072KCNn"
+        ]
+      },
+      {
+        "id": "thymosin-4-tb-500-10-mg-vial",
+        "name": "Thymosin β4 (TB-500) 10 mg / vial",
+        "variantsMoved": [
+          "var_wlaSqbkETu8hyxs7AxFG"
+        ]
+      }
+    ]
+  },
+  {
+    "baseName": "Tirzepatide",
+    "category": "Peptides",
+    "supplierId": "unknown",
+    "keeper": {
+      "id": "tirzepatide-5-mg-vial",
+      "name": "Tirzepatide 5 mg / vial"
+    },
+    "merged": [
+      {
+        "id": "tirzepatide-10-mg-vial",
+        "name": "Tirzepatide 10 mg / vial",
+        "variantsMoved": [
+          "var_gTB8jcFY6pkLpo7uyqmy"
+        ]
+      },
+      {
+        "id": "tirzepatide-15-mg-vial",
+        "name": "Tirzepatide 15 mg / vial",
+        "variantsMoved": [
+          "var_sWwBWNhBE5ChgRYFAkx8"
+        ]
+      },
+      {
+        "id": "tirzepatide-30-mg-vial",
+        "name": "Tirzepatide 30 mg / vial",
+        "variantsMoved": [
+          "var_WQ2YE1ov5g1q5coIpwKM"
+        ]
+      },
+      {
+        "id": "tirzepatide-60-mg-vial",
+        "name": "Tirzepatide 60 mg / vial",
+        "variantsMoved": [
+          "var_r0r4AEdGGIc4HqzbNAd8"
+        ]
+      }
+    ]
+  }
+]

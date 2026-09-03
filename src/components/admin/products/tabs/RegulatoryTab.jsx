@@ -1,17 +1,17 @@
 import React from 'react';
 import { Card, StatusChip, Button } from '../../../ui';
-import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers } from '@/lib/icons';
+import { Box, PackageOpen, DollarSign, Activity, FileText, CheckCircle2, AlertTriangle, Building, Truck, Globe, ExternalLink, RefreshCw, Layers, UploadCloud } from '@/lib/icons';
 
 export default function RegulatoryTab({ form, setForm }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* Compliance Dashboard Card */}
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Dashboard</h3>
+        <Card padding="md" style={{ backgroundColor: '#0f172a', borderColor: '#e2e8f0' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Compliance Dashboard</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Global Registration Status</label>
-              <select value={form.registrationStatus} onChange={e => setForm({...form, registrationStatus: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Global Registration Status</label>
+              <select value={form.registrationStatus} onChange={e => setForm({...form, registrationStatus: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#0f172a' }}>
                 <option value="Registered">Registered</option>
                 <option value="Pending">Pending</option>
                 <option value="Rejected">Rejected</option>
@@ -19,13 +19,13 @@ export default function RegulatoryTab({ form, setForm }) {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Expiry Date of current license</label>
-              <input type="date" value={form.expiryDate} onChange={e => setForm({...form, expiryDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff' }} />
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Expiry Date of current license</label>
+              <input type="date" value={form.expiryDate} onChange={e => setForm({...form, expiryDate: e.target.value})} style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#0f172a' }} />
             </div>
           </div>
 
           {/* Regional country matrix flags / badges */}
-          <span style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>Middle East & Global Markets Registration Status</span>
+          <span style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>Middle East & Global Markets Registration Status</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
             {[
               { id: 'reg_uae', label: 'UAE Market' },
@@ -40,13 +40,13 @@ export default function RegulatoryTab({ form, setForm }) {
               <div key={market.id} style={{
                 padding: '10px 8px',
                 borderRadius: '6px',
-                backgroundColor: '#1f2937',
+                backgroundColor: '#e2e8f0',
                 border: '1px solid #374151',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '4px'
               }}>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>{market.label}</span>
+                <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{market.label}</span>
                 <select
                   value={form[market.id]}
                   onChange={e => setForm({ ...form, [market.id]: e.target.value })}
@@ -72,9 +72,9 @@ export default function RegulatoryTab({ form, setForm }) {
         </Card>
 
         {/* Certificate matrices */}
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+        <Card padding="md" style={{ backgroundColor: '#0f172a', borderColor: '#e2e8f0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Compliance Documents Checklist</h3>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#1e293b' }}>Compliance Documents Checklist</h3>
             <button
               onClick={() => triggerAiAction('parse_coa')}
               style={{
@@ -106,13 +106,13 @@ export default function RegulatoryTab({ form, setForm }) {
               <div key={doc.id} style={{
                 padding: '10px 8px',
                 borderRadius: '6px',
-                backgroundColor: '#1f2937',
+                backgroundColor: '#e2e8f0',
                 border: '1px solid #374151',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '4px'
               }}>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>{doc.label}</span>
+                <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{doc.label}</span>
                 <select
                   value={form[doc.id]}
                   onChange={e => setForm({ ...form, [doc.id]: e.target.value })}
@@ -121,7 +121,7 @@ export default function RegulatoryTab({ form, setForm }) {
                     fontSize: '0.75rem',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: form[doc.id] === 'Approved' ? '#34d399' : form[doc.id] === 'Pending' ? '#f59e0b' : form[doc.id] === 'Expired' ? '#ef4444' : '#94a3b8',
+                    color: form[doc.id] === 'Approved' ? '#34d399' : form[doc.id] === 'Pending' ? '#f59e0b' : form[doc.id] === 'Expired' ? '#ef4444' : '#64748b',
                     fontWeight: 700,
                     outline: 'none',
                     cursor: 'pointer'
@@ -137,8 +137,8 @@ export default function RegulatoryTab({ form, setForm }) {
           </div>
 
           <div style={{ marginTop: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '4px' }}>Internal Compliance Notes</label>
-            <textarea rows={3} value={form.regulatoryNotes} onChange={e => setForm({...form, regulatoryNotes: e.target.value})} placeholder="Notes regarding inspections, approvals..." style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#fff', resize: 'vertical' }} />
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Internal Compliance Notes</label>
+            <textarea rows={3} value={form.regulatoryNotes} onChange={e => setForm({...form, regulatoryNotes: e.target.value})} placeholder="Notes regarding inspections, approvals..." style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #334155', borderRadius: '6px', fontSize: '0.9rem', backgroundColor: '#0f172a', color: '#0f172a', resize: 'vertical' }} />
           </div>
         </Card>
       </div>

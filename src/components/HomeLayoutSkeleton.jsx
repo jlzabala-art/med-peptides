@@ -14,7 +14,7 @@
  *  - Mobile + desktop both look clean.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styles from './HomeLayoutSkeleton.module.css';
 
 // ─── Shimmer CSS ──────────────────────────────────────────────────────────────
@@ -210,18 +210,24 @@ function SectionSkeleton({ id }) {
  * @param {Array}    props.sections  — enabled sections sorted by order (from DEFAULT_LAYOUT)
  */
 export default function HomeLayoutSkeleton({ sections = [] }) {
+  const [mounted, setMounted] = React.useState(false);
   useShimmerStyles();
-console.log('sections', sections, typeof sections, Array.isArray(sections));
+
+  React.useEffect(() => { setMounted(true); }, []);
+
+  // Only render on client to avoid SSR/CSR hydration mismatch
+  // caused by dynamic shimmer styles injected via useEffect.
+  if (!mounted) return null;
 
   return (
     <div className={styles.wrapper} aria-label="Loading home page…">
       {Array.isArray(sections) ? sections.map((section, i) => (
-  <div key={i} className={styles.sectionWrapper}>
-    {(Array.isArray(section) ? section : []).map((s, idx) => (
-      <Skel key={idx} h={s.h} w={s.w} br={s.br} mb={s.mb} style={s.style} />
-    ))}
-  </div>
-)) : null}
+        <div key={i} className={styles.sectionWrapper}>
+          {(Array.isArray(section) ? section : []).map((s, idx) => (
+            <Skel key={idx} h={s.h} w={s.w} br={s.br} mb={s.mb} style={s.style} />
+          ))}
+        </div>
+      )) : null}
     </div>
   );
 }

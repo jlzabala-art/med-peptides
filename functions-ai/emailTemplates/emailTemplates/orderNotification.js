@@ -24,7 +24,34 @@ function buildOrderNotificationHtml(order) {
     shippingAddress = {},
     notes = '',
     paymentMethod = '',
+    status = 'pending',
   } = order;
+
+  const s = (status || order.shippingStatus || order.finalStatus || 'pending').toLowerCase();
+  let statusBg = '#fffbeb'; // Yellow/Orange default (pending, draft, awaiting, processing)
+  let statusColor = '#d97706';
+  
+  if (['active', 'approved', 'reconciled', 'published', 'delivered', 'completed', 'shipped'].includes(s)) {
+    statusBg = '#f0fdf4';
+    statusColor = '#16a34a';
+  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled'].includes(s)) {
+    statusBg = '#fef2f2';
+    statusColor = '#dc2626';
+  } else if (['inactive', 'archived', 'disabled'].includes(s)) {
+    statusBg = '#f1f5f9';
+    statusColor = '#64748b';
+  } else if (['po_created', 'synced', 'converted'].includes(s)) {
+    statusBg = '#eff6ff';
+    statusColor = '#2563eb';
+  }
+  
+  const statusLabel = s.charAt(0).toUpperCase() + s.slice(1);
+
+  const resolvedShipping = shipping || order.shippingFee || 0;
+  const custName = customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || order.customerName || order.patientName || '—';
+  const custEmail = customer.email || order.customerEmail || order.patientEmail || '—';
+  const custPhone = customer.phone || order.customerPhone || shippingAddress.phone || '';
+  const custInst = customer.institution || order.customerInstitution || '';
 
   // Resolve payment method to a human-readable label
   const paymentLabel =
@@ -33,8 +60,13 @@ function buildOrderNotificationHtml(order) {
     : paymentMethod ? paymentMethod
     : '—';
 
-  const fmt = (amount) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  const fmt = (amount) => {
+    // If it's already a formatted string from CSV (like "219.00€" or "100$"), just return it.
+    if (typeof amount === 'string') return amount;
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  };
+
+  const resolvedTotal = total || order.price || 0;
 
   // createdAt can be a Firestore Timestamp, a JS Date, or an ISO string
   let dateObj;
@@ -63,6 +95,32 @@ function buildOrderNotificationHtml(order) {
       </tr>`
     )
     .join('');
+
+  const productsSection = items.length > 0 
+    ? `
+      <!-- Products table -->
+      <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Products</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:24px;">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th class="col-product" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:left;font-weight:600;">Product</th>
+            <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:center;font-weight:600;">Qty.</th>
+            <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Unit Price</th>
+            <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsRows}
+        </tbody>
+      </table>
+    ` 
+    : order.itemCount ? `
+      <!-- Imported Order Fallback -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Imported Order Summary</p>
+        <p style="margin:0;font-size:14px;color:#475569;">This order contains <strong>${order.itemCount} items</strong>. Details are available in the attached prescription or admin panel.</p>
+      </div>
+    ` : '';
 
   const addressLine = [
     shippingAddress.street,
@@ -126,14 +184,20 @@ function buildOrderNotificationHtml(order) {
               <!-- Meta row -->
               <table width="100%" cellpadding="0" cellspacing="0" class="meta-row" style="margin-bottom:28px;">
                 <tr>
-                  <td style="width:50%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
+                  <td style="width:33%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
                     <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Date</p>
                     <p style="margin:0;font-size:14px;color:#1e293b;font-weight:500;">${dateStr}</p>
                   </td>
-                  <td style="width:50%;vertical-align:top;padding-left:12px;padding-bottom:8px;">
+                  <td style="width:33%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
                     <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Status</p>
-                    <span style="display:inline-block;background:#dcfce7;color:#166534;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">Pending confirmation</span>
+                    <span style="display:inline-block;background:${statusBg};color:${statusColor};font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">${statusLabel}</span>
                   </td>
+                  ${order.supplier ? `
+                  <td style="width:33%;vertical-align:top;padding-left:12px;padding-bottom:8px;">
+                    <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Supplier</p>
+                    <span style="display:inline-block;background:#f8fafc;color:#475569;border:1px solid #cbd5e1;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">${order.supplier}</span>
+                  </td>
+                  ` : ''}
                 </tr>
               </table>
 
@@ -143,41 +207,29 @@ function buildOrderNotificationHtml(order) {
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-bottom:8px;">
-                      <p style="margin:0;font-size:14px;color:#1e293b;"><strong>${customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || '—'}</strong></p>
+                      <p style="margin:0;font-size:14px;color:#1e293b;"><strong>${custName}</strong></p>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding-bottom:6px;">
-                      <p style="margin:0;font-size:13px;color:#475569;">📧 ${customer.email || '—'}</p>
+                      <p style="margin:0;font-size:13px;color:#475569;">📧 ${custEmail}</p>
                     </td>
                   </tr>
-                  ${customer.phone ? `<tr><td style="padding-bottom:6px;"><p style="margin:0;font-size:13px;color:#475569;">📞 ${customer.phone}</p></td></tr>` : ''}
-                  ${customer.institution ? `<tr><td><p style="margin:0;font-size:13px;color:#475569;">🏥 ${customer.institution}</p></td></tr>` : ''}
+                  ${custPhone ? `<tr><td style="padding-bottom:6px;"><p style="margin:0;font-size:13px;color:#475569;">📞 ${custPhone}</p></td></tr>` : ''}
+                  ${custInst ? `<tr><td><p style="margin:0;font-size:13px;color:#475569;">🏥 ${custInst}</p></td></tr>` : ''}
                   ${addressLine ? `<tr><td style="padding-top:10px;"><p style="margin:0;font-size:13px;color:#475569;">📍 ${addressLine}</p></td></tr>` : ''}
                 </table>
               </div>
 
-              <!-- Products table -->
-              <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Products</p>
-              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:24px;">
-                <thead>
-                  <tr style="background:#f1f5f9;">
-                    <th class="col-product" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:left;font-weight:600;">Product</th>
-                    <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:center;font-weight:600;">Qty.</th>
-                    <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Unit Price</th>
-                    <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsRows}
-                </tbody>
-              </table>
+              ${productsSection}
 
+              ${paymentLabel !== '—' ? `
               <!-- Payment Method -->
               <div class="pay-row" style="background:#f0f7ff;border-radius:10px;padding:16px 24px;margin-bottom:24px;border:1px solid #bfdbfe;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                 <span style="font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">💳 Payment Method</span>
                 <span style="margin-left:auto;font-size:14px;font-weight:600;color:#1e3a5f;background:#dbeafe;padding:4px 14px;border-radius:20px;">${paymentLabel}</span>
               </div>
+              ` : ''}
 
               <!-- Totals -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
@@ -187,14 +239,14 @@ function buildOrderNotificationHtml(order) {
                 </tr>
                 <tr>
                   <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Shipping</p></td>
-                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${shipping === 0 ? 'Free' : fmt(shipping)}</p></td>
+                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${resolvedShipping === 0 ? 'Free' : fmt(resolvedShipping)}</p></td>
                 </tr>
                 <tr>
                   <td style="padding:14px 0 6px;border-top:2px solid #003666;">
                     <p style="margin:0;font-size:16px;font-weight:700;color:#003666;">TOTAL</p>
                   </td>
                   <td style="padding:14px 0 6px;border-top:2px solid #003666;text-align:right;">
-                    <p style="margin:0;font-size:20px;font-weight:700;color:#003666;">${fmt(total)}</p>
+                    <p style="margin:0;font-size:20px;font-weight:700;color:#003666;">${fmt(resolvedTotal)}</p>
                   </td>
                 </tr>
               </table>
@@ -204,6 +256,16 @@ function buildOrderNotificationHtml(order) {
               <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
                 <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Notas del cliente</p>
                 <p style="margin:0;font-size:13px;color:#78350f;">${notes}</p>
+              </div>` : ''}
+
+              ${order.prescriptionDocLink ? `
+              <!-- Prescription Link -->
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:24px;text-align:center;">
+                <p style="margin:0 0 10px;font-size:13px;color:#475569;">This order includes a prescription document.</p>
+                <a href="${order.prescriptionDocLink}" target="_blank"
+                   style="display:inline-block;background:#f1f5f9;color:#0f172a;text-decoration:none;font-size:14px;font-weight:600;padding:10px 20px;border-radius:6px;border:1px solid #cbd5e1;">
+                  📄 View Prescription Document
+                </a>
               </div>` : ''}
 
               <!-- CTA button -->

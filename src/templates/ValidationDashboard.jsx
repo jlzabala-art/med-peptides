@@ -27,6 +27,7 @@ import DataTable from '../components/ui/DataTable';
 
 
 import { runValidationSuite } from '../validation/engine/runner';
+import { toast } from 'react-hot-toast';
 
 export default function ValidationDashboard({ products }) {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function ValidationDashboard({ products }) {
 
   const handleRunTests = async () => {
     if (!products || products.length === 0) {
-      alert("No products loaded. Cannot run validation.");
+      toast("No products loaded. Cannot run validation.");
       return;
     }
 

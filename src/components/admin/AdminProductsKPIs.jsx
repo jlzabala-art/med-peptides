@@ -5,6 +5,7 @@ import Activity from 'lucide-react/dist/esm/icons/activity';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
+import MetricCard from '@/components/ui/MetricCard';
 
 export function UniformKPIs({ products, globalMetrics }) {
   const total = globalMetrics?.total ?? products.length;
@@ -14,66 +15,35 @@ export function UniformKPIs({ products, globalMetrics }) {
   const lowStock = globalMetrics?.lowStock ?? products.filter((p) => p.stock > 0 && p.stock <= (p.minStock || 5)).length;
 
   const stats = [
-    { label: 'Total Products', value: total, color: '#3b82f6', icon: <Package size={16} /> },
-    { label: 'Active', value: active, color: '#10b981', icon: <Activity size={16} /> },
-    { label: 'Draft / Inactive', value: draft, color: '#6b7280', icon: <Clock size={16} /> },
-    { label: 'Low Stock', value: lowStock, color: '#f59e0b', icon: <AlertTriangle size={16} /> },
-    { label: 'Out of Stock', value: outOfStock, color: '#ef4444', icon: <AlertCircle size={16} /> },
+    { label: 'Total Products', value: total, color: '#3b82f6', icon: Package, filter: 'all' },
+    { label: 'Active', value: active, color: '#10b981', icon: Activity, filter: 'active' },
+    { label: 'Draft / Inactive', value: draft, color: '#6b7280', icon: Clock, filter: 'draft' },
+    { label: 'Stock Issues', value: lowStock + outOfStock, color: '#f59e0b', icon: AlertTriangle, filter: 'low_stock' },
   ];
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '1rem',
-        overflowX: 'auto',
-        paddingBottom: '0.5rem',
-        marginBottom: '1.5rem',
-      }}
-    >
+    <div className="kpi-scroll-row" style={{ marginBottom: '1.5rem' }}>
       {stats.map((s, i) => (
-        <div
+        <MetricCard
           key={i}
-          style={{
-            flex: '1 1 200px',
-            minWidth: 180,
-            background: 'white',
-            padding: '1.25rem',
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+          title={s.label}
+          value={s.value}
+          icon={s.icon}
+          color={s.color}
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              const url = new URL(window.location.href);
+              if (s.filter === 'all') {
+                url.searchParams.delete('status');
+              } else {
+                url.searchParams.set('status', s.filter);
+              }
+              window.history.pushState({}, '', url.toString());
+              window.dispatchEvent(new Event('popstate'));
+            }
           }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b' }}>
-            <div
-              style={{
-                color: s.color,
-                background: s.color + '15',
-                padding: '0.4rem',
-                borderRadius: '8px',
-                display: 'flex',
-              }}
-            >
-              {s.icon}
-            </div>
-            <span
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              {s.label}
-            </span>
-          </div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
-            {s.value}
-          </div>
-        </div>
+          className="clickable-card"
+        />
       ))}
     </div>
   );

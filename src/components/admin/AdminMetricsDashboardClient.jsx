@@ -41,6 +41,7 @@ import MessageSquare from 'lucide-react/dist/esm/icons/message-square';
 import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal';
 import React, { useState, useEffect } from 'react';
 import { formatAEDtoDual } from '../../utils/currencies';
+import { fetchDashboardMetricsAction } from '../../actions/dashboardActions';
 import {
   collection,
   doc,
@@ -80,24 +81,24 @@ const ROLE_PRESETS = {
     kpiOrder: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
   },
   Finance: {
-    visibleKPIs: ['revenue', 'openOrders', 'pendingApprovals'],
+    visibleKPIs: ['revenue', 'grossProfit', 'cashPosition', 'openOrders'],
     visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['revenue', 'openOrders', 'pendingApprovals'],
+    kpiOrder: ['revenue', 'grossProfit', 'cashPosition', 'openOrders'],
   },
   Purchasing: {
-    visibleKPIs: ['openOrders', 'openRFQs'],
+    visibleKPIs: ['openRFQs', 'supplierHealth', 'openOrders', 'revenue'],
     visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['openOrders', 'openRFQs'],
+    kpiOrder: ['openRFQs', 'supplierHealth', 'openOrders', 'revenue'],
   },
   Sales: {
-    visibleKPIs: ['revenue', 'openOrders', 'openRFQs'],
+    visibleKPIs: ['pipelineValue', 'revenue', 'openOrders', 'openRFQs'],
     visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['revenue', 'openOrders', 'openRFQs'],
+    kpiOrder: ['pipelineValue', 'revenue', 'openOrders', 'openRFQs'],
   },
   Operations: {
-    visibleKPIs: ['openOrders', 'pendingApprovals'],
+    visibleKPIs: ['systemUptime', 'openOrders', 'pendingApprovals', 'openRFQs'],
     visibleWidgets: ['todayPriorities', 'aiWorkspace'],
-    kpiOrder: ['openOrders', 'pendingApprovals'],
+    kpiOrder: ['systemUptime', 'openOrders', 'pendingApprovals', 'openRFQs'],
   },
   Clinical: {
     visibleKPIs: ['activePatients', 'activeProtocols', 'pendingPrescriptions', 'dueFollowUps'],
@@ -136,16 +137,16 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [isExecutiveMode, setIsExecutiveMode] = useState(true);
 
-  // Core Data Metrics
-  const [loading, setLoading] = useState(true);
+  // Core Data Metrics (Initialized synchronously from Server Component prefetch)
+  const [loading, setLoading] = useState(!initialMetricsData?.metrics);
   const [timeFilter, setTimeFilter] = useState('7d');
-  const [dbLatency, setDbLatency] = useState('24ms');
+  const [dbLatency, setDbLatency] = useState(initialMetricsData?.metrics ? '12ms' : '24ms');
   const [aiConsumption, setAiConsumption] = useState(1.42);
-  const [activeUsersCount, setActiveUsersCount] = useState(4);
-  const [recentRegistrations, setRecentRegistrations] = useState([]);
+  const [activeUsersCount, setActiveUsersCount] = useState(initialMetricsData?.metrics?.activeUsersCount || 0);
+  const [recentRegistrations, setRecentRegistrations] = useState(initialMetricsData?.recentRegistrations || []);
 
-  // Metrics values initialized to 0 (real data source)
-  const [metrics, setMetrics] = useState({
+  // Metrics values initialized synchronously from Server Action
+  const [metrics, setMetrics] = useState(initialMetricsData?.metrics || {
     revenue: 0,
     openOrders: 0,
     pendingApprovals: 0,
@@ -160,7 +161,7 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
   });
 
   // Priorities list built dynamically from real counts
-  const [priorities, setPriorities] = useState([]);
+  const [priorities, setPriorities] = useState(initialMetricsData?.priorities || []);
 
   // AI Command Console simulation helper
   const handleAiAsk = async (queryText) => {
@@ -208,135 +209,25 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
     const startDbTime = performance.now();
     async function loadData() {
       try {
-        const { getCountFromServer, query, collection, where } = await import('firebase/firestore');
+        const data = await fetchDashboardMetricsAction();
         
-        const [
-          usersCountSnap,
-          rfqsCountSnap,
-          protocolsCountSnap,
-          pendingRxSnap,
-        ] = await Promise.all([
-          getCountFromServer(collection(db, 'users')),
-          getCountFromServer(collection(db, 'purchase_rfqs')),
-          getCountFromServer(collection(db, 'protocols')),
-          getCountFromServer(query(collection(db, 'prescriptions'), where('status', 'in', ['draft', 'pending', 'review_required']))),
-        ]);
-
-        const rfqsSize = rfqsCountSnap.data().count;
-        const activeProtocolsCount = protocolsCountSnap.data().count;
-        const pendingPrescriptionsCount = pendingRxSnap.data().count;
-        const activeUsersCount = usersCountSnap.data().count;
-
-        // Fetch max 100 for basic client-side loop sums
-        const usersSnap = await getDocs(query(collection(db, 'users'), limit(100)));
-        const ordersSnap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(100)));
-
+        if (data && data.metrics) {
+          setMetrics(data.metrics);
+          setPriorities(data.priorities || []);
+          setRecentRegistrations(data.recentRegistrations || []);
+          setActiveUsersCount(data.metrics.activeUsersCount || 0);
+        }
+        
         const latency = Math.round(performance.now() - startDbTime);
         setDbLatency(`${latency}ms`);
-
-        // Compute real statistics
-        let totalRevenue = 0;
-        let openOrdersCount = 0;
-        ordersSnap.forEach((doc) => {
-          const data = doc.data();
-          if (data.status !== 'cancelled') {
-            totalRevenue += Number(data.total || data.subtotal || 0);
-          }
-          if (['pending', 'processing', 'shipped'].includes(data.status)) {
-            openOrdersCount++;
-          }
-        });
-
-        let pendingApprovalsCount = 0;
-        let activePatientsCount = 0;
-        usersSnap.forEach((doc) => {
-          const data = doc.data();
-          if (data.approved !== true && data.role !== 'admin') {
-            pendingApprovalsCount++;
-          } else if (data.approved === true && data.role !== 'admin') {
-            activePatientsCount++;
-          }
-        });
-
-        // Set state metrics
-        setMetrics({
-          revenue: totalRevenue,
-          openOrders: openOrdersCount,
-          pendingApprovals: pendingApprovalsCount,
-          openRFQs: rfqsSize,
-          grossProfit: 0,
-          cashPosition: 0,
-          aiAlerts: 0,
-          activePatients: activePatientsCount, // from limited snapshot
-          activeProtocols: activeProtocolsCount,
-          pendingPrescriptions: pendingPrescriptionsCount,
-          dueFollowUps: 0,
-        });
-
-        // Load active users count
-        setActiveUsersCount(activeUsersCount);
-
-        // Dynamically build the priorities queue based on real data
-        const realPriorities = [];
-        let pId = 1;
-        if (pendingApprovalsCount > 0) {
-          realPriorities.push({
-            id: pId++,
-            text: `${pendingApprovalsCount} users pending approval`,
-            type: 'approval',
-            priority: 'high',
-            link: '/admin/users',
-            detail: `${pendingApprovalsCount} user profiles are registered but not approved to access clinical catalogs.`,
-          });
-        }
-        if (rfqsSize > 0) {
-          realPriorities.push({
-            id: pId++,
-            text: `${rfqsSize} RFQs require attention`,
-            type: 'rfq',
-            priority: 'critical',
-            link: '/admin/rfq',
-            detail: `${rfqsSize} purchasing requests for quotation are open and require manufacturer coordination.`,
-          });
-        }
-        if (openOrdersCount > 0) {
-          realPriorities.push({
-            id: pId++,
-            text: `${openOrdersCount} pending orders require processing`,
-            type: 'order',
-            priority: 'high',
-            link: '/admin/orders',
-            detail: `${openOrdersCount} customer orders are currently pending fulfillment.`,
-          });
-        }
-        if (pendingPrescriptionsCount > 0) {
-          realPriorities.push({
-            id: pId++,
-            text: `${pendingPrescriptionsCount} prescriptions awaiting review`,
-            type: 'prescription',
-            priority: 'critical',
-            link: '/admin/prescriptions',
-            detail: `${pendingPrescriptionsCount} clinical prescriptions are pending your review and approval.`,
-          });
-        }
-
-        if (realPriorities.length > 0) {
-          setPriorities(realPriorities);
-        }
-        
-        const recentRegs = usersSnap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-          .slice(0, 5);
-        setRecentRegistrations(recentRegs);
         setLoading(false);
       } catch (err) {
-        console.warn('Using fallback mock data for command center', err);
+        console.warn('Error fetching dashboard data via Server Action', err);
         setLoading(false);
       }
     }
     loadData();
-  }, [timeFilter]);
+  }, [initialMetricsData]);
 
   const handleApplyPreset = (presetName) => {
     setCurrentRolePreset(presetName);
@@ -428,6 +319,10 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                   background: '#f1f5f9',
                   borderRadius: '8px',
                   padding: '2px',
+                  overflowX: 'auto',
+                  maxWidth: '100%',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
                 }}
               >
                 {Object.keys(ROLE_PRESETS).map((preset) => (
@@ -445,6 +340,8 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                       boxShadow: currentRolePreset === preset ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}
                   >
                     {preset}
@@ -586,241 +483,263 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                 </div>
               </div>
             </div>
+
           </div>
         )}
       </div>
 
       {/* ── 0. AI EXECUTIVE SUMMARY WIDGET ────────────────────────────── */}
-      <AdminExecutiveSummaryWidget 
-        metrics={metrics} 
-        visibleKPIs={visibleKPIs}
-        currentRolePreset={currentRolePreset}
-      />
+      {loading ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{ height: '110px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+          ))}
+        </div>
+      ) : (
+        <AdminExecutiveSummaryWidget 
+          metrics={metrics} 
+          visibleKPIs={visibleKPIs}
+          currentRolePreset={currentRolePreset}
+        />
+      )}
 
       {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
-      <div 
-        className={`${styles.mainPortalGrid} ${(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) ? styles.withSidebar : styles.fullWidth}`}
-      >
-        {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
-        <div className={styles.widgetsCol}>
-          {/* AI COMMAND CENTER (ASK ATLAS) */}
-          <AiCommandConsole onAskQuestion={handleAiAsk} />
+      <div className={styles.workspaceGrid}>
+        {loading ? (
+          <>
+            <div className={styles.workspaceColLeft} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+              <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+            </div>
+            <div className={styles.workspaceColRight} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ height: '450px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+              <div style={{ height: '300px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={`${styles.mainPortalGrid} ${(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) ? styles.withSidebar : styles.fullWidth}`}>
+              {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
+              <div className={styles.widgetsCol}>
+                {/* AI COMMAND CENTER (ASK ATLAS) */}
+                <AiCommandConsole onAskQuestion={handleAiAsk} />
 
-          {/* ── 2. TODAY'S PRIORITIES QUEUE ─────────────────────────────── */}
-          {visibleWidgets.includes('todayPriorities') && (
-            <TodayPrioritiesQueue
-              priorities={priorities}
-              onAction={(item) => router.push(item.link)}
-            />
-          )}
+                {/* ── 2. TODAY'S PRIORITIES QUEUE ─────────────────────────────── */}
+                {visibleWidgets.includes('todayPriorities') && (
+                  <TodayPrioritiesQueue
+                    priorities={priorities}
+                    onAction={(item) => router.push(item.link)}
+                  />
+                )}
 
-          {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
-          {visibleWidgets.includes('businessHealth') && <HealthMatrixWidget />}
+                {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
+                {visibleWidgets.includes('businessHealth') && <HealthMatrixWidget />}
 
-          {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
-          {visibleWidgets.includes('financeTasks') && (
-            <FinanceTasksHub
-              onAction={(type, detail) => {
-                notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
-              }}
-            />
-          )}
-
-
-
-          {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
-          {visibleWidgets.includes('aiWorkspace') && (
-            <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '1rem',
-                  borderBottom: '1px solid #cbd5e1',
-                  paddingBottom: '0.5rem',
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: '0.95rem',
-                    fontWeight: 700,
-                    color: '#0f172a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                  }}
-                >
-                  <Sparkles size={16} color="#0ea5e9" /> Atlas AI Sourcing Hub
-                </h3>
-                {/* Tabs */}
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setAiWorkspaceTab(tab)}
-                      className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Workspace Content */}
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0.75rem',
-                    backgroundColor: '#f8fafc',
-                    borderRadius: '6px',
-                    marginBottom: '0.75rem',
-                    fontSize: '0.75rem',
-                  }}
-                >
-                  <span>
-                    Last analysis: <strong>Today 14:02</strong>
-                  </span>
-                  <span>
-                    Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
-                  </span>
-                  <span>
-                    Estimated impact: <strong style={{ color: '#0284c7' }}>{formatAEDtoDual(24000, '+')} / mo</strong>
-                  </span>
-                </div>
-
-                {aiWorkspaceTab === 'insights' && (
-                  <ul
-                    style={{
-                      margin: 0,
-                      paddingLeft: '1.2rem',
-                      fontSize: '0.82rem',
-                      color: '#334155',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.4rem',
+                {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
+                {visibleWidgets.includes('financeTasks') && (
+                  <FinanceTasksHub
+                    onAction={(type, detail) => {
+                      notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
                     }}
-                  >
-                    <li>
-                      Revenue increased <strong>18%</strong> this month across strategic wholesaler
-                      segments.
-                    </li>
-                    <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
-                    <li>
-                      <strong>3 opportunities</strong> in Dubai clinic network need strategic
-                      discount review.
-                    </li>
-                    <li>
-                      Average RFQ response time improved by <strong>22%</strong> over the last 14
-                      days.
-                    </li>
-                  </ul>
+                  />
                 )}
-                {aiWorkspaceTab === 'predictions' && (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    AI predicts a potential shipping delay of 3 days from EU laboratories next week
-                    due to logistics strikes. Recommend frontloading Peptide B purchases.
-                  </p>
-                )}
-                {aiWorkspaceTab === 'recommendations' && (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    Adjust pricing on product catalog item #4401. Market price rose by 14%, current
-                    margins will reduce to 11% if not updated in Zoho Inventory.
-                  </p>
-                )}
-                {aiWorkspaceTab === 'agents' && (
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                    Autonomous agents: <strong>Sourcing Bot</strong> is active (last synced 4 mins
-                    ago). <strong>Discrepancy Agent</strong> matched 18/18 bills successfully.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
 
-        {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
-        {(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) && (
-        <div className={styles.sideCol}>
-          {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
-          {visibleWidgets.includes('systemStatus') && (
-            <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  marginBottom: '1rem',
-                }}
-              >
-                <Server size={16} color="#64748b" />
-                <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
-                  Infrastructure Specs
-                </h3>
+                {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
+                {visibleWidgets.includes('aiWorkspace') && (
+                  <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '1rem',
+                        borderBottom: '1px solid #cbd5e1',
+                        paddingBottom: '0.5rem',
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: '0.95rem',
+                          fontWeight: 700,
+                          color: '#0f172a',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                        }}
+                      >
+                        <Sparkles size={16} color="#0ea5e9" /> Atlas AI Sourcing Hub
+                      </h3>
+                      {/* Tabs */}
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
+                          <button
+                            key={tab}
+                            onClick={() => setAiWorkspaceTab(tab)}
+                            className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
+                          >
+                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Workspace Content */}
+                    <div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          padding: '0.5rem 0.75rem',
+                          backgroundColor: '#f8fafc',
+                          borderRadius: '6px',
+                          marginBottom: '0.75rem',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        <span>
+                          Last analysis: <strong>Today 14:02</strong>
+                        </span>
+                        <span>
+                          Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
+                        </span>
+                        <span>
+                          Estimated impact: <strong style={{ color: '#0284c7' }}>{formatAEDtoDual(24000, '+')} / mo</strong>
+                        </span>
+                      </div>
+
+                      {aiWorkspaceTab === 'insights' && (
+                        <ul
+                          style={{
+                            margin: 0,
+                            paddingLeft: '1.2rem',
+                            fontSize: '0.82rem',
+                            color: '#334155',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.4rem',
+                          }}
+                        >
+                          <li>
+                            Revenue increased <strong>18%</strong> this month across strategic wholesaler
+                            segments.
+                          </li>
+                          <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
+                          <li>
+                            <strong>3 opportunities</strong> in Dubai clinic network need strategic
+                            discount review.
+                          </li>
+                          <li>
+                            Average RFQ response time improved by <strong>22%</strong> over the last 14
+                            days.
+                          </li>
+                        </ul>
+                      )}
+                      {aiWorkspaceTab === 'predictions' && (
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+                          AI predicts a potential shipping delay of 3 days from EU laboratories next week
+                          due to logistics strikes. Recommend frontloading Peptide B purchases.
+                        </p>
+                      )}
+                      {aiWorkspaceTab === 'recommendations' && (
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+                          Adjust pricing on product catalog item #4401. Market price rose by 14%, current
+                          margins will reduce to 11% if not updated in Zoho Inventory.
+                        </p>
+                      )}
+                      {aiWorkspaceTab === 'agents' && (
+                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+                          Autonomous agents: <strong>Sourcing Bot</strong> is active (last synced 4 mins
+                          ago). <strong>Discrepancy Agent</strong> matched 18/18 bills successfully.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                  fontSize: '0.8rem',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
-                  }}
-                >
-                  <span style={{ color: '#64748b' }}>Firestore Database</span>
-                  <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
+
+              {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
+              {(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) && (
+                <div className={styles.sideCol}>
+                  {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
+                  {visibleWidgets.includes('systemStatus') && (
+                    <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          marginBottom: '1rem',
+                        }}
+                      >
+                        <Server size={16} color="#64748b" />
+                        <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+                          Infrastructure Specs
+                        </h3>
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.75rem',
+                          fontSize: '0.8rem',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            borderBottom: '1px solid #f1f5f9',
+                            paddingBottom: '0.4rem',
+                          }}
+                        >
+                          <span style={{ color: '#64748b' }}>Firestore Database</span>
+                          <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            borderBottom: '1px solid #f1f5f9',
+                            paddingBottom: '0.4rem',
+                          }}
+                        >
+                          <span style={{ color: '#64748b' }}>AI Engine Link</span>
+                          <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            borderBottom: '1px solid #f1f5f9',
+                            paddingBottom: '0.4rem',
+                          }}
+                        >
+                          <span style={{ color: '#64748b' }}>Router Latency</span>
+                          <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            borderBottom: '1px solid #f1f5f9',
+                            paddingBottom: '0.4rem',
+                          }}
+                        >
+                          <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
+                          <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#64748b' }}>Environment</span>
+                          <span style={{ color: '#0f172a', fontWeight: 600 }}>Production GCC</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
-                  }}
-                >
-                  <span style={{ color: '#64748b' }}>AI Engine Link</span>
-                  <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
-                  }}
-                >
-                  <span style={{ color: '#64748b' }}>Router Latency</span>
-                  <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid #f1f5f9',
-                    paddingBottom: '0.4rem',
-                  }}
-                >
-                  <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
-                  <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#64748b' }}>Environment</span>
-                  <span style={{ color: '#0f172a', fontWeight: 600 }}>Production GCC</span>
-                </div>
-              </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
         )}
       </div>
 

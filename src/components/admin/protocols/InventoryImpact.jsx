@@ -102,7 +102,7 @@ export default function InventoryImpact({ protocol }) {
               key: 'name',
               header: 'Product',
               render: (val) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>
                   <Package size={18} color="var(--text-muted)" />
                   {val}
                 </div>

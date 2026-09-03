@@ -904,7 +904,7 @@
 .proto-detail__hero-tagline {
   font-size: clamp(0.95rem, 2vw, 1.1rem);
   color: rgba(255,255,255,0.92);
-  max-width: 640px;
+  max-width: 1000px;
   line-height: 1.65;
   margin-bottom: 2rem;
 }

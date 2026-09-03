@@ -502,30 +502,33 @@ function extractWeeklyRows(protocol) {
     return rows;
   }
 
-  // ── Priority 2: legacy phases.drugs_used ──────────────────────────────────
+  // ── Priority 2: phases (new structure) or legacy phases.drugs_used ──────────────────────────────────
   if (Array.isArray(protocol.phases) && protocol.phases.length > 0) {
+    let currentWeek = 1;
     for (const phase of protocol.phases) {
-      const startWeek = phase.start_week || 1;
-      const endWeek   = phase.end_week   || startWeek;
-      const drugs     = phase.drugs_used || [];
+      const duration = phase.durationWeeks || phase.duration_weeks || 1;
+      const startWeek = phase.start_week || currentWeek;
+      const endWeek   = phase.end_week || (startWeek + duration - 1);
+      const drugs     = phase.items || phase.medications || phase.drugs_used || [];
 
       for (let w = startWeek; w <= endWeek; w++) {
         for (const drug of drugs) {
-          const name = drug.product_slug || drug.product_id || 'Unknown';
-          const dose = drug.weekly_dose || 'Not specified';
-          const freq = drug.dosing_frequency || 'weekly';
+          const name = drug.name || drug.productName || drug.product_slug || drug.product_id || 'Unknown';
+          const dose = drug.doseValue || drug.dose || drug.weekly_dose || 'Not specified';
+          const freq = drug.frequencyPerWeek || drug.frequency || drug.dosing_frequency || 'weekly';
           const route = drug.route || 'Not specified';
 
           rows.push({
             week:      `Week ${w}`,
-            phase:     phase.phase_title || `Phase ${phase.phase_number}` || '',
+            phase:     phase.label || phase.name || phase.phase_title || `Phase ${phase.phase_number || 1}`,
             compound:  name,
-            dose,
-            frequency: freq,
+            dose:      `${dose}`,
+            frequency: `${freq}`,
             route,
           });
         }
       }
+      currentWeek = endWeek + 1;
     }
     return rows;
   }

@@ -8,18 +8,10 @@ import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import FileText from "lucide-react/dist/esm/icons/file-text";
 import React, { useState } from 'react';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { fetchApiPeptideProducts } from '../../services/procurementService';
+import { createProduct, updateProduct } from '../../repositories/productRepository';
 import { extractApiPeptidesFromImage } from '../../services/atlasAiService';
 import DataTable from '../ui/DataTable';
-
-
-
-
-
-
-
 import { Card } from '../../components/ui';
 
 export default function PriceListImportModal({ onClose, onImportSuccess, onAddToRfq, openRfq }) {
@@ -76,40 +68,37 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
       let newCount = 0;
       let updateCount = 0;
 
-      const productsRef = collection(db, 'products');
+      const existingApiPeptides = await fetchApiPeptideProducts();
 
       for (const item of extractedData) {
         addLog(`Processing ${item.peptideName}...`);
-        // Search for existing API peptide (case insensitive approx via multiple queries or manual filter)
-        // Since Firebase doesn't do case-insensitive natively well, we'll fetch all API Peptides and filter in JS
-        // for safety and speed given small expected catalog size
-        const q = query(productsRef, where('category', '==', 'API Peptide'));
-        const snap = await getDocs(q);
-        const existingDoc = snap.docs.find(d => 
-          d.data().name?.toLowerCase() === item.peptideName.toLowerCase()
+        const existingDoc = existingApiPeptides.find(d => 
+          d.name?.toLowerCase() === item.peptideName.toLowerCase()
         );
 
         if (existingDoc) {
           // Update existing
-          await updateDoc(doc(db, 'products', existingDoc.id), {
+          await updateProduct(existingDoc.id, {
             supplier: 'Lotusland',
             cost_per_gram: item.pricePerGram,
-            updatedAt: new Date()
-          });
+          }, { strict: false });
           updateCount++;
           addLog(`Updated existing API Peptide: ${item.peptideName}`);
         } else {
-          // Create new
-          await addDoc(productsRef, {
+          // Create new with canonical schema
+          await createProduct({
             name: item.peptideName,
-            category: 'API Peptide',
+            displayName: item.peptideName,
+            categoryId: 'raw_material',
+            category: 'raw_material',
+            type: 'raw_material',
+            productType: 'raw_material',
             supplier: 'Lotusland',
+            supplierIds: ['lotusland'],
             unit: 'gram',
             cost_per_gram: item.pricePerGram,
             status: 'active',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
+          }, { strict: false });
           newCount++;
           addLog(`Created new API Peptide: ${item.peptideName}`);
         }

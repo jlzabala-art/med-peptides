@@ -3,36 +3,48 @@ import { Card } from '../../../ui';
 import DataTable from '../../../ui/DataTable';
 import { Sparkles } from '@/lib/icons';
 
+const getMarginColor = (m) => (m >= 40 ? '#34d399' : m >= 20 ? '#f59e0b' : '#f87171');
 
-export default function PricingTab({ form, setForm }) {
-    const pricesList = [
-      { label: 'Retail Price (B2C)', key: 'guestVialPrice', margin: marginRetail },
-      { label: 'Clinic Price (B2B)', key: 'proVialPrice', margin: marginClinic },
-      { label: 'Distributor Price', key: 'distributorPrice', margin: marginDistributor },
-      { label: 'Wholesaler Price', key: 'wholesalerPrice', margin: marginWholesaler },
-    ];
+export default function PricingTab({ form = {}, setForm, autoGenMoq }) {
+  const cost = Number(form.costPrice || form.cost || 0);
+  const retail = Number(form.guestVialPrice || form.pricePatient || form.price || 0);
+  const clinic = Number(form.proVialPrice || form.priceDoctor || 0);
+  const distributor = Number(form.distributorPrice || form.priceWholesale || 0);
+  const wholesaler = Number(form.wholesalerPrice || 0);
+
+  const marginRetail = retail > 0 && cost > 0 ? ((retail - cost) / retail) * 100 : 0;
+  const marginClinic = clinic > 0 && cost > 0 ? ((clinic - cost) / clinic) * 100 : 0;
+  const marginDistributor = distributor > 0 && cost > 0 ? ((distributor - cost) / distributor) * 100 : 0;
+  const marginWholesaler = wholesaler > 0 && cost > 0 ? ((wholesaler - cost) / wholesaler) * 100 : 0;
+
+  const pricesList = [
+    { label: 'Retail Price (B2C)', key: 'guestVialPrice', margin: marginRetail },
+    { label: 'Clinic Price (B2B)', key: 'proVialPrice', margin: marginClinic },
+    { label: 'Distributor Price', key: 'distributorPrice', margin: marginDistributor },
+    { label: 'Wholesaler Price', key: 'wholesalerPrice', margin: marginWholesaler },
+  ];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         {/* Pricing Dashboard */}
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>Pricing Dashboard</h3>
+        <Card padding="md" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>Pricing Dashboard</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
             {/* Base Cost Box */}
             <div style={{
               padding: '1rem',
-              backgroundColor: '#1f2937',
+              backgroundColor: '#f8fafc',
               borderRadius: '8px',
-              border: '1px solid #374151'
+              border: '1px solid #e2e8f0'
             }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600 }}>Internal Unit Cost</label>
-              <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #4b5563', paddingBottom: '2px' }}>
-                <span style={{ fontSize: '1rem', color: '#94a3b8', marginRight: '4px' }}>$</span>
+              <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '4px', fontWeight: 600 }}>Internal Unit Cost</label>
+              <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '2px' }}>
+                <span style={{ fontSize: '1rem', color: '#64748b', marginRight: '4px' }}>$</span>
                 <input
                   type="number"
                   value={form.costPrice}
                   onChange={e => setForm({...form, costPrice: parseFloat(e.target.value) || 0})}
-                  style={{ border: 'none', background: 'none', width: '100%', outline: 'none', color: '#ffffff', fontSize: '1.2rem', fontWeight: 700 }}
+                  style={{ border: 'none', background: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '1.2rem', fontWeight: 700 }}
                 />
               </div>
               <span style={{ fontSize: '0.65rem', color: '#64748b', display: 'block', marginTop: '6px' }}>Base cost used for margin calc</span>
@@ -42,22 +54,22 @@ export default function PricingTab({ form, setForm }) {
             {pricesList.map((item, idx) => (
               <div key={idx} style={{
                 padding: '1rem',
-                backgroundColor: '#1f2937',
+                backgroundColor: '#f8fafc',
                 borderRadius: '8px',
-                border: `1px solid ${item.margin < 20 ? '#ef444455' : '#374151'}`
+                border: `1px solid ${item.margin < 20 ? '#fca5a5' : '#e2e8f0'}`
               }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600 }}>{item.label}</label>
-                <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #4b5563', paddingBottom: '2px' }}>
-                  <span style={{ fontSize: '1rem', color: '#94a3b8', marginRight: '4px' }}>$</span>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: '#64748b', marginBottom: '4px', fontWeight: 600 }}>{item.label}</label>
+                <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '2px' }}>
+                  <span style={{ fontSize: '1rem', color: '#64748b', marginRight: '4px' }}>$</span>
                   <input
                     type="number"
                     value={form[item.key]}
                     onChange={e => setForm({...form, [item.key]: parseFloat(e.target.value) || 0})}
-                    style={{ border: 'none', background: 'none', width: '100%', outline: 'none', color: '#ffffff', fontSize: '1.2rem', fontWeight: 700 }}
+                    style={{ border: 'none', background: 'none', width: '100%', outline: 'none', color: '#0f172a', fontSize: '1.2rem', fontWeight: 700 }}
                   />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Margin:</span>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Margin:</span>
                   <strong style={{ fontSize: '0.75rem', color: getMarginColor(item.margin) }}>
                     {item.margin.toFixed(1)}%
                   </strong>
@@ -68,10 +80,10 @@ export default function PricingTab({ form, setForm }) {
         </Card>
 
         {/* 7. MOQ Pricing Matrix */}
-        <Card padding="md" style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}>
+        <Card padding="md" style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>MOQ Pricing Matrix</h3>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>MOQ Pricing Matrix</h3>
               <p style={{ margin: '2px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>Volume tier price grids and margin curves</p>
             </div>
             <button
@@ -83,8 +95,8 @@ export default function PricingTab({ form, setForm }) {
                 padding: '6px 12px',
                 borderRadius: '6px',
                 border: '1px solid #8b5cf6',
-                backgroundColor: '#8b5cf615',
-                color: '#c084fc',
+                backgroundColor: '#f3e8ff',
+                color: '#7c3aed',
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 cursor: 'pointer'
@@ -120,12 +132,12 @@ export default function PricingTab({ form, setForm }) {
                     type="number"
                     value={r.val}
                     onChange={e => setForm({ ...form, [r.key]: parseFloat(e.target.value) || 0 })}
-                    style={{ width: '90px', padding: '4px 8px', border: '1px solid #334155', borderRadius: '4px', backgroundColor: '#0f172a', color: '#fff', fontSize: '0.8rem' }}
+                    style={{ width: '90px', padding: '4px 8px', border: '1px solid #cbd5e1', borderRadius: '4px', backgroundColor: '#ffffff', color: '#0f172a', fontSize: '0.8rem' }}
                   />
                 )
               },
               { key: 'unitMargin', header: 'Calculated Profit Margin (%)', sortValue: (r) => r.unitMargin, render: (r) => <span style={{ color: getMarginColor(r.unitMargin), fontWeight: 700 }}>{r.unitMargin.toFixed(1)}%</span> },
-              { key: 'discountPercent', header: 'Discount (vs Retail)', sortValue: (r) => r.discountPercent, render: (r) => <span style={{ color: r.discountPercent > 0 ? '#60a5fa' : '#64748b' }}>{r.discountPercent > 0 ? `${r.discountPercent.toFixed(0)}% Off` : 'Base Price'}</span> }
+              { key: 'discountPercent', header: 'Discount (vs Retail)', sortValue: (r) => r.discountPercent, render: (r) => <span style={{ color: r.discountPercent > 0 ? '#0284c7' : '#64748b' }}>{r.discountPercent > 0 ? `${r.discountPercent.toFixed(0)}% Off` : 'Base Price'}</span> }
             ]}
           />
         </Card>

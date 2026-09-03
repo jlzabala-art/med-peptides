@@ -1,26 +1,10 @@
 "use client";
 
-
-
-
-
-
-
-
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-
 import { useAuth } from '../../context/AuthContext';
 import { Globe, Shield, RefreshCw, Check, AlertTriangle, ArrowRight, Server } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
-
-
-
-
-
-
-
+import { wholesalerRepository } from '@/repositories/wholesalerRepository';
 
 export default function DomainsTab() {
   const { userProfile } = useAuth();
@@ -40,13 +24,12 @@ export default function DomainsTab() {
   useEffect(() => {
     if (!tenantId) return;
 
+    let active = true;
     async function loadTenantDomain() {
       setLoading(true);
       try {
-        const tenantRef = doc(db, 'tenants', tenantId);
-        const snap = await getDoc(tenantRef);
-        if (snap.exists()) {
-          const data = snap.data();
+        const data = await wholesalerRepository.getTenantDomainConfig(tenantId);
+        if (data && active) {
           setDomainInfo({
             subdomainUrl: data.domain?.url || `${data.slug || tenantId}.atlas-health.com`,
             customDomain: data.domain?.customDomain || '',
@@ -55,13 +38,16 @@ export default function DomainsTab() {
         }
       } catch (err) {
         console.error('Failed to load domains:', err);
-        setError('Could not load domain configurations.');
+        if (active) setError('Could not load domain configurations.');
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
     loadTenantDomain();
+    return () => {
+      active = false;
+    };
   }, [tenantId]);
 
   const handleRequestDomain = async (e) => {
@@ -73,32 +59,19 @@ export default function DomainsTab() {
     setSuccess(false);
 
     try {
-      const tenantRef = doc(db, 'tenants', tenantId);
       const isRemoving = !domainInfo.customDomain.trim();
+      const newCustomDomain = isRemoving ? null : domainInfo.customDomain.trim().toLowerCase();
+      const newStatus = isRemoving ? 'none' : 'pending_dns';
 
-      await updateDoc(tenantRef, {
-        'domain.customDomain': isRemoving ? null : domainInfo.customDomain.trim().toLowerCase(),
-        'domain.customDomainStatus': isRemoving ? 'none' : 'pending_dns',
+      await wholesalerRepository.updateTenantDomainConfig(tenantId, {
+        customDomain: newCustomDomain,
+        customDomainStatus: newStatus,
       });
 
       setDomainInfo(prev => ({
         ...prev,
-        customDomainStatus: isRemoving ? 'none' : 'pending_dns'
+        customDomainStatus: newStatus
       }));
-
-      // Write audit log
-      try {
-        const auditRef = doc(db, 'tenantAuditLogs', `${tenantId}_${Date.now()}`);
-        await setDoc(auditRef, {
-          tenantId,
-          timestamp: new Date().toISOString(),
-          action: 'update_custom_domain',
-          userId: userProfile?.uid || 'unknown',
-          details: { customDomain: domainInfo.customDomain }
-        });
-      } catch (e) {
-        console.warn('Audit log write failed:', e);
-      }
 
       setSuccess(true);
     } catch (err) {
@@ -109,7 +82,7 @@ export default function DomainsTab() {
     }
   };
 
-  const getStatusBadge = () => {
+  const getStatusChip = () => {
     switch (domainInfo.customDomainStatus) {
       case 'active':
         return (
@@ -187,7 +160,7 @@ export default function DomainsTab() {
       <form onSubmit={handleRequestDomain} style={{ background: 'var(--color-bg-surface)', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '2rem', boxShadow: 'var(--shadow-sm)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-primary)' }}>2. Custom White-Label Domain</h3>
-          {getStatusBadge()}
+          {getStatusChip()}
         </div>
 
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
@@ -245,22 +218,22 @@ export default function DomainsTab() {
                 { 
                   key: 'type', 
                   header: 'Type', 
-                  render: (row) => <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{row.type}</span>
+                  render: (val, row) => <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{row.type}</span>
                 },
                 { 
                   key: 'host', 
                   header: 'Host (Name)', 
-                  render: (row) => <span style={{ fontFamily: 'monospace' }}>{row.host}</span>
+                  render: (val, row) => <span style={{ fontFamily: 'monospace' }}>{row.host}</span>
                 },
                 { 
                   key: 'target', 
                   header: 'Target (Value)', 
-                  render: (row) => <span style={{ fontFamily: 'monospace' }}>{row.target}</span>
+                  render: (val, row) => <span style={{ fontFamily: 'monospace' }}>{row.target}</span>
                 },
                 { 
                   key: 'ttl', 
                   header: 'TTL', 
-                  render: (row) => row.ttl
+                  render: (val, row) => row.ttl
                 }
               ]}
               keyField="id"

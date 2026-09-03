@@ -1,32 +1,13 @@
 "use client";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Package from "lucide-react/dist/esm/icons/package";
-import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import FileText from "lucide-react/dist/esm/icons/file-text";
-import Send from "lucide-react/dist/esm/icons/send";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import Info from "lucide-react/dist/esm/icons/info";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Heart from "lucide-react/dist/esm/icons/heart";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import History from "lucide-react/dist/esm/icons/history";
-import FileSearch from "lucide-react/dist/esm/icons/file-search";
-import Dna from "lucide-react/dist/esm/icons/dna";
-/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { 
+  ArrowLeft, ShieldCheck, Clock, Package, DollarSign, AlertCircle, 
+  CheckCircle2, ChevronRight, FileText, Send, Loader2, ExternalLink, 
+  Info, Calendar, Activity, Heart, Shield, Zap, FlaskConical, Beaker, 
+  History, FileSearch, Dna 
+} from '@/lib/icons';
 
 
 
@@ -96,7 +77,7 @@ export default function ProtocolResult({ products, region, isProfessional, addPr
     setIsAddingToCart(true);
 
     // Read directly from the Firestore document fields — always available on load
-    const name = protocol.protocol_name || protocol.formData?.goal || 'Custom Protocol';
+    const name = protocol.name || protocol.formData?.goal || 'Custom Protocol';
     const productList = Array.isArray(protocol.products)
       ? protocol.products.map(p => p.name || p).filter(Boolean)
       : [];

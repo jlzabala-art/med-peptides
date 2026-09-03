@@ -1,43 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, orderBy, getDocs, addDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import { fetchPayouts, requestPayoutApproval } from '../../../services/payoutService';
 
 import { Card, CardHeader, CardContent } from '../../ui/Card';
 import Button from '../../ui/Button';
 import Badge from '../../ui/Badge';
 import EmptyState from '../../ui/EmptyState';
 import { DollarSign } from '@/lib/icons';
-
-const DEMO_PAYOUTS = [
-  {
-    id: '1',
-    doctorId: 'doc1',
-    doctorName: 'Dr. Alejandro Gomez',
-    amount: 1250.0,
-    period: 'Mayo 2026',
-    status: 'pending',
-  },
-  {
-    id: '2',
-    doctorId: 'doc2',
-    doctorName: 'Dra. María Sánchez',
-    amount: 3400.5,
-    period: 'Mayo 2026',
-    status: 'processing',
-  },
-  {
-    id: '3',
-    doctorId: 'doc3',
-    doctorName: 'Dr. John Doe',
-    amount: 890.0,
-    period: 'Abril 2026',
-    status: 'paid',
-  },
-];
+import { toast } from 'react-hot-toast';
 
 export default function PayoutManagerWidget({ ownerId = 'admin', activeRoleProp }) {
   const { activeRole: authRole } = useAuth();
@@ -46,27 +18,19 @@ export default function PayoutManagerWidget({ ownerId = 'admin', activeRoleProp 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchPayouts() {
+    async function loadData() {
       if (activeRole !== 'admin') {
         setLoading(false);
         return;
       }
       try {
-        const q = query(collection(db, 'payouts'), orderBy('period', 'desc'));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-          setPayouts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        } else {
-          setPayouts(DEMO_PAYOUTS);
-        }
-      } catch (err) {
-        console.error('Error fetching payouts', err);
-        setPayouts(DEMO_PAYOUTS);
+        const data = await fetchPayouts();
+        setPayouts(data);
       } finally {
         setLoading(false);
       }
     }
-    fetchPayouts();
+    loadData();
   }, [activeRole]);
 
   const handleApprove = async (id) => {
@@ -75,21 +39,16 @@ export default function PayoutManagerWidget({ ownerId = 'admin', activeRoleProp 
 
     if (payout.amount >= 1000) {
       try {
-        await addDoc(collection(db, 'financial_approvals'), {
-          type: 'payout_auth',
-          status: 'pending',
-          data: {
-            payoutId: id,
-            amount: payout.amount,
-            recipientName: payout.doctorName
-          },
-          requestedBy: activeRole || 'Admin',
-          createdAt: new Date().toISOString()
+        await requestPayoutApproval({
+          payoutId: id,
+          amount: payout.amount,
+          recipientName: payout.doctorName,
+          requestedBy: activeRole || 'Admin'
         });
-        alert('High-value payout routed to CFO for approval.');
+        toast('High-value payout routed to CFO for approval.');
         setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'pending' } : p)));
       } catch (err) {
-        console.error('Error queueing approval', err);
+        toast.error('Failed to queue approval');
       }
     } else {
       setPayouts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'processing' } : p)));
@@ -148,7 +107,7 @@ export default function PayoutManagerWidget({ ownerId = 'admin', activeRoleProp 
                       }
                       size="sm"
                     >
-                      {p.status === 'paid' ? 'Paid' : p.status === 'processing' ? 'Processing' : 'Pending'}
+                      {p.status === 'paid' ? 'completed' : p.status === 'processing' ? 'Processing' : 'Pending'}
                     </Badge>
                   </div>
                 </div>

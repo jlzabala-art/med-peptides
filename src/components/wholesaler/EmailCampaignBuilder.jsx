@@ -24,6 +24,8 @@ import { emptyCampaign, CAMPAIGN_STATUS } from '../../schemas/emailCampaignSchem
 import { renderCatalogEmailHtml } from '../../utils/emailHtmlRenderer';
 import EmailPreviewPanel from './EmailPreviewPanel';
 import { ArrowLeft, ArrowRight, Save, Bot, Sparkles, Check, Trash2, Plus, Mail, Users, ExternalLink, BarChart2, Eye, Copy, Send, MessageSquare } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
+import StatusChip from '../ui/StatusChip';
 
 
 
@@ -98,7 +100,7 @@ export default function EmailCampaignBuilder({ ownerId, ownerType, onBack }) {
   // Vertex AI Catalog Assistant: Curates a recipient-specific intro message & subject line
   const handleAiGenerateText = async () => {
     if (!selectedCatalog) {
-      alert('Please select a catalog first.');
+      toast('Please select a catalog first.');
       return;
     }
     setAiGenerating(true);
@@ -138,7 +140,7 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
       }));
     } catch (e) {
       console.error(e);
-      alert('AI Generation failed. Using default template copy.');
+      toast.error('AI Generation failed. Using default template copy.');
       setCampaign(prev => ({
         ...prev,
         personalization: {
@@ -164,14 +166,14 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
       await emailCampaignRepository.saveCampaign(finalCampaign);
       // If sent, write mock open/click events in next 10 seconds for demo tracking
       if (sendNow) {
-        alert('Email campaign sent successfully to queue!');
+        toast.success('Email campaign sent successfully to queue!');
       } else {
-        alert('Campaign saved as draft.');
+        toast.success('Campaign saved as draft.');
       }
       setView('list');
       loadData();
     } catch (e) {
-      alert(`Error saving campaign: ${e.message}`);
+      toast.error(`Error saving campaign: ${e.message}`);
     } finally {
       setSaving(false);
     }
@@ -200,7 +202,7 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
 
   const handleSendTest = async () => {
     if (!testEmail) {
-      alert('Please enter a test email address.');
+      toast('Please enter a test email address.');
       return;
     }
     setSendingTest(true);
@@ -210,7 +212,7 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
       await new Promise(resolve => setTimeout(resolve, 1200));
       setTestSentSuccess(true);
     } catch (err) {
-      alert('Simulation failed.');
+      toast.error('Simulation failed.');
     } finally {
       setSendingTest(false);
     }
@@ -447,7 +449,7 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
                       onClick={() => {
                         const msg = `Hello ${campaign.recipient.name || 'Doctor'}, I have prepared a customized clinical catalog for ${campaign.recipient.clinic || 'your clinic'} focusing on "${campaign.personalization.goal || selectedCatalog?.goal || ''}". You can view it here: ${trackingUrl}`;
                         navigator.clipboard.writeText(msg);
-                        alert('Invitation text copied to clipboard!');
+                        toast('Invitation text copied to clipboard!');
                       }}
                       style={{ ...actionButtonStyle, display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'var(--color-bg-surface)', color: '#137333', borderColor: '#137333' }}
                     >
@@ -654,13 +656,7 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{c.recipient?.name}</td>
                   <td style={tdStyle}>{c.subject}</td>
                   <td style={tdStyle}>
-                    <span style={{
-                      ...statusBadgeStyle,
-                      backgroundColor: c.status === 'sent' ? '#e6f4ea' : '#f1f3f4',
-                      color: c.status === 'sent' ? '#137333' : '#5f6368'
-                    }}>
-                      {c.status}
-                    </span>
+                    <StatusChip status={c.status} />
                   </td>
                   <td style={tdStyle}>{c.tracking?.openCount || 0}</td>
                   <td style={tdStyle}>{c.tracking?.clickCount || 0}</td>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
@@ -177,12 +178,16 @@ export default function UniversalProductCard({
         )}
 
         {showImage && imagePath ? (
-          <img 
-            src={imagePath} 
-            alt={displayTitle} 
-            style={{ width: '120px', height: '120px', objectFit: 'contain' }}
-            onError={(e) => { e.currentTarget.src = '/assets/vials/generic-vial.png'; }}
-          />
+          <div style={{ position: 'relative', width: '120px', height: '120px' }}>
+            <Image 
+              src={imagePath} 
+              alt={displayTitle} 
+              fill
+              sizes="120px"
+              style={{ objectFit: 'contain' }}
+              onError={(e) => { e.currentTarget.src = '/assets/vials/generic-vial.png'; e.currentTarget.srcset = '' }}
+            />
+          </div>
         ) : (
           <FlaskConical size={48} color="var(--primary)" />
         )}

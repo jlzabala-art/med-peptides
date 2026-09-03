@@ -14,9 +14,11 @@ import {
   serverTimestamp,
   deleteDoc,
   writeBatch,
-  startAfter
+  startAfter,
+  increment
 } from 'firebase/firestore';
 import { logAction } from './auditLogger.js';
+import logger from '../utils/logger.js';
 
 /**
  * NEW PROTOCOL VERSIONING STORAGE (v5.0)
@@ -73,7 +75,7 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
           };
           await updateDoc(docRef, updatePayload);
           await logAction(userId, role, 'PROTOCOL_UPDATE', existingId, {
-            protocolName: current.protocol_name || current.name
+            protocolName: current.name || current.name
           });
           return existingId;
         }
@@ -82,7 +84,7 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
 
     // New Document Payload
     const payload = {
-      protocol_name: protocolData.blueprint?.title || protocolData.protocol_name || "New Protocol",
+      name: protocolData.blueprint?.title || protocolData.name || "New Protocol",
       therapeutic_category: formData.primaryCondition || "general",
       
       created_at: serverTimestamp(),
@@ -151,7 +153,7 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
     
     const sanitizedPayload = sanitize(payload);
     console.group("Persistence: Save Protocol");
-    console.log("Payload:", sanitizedPayload);
+    logger.debug("[protocolStorage] Payload:", sanitizedPayload);
     
     try {
         const phasesToSave = protocolData.blueprint?.phases || protocolData.phases || [];
@@ -171,10 +173,10 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
             });
 
             await batch.commit();
-            console.log("Success (Batch)! Document ID:", newDocRef.id);
+            logger.info("[protocolStorage] Success (Batch)! Document ID:", newDocRef.id);
             console.groupEnd();
             await logAction(userId, role, 'PROTOCOL_VERSION_CREATE', newDocRef.id, {
-              protocolName: sanitizedPayload.protocol_name,
+              protocolName: sanitizedPayload.name,
               previousVersionId: prevId
             });
             return newDocRef.id;
@@ -190,20 +192,20 @@ export const saveProtocol = async (protocolData, formData, options = {}) => {
             
             await batch.commit();
             
-            console.log("Success! Document ID:", newDocRef.id);
+            logger.info("[protocolStorage] Success! Document ID:", newDocRef.id);
             console.groupEnd();
             await logAction(userId, role, 'PROTOCOL_CREATE', newDocRef.id, {
-              protocolName: sanitizedPayload.protocol_name
+              protocolName: sanitizedPayload.name
             });
             return newDocRef.id;
         }
     } catch (fireError) {
-        console.error("Firestore specific error:", fireError);
+        logger.error("[protocolStorage] Firestore specific error:", fireError);
         console.groupEnd();
         throw new Error(`Firestore rejection: ${fireError.message}`);
     }
   } catch (error) {
-    console.error("Protocol persistence logic failure:", error);
+    logger.error("[protocolStorage] Protocol persistence logic failure:", error);
     throw error;
   }
 };
@@ -263,7 +265,7 @@ export const getProtocolById = async (id) => {
     }
     return null;
   } catch (error) {
-    console.error("Error fetching protocol:", error);
+    logger.error("[protocolStorage] Error fetching protocol:", error);
     return null;
   }
 };
@@ -296,7 +298,7 @@ export const getSavedProtocolsList = async (filters = {}) => {
     const snap = await getDocs(q);
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (error) {
-    console.error("Error listing protocols:", error);
+    logger.error("[protocolStorage] Error listing protocols:", error);
     return [];
   }
 };
@@ -312,7 +314,7 @@ export const duplicateProtocol = async (id, userId, userName) => {
         const { id: _, created_at, updated_at, ...rest } = protocol;
         const payload = {
             ...rest,
-            protocol_name: `${protocol.protocol_name} (Copy)`,
+            name: `${protocol.name} (Copy)`,
             version_number: 1,
             previous_version_id: null,
             created_at: serverTimestamp(),
@@ -326,7 +328,7 @@ export const duplicateProtocol = async (id, userId, userName) => {
         const docRef = await addDoc(collection(db, COLLECTION_NAME), payload);
         return docRef.id;
     } catch (error) {
-        console.error("Error duplicating protocol:", error);
+        logger.error("[protocolStorage] Error duplicating protocol:", error);
         throw error;
     }
 };
@@ -340,14 +342,14 @@ export const getProtocolHistory = async (originalProtocolName, createdByUserId) 
         // Simplified: find all with same name and author
         const q = query(
             collection(db, COLLECTION_NAME),
-            where("protocol_name", "==", originalProtocolName),
+            where("name", "==", originalProtocolName),
             where("created_by.user_id", "==", createdByUserId),
             orderBy("version_number", "desc")
         );
         const snap = await getDocs(q);
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (error) {
-        console.error("Error fetching history:", error);
+        logger.error("[protocolStorage] Error fetching history:", error);
         return [];
     }
 };
@@ -360,7 +362,7 @@ export const deleteProtocol = async (id) => {
         await deleteDoc(doc(db, COLLECTION_NAME, id));
         return true;
     } catch (error) {
-        console.error("Error deleting protocol:", error);
+        logger.error("[protocolStorage] Error deleting protocol:", error);
         return false;
     }
 };
@@ -378,10 +380,19 @@ export const getUserProtocols = async (userId = null) => {
 export const updateProtocol = async (id, fields) => {
     try {
         const docRef = doc(db, COLLECTION_NAME, id);
-        await updateDoc(docRef, { ...fields, updated_at: serverTimestamp() });
+        await updateDoc(docRef, { 
+            ...fields, 
+            updated_at: serverTimestamp(),
+            version_number: increment(1)
+        });
+        
+        await logAction('guest', 'admin', 'PROTOCOL_UPDATE', id, {
+            fields_updated: Object.keys(fields)
+        });
+        
         return true;
     } catch (error) {
-        console.error("Error updating protocol:", error);
+        logger.error("[protocolStorage] Error updating protocol:", error);
         return false;
     }
 };
@@ -443,7 +454,7 @@ function toProtocolCardDTO(raw) {
         short_code:      raw.short_code      || raw.metadata?.shortCode || protocolId || null,
         version:         raw.version         || raw.protocol_version || raw.metadata?.version || null,
         // display
-        title:           raw.title || raw.protocol_title || raw.name || raw.protocol_name || 'Unnamed Protocol',
+        title:           raw.title || raw.name || raw.name || raw.name || 'Unnamed Protocol',
         category:        raw.category        || raw.metadata?.primary_condition || raw.primary_goal || raw.metadata?.primary_goal || '',
         primary_goal:    raw.primary_goal    || raw.metadata?.primary_goal || '',
         tagline:         raw.tagline         || raw.overview_summary || raw.summary || raw.description || raw.metadata?.description || '',
@@ -500,7 +511,7 @@ export const getPublicProtocols = async () => {
         const snap = await Promise.race([getDocs(q), timeout]);
         return snap.docs.map(d => toProtocolCardDTO({ id: d.id, ...d.data() }));
     } catch (err) {
-        console.error('[protocolStorage] getPublicProtocols failed:', err);
+        logger.error('[protocolStorage] getPublicProtocols failed:', err);
         throw err;   // Re-throw so FeaturedProtocols can show error state
     }
 };
@@ -519,7 +530,7 @@ export const getAllProtocols = async () => {
             return dateB - dateA;
         });
     } catch (error) {
-        console.error('[protocolStorage] getAllProtocols:', error);
+        logger.error('[protocolStorage] getAllProtocols:', error);
         throw error;
     }
 };
@@ -553,7 +564,7 @@ export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20, o
             hasMore: snap.docs.length === pageSize
         };
     } catch (error) {
-        console.error('[protocolStorage] getPaginatedProtocols:', error);
+        logger.error('[protocolStorage] getPaginatedProtocols:', error);
         throw error;
     }
 };
@@ -563,7 +574,7 @@ export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20, o
  * Used by admin panel for full phase editing.
  *
  * @param {string} id - Protocol document ID
- * @param {Object} updates - { protocol_name?, therapeutic_category?, status?, phases? }
+ * @param {Object} updates - { name?, therapeutic_category?, status?, phases? }
  */
 export const updateProtocolFull = async (id, updates) => {
     try {
@@ -577,6 +588,7 @@ export const updateProtocolFull = async (id, updates) => {
                 ...topLevelUpdates,
                 phase_count: phases.length, // Cache count on top level
                 updated_at: serverTimestamp(),
+                version_number: increment(1)
             });
 
             // Write each phase to the subcollection
@@ -590,11 +602,17 @@ export const updateProtocolFull = async (id, updates) => {
             await updateDoc(docRef, {
                 ...topLevelUpdates,
                 updated_at: serverTimestamp(),
+                version_number: increment(1)
             });
         }
+
+        await logAction('guest', 'admin', 'PROTOCOL_UPDATE_FULL', id, {
+            phases_updated: !!phases
+        });
+
         return true;
     } catch (error) {
-        console.error('[protocolStorage] updateProtocolFull:', error);
+        logger.error('[protocolStorage] updateProtocolFull:', error);
         throw error;
     }
 };
@@ -628,7 +646,7 @@ export const createProtocolQuote = async (protocolId, costData, doctorId = null)
         await setDoc(quoteRef, quoteSnapshot);
         return { quoteId: quoteRef.id, ...quoteSnapshot };
     } catch (error) {
-        console.error('[protocolStorage] createProtocolQuote:', error);
+        logger.error('[protocolStorage] createProtocolQuote:', error);
         throw error;
     }
 };

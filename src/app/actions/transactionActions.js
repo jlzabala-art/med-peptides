@@ -104,7 +104,11 @@ export async function serverAutoDraftQuotationFromPrescription({ rxId, createdBy
         const prodSnap = await dbAdmin.collection('products').doc(item.productId).get();
         if (prodSnap.exists) {
           const prodData = prodSnap.data();
-          unitPrice = prodData.retailPrice || prodData.price || 0;
+          // Phase 3: use canonical pricing.retail.perUnit, fall back to legacy fields
+          unitPrice = prodData.pricing?.retail?.perUnit
+                   ?? prodData.retailPrice
+                   ?? prodData.price
+                   ?? 0;
           title = prodData.name || title;
         }
       }

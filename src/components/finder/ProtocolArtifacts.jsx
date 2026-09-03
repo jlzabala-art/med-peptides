@@ -36,6 +36,7 @@ import React from 'react';
 
 import { generatePatientGuide, generateClinicalPDF } from '../../services/pdfService';
 import { generateProtocolICS } from '../../services/calendarService';
+import { toast } from 'react-hot-toast';
 
 // --- SHARED COMPONENTS ---
 
@@ -417,7 +418,7 @@ export const ArtifactPreviewOverlay = ({ type, data, onClose }) => {
                         generateProtocolICS(data);
                       } catch (err) {
                         console.error("ICS Gen Error:", err);
-                        alert("Calendar export failed. Check console for details.");
+                        toast.error("Calendar export failed. Check console for details.");
                       }
                     }
                     if (type === 'json') {

@@ -1,15 +1,7 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { subscribeToDoctorRecommendations } from '../../../repositories/recommendationRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { Activity, Clock, Package, CheckCircle2 } from '@/lib/icons';
-
-
-
-
 
 export default function ActivePrescriptionsTracker() {
   const { user } = useAuth();
@@ -17,17 +9,9 @@ export default function ActivePrescriptionsTracker() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const q = query(
-      collection(db, 'recommendations'), 
-      where('doctorId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(5)
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToDoctorRecommendations(user.uid, (list) => {
       setPrescriptions(list);
-    });
+    }, 5);
 
     return () => unsub();
   }, [user]);

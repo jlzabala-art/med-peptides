@@ -22,7 +22,7 @@ import { resolveProductId } from '../../data/compoundIndex';
 import { resolveProductPrice } from '../../utils/resolveProductPrice';
 import { parseFrequencyToInjectionsPerWeek } from '../../utils/dosageUtils';
 import { derivePhaseSupply, buildSupplyManifest, ACCESSORY_DEFS } from '../../utils/supplyMath';
-import { Package, Syringe, Droplets, CheckCircle2, ChevronRight, AlertTriangle, ShoppingCart, Info, Activity, FlaskConical, Zap, History } from '@/lib/icons';
+import { Package, Syringe, Droplets, CheckCircle2, ChevronRight, AlertTriangle, Briefcase, Info, Activity, FlaskConical, Zap, History } from '@/lib/icons';
 
 // ── Number Ticker (Smooth counting animation) ───────────────────────────────────
 const NumberTicker = ({ value, prefix = '', suffix = '' }) => {
@@ -1745,7 +1745,7 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
         <div className="pse-sticky-bottom-bar">
           <div className="pse-sticky-total">
             <span className="pse-sticky-label">Total Cost</span>
-            <span className="pse-sticky-value">${grandTotal.toFixed(0)}</span>
+            <span className="pse-sticky-value">${(includeAccessories ? bundleTotal : compoundTotal).toFixed(0)}</span>
           </div>
           <button
             className={`pse-bundle-btn pse-add-btn${added ? ' pse-bundle-btn--success' : ''}`}
@@ -1757,9 +1757,9 @@ const ProtocolSupplyEngine = React.memo(function ProtocolSupplyEngine({
             }}
           >
             {added ? (
-              <><CheckCircle2 size={18} /> Added to Order</>
+              <><CheckCircle2 size={18} /> Added to Workspace</>
             ) : (
-              <><ShoppingCart size={18} /> Add Protocol Bundle to Order</>
+              <><Briefcase size={18} /> Add Protocol Bundle to Workspace</>
             )}
           </button>
         </div>

@@ -6,15 +6,16 @@ import * as XLSX from 'xlsx';
 import { Download } from '@/lib/icons';
 import productRepository from '../../../repositories/productRepository';
 import DataTable from '../../ui/DataTable';
+import { toast } from 'react-hot-toast';
 
 export default function ImportCoATab() {
   const handleSave = async (data) => {
     try {
       await productRepository.importCoAs(data);
-      alert('Certificates saved successfully!');
+      toast.success('Certificates saved successfully!');
     } catch (error) {
       console.error('Error saving certificates:', error);
-      alert('Failed to save certificates.');
+      toast.error('Failed to save certificates.');
     }
   };
 
@@ -97,7 +98,7 @@ export default function ImportCoATab() {
         header: 'Purity %',
         align: 'right',
         render: (r) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <input
               type="number"
               step="0.1"

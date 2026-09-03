@@ -1,23 +1,28 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import AdminCatalogTabClient from './AdminCatalogTabClient';
+import { Skeleton } from '../ui';
 import { fetchProductsAction, fetchProductsMetricsAction } from '../../actions/productsActions';
+import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 
 /**
- * Server Component Container for Master Catalog Hub
- * Pre-fetches the initial page of products securely via Firebase Admin
- * and passes the data to the interactive Client Component.
+ * Async Server Component Container for Admin Products & Catalog
+ * Pre-fetches the initial 50 products and global catalog facets in parallel via Firebase Admin.
  */
-export default async function AdminProductsTab({ readOnly = false }) {
-  const [initialProducts, globalMetrics] = await Promise.all([
-    fetchProductsAction({ limitCount: 50 }),
-    fetchProductsMetricsAction()
+export default async function AdminProductsTab({ readOnly = false, initialProducts = null, globalMetrics = null }) {
+  const [fetchedProducts, fetchedMetrics] = await Promise.all([
+    initialProducts ? Promise.resolve(initialProducts) : fetchProductsAction({ limitCount: 50 }),
+    globalMetrics ? Promise.resolve(globalMetrics) : fetchProductsMetricsAction()
   ]);
-  
+
   return (
-    <AdminCatalogTabClient 
-      initialProducts={initialProducts}
-      globalMetrics={globalMetrics}
-      readOnly={readOnly}
-    />
+    <AdminTabErrorBoundary tabId="products" tabLabel="Products & Catalog">
+      <Suspense fallback={<div className="p-8"><Skeleton className="h-64 w-full" /></div>}>
+        <AdminCatalogTabClient 
+          initialProducts={fetchedProducts}
+          globalMetrics={fetchedMetrics}
+          readOnly={readOnly}
+        />
+      </Suspense>
+    </AdminTabErrorBoundary>
   );
 }

@@ -23,6 +23,13 @@ export default class AppErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
+    if (typeof window !== 'undefined') {
+      window.__LAST_ERROR__ = {
+        message: error?.message,
+        stack: error?.stack,
+        componentStack: info?.componentStack
+      };
+    }
     console.error('[AppErrorBoundary] Unhandled render error:', error, info);
   }
 

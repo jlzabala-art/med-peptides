@@ -17,18 +17,18 @@ export function usePrescriptionAggregates() {
       const totalSnap = await getCountFromServer(collRef);
       const totalPrescriptions = totalSnap.data().count;
 
-      // 2. Awaiting Review ('assigned_to_wholesaler', 'draft')
-      const awaitingQuery = query(collRef, where('status', 'in', ['assigned_to_wholesaler', 'draft']));
+      // 2. pending
+      const awaitingQuery = query(collRef, where('status', '==', 'pending'));
       const awaitingSnap = await getCountFromServer(awaitingQuery);
       const awaitingReview = awaitingSnap.data().count;
 
       // 3. Active
-      const activeQuery = query(collRef, where('status', 'in', ['Active', 'active', 'sent', 'viewed_by_patient', 'ordered', 'added_to_bulk']));
+      const activeQuery = query(collRef, where('status', '==', 'active'));
       const activeSnap = await getCountFromServer(activeQuery);
       const active = activeSnap.data().count;
 
-      // 4. Fulfilled
-      const fulfilledQuery = query(collRef, where('status', 'in', ['Fulfilled', 'fulfilled']));
+      // 4. Completed (Fulfilled)
+      const fulfilledQuery = query(collRef, where('status', '==', 'completed'));
       const fulfilledSnap = await getCountFromServer(fulfilledQuery);
       const fulfilled = fulfilledSnap.data().count;
 

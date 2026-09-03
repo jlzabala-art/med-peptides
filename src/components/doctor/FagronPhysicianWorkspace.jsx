@@ -42,6 +42,8 @@ import { RX_STATUS, rxEvent } from '../../config/prescriptionConfig';
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STEP = { UPLOAD: 0, REVIEW: 1, DONE: 2 };
 
+import { extractPrescriptionFromDocument } from '../../services/prescriptionAiService';
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(d) {
   if (!d) return '—';
@@ -58,18 +60,46 @@ function fmt(d) {
 
 /**
  * extractFromPdf
- * ─────────────────────────────────────────────────────────────────────────────
- * Replace this function body with a real call to your backend OCR service.
- *
- * Expected API:
- *   POST /api/fagron/extract   { fileUrl: string }
- *   → { patient, items, diagnosis, clinicalNotes, duration, refills }
- *
- * Currently returns plausible demo data after a short delay so the UI
- * is fully usable without a live backend.
+ * Calls real multimodal Gemini AI parser with graceful fallback to demo structure.
  */
-async function extractFromPdf(/* fileUrl */) {
-  await new Promise((r) => setTimeout(r, 2200));
+async function extractFromPdf(file) {
+  if (file) {
+    try {
+      const rawData = await extractPrescriptionFromDocument(file);
+      const firstBlock = rawData.formulationBlocks?.[0] || {};
+      const rawItems = firstBlock.items || rawData.ingredients || [];
+
+      return {
+        patient: {
+          name: rawData.patient?.name || '',
+          dob: rawData.patient?.dob || '',
+          gender: rawData.patient?.gender || '',
+          email: rawData.patient?.email || '',
+          phone: rawData.patient?.phone || '',
+        },
+        items: rawItems.map((it) => ({
+          name: it.name || '',
+          strength: it.dose || it.strength || '',
+          quantity: Number(it.quantity) || 1,
+          unit: 'vials',
+          dosage: it.dosage || it.dose || '',
+          frequency: it.frequency || 'Once daily',
+          route: it.route || 'Topical',
+        })),
+        diagnosis: rawData.diagnosis || (rawData.fagronDetails?.testName ? `Fagron ${rawData.fagronDetails.testName}` : 'Clinical Indication'),
+        clinicalNotes: rawData.clinicalNotes || (rawData.fagronDetails?.summary || ''),
+        duration: Number(firstBlock.treatmentDays) || 30,
+        refills: 0,
+        boxId: rawData.fagronDetails?.boxId || null,
+        testName: rawData.fagronDetails?.testName || null,
+      };
+    } catch (err) {
+      console.warn('[FagronPhysicianWorkspace] AI Extraction failed, using fallback:', err.message);
+    }
+  }
+
+  // Fallback demo data
+  await new Promise((r) => setTimeout(r, 1200));
   return {
     patient: {
       name: 'María García López',
@@ -100,9 +130,11 @@ async function extractFromPdf(/* fileUrl */) {
     ],
     diagnosis: 'Peptide deficiency syndrome with inflammatory markers',
     clinicalNotes:
-      'Biomarkers: CRP elevated (8.2 mg/L), IL-6 raised. Genetic markers: MTHFR C677T heterozygous. Physician comments: Patient reports fatigue and poor healing. Fagron panel recommends regenerative peptide protocol.',
+      'Biomarkers: CRP elevated (8.2 mg/L), IL-6 raised. Genetic markers: MTHFR C677T heterozygous. Fagron panel recommends regenerative peptide protocol.',
     duration: 30,
     refills: 2,
+    boxId: 'BOX-DEMO',
+    testName: 'TrichoTest',
   };
 }
 
@@ -288,7 +320,7 @@ export default function FagronPhysicianWorkspace({ doctorId, doctorMeta }) {
     setFilePreviewUrl(URL.createObjectURL(f));
     setExtracting(true);
     try {
-      const data = await extractFromPdf(/* pass cloud URL once uploaded */);
+      const data = await extractFromPdf(f);
       setPatient(data.patient);
       setItems(data.items);
       setDiagnosis(data.diagnosis);

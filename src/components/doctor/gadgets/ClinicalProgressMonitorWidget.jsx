@@ -1,15 +1,7 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { subscribeToSymptomLogs } from '../../../repositories/prescriptionRepository';
 import { useAuth } from '../../../context/AuthContext';
 import { ActivitySquare, Battery, Moon, Frown } from '@/lib/icons';
-
-
-
-
 
 export default function ClinicalProgressMonitorWidget() {
   const { user } = useAuth();
@@ -18,18 +10,9 @@ export default function ClinicalProgressMonitorWidget() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    // Get last 20 symptom logs for this doctor
-    const q = query(
-      collection(db, 'symptom_logs'),
-      where('doctorId', '==', user.uid),
-      orderBy('timestamp', 'desc'),
-      limit(20)
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const unsub = subscribeToSymptomLogs(user.uid, (list) => {
       setLogs(list);
-    });
+    }, 20);
 
     return () => unsub();
   }, [user]);

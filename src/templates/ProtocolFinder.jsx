@@ -1,31 +1,12 @@
 "use client";
-import { useRouter } from 'next/navigation';
-import Target from "lucide-react/dist/esm/icons/target";
-import Zap from "lucide-react/dist/esm/icons/zap";
-import Activity from "lucide-react/dist/esm/icons/activity";
-import Brain from "lucide-react/dist/esm/icons/brain";
-import Moon from "lucide-react/dist/esm/icons/moon";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
-import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
-import Info from "lucide-react/dist/esm/icons/info";
-import Filter from "lucide-react/dist/esm/icons/filter";
-import Beaker from "lucide-react/dist/esm/icons/beaker";
-import Shield from "lucide-react/dist/esm/icons/shield";
-import User from "lucide-react/dist/esm/icons/user";
-import Clipboard from "lucide-react/dist/esm/icons/clipboard";
-import Ruler from "lucide-react/dist/esm/icons/ruler";
-import Weight from "lucide-react/dist/esm/icons/weight";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Clock from "lucide-react/dist/esm/icons/clock";
-import Microscope from "lucide-react/dist/esm/icons/microscope";
-import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
-import Dumbbell from "lucide-react/dist/esm/icons/dumbbell";
-import Heart from "lucide-react/dist/esm/icons/heart";
-/* eslint-disable no-unused-vars */
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, useMemo } from 'react';
-import {  useSearchParams } from 'next/navigation';
+import { 
+  Target, Zap, Activity, Brain, Moon, Sparkles, ShieldCheck, 
+  ChevronRight, ArrowRight, Info, Filter, Beaker, Shield, User, 
+  Clipboard, Ruler, Weight, AlertTriangle, Clock, Microscope, 
+  RefreshCw, Dumbbell, Heart 
+} from '@/lib/icons';
 
 
 

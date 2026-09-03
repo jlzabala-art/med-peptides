@@ -15,13 +15,19 @@ export function useProductSearch({
   indexName = algoliaConfig.indices.products, 
   debounceMs = 300,
   hitsPerPage = 10,
-  filters = '' 
+  filters = '',
+  query = '',
+  alwaysFetch = false,
+  ...rest
 } = {}) {
-  // Leverage the new generic Algolia hook
+  // Leverage the generic Algolia hook
   return useAlgoliaSearch({
     indexName,
     debounceMs,
     hitsPerPage,
-    filters
+    filters,
+    query,
+    alwaysFetch,
+    ...rest
   });
 }

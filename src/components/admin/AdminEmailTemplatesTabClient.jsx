@@ -49,38 +49,40 @@ function TagBadge({ tag }) {
 }
 
 export default function AdminEmailTemplatesTabClient({ templates = [], isSubTab }) {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState([]); // string[]
   const [search, setSearch] = useState('');
 
-  const activeFilters = [];
-  if (activeFilter !== 'all') {
-    activeFilters.push({
-      key: 'tag',
-      label: 'Tag',
-      value: activeFilter,
-      onRemove: () => setActiveFilter('all')
-    });
-  }
+  const ALL_TAGS = [
+    { label: '⚡ Automatic',  value: 'auto' },
+    { label: '✋ Manual',     value: 'manual' },
+    { label: '🛒 Orders',    value: 'order' },
+    { label: '👤 Onboarding', value: 'onboarding' },
+  ];
+
+  const activeFilters = activeFilter.map(val => ({
+    key: `tag-${val}`,
+    label: 'Type',
+    value: ALL_TAGS.find(t => t.value === val)?.label || val,
+    onRemove: () => setActiveFilter(prev => prev.filter(v => v !== val))
+  }));
 
   const filterOptions = [
     {
       key: 'tag',
       label: 'Template Type',
-      options: [
-        { label: 'All Templates', value: 'all' },
-        { label: '⚡ Automatic', value: 'auto' },
-        { label: '✋ Manual', value: 'manual' },
-        { label: '🛒 Orders', value: 'order' },
-        { label: '👤 Onboarding', value: 'onboarding' },
-      ],
-      value: activeFilter,
+      multiSelect: true,
+      values: activeFilter,
+      options: ALL_TAGS.map(t => ({
+        ...t,
+        count: templates.filter(tp => tp.tags?.includes(t.value)).length || null,
+      })),
       onChange: setActiveFilter
     }
   ];
 
   const filtered = useMemo(() => {
     return templates.filter((t) => {
-      const matchesFilter = activeFilter === 'all' || t.tags.includes(activeFilter);
+      const matchesFilter = activeFilter.length === 0 || activeFilter.some(f => t.tags?.includes(f));
       return matchesFilter;
     });
   }, [activeFilter]);
@@ -109,7 +111,7 @@ export default function AdminEmailTemplatesTabClient({ templates = [], isSubTab 
       key: 'tags',
       header: 'Tags',
       render: (tags) => (
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'inline-flex', gap: '4px', flexWrap: 'wrap' }}>
           {tags.map(tag => <TagBadge key={tag} tag={tag} />)}
         </div>
       )
@@ -173,7 +175,7 @@ export default function AdminEmailTemplatesTabClient({ templates = [], isSubTab 
       )}
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '0.5rem' }}>
+      <div className="kpi-scroll-row" style={{ marginBottom: '0.5rem' }}>
         <MetricCard
           title="Total Templates"
           value={templates.length}
@@ -191,6 +193,12 @@ export default function AdminEmailTemplatesTabClient({ templates = [], isSubTab 
           value={templates.filter(t => t.tags.includes('manual')).length}
           icon={Check}
           color="var(--color-warning)"
+        />
+        <MetricCard
+          title="Custom Overrides"
+          value={templates.filter(t => t.tags.includes('custom')).length || 0}
+          icon={Mail}
+          color="var(--color-info)"
         />
       </div>
 

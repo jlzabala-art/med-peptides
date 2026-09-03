@@ -8,6 +8,8 @@ import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 import React from 'react';
 import { toast } from 'react-hot-toast';
 import { createRoot } from 'react-dom/client';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 
 
@@ -46,6 +48,39 @@ class NotificationService {
 
   info(message) {
     this.toast(message, 'info');
+  }
+
+  /**
+   * Persists a notification to Firestore targeting specific roles or users.
+   * @param {Object} params 
+   * @param {string|string[]} params.to - User ID or array of roles (e.g. ['admin', 'doctor'])
+   * @param {string} params.message - The notification content
+   * @param {string} params.type - The type/category (e.g. 'product', 'prescription')
+   * @param {string} [params.link] - Optional URL to redirect when clicked
+   */
+  async send({ to, message, type = 'info', link = null }) {
+    if (!db) {
+      console.warn('Firestore DB not initialized, cannot send notification');
+      return;
+    }
+    
+    try {
+      const isArray = Array.isArray(to);
+      const targetRoles = isArray ? to : null;
+      const userId = !isArray ? to : null;
+
+      await addDoc(collection(db, 'notifications'), {
+        message,
+        type,
+        link,
+        targetRoles,
+        userId,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error('Failed to send notification via NotificationService', err);
+    }
   }
 
   /**

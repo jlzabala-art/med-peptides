@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, DollarSign } from '@/lib/icons';
 import DataTable from '../ui/DataTable';
+import StatusChip from '../ui/StatusChip';
 
 export default function FinancialWholesalerModal({
   financialWholesaler,
@@ -573,7 +574,7 @@ export default function FinancialWholesalerModal({
                                   columns={[
                                     { key: 'invoice', header: 'Invoice #', render: (r) => <a href={`https://erp.mediluxeme.com/app/662274409#/invoices/${r.invoiceId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1a73e8', textDecoration: 'underline' }}>{r.invoiceNumber}</a> },
                                     { key: 'date', header: 'Date', render: (r) => <span style={{ color: 'var(--text-muted)' }}>{r.date}</span> },
-                                    { key: 'status', header: 'Status', render: (r) => <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '10px', backgroundColor: r.status === 'paid' ? '#e6f4ea' : '#fef3c7', color: r.status === 'paid' ? '#137333' : '#b45309', textTransform: 'capitalize', fontWeight: 600 }}>{r.status}</span> },
+                                    { key: 'status', header: 'Status', render: (r) => <StatusChip status={r.status} /> },
                                     { key: 'total', header: 'Total (AED)', render: (r) => <span style={{ fontWeight: 700 }}>{r.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> }
                                   ]}
                                 />

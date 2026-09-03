@@ -4,7 +4,7 @@ import Search from "lucide-react/dist/esm/icons/search";
 import Bell from "lucide-react/dist/esm/icons/bell";
 import User from "lucide-react/dist/esm/icons/user";
 import ChevronDown from "lucide-react/dist/esm/icons/chevron-down";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
+import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import Menu from "lucide-react/dist/esm/icons/menu";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Globe from "lucide-react/dist/esm/icons/globe";
@@ -187,8 +187,8 @@ export default function AppHeader({
       {/* Right: Actions & Profile — NO AdminPortalSwitcher here (moved to left) */}
       <div className="app-header-right">
         {onOpenCart && (
-          <button className="app-header-action" aria-label="Cart" onClick={onOpenCart}>
-            <ShoppingCart size={20} strokeWidth={1.8} />
+          <button className="app-header-action" aria-label="Workspace Buffer" title="Workspace Buffer" onClick={onOpenCart}>
+            <Briefcase size={20} strokeWidth={1.8} />
             {cartCount > 0 && (
               <div className="app-header-badge cart-badge">{cartCount}</div>
             )}

@@ -62,8 +62,11 @@ export function useProductFilters(products, initialSearch = '') {
       }
 
       return group.variants.some((p) => {
-        const matchesCategory = filterCategory === 'All' || p?.category === filterCategory;
-        const matchesSupplier = filterSupplier === 'All' || p?.supplier === filterSupplier;
+        const matchesCategory = filterCategory === 'All' || p?.categoryId === filterCategory || p?.category === filterCategory;
+        // Supplier: match by ID via supplierIds[] array or legacy supplierId field
+        const matchesSupplier  = filterSupplier === 'All' ||
+          (p?.supplierIds || []).includes(filterSupplier) ||
+          p?.supplierId === filterSupplier;
         const matchesStatus =
           filterStatus === 'All' ||
           (filterStatus === 'Active' && p?.isActive !== false) ||

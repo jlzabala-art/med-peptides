@@ -1,0 +1,1692 @@
+{
+  "summary": {
+    "totalProductsInCatalog": 395,
+    "totalVariantsInCatalog": 842,
+    "totalCategories": 11,
+    "totalSuppliers": 21,
+    "lotusLandProducts": 71,
+    "lotusLandVariants": 126,
+    "lotusLandExpected": 104
+  },
+  "lotusProducts": [
+    {
+      "id": "5-amino-1mq",
+      "name": "5-Amino-1MQ",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_5_amino_1mq_10_mg_vial",
+          "sku": "SKU-5AMINO1MQ-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "aod-9604",
+      "name": "AOD-9604",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_aod_9604_2_mg_vial",
+          "sku": "SKU-AOD9604-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        },
+        {
+          "id": "lotusland_aod_9604_5_mg_vial",
+          "sku": "SKU-AOD9604-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "ara-290",
+      "name": "ARA-290",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_ara_290_10_mg_vial",
+          "sku": "SKU-ARA290-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "bac-water",
+      "name": "Bac Water",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "L4Kl6n9S4dheIGVIU5V3",
+          "sku": "SKU-BACWATER-3ML-BOX",
+          "presentation": "Vial",
+          "dosage": "3 ml",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 30
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:55:43.635Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        },
+        {
+          "id": "lotusland-bacteriostaticwater-30mlbottle-default",
+          "sku": "SKU-BACWATER-30MLBOTTLE-BOTT",
+          "presentation": "Vial",
+          "dosage": "30 ml / bottle",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 1,
+                  "maxQty": 9,
+                  "unitCost": 20
+                },
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 2
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:55:43.635Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mnC4cUo9TJ8w75nIPVlB",
+      "name": "Benzocaine USP",
+      "categoryId": "raw_material",
+      "status": "active",
+      "type": "raw_material",
+      "variants": [
+        {
+          "id": "sMeQYng2F9bjW6vGxOac",
+          "sku": "SKU-MNC4CUO9TJ8W75NIPVLB-20000G-VIAL",
+          "presentation": "Vial",
+          "dosage": "20000g"
+        },
+        {
+          "id": "var_1787232670615_rnw39",
+          "sku": "SKU-MNC4CUO9TJ8W75NIPVLB-20000G-VIAL",
+          "presentation": "Vial",
+          "dosage": "20000g"
+        }
+      ]
+    },
+    {
+      "id": "bloodo-nad-level-test",
+      "name": "Bloodo NAD Level Test",
+      "categoryId": "diagnostic_test",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "bloodo-nad-level-test-default",
+          "sku": "SKU-BLOODONADLEVELTEST-STANDARDDOSE-VIAL",
+          "presentation": "Vial",
+          "dosage": "Standard Dose",
+          "stock": 0
+        }
+      ]
+    },
+    {
+      "id": "bpc-157",
+      "name": "BPC-157",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_bpc_157_10_mg_vial",
+          "sku": "SKU-BPC157-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_bpc_157_20_mg_vial",
+          "sku": "SKU-BPC157-20MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "20 mg / vial"
+        },
+        {
+          "id": "lotusland_bpc_157_2_mg_vial",
+          "sku": "SKU-BPC157-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        },
+        {
+          "id": "lotusland_bpc_157_5_mg_vial",
+          "sku": "SKU-BPC157-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "bpc-157-tb-500",
+      "name": "BPC-157 + TB-500",
+      "categoryId": "peptide_combinations",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_bpc_157_tb_500_10_mg_10_mg_vial",
+          "sku": "SKU-BPC157TB500-10MG10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg + 10 mg / vial"
+        },
+        {
+          "id": "lotusland_bpc_157_tb_500_5_mg_5_mg_vial",
+          "sku": "SKU-BPC157TB500-5MG5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg + 5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "cagrilintide",
+      "name": "Cagrilintide",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_cagrilintide_10_mg_vial",
+          "sku": "SKU-CAGRILINTIDE-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_cagrilintide_5_mg_vial",
+          "sku": "SKU-CAGRILINTIDE-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "lotus-calcitonin-raw-api",
+      "name": "Calcitonin Peptide (Bulk API)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "raw_material",
+      "variants": [
+        {
+          "id": "var-calcitonin-5g",
+          "sku": "SKU-LOTUSCALCITONINRAWAPI-5GLYOPHILIZEDPOWDER-BULK",
+          "presentation": "Lyophilized Vial",
+          "dosage": "5g Lyophilized Powder",
+          "pricing": {
+            "cost_tiers": {
+              "cost_50": 22000,
+              "cost_10": 11625,
+              "cost_100": 40000,
+              "cost_1": 2325
+            },
+            "masterPrice": {
+              "currency": "USD",
+              "base": 2325
+            },
+            "supplierCost": 2325,
+            "clinicPrice": {
+              "currency": "USD",
+              "base": 3500
+            },
+            "retailPrice": {
+              "currency": "USD",
+              "base": 4200
+            },
+            "wholesalePrice": {
+              "currency": "USD",
+              "base": 2900
+            }
+          },
+          "stock": 0
+        }
+      ]
+    },
+    {
+      "id": "cardiogen",
+      "name": "Cardiogen",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_cardiogen_25_mg_vial",
+          "sku": "SKU-CARDIOGEN-25MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "25 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "cartalax",
+      "name": "Cartalax",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_cartalax_25_mg_vial",
+          "sku": "SKU-CARTALAX-25MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "25 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "cjc-1295-dac",
+      "name": "CJC 1295 DAC",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_cjc_1295_with_dac_2_mg_vial",
+          "sku": "SKU-CJC1295DAC-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "cjc-1295-no-dac",
+      "name": "CJC-1295 No DAC",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "cjc-no-dac-10mg",
+          "sku": "SKU-CJC1295NODAC-10MG-VIAL",
+          "presentation": "Vial",
+          "dosage": "10mg"
+        },
+        {
+          "id": "cjc-no-dac-5mg",
+          "sku": "SKU-CJC1295NODAC-5MG-VIAL",
+          "presentation": "Vial",
+          "dosage": "5mg"
+        }
+      ]
+    },
+    {
+      "id": "cjc-1295-without-dac",
+      "name": "CJC-1295 without DAC",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_cjc_1295_without_dac_10_mg_vial",
+          "sku": "SKU-CJC1295WITHOUTDAC-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_cjc_1295_without_dac_2_mg_vial",
+          "sku": "SKU-CJC1295WITHOUTDAC-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        },
+        {
+          "id": "lotusland_cjc_1295_without_dac_5_mg_vial",
+          "sku": "SKU-CJC1295WITHOUTDAC-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "cjc-1295-without-dac-ipamorelin",
+      "name": "CJC-1295 without DAC + Ipamorelin",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_cjc_1295_without_dac_ipamorelin_5_mg_5_mg_vial",
+          "sku": "SKU-CJC1295WITHOUTDACIPAMORELIN-5MG5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg + 5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "dsip",
+      "name": "DSIP",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_dsip_10_mg_vial",
+          "sku": "SKU-DSIP-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_dsip_5_mg_vial",
+          "sku": "SKU-DSIP-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "epithalon",
+      "name": "Epithalon",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_epithalon_100_mg_vial",
+          "sku": "SKU-EPITHALON-100MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "100 mg / vial"
+        },
+        {
+          "id": "lotusland_epithalon_10_mg_vial",
+          "sku": "SKU-EPITHALON-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_epithalon_30_mg_vial",
+          "sku": "SKU-EPITHALON-30MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "30 mg / vial"
+        },
+        {
+          "id": "lotusland_epithalon_50_mg_vial",
+          "sku": "SKU-EPITHALON-50MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "50 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "lotus-fezolinetant-raw-api",
+      "name": "Fezolinetant (Bulk API)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "raw_material",
+      "variants": [
+        {
+          "id": "var-fezolinetant-100g",
+          "sku": "SKU-LOTUSFEZOLINETANTRAWAPI-100G-BULK",
+          "presentation": "Lyophilized Vial",
+          "dosage": "100g"
+        }
+      ]
+    },
+    {
+      "id": "fox-04",
+      "name": "FOX-04",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_fox_04_12_mg_vial",
+          "sku": "SKU-FOX04-12MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "12 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "fst344",
+      "name": "FST344",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_fst344_1_mg_vial",
+          "sku": "SKU-FST344-1MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "1 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "g4Ax8meYh2vpF0sZOOh1",
+      "variants": [
+        {
+          "id": "AWwLZs7wcvcK03JgyBgw",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "TwNXNfTSkeXZ3oOmvkLE",
+          "sku": "SKU-PRD-40MG-VIAL",
+          "presentation": "vial",
+          "dosage": "40 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "grzr3nyIILWNQDV0wv0b",
+          "sku": "SKU-PRD-20MG-VIAL",
+          "presentation": "vial",
+          "dosage": "20 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "oIJtqJ0SmVmN7MEux6Oq",
+          "sku": "SKU-PRD-30MG-VIAL",
+          "presentation": "vial",
+          "dosage": "30 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "s6G3PurgwGltGiz273iX",
+          "sku": "SKU-PRD-5MG-VIAL",
+          "presentation": "vial",
+          "dosage": "5 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ghk-cu",
+      "name": "GHK-Cu",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "ghk-cu-100mg-vial",
+          "sku": "SKU-GHKCU-100MG-VIAL",
+          "presentation": "Vial",
+          "dosage": "100mg"
+        }
+      ]
+    },
+    {
+      "id": "ghk-cu-human-copper",
+      "name": "GHK-Cu (Human Copper)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_ghk_cu_human_copper_100_mg_vial",
+          "sku": "SKU-GHKCUHUMANCOPPER-100MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "100 mg / vial"
+        },
+        {
+          "id": "lotusland_ghk_cu_human_copper_50_mg_vial",
+          "sku": "SKU-GHKCUHUMANCOPPER-50MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "50 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "ghrp-2-5mg",
+      "variants": [
+        {
+          "id": "lotusland_ghrp_2_5_mg_vial",
+          "sku": "SKU-PRD-5MG-VIAL",
+          "presentation": "vial",
+          "dosage": "5 mg"
+        }
+      ]
+    },
+    {
+      "id": "glow-bpc-157-tb-500-ghk",
+      "name": "Glow (BPC-157 + TB-500 + GHK)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_glow_bpc_157_tb_500_ghk_10_mg_10_mg_75_mg_vial",
+          "sku": "SKU-GLOWBPC157TB500GHK-10MG10MG75MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg + 10 mg + 75 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "gw501516",
+      "name": "GW501516",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "v3hhdYzbLosS1jRabRLE",
+          "sku": "SKU-GW501516-10MG-BOTT",
+          "presentation": "Vial",
+          "dosage": "10 mg",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 80
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:56:27.909Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "hcg-5000iu",
+      "variants": [
+        {
+          "id": "lotusland_hcg_10000_iu_vial",
+          "sku": "SKU-PRD-10000IU-VIAL",
+          "presentation": "vial",
+          "dosage": "10000 iu"
+        },
+        {
+          "id": "lotusland_hcg_5000_iu_vial",
+          "sku": "SKU-PRD-5000IU-VIAL",
+          "presentation": "vial",
+          "dosage": "5000 iu"
+        }
+      ]
+    },
+    {
+      "id": "hexarelin-5mg",
+      "variants": [
+        {
+          "id": "lotusland_hexarelin_2_mg_vial",
+          "sku": "SKU-PRD-2MG-VIAL",
+          "presentation": "vial",
+          "dosage": "2 mg"
+        },
+        {
+          "id": "lotusland_hexarelin_5_mg_vial",
+          "sku": "SKU-PRD-5MG-VIAL",
+          "presentation": "vial",
+          "dosage": "5 mg"
+        }
+      ]
+    },
+    {
+      "id": "hgh",
+      "name": "HGH",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_hgh_10_iu_vial",
+          "sku": "SKU-HGH-10IUVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 iu / vial"
+        },
+        {
+          "id": "lotusland_hgh_20_iu_vial",
+          "sku": "SKU-HGH-20IUVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "20 iu / vial"
+        },
+        {
+          "id": "lotusland_hgh_36_iu_vial",
+          "sku": "SKU-HGH-36IUVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "36 iu / vial"
+        }
+      ]
+    },
+    {
+      "id": "hmg-75iu",
+      "variants": [
+        {
+          "id": "lotusland_hmg_75_iu_vial",
+          "sku": "SKU-PRD-75IU-VIAL",
+          "presentation": "vial",
+          "dosage": "75 iu"
+        }
+      ]
+    },
+    {
+      "id": "igf-lr3",
+      "name": "IGF LR3",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_igf_lr3_0_1_mg_vial",
+          "sku": "SKU-IGFLR3-01MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "0.1 mg / vial"
+        },
+        {
+          "id": "lotusland_igf_lr3_1_mg_vial",
+          "sku": "SKU-IGFLR3-1MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "1 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "e9URhAeNH7ygDWzvrf83",
+      "name": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "rlquV5BesN4OEKodMjx7",
+          "sku": "SKU-E9URHAENH7YGDWZVRF83-NA-BOX",
+          "presentation": "Vial",
+          "dosage": "N/A",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 15
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:56:32.121Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ipamorelin-5mg",
+      "variants": [
+        {
+          "id": "lotusland_ipamorelin_10_mg_vial",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg"
+        }
+      ]
+    },
+    {
+      "id": "kisspeptin-10",
+      "name": "Kisspeptin-10",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_kisspeptin_10_5_mg_vial",
+          "sku": "SKU-KISSPEPTIN10-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "klow-bpc-157-tb-500-ghkcu-kpv",
+      "name": "Klow (BPC-157 + TB-500 + GHK-Cu + KPV)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_klow_bpc_157_tb_500_ghkcu_kpv_10_mg_10_mg_75_mg_10_mg_vial",
+          "sku": "SKU-KLOWBPC157TB500GHKCUKPV-10MG10MG75MG10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg + 10 mg + 75 mg + 10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "kpv",
+      "name": "KPV",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_kpv_10_mg_vial",
+          "sku": "SKU-KPV-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "XZGvCekvmuElDd7Ng8J4",
+      "name": "Lidocaine USP",
+      "categoryId": "raw_material",
+      "status": "active",
+      "type": "raw_material",
+      "variants": [
+        {
+          "id": "W7BS7bKwguYvWuWtvEfw",
+          "sku": "SKU-XZGVCEKVMUELDD7NG8J4-30000G-VIAL",
+          "presentation": "Vial",
+          "dosage": "30000g"
+        },
+        {
+          "id": "var_1787232671164_tiey4",
+          "sku": "SKU-XZGVCEKVMUELDD7NG8J4-30000G-VIAL",
+          "presentation": "Vial",
+          "dosage": "30000g"
+        }
+      ]
+    },
+    {
+      "id": "ll-37",
+      "name": "LL-37",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_ll_37_12_mg_vial",
+          "sku": "SKU-LL37-12MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "12 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "ayaRAyGlEW4uIMjRLkeK",
+      "name": "Methylene Blue",
+      "categoryId": "raw_material",
+      "status": "active",
+      "type": "raw_material",
+      "variants": [
+        {
+          "id": "an5BVtxi9yVHzRH6UZs4",
+          "sku": "SKU-AYARAYGLEW4UIMJRLKEK-3000G-VIAL",
+          "presentation": "Vial",
+          "dosage": "3000g"
+        },
+        {
+          "id": "var_1787232668835_mx2pq",
+          "sku": "SKU-AYARAYGLEW4UIMJRLKEK-3000G-VIAL",
+          "presentation": "Vial",
+          "dosage": "3000g"
+        }
+      ]
+    },
+    {
+      "id": "mk-677",
+      "name": "MK-677",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "AQylf155e5MNMz1KkwNw",
+          "sku": "SKU-MK677-12MG-BOTT",
+          "presentation": "Vial",
+          "dosage": "12 mg",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 120
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:56:58.187Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mots-c-10mg",
+      "variants": [
+        {
+          "id": "lotusland_mots_c_10_mg_vial",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg"
+        },
+        {
+          "id": "lotusland_mots_c_40_mg_vial",
+          "sku": "SKU-PRD-40MG-VIAL",
+          "presentation": "vial",
+          "dosage": "40 mg"
+        },
+        {
+          "id": "lotusland_mots_c_60_mg_vial",
+          "sku": "SKU-PRD-60MG-VIAL",
+          "presentation": "vial",
+          "dosage": "60 mg"
+        }
+      ]
+    },
+    {
+      "id": "mt2",
+      "name": "MT2",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_mt2_10_mg_vial",
+          "sku": "SKU-MT2-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "nad-100mg",
+      "variants": [
+        {
+          "id": "lotusland_nad_1000_mg_vial",
+          "sku": "SKU-PRD-1000MG-VIAL",
+          "presentation": "vial",
+          "dosage": "1000 mg"
+        },
+        {
+          "id": "lotusland_nad_500_mg_vial",
+          "sku": "SKU-PRD-500MG-VIAL",
+          "presentation": "vial",
+          "dosage": "500 mg"
+        },
+        {
+          "id": "lotusland_nad_750_mg_vial",
+          "sku": "SKU-PRD-750MG-VIAL",
+          "presentation": "vial",
+          "dosage": "750 mg"
+        }
+      ]
+    },
+    {
+      "id": "nad",
+      "name": "NAD+ (Nicotinamide Adenine Dinucleotide)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "nad-vial-1000mg",
+          "sku": "SKU-NAD-1000MG-VIAL",
+          "presentation": "Vial",
+          "dosage": "1000mg",
+          "stock": 100
+        },
+        {
+          "id": "nad-vial-500mg",
+          "sku": "SKU-NAD-500MG-VIAL",
+          "presentation": "Vial",
+          "dosage": "500mg",
+          "stock": 100
+        }
+      ]
+    },
+    {
+      "id": "oxytocin-acetate",
+      "name": "Oxytocin Acetate",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_oxytocin_acetate_10_mg_vial",
+          "sku": "SKU-OXYTOCINACETATE-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_oxytocin_acetate_2_mg_vial",
+          "sku": "SKU-OXYTOCINACETATE-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "pe-22-28",
+      "name": "PE 22-28",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_pe_22_28_10_mg_vial",
+          "sku": "SKU-PE2228-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "peg-mgf",
+      "name": "PEG-MGF",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_peg_mgf_5_mg_vial",
+          "sku": "SKU-PEGMGF-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "pinealon",
+      "name": "Pinealon",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "3kZjdb8YPp9CQ8MrnHnw",
+          "sku": "SKU-PINEALON-25MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "25 mg / vial",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 480
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:57:05.802Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        },
+        {
+          "id": "DjonhMId6Nrxtkrmuzai",
+          "sku": "SKU-PINEALON-16MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "16 mg / vial",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 300
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:57:05.802Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "pnc-27",
+      "name": "PNC-27",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_pnc_27_10_mg_vial",
+          "sku": "SKU-PNC27-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "Pom63lsg1UcYKeaJpvF2",
+      "variants": [
+        {
+          "id": "33lj7qal5isZkzahlKmd",
+          "sku": "SKU-PRD-20MG-VIAL",
+          "presentation": "vial",
+          "dosage": "20 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "7vI0xsKvViIIE5AHZuZU",
+          "sku": "SKU-PRD-40MG-VIAL",
+          "presentation": "vial",
+          "dosage": "40 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "KeNogdoabUQYKQZcxHWB",
+          "sku": "SKU-PRD-30MG-VIAL",
+          "presentation": "vial",
+          "dosage": "30 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "sN9MFi7VRQ40j003PI8E",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        },
+        {
+          "id": "wER1Y4NLFJyWbqwmTVkB",
+          "sku": "SKU-PRD-5MG-VIAL",
+          "presentation": "vial",
+          "dosage": "5 mg",
+          "pricing": {
+            "retailPrice": {
+              "base": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "prostamax",
+      "name": "Prostamax",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_prostamax_25_mg_vial",
+          "sku": "SKU-PROSTAMAX-25MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "25 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "pt-141-10mg-vial",
+      "variants": [
+        {
+          "id": "lotusland_pt_141_10_mg_vial",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg"
+        },
+        {
+          "id": "lotusland_pt_141_20_mg_vial",
+          "sku": "SKU-PRD-20MG-VIAL",
+          "presentation": "vial",
+          "dosage": "20 mg"
+        },
+        {
+          "id": "lotusland_pt_141_5_mg_vial",
+          "sku": "SKU-PRD-5MG-VIAL",
+          "presentation": "vial",
+          "dosage": "5 mg"
+        }
+      ]
+    },
+    {
+      "id": "retatrutide",
+      "name": "Retatrutide",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_retatrutide_10_mg_vial",
+          "sku": "SKU-RETATRUTIDE-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_retatrutide_20_mg_vial",
+          "sku": "SKU-RETATRUTIDE-20MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "20 mg / vial"
+        },
+        {
+          "id": "lotusland_retatrutide_30_mg_vial",
+          "sku": "SKU-RETATRUTIDE-30MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "30 mg / vial"
+        },
+        {
+          "id": "lotusland_retatrutide_40_mg_vial",
+          "sku": "SKU-RETATRUTIDE-40MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "40 mg / vial"
+        },
+        {
+          "id": "lotusland_retatrutide_5_mg_vial",
+          "sku": "SKU-RETATRUTIDE-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "selank",
+      "name": "Selank",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_selank_10_mg_vial",
+          "sku": "SKU-SELANK-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_selank_5_mg_vial",
+          "sku": "SKU-SELANK-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "semaglutide",
+      "name": "Semaglutide",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_semaglutide_10_mg_vial",
+          "sku": "SKU-SEMAGLUTIDE-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_semaglutide_2_mg_vial",
+          "sku": "SKU-SEMAGLUTIDE-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        },
+        {
+          "id": "lotusland_semaglutide_5_mg_vial",
+          "sku": "SKU-SEMAGLUTIDE-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "semax",
+      "name": "Semax",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_semax_10_mg_vial",
+          "sku": "SKU-SEMAX-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "sermorelin-5-mg",
+      "variants": [
+        {
+          "id": "lotusland_sermorelin_10_mg_vial",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg"
+        },
+        {
+          "id": "lotusland_sermorelin_5_mg_vial",
+          "sku": "SKU-PRD-5MG-VIAL",
+          "presentation": "vial",
+          "dosage": "5 mg"
+        }
+      ]
+    },
+    {
+      "id": "slu-pp-332-100mg-caps-x30",
+      "name": "SLU-PP-332",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_slu_pp_332_250_mcg_tablet",
+          "sku": "SKU-SLUPP332100MGCAPSX30-250MCG-BOTT",
+          "presentation": "Vial",
+          "dosage": "250 mcg"
+        }
+      ]
+    },
+    {
+      "id": "snap-8",
+      "name": "Snap-8",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_snap_8_10_mg_vial",
+          "sku": "SKU-SNAP8-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "ss-31",
+      "name": "SS-31",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_ss_31_10_mg_vial",
+          "sku": "SKU-SS31-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_ss_31_50_mg_vial",
+          "sku": "SKU-SS31-50MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "50 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "starter-kit-syringe-bac-water",
+      "name": "Starter Kit (Syringe + Bac Water)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "LNdIs76yiUmEaywUSh76",
+          "sku": "SKU-STARTERKITSYRINGEBACWATER-NA-KIT",
+          "presentation": "Vial",
+          "dosage": "N/A",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 15
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:57:16.811Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "syringe-bac-water-bundle",
+      "name": "Syringe + Bac Water Bundle",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "JurZK65aaBVeaCC4i5rr",
+          "sku": "SKU-SYRINGEBACWATERBUNDLE-30ML-KIT",
+          "presentation": "Vial",
+          "dosage": "30 ml",
+          "pricing": {
+            "acquisition": {
+              "currency": "USD",
+              "tiers": [
+                {
+                  "minQty": 10,
+                  "maxQty": null,
+                  "unitCost": 30
+                }
+              ],
+              "lastUpdated": "2026-08-10T16:57:17.287Z"
+            },
+            "retail": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "clinic": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            },
+            "wholesale": {
+              "currency": "USD",
+              "tiers": [],
+              "lastUpdated": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "tesamorelin-2mg",
+      "variants": [
+        {
+          "id": "lotusland_tesamorelin_10_mg_vial",
+          "sku": "SKU-PRD-10MG-VIAL",
+          "presentation": "vial",
+          "dosage": "10 mg"
+        }
+      ]
+    },
+    {
+      "id": "testagen",
+      "name": "Testagen",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_testagen_25_mg_vial",
+          "sku": "SKU-TESTAGEN-25MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "25 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "thymogen-5mg-vial",
+      "variants": [
+        {
+          "id": "lotusland_thymogen_25_mg_vial",
+          "sku": "SKU-PRD-25MG-VIAL",
+          "presentation": "vial",
+          "dosage": "25 mg"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-alpha-1-5-mg",
+      "name": "Thymosin Alpha - 1",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_thymosin_alpha_1_10_mg_vial",
+          "sku": "SKU-THYMOSINALPHA15MG-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-alpha-1-thymalin",
+      "name": "Thymosin Alpha 1 + Thymalin",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_thymosin_alpha_1_thymalin_10_mg_10_mg_vial",
+          "sku": "SKU-THYMOSINALPHA1THYMALIN-10MG10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg + 10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-4-tb-500",
+      "name": "Thymosin β4 (TB-500)",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_thymosin_b4_tb_500_10_mg_vial",
+          "sku": "SKU-THYMOSIN4TB500-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_thymosin_b4_tb_500_2_mg_vial",
+          "sku": "SKU-THYMOSIN4TB500-2MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "2 mg / vial"
+        },
+        {
+          "id": "lotusland_thymosin_b4_tb_500_5_mg_vial",
+          "sku": "SKU-THYMOSIN4TB500-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "thymulin",
+      "name": "Thymulin",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_thymulin_10_mg_vial",
+          "sku": "SKU-THYMULIN-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        }
+      ]
+    },
+    {
+      "id": "tirzepatide",
+      "name": "Tirzepatide",
+      "categoryId": "peptide",
+      "status": "active",
+      "type": "finished_product",
+      "variants": [
+        {
+          "id": "lotusland_tirzepatide_10_mg_vial",
+          "sku": "SKU-TIRZEPATIDE-10MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "10 mg / vial"
+        },
+        {
+          "id": "lotusland_tirzepatide_15_mg_vial",
+          "sku": "SKU-TIRZEPATIDE-15MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "15 mg / vial"
+        },
+        {
+          "id": "lotusland_tirzepatide_30_mg_vial",
+          "sku": "SKU-TIRZEPATIDE-30MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "30 mg / vial"
+        },
+        {
+          "id": "lotusland_tirzepatide_5_mg_vial",
+          "sku": "SKU-TIRZEPATIDE-5MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "5 mg / vial"
+        },
+        {
+          "id": "lotusland_tirzepatide_60_mg_vial",
+          "sku": "SKU-TIRZEPATIDE-60MGVIAL-VIAL",
+          "presentation": "Vial",
+          "dosage": "60 mg / vial"
+        }
+      ]
+    }
+  ]
+}

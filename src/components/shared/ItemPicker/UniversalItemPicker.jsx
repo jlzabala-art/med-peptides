@@ -9,6 +9,7 @@ import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import ChevronDown from 'lucide-react/dist/esm/icons/chevron-down';
 import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 import { useProductSearch } from '../../../hooks/useProductSearch';
+import EmptyState from '../../ui/EmptyState';
 
 /**
  * UniversalItemPicker
@@ -102,7 +103,7 @@ export default function UniversalItemPicker({
     const id = item.id || item.objectID;
     const isSelected = selectedItems.has(id);
     const selItem = selectedItems.get(id);
-    const hasVariants = item.variants && item.variants.length > 0;
+    const hasVariants = (item.variants && item.variants.length > 0) || (item.variantsCount > 0);
     const isExpanded = expandedProducts.has(id);
 
     return (
@@ -148,11 +149,39 @@ export default function UniversalItemPicker({
 
           {/* Item Details */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <div style={{ fontWeight: isVariant ? 500 : 600, color: '#0f172a', fontSize: '0.9rem' }}>
-              {item.name || item.displayName || item.sku || 'Unknown'}
-              {hasVariants && !isVariant && <span style={{ fontSize: '0.75rem', color: '#64748b', marginLeft: '0.5rem', fontWeight: 400 }}>({item.variants.length} variants)</span>}
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+              <span style={{ fontWeight: isVariant ? 500 : 600, color: '#0f172a', fontSize: '0.9rem' }}>
+                {item.name || item.displayName || item.sku || 'Unknown'}
+              </span>
+              
+              {/* Product Type or Presentation Badge */}
+              {isVariant ? (
+                (() => {
+                  const pres = item.presentation || item.format || 'vial';
+                  if (pres === 'pen' || pres === 'cartridge') {
+                    return <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>Pen</span>;
+                  }
+                  if (pres === 'nasal_spray') {
+                    return <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4' }}>Spray</span>;
+                  }
+                  if (pres === 'capsule' || pres === 'tablet') {
+                    return <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: '#faf5ff', color: '#7e22ce', border: '1px solid #e9d5ff' }}>Oral</span>;
+                  }
+                  return <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>Vial</span>;
+                })()
+              ) : (
+                (() => {
+                  if (item.productType === 'api_raw_material' || item.productType === 'raw_material' || item.isApiPlaceholder) {
+                    return <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '1px 6px', borderRadius: 4, background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }}>🧪 RAW API</span>;
+                  }
+                  if (hasVariants) {
+                    return <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>({item.variants?.length || item.variantsCount || 1} variants)</span>;
+                  }
+                  return null;
+                })()
+              )}
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.75rem', color: '#64748b' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.75rem', color: '#64748b', flexWrap: 'wrap' }}>
               {item.sku && <span>SKU: {item.sku}</span>}
               {!isVariant && item.category && <span>• {item.category}</span>}
               {item.stock !== undefined && (
@@ -249,16 +278,21 @@ export default function UniversalItemPicker({
         `}</style>
         
         {results.length === 0 && !isSearching && query.length > 0 && (
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#64748b' }}>
-            <Box size={40} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-            <p>No items found matching "{query}"</p>
-          </div>
+          <EmptyState
+            icon={Box}
+            title="No items found"
+            subtitle={`No items found matching "${query}"`}
+            compact={true}
+          />
         )}
 
         {results.length === 0 && !isSearching && query.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#94a3b8' }}>
-            <p>Type to search the catalog</p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title="Search Catalog"
+            subtitle="Type to search the catalog"
+            compact={true}
+          />
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, StandardDrawer, DataTable } from '../../ui';
+import { Card, StandardDrawer, DataTable, AppActionGroup } from '../../ui';
 import { useAuth } from '../../../context/AuthContext';
 import { useProcurementManager } from '../../../hooks/data/useProcurementManager';
 import toast from 'react-hot-toast';
@@ -131,7 +131,7 @@ export default function CreatePurchaseRFQModal({ supplierName, selectedVariantId
                 key: 'targetCost',
                 header: 'Target Cost',
                 render: (r) => (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                     <span style={{ marginRight: '4px', color: 'var(--text-muted)' }}>$</span>
                     <input 
                       type="number"
@@ -165,12 +165,10 @@ export default function CreatePurchaseRFQModal({ supplierName, selectedVariantId
               },
               {
                 key: 'actions',
-                header: '',
+                header: 'Actions',
                 render: (r) => (
-                  <div style={{ textAlign: 'right' }}>
-                    <button onClick={() => handleRemoveItem(r._idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
-                      <X size={16} />
-                    </button>
+                  <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+                    <AppActionGroup actions={[{ type: 'delete', onClick: () => handleRemoveItem(r._idx) }]} />
                   </div>
                 )
               }

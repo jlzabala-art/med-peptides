@@ -22,6 +22,7 @@ import Spinner from '../ui/Spinner';
 
 import { getPaginatedProtocols } from '../../services/protocolStorage';
 import CustomProtocolBuilder from '../admin/CustomProtocolBuilder';
+import { toast } from 'react-hot-toast';
 
 export default function DoctorProtocolsTab({ doctorId }) {
   const [activeTab, setActiveTab] = useState('public');
@@ -67,7 +68,7 @@ export default function DoctorProtocolsTab({ doctorId }) {
       }
     } catch (err) {
       console.error("Clone error", err);
-      alert('Error cloning protocol');
+      toast.error('Error cloning protocol');
     } finally {
       setCloning(null);
     }

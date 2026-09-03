@@ -6,6 +6,8 @@ import Send from "lucide-react/dist/esm/icons/send";
 import { useProcurementManager } from '../../hooks/data/useProcurementManager';
 import StandardDrawer from '../ui/StandardDrawer';
 import DataTable from '../ui/DataTable';
+import { toast } from 'react-hot-toast';
+import { buildWhatsAppRFQUrl } from '../../utils/whatsappRFQHelper';
 
 export default function SupplierRFQModal({ rfq, onClose, onSuccess }) {
   const { respondToPurchaseRFQ, loading } = useProcurementManager();
@@ -41,11 +43,37 @@ export default function SupplierRFQModal({ rfq, onClose, onSuccess }) {
       });
       onSuccess();
     } catch (err) {
-      alert('Error submitting quotation: ' + err.message);
+      toast.error('Error submitting quotation: ' + err.message);
+    }
+  };
+
+  const [isConverting, setIsConverting] = useState(false);
+
+  const handleConvertToPO = async () => {
+    try {
+      setIsConverting(true);
+      const res = await fetch('/api/catalog/convert-quotation-to-po', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quotationId: rfq.id, notes: rfq.notes || '' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Purchase Order generated: ${data.poNumber}`);
+        if (onSuccess) onSuccess();
+        onClose();
+      } else {
+        toast.error(data.error || 'Failed to generate Purchase Order');
+      }
+    } catch (err) {
+      toast.error('Error generating PO: ' + err.message);
+    } finally {
+      setIsConverting(false);
     }
   };
 
   const isPending = rfq.status === 'pending_supplier';
+  const canConvertToPO = rfq.status === 'supplier_quoted' || rfq.status === 'accepted';
   const subtotal = calculateSubtotal();
   const total = subtotal + (parseFloat(shippingCost) || 0);
 
@@ -54,20 +82,52 @@ export default function SupplierRFQModal({ rfq, onClose, onSuccess }) {
       isOpen={true}
       onClose={onClose}
       title={isPending ? 'Respond to Quotation Request' : 'Quotation Details'}
-      subtitle={`RFQ ID: ${rfq.prfqId}`}
+      subtitle={`RFQ ID: ${rfq.prfqId || rfq.id}`}
       width="800px"
       footer={
-        <>
-          <button className="btn btn-outline" onClick={onClose} disabled={loading}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', width: '100%', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" onClick={onClose} disabled={loading || isConverting}>
             Close
           </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              const waUrl = buildWhatsAppRFQUrl(rfq, rfq.supplierPhone || '');
+              window.open(waUrl, '_blank', 'noopener,noreferrer');
+            }}
+            style={{
+              backgroundColor: '#25D366',
+              color: '#ffffff',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem'
+            }}
+          >
+            📱 Send RFQ via WhatsApp
+          </button>
+          {canConvertToPO && (
+            <button
+              className="btn btn-primary"
+              onClick={handleConvertToPO}
+              disabled={isConverting}
+              style={{ background: '#2563eb', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <Send size={15} />
+              {isConverting ? 'Generating PO...' : 'Convert to PO'}
+            </button>
+          )}
           {isPending && (
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
               <Send size={16} />
               {loading ? 'Submitting...' : 'Submit Quotation to Admin'}
             </button>
           )}
-        </>
+        </div>
       }
     >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

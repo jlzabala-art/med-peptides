@@ -49,6 +49,7 @@ import EmailCampaignBuilder from '../components/wholesaler/EmailCampaignBuilder'
 import DemandForecastingWidget from '../components/wholesaler/DemandForecastingWidget';
 import { Card, MetricCard } from '../components/ui';
 import { LayoutDashboard, Layers, Package, TrendingUp, Settings, LogOut, ChevronRight, ArrowRight, Clock, CheckCircle2, AlertCircle, Truck, Box, BarChart3, Laptop, Bell, MapPin, Paintbrush, Globe, MessageSquare, Brain, Mail, Sparkles, ChevronUp, ChevronDown, ClipboardList, Zap, Users, FileText } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 // ── Flat tab list (for reference) ────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'overview',    label: 'Overview',    icon: LayoutDashboard },
@@ -108,46 +109,16 @@ const RX_PIPELINE = [
 
 // ── Kit logistics status tracker milestones ──────────────────────────────────
 const KIT_STEPS = [
-  { key: 'kit_dispatched', label: 'Kit Enviado', icon: '📦' },
-  { key: 'sample_ready', label: 'Muestra Lista', icon: '🧪' },
-  { key: 'collection_label_sent', label: 'Etiqueta Generada', icon: '🏷️' },
-  { key: 'in_transit', label: 'En Tránsito', icon: '🚚' },
-  { key: 'processing', label: 'Analizando', icon: '🔬' },
-  { key: 'results_available', label: 'Resultados Listos', icon: '📋' }
+  { key: 'order_placed', label: 'Order Placed', icon: '📝' },
+  { key: 'kit_dispatched', label: 'Kit Dispatched', icon: '📦' },
+  { key: 'sample_ready', label: 'Sample Ready', icon: '🧪' },
+  { key: 'collection_label_sent', label: 'Label Generated', icon: '🏷️' },
+  { key: 'in_transit', label: 'In Transit', icon: '🚚' },
+  { key: 'processing', label: 'Analyzing', icon: '🔬' },
+  { key: 'results_available', label: 'Results Ready', icon: '📋' }
 ];
 
-// ── KPI Card ───────────────────────────────────────────────────────────────────
-function KpiCard({ label, value, sub, icon: Icon, color, urgent, onClick }) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        flex: '1 1 150px', minWidth: 0,
-        background: 'var(--color-bg-surface)',
-        borderRadius: '4px',
-        border: '1px solid #dadce0',
-        borderTop: urgent ? `3px solid ${color}` : '1px solid #dadce0',
-        padding: '1.25rem',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'box-shadow 0.15s',
-      }}
-      onMouseEnter={e => onClick && (e.currentTarget.style.boxShadow = '0 1px 3px rgba(60,64,67,0.3), 0 4px 8px rgba(60,64,67,0.15)')}
-      onMouseLeave={e => onClick && (e.currentTarget.style.boxShadow = 'none')}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Icon size={18} color="#5f6368" strokeWidth={2} />
-          {urgent && <span style={{ fontSize: '0.65rem', fontWeight: 500, color: color, textTransform: 'uppercase' }}>ACTION</span>}
-        </div>
-      </div>
-      <div style={{ fontSize: '1.5rem', fontWeight: 500, color: '#202124', lineHeight: 1, fontFamily: 'monospace' }}>
-        {value}
-      </div>
-      <div style={{ fontSize: '0.8rem', fontWeight: 500, color: '#3c4043', marginTop: '0.5rem' }}>{label}</div>
-      {sub && <div style={{ fontSize: '0.7rem', color: '#5f6368', marginTop: '0.15rem' }}>{sub}</div>}
-    </div>
-  );
-}
+
 
 // ── Rx row in pipeline board (Non-expandable, simple overview) ───────────────────
 function SimpleRxRow({ rx }) {
@@ -287,7 +258,7 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
         ]
       });
       setKitStatus('collection_label_sent');
-      alert(t('wholesaler.alerts.label_saved'));
+      toast.success(t('wholesaler.alerts.label_saved'));
     } catch (err) {
       console.error(err);
     } finally {
@@ -313,7 +284,7 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
         ]
       });
       setKitStatus('results_available');
-      alert(t('wholesaler.alerts.results_saved'));
+      toast.success(t('wholesaler.alerts.results_saved'));
     } catch (err) {
       console.error(err);
     } finally {
@@ -366,7 +337,7 @@ function ExpandableRxRow({ rx, catalogProducts = [], catalogProtocols = [] }) {
           }
         ]
       });
-      alert(t('wholesaler.alerts.recommendations_saved'));
+      toast.success(t('wholesaler.alerts.recommendations_saved'));
     } catch (err) {
       console.error(err);
     } finally {

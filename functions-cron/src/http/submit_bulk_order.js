@@ -205,11 +205,25 @@ exports.submitBulkOrder = onRequest(
         createdAt:     FieldValue.serverTimestamp(),
       });
 
-      await batch.commit();
 
-      // ── 8. Collect doctor IDs to notify (future: send email) ─────────────
+
+      // ── 8. Collect doctor IDs to notify ─────────────
       const doctorIds = [...new Set(prescriptions.map(rx => rx.doctorId).filter(Boolean))];
-      // TODO: Send push/email notification to each doctor
+      
+      for (const doctorId of doctorIds) {
+        const docNotifRef = db.collection("notifications").doc();
+        batch.set(docNotifRef, {
+          userId: doctorId,
+          type: "bulk_order_processed",
+          title: "Sus prescripciones están en proceso",
+          body: `El mayorista ha incluido sus prescripciones en el pedido Bulk ${bulkOrderId}.`,
+          bulkOrderId,
+          status: "unread",
+          createdAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
 
       return res.json({
         success:          true,

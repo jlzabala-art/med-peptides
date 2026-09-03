@@ -1,5 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
 import * as fb from '../firebase';
+import { logger } from '../utils/logger';
 const functions = fb?.functions;
 
 /**
@@ -65,7 +66,7 @@ export const extractApiPeptidesFromImage = async (imageFile, instructions = '') 
         return mappedData;
 
     } catch (error) {
-        console.error("Atlas AI Backend Extraction failed:", error);
+        logger.error("Atlas AI Backend Extraction failed", { error });
         throw new Error("Failed to process image with Atlas AI on the backend. Ensure the image is clear.");
     }
 };

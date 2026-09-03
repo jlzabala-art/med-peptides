@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, limit, orderBy } from 'firebase/firestore';
-import * as fb from '../../../firebase';
-const db = fb?.db;
+import { fetchRecentShipments } from '../../../services/procurementService';
 import { Package, Truck } from '@/lib/icons';
 import BaseWidget from '../core/BaseWidget';
 
@@ -18,16 +16,10 @@ export default function OrderTrackingWidget(props) {
     const fetchOrders = async () => {
       setLoading(true);
       try {
-        // In a real scenario, we'd add `where('userId', '==', userId)` for patients
-        const q = query(
-          collection(db, 'supplier_shipments'), 
-          orderBy('createdAt', 'desc'), 
-          limit(5)
-        );
-        const snap = await getDocs(q);
-        setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const list = await fetchRecentShipments(5);
+        setOrders(list);
       } catch (err) {
-        console.error("Failed to fetch orders:", err);
+        // logged in service
       }
       setLoading(false);
     };

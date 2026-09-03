@@ -32,7 +32,7 @@ export default function PathwayBuilder({ onClose, onSave, onGenerateAI }) {
     }
 
     onSave({
-      protocol_name: formData.title || 'New Clinical Pathway',
+      name: formData.title || 'New Clinical Pathway',
       therapeutic_category: formData.category,
       complexity_level: formData.complexity,
       status: 'draft',

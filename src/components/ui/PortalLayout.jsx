@@ -28,14 +28,18 @@ import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import AvatarGenerator from './AvatarGenerator';
 import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
 import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDropdown';
+import RoleImpersonatorSelector from '../shell/RoleImpersonatorSelector';
 import useAdminNotifications from '../../hooks/useAdminNotifications';
 import { useCopilot } from '../../context/CopilotContext';
 import CopilotWorkspacePanel from '../ai-copilot/CopilotWorkspacePanel';
 import ContextualFAB from '../common/ContextualFAB';
 import HelpDrawer from './HelpDrawer';
-import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List } from '@/lib/icons';
+import PullToRefreshContainer from '../mobile/PullToRefreshContainer';
+import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List, Briefcase } from '@/lib/icons';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { useCart } from '../../context/CartProvider';
 
-// ── Atlas AI — Suggested Prompts per Role ──────────────────────────────────────
+// ── Atlas AI — Suggested Prompts per Role (100% English) ──────────────────────
 const ROLE_SUGGESTED_PROMPTS = {
   admin: [
     { label: '🔄 Sync catalog with Zoho' },
@@ -46,39 +50,39 @@ const ROLE_SUGGESTED_PROMPTS = {
     { label: '📉 Project net income based on sales' },
   ],
   doctor: [
-    { label: '💉 Protocolo para pérdida de peso' },
-    { label: '🔬 Evidencia clínica BPC-157' },
-    { label: '💊 Interacciones: Semaglutide + Metformina' },
-    { label: '📋 Redactar nota clínica' },
-    { label: '⚖️ Dosis ajustada por peso para Tirzepatide' },
+    { label: '💉 Weight loss protocol recommendations' },
+    { label: '🔬 Clinical evidence for BPC-157' },
+    { label: '💊 Drug interactions: Semaglutide + Metformin' },
+    { label: '📋 Draft clinical summary note' },
+    { label: '⚖️ Weight-adjusted Tirzepatide titration' },
   ],
   patient: [
-    { label: '💬 Explícame mi protocolo actual' },
-    { label: '📅 ¿Qué esperar en semana 2 con BPC-157?' },
-    { label: '🩺 Tuve rojez en el sitio — ¿es normal?' },
-    { label: '⏰ Recordatorio de adherencia' },
-    { label: '📈 ¿Cómo mido mi progreso?' },
+    { label: '💬 Explain my current peptide protocol' },
+    { label: '📅 What to expect in week 2 with BPC-157?' },
+    { label: '🩺 Injection site redness — is this normal?' },
+    { label: '⏰ Protocol adherence schedule' },
+    { label: '📈 How to track biomarker progress' },
   ],
   wholesaler: [
-    { label: '📦 ¿Qué péptidos tienen más demanda?' },
-    { label: '💰 Optimizar márgenes con estos costos' },
-    { label: '🗺️ Análisis de territorio para Madrid' },
-    { label: '📜 Regulación Semaglutide en España' },
-    { label: '🤝 Presentación para nueva clínica' },
+    { label: '📦 Which peptides have highest demand?' },
+    { label: '💰 Optimize margins with these cost tiers' },
+    { label: '🗺️ Territory and clinic growth analysis' },
+    { label: '📜 Regulatory guidance for Semaglutide' },
+    { label: '🤝 B2B clinic proposal outline' },
   ],
   compounding_pharmacy: [
-    { label: '⚗️ Formulación BPC-157 200mcg/ml × 5ml' },
-    { label: '🛒 Sourcing API CJC-1295 con DAC' },
-    { label: '🧊 Estabilidad Semax a 4°C vs -20°C' },
-    { label: '✅ ¿Cumple mi proceso con GMP España?' },
-    { label: '💵 Precio de formulación desde API a €X/g' },
+    { label: '⚗️ Formulation: BPC-157 200mcg/ml × 5ml' },
+    { label: '🛒 Sourcing API for CJC-1295 with DAC' },
+    { label: '🧊 Stability of Semax at 4°C vs -20°C' },
+    { label: '✅ GMP compliance checklist' },
+    { label: '💵 Compounding unit cost from API €/g' },
   ],
   supplier: [
-    { label: '📄 Generar ficha técnica de API' },
-    { label: '📊 Forecast demanda Q3' },
-    { label: '🤝 Propuesta B2B para nuevo wholesaler' },
-    { label: '📋 Documentación para exportar a México' },
-    { label: '🔬 Interpretar Certificate of Analysis' },
+    { label: '📄 Generate API technical data sheet' },
+    { label: '📊 Demand forecast for Q3' },
+    { label: '🤝 B2B wholesale partnership proposal' },
+    { label: '📋 Export documentation and compliance' },
+    { label: '🔬 Certificate of Analysis (COA) review' },
   ],
 };
 
@@ -89,6 +93,72 @@ const ROLE_AGENT_TYPE = {
   wholesaler: 'b2b_optimizer',
   compounding_pharmacy: 'formulation_expert',
   supplier: 'api_catalog_expert',
+};
+
+const ROLE_BADGE_CONFIG = {
+  admin: {
+    label: 'ADMIN',
+    name: 'Administrator',
+    color: '#003666',
+    bg: 'rgba(0, 54, 102, 0.08)',
+    border: 'rgba(0, 54, 102, 0.22)',
+  },
+  doctor: {
+    label: 'DOCTOR',
+    name: 'Clinical MD',
+    color: '#0d9488',
+    bg: 'rgba(13, 148, 136, 0.08)',
+    border: 'rgba(13, 148, 136, 0.22)',
+  },
+  patient: {
+    label: 'PATIENT',
+    name: 'Patient Portal',
+    color: '#7c3aed',
+    bg: 'rgba(124, 58, 237, 0.08)',
+    border: 'rgba(124, 58, 237, 0.22)',
+  },
+  wholesaler: {
+    label: 'WHOLESALER',
+    name: 'B2B Wholesale',
+    color: '#c2410c',
+    bg: 'rgba(194, 65, 12, 0.08)',
+    border: 'rgba(194, 65, 12, 0.22)',
+  },
+  wholeseller: {
+    label: 'WHOLESALER',
+    name: 'B2B Wholesale',
+    color: '#c2410c',
+    bg: 'rgba(194, 65, 12, 0.08)',
+    border: 'rgba(194, 65, 12, 0.22)',
+  },
+  supplier: {
+    label: 'SUPPLIER',
+    name: 'Raw API Supplier',
+    color: '#0284c7',
+    bg: 'rgba(2, 132, 199, 0.08)',
+    border: 'rgba(2, 132, 199, 0.22)',
+  },
+  clinic: {
+    label: 'CLINIC',
+    name: 'Clinical Facility',
+    color: '#059669',
+    bg: 'rgba(5, 150, 105, 0.08)',
+    border: 'rgba(5, 150, 105, 0.22)',
+  },
+  compounding_pharmacy: {
+    label: 'PHARMACY',
+    name: 'Compounding Pharmacy',
+    color: '#d97706',
+    bg: 'rgba(217, 119, 6, 0.08)',
+    border: 'rgba(217, 119, 6, 0.22)',
+  },
+  pharmacy: {
+    label: 'PHARMACY',
+    name: 'Compounding Pharmacy',
+    color: '#d97706',
+    bg: 'rgba(217, 119, 6, 0.08)',
+    border: 'rgba(217, 119, 6, 0.22)',
+  },
 };
 
 /**
@@ -110,15 +180,30 @@ export default function PortalLayout({
   const routerNavigate = useRouter();
   const { user, userProfile } = useAuth();
   const { currency, updateCurrency, density, updateDensity } = usePreferences();
+  const { cart } = useCart();
+  const { toggleDrawer: toggleWorkspaceDrawer, getTotalItemCount, getActiveWorkspace } = useWorkspaceStore();
+  const workspaceItemCount = getTotalItemCount();
+  const activeWs = getActiveWorkspace();
+  const cartItemCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isAiOpen, setAiOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  );
+
+  useEffect(() => {
+    const handleOpenAi = () => setAiOpen(true);
+    window.addEventListener('open-clinical-ai', handleOpenAi);
+    return () => window.removeEventListener('open-clinical-ai', handleOpenAi);
+  }, []);
+
   const { toggleCopilot, isOpen: isCopilotOpen } = useCopilot();
   // Holds live data injected by admin tab components via 'admin-context-update' events
   const [enrichedContext, setEnrichedContext] = useState(null);
   // Real-time attention notifications state
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
+  const [optimisticReadIds, setOptimisticReadIds] = useState([]); // Instant UI update
   // Command Palette
   const [isPaletteOpen, setPaletteOpen] = useState(false);
   // Help Drawer
@@ -155,7 +240,7 @@ export default function PortalLayout({
   // Derived state: Filter out read notifications and sort
   const readIds = userProfile?.read_notifications || [];
   const visibleNotifications = notifications
-    .filter((n) => !readIds.includes(n.id))
+    .filter((n) => !readIds.includes(n.id) && !optimisticReadIds.includes(n.id))
     .sort((a, b) => {
       const severityScore = { critical: 3, warning: 2, info: 1 };
       return (severityScore[b.severity] || 0) - (severityScore[a.severity] || 0);
@@ -164,6 +249,9 @@ export default function PortalLayout({
   const handleMarkAsRead = async (id, e) => {
     if (e) e.stopPropagation();
     if (!user) return;
+    
+    setOptimisticReadIds(prev => [...prev, id]); // Instant UI update
+    
     try {
       await updateDoc(doc(db, 'users', user.uid), {
         read_notifications: arrayUnion(id),
@@ -176,12 +264,15 @@ export default function PortalLayout({
   const handleMarkAllAsRead = async (e) => {
     if (e) e.stopPropagation();
     if (!user || visibleNotifications.length === 0) return;
+    
+    const allIds = visibleNotifications.map((n) => n.id);
+    setOptimisticReadIds(prev => [...prev, ...allIds]); // Instant UI update
+    setNotificationsOpen(false);
+    
     try {
-      const allIds = visibleNotifications.map((n) => n.id);
       await updateDoc(doc(db, 'users', user.uid), {
         read_notifications: arrayUnion(...allIds),
       });
-      setNotificationsOpen(false);
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
@@ -205,7 +296,7 @@ export default function PortalLayout({
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
+      const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
       if (mobile) {
         setSidebarOpen(false);
@@ -237,6 +328,7 @@ export default function PortalLayout({
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-top: 3px solid var(--color-primary, #003666);
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
@@ -368,7 +460,7 @@ export default function PortalLayout({
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        width: '100vw',
+        width: '100%',
         overflow: 'hidden',
         backgroundColor: 'var(--color-bg-app)',
       }}
@@ -398,7 +490,7 @@ export default function PortalLayout({
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          {portalTitle && (
+          {portalTitle ? (
             <>
               <span className="portal-header-title">{portalTitle}</span>
               <span className="portal-header-sep">|</span>
@@ -406,6 +498,43 @@ export default function PortalLayout({
                 <AdminPortalSwitcher />
               </span>
             </>
+          ) : (
+            (() => {
+              const roleBadge = ROLE_BADGE_CONFIG[roleContext] || ROLE_BADGE_CONFIG.admin;
+              return (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '999px',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.04em',
+                    background: roleBadge.bg,
+                    color: roleBadge.color,
+                    border: `1px solid ${roleBadge.border}`,
+                    marginLeft: '0.25rem',
+                    flexShrink: 0,
+                    boxShadow: `0 1px 4px ${roleBadge.color}15`,
+                  }}
+                  title={`Active Portal Role: ${roleBadge.name}`}
+                >
+                  <span
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      backgroundColor: roleBadge.color,
+                      boxShadow: `0 0 6px ${roleBadge.color}`,
+                      display: 'inline-block',
+                    }}
+                  />
+                  {roleBadge.label}
+                </span>
+              );
+            })()
           )}
         </div>
 
@@ -441,8 +570,9 @@ export default function PortalLayout({
           </span>
 
           {/* Notifications Dropdown (GCP Attention Style) */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative' }} className="portal-header-bell-wrap">
             <button
+              className="portal-header-bell-btn"
               onClick={() => setNotificationsOpen(!isNotificationsOpen)}
               style={{
                 ...iconBtnStyle,
@@ -472,9 +602,10 @@ export default function PortalLayout({
                     color: 'white',
                     fontSize: '0.65rem',
                     fontWeight: 700,
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '50%',
+                    minWidth: '18px',
+                    height: '18px',
+                    padding: '0 4px',
+                    borderRadius: '9px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -563,7 +694,7 @@ export default function PortalLayout({
                             // If path contains query string, navigate to /admin/<tab>?query
                             const [tabPart, queryPart] = n.actionPath.split('?');
                             const fullPath = `/admin/${tabPart}${queryPart ? '?' + queryPart : ''}`;
-                            routerNavigate(fullPath);
+                            routerNavigate.push(fullPath);
                           }
                           setNotificationsOpen(false);
                         }}
@@ -631,31 +762,67 @@ export default function PortalLayout({
           </div>
 
           <button
+            onClick={toggleWorkspaceDrawer}
+            style={{
+              ...iconBtnStyle,
+              position: 'relative',
+              backgroundColor: 'rgba(255,255,255,0.5)',
+              borderColor: 'rgba(0,0,0,0.05)',
+              marginLeft: '0.25rem'
+            }}
+            title={`Espacios de Trabajo (${activeWs?.name || 'Workspace'} - ${workspaceItemCount} items)`}
+          >
+            <Briefcase
+              size={20}
+              color="var(--color-text-secondary)"
+            />
+            {workspaceItemCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-2px',
+                  right: '-2px',
+                  backgroundColor: 'var(--color-primary, #003666)',
+                  color: 'white',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid white',
+                }}
+              >
+                {workspaceItemCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            className="portal-header-sparkles-btn"
             onClick={() => {
-              if (roleContext === 'admin') {
-                toggleCopilot();
-              } else {
-                setAiOpen(!isAiOpen);
-              }
+              setAiOpen(!isAiOpen);
             }}
             style={{
               ...iconBtnStyle,
               padding: '0.4rem 0.8rem',
               borderRadius: '24px',
               gap: '6px',
-              backgroundColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+              backgroundColor: isAiOpen
                 ? 'rgba(168, 85, 247, 0.1)'
                 : 'rgba(255,255,255,0.5)',
-              borderColor: (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+              borderColor: isAiOpen
                 ? 'rgba(168, 85, 247, 0.4)'
                 : 'rgba(0,0,0,0.05)',
             }}
-            title="Ask Atlas anything"
+            title="Ask Atlas AI anything"
           >
             <Sparkles
               size={16}
               color={
-                (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+                isAiOpen
                   ? '#a855f7'
                   : 'var(--color-text-secondary)'
               }
@@ -664,7 +831,7 @@ export default function PortalLayout({
               style={{
                 fontSize: '0.85rem',
                 fontWeight: 600,
-                color: (roleContext === 'admin' ? isCopilotOpen : isAiOpen)
+                color: isAiOpen
                   ? '#a855f7'
                   : 'var(--color-text-secondary)',
                 display: isMobile ? 'none' : 'inline',
@@ -687,6 +854,9 @@ export default function PortalLayout({
               size={36}
               onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
             />
+            {/* Role Impersonator Tool (Rule #14) */}
+            <RoleImpersonatorSelector />
+
             {/* Header Actions (Logout icon from AdminDashboard) */}
             {headerActions}
           </div>
@@ -710,20 +880,26 @@ export default function PortalLayout({
 
         {/* CENTER CONTENT */}
         <main
+          className="portal-main-content"
           style={{
             flex: 1,
+            minWidth: 0,
+            width: '100%',
             overflowY: 'auto',
             overflowX: 'hidden',
+            maxWidth: '100%',
             backgroundColor: 'var(--color-bg-app)',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          {children}
+          <PullToRefreshContainer>
+            {children}
+          </PullToRefreshContainer>
         </main>
 
-        {/* AdminAIAssistant removed in favor of CopilotWorkspacePanel */}
-        {isAiOpen && roleContext !== 'admin' && (
+        {/* Universal Atlas AI Assistant Drawer */}
+        {isAiOpen && (
           <aside
             style={{
               width: isMobile ? '100%' : '300px',
@@ -804,15 +980,19 @@ export default function PortalLayout({
         }}
       />
       <CopilotWorkspacePanel />
+      <ClinicalAssistant
+        embedded={false}
+        isOpen={isAiOpen}
+        setIsOpen={setAiOpen}
+        pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext}
+        contextMode={roleContext}
+        agentType={ROLE_AGENT_TYPE[roleContext] || 'default'}
+        suggestedPrompts={ROLE_SUGGESTED_PROMPTS[roleContext] || []}
+      />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
       <ContextualFAB />
-      {isMobile && (
-        <MobileBottomNav 
-          activeId={activeNavId} 
-          onNavigate={onNavigate} 
-          navGroups={sidebarNavGroups} 
-        />
-      )}
+      {/* MobileBottomNav removed — was covering MobileFiltersSheet footer (Apply button)
+          and cluttering every admin mobile screen. Navigation via hamburger TopBar. */}
     </div>
   );
 }

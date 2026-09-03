@@ -5,10 +5,11 @@ import { collection, query, orderBy, onSnapshot, limit, writeBatch, doc } from '
 import { useAuth } from '../../context/AuthContext';
 import WorkflowDetailWorkspace from './components/WorkflowDetailWorkspace';
 import { Clock, CheckCircle2, AlertCircle, FileText, Pill, Truck, DollarSign, Search, Inbox, Inbox as ArchiveIcon, Trash2, UserPlus, FileUp, Filter, Zap } from '@/lib/icons';
+import { toast } from 'react-hot-toast';
 
 const sidebarViews = [
   { id: 'inbox', label: 'Inbox', icon: Inbox },
-  { id: 'awaiting-review', label: 'Awaiting Review', icon: Clock },
+  { id: 'awaiting-review', label: 'pending', icon: Clock },
   { id: 'awaiting-approval', label: 'Awaiting Approval', icon: CheckCircle2 },
   { id: 'processed-today', label: 'Processed Today', icon: Zap },
   { id: 'completed', label: 'Completed', icon: CheckCircle2 },
@@ -64,7 +65,7 @@ export default function OperationsInboxHub() {
   const getCount = (viewId) => {
     switch (viewId) {
       case 'inbox': return queue.filter(q => q.status === 'New' || q.status === 'AI Processing').length;
-      case 'awaiting-review': return queue.filter(q => q.status === 'Awaiting Review').length;
+      case 'awaiting-review': return queue.filter(q => q.status === 'pending').length;
       case 'awaiting-approval': return queue.filter(q => q.status === 'Awaiting Approval').length;
       case 'completed': return queue.filter(q => q.status === 'Completed' || q.status === 'Workflow Generated').length;
       case 'archived': return queue.filter(q => q.status === 'Archived').length;
@@ -81,7 +82,7 @@ export default function OperationsInboxHub() {
     // View filter
     switch (activeView) {
       case 'inbox': result = result.filter(q => q.status === 'New' || q.status === 'AI Processing'); break;
-      case 'awaiting-review': result = result.filter(q => q.status === 'Awaiting Review'); break;
+      case 'awaiting-review': result = result.filter(q => q.status === 'pending'); break;
       case 'awaiting-approval': result = result.filter(q => q.status === 'Awaiting Approval'); break;
       case 'completed': result = result.filter(q => q.status === 'Completed' || q.status === 'Workflow Generated'); break;
       case 'archived': result = result.filter(q => q.status === 'Archived'); break;
@@ -148,11 +149,11 @@ export default function OperationsInboxHub() {
     );
   }
 
-  const getStatusBadge = (status) => {
+  const getStatusChip = (status) => {
     switch (status) {
       case 'New': return <span style={{ background: '#e0e7ff', color: '#4338ca', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{status}</span>;
       case 'AI Processing': return <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{status}</span>;
-      case 'Awaiting Review': return <span style={{ background: '#fef08a', color: '#854d0e', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{status}</span>;
+      case 'pending': return <StatusChip status="pending" />;
       case 'Awaiting Approval': return <span style={{ background: '#fed7aa', color: '#9a3412', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{status}</span>;
       case 'Workflow Generated':
       case 'Completed': return <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}>{status}</span>;
@@ -192,7 +193,7 @@ export default function OperationsInboxHub() {
       setSelectedRows([]);
     } catch (err) {
       console.error('Error archiving:', err);
-      alert('Error archiving items.');
+      toast.error('Error archiving items.');
     }
   };
 
@@ -256,7 +257,7 @@ export default function OperationsInboxHub() {
         <div style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '20px 24px', display: 'flex', gap: '24px' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Pending Review</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>{queue.filter(q => q.status === 'Awaiting Review').length}</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>{queue.filter(q => q.status === 'pending').length}</div>
           </div>
           <div style={{ width: '1px', background: '#e2e8f0' }} />
           <div style={{ flex: 1 }}>
@@ -343,7 +344,7 @@ export default function OperationsInboxHub() {
                         onChange={(e) => { e.stopPropagation(); toggleRow(item.id); }}
                         style={{ transform: 'scale(1.2)' }}
                       />
-                      {getStatusBadge(item.status)}
+                      {getStatusChip(item.status)}
                     </div>
                     <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>{item.date}</div>
                   </div>
@@ -422,7 +423,7 @@ export default function OperationsInboxHub() {
                     <td style={{ padding: '16px 24px' }} onClick={(e) => e.stopPropagation()}>
                       <input type="checkbox" checked={selectedRows.includes(item.id)} onChange={() => toggleRow(item.id)} />
                     </td>
-                    <td style={{ padding: '16px' }}>{getStatusBadge(item.status)}</td>
+                    <td style={{ padding: '16px' }}>{getStatusChip(item.status)}</td>
                     <td style={{ padding: '16px', fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{item.detectedIntent}</td>
                     <td style={{ padding: '16px', fontSize: '13px', color: '#64748b' }}>{item.outcome}</td>
                     <td style={{ padding: '16px', fontSize: '13px', fontWeight: 700, color: '#0ea5e9' }} onClick={(e) => {

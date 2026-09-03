@@ -105,7 +105,7 @@ export default function ImportRFQTab() {
         key: 'quantity',
         header: 'Qty Requested',
         render: (r) => (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <input
               type="number"
               value={r.quantity || ''}

@@ -15,6 +15,9 @@ const storage = fb?.storage;
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../../context/AuthContext';
+import notifier from '../../services/NotificationService';
+import { useToast } from '../../hooks/useToast';
+import { toast } from 'react-hot-toast';
 
 
 
@@ -93,7 +96,7 @@ export default function DocumentUploadWidget({
       (error) => {
         console.error('Upload failed:', error);
         setUploading(false);
-        alert('File upload failed: ' + error.message);
+        toast.error('File upload failed: ' + error.message);
       },
       async () => {
         try {
@@ -124,17 +127,20 @@ export default function DocumentUploadWidget({
     );
   };
 
-  const handleDelete = async (docId, storagePath) => {
-    if (!window.confirm('Are you sure you want to delete this document?')) return;
-    try {
-      if (storagePath) {
-        await deleteObject(ref(storage, storagePath)).catch(e => console.warn('Storage object missing', e));
+  const handleDelete = (docId, storagePath) => {
+    notifier.confirmCritical(
+      'Delete this document permanently? This cannot be undone.',
+      async () => {
+        try {
+          if (storagePath) {
+            await deleteObject(ref(storage, storagePath)).catch(e => console.warn('Storage object missing', e));
+          }
+          await deleteDoc(doc(db, collectionName, docId));
+        } catch (e) {
+          console.error('Error deleting document:', e);
+        }
       }
-      await deleteDoc(doc(db, collectionName, docId));
-    } catch (e) {
-      console.error('Error deleting document:', e);
-      alert('Error deleting document');
-    }
+    );
   };
 
   return (

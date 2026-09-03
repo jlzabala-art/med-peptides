@@ -10,17 +10,20 @@ export default function GuestHeroSearch({
 }) {
   const { t } = useTranslation();
   return (
-    <section className="hero-section">
-      <div className="hero-section__bg-glow" aria-hidden="true" />
+    <section className="hero-section hero-section--light-grid">
+      <div className="hero-section__grid-bg" aria-hidden="true" />
       
-      <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: '1280px', margin: '0 auto', width: '100%', padding: '2rem 1rem' }}>
-        {/* Hero Headings */}
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem', marginTop: '2rem' }}>
-          <h1 className="hero-headline" style={{ color: 'white', fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 4rem)', marginBottom: '1rem', letterSpacing: '-0.03em' }}>
-            {t('hero.title', 'Optimize your health with AI')}
+      <div className="container guest-hero-container" style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        {/* Hero Headings matching mobile design */}
+        <div className="guest-hero-headings" style={{ marginBottom: '1.75rem', marginTop: '0.5rem' }}>
+          <h1 className="hero-headline-goal" style={{ fontWeight: 900, fontSize: 'clamp(2.3rem, 6vw, 3.8rem)', marginBottom: '0.4rem', letterSpacing: '-0.03em', color: '#00274c', lineHeight: 1.15 }}>
+            Optimize by <span style={{ color: '#0ea5e9' }}>Goal</span>
           </h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: 'clamp(1.1rem, 2vw, 1.25rem)', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6 }}>
-            {t('hero.subtitle', 'Tell ClinicalAI about your goals, or search directly for compounds and protocols.')}
+          <h2 style={{ color: '#0f172a', fontWeight: 700, fontSize: 'clamp(1.15rem, 3vw, 1.5rem)', margin: '0 0 0.6rem 0', letterSpacing: '-0.01em' }}>
+            Peptides, supplements & guided protocols
+          </h2>
+          <p style={{ color: '#64748b', fontSize: 'clamp(0.92rem, 2vw, 1.05rem)', maxWidth: '580px', margin: '0 auto', lineHeight: 1.5, fontWeight: 450 }}>
+            Explore evidence-based pathways for energy, recovery, sleep, cognition, metabolism and healthy aging.
           </p>
         </div>
 
@@ -28,7 +31,7 @@ export default function GuestHeroSearch({
         <HybridHeroInput onSearch={onOpenSearch} onOpenAI={onOpenAI} />
 
         {/* Trust Row */}
-        <div style={{ marginTop: '4rem' }}>
+        <div style={{ marginTop: '2rem' }}>
           <TrustRow />
         </div>
       </div>

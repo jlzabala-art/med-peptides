@@ -1,0 +1,39 @@
+import { NextResponse } from "next/server";
+import { authMiddleware } from "next-firebase-auth-edge";
+import { serverConfig } from "./src/authConfig";
+
+export async function middleware(request) {
+  return authMiddleware(request, {
+    loginPath: "/api/login",
+    logoutPath: "/api/logout",
+    apiKey: serverConfig.firebaseApiKey,
+    cookieName: serverConfig.cookieName,
+    cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+    cookieSerializeOptions: serverConfig.cookieSerializeOptions,
+    serviceAccount: serverConfig.serviceAccount,
+    handleValidToken: async ({ token, decodedToken }, headers) => {
+      // Valid token
+      return NextResponse.next({
+        request: {
+          headers
+        }
+      });
+    },
+    handleInvalidToken: async (reason) => {
+      // Invalid token - redirect to login immediately for protected routes
+      return NextResponse.redirect(new URL('/login', request.url));
+    },
+    handleError: async (error) => {
+      console.error('Unhandled auth middleware error', error);
+      return NextResponse.next();
+    }
+  });
+}
+
+export const config = {
+  matcher: [
+    "/api/login",
+    "/api/logout",
+    "/(admin|clinic|doctor|patient|supplier|wholesaler|pharmacy)(/.*)?",
+  ],
+};

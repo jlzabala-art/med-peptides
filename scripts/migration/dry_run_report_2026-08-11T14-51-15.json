@@ -1,0 +1,2084 @@
+{
+  "generatedAt": "2026-08-11T14:51:15.168Z",
+  "stats": {
+    "totalProductDocs": 611,
+    "uniqueCanonicalNames": 412,
+    "cleanSingletons": 333,
+    "groupsNeedingMerge": 79,
+    "totalDocsToDelete": 199,
+    "totalVariantsToMove": 244
+  },
+  "crossCollectionRefs": {},
+  "mergePlan": [
+    {
+      "canonicalName": "5-Amino-1MQ",
+      "winner": "5-amino-1mq",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "5-amino-1mq-10mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "T2WumrIFHNiJL5UndJRN-default",
+            "imLaf5RoNqeespb3a3ur"
+          ]
+        },
+        {
+          "id": "bioniq_5_amino_1mq_single_use_pen_100_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_5_amino_1mq_single_use_pen_100_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_5_amino_1mq_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_5_amino_1mq_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Amlexanox",
+      "winner": "amlexanox-40mg-caps-x30",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "amlexanox-40mg-caps-x90",
+          "variantCount": 1,
+          "variantIds": [
+            "FbrR6IlePdE6Afr6PXZl-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "AOD-9604",
+      "winner": "aod-9604",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_aod_9604_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_aod_9604_2_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_aod_9604_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_aod_9604_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "AOD 9604",
+      "winner": "aod-9604-5mg-vial",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "aod-9604-300mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "pfCbZrsigUSpy8p4xt08-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "ARA-290",
+      "winner": "ara-290",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_ara_290_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ara_290_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Bac Water",
+      "winner": "bac-water",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_bac_water_30_ml_bottle",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bac_water_30_ml_bottle-default"
+          ]
+        },
+        {
+          "id": "lotusland_bac_water_3_ml_10_bottles",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bac_water_3_ml_10_bottles-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "BPC-157",
+      "winner": "bpc-157",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 22,
+      "losers": [
+        {
+          "id": "bioniq_bpc_157_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_bpc_157_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "bpc-157-1000mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "ndSXGLM9fy0sCCGeclVt-default"
+          ]
+        },
+        {
+          "id": "bpc-157-100mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "EUtmtCWKpojjR6yKK0KW-default"
+          ]
+        },
+        {
+          "id": "bpc-157-10mg-tb-500-10mg-ghk-cu-50mg-kpv-10mg",
+          "variantCount": 1,
+          "variantIds": [
+            "HMVi6zmZLyslAHJkP1ct-default"
+          ]
+        },
+        {
+          "id": "bpc-157-10mg-tb-500-10mg-ghk-cu-50mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ZYc70Pa7uM1Eg9J7a8GE-default"
+          ]
+        },
+        {
+          "id": "bpc-157-10mg-tb-500-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "gpLdTOXehtsh6fm4xVyc-default"
+          ]
+        },
+        {
+          "id": "bpc-157-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "hd2aLSicnhvAKFp0KCde-default"
+          ]
+        },
+        {
+          "id": "bpc-157-150mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "QXCKi2QEFituGzVYTgQe-default"
+          ]
+        },
+        {
+          "id": "bpc-157-200mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "omQ8RQWFzWusnd2TAq2I-default"
+          ]
+        },
+        {
+          "id": "bpc-157-25mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "xmcoy4kt34v7XLD4TxK2-default"
+          ]
+        },
+        {
+          "id": "bpc-157-300mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "YRvnQAjC9AT5j8K9eOM8-default"
+          ]
+        },
+        {
+          "id": "bpc-157-500mcg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "EaJbjeLrX83jpOPF7pku-default"
+          ]
+        },
+        {
+          "id": "bpc-157-5mg-vial",
+          "variantCount": 5,
+          "variantIds": [
+            "6ZHalxwLJoIX0Ow6sX7p",
+            "9WmOGKlQBFsV86gOklTM",
+            "Q2W2JdKPqgwbcMUn1dSU-default",
+            "UK4s9qprJrOkKPrc49ul",
+            "wj0XsgWASynAQWmhXBjl"
+          ]
+        },
+        {
+          "id": "lotusland_bpc_157_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bpc_157_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_bpc_157_20_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bpc_157_20_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_bpc_157_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bpc_157_2_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_bpc_157_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bpc_157_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "CJC 1295 No Dac",
+      "winner": "cjc-1295-no-dac-10mg-vial",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "bioniq_cjc_1295_no_dac_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_cjc_1295_no_dac_single_use_pen_30_mg-default"
+          ]
+        },
+        {
+          "id": "cjc-1295-no-dac-2mg-ipamorelin-2mg-bpc-157-5mg",
+          "variantCount": 1,
+          "variantIds": [
+            "2QmtGhPjoSvKERb2nqPS-default"
+          ]
+        },
+        {
+          "id": "cjc-1295-no-dac-3mg-ipamorelin-3mg-sermorelin-6mg",
+          "variantCount": 1,
+          "variantIds": [
+            "XncSj8ARrLuoFWhpT3X3-default"
+          ]
+        },
+        {
+          "id": "cjc-1295-no-dac-5mg-ipamorelin-5mg",
+          "variantCount": 1,
+          "variantIds": [
+            "fWZr6OnX3DJxyTsdkGDc-default"
+          ]
+        },
+        {
+          "id": "cjc-1295-no-dac-5mg-ipamorelin-5mg-bpc-157-15mg",
+          "variantCount": 1,
+          "variantIds": [
+            "MJuNguC01SoAhxa4lrcg-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Dihexa",
+      "winner": "dihexa",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "bioniq_dihexa_capsule",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_dihexa_capsule-default"
+          ]
+        },
+        {
+          "id": "dihexa-10mg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "ymmr0TtBqFwW3Tc1qKSd-default"
+          ]
+        },
+        {
+          "id": "dihexa-30mg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "OxiJD1LU2g6BxYSziDyL-default"
+          ]
+        },
+        {
+          "id": "dihexa-5mg-caps-x30",
+          "variantCount": 1,
+          "variantIds": [
+            "I9hDGgzkUQUTqrjlAIkp-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "DSIP",
+      "winner": "dsip",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 7,
+      "losers": [
+        {
+          "id": "bioniq_dsip_nasal_spray",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_dsip_nasal_spray-default"
+          ]
+        },
+        {
+          "id": "dsip-5mg-vial",
+          "variantCount": 3,
+          "variantIds": [
+            "TAF0DynbcDFqcYIqTZsn",
+            "XwLM1Tm15GqNqjwTYcNS-default",
+            "kzxRFJ8mNikrqeedj58t"
+          ]
+        },
+        {
+          "id": "lotusland_dsip_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_dsip_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_dsip_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_dsip_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Epitalon",
+      "winner": "epitalon",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "bioniq_epitalon_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_epitalon_single_use_pen_30_mg-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Follistatin 344",
+      "winner": "follistatin-344-1mg-vial",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "bioniq_follistatin_344_single_use_pen_3_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_follistatin_344_single_use_pen_3_mg-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "GHK-Cu",
+      "winner": "ghk-cu",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "bioniq_ghk_cu_single_use_pen_100_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_ghk_cu_single_use_pen_100_mg-default"
+          ]
+        },
+        {
+          "id": "bioniq_ghk_cu_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_ghk_cu_single_use_pen_30_mg-default"
+          ]
+        },
+        {
+          "id": "ghk-cu-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "iiHCc1frQUxYTdEGz0Mt-default"
+          ]
+        },
+        {
+          "id": "ghk-cu-50mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "r0cFTwkcAdJeMuNJiJyE-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Ipamorelin",
+      "winner": "ipamorelin",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "bioniq_ipamorelin_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_ipamorelin_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "ipamorelin-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ZQX9CQmBYH7xbDDepoer-default"
+          ]
+        },
+        {
+          "id": "ipamorelin-5mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "YOTGmTU2GZzePRID6SyW-default",
+            "wxeQLx1iHh9xac62tViv"
+          ]
+        },
+        {
+          "id": "lotusland_ipamorelin_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ipamorelin_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "KPV",
+      "winner": "kpv",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "bioniq_kpv_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_kpv_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "kpv-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "S9tWSye5eXaLCFnADg0B-default"
+          ]
+        },
+        {
+          "id": "kpv-5mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "5vdbwxeegknxXAbVboC6",
+            "j7VPz1VUeJopTRUMj2ZL-default"
+          ]
+        },
+        {
+          "id": "lotusland_kpv_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_kpv_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Melanotan II",
+      "winner": "melanotan-ii",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "bioniq_melanotan_ii_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_melanotan_ii_single_use_pen_30_mg-default"
+          ]
+        },
+        {
+          "id": "melanotan-ii-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ES6lsOPkNa7ZAJaoWMGX-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "MOTS-C",
+      "winner": "mots-c",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 12,
+      "losers": [
+        {
+          "id": "bioniq_mots_c_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_mots_c_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_mots_c_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_mots_c_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_mots_c_40_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_mots_c_40_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_mots_c_60_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_mots_c_60_mg_vial-default"
+          ]
+        },
+        {
+          "id": "mots-c-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "sm14vniE0KxpBugkU8e7-default"
+          ]
+        },
+        {
+          "id": "mots-c-20mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "D3kYybmYfChi1CpFfgXt-default"
+          ]
+        },
+        {
+          "id": "mots-c-50mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ae8Asd0bSMCLRmjNzDDO-default"
+          ]
+        },
+        {
+          "id": "mots-c-5mg-vial",
+          "variantCount": 4,
+          "variantIds": [
+            "7jPfG5NV24E17Mvgrxar",
+            "8IoE4wwnxUVHtXzQj1BJ-default",
+            "B7wZOYdtugWEPaF5gzHh",
+            "WskRy5g5DpnSlNlTIFcG"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "NAD+",
+      "winner": "nad",
+      "winnerCurrentVars": 4,
+      "finalVarCount": 9,
+      "losers": [
+        {
+          "id": "bioniq_nad_nasal_spray",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_nad_nasal_spray-default"
+          ]
+        },
+        {
+          "id": "bioniq_nad_single_use_pen_300_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_nad_single_use_pen_300_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_nad_1000_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_nad_1000_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_nad_500_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_nad_500_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_nad_750_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_nad_750_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "PT-141",
+      "winner": "pt-141-10mg-vial",
+      "winnerCurrentVars": 4,
+      "finalVarCount": 8,
+      "losers": [
+        {
+          "id": "bioniq_pt_141_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_pt_141_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_pt_141_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pt_141_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_pt_141_20_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pt_141_20_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_pt_141_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pt_141_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Selank",
+      "winner": "selank",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 9,
+      "losers": [
+        {
+          "id": "bioniq_selank_nasal_spray",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_selank_nasal_spray-default"
+          ]
+        },
+        {
+          "id": "bioniq_selank_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_selank_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_selank_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_selank_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_selank_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_selank_5_mg_vial-default"
+          ]
+        },
+        {
+          "id": "selank-5mg-semax-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "vIHzmiljsnmxvQyKNIN2-default"
+          ]
+        },
+        {
+          "id": "selank-5mg-vial",
+          "variantCount": 3,
+          "variantIds": [
+            "CeQkwMjOnL9OlcsdpK27-default",
+            "Hrq0b46KA9unNLvi7P2X",
+            "srQnh1URrCWPNHfiglpG"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Semax",
+      "winner": "semax",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "bioniq_semax_nasal_spray",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_semax_nasal_spray-default"
+          ]
+        },
+        {
+          "id": "bioniq_semax_single_use_pen_15_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_semax_single_use_pen_15_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_semax_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_semax_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "semax-5mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "ZM1P28BjU7vaMXqD4dFH",
+            "iUsI47wbU4KLAXLp1IuF-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "SS-31",
+      "winner": "ss-31",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "bioniq_ss_31_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_ss_31_single_use_pen_30_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_ss_31_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ss_31_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_ss_31_50_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ss_31_50_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Tesamorelin",
+      "winner": "tesamorelin",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "bioniq_tesamorelin_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_tesamorelin_single_use_pen_30_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_tesamorelin_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_tesamorelin_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "tesamorelin-20mg-ipamorelin-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "cvGpOwchQDvtQ3k9yB4T-default"
+          ]
+        },
+        {
+          "id": "tesamorelin-5mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "9RHXk0Lo4vwprhLruEqu",
+            "r6pHsPvslIJnfJPLmusn-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymalin",
+      "winner": "thymalin-5mg-vial",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "bioniq_thymalin_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_thymalin_single_use_pen_30_mg-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymosin Alpha 1",
+      "winner": "thymosin-alpha-1",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 4,
+      "losers": [
+        {
+          "id": "bioniq_thymosin_alpha_1_single_use_pen_30_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "bioniq_thymosin_alpha_1_single_use_pen_30_mg-default"
+          ]
+        },
+        {
+          "id": "lotusland_thymosin_alpha_1_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymosin_alpha_1_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "BPC-157 + TB-500",
+      "winner": "bpc-157-tb-500",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_bpc_157_tb_500_10_mg_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bpc_157_tb_500_10_mg_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_bpc_157_tb_500_5_mg_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_bpc_157_tb_500_5_mg_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Cagrilintide",
+      "winner": "cagrilintide",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 7,
+      "losers": [
+        {
+          "id": "cagrilintide-5mg-semaglutide-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ESdoGhuDe9dvWWqn4qeg-default"
+          ]
+        },
+        {
+          "id": "cagrilintide-5mg-vial",
+          "variantCount": 3,
+          "variantIds": [
+            "DyWsCPR3U6Sm73TkSbHv-default",
+            "kvLPCXSg7hFVNXczeeoJ",
+            "lZLvyQCBrbBr3IsVObym"
+          ]
+        },
+        {
+          "id": "lotusland_cagrilintide_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cagrilintide_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_cagrilintide_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cagrilintide_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Cardiogen",
+      "winner": "cardiogen",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_cardiogen_25_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cardiogen_25_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Cartalax",
+      "winner": "cartalax",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_cartalax_25_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cartalax_25_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "CJC 1295 DAC",
+      "winner": "cjc-1295-dac",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "cjc-1295-dac-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "olhgWoyCcFr3Gl45oPRY-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "CJC-1295 with DAC",
+      "winner": "cjc-1295-with-dac",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "lotusland_cjc_1295_with_dac_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cjc_1295_with_dac_2_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "CJC-1295 without DAC + Ipamorelin",
+      "winner": "cjc-1295-without-dac-ipamorelin",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_cjc_1295_without_dac_ipamorelin_5_mg_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cjc_1295_without_dac_ipamorelin_5_mg_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "winner": "e9URhAeNH7ygDWzvrf83",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 4,
+      "losers": [
+        {
+          "id": "insulin-syringes-1-2-ml-31g-x-8-mm-100-counts",
+          "variantCount": 1,
+          "variantIds": [
+            "rlquV5BesN4OEKodMjx7"
+          ]
+        },
+        {
+          "id": "insulin-syringes-12-ml-31g-x-8-mm-100-counts",
+          "variantCount": 1,
+          "variantIds": [
+            "ZufMzncL3yvcZTNurW5O-default"
+          ]
+        },
+        {
+          "id": "lotusland_insulin_syringes_1_2_ml_31g_x_8_mm_100_counts_n_a",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_insulin_syringes_1_2_ml_31g_x_8_mm_100_counts_n_a-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Epithalon",
+      "winner": "epithalon",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 10,
+      "losers": [
+        {
+          "id": "epithalon-50mg-vial",
+          "variantCount": 5,
+          "variantIds": [
+            "9eKHWIp5GtuaGPfydVzV",
+            "DIr0wL0dG6QyXFyuh4D1-default",
+            "DWCvAr373KKNft1sUJ1k",
+            "QBor1NWioMFUkjzK844q",
+            "VJE9yrbwCOepQDkjHv4u"
+          ]
+        },
+        {
+          "id": "lotusland_epithalon_100_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_epithalon_100_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_epithalon_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_epithalon_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_epithalon_30_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_epithalon_30_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_epithalon_50_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_epithalon_50_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "FOX-04",
+      "winner": "fox-04",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_fox_04_12_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_fox_04_12_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "FST344",
+      "winner": "fst344",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_fst344_1_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_fst344_1_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "GHK-Cu (Human Copper)",
+      "winner": "ghk-cu-human-copper",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_ghk_cu_human_copper_100_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ghk_cu_human_copper_100_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_ghk_cu_human_copper_50_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ghk_cu_human_copper_50_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "GHRP-2",
+      "winner": "ghrp-2",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_ghrp_2_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ghrp_2_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "GLOW (BPC-157 / TB-500 / GHK)",
+      "winner": "glow-bpc-157-tb-500-ghk",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_glow_bpc_157_tb_500_ghk_10_mg_10_mg_75_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_glow_bpc_157_tb_500_ghk_10_mg_10_mg_75_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Glutathione",
+      "winner": "glutathione",
+      "winnerCurrentVars": 4,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_glutathione_500_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_glutathione_500_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "GW501516",
+      "winner": "gw501516",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "lotusland_gw501516_10_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_gw501516_10_mg-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "HCG",
+      "winner": "hcg",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 7,
+      "losers": [
+        {
+          "id": "hcg-2000iu-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "Q7qskegro7D8jrxbwJbe-default"
+          ]
+        },
+        {
+          "id": "hcg-5000iu-vial",
+          "variantCount": 3,
+          "variantIds": [
+            "K7pp4z7rL6M4o0nMZIoN-default",
+            "T5LP6TwNyPZesO9nYqDG",
+            "ZcfkYBifyZAYu5tQ0s3C"
+          ]
+        },
+        {
+          "id": "lotusland_hcg_10000_iu_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hcg_10000_iu_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_hcg_5000_iu_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hcg_5000_iu_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Hexarelin",
+      "winner": "hexarelin",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_hexarelin_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hexarelin_2_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_hexarelin_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hexarelin_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "HGH",
+      "winner": "hgh",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 8,
+      "losers": [
+        {
+          "id": "hgh-36iu-3ml-vial",
+          "variantCount": 4,
+          "variantIds": [
+            "0ot2wwKrpbfTUK6JZVeg",
+            "JOe7hgSzbhIpcrqkT3eg",
+            "XctHkpWmfKYgXQMU6UmI-default",
+            "a599k0JRLIf2aPpOekbQ"
+          ]
+        },
+        {
+          "id": "lotusland_hgh_10_iu_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hgh_10_iu_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_hgh_20_iu_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hgh_20_iu_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_hgh_36_iu_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hgh_36_iu_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "HMG",
+      "winner": "hmg",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 4,
+      "losers": [
+        {
+          "id": "hmg-75iu-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "AUtYj11XwCEw0EIBpx4t",
+            "Bl1xALGtPspBnpCTEIkE-default"
+          ]
+        },
+        {
+          "id": "lotusland_hmg_75_iu_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_hmg_75_iu_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "IGF-1 LR3",
+      "winner": "igf-1-lr3",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "igf-1-lr3-1mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "46J5dhifpl1sFDm4OHvL-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "IGF LR3",
+      "winner": "igf-lr3",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_igf_lr3_0_1_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_igf_lr3_0_1_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_igf_lr3_1_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_igf_lr3_1_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Kisspeptin-10",
+      "winner": "kisspeptin-10",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 4,
+      "losers": [
+        {
+          "id": "kisspeptin-10-5mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "Q1hxoT4RzjMcDQ1A9rhx",
+            "urcqODapb8jUt1t0FMUR-default"
+          ]
+        },
+        {
+          "id": "lotusland_kisspeptin_10_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_kisspeptin_10_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "KLOW (BPC-157 / TB-500 / GHKCu / KPV)",
+      "winner": "klow-bpc-157-tb-500-ghkcu-kpv",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_klow_bpc_157_tb_500_ghkcu_kpv_10_mg_10_mg_75_mg_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_klow_bpc_157_tb_500_ghkcu_kpv_10_mg_10_mg_75_mg_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Lion's Mane Mushroom",
+      "winner": "lions-mane-mushroom",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "lion-s-mane-mushroom",
+          "variantCount": 1,
+          "variantIds": [
+            "lion-s-mane-mushroom-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "LL-37",
+      "winner": "ll-37",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_ll_37_12_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_ll_37_12_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "CJC-1295 without DAC",
+      "winner": "lotusland_cjc_1295_without_dac_2_mg_vial",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_cjc_1295_without_dac_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cjc_1295_without_dac_5_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_cjc_1295_without_dac_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_cjc_1295_without_dac_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "MK-677",
+      "winner": "mk-677",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_mk_677_12_mg",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_mk_677_12_mg-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "MT2",
+      "winner": "mt2",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_mt2_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_mt2_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "NMN",
+      "winner": "nmn",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_nmn_50_mg_tablet",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_nmn_50_mg_tablet-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Oxytocin Acetate",
+      "winner": "oxytocin-acetate",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_oxytocin_acetate_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_oxytocin_acetate_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_oxytocin_acetate_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_oxytocin_acetate_2_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "PE 22-28",
+      "winner": "pe-22-28",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_pe_22_28_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pe_22_28_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "PEG-MGF",
+      "winner": "peg-mgf",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_peg_mgf_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_peg_mgf_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Pinealon",
+      "winner": "pinealon",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 5,
+      "losers": [
+        {
+          "id": "lotusland_pinealon_16_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pinealon_16_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_pinealon_25_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pinealon_25_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "PNC-27",
+      "winner": "pnc-27",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_pnc_27_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_pnc_27_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Prostamax",
+      "winner": "prostamax",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_prostamax_25_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_prostamax_25_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Retatrutide",
+      "winner": "retatrutide",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 15,
+      "losers": [
+        {
+          "id": "lotusland_retatrutide_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_retatrutide_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_retatrutide_20_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_retatrutide_20_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_retatrutide_30_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_retatrutide_30_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_retatrutide_40_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_retatrutide_40_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_retatrutide_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_retatrutide_5_mg_vial-default"
+          ]
+        },
+        {
+          "id": "retatrutide-12mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "apeVB5zMLe56qHgsTmW0-default"
+          ]
+        },
+        {
+          "id": "retatrutide-50mg-vial-10ml",
+          "variantCount": 1,
+          "variantIds": [
+            "WnTDhrpGtQcupcN4c1lJ-default"
+          ]
+        },
+        {
+          "id": "retatrutide-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ZTNRApt4cNpv1WoK8s0V-default"
+          ]
+        },
+        {
+          "id": "retatrutide-60mg-vial-10ml",
+          "variantCount": 6,
+          "variantIds": [
+            "0ncBX3po8PvhUqgvbmow",
+            "PlRd12y0w1ch3VUZ6OJp-default",
+            "QiUlYyiPcqvmahU6Y5Fx",
+            "jP2nhM9XJZQ796WXke29",
+            "ketTCtUfzro4feur3Unh",
+            "zmUfP8QDm9jgUhiRu689"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Semaglutide",
+      "winner": "semaglutide",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 10,
+      "losers": [
+        {
+          "id": "lotusland_semaglutide_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_semaglutide_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_semaglutide_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_semaglutide_2_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_semaglutide_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_semaglutide_5_mg_vial-default"
+          ]
+        },
+        {
+          "id": "semaglutide-20mg-vial-10ml",
+          "variantCount": 1,
+          "variantIds": [
+            "BcwWwoVhS76ChauChmWu-default"
+          ]
+        },
+        {
+          "id": "semaglutide-2mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "WCAeRnnJZcP11dFHcGvM-default"
+          ]
+        },
+        {
+          "id": "semaglutide-5mg-vial",
+          "variantCount": 4,
+          "variantIds": [
+            "62D9dJ355emy7yScNbmB",
+            "BjKlxqjOlvpSI2ynUeJF",
+            "ClpxgSmU8IdnrBuYT5Wl-default",
+            "LMfM08I6BXS0r1dxwhlc"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Sermorelin",
+      "winner": "sermorelin",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "lotusland_sermorelin_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_sermorelin_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_sermorelin_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_sermorelin_5_mg_vial-default"
+          ]
+        },
+        {
+          "id": "sermorelin-5mg-vial",
+          "variantCount": 3,
+          "variantIds": [
+            "CDSE6Ig5i7zDOTbTM8I7",
+            "GImln1iKD58tO4AHZsfa-default",
+            "Qu2ZrjKc6oNfeBsROaN6"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "SLU-PP-332",
+      "winner": "slu-pp-332-100mg-caps-x30",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_slu_pp_332_250_mcg_tablet",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_slu_pp_332_250_mcg_tablet-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Snap-8",
+      "winner": "snap-8",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_snap_8_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_snap_8_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Starter Kit (Syringe + Bac Water)",
+      "winner": "starter-kit-syringe-bac-water",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "lotusland_starter_kit_syringe_bac_water_n_a",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_starter_kit_syringe_bac_water_n_a-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Syringe + Bac Water Bundle",
+      "winner": "syringe-bac-water-bundle",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_syringe_bac_water_bundle_30_ml_bac_water_100_syringes",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_syringe_bac_water_bundle_30_ml_bac_water_100_syringes-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Testagen",
+      "winner": "testagen",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_testagen_25_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_testagen_25_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymogen",
+      "winner": "thymogen",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 4,
+      "losers": [
+        {
+          "id": "lotusland_thymogen_25_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymogen_25_mg_vial-default"
+          ]
+        },
+        {
+          "id": "thymogen-5mg-vial",
+          "variantCount": 2,
+          "variantIds": [
+            "P1l5iQBdtgeGJG4Dwy2k-default",
+            "oCxS7NHtmOArOMKyc0JY"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymosin β4 (TB-500)",
+      "winner": "thymosin-4-tb-500",
+      "winnerCurrentVars": 3,
+      "finalVarCount": 6,
+      "losers": [
+        {
+          "id": "lotusland_thymosin_4_tb_500_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymosin_4_tb_500_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_thymosin_4_tb_500_2_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymosin_4_tb_500_2_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_thymosin_4_tb_500_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymosin_4_tb_500_5_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymosin Alpha 1 + Thymalin",
+      "winner": "thymosin-alpha-1-thymalin",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_thymosin_alpha_1_thymalin_10_mg_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymosin_alpha_1_thymalin_10_mg_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymulin",
+      "winner": "thymulin",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "lotusland_thymulin_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_thymulin_10_mg_vial-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Tirzepatide",
+      "winner": "tirzepatide",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 15,
+      "losers": [
+        {
+          "id": "lotusland_tirzepatide_10_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_tirzepatide_10_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_tirzepatide_15_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_tirzepatide_15_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_tirzepatide_30_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_tirzepatide_30_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_tirzepatide_5_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_tirzepatide_5_mg_vial-default"
+          ]
+        },
+        {
+          "id": "lotusland_tirzepatide_60_mg_vial",
+          "variantCount": 1,
+          "variantIds": [
+            "lotusland_tirzepatide_60_mg_vial-default"
+          ]
+        },
+        {
+          "id": "tirzepatide-20mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "MtoTuQVhNnuu2LqXOfBq-default"
+          ]
+        },
+        {
+          "id": "tirzepatide-40mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "d1VPqXm9S9gO7G26Kkc3-default"
+          ]
+        },
+        {
+          "id": "tirzepatide-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "ehr9VNobbU5XMbCHqAmN-default"
+          ]
+        },
+        {
+          "id": "tirzepatide-60mg-vial",
+          "variantCount": 6,
+          "variantIds": [
+            "05wzIwa8B6PdJN8GGAvc",
+            "LMLZCEoLGLwfguhNckeU",
+            "PoMnPETaNsqlFRjSxCLC",
+            "a8aG6NKCccTzxouh0pZC-default",
+            "h088YSdr0FaN3tGvqYrp",
+            "tVt5A6cyssUYJeSZfDyU"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Oxytocin",
+      "winner": "oxytocin",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "oxytocin-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "mmp3kqENoUqLeoUrSM3F-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Serrapeptase 300,000SPU",
+      "winner": "serrapeptase-300000spu",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 2,
+      "losers": [
+        {
+          "id": "serrapeptase-300-000spu",
+          "variantCount": 1,
+          "variantIds": [
+            "serrapeptase-300-000spu-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Spermidine",
+      "winner": "spermidine",
+      "winnerCurrentVars": 2,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "spermidine-20mg-vial-injectable",
+          "variantCount": 1,
+          "variantIds": [
+            "A8GtpxU9YLIMaFO81Xqq-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "SS-31 (Elamipretide)",
+      "winner": "ss-31-elamipretide-5mg-vial",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "ss-31-elamipretide-10mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "QIN2P1AjhQkdmQfrjGfF-default"
+          ]
+        },
+        {
+          "id": "ss-31-elamipretide-50mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "gbuWc5tUAIrhdlF2RKMv-default"
+          ]
+        }
+      ]
+    },
+    {
+      "canonicalName": "Thymosin Beta (TB-500)",
+      "winner": "thymosin-beta-tb-500",
+      "winnerCurrentVars": 1,
+      "finalVarCount": 3,
+      "losers": [
+        {
+          "id": "thymosin-beta-tb-500-20mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "w1VvC4UgFC6kB5IMtgeV-default"
+          ]
+        },
+        {
+          "id": "thymosin-beta-tb-500-5mg-vial",
+          "variantCount": 1,
+          "variantIds": [
+            "BA4bW6rxOyZjGdTPcebr-default"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -55,8 +55,8 @@ export default function InvoiceActionCenter({ invoice }) {
   }
 
   // Invoice Specific Action Center
-  const isOverdue = invoice.status === 'Overdue';
-  const isPaid = invoice.status === 'Paid';
+  const isOverdue = invoice.status === 'error';
+  const isPaid = invoice.status === 'completed';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', gap: '2rem' }}>

@@ -1,14 +1,23 @@
 "use client";
 
-import React, { Suspense } from 'react';
-import { redirect } from 'next/navigation';
+import React, { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import PortalSidebar from '../../components/ui/PortalSidebar';
 
 export default function MedicalLayout({ children }) {
   const { user, userProfile, loading } = useAuth();
+  const router = useRouter();
 
-  if (loading) {
+  const isUnauthorized = !loading && (!user || (userProfile?.role !== 'doctor' && userProfile?.role !== 'admin'));
+
+  useEffect(() => {
+    if (isUnauthorized) {
+      router.push('/login');
+    }
+  }, [isUnauthorized, router]);
+
+  if (loading || isUnauthorized) {
     return (
       <div className="portal-loading-container" style={{ padding: '2rem' }}>
         <div className="skeleton" style={{ height: 28, width: 200, marginBottom: '1.25rem' }} />
@@ -16,12 +25,6 @@ export default function MedicalLayout({ children }) {
         <div className="skeleton" style={{ height: 240, borderRadius: 12 }} />
       </div>
     );
-  }
-
-  // Allow either doctor or admin to access the medical portal
-  if (!user || (userProfile?.role !== 'doctor' && userProfile?.role !== 'admin')) {
-    redirect('/login');
-    return null;
   }
 
   return (

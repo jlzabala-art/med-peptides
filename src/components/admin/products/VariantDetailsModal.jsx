@@ -9,9 +9,11 @@ import * as fb from '../../../firebase';
 const db = fb?.db;
 const storage = fb?.storage;
 import { useToast } from '../../../hooks/useToast';
+import notifier from '../../../services/NotificationService';
 import RightWorkspacePanel from '../catalog/RightWorkspacePanel';
 import { Button } from '../../ui';
 import { getCategorySchema } from './VariantSchemas';
+import { updateVariant, updateProduct } from '../../../repositories/productRepository';
 import { Save, PackageOpen, AlertCircle } from '@/lib/icons';
 
 export default function VariantDetailsModal({
@@ -102,17 +104,17 @@ export default function VariantDetailsModal({
           variant.cost ||
           variant.unitCost ||
           variant.baseCost ||
-          variant.pricing?.master?.perUnit ||
+          variant.pricing?.supplierCost ||
           0,
         msrp:
-          variant.pricing?.retail?.perUnit ||
+          variant.pricing?.retail ||
           variant.msrp ||
           variant.retailPrice ||
           variant.price ||
           0,
-        clinicPrice: variant.pricing?.clinic?.perUnit || variant.clinicPrice || variant.clinic || 0,
+        clinicPrice: variant.pricing?.clinic || variant.clinicPrice || variant.clinic || 0,
         wholesalePrice:
-          variant.pricing?.wholesale?.perUnit || variant.wholesalePrice || variant.wholesale || 0,
+          variant.pricing?.wholesale || variant.wholesalePrice || variant.wholesale || 0,
         regStatus: variant.regStatus || variant.registrationStatus || 'Unregistered',
         coaAvailable: variant.coaAvailable || false,
       });
@@ -183,12 +185,10 @@ export default function VariantDetailsModal({
       }
 
       if (variantDocId && !variantDocId.includes('-root')) {
-        const vRef = doc(db, 'products', product.id, 'variants', variantDocId);
-        await updateDoc(vRef, updatePayload);
+        await updateVariant(product.id, variantDocId, updatePayload, { strict: false });
       } else {
         // Fallback to updating the product if it's a flat catalog item without variant subdocs
-        const pRef = doc(db, 'products', product.id);
-        await updateDoc(pRef, updatePayload);
+        await updateProduct(product.id, updatePayload, { strict: false });
       }
 
       toast.success('Variant updated successfully.');
@@ -203,24 +203,37 @@ export default function VariantDetailsModal({
     }
   };
 
-  const handleSupplierChange = async (val) => {
+  const handleSupplierChange = (val) => {
     if (val === '___ADD_NEW___') {
-      const newSupplier = window.prompt('Enter new supplier name:');
-      if (newSupplier && newSupplier.trim()) {
-        const nameTrimmed = newSupplier.trim();
-        try {
-          await addDoc(collection(db, 'wholesellers'), {
-            companyName: nameTrimmed,
-            createdAt: new Date().toISOString(),
-            status: 'active',
-          });
-          setSuppliersList((prev) => [...new Set([...prev, nameTrimmed])].sort());
-          setForm({ ...form, supplier: nameTrimmed });
-          toast.success('New supplier added successfully');
-        } catch (err) {
-          toast.error('Failed to add new supplier');
+      let newSupplier = '';
+      notifier.confirmCritical(
+        <div>
+          <p style={{ marginBottom: '0.5rem', fontWeight: 500 }}>New supplier name:</p>
+          <input
+            autoFocus
+            type="text"
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.9rem' }}
+            placeholder="Supplier name…"
+            onChange={(e) => { newSupplier = e.target.value; }}
+          />
+        </div>,
+        async () => {
+          const nameTrimmed = newSupplier.trim();
+          if (!nameTrimmed) { toast.error('Please enter a supplier name.'); return; }
+          try {
+            await addDoc(collection(db, 'wholesalers'), {
+              companyName: nameTrimmed,
+              createdAt: new Date().toISOString(),
+              status: 'active',
+            });
+            setSuppliersList((prev) => [...new Set([...prev, nameTrimmed])].sort());
+            setForm({ ...form, supplier: nameTrimmed });
+            toast.success('New supplier added successfully');
+          } catch (err) {
+            toast.error('Failed to add new supplier');
+          }
         }
-      }
+      );
     } else {
       setForm({ ...form, supplier: val });
     }
@@ -233,11 +246,11 @@ export default function VariantDetailsModal({
     const inputBaseStyle = {
       padding: '10px 12px',
       borderRadius: '8px',
-      border: `1px solid ${isError ? '#ef4444' : '#cbd5e1'}`,
+      border: `1px solid ${isError ? '#ef4444' : '#475569'}`,
       fontSize: '0.95rem',
       outline: 'none',
       width: '100%',
-      backgroundColor: '#fff',
+      backgroundColor: '#0f172a',
       transition: 'border-color 0.2s',
     };
 
@@ -257,7 +270,7 @@ export default function VariantDetailsModal({
             control: (base) => ({
               ...base,
               borderRadius: '8px',
-              borderColor: isError ? '#ef4444' : '#cbd5e1',
+              borderColor: isError ? '#ef4444' : '#475569',
               fontSize: '0.95rem',
               minHeight: '42px',
             }),
@@ -298,7 +311,7 @@ export default function VariantDetailsModal({
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gap: '12px',
-            background: '#f8fafc',
+            background: '#1e293b',
             padding: '12px',
             borderRadius: '8px',
             border: '1px solid #e2e8f0',
@@ -428,7 +441,7 @@ export default function VariantDetailsModal({
                 style={{
                   ...inputBaseStyle,
                   padding: '8px',
-                  color: uploadingFiles[field.name] ? '#94a3b8' : '#334155',
+                  color: uploadingFiles[field.name] ? '#64748b' : '#475569',
                 }}
               />
               {uploadingFiles[field.name] && (
@@ -485,7 +498,7 @@ export default function VariantDetailsModal({
             onChange={(e) => setForm({ ...form, [field.name]: e.target.checked })}
             style={{ width: '18px', height: '18px', accentColor: '#0ea5e9' }}
           />
-          <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: 500 }}>
+          <span style={{ fontSize: '0.95rem', color: '#475569', fontWeight: 500 }}>
             {field.label}
           </span>
         </label>
@@ -628,7 +641,7 @@ export default function VariantDetailsModal({
       onClose={onClose}
       title={
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1e293b' }}>
+          <span style={{ fontSize: '1.2rem', fontWeight: 700, color: '#e2e8f0' }}>
             {product.name || 'Unknown Product'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -697,21 +710,21 @@ export default function VariantDetailsModal({
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          backgroundColor: '#f8fafc',
+          backgroundColor: '#1e293b',
           padding: '24px',
           overflowY: 'auto',
         }}
       >
         <div
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: '#0f172a',
             padding: '24px',
             borderRadius: '12px',
             border: '1px solid #e2e8f0',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '1.1rem', color: '#1e293b' }}>
+          <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '1.1rem', color: '#e2e8f0' }}>
             {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)} Details
           </h3>
           {schema[activeSection] && renderSection(schema[activeSection])}

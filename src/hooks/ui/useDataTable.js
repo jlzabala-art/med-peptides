@@ -167,7 +167,8 @@ export function useDataTable(data = [], options = {}) {
     setSortDesc,
 
     // ── Bulk Selection ──────────────────────────────────────────────────────
-    selectedIds,
+    selectedIds: useMemo(() => Array.from(selectedIds), [selectedIds]),
+    selectedIdsSet: selectedIds,
     selectedCount: selectedIds.size,
     isSelected,
     toggleRowSelection,
@@ -178,7 +179,7 @@ export function useDataTable(data = [], options = {}) {
     toggleSelectAllCurrentPage,
     selectedItems: processedData.filter((item) => selectedIds.has(item[idField])),
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
+    // ── Mobile ──────────────────────────────────────────────────────────────
     isMobileView,
   };
 }

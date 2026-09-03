@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, orderBy, doc, updateDoc, limit, startAfter, getCountFromServer } from 'firebase/firestore';
-import * as fb from '../../firebase';
-const db = fb?.db;
+import { getShipmentsBySupplier, updateShipmentStatus } from '@/repositories/supplierRepository';
 import ShipmentStepper from '../ui/ShipmentStepper';
 import Card from '../ui/Card';
 import Modal from '../ui/Modal';
@@ -13,6 +11,9 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
 import AppActionGroup from '../ui/AppActionGroup';
 import { useCalendarSync } from '../../hooks/useCalendarSync';
+import { toast } from 'react-hot-toast';
+import EmptyState from '../ui/EmptyState';
+import Truck from 'lucide-react/dist/esm/icons/truck';
 
 /**
  * ShippingTrackerTab
@@ -68,30 +69,12 @@ export default function ShippingTrackerTab({ supplierId }) {
     if (!supplierId) return;
     setLoading(true);
     try {
-      const baseQ = query(
-        collection(db, 'supplier_shipments'),
-        where('supplierId', '==', supplierId)
-      );
-
-      const countSnap = await getCountFromServer(baseQ);
-      const total = countSnap.data().count;
-      setTotalPages(Math.ceil(total / PAGE_SIZE));
-
-      let qConstraints = [orderBy('createdAt', 'desc'), limit(PAGE_SIZE)];
-      if (page > 1 && pageCursors[page]) {
-        qConstraints.push(startAfter(pageCursors[page]));
-      }
-
-      const q = query(baseQ, ...qConstraints);
-      const snap = await getDocs(q);
-      const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setShipments(data);
-
-      if (snap.docs.length > 0) {
-        setPageCursors((prev) => ({
-          ...prev,
-          [page + 1]: snap.docs[snap.docs.length - 1],
-        }));
+      const lastDoc = page > 1 ? pageCursors[page] : null;
+      const result = await getShipmentsBySupplier(supplierId, { limitCount: PAGE_SIZE, lastDoc });
+      setShipments(result.shipments);
+      setTotalPages(Math.ceil(result.total / PAGE_SIZE));
+      if (result.lastDoc) {
+        setPageCursors((prev) => ({ ...prev, [page + 1]: result.lastDoc }));
       }
     } catch (err) {
       console.error('Error loading shipments:', err);
@@ -106,15 +89,12 @@ export default function ShippingTrackerTab({ supplierId }) {
 
   const statusFlow = ['ordered', 'packed', 'shipped', 'in_transit', 'delivered'];
 
-  // Simple status updater – moves to the next step in the flow
   const advanceStatus = async (shipmentId, currentStatus) => {
     const currentIdx = statusFlow.indexOf(currentStatus);
-    if (currentIdx < 0 || currentIdx === statusFlow.length - 1) return; // already final
+    if (currentIdx < 0 || currentIdx === statusFlow.length - 1) return;
     const nextStatus = statusFlow[currentIdx + 1];
-    const shipmentRef = doc(db, 'supplier_shipments', shipmentId);
-    await updateDoc(shipmentRef, {
+    await updateShipmentStatus(shipmentId, {
       status: nextStatus,
-      updatedAt: new Date().toISOString(),
       [`${nextStatus}At`]: new Date().toISOString(),
     });
   };
@@ -125,9 +105,13 @@ export default function ShippingTrackerTab({ supplierId }) {
 
   if (shipments.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-        <h3>No hay envíos activos</h3>
-        <p>Cuando se creen envíos, aparecerán aquí en tiempo real.</p>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+        <h2 style={{ marginBottom: '1.5rem', color: '#0f172a' }}>Seguimiento de Envíos</h2>
+        <EmptyState
+          icon={Truck}
+          title="No hay envíos activos"
+          subtitle="Cuando se creen envíos, aparecerán aquí en tiempo real."
+        />
       </div>
     );
   }
@@ -156,7 +140,7 @@ export default function ShippingTrackerTab({ supplierId }) {
           });
           actions.push({
             type: 'contact',
-            onClick: () => alert(`Contactar al mayorista del envío ${s.trackingNumber || s.id}`),
+            onClick: () => toast(`Contactar al mayorista del envío ${s.trackingNumber || s.id}`),
           });
           actions.push({
             type: 'ai',

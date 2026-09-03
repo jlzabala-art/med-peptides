@@ -86,7 +86,7 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
       {/* Upper Grid: Qualitative Goals + Quantitative Ranges */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
         gap: '1.25rem',
       }}>
         {/* Left Column: Qualitative Clinical Goals */}
@@ -149,7 +149,7 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
             flexDirection: 'column',
             gap: '1rem',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
               <div style={{
                 width: 30, height: 30, borderRadius: 8,
                 background: `${accentColor}18`,
@@ -157,7 +157,7 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
               }}>
                 <TrendingUp size={16} color={accentColor} />
               </div>
-              <span style={{ fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-secondary)' }}>
+              <span style={{ fontSize: '0.76rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-secondary)', minWidth: 0, wordBreak: 'break-word' }}>
                 Quantitative Milestones
               </span>
             </div>
@@ -179,14 +179,17 @@ export default function ProtocolOutcomesSection({ expectedOutcomes, accentColor 
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        gap: '1.5rem',
+                        gap: '1rem',
                         borderBottom: i < block.items.length - 1 ? '1px dashed rgba(0,0,0,0.04)' : 'none',
                         paddingBottom: i < block.items.length - 1 ? '0.6rem' : 0,
+                        flexWrap: 'wrap',
                       }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 550, color: 'var(--color-text-secondary)' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 550, color: 'var(--color-text-secondary)', flex: '1 1 auto', minWidth: 0, wordBreak: 'break-word' }}>
                           {item.metric}
                         </span>
-                        <OutcomeProgressBar value={item.value} accentColor={accentColor} />
+                        <div style={{ flex: '0 0 auto', width: '100%', maxWidth: '200px' }}>
+                          <OutcomeProgressBar value={item.value} accentColor={accentColor} />
+                        </div>
                       </div>
                     ))}
                   </div>

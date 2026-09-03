@@ -88,36 +88,49 @@ export default function SalesOrdersModule() {
     }
   };
 
-  const generateDropshipPO = async () => {
+  const generateDropshipPO = () => {
     if (!selectedDoc) return;
-    const supplier = window.prompt("Introduce el nombre del proveedor para este pedido Dropship:");
-    if (!supplier) return;
-    try {
-      const items = selectedDoc.items.map(i => ({
-        itemName: i.name || i.itemName,
-        quantity: i.quantity || 1,
-        unit: i.unit || 'vial',
-        unitPrice: 0 // Supplier price unknown at this step, admin must edit
-      }));
-
-      const payload = {
-        supplierName: supplier,
-        poNumber: `PO-DROP-${Date.now().toString().slice(-6)}`,
-        status: 'open',
-        items,
-        totalAmount: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        linkedSalesOrderId: selectedDoc.id,
-        notes: `Envío Directo a Cliente: ${selectedDoc.customerName}`
-      };
-      await addDoc(collection(db, 'purchaseOrders'), payload);
-      await updateDoc(doc(db, 'b2b_sales_orders', selectedDoc.id), { poGenerated: true });
-      notifier.info("Purchase Order (Dropship) generado con éxito.");
-    } catch (e) {
-      console.error(e);
-      notifier.info("Error al generar PO.");
-    }
+    let supplier = '';
+    notifier.confirmCritical(
+      <div>
+        <p style={{ marginBottom: '0.5rem', fontWeight: 500 }}>Supplier name for Dropship order:</p>
+        <input
+          autoFocus
+          type="text"
+          style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '0.9rem' }}
+          placeholder="Supplier name..."
+          onChange={(e) => { supplier = e.target.value; }}
+        />
+      </div>,
+      async () => {
+        if (!supplier.trim()) { notifier.info('Please enter a supplier name.'); return; }
+        try {
+          const items = selectedDoc.items.map(i => ({
+            itemName: i.name || i.itemName,
+            quantity: i.quantity || 1,
+            unit: i.unit || 'vial',
+            unitPrice: 0
+          }));
+          const payload = {
+            supplierName: supplier.trim(),
+            poNumber: `PO-DROP-${Date.now().toString().slice(-6)}`,
+            status: 'open',
+            items,
+            totalAmount: 0,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            linkedSalesOrderId: selectedDoc.id,
+            notes: `Envío Directo a Cliente: ${selectedDoc.customerName}`
+          };
+          await addDoc(collection(db, 'purchaseOrders'), payload);
+          await updateDoc(doc(db, 'b2b_sales_orders', selectedDoc.id), { poGenerated: true });
+          notifier.info('Purchase Order (Dropship) generado con éxito.');
+        } catch (e) {
+          console.error(e);
+          notifier.info('Error al generar PO.');
+        }
+      }
+    );
   };
 
   const renderSidebarItem = (doc) => {

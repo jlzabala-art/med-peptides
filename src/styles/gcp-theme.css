@@ -69,6 +69,7 @@
   font-family: inherit;
   cursor: pointer;
   transition: background-color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
 }
 
 .gcp-btn-primary:hover:not(:disabled) {
@@ -98,6 +99,7 @@
   font-family: inherit;
   cursor: pointer;
   transition: background-color 0.15s;
+  white-space: nowrap;
 }
 
 .gcp-btn-secondary:hover:not(:disabled) {
@@ -164,6 +166,7 @@
   text-align: left;
   padding: 1rem;
   border-bottom: 2px solid var(--gcp-border);
+  white-space: nowrap;
 }
 
 .gcp-table td {
@@ -222,6 +225,9 @@
     min-height: 34px;
     font-size: 0.875rem;
     word-break: break-word;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
   }
 
   .gcp-table-container td:last-child {

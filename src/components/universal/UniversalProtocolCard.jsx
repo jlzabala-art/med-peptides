@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
+import { useDrawer } from '../../context/DrawerContext';
 import { Layers, ArrowRight, Clock, FlaskConical, Zap, UserPlus, ShoppingCart } from '@/lib/icons';
 
 // Icons
@@ -48,6 +49,7 @@ export default function UniversalProtocolCard({
   
   const { userProfile, isProfessional } = useAuth();
   const { isTenantMode } = useTenant();
+  const { openDrawer } = useDrawer();
 
   // Determine Role Context
   const role = isTenantMode ? 'wholesaler' 
@@ -61,10 +63,22 @@ export default function UniversalProtocolCard({
   const glowColor = protocol.glowColor || 'rgba(14,165,233,0.12)';
   const compounds = protocol.compounds || [];
 
+  // Open the global rx-builder drawer with this protocol pre-loaded
+  const openRxBuilder = (e) => {
+    e.stopPropagation();
+    openDrawer('rx-builder', 'new', {
+      initialProtocol: protocol,
+      initialProtocolId: protocol.id,
+      initialProtocolName: protocol.name || protocol.title,
+      sourceModule: 'protocol-card',
+    });
+  };
+
   const handleActionClick = (e) => {
     e.stopPropagation();
-    if (role === 'doctor' && onAssign) {
-      onAssign(protocol);
+    // Doctor and admin: open the Rx Builder
+    if (role === 'doctor' || role === 'admin' || role === 'professional') {
+      openRxBuilder(e);
     } else if ((role === 'retail' || role === 'patient') && onPurchase) {
       onPurchase(protocol);
     } else if (onView) {
@@ -73,7 +87,7 @@ export default function UniversalProtocolCard({
   };
 
   const renderCTA = () => {
-    if (role === 'doctor') {
+    if (role === 'doctor' || role === 'admin' || role === 'professional') {
       return (
         <button style={{
           width: '100%',
@@ -81,8 +95,8 @@ export default function UniversalProtocolCard({
           padding: '0.65rem', borderRadius: 10,
           background: 'var(--primary)', color: 'white', border: 'none',
           fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer'
-        }} onClick={handleActionClick}>
-          Assign to Patient <UserPlus size={14} />
+        }} onClick={openRxBuilder}>
+          New Prescription <UserPlus size={14} />
         </button>
       );
     }

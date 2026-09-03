@@ -26,6 +26,7 @@ export default function MasterDosageTimeline({ protocol }) {
 function PhaseBlock({ phase, index, protocol }) {
   const durationWeeks = phase.durationWeeks || 4;
   const items = phase.items || phase.medications || [];
+  const [expandedWeek, setExpandedWeek] = useState(0); // Open first week by default
   
   // Find items that need reconstitution
   const vialItems = items.filter(item => (item.diluentMl > 0 || item.vialStrengthMg > 0) && !item.name?.toLowerCase().includes('pen'));
@@ -93,7 +94,13 @@ function PhaseBlock({ phase, index, protocol }) {
         {/* Weeks Iteration */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {Array.from({ length: durationWeeks }).map((_, wIdx) => (
-            <WeekBlock key={wIdx} weekIndex={wIdx} phaseItems={items} />
+            <WeekBlock 
+              key={wIdx} 
+              weekIndex={wIdx} 
+              phaseItems={items} 
+              expanded={expandedWeek === wIdx}
+              onToggle={() => setExpandedWeek(expandedWeek === wIdx ? null : wIdx)}
+            />
           ))}
         </div>
 
@@ -102,8 +109,7 @@ function PhaseBlock({ phase, index, protocol }) {
   );
 }
 
-function WeekBlock({ weekIndex, phaseItems }) {
-  const [expanded, setExpanded] = useState(weekIndex === 0); // Open first week by default
+function WeekBlock({ weekIndex, phaseItems, expanded, onToggle }) {
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const currentDayIndex = (new Date().getDay() + 6) % 7;
   
@@ -123,7 +129,7 @@ function WeekBlock({ weekIndex, phaseItems }) {
   return (
     <div style={{ border: expanded ? '2px solid var(--border)' : '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', transition: 'all 0.2s' }}>
       <button 
-        onClick={() => setExpanded(!expanded)}
+        onClick={onToggle}
         style={{ 
           width: '100%', 
           padding: '1rem 1.25rem', 

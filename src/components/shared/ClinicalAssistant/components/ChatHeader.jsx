@@ -23,12 +23,20 @@ export default function ChatHeader({
   maxFreeQueries = 5,
   isRegistered = false,
   role = 'patient',
-  contextMode = 'clinical'
+  contextMode = 'clinical',
+  pageContext
 }) {
-  const themeAccent = contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
-  const themeBgActive = contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
-  const headerTitle = contextMode === 'admin' ? 'Atlas AI (Admin)' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Atlas AI';
-  const statusLabel = contextMode === 'admin' ? 'System Link Active' : contextMode === 'doctor' ? 'Clinical Link Active' : 'Neural Link Active';
+  const isPatientContext = contextMode === 'patient' || pageContext?.mode === 'patient' || Boolean(pageContext?.patientId);
+  const isProductContext = !isPatientContext && (
+    pageContext?.isProductPage ||
+    (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
+    (!pageContext && messages?.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)))
+  );
+
+  const themeAccent = isPatientContext ? '#0d9488' : isProductContext ? '#7c3aed' : contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
+  const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : isProductContext ? 'rgba(124, 58, 237, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
+  const headerTitle = isPatientContext ? '🩺 Patient Clinical Copilot' : isProductContext ? '🔬 ClinicalAI — Product Intelligence' : contextMode === 'admin' ? 'Atlas AI (Admin)' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Atlas AI';
+  const statusLabel = isPatientContext ? `Patient Link Active · ${pageContext?.name || 'Chart'}` : isProductContext ? 'Product Research Link Active' : contextMode === 'admin' ? 'System Link Active' : contextMode === 'doctor' ? 'Clinical Link Active' : 'Neural Link Active';
 
   return (
     <div className="clinical-chat-header" style={{
@@ -44,8 +52,8 @@ export default function ChatHeader({
     }}>
       <button 
         onClick={onToggleHistory}
-        title={isHistoryOpen ? "Ocultar panel lateral de historial" : "Mostrar historial de chats"}
-        data-tooltip={isHistoryOpen ? "Ocultar panel lateral de historial" : "Mostrar historial de chats"}
+        title={isHistoryOpen ? "Hide chat history sidebar" : "Show chat history"}
+        data-tooltip={isHistoryOpen ? "Hide chat history sidebar" : "Show chat history"}
         style={{
           width: '32px',
           height: '32px',
@@ -74,41 +82,39 @@ export default function ChatHeader({
         </span>
       </button>
       <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        {contextMode !== 'admin' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
-            <h3 style={{ 
-              margin: 0, 
-              fontSize: '0.95rem', 
-              fontWeight: 800, 
-              color: '#0f172a',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }} title={`Asistente de IA: ${headerTitle}`}>
-              {headerTitle}
-            </h3>
-            {contextMode !== 'doctor' && !isMobile && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                backgroundColor: '#e8f0fe',
-                border: '1px solid #dadce0',
-                padding: '2px 8px',
-                borderRadius: '20px',
-                fontSize: '0.62rem',
-                fontWeight: 850,
-                color: '#1967d2',
-                textTransform: 'uppercase',
-                letterSpacing: '0.03em',
-                flexShrink: 0
-              }} title="El sistema puede analizar recetas médicas en esta sesión.">
-                <span style={{ fontSize: '0.72rem' }}>📋</span>
-                <span>Prescription Scan Ready</span>
-              </div>
-            )}
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden' }}>
+          <h3 style={{ 
+            margin: 0, 
+            fontSize: '0.95rem', 
+            fontWeight: 800, 
+            color: '#0f172a',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }} title={`AI Assistant: ${headerTitle}`}>
+            {headerTitle}
+          </h3>
+          {!isProductContext && contextMode !== 'doctor' && contextMode !== 'admin' && !isMobile && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#e8f0fe',
+              border: '1px solid #dadce0',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.62rem',
+              fontWeight: 850,
+              color: '#1967d2',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em',
+              flexShrink: 0
+            }} title="Prescription scan is available in this session.">
+              <span style={{ fontSize: '0.72rem' }}>📋</span>
+              <span>Prescription Scan Ready</span>
+            </div>
+          )}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: contextMode === 'admin' ? '0' : '0.1rem' }}>
           <div style={{ 
             width: '5px',
@@ -129,25 +135,24 @@ export default function ChatHeader({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
-          }} title={`Estado de conexión: ${statusLabel}`}>
+          }} title={`Connection status: ${statusLabel}`}>
             {statusLabel}
           </span>
-          {!isRegistered && (
-            <>
-              <span style={{ fontSize: '0.5rem', color: '#dadce0', margin: '0 0.2rem' }}>|</span>
-              <span style={{ 
-                fontSize: '0.62rem',
-                fontWeight: 700,
-                color: queriesToday >= maxFreeQueries ? '#d93025' : '#5f6368',
-                backgroundColor: queriesToday >= maxFreeQueries ? '#fce8e6' : '#f1f3f4',
-                padding: '2px 6px',
-                borderRadius: '8px',
-                whiteSpace: 'nowrap'
-              }} title={`Used ${queriesToday} of ${maxFreeQueries} free queries today.`}>
-                Quota: {queriesToday}/{maxFreeQueries}
-              </span>
-            </>
-          )}
+          {/* Quota pill — show for all users with correct limit */}
+          <>
+            <span style={{ fontSize: '0.5rem', color: '#dadce0', margin: '0 0.2rem' }}>|</span>
+            <span style={{ 
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              color: queriesToday >= maxFreeQueries ? '#d93025' : isRegistered ? '#188038' : '#5f6368',
+              backgroundColor: queriesToday >= maxFreeQueries ? '#fce8e6' : isRegistered ? '#e6f4ea' : '#f1f3f4',
+              padding: '2px 6px',
+              borderRadius: '8px',
+              whiteSpace: 'nowrap'
+            }} title={`Used ${queriesToday} of ${maxFreeQueries} ${isRegistered ? 'registered' : 'free'} queries today.`}>
+              Quota: {queriesToday}/{maxFreeQueries} {isRegistered ? '✓' : ''}
+            </span>
+          </>
         </div>
       </div>
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
@@ -155,8 +160,8 @@ export default function ChatHeader({
           <>
             <button
               onClick={onToggleBeginner}
-              title={isBeginnerMode ? "Cambiar a modo experto (rápido)" : "Cambiar a modo principiante (explicado)"}
-              data-tooltip={isBeginnerMode ? "Cambiar a modo experto (rápido)" : "Cambiar a modo principiante (explicado)"}
+              title={isBeginnerMode ? "Switch to Expert mode (faster)" : "Switch to Beginner mode (explained)"}
+              data-tooltip={isBeginnerMode ? "Switch to Expert mode" : "Switch to Beginner mode"}
               style={{
                 width: '32px', height: '32px', borderRadius: '10px',
                 border: '1px solid #e2e8f0',
@@ -180,8 +185,8 @@ export default function ChatHeader({
             }} />
             <button
               onClick={() => generateClinicalBriefPDF(messages)}
-              title="Exportar chat a PDF"
-              data-tooltip="Exportar chat a PDF"
+              title="Export chat to PDF"
+              data-tooltip="Export chat to PDF"
               style={{
                 width: '32px', height: '32px', borderRadius: '10px',
                 border: isMobile ? 'none' : '1px solid #e2e8f0', 
@@ -200,8 +205,8 @@ export default function ChatHeader({
 
             <button
               onClick={onClear}
-              title="Borrar chat actual"
-              data-tooltip="Borrar chat actual"
+              title="Clear current chat"
+              data-tooltip="Clear current chat"
               style={{
                 width: '32px', height: '32px', borderRadius: '10px',
                 border: isMobile ? '1px solid rgba(255,255,255,0.25)' : '1px solid #fee2e2',
@@ -221,8 +226,8 @@ export default function ChatHeader({
         )}
         <button
           onClick={onClose}
-          title="Cerrar asistente"
-          data-tooltip="Cerrar asistente"
+          title="Close assistant"
+          data-tooltip="Close assistant"
           style={{
             width: '32px', height: '32px', borderRadius: '10px',
             border: isMobile ? 'none' : '1px solid #e2e8f0', 

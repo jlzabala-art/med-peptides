@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function AppEntityCell({ title, subtitle, icon, badges }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-12)' }}>
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-12)', minWidth: 0 }}>
       {icon && (
         <div style={{ 
           display: 'flex', 
@@ -15,17 +15,17 @@ export default function AppEntityCell({ title, subtitle, icon, badges }) {
           color: 'var(--color-text-secondary)',
           flexShrink: 0
         }}>
-          {icon}
+          {React.isValidElement(icon) ? icon : React.createElement(icon, { size: 20 })}
         </div>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
         <span style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '14px', lineHeight: '1.2' }}>
           {title}
         </span>
         {subtitle && (
-          <span style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>
+          <div style={{ color: 'var(--color-text-secondary)', fontSize: '13px' }}>
             {subtitle}
-          </span>
+          </div>
         )}
         {badges && badges.length > 0 && (
           <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>

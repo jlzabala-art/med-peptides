@@ -226,124 +226,96 @@ export default function EternaDiagnosticsShowcase({ onSelectProduct }) {
 
       <div>
         {/* Section Header */}
-        <div className="section-header">
-          <div className="section-eyebrow" style={{ color: '#a855f7', borderColor: 'rgba(168, 85, 247, 0.25)', background: 'rgba(168, 85, 247, 0.1)' }}>
-            <Sparkles size={14} /> EXCLUSIVE BIOMARKER INTEGRATION
+        <div className="section-header" style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 2.5rem' }}>
+          <div className="section-eyebrow" style={{ color: '#0284c7', borderColor: 'rgba(2, 132, 199, 0.25)', background: 'rgba(2, 132, 199, 0.08)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.85rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.06em' }}>
+            <Sparkles size={13} /> LONGEVITY DIAGNOSTICS · ETERNA®
           </div>
 
-          <h2 className="section-title">
+          <h2 className="section-title" style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)', fontWeight: 850, letterSpacing: '-0.02em', margin: '0.6rem 0 0.4rem' }}>
             ETERNA® Longevity Diagnostics
           </h2>
-          <p className="section-subtitle">
-            Optimize your research with clinical-grade multi-omics. Eterna combines DNA profiles, 
-            organ-level proteomics, real-time wearables, and automated bloodwork parsing.
+          <p className="section-subtitle" style={{ fontSize: 'clamp(0.92rem, 1.8vw, 1.05rem)', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 auto' }}>
+            Clinical-grade multi-omics integrating genetics, proteomics and real-time biometrics into a unified healthspan trajectory.
           </p>
         </div>
 
-        {/* Two-Column Showcase Area */}
+        {/* Two-Column Showcase Area on Laptop / Dashboard First on Mobile */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-          gap: '4rem', 
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', 
+          gap: isMobile ? '2rem' : '3.5rem', 
           alignItems: 'center',
-          marginBottom: '5.5rem'
+          marginBottom: '3.5rem'
         }}>
-          {/* Left Column: Product Info & Core Value Prop */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1.25rem', color: 'var(--text-main)' }}>
-              The Unified Health Span Dashboard
-            </h3>
-            <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.975rem' }}>
-              Instead of isolated lab values, Eterna analyzes your aging trajectory across organ systems. 
-              By cross-referencing your genetics with functional proteomic changes and daily biometrics, 
-              the system tracks how you age, why, and exactly which protocols mitigate specific risk factors.
-            </p>
+          {/* Left Column (Desktop Only or Bottom on Mobile): Value Prop & Metrics */}
+          {!isMobile && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+            >
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.85rem', color: 'var(--text-main)' }}>
+                The Unified Health Span Dashboard
+              </h3>
+              <p style={{ color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: '1.5rem', fontSize: '0.925rem' }}>
+                Instead of isolated lab values, Eterna analyzes your biological aging rate across major organ systems, identifying exact protocols to optimize your healthspan.
+              </p>
 
-            {/* Checklist of what it includes */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
-              {[
-                { title: "700k+ Genetic Marker Sequencer", detail: "Provides lifetime genetic predisposition map." },
-                { title: "1,000+ Protein Biomarker Profiling", detail: "Calculates individual organ system biological age." },
-                { title: "Continuous Wearable & Telemetry Sync", detail: "Links Oura, Apple Watch, Garmin, and Fitbit." },
-                { title: "Automated PDF Bloodwork Uploader", detail: "Parses standard clinical panels (HbA1c, ApoB, hs-CRP)." }
-              ].map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <div style={{ 
-                    flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%',
-                    background: 'rgba(168, 85, 247, 0.15)', border: '1px solid rgba(168, 85, 247, 0.3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a855f7', marginTop: '2px'
-                  }}>
-                    <Check size={12} strokeWidth={3} />
+              {/* Checklist of what it includes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.75rem' }}>
+                {[
+                  { title: "700k+ Genetic Marker Sequencer", detail: "Lifetime predisposition map" },
+                  { title: "1,000+ Protein Biomarker Profiling", detail: "Organ-system biological age tracking" },
+                  { title: "Continuous Wearable & Lab Sync", detail: "Links Oura, Apple Watch & clinical bloodwork" }
+                ].map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '0.65rem', alignItems: 'flex-start' }}>
+                    <div style={{ 
+                      flexShrink: 0, width: '18px', height: '18px', borderRadius: '50%',
+                      background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.25)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284c7', marginTop: '2px'
+                    }}>
+                      <Check size={11} strokeWidth={3} />
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>{item.title}</h4>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '1px 0 0' }}>{item.detail}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.925rem', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>{item.title}</h4>
-                    <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>{item.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Box */}
-            <div style={{
-              background: 'var(--background)',
-              border: '1px solid var(--border)',
-              borderRadius: '24px',
-              padding: '1.75rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.25rem',
-              boxShadow: 'var(--shadow-md)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>COMPLETE PACKAGE</div>
-                  <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '2px' }}>ETERNA® Platform Kit</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>Includes 12-Month Access</div>
-                </div>
+                ))}
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', width: '100%', marginTop: '1.25rem' }}>
-                <button
-                  onClick={handleViewDetails}
-                  style={{
-                    flex: 1,
-                    padding: '1rem 1.5rem',
-                    borderRadius: '14px',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    boxShadow: 'var(--shadow-sm)',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseOver={e => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                  }}
-                  onMouseOut={e => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                  }}
-                >
-                  Specs <ArrowRight size={16} />
-                </button>
-              </div>
-            </div>
-
-          </motion.div>
+              {/* CTA Button */}
+              <button
+                onClick={handleViewDetails}
+                style={{
+                  padding: '0.75rem 1.75rem',
+                  borderRadius: '999px',
+                  background: 'var(--primary, #003666)',
+                  color: 'white',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 4px 14px rgba(0, 54, 102, 0.15)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 6px 18px rgba(0, 54, 102, 0.25)';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 54, 102, 0.15)';
+                }}
+              >
+                Explore Eterna Platform <ArrowRight size={15} />
+              </button>
+            </motion.div>
+          )}
 
           {/* Right Column: Interactive App Interface Mockup */}
           <motion.div
@@ -506,23 +478,63 @@ export default function EternaDiagnosticsShowcase({ onSelectProduct }) {
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
                 <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>SECURE HEALTH PROFILE (GDPR)</span>
-                <span style={{ fontSize: '0.72rem', color: '#a855f7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   12 Month License Active <ShieldCheck size={12} />
                 </span>
               </div>
 
             </div>
 
+            {/* Mobile 2x2 Benefits Grid & CTA */}
+            {isMobile && (
+              <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+                  {[
+                    { val: '700K+', lbl: 'Genetic markers' },
+                    { val: '1,000+', lbl: 'Protein biomarkers' },
+                    { val: '24/7', lbl: 'Wearables sync' },
+                    { val: 'PDF', lbl: 'Bloodwork import' },
+                  ].map((stat, i) => (
+                    <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem 0.65rem', textAlign: 'center' }}>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary, #003666)' }}>{stat.val}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>{stat.lbl}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleViewDetails}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem 1.5rem',
+                    borderRadius: '999px',
+                    background: 'var(--primary, #003666)',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 4px 14px rgba(0, 54, 102, 0.15)'
+                  }}
+                >
+                  Explore Eterna Platform <ArrowRight size={15} />
+                </button>
+              </div>
+            )}
+
             {/* Back decorative mockup circle wireframe */}
             <div style={{
               position: 'absolute', top: '-7%', right: '-7%', width: '114%', height: '114%',
-              border: '1px dashed rgba(168, 85, 247, 0.25)', borderRadius: '50%',
+              border: '1px dashed rgba(2, 132, 199, 0.25)', borderRadius: '50%',
               zIndex: 1, pointerEvents: 'none'
             }} />
           </motion.div>
 
         </div>
-
 
       </div>
     </div>

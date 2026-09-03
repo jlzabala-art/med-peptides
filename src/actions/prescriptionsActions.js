@@ -24,15 +24,24 @@ function serializeFirestoreData(obj) {
   return result;
 }
 
-export async function fetchPrescriptionsAction({ limitCount = 50 } = {}) {
+export async function fetchPrescriptionsAction({ limitCount = 50, daysBack = 30 } = {}) {
   try {
     if (!adminDb) {
       console.warn("adminDb is null, falling back to empty array");
       return [];
     }
 
-    const snapshot = await adminDb.collection('prescriptions').limit(limitCount).get();
-    
+    // Default: last N days, ordered newest-first
+    const since = new Date();
+    since.setDate(since.getDate() - daysBack);
+
+    let q = adminDb
+      .collection('prescriptions')
+      .orderBy('createdAt', 'desc')
+      .where('createdAt', '>=', since)
+      .limit(limitCount);
+
+    const snapshot = await q.get();
     const prescriptions = snapshot.docs.map(doc => {
       const data = doc.data();
       return { id: doc.id, ...serializeFirestoreData(data) };
@@ -40,12 +49,23 @@ export async function fetchPrescriptionsAction({ limitCount = 50 } = {}) {
 
     return prescriptions;
   } catch (error) {
-    console.error("Error fetching prescriptions securely:", error);
-    return [];
+    // Fallback: if composite index not yet deployed, fetch without date filter
+    console.warn("fetchPrescriptionsAction: orderBy+where failed, falling back:", error.message);
+    try {
+      const snap = await adminDb
+        .collection('prescriptions')
+        .orderBy('createdAt', 'desc')
+        .limit(limitCount)
+        .get();
+      return snap.docs.map(d => ({ id: d.id, ...serializeFirestoreData(d.data()) }));
+    } catch (err2) {
+      console.error("fetchPrescriptionsAction fallback also failed:", err2);
+      return [];
+    }
   }
 }
 
-export async function fetchDoctorPrescriptionsAction(doctorId) {
+export async function fetchDoctorPrescriptionsAction(doctorId, { limitCount = 50 } = {}) {
   if (!adminDb) {
     console.warn("adminDb is null, falling back to empty array");
     return [];
@@ -53,22 +73,18 @@ export async function fetchDoctorPrescriptionsAction(doctorId) {
   if (!doctorId) return [];
 
   try {
-    const snapshot = await adminDb.collection('prescriptions')
+    // Server-side ordering — no need to sort in JS
+    const snapshot = await adminDb
+      .collection('prescriptions')
       .where('doctorId', '==', doctorId)
+      .orderBy('createdAt', 'desc')
+      .limit(limitCount)
       .get();
-      
-    const docs = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return { id: doc.id, ...serializeFirestoreData(data) };
-    });
-    
-    docs.sort((a, b) => {
-      const tA = new Date(a.createdAt || 0).getTime();
-      const tB = new Date(b.createdAt || 0).getTime();
-      return tB - tA;
-    });
-    
-    return docs;
+
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...serializeFirestoreData(doc.data())
+    }));
   } catch (error) {
     console.error("Error fetching doctor prescriptions securely:", error);
     return [];

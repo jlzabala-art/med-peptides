@@ -8,9 +8,13 @@ function initializeFirebaseAdmin() {
     return apps[0];
   }
 
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  let rawPk = process.env.FIREBASE_PRIVATE_KEY || '';
+  if (rawPk.startsWith('"') && rawPk.endsWith('"')) {
+    rawPk = rawPk.slice(1, -1);
+  }
+  const privateKey = rawPk ? rawPk.replace(/\\n/g, '\n') : undefined;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'med-peptides-app';
 
   // Use service account from env vars (local dev + production)
   if (privateKey && clientEmail && projectId) {

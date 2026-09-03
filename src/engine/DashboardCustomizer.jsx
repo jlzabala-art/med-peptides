@@ -105,7 +105,7 @@ export default function DashboardCustomizer({ currentConfig, defaultConfig, onCl
       ...currentConfig,
       widgets: widgets
     });
-    toast.success('Configuración del panel guardada');
+    toast.success('Dashboard configuration saved');
   };
 
   const handleRestore = () => {

@@ -678,7 +678,7 @@ export default function InventoryIntelligenceView({ variants = [], onAction }) {
                 header: 'Days Left',
                 sortValue: (r) => r._daysLeft,
                 render: (r) => (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span style={{ fontSize: '1.25rem', fontWeight: 800 }}>{r._daysLeft}</span>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}>days<br/>remaining</span>
                   </div>
@@ -688,7 +688,7 @@ export default function InventoryIntelligenceView({ variants = [], onAction }) {
                 key: '_risk',
                 header: 'Risk & AI Conf.',
                 render: (r) => (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 600, color: r._daysLeft < 7 ? '#ef4444' : '#f59e0b' }}>{r._daysLeft === 0 ? 'Critical (Stock-out)' : 'High Risk'}</span>
                     <span style={{ fontSize: '0.75rem', color: '#64748b' }}><Sparkles size={10} color="#8b5cf6" /> {r._confidence} AI Confidence</span>
                   </div>
@@ -824,7 +824,7 @@ export default function InventoryIntelligenceView({ variants = [], onAction }) {
                 key: 'noSalesDays',
                 header: 'Days W/O Sales',
                 sortValue: (r) => r.noSalesDays,
-                render: (r) => <span style={{ color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={16} /> {r.noSalesDays} days</span>
+                render: (r) => <span style={{ color: '#ef4444', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={16} /> {r.noSalesDays} days</span>
               },
               { key: '_capital', header: 'Tied Capital', align: 'right', sortValue: (r) => r.stock * r.price, render: (r) => <span style={{ fontWeight: 600 }}>${(r.stock * r.price).toLocaleString()}</span> },
               { key: 'stock', header: 'Current Stock', align: 'right', sortValue: (r) => r.stock, render: (r) => r.stock },

@@ -7,6 +7,7 @@ import { useShop } from '../../../context/ShopProvider';
 import { useCart } from '../../../context/CartProvider';
 import { useUIStore } from '../../../stores/uiStore';
 import { useParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 export default function CollectionClientWrapper({ serverParams, initialProducts }) {
   const params = useParams();
@@ -25,7 +26,7 @@ export default function CollectionClientWrapper({ serverParams, initialProducts 
       const exists = prev.find(p => p.id === product.id || p.name === product.name);
       if (exists) return prev.filter(p => p.id !== product.id && p.name !== product.name);
       if (prev.length >= 3) {
-        alert("You can only compare up to 3 products at a time.");
+        toast("You can only compare up to 3 products at a time.");
         return prev;
       }
       return [...prev, product];

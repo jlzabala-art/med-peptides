@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import UniversalItemPicker from '../shared/ItemPicker/UniversalItemPicker';
 import { Trash2, Plus, ShoppingBag } from 'lucide-react';
 import DataTable from '../ui/DataTable';
+import AppActionGroup from '../ui/AppActionGroup';
 
 export default function B2BOrderBuilderTable({ items, onChange }) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -86,7 +87,7 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
       render: (val, row) => {
         const index = items.findIndex((i) => i.id === row.id);
         return row.isApiWithScore ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '0.2rem' }}>
             <input 
               type="number" 
               value={row.rate} 
@@ -116,14 +117,16 @@ export default function B2BOrderBuilderTable({ items, onChange }) {
     },
     {
       key: 'actions',
-      header: '',
-      align: 'center',
+      header: 'Actions',
+      align: 'right',
       render: (val, row) => {
         const index = items.findIndex((i) => i.id === row.id);
         return (
-          <button onClick={() => removeItem(index)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.4rem', borderRadius: '4px' }}>
-            <Trash2 size={16} />
-          </button>
+          <div style={{ display: 'inline-flex', justifyContent: 'flex-end', width: '100%' }}>
+            <AppActionGroup actions={[
+              { type: 'delete', onClick: () => removeItem(index) }
+            ]} />
+          </div>
         );
       }
     }

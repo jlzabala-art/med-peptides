@@ -10,14 +10,20 @@ import BottomTabBar from '../layout/BottomTabBar';
 import SearchModal from '../snippets/SearchModal';
 import { useAuth } from '../context/AuthContext';
 import { useUIStore } from '../stores/uiStore';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { Toaster } from 'react-hot-toast';
+import AppErrorBoundary from '../components/AppErrorBoundary';
+import PWAInstallPrompt from '../components/mobile/PWAInstallPrompt';
+import AtlasAIDrawer from '../components/shared/AtlasAIDrawer';
+import { useFirestoreData } from '../hooks/useFirestoreData';
 
-// Routes that have their own dashboard/portal layout — B2C shell must be hidden
-const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/session-ended'];
+// Routes that have their own dashboard/portal layout or are standalone public views — B2C shell must be hidden
+const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/session-ended', '/shared', '/quotation'];
 
 export default function GlobalClientWrapper({ children }) {
   const { isProfessional, activeRole } = useAuth();
   const { activeModal, setActiveModal, searchQuery, setSearchQuery, setSearchInitialTab } = useUIStore();
+  const { catalogue: products, protocols, supplements } = useFirestoreData();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -65,11 +71,17 @@ export default function GlobalClientWrapper({ children }) {
 
   // Portal routes have their own layout — just render children
   if (isPortalRoute) {
-    return <>{children}</>;
+    return (
+      <AppErrorBoundary>
+        <Toaster containerStyle={{ zIndex: 99999 }} />
+        {children}
+        <PWAInstallPrompt />
+      </AppErrorBoundary>
+    );
   }
 
   return (
-    <>
+    <AppErrorBoundary>
       <Header 
         onSelectCategory={handleCategorySelect}
         onOpenSearch={(q, tab) => {
@@ -84,18 +96,26 @@ export default function GlobalClientWrapper({ children }) {
         {children}
       </main>
 
-      <Footer />
+      {pathname === '/' && <Footer />}
       <Cart />
       <ClinicalAssistant />
       <BackToTop />
       <BottomTabBar />
+      <AtlasAIDrawer 
+        isOpen={activeModal === 'ai'} 
+        onClose={() => setActiveModal(null)} 
+      />
       
       {activeModal === 'search' && (
         <Suspense fallback={null}>
           <SearchModal 
+            isOpen={true}
+            initialQuery={searchQuery}
+            products={products || []}
+            protocolIndex={protocols || []}
+            supplementCatalogue={supplements || []}
             onClose={() => setActiveModal(null)} 
             onSelectProduct={(p) => {
-               // generic route
                const slug = p.slug || p.id;
                router.push(`/product/${slug}`);
                setActiveModal(null);
@@ -103,7 +123,9 @@ export default function GlobalClientWrapper({ children }) {
           />
         </Suspense>
       )}
-    </>
+      <Toaster containerStyle={{ zIndex: 99999 }} />
+      <PWAInstallPrompt />
+    </AppErrorBoundary>
   );
 }
 

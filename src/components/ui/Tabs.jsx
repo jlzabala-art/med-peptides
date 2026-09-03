@@ -49,7 +49,7 @@ export function Tabs({ tabs = [], defaultTab, activeTab: controlledTab, onChange
           {`.hide-scroll::-webkit-scrollbar { display: none; }`}
         </style>
         
-        <div className="hide-scroll" style={{ display: 'flex', gap: '1.5rem', width: '100%' }}>
+        <div className="hide-scroll" style={{ display: 'flex', gap: '1.25rem', minWidth: '100%', overflowX: 'auto', paddingBottom: '2px' }}>
           {tabs.map((tab) => {
             const isActive = currentTab === tab.id;
             const Icon = tab.icon;
@@ -62,17 +62,19 @@ export function Tabs({ tabs = [], defaultTab, activeTab: controlledTab, onChange
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  padding: '1rem 0.25rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  color: isActive ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                  padding: '0.75rem 0.5rem',
+                  fontSize: '0.85rem',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? 'var(--color-primary, #0d9488)' : 'var(--color-text-secondary, #64748b)',
                   backgroundColor: 'transparent',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  borderBottom: isActive ? '2px solid var(--color-primary, #0d9488)' : '2px solid transparent',
                   cursor: 'pointer',
-                  transition: 'color 0.2s, border-bottom-color 0.2s',
+                  transition: 'all 0.2s ease',
                   outline: 'none',
                   whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  minWidth: 'max-content',
                   position: 'relative',
                   top: '1px' // Pull border over the container's bottom border
                 }}

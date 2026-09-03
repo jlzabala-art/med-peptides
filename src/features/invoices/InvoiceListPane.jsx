@@ -65,9 +65,9 @@ export default function InvoiceListPane({ invoices, selectedInvoiceId, onSelect 
           
           let statusBg = '#f1f5f9';
           let statusColor = '#64748b';
-          if (status === 'Paid') { statusBg = '#d1fae5'; statusColor = '#059669'; }
+          if (status === 'completed') { statusBg = '#d1fae5'; statusColor = '#059669'; }
           else if (status === 'Sent') { statusBg = '#eff6ff'; statusColor = '#2563eb'; }
-          else if (status === 'Overdue') { statusBg = '#fee2e2'; statusColor = '#dc2626'; }
+          else if (status === 'error') { statusBg = '#fee2e2'; statusColor = '#dc2626'; }
           else if (status === 'Partially Paid') { statusBg = '#fef3c7'; statusColor = '#d97706'; }
 
           return (

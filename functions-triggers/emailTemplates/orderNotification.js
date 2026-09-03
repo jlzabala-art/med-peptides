@@ -24,7 +24,34 @@ function buildOrderNotificationHtml(order) {
     shippingAddress = {},
     notes = '',
     paymentMethod = '',
+    status = 'pending',
   } = order;
+
+  const s = (status || 'pending').toLowerCase();
+  let statusBg = '#fffbeb'; // Yellow/Orange default (pending, draft, awaiting, processing)
+  let statusColor = '#d97706';
+  
+  if (['active', 'approved', 'reconciled', 'published', 'delivered', 'completed'].includes(s)) {
+    statusBg = '#f0fdf4';
+    statusColor = '#16a34a';
+  } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled'].includes(s)) {
+    statusBg = '#fef2f2';
+    statusColor = '#dc2626';
+  } else if (['inactive', 'archived', 'disabled'].includes(s)) {
+    statusBg = '#f1f5f9';
+    statusColor = '#64748b';
+  } else if (['po_created', 'synced', 'converted'].includes(s)) {
+    statusBg = '#eff6ff';
+    statusColor = '#2563eb';
+  }
+  
+  const statusLabel = s.charAt(0).toUpperCase() + s.slice(1);
+
+  const resolvedShipping = shipping || order.shippingFee || 0;
+  const custName = customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || order.customerName || '—';
+  const custEmail = customer.email || order.customerEmail || '—';
+  const custPhone = customer.phone || order.customerPhone || shippingAddress.phone || '';
+  const custInst = customer.institution || order.customerInstitution || '';
 
   // Resolve payment method to a human-readable label
   const paymentLabel =
@@ -49,18 +76,51 @@ function buildOrderNotificationHtml(order) {
     ? new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
     : dateObj.toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
 
+  const formatItem = (item) => {
+    let name = item.name || item.productName || item.itemKey || '—';
+    let variant = item.variant || item.dosage || '';
+    const isProtocol = item.isProtocol || name.toLowerCase().includes('protocol') || (item.category && item.category.toLowerCase() === 'protocol') || name.includes('-protocol-bundle');
+
+    if (name.includes('::')) {
+      const [prod, varId] = name.split('::');
+      name = prod.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      if (!variant && varId) {
+        variant = varId.replace(/_/g, ' ').replace(prod.replace(/-/g, '_'), '').trim();
+        if (variant) variant = variant.replace(/\b\w/g, c => c.toUpperCase());
+      }
+    } else if (name.includes('-protocol-bundle')) {
+      name = name.replace('-protocol-bundle', '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' (Protocol Bundle)';
+    }
+
+    // Strip supplier references from variant if present
+    variant = variant.replace(/\s*·\s*(Lotusland|Bioniq|Fusion|BioTech|PeptideLab|GlobalRx)\b/gi, '').trim();
+
+    if (isProtocol) {
+      if (!variant.toLowerCase().includes('protocol')) {
+        variant = variant ? `Protocol · ${variant}` : 'Protocol · Full Cycle Supply';
+      }
+    } else if (item.category && !variant.toLowerCase().includes(item.category.toLowerCase())) {
+      variant = variant ? `${variant} · ${item.category}` : item.category;
+    }
+
+    return { name, variant };
+  };
+
   const itemsRows = items
     .map(
-      (item) => `
+      (item) => {
+        const { name: displayName, variant: displayVariant } = formatItem(item);
+        return `
       <tr>
         <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b;">
-          ${item.name || '—'}
-          ${item.variant ? `<br><span style="font-size:12px;color:#64748b;">${item.variant}</span>` : ''}
+          ${displayName}
+          ${displayVariant ? `<br><span style="font-size:12px;color:#64748b;">${displayVariant}</span>` : ''}
         </td>
         <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${item.quantity || 1}</td>
         <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(item.unitPrice || item.price || 0)}</td>
         <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(item.lineTotal || (item.unitPrice || item.price || 0) * (item.quantity || 1))}</td>
-      </tr>`
+      </tr>`;
+      }
     )
     .join('');
 
@@ -132,7 +192,7 @@ function buildOrderNotificationHtml(order) {
                   </td>
                   <td style="width:50%;vertical-align:top;padding-left:12px;padding-bottom:8px;">
                     <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Status</p>
-                    <span style="display:inline-block;background:#dcfce7;color:#166534;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">Pending confirmation</span>
+                    <span style="display:inline-block;background:${statusBg};color:${statusColor};font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">${statusLabel}</span>
                   </td>
                 </tr>
               </table>
@@ -143,16 +203,16 @@ function buildOrderNotificationHtml(order) {
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="padding-bottom:8px;">
-                      <p style="margin:0;font-size:14px;color:#1e293b;"><strong>${customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || '—'}</strong></p>
+                      <p style="margin:0;font-size:14px;color:#1e293b;"><strong>${custName}</strong></p>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding-bottom:6px;">
-                      <p style="margin:0;font-size:13px;color:#475569;">📧 ${customer.email || '—'}</p>
+                      <p style="margin:0;font-size:13px;color:#475569;">📧 ${custEmail}</p>
                     </td>
                   </tr>
-                  ${customer.phone ? `<tr><td style="padding-bottom:6px;"><p style="margin:0;font-size:13px;color:#475569;">📞 ${customer.phone}</p></td></tr>` : ''}
-                  ${customer.institution ? `<tr><td><p style="margin:0;font-size:13px;color:#475569;">🏥 ${customer.institution}</p></td></tr>` : ''}
+                  ${custPhone ? `<tr><td style="padding-bottom:6px;"><p style="margin:0;font-size:13px;color:#475569;">📞 ${custPhone}</p></td></tr>` : ''}
+                  ${custInst ? `<tr><td><p style="margin:0;font-size:13px;color:#475569;">🏥 ${custInst}</p></td></tr>` : ''}
                   ${addressLine ? `<tr><td style="padding-top:10px;"><p style="margin:0;font-size:13px;color:#475569;">📍 ${addressLine}</p></td></tr>` : ''}
                 </table>
               </div>
@@ -187,7 +247,7 @@ function buildOrderNotificationHtml(order) {
                 </tr>
                 <tr>
                   <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Shipping</p></td>
-                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${shipping === 0 ? 'Free' : fmt(shipping)}</p></td>
+                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${resolvedShipping === 0 ? 'Free' : fmt(resolvedShipping)}</p></td>
                 </tr>
                 <tr>
                   <td style="padding:14px 0 6px;border-top:2px solid #003666;">

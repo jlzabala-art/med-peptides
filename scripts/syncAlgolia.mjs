@@ -18,7 +18,7 @@ if (fs.existsSync(envPath)) {
     });
 }
 
-const APP_ID = process.env.VITE_ALGOLIA_APP_ID;
+const APP_ID = process.env.VITE_ALGOLIA_APP_ID || process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
 // We need the admin API key for writing, search key is only for reading
 const ADMIN_KEY = process.env.ALGOLIA_ADMIN_KEY; 
 

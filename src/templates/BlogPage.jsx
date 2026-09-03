@@ -74,7 +74,7 @@ export default function BlogPage() {
           <div className="blog-hero__image-wrapper">
             <div className="blog-hero__image-container">
               <img 
-                src={blogHeroImg} 
+                src={blogHeroImg.src} 
                 alt="Scientific research library with molecular models and data" 
                 className="blog-hero__img" 
                 loading="eager"

@@ -17,6 +17,7 @@ import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import PageHeader from '../ui/PageHeader';
+import AppActionGroup from '../ui/AppActionGroup';
 /**
  * AdminBulkOrdersTab.jsx
  *
@@ -317,30 +318,17 @@ function BulkActions({ order, onUpdate }) {
   };
 
   return (
-    <button
-      onClick={handle}
-      disabled={acting}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.6rem 1.1rem',
-        borderRadius: '9px',
-        border: 'none',
-        background: next.color,
-        color: 'var(--color-bg-surface)',
-        cursor: acting ? 'not-allowed' : 'pointer',
-        fontFamily: 'inherit',
-        fontWeight: 800,
-        fontSize: '0.78rem',
-        opacity: acting ? 0.7 : 1,
-        boxShadow: `0 4px 12px ${next.color}40`,
-        transition: 'all 0.15s',
-      }}
-    >
-      <next.icon size={13} />
-      {acting ? 'Saving…' : next.label}
-    </button>
+    <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+      <AppActionGroup actions={[
+        {
+          type: 'custom',
+          label: acting ? 'Saving...' : next.label,
+          icon: next.icon,
+          onClick: handle,
+          disabled: acting
+        }
+      ]} />
+    </div>
   );
 }
 
@@ -436,7 +424,7 @@ export default function AdminBulkOrdersTabClient({ initialData = [], isSubTab = 
 
   const { query: searchTerm, setQuery: setSearchTerm, results: searchResults, isSearching } = useAlgoliaSearch({
     indexName: algoliaConfig.indices.orders,
-    filters: "type:bulk_order",
+    filters: filterStatus && filterStatus !== 'all' ? `type:bulk_order AND status:${filterStatus}` : "type:bulk_order",
     debounceMs: 300,
     hitsPerPage: 50
   });
@@ -561,7 +549,7 @@ export default function AdminBulkOrdersTabClient({ initialData = [], isSubTab = 
       key: 'source',
       header: 'Traceability',
       render: (o) => (
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'inline-flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {o.source_prescription_ids?.map((id) => (
             <span
               key={id}

@@ -41,8 +41,57 @@ service cloud.firestore {
       );
     }
 
-    match /products/{productId}               { allow read: if true; allow write: if isAdmin(); }
-    match /products/{productId}/variants/{variantId} { allow read: if true; allow write: if isAdmin(); }
+    // ── Products — Field-Validated Writes (Phase 6B) ───────────────────────
+    // Public read; admin-only writes with field-level validation.
+    function isValidProductStatus(status) {
+      return status in ['draft', 'active', 'published', 'out of stock', 'hidden', 'archived'];
+    }
+
+    function isValidProductType(type) {
+      return type in [
+        'peptide', 'supplement', 'test_kit', 'equipment', 'consumable',
+        'api_raw_material', 'bundle', 'subscription', 'hormone',
+        'small_molecule', 'injectable_nutrient', 'iv_protocol',
+        'topical_cosmetic', 'professional_material', 'genetic_test'
+      ];
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+
+      // Create: admin, required fields present, enums valid
+      allow create: if isAdmin()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200
+        && isValidProductStatus(request.resource.data.status)
+        && isValidProductType(request.resource.data.type)
+        && request.resource.data.categoryId is string
+        && request.resource.data._schemaVersion is number;
+
+      // Update: admin, validate any changed enums
+      allow update: if isAdmin()
+        && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() > 0))
+        && (!('status' in request.resource.data) || isValidProductStatus(request.resource.data.status))
+        && (!('type' in request.resource.data) || isValidProductType(request.resource.data.type));
+
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId}/variants/{variantId} {
+      allow read: if true;
+
+      // Create: admin, supplierId required
+      allow create: if isAdmin()
+        && request.resource.data.supplierId is string
+        && request.resource.data.supplierId.size() > 0;
+
+      // Update: admin, validate supplierId if present
+      allow update: if isAdmin()
+        && (!('supplierId' in request.resource.data) || (request.resource.data.supplierId is string && request.resource.data.supplierId.size() > 0));
+
+      allow delete: if isAdmin();
+    }
     match /catalogProducts/{id}        { allow read: if true; allow write: if isAdmin(); }
 
     // SUPPLEMENTS — fully public read (get + list + query); Admins can write
@@ -63,6 +112,9 @@ service cloud.firestore {
     match /global_rates/{id}           { allow read: if true; allow write: if isAdmin(); }
     match /rates/{id}                  { allow read: if true; allow write: if isAdmin(); }
     match /wholesellers/{id}           { allow read: if true; allow write: if isAdmin(); }
+    match /patients/{id}               { allow read: if isAdmin() || isDoctor() || request.auth.uid == id; allow write: if isAdmin(); }
+    match /agency_rfqs/{id}            { allow read: if isAdmin(); allow write: if isAdmin(); }
+    match /purchaseOrders/{id}         { allow read: if isAdmin() || isWholesaler(); allow write: if isAdmin(); }
     match /product_variants/{id}       { allow read: if true; allow write: if isAdmin(); }
     match /blueprints/{id}             { allow read: if true; allow write: if isAdmin(); }
     match /monitoring_profiles/{id}    { allow read: if true; allow write: if isAdmin(); }
@@ -514,7 +566,18 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
     match /catalog_metadata/{docId} {
-      allow read, write: if true;
+      // Pre-computed catalog stats — readable by all authenticated users.
+      // Writes go exclusively through Cloud Functions (Admin SDK bypasses rules).
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ── _meta/* — Materialized views (server-side pre-computed) ────────────
+    // Written exclusively by Cloud Functions triggers via Admin SDK.
+    // Readable by all authenticated users for KPI widgets / facet filters.
+    match /_meta/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
     }
 
 
@@ -532,6 +595,12 @@ service cloud.firestore {
     match /productEnrichments/{docId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated();
+    }
+
+    // ── CLINICS ──────────────────────────────────────────────────────────────
+    match /clinics/{docId} {
+      allow read: if isAuthenticated() || true;
+      allow write: if isAdmin();
     }
 
     // Default catch-all: Admins only

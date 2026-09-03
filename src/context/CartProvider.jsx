@@ -4,19 +4,25 @@ import { useAuth } from './AuthContext';
 import { useUIStore } from '../stores/uiStore';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 import { useTenant } from './TenantContext';
+import { toast } from 'react-hot-toast';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const { isProfessional } = useAuth();
+  const { isProfessional, isAdmin } = useAuth();
   const { setActiveModal } = useUIStore();
-  const { supplementCatalogue } = useFirestoreData();
+  const { supplementCatalogue, catalogue } = useFirestoreData();
   const { tenantId, tenant } = useTenant();
+
+  const getCartKey = () => isAdmin ? 'mp_admin_cart_v3' : 'mp_cart_v3';
+  const getCartMetaKey = () => isAdmin ? 'mp_admin_cart_metadata_v3' : 'mp_cart_metadata_v3';
+  const getCartOwnershipKey = () => isAdmin ? 'mp_admin_cart_ownership_v3' : 'mp_cart_ownership_v3';
 
   const [cart, setCart] = useState(() => {
     if (typeof window === 'undefined') return {}; // SSR Fix
     try {
-      const savedCart = window.localStorage.getItem('mp_cart');
+      // Intentionally checking default mp_cart_v3 on initial load, effect will sync if isAdmin is true later
+      const savedCart = window.localStorage.getItem('mp_cart_v3');
       return savedCart ? JSON.parse(savedCart) : {};
     } catch (e) {
       return {};
@@ -26,7 +32,7 @@ export function CartProvider({ children }) {
   const [cartMetadata, setCartMetadata] = useState(() => {
     if (typeof window === 'undefined') return {};
     try {
-      const saved = window.localStorage.getItem('mp_cart_metadata');
+      const saved = window.localStorage.getItem('mp_cart_metadata_v3');
       return saved ? JSON.parse(saved) : {};
     } catch (e) {
       return {};
@@ -49,7 +55,7 @@ export function CartProvider({ children }) {
       };
     }
     try {
-      const saved = window.localStorage.getItem('mp_cart_ownership');
+      const saved = window.localStorage.getItem('mp_cart_ownership_v3');
       return saved ? JSON.parse(saved) : {
         patientId: null,
         supervisingPhysicianId: null,
@@ -90,13 +96,33 @@ export function CartProvider({ children }) {
     }));
   }, [tenantId, tenant]);
 
+  // When auth resolves or isAdmin changes, switch context
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedCart = window.localStorage.getItem(getCartKey());
+      if (savedCart) setCart(JSON.parse(savedCart));
+      else setCart({});
+
+      const savedMeta = window.localStorage.getItem(getCartMetaKey());
+      if (savedMeta) setCartMetadata(JSON.parse(savedMeta));
+      else setCartMetadata({});
+
+      const savedOwnership = window.localStorage.getItem(getCartOwnershipKey());
+      if (savedOwnership) setCartOwnership(JSON.parse(savedOwnership));
+      // (If no ownership found, we could reset it, but leaving default is okay)
+    } catch (e) {
+      console.error('Failed to sync cart keys on admin change', e);
+    }
+  }, [isAdmin]);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('mp_cart', JSON.stringify(cart));
-      window.localStorage.setItem('mp_cart_metadata', JSON.stringify(cartMetadata));
-      window.localStorage.setItem('mp_cart_ownership', JSON.stringify(cartOwnership));
+      window.localStorage.setItem(getCartKey(), JSON.stringify(cart));
+      window.localStorage.setItem(getCartMetaKey(), JSON.stringify(cartMetadata));
+      window.localStorage.setItem(getCartOwnershipKey(), JSON.stringify(cartOwnership));
     }
-  }, [cart, cartMetadata, cartOwnership]);
+  }, [cart, cartMetadata, cartOwnership, isAdmin]);
 
   const clearCart = useCallback(() => {
     setCart({});
@@ -131,7 +157,7 @@ export function CartProvider({ children }) {
       setCart(prev => {
         const next = { ...prev };
         items.forEach(item => {
-          const key = item.label || item.name;
+          const key = (item.productId && item.variantId) ? `${item.productId}::${item.variantId}` : (item.label || item.name);
           if (!key) return;
           next[key] = (next[key] || 0) + (item.qty || 1);
         });
@@ -142,7 +168,7 @@ export function CartProvider({ children }) {
         setCartMetadata(prev => {
           const next = { ...prev };
           items.forEach(item => {
-            const key = item.label || item.name;
+            const key = (item.productId && item.variantId) ? `${item.productId}::${item.variantId}` : (item.label || item.name);
             if (!key) return;
             next[key] = {
               isProtocol: true,
@@ -151,6 +177,10 @@ export function CartProvider({ children }) {
               source: item.source,
               price: item.price ?? null,
               isSupplement: item.isSupplement ?? false,
+              name: item.name || item.label,
+              dosage: item.dosage,
+              productId: item.productId,
+              variantId: item.variantId
             };
           });
           const existingBundles = prev.protocolBundles ?? [];
@@ -158,6 +188,7 @@ export function CartProvider({ children }) {
           next.protocolBundles = bundleExists
             ? existingBundles.map(b => b.id === bundle.id ? { ...bundle } : b)
             : [...existingBundles, { ...bundle }];
+          if (options?.onAdd) options.onAdd();
           return next;
         });
       }
@@ -165,33 +196,27 @@ export function CartProvider({ children }) {
     }
 
     const isObject = typeof productOrName === 'object' && productOrName !== null;
-    let itemKey = productOrName;
-    
+    let itemKey = '';
+
     if (isObject) {
-      const productName = productOrName.name || 
-                          productOrName.displayName || 
-                          productOrName.label || 
-                          productOrName.title || 
-                          productOrName.productName || 
-                          productOrName.product_title ||
-                          productOrName.slug ||
-                          productOrName.id;
-                          
-      if (productName) {
-        let details = [];
-        if (productOrName.dosage) details.push(productOrName.dosage);
-        if (productOrName.quantity && (productOrName.productType === 'supplement' || productOrName.isSupplement)) {
-          details.push(productOrName.quantity);
-        }
-        const detailsStr = details.filter(Boolean).join(' / ');
-        itemKey = detailsStr ? `${productName} (${detailsStr})` : productName;
+      const pId = productOrName.productId || productOrName.id;
+      const vId = productOrName.variantId || productOrName.variant?.id;
+      if (pId && vId) {
+        itemKey = `${pId}::${vId}`;
+      } else if (pId) {
+        itemKey = `${pId}::${pId}`;
+      } else if (productOrName.name || productOrName.label || productOrName.title) {
+        itemKey = productOrName.name || productOrName.label || productOrName.title;
       } else {
-        itemKey = null;
+        console.error("CartProvider: Missing productId/name in cart item", productOrName);
+        toast.error("Cart item is missing product identifier.");
+        return;
       }
-    }
-    
-    if (!itemKey) {
-      console.warn("[CartProvider] updateCart: key is null or undefined for productOrName:", productOrName);
+    } else if (typeof productOrName === 'string' && productOrName.trim()) {
+      itemKey = productOrName.trim();
+    } else {
+      console.error("CartProvider: Invalid cart item format", productOrName);
+      toast.error("Invalid cart item format.");
       return;
     }
 
@@ -199,20 +224,24 @@ export function CartProvider({ children }) {
       const currentQty = prev[itemKey] || 0;
       const newQty = currentQty + delta;
 
-      if (newQty <= 0) {
-        const next = { ...prev };
-        delete next[itemKey];
-        setCartMetadata(mPrev => {
-          const mNext = { ...mPrev };
-          delete mNext[itemKey];
-          return mNext;
-        });
-        return next;
+      const matchesSupplement = supplementCatalogue?.some(
+        s => s.id === itemKey.split('::')[0] || s.name?.toLowerCase() === (isObject ? productOrName.name?.toLowerCase() : itemKey.toLowerCase())
+      );
+      
+      // Stock validation (Phase 3)
+      let maxStock = Infinity;
+      if (isObject) {
+        if (productOrName.stock?.quantity !== undefined) {
+          maxStock = productOrName.stock.quantity;
+        } else if (productOrName.variant?.stock?.quantity !== undefined) {
+          maxStock = productOrName.variant.stock.quantity;
+        }
+      }
+      if (delta > 0 && newQty > maxStock) {
+         toast(`Sorry, we only have ${maxStock} units of this variant in stock.`);
+         return prev;
       }
 
-      const matchesSupplement = supplementCatalogue?.some(
-        s => s.name?.toLowerCase() === itemKey.toLowerCase()
-      );
       if (isObject && productOrName.isSupplement) {
       } else if (matchesSupplement) {
       } else {
@@ -225,7 +254,7 @@ export function CartProvider({ children }) {
         // Bypass limits for B2B or Wholesale cart types
         if (cartType !== 'wholesale' && cartType !== 'b2b') {
           if (!isProfessional && (currentPeptideTotal + proposedUnitsToAdd > 10)) {
-            alert("For security and research compliance, individual guest peptide inquiries are strictly limited to 10 units max. Please log in to a Professional account or contact us for bulk institutional requests.");
+            toast("For security and research compliance, individual guest peptide inquiries are strictly limited to 10 units max. Please log in to a Professional account or contact us for bulk institutional requests.");
             return prev;
           }
         }
@@ -237,29 +266,48 @@ export function CartProvider({ children }) {
       // Bypass limits for B2B or Wholesale cart types
       if (cartType !== 'wholesale' && cartType !== 'b2b') {
         if (!isProfessional && (currentTotal + diff > 20)) {
-          alert("For security and research compliance, individual guest inquiries are limited to 20 units total. Please log in to a Professional account or contact us for bulk institutional requirements.");
+          toast("For security and research compliance, individual guest inquiries are limited to 20 units total. Please log in to a Professional account or contact us for bulk institutional requirements.");
           return prev;
         }
       }
 
-      if (isObject) {
-        setCartMetadata(mPrev => {
-          let price = productOrName.price ?? null;
-          if (price == null && productOrName.pricing?.retail?.perUnit != null) {
-            price = productOrName.pricing.retail.perUnit;
-          }
-          const currentMeta = mPrev[itemKey] || {};
-          const mNext = { ...mPrev };
+      setCartMetadata(mPrev => {
+        const currentMeta = mPrev[itemKey] || {};
+        // Phase 3: read from canonical pricing.retail.perUnit, fall back to legacy fields
+        const newPrice = isObject
+          ? (productOrName.variant?.pricing?.retail?.perUnit
+              ?? productOrName.pricing?.retail?.perUnit
+              ?? productOrName.retailPrice
+              ?? productOrName.price
+              ?? productOrName.variant?.price)
+          : undefined;
+        const mNext = { ...mPrev };
+        
+        if (newQty <= 0) {
+          delete mNext[itemKey];
+        } else {
+          const resolvedName = isObject ? (productOrName.name || productOrName.title) : (currentMeta.name || itemKey.split('::')[0]);
+          const resolvedDosage = isObject ? (productOrName.dosage || productOrName.variant?.dosage || productOrName.variant?.strength) : currentMeta.dosage;
+
           mNext[itemKey] = {
             ...currentMeta,
-            price: price != null ? price : currentMeta.price,
-            isSupplement: productOrName.productType === 'supplement' || productOrName.productType === 'diagnostic' || productOrName.isSupplement,
-            productId: productOrName.productId || productOrName.id,
-            variantId: productOrName.variantId || productOrName.id,
-            supplierId: productOrName.supplierId || productOrName.supplier || null
+            name: resolvedName,
+            dosage: resolvedDosage,
+            price: newPrice !== undefined ? newPrice : currentMeta.price,
+            isSupplement: isObject ? (productOrName.productType === 'supplement' || productOrName.productType === 'diagnostic' || productOrName.isSupplement) : currentMeta.isSupplement,
+            productId: isObject ? (productOrName.productId || productOrName.id) : (currentMeta.productId || itemKey.split('::')[0]),
+            variantId: isObject ? (productOrName.variantId || productOrName.variant?.id || productOrName.id) : (currentMeta.variantId || itemKey.split('::')[1]),
+            supplierId: isObject ? (productOrName.supplierId || productOrName.supplier || null) : currentMeta.supplierId,
+            type: isObject ? (productOrName.type || 'product') : currentMeta.type
           };
-          return mNext;
-        });
+        }
+        return mNext;
+      });
+
+      if (newQty <= 0) {
+        const next = { ...prev };
+        delete next[itemKey];
+        return next;
       }
 
       return { ...prev, [itemKey]: newQty };
@@ -284,6 +332,55 @@ export function CartProvider({ children }) {
       return next;
     });
   }, [cartMetadata]);
+
+  // Phase 2: Add Protocol directly via its BOM
+  const addProtocolToCart = useCallback((protocol, fullCatalog) => {
+    if (!protocol || !protocol.bom || !Array.isArray(protocol.bom)) {
+      toast.error('This protocol lacks a structured Bill of Materials (BOM).');
+      return;
+    }
+    
+    // Attempt to map BOM items to catalogue
+    const itemsToAdd = [];
+    let missingItems = false;
+    
+    protocol.bom.forEach(bomItem => {
+      const product = fullCatalog?.find(p => p.id === bomItem.productId);
+      if (!product) { missingItems = true; return; }
+      
+      const variant = product.variants?.find(v => v.id === bomItem.variantId) || product.defaultVariant || product.variants?.[0];
+      if (!variant) { missingItems = true; return; }
+      
+      const dosageStr = variant.dosage || variant.strength;
+      itemsToAdd.push({
+        id: product.id,
+        productId: product.id,
+        variantId: variant.id,
+        name: product.name,
+        dosage: dosageStr,
+        price: variant.pricing?.retail?.perUnit || 0, // Simplified, should use resolved price
+        qty: bomItem.quantity || 1,
+        isSupplement: product.type === 'supplement'
+      });
+    });
+
+    if (missingItems) {
+      toast.error('Some items in this protocol are currently unavailable.');
+    }
+
+    if (itemsToAdd.length === 0) return;
+
+    // Use existing array pattern
+    updateCart({
+      items: itemsToAdd,
+      bundle: {
+        id: protocol.id,
+        name: protocol.name,
+        products: itemsToAdd.map(i => i.name)
+      }
+    }, 1);
+
+  }, [updateCart]);
 
   const cartBreakdown = useMemo(() => {
     return Object.entries(cart).reduce((acc, [itemKey, qty]) => {
@@ -338,12 +435,17 @@ export function CartProvider({ children }) {
     const handleRxAddToCart = (e) => {
       const { items = [], prescriptionId, source = 'refill', doctorId } = e.detail || {};
       items.forEach(item => {
-        if (!item?.name) return;
-        updateCart({ name: item.name, id: item.id || item.name }, item.quantity || 1);
+        if (!item?.productId) {
+          console.error("Missing productId in rx-add-to-cart", item);
+          toast.error(`Prescription item missing productId: ${item.name || 'Unknown'}`);
+          return;
+        }
+        updateCart(item, item.quantity || 1);
+        const itemKey = `${item.productId}::${item.variantId || item.productId}`;
         setCartMetadata(prev => ({
           ...prev,
-          [item.name]: {
-            ...(prev[item.name] || {}),
+          [itemKey]: {
+            ...(prev[itemKey] || {}),
             prescriptionId,
             source,
             supervisingPhysicianId: doctorId || item.doctorId || null,
@@ -369,24 +471,35 @@ export function CartProvider({ children }) {
     const { id, doctorId, adminId, products: recProducts = [], protocols: recProtocols = [], peptides = [] } = recommendation;
 
     recProducts.forEach(item => {
-      if (item.name && item.qty > 0) {
-        setCart(prev => ({ ...prev, [item.name]: (prev[item.name] || 0) + item.qty }));
+      if (!item.productId) {
+        console.error("Missing productId in doctor recommendation product", item);
+        toast.error(`Recommended product missing productId: ${item.name || 'Unknown'}`);
+        return;
+      }
+      if (item.qty > 0) {
+        const itemKey = `${item.productId}::${item.variantId || item.productId}`;
+        setCart(prev => ({ ...prev, [itemKey]: (prev[itemKey] || 0) + item.qty }));
         setCartMetadata(prev => ({
           ...prev,
-          [item.name]: { ...(prev[item.name] || {}), source: 'doctor_recommended', recommendationId: id },
+          [itemKey]: { ...(prev[itemKey] || {}), source: 'doctor_recommended', recommendationId: id },
         }));
       }
     });
 
-    peptides.forEach(peptideName => {
-      const name = typeof peptideName === 'string' ? peptideName : peptideName.name;
-      if (name) {
-        setCart(prev => ({ ...prev, [name]: (prev[name] || 0) + 1 }));
-        setCartMetadata(prev => ({
-          ...prev,
-          [name]: { ...(prev[name] || {}), source: 'doctor_recommended', recommendationId: id },
-        }));
+    peptides.forEach(peptide => {
+      // Peptides in recommendations should now also be objects with productId
+      if (typeof peptide === 'string' || !peptide.productId) {
+        console.error("Legacy string peptide or missing productId in doctor recommendation", peptide);
+        toast.error(`Legacy format unsupported in recommendation: ${typeof peptide === 'string' ? peptide : peptide.name}`);
+        return;
       }
+      
+      const itemKey = `${peptide.productId}::${peptide.variantId || peptide.productId}`;
+      setCart(prev => ({ ...prev, [itemKey]: (prev[itemKey] || 0) + 1 }));
+      setCartMetadata(prev => ({
+        ...prev,
+        [itemKey]: { ...(prev[itemKey] || {}), source: 'doctor_recommended', recommendationId: id },
+      }));
     });
 
     setCartOwnership(prev => ({
@@ -406,6 +519,7 @@ export function CartProvider({ children }) {
       cartMetadata, setCartMetadata,
       cartOwnership, setCartOwnership,
       updateCart,
+      addProtocolToCart,
       removeProtocolBundle,
       cartBreakdown,
       cartCount,

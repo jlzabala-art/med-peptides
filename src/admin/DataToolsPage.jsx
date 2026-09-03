@@ -4,6 +4,7 @@ import { relationshipAuditService } from '../services/relationshipAuditService';
 import { exportService } from '../services/exportService';
 import { useAuth } from '../context/AuthContext';
 import { Download, AlertTriangle, Bug, HardDrive, LayoutList, BookOpen, AlertCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function DataToolsPage() {
   const { isAdmin } = useAuth();
@@ -74,7 +75,7 @@ export default function DataToolsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error(`Export failed for ${entity}:`, err);
-      alert(`Export failed: ${err.message}`);
+      toast.error(`Export failed: ${err.message}`);
     } finally {
       setExporting(false);
     }

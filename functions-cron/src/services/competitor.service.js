@@ -3,9 +3,10 @@ const stringSimilarity = require("string-similarity");
 const geminiService = require("./gemini.service");
 
 const DEFAULT_COMPETITORS = [
-  { name: "UAE Peptides", url: "https://uaepeptides.com/collections/all" },
   { name: "Peptide Sciences", url: "https://www.peptidesciences.com/peptides" },
-  { name: "Limitless Life Nootropics", url: "https://limitlesslifenootropics.com/product-category/peptides/" }
+  { name: "Limitless Life Nootropics", url: "https://limitlesslifenootropics.com/product-category/peptides/" },
+  { name: "DN Lab Research", url: "https://dnlabresearch.com/product-category/peptides/" },
+  { name: "UAE Peptides", url: "https://uaepeptides.com/collections/all" }
 ];
 
 async function scrapeUrlAndParse(url, apiKey, trackPromptExtension = "") {
@@ -56,7 +57,7 @@ async function runScrapingJob(apiKey, specificProductId = null) {
     if (data.frequency) frequency = data.frequency;
     if (data.lastRun) lastRun = data.lastRun.toDate();
     
-    if (data.targetUrls) {
+    if (data.targetUrls && data.targetUrls.length > 0) {
       competitors = data.targetUrls.map(url => {
         try {
           const u = new URL(url);
@@ -65,7 +66,7 @@ async function runScrapingJob(apiKey, specificProductId = null) {
           return { name: url, url: url };
         }
       });
-    } else if (data.urls) {
+    } else if (data.urls && data.urls.length > 0) {
       competitors = data.urls;
     }
   }
@@ -85,6 +86,15 @@ async function runScrapingJob(apiKey, specificProductId = null) {
     }
   }
 
+  // Check for queued items from the UI (e.g. Schedule Nightly Scan)
+  let queuedProductIds = new Set();
+  try {
+    const queueSnap = await db.collection("competitor_scrape_queue").where("status", "==", "pending").get();
+    queueSnap.forEach(d => queuedProductIds.add(d.id));
+  } catch (e) {
+    console.warn("competitor_scrape_queue note:", e.message);
+  }
+
   // Fetch tracked products
   const productsSnap = await db.collection("products").get();
   let allProducts = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -93,7 +103,10 @@ async function runScrapingJob(apiKey, specificProductId = null) {
     allProducts = allProducts.filter(p => p.id === specificProductId);
   }
   
-  const trackedNames = allProducts.filter(p => p.trackCompetitors || specificProductId).map(p => p.name || p.displayName);
+  const trackedNames = allProducts
+    .filter(p => p.trackCompetitors || specificProductId || queuedProductIds.has(p.id))
+    .map(p => p.canonicalName || p.name || p.displayName)
+    .filter(Boolean);
   
   const trackPromptExtension = trackedNames.length > 0 
     ? `\nCRITICAL: Pay special attention to finding pricing for these specific products: ${trackedNames.join(', ')}.` 
@@ -129,17 +142,12 @@ async function runScrapingJob(apiKey, specificProductId = null) {
       }
     }
   }
-
-  // Load previous cache to compare trends
-  const cacheDocRef = db.collection("settings").doc("competitor_cache");
-  const cacheDoc = await cacheDocRef.get();
-  const previousCache = cacheDoc.exists ? cacheDoc.data().matches || [] : [];
   
-  // Calculate Multi-tier Matches and Cache
+  // Calculate Multi-tier Matches
   const newCacheMatches = [];
 
   for (const ourProduct of allProducts) {
-    const myName = (ourProduct.name || ourProduct.displayName || "").toLowerCase().trim();
+    const myName = (ourProduct.canonicalName || ourProduct.name || ourProduct.displayName || "").toLowerCase().trim();
     if (!myName) continue;
     
     const matchesForThisProduct = [];
@@ -150,82 +158,140 @@ async function runScrapingJob(apiKey, specificProductId = null) {
       
       const isMatch = similarity > 0.6 || compName.includes(myName) || myName.includes(compName);
       if (isMatch) {
-        
-        // Compare with previous price to detect trend
-        let trend = "same";
-        let diff = 0;
-        
-        const prevProductCache = previousCache.find(p => p.productId === ourProduct.id);
-        if (prevProductCache) {
-           const prevCompMatch = prevProductCache.competitors.find(c => c.competitor_name === compItem.competitor_name && c.product_name === compItem.product_name);
-           if (prevCompMatch) {
-             diff = compItem.price_usd - prevCompMatch.price_usd;
-             if (diff > 0) trend = "up";
-             else if (diff < 0) trend = "down";
-           }
-        }
-        
         matchesForThisProduct.push({
            ...compItem,
            similarity: Math.round(similarity * 100) / 100,
-           price_trend: trend,
-           price_diff_vs_yesterday: diff,
+           price_trend: "stable",
+           price_diff_vs_yesterday: 0,
            ppm: compItem.dosage_mg ? (compItem.price_usd / compItem.dosage_mg) : null
         });
       }
     }
 
     if (matchesForThisProduct.length > 0) {
-      // Sort matches by best similarity
       matchesForThisProduct.sort((a,b) => b.similarity - a.similarity);
       
-      const myMg = ourProduct.mg || 1;
-      
-      // Calculate our PPMs
+      let myMg = ourProduct.mg || null;
+      let myRetailPrice = ourProduct.price || null;
+      let myClinicPrice = ourProduct.clinicPrice || null;
+      let myWholesalePrice = ourProduct.wholesalerPrice || null;
+      let myAverageCost = null;
+
+      // Extract from unified variants & commercial pricing
+      if (ourProduct.variants && ourProduct.variants.length > 0) {
+        const costs = [];
+        ourProduct.variants.forEach(v => {
+          const dose = parseFloat(v.dosage || v.dose || 1) || 1;
+          if (!myMg) myMg = dose;
+          const unitCost = v.unit_price ?? v.price;
+          if (typeof unitCost === 'number' && unitCost > 0) {
+            costs.push(unitCost / dose);
+          }
+          if (v.commercial_pricing) {
+            if (!myRetailPrice && v.commercial_pricing.retail_price) myRetailPrice = v.commercial_pricing.retail_price;
+            if (!myClinicPrice && v.commercial_pricing.clinic_price) myClinicPrice = v.commercial_pricing.clinic_price;
+            if (!myWholesalePrice && v.commercial_pricing.wholesale_price) myWholesalePrice = v.commercial_pricing.wholesale_price;
+          }
+        });
+        if (costs.length > 0) {
+          myAverageCost = costs.reduce((a, b) => a + b, 0) / costs.length;
+        }
+      }
+
+      const effectiveMg = myMg || 1;
+
       const myPPMs = {
-        retail: ourProduct.price ? (ourProduct.price / myMg) : null,
-        clinic: ourProduct.clinicPrice ? (ourProduct.clinicPrice / myMg) : null,
-        wholesaler: ourProduct.wholesalerPrice ? (ourProduct.wholesalerPrice / myMg) : null,
-        distributor: ourProduct.distributorPrice ? (ourProduct.distributorPrice / myMg) : null,
-        master: ourProduct.masterPrice ? (ourProduct.masterPrice / myMg) : null
+        retail: myRetailPrice ? (myRetailPrice / effectiveMg) : null,
+        clinic: myClinicPrice ? (myClinicPrice / effectiveMg) : null,
+        wholesaler: myWholesalePrice ? (myWholesalePrice / effectiveMg) : null,
+        distributor: ourProduct.distributorPrice ? (ourProduct.distributorPrice / effectiveMg) : null,
+        master: ourProduct.masterPrice ? (ourProduct.masterPrice / effectiveMg) : null
       };
 
       newCacheMatches.push({
         productId: ourProduct.id,
-        productName: ourProduct.name || ourProduct.displayName,
-        myMg,
+        productName: ourProduct.canonicalName || ourProduct.name || ourProduct.displayName,
+        myMg: effectiveMg,
         myPPMs,
-        competitors: matchesForThisProduct
+        myAverageCost,
+        competitors: matchesForThisProduct,
+        lastUpdated: timestamp
       });
     }
   }
   
-  // Merge cache if specific product
-  let finalMatches = newCacheMatches;
-  if (specificProductId) {
-    const otherMatches = previousCache.filter(p => p.productId !== specificProductId);
-    finalMatches = [...otherMatches, ...newCacheMatches];
+  // Save cache individually
+  let kpiTotalMatches = 0;
+  let kpiNeedsAdjustment = 0;
+  let kpiHighlyCompetitive = 0;
+  
+  for (const match of newCacheMatches) {
+    let totalCompPPM = 0;
+    let validComps = 0;
+    for (const comp of match.competitors) {
+      if (comp.ppm) {
+        totalCompPPM += comp.ppm;
+        validComps++;
+      }
+    }
+    const avgPpm = validComps > 0 ? (totalCompPPM / validComps) : null;
+    
+    // Fetch previous history
+    const docRef = db.collection("competitor_analysis_results").doc(match.productId);
+    const existingDoc = await docRef.get();
+    let history = [];
+    if (existingDoc.exists) {
+      history = existingDoc.data().history || [];
+    }
+    
+    if (avgPpm) {
+      history.push({ date: timestamp, avgPpm });
+      if (history.length > 30) history = history.slice(-30);
+    }
+    
+    match.history = history;
+    batch.set(docRef, match);
+
+    // KPI calculation (using retail tier as benchmark)
+    kpiTotalMatches++;
+    const myRetailPPM = match.myPPMs?.retail;
+    if (myRetailPPM) {
+      let isCheaper = true;
+      let isExpensive = true;
+      match.competitors.forEach(comp => {
+        if (!comp.ppm) return;
+        if (myRetailPPM - comp.ppm > 0.05) isCheaper = false;
+        if (myRetailPPM - comp.ppm < -0.05) isExpensive = false;
+      });
+      if (isCheaper) kpiHighlyCompetitive++;
+      if (isExpensive) kpiNeedsAdjustment++;
+    }
+
+    // Mark queued scan completed
+    if (queuedProductIds.has(match.productId)) {
+      const qRef = db.collection("competitor_scrape_queue").doc(match.productId);
+      batch.set(qRef, { status: "completed", completedAt: timestamp }, { merge: true });
+    }
   }
 
-  // Save cache
-  batch.set(cacheDocRef, {
-     lastUpdated: timestamp,
-     matches: finalMatches
-  });
-
-  // Update lastRun (only if global run)
+  // Save global KPIs if global run
   if (!specificProductId) {
+    const kpiRef = db.collection("settings").doc("competitor_kpis");
+    batch.set(kpiRef, {
+      totalMatches: kpiTotalMatches,
+      highlyCompetitive: kpiHighlyCompetitive,
+      needsAdjustment: kpiNeedsAdjustment,
+      lastUpdated: timestamp
+    });
     batch.set(configDocRef, { lastRun: new Date() }, { merge: true });
   }
 
-  if (scrapedCount > 0) {
+  if (scrapedCount > 0 || newCacheMatches.length > 0) {
     await batch.commit();
-    console.log(`Successfully scraped and stored ${scrapedCount} competitor products and generated cache.`);
-  } else {
-    console.log('No competitor products found to store.');
+    console.log(`Successfully scraped and stored competitor pricing results.`);
   }
 
-  return { success: true, count: scrapedCount, timestamp };
+  return { success: true, count: scrapedCount, matches: newCacheMatches.length, timestamp };
 }
 
 module.exports = {

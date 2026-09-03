@@ -8,10 +8,16 @@ import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { conversationRepository } from '../repositories/conversationRepository';
 import { useAuth } from '../context/AuthContext';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 
 import PanelShell from '../components/shell/PanelShell';
 import PageTransition from '../components/PageTransition';
-import Omnibar from '../components/admin/Omnibar';
+import dynamic from 'next/dynamic';
+
+const Omnibar = dynamic(() => import('../components/admin/Omnibar'), {
+  ssr: false,
+});
 import { useRoleAccess } from '../hooks/useRoleAccess';
 
 import GlobalNotificationCenter from '../components/shared/widgets/GlobalNotificationCenter';
@@ -33,6 +39,7 @@ const PINNED_ITEMS = [
   { id: 'messages', label: 'Messages', icon: MessageSquare },
   { id: 'operations-inbox', label: 'Inbox', icon: Inbox },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'pending-apis', label: 'APIs Pendientes', icon: Database },
 ];
 
 // ── Hooks ──────────────────────────────────────────────────────────────────────
@@ -43,10 +50,17 @@ function useUnreadMessagesCount() {
 
   useEffect(() => {
     if (!user) return;
-    return conversationRepository.subscribeToUnreadMessages(
-      { userId: user.uid, isAdmin: is('admin') },
-      setUnread
-    );
+    let unsub = null;
+    const timer = setTimeout(() => {
+      unsub = conversationRepository.subscribeToUnreadMessages(
+        { userId: user.uid, isAdmin: is('admin') },
+        setUnread
+      );
+    }, 800);
+    return () => {
+      clearTimeout(timer);
+      if (unsub) unsub();
+    };
   }, [user, is]);
 
   return unread;
@@ -55,7 +69,14 @@ function useUnreadMessagesCount() {
 function useInboxPendingCount() {
   const [count, setCount] = useState(0);
   useEffect(() => {
-    return conversationRepository.subscribeToInboxPending(setCount);
+    let unsub = null;
+    const timer = setTimeout(() => {
+      unsub = conversationRepository.subscribeToInboxPending(setCount);
+    }, 1000);
+    return () => {
+      clearTimeout(timer);
+      if (unsub) unsub();
+    };
   }, []);
   return count;
 }
@@ -66,8 +87,39 @@ function useUpcomingCalendarCount() {
 
   useEffect(() => {
     if (!user) return;
-    return conversationRepository.subscribeToUpcomingCalendarEvents(user.uid, setCount);
+    let unsub = null;
+    const timer = setTimeout(() => {
+      unsub = conversationRepository.subscribeToUpcomingCalendarEvents(user.uid, setCount);
+    }, 1200);
+    return () => {
+      clearTimeout(timer);
+      if (unsub) unsub();
+    };
   }, [user]);
+
+  return count;
+}
+
+function usePendingApiCount() {
+  const { is } = useRoleAccess();
+  const isAdmin = is('admin');
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAdmin || typeof window === 'undefined') return;
+    let unsub = null;
+    const timer = setTimeout(() => {
+      const q = query(collection(db, 'products'), where('isApiPlaceholder', '==', true));
+      unsub = onSnapshot(q, (snap) => setCount(snap.size), (err) => {
+        console.error('Error fetching pending APIs', err);
+        setCount(0);
+      });
+    }, 1500);
+    return () => {
+      clearTimeout(timer);
+      if (unsub) unsub();
+    };
+  }, [isAdmin]);
 
   return count;
 }
@@ -128,6 +180,7 @@ export default function AdminDashboard({ children }) {
   const unreadMessages = useUnreadMessagesCount();
   const pendingInboxItems = useInboxPendingCount();
   const upcomingCalendarCount = useUpcomingCalendarCount();
+  const pendingApiCount = usePendingApiCount();
   const [isOmnibarOpen, setIsOmnibarOpen] = useState(false);
 
   useEffect(() => {
@@ -164,9 +217,16 @@ export default function AdminDashboard({ children }) {
           badgeColor: '#f97316', // Orange for calendar
         };
       }
+      if (item.id === 'pending-apis') {
+        return {
+          ...item,
+          badge: pendingApiCount > 0 ? pendingApiCount : null,
+          badgeColor: '#eab308', // Yellow
+        };
+      }
       return item;
     });
-  }, [unreadMessages, pendingInboxItems, upcomingCalendarCount]);
+  }, [unreadMessages, pendingInboxItems, upcomingCalendarCount, pendingApiCount]);
 
   const filteredNavGroups = React.useMemo(() => {
     // 1. Determine which role to use for navigation (simulated or real)
@@ -239,13 +299,21 @@ export default function AdminDashboard({ children }) {
     isAdmin
   ]);
 
+  const [isPending, startTransition] = React.useTransition();
+
   const navToTab = useCallback(
     (tabId) => {
-      if (tabId === 'b2c-shop') {
-        router.push('/');
-        return;
-      }
-      router.push(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
+      startTransition(() => {
+        if (tabId === 'b2c-shop') {
+          router.push('/');
+          return;
+        }
+        if (tabId === 'pending-apis') {
+          router.push('/admin/catalog?apiPlaceholder=Only APIs');
+          return;
+        }
+        router.push(`/admin/${tabId === 'dashboard' ? '' : tabId}`);
+      });
     },
     [router]
   );
@@ -293,7 +361,21 @@ export default function AdminDashboard({ children }) {
         </div>
       }
     >
-      <div style={{ padding: '1.5rem', width: '100%', boxSizing: 'border-box' }}>
+      <div 
+        style={{ 
+          padding: '1.5rem', 
+          width: '100%', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          flex: 1, 
+          minHeight: 0, 
+          boxSizing: 'border-box',
+          opacity: isPending ? 0.75 : 1,
+          transition: 'opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'opacity, transform',
+          transform: 'translate3d(0, 0, 0)'
+        }}
+      >
         <React.Suspense fallback={<AdminLoadingFallback />}>
           {children}
         </React.Suspense>

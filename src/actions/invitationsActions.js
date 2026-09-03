@@ -21,14 +21,10 @@ export async function fetchInvitationsAction({ limitCount = 50, tenantId = null 
     
     const invitations = snapshot.docs.map(doc => {
       const data = doc.data();
-      // Serialize dates
-      if (data.invitedAt && data.invitedAt.toDate) {
-        data.invitedAt = data.invitedAt.toDate().toISOString();
-      }
       return { id: doc.id, ...data };
     });
 
-    return invitations;
+    return JSON.parse(JSON.stringify(invitations));
   } catch (error) {
     console.error("Error fetching invitations securely:", error);
     return [];

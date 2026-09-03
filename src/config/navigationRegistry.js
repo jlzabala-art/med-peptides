@@ -63,10 +63,22 @@ export const NAVIGATION_REGISTRY = [
     items: [
       {
         id: 'catalog',
-        label: 'Master Catalog',
+        label: 'Product Catalog',
         icon: Search,
         roles: ['admin', 'pharmacist', 'medical_director', 'sales', 'operations'],
-        // Absorbed: pricing-visibility, competitors, alternatives (rendered as tabs within the view)
+        // Absorbed: pricing-visibility, alternatives (rendered as tabs within the view)
+      },
+      {
+        id: 'competitors',
+        label: 'Competitors Intelligence',
+        icon: LineChart,
+        roles: ['admin', 'sales', 'ceo'],
+      },
+      {
+        id: 'import-prices',
+        label: 'Import Price List',
+        icon: FileText,
+        roles: ['admin', 'pharmacist', 'operations', 'sales'],
       },
       {
         id: 'inventory',
@@ -104,6 +116,12 @@ export const NAVIGATION_REGISTRY = [
         // Absorbed: leads, clinics, agency-deals (unified with segment tabs)
       },
       {
+        id: 'account-managers',
+        label: 'Account Managers',
+        icon: HandshakeIcon,
+        roles: ['admin', 'sales'],
+      },
+      {
         id: 'quotations',
         label: 'Quotes & Pricing',
         icon: FileText,
@@ -133,6 +151,12 @@ export const NAVIGATION_REGISTRY = [
         label: 'Suppliers',
         icon: Building,
         roles: ['admin', 'operations', 'pharmacist'],
+      },
+      {
+        id: 'wholesellers',
+        label: 'Wholesellers',
+        icon: Building,
+        roles: ['admin', 'operations', 'finance'],
       },
       {
         id: 'procurement',
@@ -232,6 +256,7 @@ export const NAVIGATION_REGISTRY = [
       { id: 'ai-insights',    label: 'AI Insights',    icon: LineChart,     roles: ['admin', 'ceo'] },
       { id: 'ai-agents',      label: 'AI Agents',      icon: Bot,           roles: ['admin'] },
       { id: 'prompt-library', label: 'Prompt Library', icon: BookOpenIcon,  roles: ['admin', 'medical_director'] },
+      { id: 'knowledge-base', label: 'Knowledge Base', icon: Database,      roles: ['admin'] },
       { id: 'ai-logs',        label: 'AI Logs',        icon: TerminalSquare,roles: ['admin'] },
     ]
   },
@@ -272,7 +297,6 @@ export const getNavigationForRole = (role) => {
 export const ROUTE_ALIASES = {
   // Catalog
   'pricing-visibility':  'catalog',
-  'competitors':         'catalog',
   'alternatives':        'catalog',
   'certificates':        'inventory',
   'catalog-enrichment':  'inventory',

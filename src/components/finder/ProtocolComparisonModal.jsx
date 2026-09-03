@@ -232,7 +232,7 @@ const ProtocolComparisonModal = ({ isOpen, onClose, versionA, versionB }) => {
           </div>
 
           {/* Rows */}
-          <CompareRow label="Protocol Title" valA={versionA.protocol_name} valB={versionB.protocol_name} />
+          <CompareRow label="Protocol Title" valA={versionA.name} valB={versionB.name} />
           <CompareRow label="Clinical Focus" valA={versionA.therapeutic_category} valB={versionB.therapeutic_category} />
           <CompareRow label="Status" valA={versionA.status?.toUpperCase()} valB={versionB.status?.toUpperCase()} />
 

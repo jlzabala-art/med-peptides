@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
- 
+import { useRouter, useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { useParams as useParams } from 'next/navigation';
 import FAQDiscoveryView from './FAQDiscoveryView';
 import * as fb from '../firebase';
 const db = fb?.db;

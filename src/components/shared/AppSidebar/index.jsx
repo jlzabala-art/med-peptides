@@ -5,9 +5,13 @@ import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, C
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import { useNavigationStore } from '../../../stores/navigationStore';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 import QuickCreateDropdown from './QuickCreateDropdown';
+import { prefetchModuleData } from '../../../utils/speculativePrefetch';
 import './AppSidebar.css';
+
 
 // ── Main AppSidebar ───────────────────────────────────────────────────────────
 export default function AppSidebar({
@@ -19,11 +23,14 @@ export default function AppSidebar({
   isOpen,
   onClose
 }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const { 
     expandedGroups, toggleGroup, setExpandedGroups,
     favorites, toggleFavorite,
     recents, addRecent
   } = useNavigationStore();
+
 
   const { simulatedRole, exitSimulation } = useSimulationStore();
   const simulatedRoleData = ALL_ROLES.find((r) => r.id === simulatedRole);
@@ -61,6 +68,14 @@ export default function AppSidebar({
   // Local visual expand/collapse
   const [expanded, setExpanded] = React.useState(true);
 
+  // Publish sidebar width as a CSS var so fixed-position overlays (e.g. QuickView drawer)
+  // can align to the sidebar edge without JS coupling.
+  useEffect(() => {
+    const w = isMobile ? '0px' : expanded ? 'var(--sb-w-full)' : 'var(--sb-w-mini)';
+    document.documentElement.style.setProperty('--sidebar-current-width', w);
+    return () => document.documentElement.style.removeProperty('--sidebar-current-width');
+  }, [expanded, isMobile]);
+
   // Helper to extract an item by ID from the global registry (so we can render favs/recents)
   const getItemById = (id) => {
     for (const g of groups) {
@@ -84,18 +99,39 @@ export default function AppSidebar({
     const isActive = item.id === '' ? currentSlug === '' : currentSlug === item.id || currentSlug.startsWith(item.id + '/');
     const isFav = favorites.includes(item.id);
 
+    const targetHref = item.id === 'b2c-shop' ? '/' : `/${effectiveRole}/${item.id === 'dashboard' ? '' : item.id}`;
+
     return (
       <div 
         key={`${prefix}${item.id}`} 
         className={`sb-item ${isActive ? 'active' : ''} level-${level}`}
         data-tooltip={!expanded ? item.label : undefined}
+        onMouseEnter={() => {
+          try {
+            router.prefetch(targetHref);
+            prefetchModuleData(item.id, queryClient, effectiveRole);
+          } catch (e) {}
+        }}
+
       >
-        <button className="sb-item-btn" onClick={() => handleNavigate(item.id)}>
+        <Link 
+          href={targetHref}
+          className="sb-item-btn" 
+          onClick={(e) => {
+            // Let the Link handle navigation normally, but still record recents if needed
+            addRecent(item.id);
+            // We do NOT call preventDefault here so Next.js router handles the navigation
+            if (isMobile) {
+              onClose?.();
+            }
+          }}
+          prefetch={true}
+        >
           <span className="sb-item-icon">
             {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
           </span>
           {expanded && <span className="sb-item-label">{item.label}</span>}
-        </button>
+        </Link>
         
         {expanded && (
           <button 

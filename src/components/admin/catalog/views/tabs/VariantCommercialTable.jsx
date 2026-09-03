@@ -1,8 +1,15 @@
 "use client";
 
+import { CATALOG_ACTIONS } from "../../hooks/useCatalogActionRouter";
 import React, { useState, useMemo } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { Check, Edit2, Play, Pause, ExternalLink, Eye, Sparkles } from 'lucide-react';
+import { db } from '../../../../../firebase';
 import AppActionGroup from '../../../../ui/AppActionGroup';
 import DataTable from '../../../../ui/DataTable';
+import InlineEditableCell from '../../../../ui/InlineEditableCell';
+import notifier from '../../../../../services/NotificationService';
+import { PRESENTATION_LABELS } from '../../../../../constants/presentationTypes';
 
 export default function VariantCommercialTable({ variants, parentProduct, onAction, selectedIds = [], onSelectionChange }) {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -24,11 +31,15 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
     };
 
     return variants.map(v => {
-      const rawCost = extractNumber(v.cost_per_gram || v.cost || v.unitCost || v.pricing?.master?.perUnit);
+      const rawCost = extractNumber(v.cost_per_gram || v.cost || v.unitCost || v.pricing?.supplierCost);
+      const rawCost10 = extractNumber(v.pricing?.supplierCost10 || 0);
       const rawShipping = extractNumber(v.shippingCost || v.shipping);
-      const rawWholesale = extractNumber(v.pricing?.wholesale?.perUnit || v.wholesalePrice || v.wholesale);
-      const rawClinic = extractNumber(v.pricing?.clinic?.perUnit || v.clinicPrice || v.clinic);
-      const rawMsrp = extractNumber(v.pricing?.retail?.perUnit || v.msrp || v.price);
+      const rawWholesale = extractNumber(v.pricing?.wholesale || v.wholesalePrice || v.wholesale);
+      const rawWholesale10 = extractNumber(v.pricing?.wholesale10 || 0);
+      const rawClinic = extractNumber(v.pricing?.clinic || v.clinicPrice || v.clinic);
+      const rawClinic10 = extractNumber(v.pricing?.clinic10 || 0);
+      const rawMsrp = extractNumber(v.pricing?.retail || v.msrp || v.price);
+      const rawMsrp10 = extractNumber(v.pricing?.retail10 || 0);
 
       const generateFallbackSku = () => {
         const prodName = parentProduct?.name || parentProduct?.displayName || 'UNK';
@@ -57,9 +68,13 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
         displaySku: v.sku || generateFallbackSku(),
         supplierName: v.supplier || parentProduct?.supplier || 'Unassigned',
         rawCost: Number(rawCost),
+        rawCost10: Number(rawCost10),
         rawWholesale: Number(rawWholesale),
+        rawWholesale10: Number(rawWholesale10),
         rawClinic: Number(rawClinic),
+        rawClinic10: Number(rawClinic10),
         rawMsrp: Number(rawMsrp),
+        rawMsrp10: Number(rawMsrp10),
       };
     });
   }, [variants, parentProduct]);
@@ -122,46 +137,249 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
     {
       key: 'rawCost',
       header: <span onClick={() => handleSort('rawCost')} style={{ cursor: 'pointer' }}>Base Cost{getSortIcon('rawCost')}</span>,
-      render: (val) => <span>{val ? `$${val}` : '-'}</span>
+      render: (val, row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>1x</span>
+            <InlineEditableCell
+              value={val || 0}
+              type="number"
+              format={(v) => (v ? `$${v}` : '-')}
+              onSave={async (newVal) => {
+                const numeric = parseFloat(newVal) || 0;
+                if (numeric !== val) {
+                  const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                  await updateDoc(ref, { 'pricing.supplierCost': numeric });
+                  notifier.success('Base cost updated');
+                }
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>10x</span>
+            <InlineEditableCell
+              value={row.rawCost10 || 0}
+              type="number"
+              format={(v) => (v ? `$${v}` : '-')}
+              onSave={async (newVal) => {
+                const numeric = parseFloat(newVal) || 0;
+                if (numeric !== row.rawCost10) {
+                  const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                  await updateDoc(ref, { 'pricing.supplierCost10': numeric });
+                  notifier.success('Base cost (10 kits) updated');
+                }
+              }}
+            />
+          </div>
+        </div>
+      )
     },
     {
       key: 'rawWholesale',
       header: <span onClick={() => handleSort('rawWholesale')} style={{ cursor: 'pointer' }}>Wholesale{getSortIcon('rawWholesale')}</span>,
       render: (val, row) => (
-        <span>
-          {val ? `$${val}` : '-'}
-          {val && row.rawCost ? <span style={{fontSize:'0.75rem', color:'#64748b', marginLeft:'6px'}}>{Math.round(((val - row.rawCost)/val)*100)}%</span> : null}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>1x</span>
+            <InlineEditableCell
+              value={val || 0}
+              type="number"
+              format={(v) => (v ? `$${v}` : '-')}
+              onSave={async (newVal) => {
+                const numeric = parseFloat(newVal) || 0;
+                if (numeric !== val) {
+                  const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                  await updateDoc(ref, { 'pricing.wholesale': numeric });
+                  notifier.success('Wholesale price updated');
+                }
+              }}
+            />
+            {val && row.rawCost ? <span style={{fontSize:'0.75rem', color:'#64748b'}}>{Math.round(((val - row.rawCost)/val)*100)}%</span> : null}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>10x</span>
+            <InlineEditableCell
+              value={row.rawWholesale10 || 0}
+              type="number"
+              format={(v) => (v ? `$${v}` : '-')}
+              onSave={async (newVal) => {
+                const numeric = parseFloat(newVal) || 0;
+                if (numeric !== row.rawWholesale10) {
+                  const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                  await updateDoc(ref, { 'pricing.wholesale10': numeric });
+                  notifier.success('Wholesale price (10 kits) updated');
+                }
+              }}
+            />
+            {row.rawWholesale10 && row.rawCost10 ? <span style={{fontSize:'0.75rem', color:'#64748b'}}>{Math.round(((row.rawWholesale10 - row.rawCost10)/row.rawWholesale10)*100)}%</span> : null}
+          </div>
+        </div>
       )
     },
     {
       key: 'rawClinic',
       header: <span onClick={() => handleSort('rawClinic')} style={{ cursor: 'pointer' }}>Clinic{getSortIcon('rawClinic')}</span>,
       render: (val, row) => (
-        <span>
-          {val ? `$${val}` : '-'}
-          {val && row.rawWholesale ? <span style={{fontSize:'0.75rem', color:'#64748b', marginLeft:'6px'}}>{Math.round(((val - row.rawWholesale)/val)*100)}%</span> : null}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>1x</span>
+            <InlineEditableCell
+              value={val || 0}
+              type="number"
+              format={(v) => (v ? `$${v}` : '-')}
+              onSave={async (newVal) => {
+                const numeric = parseFloat(newVal) || 0;
+                if (numeric !== val) {
+                  const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                  await updateDoc(ref, { 'pricing.clinic': numeric });
+                  notifier.success('Clinic price updated');
+                }
+              }}
+            />
+            {val && row.rawWholesale ? <span style={{fontSize:'0.75rem', color:'#64748b'}}>{Math.round(((val - row.rawWholesale)/val)*100)}%</span> : null}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>10x</span>
+            <InlineEditableCell
+              value={row.rawClinic10 || 0}
+              type="number"
+              format={(v) => (v ? `$${v}` : '-')}
+              onSave={async (newVal) => {
+                const numeric = parseFloat(newVal) || 0;
+                if (numeric !== row.rawClinic10) {
+                  const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                  await updateDoc(ref, { 'pricing.clinic10': numeric });
+                  notifier.success('Clinic price (10 kits) updated');
+                }
+              }}
+            />
+            {row.rawClinic10 && row.rawWholesale10 ? <span style={{fontSize:'0.75rem', color:'#64748b'}}>{Math.round(((row.rawClinic10 - row.rawWholesale10)/row.rawClinic10)*100)}%</span> : null}
+          </div>
+        </div>
       )
     },
     {
       key: 'rawMsrp',
       header: <span onClick={() => handleSort('rawMsrp')} style={{ cursor: 'pointer' }}>MSRP{getSortIcon('rawMsrp')}</span>,
       render: (val, row) => (
-        <span>
-          <b>{val ? `$${val}` : '-'}</b>
-          {val && row.rawClinic ? <span style={{fontSize:'0.75rem', color:'#f59e0b', marginLeft:'6px'}}>{Math.round(((val - row.rawClinic)/val)*100)}%</span> : null}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>1x</span>
+            <span style={{ fontWeight: 'bold' }}>
+              <InlineEditableCell
+                value={val || 0}
+                type="number"
+                format={(v) => (v ? `$${v}` : '-')}
+                onSave={async (newVal) => {
+                  const numeric = parseFloat(newVal) || 0;
+                  if (numeric !== val) {
+                    const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                    await updateDoc(ref, { 'pricing.retail': numeric });
+                    notifier.success('MSRP updated');
+                  }
+                }}
+              />
+            </span>
+            {val && row.rawClinic ? <span style={{fontSize:'0.75rem', color:'#f59e0b'}}>{Math.round(((val - row.rawClinic)/val)*100)}%</span> : null}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#64748b', width: '16px' }}>10x</span>
+            <span style={{ fontWeight: 'bold' }}>
+              <InlineEditableCell
+                value={row.rawMsrp10 || 0}
+                type="number"
+                format={(v) => (v ? `$${v}` : '-')}
+                onSave={async (newVal) => {
+                  const numeric = parseFloat(newVal) || 0;
+                  if (numeric !== row.rawMsrp10) {
+                    const ref = doc(db, 'products', parentProduct.id, 'variants', row.id);
+                    await updateDoc(ref, { 'pricing.retail10': numeric });
+                    notifier.success('MSRP (10 kits) updated');
+                  }
+                }}
+              />
+            </span>
+            {row.rawMsrp10 && row.rawClinic10 ? <span style={{fontSize:'0.75rem', color:'#f59e0b'}}>{Math.round(((row.rawMsrp10 - row.rawClinic10)/row.rawMsrp10)*100)}%</span> : null}
+          </div>
+        </div>
       )
     },
     {
       key: 'actions',
       header: 'Actions',
       render: (val, row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
           <AppActionGroup
             maxVisible={3}
-            actions={[{ type: 'edit', onClick: () => onAction && onAction('edit_variant', parentProduct, row, 'commercial') }]}
+            actions={[
+              {
+                type: 'sparkles',
+                icon: Sparkles,
+                label: `Ask ClinicalAI about ${parentProduct?.canonicalName || 'Product'}`,
+                onClick: (e) => {
+                  e?.stopPropagation?.();
+                  window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                    detail: {
+                      action: 'ask_about_entity',
+                      entityName: parentProduct?.canonicalName || row.name,
+                      displayText: `Clinical Profile: ${parentProduct?.canonicalName || row.name}`,
+                      autoSend: true,
+                      clearHistory: true,
+                      productMode: true,    // ✔️ activa modo producto sticky
+                      autoGenerate: true,   // ✔️ auto-genera el perfil al abrir
+                      context: {
+                        isProductPage: true,
+                        productMode: true,
+                        // ── Identificación ─────────────────────────────────────
+                        name: parentProduct?.canonicalName || row.name,
+                        canonicalName: parentProduct?.canonicalName || row.name,
+                        displayName: parentProduct?.displayName || parentProduct?.canonicalName,
+                        slug: parentProduct?.slug || parentProduct?.id,
+                        id: parentProduct?.id,
+                        category: parentProduct?.category || '',
+                        tags: parentProduct?.tags || [],
+                        goalIds: parentProduct?.goalIds || [],
+                        goalLabels: parentProduct?.goalLabels || [],
+                        // ── Contenido clínico ──────────────────────────────────
+                        description: parentProduct?.description || '',
+                        objective: parentProduct?.objective || '',
+                        mechanisms: parentProduct?.mechanisms || parentProduct?.mechanism || '',
+                        clinical_benefits: parentProduct?.clinical_benefits || parentProduct?.clinicalBenefits || [],
+                        pharmacology: parentProduct?.pharmacology || {
+                          halfLife: parentProduct?.halfLife || null,
+                          bioavailability: parentProduct?.bioavailability || null,
+                          receptors: parentProduct?.receptors || [],
+                        },
+                        aiContent: parentProduct?.aiContent || null,
+                        // ── Especificaciones ───────────────────────────────────
+                        purity: parentProduct?.purity || '≥98%',
+                        standard_dosage: parentProduct?.standard_dosage || '',
+                        storage: parentProduct?.storage || null,
+                        // ── Variante seleccionada ─────────────────────────────
+                        selectedVariant: {
+                          dosage: row.dosage,
+                          presentation: PRESENTATION_LABELS[row.presentation] || row.presentation,
+                          supplier: row.supplierName || row.supplierId,
+                          price: row.pricing?.retail || row.msrp || row.price,
+                          stock: row.stock
+                        },
+                        // ── Todas las variantes ───────────────────────────────
+                        variants: (parentProduct?.variants || variants || []).map(v => ({
+                          dosage: v.dosage,
+                          presentation: PRESENTATION_LABELS[v.presentation] || v.presentation,
+                          supplier: v.supplierName || v.supplierId,
+                          price: v.pricing?.retail || v.msrp || v.price,
+                          stock: v.stock,
+                          purity: v.purity || parentProduct?.purity,
+                        }))
+                      }
+                    }
+                  }));
+                }
+              },
+              { type: 'view', icon: Eye, label: 'Quick View', onClick: () => onAction && onAction(CATALOG_ACTIONS.QUICK_VIEW, parentProduct) },
+              { type: 'edit', onClick: () => onAction && onAction(CATALOG_ACTIONS.EDIT_VARIANT, parentProduct, row, 'commercial') }
+            ]}
           />
         </div>
       )
@@ -174,7 +392,7 @@ export default function VariantCommercialTable({ variants, parentProduct, onActi
         columns={columns}
         data={sortedVariants}
         keyField={(row, idx) => row.id || idx.toString()}
-        onRowClick={(row) => onAction && onAction('edit_variant', parentProduct, row, 'commercial')}
+        onRowClick={(row) => onAction && onAction(CATALOG_ACTIONS.EDIT_VARIANT, parentProduct, row, 'commercial')}
         rowStyle={(row) => ({
           backgroundColor: selectedIds.includes(row.id) ? 'var(--color-bg-selected)' : 'transparent',
           borderLeft: selectedIds.includes(row.id) ? '4px solid #3b82f6' : '4px solid transparent',

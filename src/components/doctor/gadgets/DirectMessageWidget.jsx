@@ -1,18 +1,9 @@
-"use client";
-
+import React, { useState, useEffect, useRef } from 'react';
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Send from "lucide-react/dist/esm/icons/send";
-import User from "lucide-react/dist/esm/icons/user";
 import Clock from "lucide-react/dist/esm/icons/clock";
-import React, { useState, useEffect, useRef } from 'react';
-import { db } from '../../../firebase';
-
-import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { getDoctorPatientRelationships, getDirectMessages, sendDirectMessage } from '../../../repositories/conversationRepository';
 import { useAuth } from '../../../context/AuthContext';
-
-
-
-
 
 export default function DirectMessageWidget() {
   const { user } = useAuth();
@@ -23,14 +14,21 @@ export default function DirectMessageWidget() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
+    }, 100);
+  };
+
   // Fetch active patients for the doctor
   useEffect(() => {
     async function fetchPatients() {
       if (!user?.uid) return;
       try {
-        const q = query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', user.uid), where('status', '==', 'active'));
-        const snap = await getDocs(q);
-        setPatients(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const list = await getDoctorPatientRelationships(user.uid);
+        setPatients(list);
       } catch (err) {
         console.error("Error fetching patients for messages", err);
       }
@@ -41,50 +39,25 @@ export default function DirectMessageWidget() {
   // Fetch messages for selected patient
   useEffect(() => {
     if (!selectedPatient || !user?.uid) {
-      setMessages([]);
       return;
     }
+    let active = true;
     async function fetchMessages() {
       try {
-        const q = query(
-          collection(db, 'secure_messages'),
-          where('doctorId', '==', user.uid),
-          where('patientId', '==', selectedPatient),
-          orderBy('createdAt', 'asc')
-        );
-        // Note: In a real app we'd use onSnapshot, but getDocs is fine for this demo if we refresh on send
-        const snap = await getDocs(q);
-        setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        const list = await getDirectMessages(user.uid, selectedPatient);
+        if (!active) return;
+        setMessages(list);
         scrollToBottom();
       } catch (err) {
         console.error("Error fetching messages", err);
-        // If index is missing, we might need to fallback to client-side sorting
-        try {
-          const qFallback = query(
-            collection(db, 'secure_messages'),
-            where('doctorId', '==', user.uid),
-            where('patientId', '==', selectedPatient)
-          );
-          const snapF = await getDocs(qFallback);
-          const list = snapF.docs.map(d => ({ id: d.id, ...d.data() }));
-          list.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
-          setMessages(list);
-          scrollToBottom();
-        } catch (fallbackErr) {
-          console.error("Fallback also failed", fallbackErr);
-        }
       }
     }
     fetchMessages();
+    return () => {
+      active = false;
+      setMessages([]);
+    };
   }, [selectedPatient, user]);
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
-    }, 100);
-  };
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -94,59 +67,103 @@ export default function DirectMessageWidget() {
       const p = patients.find(x => x.patientId === selectedPatient);
       const newMsgObj = {
         doctorId: user.uid,
+        doctorName: user.displayName || 'Doctor',
         patientId: selectedPatient,
-        senderId: user.uid, // Physician is sender
-        senderName: user.displayName || 'Physician',
+        patientName: p ? `${p.firstName} ${p.lastName}` : 'Patient',
         text: newMessage.trim(),
-        createdAt: serverTimestamp()
+        sender: 'doctor',
       };
-      await addDoc(collection(db, 'secure_messages'), newMsgObj);
-      // Optimistic update
-      setMessages(prev => [...prev, { ...newMsgObj, createdAt: { toMillis: () => Date.now() } }]);
+      await sendDirectMessage(newMsgObj);
+      setMessages(prev => [...prev, { ...newMsgObj, createdAt: { toMillis: () => 0 } }]);
       setNewMessage('');
       scrollToBottom();
     } catch (err) {
-      console.error("Failed to send message", err);
+      console.error("Error sending message", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="card" style={{ padding: '0', background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      {/* Header */}
-      <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0', background: 'var(--color-bg-app)' }}>
-        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <MessageSquare size={18} color="var(--primary)" /> Mensajería Segura
-        </h3>
-        <select 
-          value={selectedPatient} 
-          onChange={e => setSelectedPatient(e.target.value)} 
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none', fontWeight: 600, color: 'var(--color-text-secondary)' }}
-        >
-          <option value="">-- Seleccionar Patient --</option>
-          {patients.map(p => <option key={p.id} value={p.patientId}>{p.patientName}</option>)}
-        </select>
+    <div style={{
+      background: 'var(--color-bg-surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      height: '520px',
+      display: 'flex',
+      flexDirection: 'column',
+      boxShadow: 'var(--shadow-sm)'
+    }}>
+      {/* Header with Patient Selector */}
+      <div style={{
+        padding: '0.85rem 1rem',
+        borderBottom: '1px solid var(--border)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'var(--color-bg-app)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <MessageSquare size={18} color="var(--primary)" />
+          <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>Direct Patient Messages</span>
+        </div>
+        <div>
+          <select 
+            value={selectedPatient} 
+            onChange={e => setSelectedPatient(e.target.value)}
+            style={{
+              padding: '0.35rem 0.65rem',
+              borderRadius: '6px',
+              border: '1px solid var(--border)',
+              fontSize: '0.85rem',
+              background: 'white',
+              outline: 'none',
+              maxWidth: '180px'
+            }}
+          >
+            <option value="">Select a patient...</option>
+            {patients.map(p => (
+              <option key={p.id || p.patientId} value={p.patientId}>
+                {p.firstName || p.patientName || 'Patient'} {p.lastName || ''}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Messages Area */}
-      <div ref={scrollRef} style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', background: 'white', minHeight: '300px' }}>
+      {/* Messages Thread Container */}
+      <div ref={scrollRef} style={{
+        flex: 1,
+        padding: '1rem',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        background: 'var(--color-bg-app)'
+      }}>
         {!selectedPatient ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.9rem', flexDirection: 'column', gap: '0.5rem' }}>
-            <User size={32} opacity={0.5} />
-            Selecciona un paciente para conversar
+          <div style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', marginTop: '4rem', fontSize: '0.9rem' }}>
+            Select a patient above to start or view secure conversation history.
           </div>
         ) : messages.length === 0 ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-tertiary)', fontSize: '0.9rem' }}>
-            No hay mensajes previos. Escribe el primero.
+          <div style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', marginTop: '4rem', fontSize: '0.9rem' }}>
+            No messages yet. Send a note to the patient below.
           </div>
         ) : (
-          messages.map((msg, i) => {
-            const isMe = msg.senderId === user.uid;
+          messages.map((msg, index) => {
+            const isMe = msg.sender === 'doctor' || msg.senderId === user?.uid;
             return (
-              <div key={msg.id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
-                <div style={{ 
-                  maxWidth: '80%', padding: '0.75rem 1rem', borderRadius: '16px',
+              <div key={msg.id || index} style={{
+                alignSelf: isMe ? 'flex-end' : 'flex-start',
+                maxWidth: '75%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: isMe ? 'flex-end' : 'flex-start'
+              }}>
+                <div style={{
+                  padding: '0.65rem 0.9rem',
+                  borderRadius: '16px',
                   background: isMe ? 'var(--primary)' : '#f1f5f9',
                   color: isMe ? 'white' : 'var(--color-text-primary)',
                   borderBottomRightRadius: isMe ? '4px' : '16px',
@@ -156,7 +173,7 @@ export default function DirectMessageWidget() {
                   {msg.text}
                 </div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--color-text-tertiary)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                  <Clock size={10} /> {msg.createdAt ? new Date(msg.createdAt?.toMillis ? msg.createdAt.toMillis() : Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Ahora'}
+                  <Clock size={10} /> {msg.createdAt ? new Date(msg.createdAt?.toMillis ? msg.createdAt.toMillis() : (msg.createdAt?.seconds ? msg.createdAt.seconds * 1000 : 0)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                 </div>
               </div>
             );
@@ -171,7 +188,7 @@ export default function DirectMessageWidget() {
             type="text" 
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
-            placeholder="Escribe un mensaje..." 
+            placeholder="Type a message..." 
             disabled={!selectedPatient || loading}
             style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '24px', border: '1px solid #e2e8f0', outline: 'none', background: 'var(--color-bg-app)' }}
           />

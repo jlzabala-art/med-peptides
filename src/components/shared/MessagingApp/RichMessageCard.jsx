@@ -3,6 +3,7 @@ import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import CreditCard from "lucide-react/dist/esm/icons/credit-card";
 import ExternalLink from "lucide-react/dist/esm/icons/external-link";
 import React from 'react';
+import { toast } from 'react-hot-toast';
 
 
 
@@ -39,7 +40,7 @@ export default function RichMessageCard({ type, referenceId, text }) {
       window.open(referenceId, '_blank');
     } else {
       // In a real app, route to the product or order details page
-      alert(`Navigating to ${type}: ${referenceId}`);
+      toast(`Navigating to ${type}: ${referenceId}`);
     }
   };
 

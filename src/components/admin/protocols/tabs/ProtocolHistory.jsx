@@ -47,7 +47,7 @@ function buildHistoryFromProtocol(protocol) {
       type: 'created',
       actor: protocol?.createdBy || protocol?.created_by || 'System',
       ts: createdAt,
-      summary: `Protocol "${protocol?.protocol_name || 'Unnamed'}" created`,
+      summary: `Protocol "${protocol?.name || 'Unnamed'}" created`,
       details: {
         category: protocol?.therapeutic_category,
         status: 'draft',
