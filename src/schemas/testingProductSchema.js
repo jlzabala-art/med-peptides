@@ -73,6 +73,12 @@ export function emptyTestingProduct(overrides = {}) {
       digitalDashboard: false,
       wearableIntegration: false,
     },
+
+    // Subscription & Software Access (Cadence options)
+    subscription: {
+      isSubscription: false,
+      availableIntervals: ['one_time'], // 'one_time' | 'monthly' | 'annual'
+    },
     
     createdAt: now,
     updatedAt: now,

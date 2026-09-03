@@ -209,14 +209,32 @@ export function useMasterCatalogColumns({
 
                   const counts = {};
                   const isRawType = getProductAvailableTypes(row).includes('raw_material');
+                  const catLower = String(row.category || '').toLowerCase();
+                  const isDiagnosticOrService = catLower === 'diagnostic' || catLower === 'service' || catLower === 'genetic_test' || catLower === 'diagnostic_test';
+
                   for (const v of variants) {
                     const pStr = String(v.presentation || v.presentationName || v.format || '').toLowerCase();
                     const isBulk = v.unitOfMeasure === 'g' || v.unitOfMeasure === 'kg' || v.supplierPricing?.unitOfMeasure === 'g' || pStr.includes('bulk') || pStr.includes('api') || pStr.includes('powder') || v.type === 'raw_material' || isRawType;
                     const isPen = pStr.includes('pen') || pStr.includes('cartridge');
                     const isSpray = pStr.includes('spray') || pStr.includes('nasal') || pStr.includes('drop');
-                    const isCapsule = pStr.includes('capsule') || pStr.includes('oral');
+                    const isCapsule = pStr.includes('capsule') || pStr.includes('oral') || pStr.includes('tablet');
+                    const isDigital = pStr.includes('digital') || pStr.includes('subscription') || pStr.includes('saas') || catLower === 'service';
+                    const isDna = pStr.includes('dna') || pStr.includes('genetic') || pStr.includes('saliva') || pStr.includes('nutrigen');
+                    const isBlood = pStr.includes('blood') || pStr.includes('cortisol') || pStr.includes('serum');
+                    const isKit = pStr.includes('kit') || pStr.includes('bundle') || pStr.includes('box');
 
-                    const pres = isBulk ? 'bulk_powder_gram' : isPen ? 'pen' : isSpray ? 'spray' : isCapsule ? 'capsule' : 'vial';
+                    let pres;
+                    if (isBulk) pres = 'bulk_powder_gram';
+                    else if (isPen) pres = 'pen';
+                    else if (isSpray) pres = 'spray';
+                    else if (isCapsule) pres = 'capsule';
+                    else if (isDigital) pres = 'digital';
+                    else if (isDna) pres = 'dna_test';
+                    else if (isBlood) pres = 'blood_test';
+                    else if (isKit || isDiagnosticOrService) pres = 'kit';
+                    else if (pStr.includes('vial') || pStr.includes('ampoule') || pStr.includes('lyophil')) pres = 'vial';
+                    else pres = 'vial';
+
                     counts[pres] = (counts[pres] || 0) + 1;
                   }
 
@@ -237,7 +255,7 @@ export function useMasterCatalogColumns({
                       </span>
                     );
                   }
-                  if (counts.vial && !isRawType) {
+                  if (counts.vial && !isRawType && !isDiagnosticOrService) {
                     badges.push(
                       <span key="vials" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>
                         {counts.vial} Vial{counts.vial > 1 ? 's' : ''}
@@ -260,19 +278,32 @@ export function useMasterCatalogColumns({
                       </span>
                     );
                   }
-                  const kits = (counts.kit || 0) + (counts.bundle || 0) + (counts.box || 0) + (counts.combination_blend || 0);
-                  if (kits > 0) {
+                  if (counts.dna_test > 0) {
                     badges.push(
-                      <span key="kits" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
-                        {kits} Kit{kits > 1 ? 's' : ''}
+                      <span key="dna" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#ecfeff', color: '#0e7490', border: '1px solid #cffafe' }}>
+                        {counts.dna_test} DNA Kit{counts.dna_test > 1 ? 's' : ''}
                       </span>
                     );
                   }
-                  const tests = (counts.blood_test || 0) + (counts.dna_test || 0) + (counts.digital || 0);
-                  if (tests > 0) {
+                  if (counts.blood_test > 0) {
                     badges.push(
-                      <span key="tests" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#ecfeff', color: '#0e7490', border: '1px solid #cffafe' }}>
-                        {tests} Test{tests > 1 ? 's' : ''}
+                      <span key="blood" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }}>
+                        {counts.blood_test} Blood Test{counts.blood_test > 1 ? 's' : ''}
+                      </span>
+                    );
+                  }
+                  if (counts.digital > 0) {
+                    badges.push(
+                      <span key="digital" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#f5f3ff', color: '#6d28d9', border: '1px solid #ddd6fe' }}>
+                        {counts.digital > 1 ? `${counts.digital} Plans` : 'Digital Service'}
+                      </span>
+                    );
+                  }
+                  const kits = (counts.kit || 0) + (counts.bundle || 0) + (counts.box || 0) + (counts.combination_blend || 0);
+                  if (kits > 0 && !counts.dna_test && !counts.blood_test) {
+                    badges.push(
+                      <span key="kits" style={{ fontSize: '0.68rem', fontWeight: 600, padding: '1px 5px', borderRadius: 4, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
+                        {kits} Kit{kits > 1 ? 's' : ''}
                       </span>
                     );
                   }

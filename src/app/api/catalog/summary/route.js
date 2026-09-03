@@ -351,15 +351,22 @@ export async function buildCatalogSummary(searchParams) {
       const suppliers = new Map();
 
       productVariants.forEach(v => {
-        const pres = v.presentation || 'vial';
+        const pres = (v.presentation || '').toLowerCase();
+        const cat = (data.category || '').toLowerCase();
+        const isDiagnosticOrService = cat === 'diagnostic' || cat === 'service' || cat === 'genetic_test' || cat === 'diagnostic_test';
+
         if (pres === 'pen' || pres === 'cartridge') {
           kpiFormatCounts.pen++;
-        } else if (pres === 'nasal_spray') {
+        } else if (pres === 'nasal_spray' || pres === 'spray') {
           kpiFormatCounts.spray++;
         } else if (pres === 'capsule' || pres === 'tablet') {
           kpiFormatCounts.oral++;
         } else if (pres === 'cream' || pres === 'bottle') {
           kpiFormatCounts.topical++;
+        } else if (pres === 'kit' || pres === 'dna_test' || pres === 'blood_test' || isDiagnosticOrService) {
+          kpiFormatCounts.kit = (kpiFormatCounts.kit || 0) + 1;
+        } else if (pres === 'digital') {
+          kpiFormatCounts.digital = (kpiFormatCounts.digital || 0) + 1;
         } else {
           kpiFormatCounts.vial++;
         }

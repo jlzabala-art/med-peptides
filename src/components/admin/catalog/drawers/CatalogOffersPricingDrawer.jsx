@@ -572,7 +572,7 @@ export default function CatalogOffersPricingDrawer({
     <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
-      width={isExpanded ? "min(1360px, 96vw)" : (activeDrawer === 'offers' ? "min(1050px, 92vw)" : "min(1100px, 92vw)")}
+      width={isExpanded ? "min(1360px, 96vw)" : "clamp(480px, 62vw, 880px)"}
       actions={
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {activeDrawer === 'offers' && (

@@ -262,6 +262,11 @@ export const VARIANT_FIELD_CONTRACT = Object.freeze({
   route:         { type: 'string',  required: false, default: '' },
   dosage:        { type: 'string',  required: false, default: '' },
 
+  // ── Subscription & Service Details ──
+  billingInterval: { type: 'string', required: false, default: 'one_time' }, // 'monthly' | 'annual' | 'quarterly' | 'one_time'
+  cadence:         { type: 'string', required: false, default: '' },
+  serviceTier:     { type: 'string', required: false, default: '' },
+
   // ── Pricing (structured) ──
   pricing: {
     type: 'object',
