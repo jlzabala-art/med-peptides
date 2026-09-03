@@ -165,7 +165,13 @@ export function useSupplierData({ initialData } = {}) {
       _supplierCache.ts = Date.now();
 
       if (typeof window !== 'undefined') {
-        localStorage.setItem('__rg_suppliers_cache', JSON.stringify({ data: list, ts: Date.now() }));
+        try {
+          const trimmedList = list.slice(0, 25);
+          const serialized = JSON.stringify({ data: trimmedList, ts: Date.now() });
+          if (serialized.length < 100000) {
+            localStorage.setItem('__rg_suppliers_cache', serialized);
+          }
+        } catch (e) {}
       }
 
       setSuppliers(list);

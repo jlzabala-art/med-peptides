@@ -628,15 +628,23 @@ export function useCatalogData(options = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, categoryFilter, activeWorkspace, supplierFilter, advancedFilters, activeKpis, skipFetch]);
 
-  // Persist Default View to LocalStorage for zero-latency load
+  // Persist lightweight initial skeleton to LocalStorage for zero-latency load, full data in RAM
   useEffect(() => {
     if (isDefaultQuery && currentPage === 1 && products.length > 0 && typeof window !== 'undefined') {
       try {
-        const cachePayload = { products, variants, ts: Date.now() };
-        localStorage.setItem('__rg_catalog_cache', JSON.stringify(cachePayload));
+        // Keep full products in RAM Layer 1 (unlimited memory, 0ms)
         _catalogCache.products = products;
         _catalogCache.variants = variants;
         _catalogCache.ts = Date.now();
+
+        // Only store first 25 products in localStorage to stay well below browser quota
+        const trimmedProducts = products.slice(0, 25);
+        const trimmedVariants = variants.slice(0, 50);
+        const cachePayload = { products: trimmedProducts, variants: trimmedVariants, ts: Date.now() };
+        const serialized = JSON.stringify(cachePayload);
+        if (serialized.length < 150000) {
+          localStorage.setItem('__rg_catalog_cache', serialized);
+        }
       } catch (e) {
          // Ignore quota errors
       }

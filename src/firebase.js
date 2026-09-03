@@ -4,6 +4,7 @@ import { getFirestore, initializeFirestore, persistentLocalCache, persistentMult
 import { getFunctions } from 'firebase/functions';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
+import { initStorageQuotaGuard } from './utils/storageQuotaGuard';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
@@ -20,6 +21,7 @@ let firestoreDb;
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
   if (typeof window !== 'undefined') {
+    initStorageQuotaGuard();
     try {
       firestoreDb = initializeFirestore(app, {
         localCache: persistentLocalCache({

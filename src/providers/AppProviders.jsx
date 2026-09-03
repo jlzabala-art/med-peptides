@@ -1,11 +1,12 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter } from 'next/navigation';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
 import { HelmetProvider } from 'react-helmet-async';
+import { initStorageQuotaGuard } from '../utils/storageQuotaGuard';
 
 // Contexts
 import { AuthProvider } from '../context/AuthContext';
@@ -66,6 +67,10 @@ const persister = createAsyncStoragePersister({
 });
 
 export default function AppProviders({ children }) {
+  useEffect(() => {
+    initStorageQuotaGuard();
+  }, []);
+
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <AuthProvider>
