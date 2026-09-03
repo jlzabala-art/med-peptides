@@ -384,19 +384,39 @@ export default function PortalLayout({
       display: flex;
       position: relative;
       width: 100%;
-      max-width: 420px;
+      max-width: clamp(200px, 24vw, 380px);
     }
     .portal-header-search-bar input {
       width: 100%;
-      padding: 0.55rem 1rem 0.55rem 2.6rem;
-      border-radius: 24px;
+      padding: 0.55rem 3.4rem 0.55rem 2.6rem;
+      border-radius: 20px;
       border: 1px solid rgba(0, 0, 0, 0.08);
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.65);
       color: var(--color-text-primary);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       outline: none;
       cursor: pointer;
       box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+    .portal-header-search-bar input:hover {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: var(--color-primary, #003666);
+    }
+    .portal-header-search-kbd {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 0.68rem;
+      font-family: inherit;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      background: rgba(0, 0, 0, 0.05);
+      padding: 2px 6px;
+      border-radius: 5px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
     }
     .portal-header-search-icon-inside {
       position: absolute;
@@ -410,10 +430,13 @@ export default function PortalLayout({
     /* Mobile search ICON button — hidden on desktop */
     .portal-header-search-btn {
       display: none;
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.7);
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: 50%;
-      padding: 0.45rem;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
       cursor: pointer;
       align-items: center;
       justify-content: center;
@@ -432,6 +455,7 @@ export default function PortalLayout({
     }
     /* Preferences pill — hide on narrow */
     .portal-header-prefs { display: flex; }
+    .portal-header-impersonator-wrap { display: flex; align-items: center; }
     @media (max-width: 840px) {
       .portal-header-prefs { display: none; }
     }
@@ -442,6 +466,23 @@ export default function PortalLayout({
       /* Hide portal title text — keep switcher */
       .portal-header-title { display: none; }
       .portal-header-sep:first-of-type { display: none; }
+    }
+    @media (max-width: 768px) {
+      .portal-header-impersonator-wrap { display: none !important; }
+      .portal-header-sparkles-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0 !important;
+        justify-content: center !important;
+      }
+      .portal-header-bell-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+      }
     }
     @media (max-width: 720px) {
       /* Hide ALL text in left, show only logo + hamburger */
@@ -546,10 +587,11 @@ export default function PortalLayout({
             </span>
             <input
               type="text"
-              placeholder="Search everything... (Cmd+K)"
+              placeholder="Search everything..."
               onClick={() => setPaletteOpen(true)}
               readOnly
             />
+            <span className="portal-header-search-kbd">⌘K</span>
           </div>
         </div>
 
@@ -623,7 +665,8 @@ export default function PortalLayout({
                   position: 'absolute',
                   top: 'calc(100% + 8px)',
                   right: 0,
-                  width: '320px',
+                  width: 'min(340px, 92vw)',
+                  maxWidth: '92vw',
                   backgroundColor: 'white',
                   borderRadius: '12px',
                   boxShadow:
@@ -854,8 +897,10 @@ export default function PortalLayout({
               size={36}
               onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
             />
-            {/* Role Impersonator Tool (Rule #14) */}
-            <RoleImpersonatorSelector />
+            {/* Role Impersonator Tool (Rule #14) — hidden on mobile topbar */}
+            <span className="portal-header-impersonator-wrap">
+              <RoleImpersonatorSelector />
+            </span>
 
             {/* Header Actions (Logout icon from AdminDashboard) */}
             {headerActions}

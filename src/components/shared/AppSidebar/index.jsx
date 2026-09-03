@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo } from 'react';
-import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building, Eye } from '@/lib/icons';
+import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building, Eye, X } from '@/lib/icons';
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import { useNavigationStore } from '../../../stores/navigationStore';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
@@ -65,8 +65,26 @@ export default function AppSidebar({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // Local visual expand/collapse
-  const [expanded, setExpanded] = React.useState(true);
+  // Local visual expand/collapse with persistence and compact-laptop intelligence
+  const [expanded, setExpanded] = React.useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('atlas_sidebar_expanded');
+      if (saved !== null) return saved === 'true';
+      // Auto-collapse on compact laptop screens (1024px to 1280px) to maximize table working area
+      if (window.innerWidth >= 1024 && window.innerWidth <= 1280) return false;
+    }
+    return true;
+  });
+
+  const handleToggleExpanded = () => {
+    setExpanded((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('atlas_sidebar_expanded', String(next));
+      } catch (e) {}
+      return next;
+    });
+  };
 
   // Publish sidebar width as a CSS var so fixed-position overlays (e.g. QuickView drawer)
   // can align to the sidebar edge without JS coupling.
@@ -127,13 +145,46 @@ export default function AppSidebar({
           }}
           prefetch={true}
         >
-          <span className="sb-item-icon">
+          <span className="sb-item-icon" style={{ position: 'relative' }}>
             {Icon && <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />}
+            {!expanded && !isMobile && item.badge !== undefined && item.badge !== null && item.badge !== 0 && (
+              <span 
+                style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -2,
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  backgroundColor: typeof item.badge === 'object' ? item.badge.bg || '#ef4444' : '#ef4444',
+                  boxShadow: '0 0 4px rgba(239, 68, 68, 0.6)'
+                }}
+              />
+            )}
           </span>
-          {expanded && <span className="sb-item-label">{item.label}</span>}
+          {(expanded || isMobile) && (
+            <span className="sb-item-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, gap: '6px' }}>
+              <span>{item.label}</span>
+              {item.badge !== undefined && item.badge !== null && item.badge !== 0 && (
+                <span 
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '1px 6px',
+                    borderRadius: '10px',
+                    backgroundColor: typeof item.badge === 'object' ? item.badge.bg || '#ef4444' : '#ef4444',
+                    color: typeof item.badge === 'object' ? item.badge.color || '#ffffff' : '#ffffff',
+                    lineHeight: '1.2'
+                  }}
+                >
+                  {typeof item.badge === 'object' ? item.badge.text : item.badge}
+                </span>
+              )}
+            </span>
+          )}
         </Link>
         
-        {expanded && (
+        {(expanded || isMobile) && (
           <button 
             className={`sb-item-action ${isFav ? 'fav-active' : ''}`} 
             onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
@@ -166,15 +217,41 @@ export default function AppSidebar({
       <div className="sb-header">
         <div className="sb-brand">
           <AtlasHealthLogo size={24} />
-          {expanded && <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 700, color: 'var(--sb-text)' }}>Atlas Health</span>}
+          {(expanded || isMobile) && <span style={{ marginLeft: '8px', fontSize: '14px', fontWeight: 700, color: 'var(--sb-text)' }}>Atlas Health</span>}
         </div>
-        <button 
-          className="sb-hamburger" 
-          onClick={() => setExpanded(!expanded)}
-          style={{ marginLeft: expanded ? 'auto' : '0' }}
-        >
-          {expanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-        </button>
+        {isMobile ? (
+          <button 
+            className="sb-close-btn" 
+            onClick={onClose}
+            aria-label="Close menu"
+            style={{ 
+              marginLeft: 'auto', 
+              background: 'transparent', 
+              border: 'none', 
+              cursor: 'pointer', 
+              width: '44px', 
+              height: '44px', 
+              minWidth: '44px',
+              minHeight: '44px',
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: 'var(--sb-text)',
+              borderRadius: '8px'
+            }}
+          >
+            <X size={20} />
+          </button>
+        ) : (
+          <button 
+            className="sb-hamburger" 
+            onClick={handleToggleExpanded}
+            style={{ marginLeft: expanded ? 'auto' : '0' }}
+            title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {expanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+          </button>
+        )}
       </div>
 
       <nav className="sb-scroll">

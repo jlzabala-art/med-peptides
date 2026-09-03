@@ -2,20 +2,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { 
   LayoutDashboard, ShoppingBag, Globe, History, Settings, 
-  LogOut, Package, MessageSquare 
+  LogOut, Package, MessageSquare, FileText, Truck 
 } from '@/lib/icons';
 import { useAuth } from '../context/AuthContext';
-
-
-
-
-
-
 
 import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
-
 
 import OrdersTab from '../components/admin/OrdersTab';
 import AdminClientsTab from '../components/admin/AdminClientsTab';
@@ -24,6 +17,7 @@ import AdminAccountManagersTab from '../components/admin/AdminAccountManagersTab
 import ShippingTrackerTab from '../components/supplier/ShippingTrackerTab';
 import ClinicalAIWidget from '../components/admin/ClinicalAIWidget';
 import MessagingWidget from '../components/messaging/MessagingWidget';
+
 const SUPPLIER_NAV_GROUPS = [
   {
     id: 'overview',
@@ -39,6 +33,8 @@ const SUPPLIER_NAV_GROUPS = [
     items: [
       { id: 'catalog', label: 'Mass Catalog / APIs', icon: Package },
       { id: 'orders', label: 'Wholesale Orders', icon: ShoppingBag },
+      { id: 'rfqs', label: 'Quote Requests (RFQs)', icon: FileText },
+      { id: 'shipments', label: 'Shipment Tracker', icon: Truck },
       { id: 'clients', label: 'B2B Clients', icon: Globe },
     ],
   },
@@ -60,7 +56,7 @@ export function SupplierDashboardTab({ userProfile }) {
             <Globe size={36} /> Supplier Portal
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500, marginTop: '0.5rem' }}>
-            Panel de control B2B corporativo (Venta de materias primas y distribución masiva).
+            Corporate B2B Management (Raw Material Sales & Bulk Distribution).
           </p>
         </div>
         <div style={{ background: 'white', padding: '1rem 1.5rem', borderRadius: '16px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
