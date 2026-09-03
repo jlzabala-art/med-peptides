@@ -214,6 +214,7 @@ export { default as LinkIcon } from 'lucide-react/dist/esm/icons/link';
 export { default as Loader } from 'lucide-react/dist/esm/icons/loader';
 export { default as LogIn } from 'lucide-react/dist/esm/icons/log-in';
 export { default as Maximize2 } from 'lucide-react/dist/esm/icons/maximize-2';
+export { default as Minimize2 } from 'lucide-react/dist/esm/icons/minimize-2';
 export { default as Monitor } from 'lucide-react/dist/esm/icons/monitor';
 export { default as PackagePlus } from 'lucide-react/dist/esm/icons/package-plus';
 export { default as PackageX } from 'lucide-react/dist/esm/icons/package-x';

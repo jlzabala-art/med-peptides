@@ -11,6 +11,7 @@ import {
   buildApiColumns 
 } from '../columns/catalogColumns';
 import { UploadCloud, FileText, Share2, Layers, TrendingUp, Copy, Star } from 'lucide-react';
+import { Maximize2, Minimize2 } from '@/lib/icons';
 import InlineEditableCell from '../../../ui/InlineEditableCell';
 import notifier from '../../../../services/NotificationService';
 import { useAppSettings } from '../../../../hooks/useAppSettings';
@@ -48,6 +49,7 @@ export default function CatalogOffersPricingDrawer({
   const { settings } = useAppSettings();
   const [drawerTab, setDrawerTab] = React.useState('offers'); // 'offers' | 'competitors'
   const [loadingVariants, setLoadingVariants] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   React.useEffect(() => {
     if (activeDrawer === 'competitors') {
@@ -570,67 +572,92 @@ export default function CatalogOffersPricingDrawer({
     <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
-      width={activeDrawer === 'offers' ? "1050px" : "1100px"}
+      width={isExpanded ? "min(1360px, 96vw)" : (activeDrawer === 'offers' ? "min(1050px, 92vw)" : "min(1100px, 92vw)")}
       actions={
-        activeDrawer === 'offers' ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button
-              onClick={() => {
-                if (onOpenImportPriceList) {
-                  const suppId = selectedProduct?.supplierId || selectedProduct?.supplierPricing?.supplierId || selectedProduct?.suppliers?.[0] || 'supplier-lotusland';
-                  const cat = selectedProduct?.category || '';
-                  onOpenImportPriceList({ productId: selectedProduct?.id, supplierId: suppId, category: cat });
-                }
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                color: '#0284c7',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '7px',
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <UploadCloud size={14} style={{ color: '#0284c7' }} />
-              <span>Import Price List</span>
-            </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {activeDrawer === 'offers' && (
+            <>
+              <button
+                onClick={() => {
+                  if (onOpenImportPriceList) {
+                    const suppId = selectedProduct?.supplierId || selectedProduct?.supplierPricing?.supplierId || selectedProduct?.suppliers?.[0] || 'supplier-lotusland';
+                    const cat = selectedProduct?.category || '';
+                    onOpenImportPriceList({ productId: selectedProduct?.id, supplierId: suppId, category: cat });
+                  }
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  color: '#0284c7',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '7px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <UploadCloud size={14} style={{ color: '#0284c7' }} />
+                <span>Import Price List</span>
+              </button>
 
-            <button
-              onClick={() => handleExportProductPdf && handleExportProductPdf({ 
-                currency: displayCurrency, 
-                priceView, 
-                commercialChannel, 
-                groupBy: 'supplier' 
-              })}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                color: '#003666',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '7px',
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <FileText size={14} style={{ color: '#0284c7' }} />
-              <span>Export PDF</span>
-              <Share2 size={12} style={{ opacity: 0.6 }} />
-            </button>
-          </div>
-        ) : null
+              <button
+                onClick={() => handleExportProductPdf && handleExportProductPdf({ 
+                  currency: displayCurrency, 
+                  priceView, 
+                  commercialChannel, 
+                  groupBy: 'supplier' 
+                })}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  color: '#003666',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '7px',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <FileText size={14} style={{ color: '#0284c7' }} />
+                <span>Export PDF</span>
+                <Share2 size={12} style={{ opacity: 0.6 }} />
+              </button>
+            </>
+          )}
+
+          <button
+            onClick={() => setIsExpanded(prev => !prev)}
+            title={isExpanded ? "Collapse to standard width" : "Expand to wide comparison view"}
+            aria-label={isExpanded ? "Collapse drawer width" : "Expand drawer width"}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.35rem',
+              width: '32px',
+              height: '32px',
+              borderRadius: '7px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#ffffff',
+              color: '#475569',
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {isExpanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+          </button>
+        </div>
       }
       title={
         activeDrawer === 'pricing' ? `Pricing Visibility: ${selectedProduct?.canonicalName}` :

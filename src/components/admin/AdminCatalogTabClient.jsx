@@ -370,7 +370,7 @@ function DesktopCatalogActions(props) {
 ───────────────────────────────────────────────────────────────── */
 function MobileCatalogActions(props) {
   return (
-    <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', width: '100%' }}>
+    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', width: '100%' }}>
       <button
         onClick={props.onNewProduct}
         className="gcp-btn-primary"
@@ -380,23 +380,46 @@ function MobileCatalogActions(props) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.35rem',
-          padding: '0.45rem 0.65rem',
-          minHeight: '38px',
+          padding: '0.45rem 0.75rem',
+          minHeight: '44px',
           whiteSpace: 'nowrap'
         }}
       >
         <Plus size={16} />
-        <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>New Product</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>New Product</span>
       </button>
       <button
         onClick={props.onImportPriceList}
         className="gcp-btn-secondary"
         title="Import Price List"
-        style={{ padding: '0.45rem', minHeight: '38px', minWidth: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{ 
+          padding: '0.45rem', 
+          minHeight: '44px', 
+          minWidth: '44px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}
       >
         <FileText size={16} />
       </button>
-      <CatalogExportDropdown {...props} isMobile={true} />
+      <button
+        onClick={props.onOpenExportHub}
+        className="gcp-btn-secondary"
+        title="Export Hub & Price Lists"
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          gap: '0.35rem',
+          padding: '0.45rem 0.75rem', 
+          minHeight: '44px', 
+          minWidth: '44px' 
+        }}
+      >
+        <Download size={15} />
+        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Export</span>
+      </button>
     </div>
   );
 }

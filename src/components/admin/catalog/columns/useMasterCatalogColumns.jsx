@@ -51,7 +51,7 @@ export function useMasterCatalogColumns({
     {
       key: 'product',
       header: 'Canonical Product',
-      width: '44%',
+      width: '45%',
       mobilePriority: 1,
       render: (row) => (
         <AppEntityCell
@@ -293,7 +293,7 @@ export function useMasterCatalogColumns({
     {
       key: 'suppliers',
       header: 'Suppliers',
-      width: '90px',
+      width: '10%',
       align: 'center',
       nowrap: true,
       mobilePriority: 2,
@@ -363,7 +363,7 @@ export function useMasterCatalogColumns({
     {
       key: 'status',
       header: 'Status',
-      width: '16%',
+      width: '18%',
       align: 'center',
       mobilePriority: 2,
       render: (row) => {
@@ -465,7 +465,7 @@ export function useMasterCatalogColumns({
     {
       key: 'actions',
       header: 'Actions',
-      width: '22%',
+      width: '27%',
       align: 'right',
       isAction: true,
       render: (row) => {
@@ -631,7 +631,7 @@ export function useMasterCatalogColumns({
           }
         ];
 
-        return <AppActionGroup maxVisible={3} actions={actions} />;
+        return <AppActionGroup maxVisible={2} actions={actions} />;
       }
     }
   ], [

@@ -36,11 +36,37 @@ const CATEGORY_ICONS = {
   wellness:              Heart,
 };
 
-function CategoryIcon({ category }) {
+function CategoryIcon({ category, isSelected, selectionMode, onThumbClick }) {
   const Icon = CATEGORY_ICONS[category?.toLowerCase()] || Package;
   return (
-    <div className="mcc-thumb" aria-hidden="true">
-      <Icon size={28} strokeWidth={1.5} />
+    <div 
+      className={`mcc-thumb ${isSelected ? 'mcc-thumb--selected' : ''}`} 
+      aria-hidden="true"
+      onClick={onThumbClick}
+      style={{
+        position: 'relative',
+        cursor: 'pointer',
+        backgroundColor: isSelected ? 'var(--color-primary, #003666)' : undefined,
+        color: isSelected ? '#ffffff' : undefined,
+        transition: 'background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease'
+      }}
+      title={selectionMode ? (isSelected ? 'Deselect item' : 'Select item') : 'Tap to select'}
+    >
+      {selectionMode || isSelected ? (
+        isSelected ? (
+          <Check size={28} strokeWidth={2.5} />
+        ) : (
+          <div style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '6px',
+            border: '2px solid #94a3b8',
+            background: 'transparent'
+          }} />
+        )
+      ) : (
+        <Icon size={28} strokeWidth={1.5} />
+      )}
     </div>
   );
 }
@@ -250,34 +276,15 @@ export default function MobileCatalogCard({
       aria-label={`${name}${metaLine ? `, ${metaLine}` : ''}${priceLabel ? `, ${priceLabel}` : ''}`}
       aria-pressed={selectionMode ? isSelected : undefined}
     >
-      {/* Selection checkbox (always visible) */}
-      <div
-        className="mcc-checkbox-container"
-        onClick={(e) => {
-          // If not in selection mode, tapping the checkbox directly starts it
-          if (!selectionMode) {
-            e.stopPropagation();
-            onToggleSelect?.();
-          }
+      <CategoryIcon 
+        category={row.category} 
+        isSelected={isSelected}
+        selectionMode={selectionMode}
+        onThumbClick={(e) => {
+          e.stopPropagation();
+          onToggleSelect?.();
         }}
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '0.75rem',
-          left: '0.75rem',
-          zIndex: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '32px',
-          height: '32px',
-          color: isSelected ? 'var(--color-primary, #003666)' : 'var(--color-text-tertiary)',
-        }}
-      >
-        {isSelected ? <CheckSquare size={20} strokeWidth={2} /> : <Square size={20} strokeWidth={2} />}
-      </div>
-
-      <CategoryIcon category={row.category} />
+      />
 
       <div className="mcc-body">
         <div className="mcc-name" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
