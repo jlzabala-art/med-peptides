@@ -60,6 +60,7 @@ import * as productRepository from '@/repositories/productRepository';
 import { mapSourcingToCategory } from '@/repositories/mappers';
 import { getRelatedProducts } from '@/utils/discoveryEngine';
 import { lockScroll, unlockScroll } from '@/utils/scrollLock';
+import { getHumanFormatName } from '@/utils/productVariantProcessing';
 import RelatedProductsCarousel from '@/components/shared/RelatedProductsCarousel';
 import AlgoliaCompetitorBadge from '@/components/admin/competitors/AlgoliaCompetitorBadge';
 import { formatPrice, resolveVariantPrice } from '@/services/pricingService';
@@ -213,7 +214,7 @@ export default function PeptideDetail({
     if (activeProduct) {
       trackPeptideView({
         peptide_name: activeProduct.name,
-        protocol_id: location.state?.protocol_id || null
+        protocol_id: (typeof window !== 'undefined' && window.history?.state?.protocol_id) || null
       });
       trackRecentView({
         type: 'peptide',
@@ -221,7 +222,7 @@ export default function PeptideDetail({
         name: activeProduct.name,
       });
     }
-  }, [activeProduct?.name, activeProduct?.slug, location.state?.protocol_id]);
+  }, [activeProduct?.name, activeProduct?.slug]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -379,7 +380,7 @@ export default function PeptideDetail({
       .filter(v => normalizeSupplier(v.supplierId || v.supplier) === selectedSupplierId)
       .map(v => getFormat(v));
     const uniqueF = [...new Set(formats)].sort();
-    return uniqueF.map(name => ({ id: name, name })); 
+    return uniqueF.map(name => ({ id: name, name: getHumanFormatName(name, name) })); 
   }, [activeSupplierNode, processedHierarchy, productVariants, selectedSupplierId]);
 
   // Auto-select valid format
@@ -666,10 +667,11 @@ export default function PeptideDetail({
     }
 
     const resolved = resolveVariantPrice(targetVariant, { tier, countryCode: region });
-    const amount = volumeOption === 'kit' ? resolved.kit : resolved.perUnit;
+    const isKit = volumeOption === 'kit' || volumeOption === 'tier_10';
+    const amount = isKit ? resolved.kit : resolved.perUnit;
 
     // Fallback if kit is selected but not available
-    if (amount == null && volumeOption === 'kit') {
+    if (amount == null && isKit) {
       return formatPrice(resolved.perUnit, resolved.currency ?? 'USD', region);
     }
 
@@ -1298,7 +1300,10 @@ export default function PeptideDetail({
                   <div className="pd-supplier-toggle" style={{ width: '100%' }}>
                     <select
                       value={selectedFormatId || ''}
-                      onChange={(e) => setSelectedFormatId(e.target.value)}
+                      onChange={(e) => {
+                        triggerHaptic('light');
+                        setSelectedFormatId(e.target.value);
+                      }}
                       style={{
                         width: '100%',
                         padding: '0.65rem 0.85rem',
@@ -1307,7 +1312,8 @@ export default function PeptideDetail({
                         backgroundColor: 'var(--bg-surface)',
                         color: 'var(--text-main)',
                         fontWeight: 600,
-                        fontSize: '0.9rem',
+                        fontSize: '1rem',
+                        minHeight: '44px',
                         cursor: 'pointer',
                         boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                         appearance: 'none',
@@ -1318,7 +1324,7 @@ export default function PeptideDetail({
                       }}
                     >
                       {availableFormatNodes.map((format, idx) => (
-                        <option key={`valid-${idx}`} value={format.id}>{format.name}</option>
+                        <option key={`valid-${idx}`} value={format.id}>{getHumanFormatName(format.id, format.name)}</option>
                       ))}
                     </select>
                   </div>
@@ -1384,25 +1390,25 @@ export default function PeptideDetail({
                       ? 'Tier ×100 (Total Pack Price)'
                       : `Unit Price (x1)`} {tier ? `(${tier})` : ''}
                   </span>
-                  {(volumeOption === 'kit' || volumeOption === 'tier_10') && <span style={{ color: 'var(--secondary)', fontSize: '0.70rem', fontWeight: 800 }}>⭐ RECOMMENDED VOLUME TIER</span>}
+                  {(volumeOption === 'kit' || volumeOption === 'tier_10') && <span style={{ color: 'var(--color-secondary, #0096cc)', fontSize: '0.70rem', fontWeight: 800 }}>⭐ RECOMMENDED VOLUME TIER</span>}
                 </div>
                 {authLoading ? (
                   <span style={{ display: 'inline-block', width: '120px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--color-border)', animation: 'pulse 1.5s ease-in-out infinite' }} />
                 ) : priceDisplay === 'unavailable' ? (
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)', alignSelf: 'center' }}>{tier === 'master' ? 'Not Set (Set Below)' : 'Contact us for pricing'}</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted, #94a3b8)', alignSelf: 'center' }}>{tier === 'master' ? 'Not Set (Set Below)' : 'Contact us for pricing'}</span>
                 ) : priceDisplay ? (
-                  <span style={{ fontWeight: 800, color: (volumeOption === 'kit' || volumeOption === 'tier_10') ? 'var(--secondary)' : 'var(--primary)', fontSize: '1.85rem', lineHeight: 1 }}>{priceDisplay}</span>
+                  <span style={{ fontWeight: 800, color: (volumeOption === 'kit' || volumeOption === 'tier_10') ? 'var(--color-secondary, #0096cc)' : 'var(--color-primary, #003666)', fontSize: '1.85rem', lineHeight: 1 }}>{priceDisplay}</span>
                 ) : (
-                  <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted)', alignSelf: 'center' }}>Select strength to see price</span>
+                  <span style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted, #94a3b8)', alignSelf: 'center' }}>Select strength to see price</span>
                 )}
               </div>
               <p style={{
                 fontSize: '0.7rem',
-                color: 'var(--text-muted)',
+                color: 'var(--text-muted, #64748b)',
                 margin: '-0.75rem 0 0.5rem 0',
                 lineHeight: 1.4,
                 fontWeight: 500,
-                borderBottom: '1px solid var(--border)',
+                borderBottom: '1px solid var(--border, #e2e8f0)',
                 paddingBottom: '0.75rem'
               }}>
                 Final logistics and tax calculations are applied at checkout.
@@ -1432,9 +1438,9 @@ export default function PeptideDetail({
                 if (showKitToggle) {
                   return (
                     <div style={{ display: 'flex', gap: '0.5rem', opacity: (priceDisplay && priceDisplay !== 'unavailable') ? 1 : 0.5, pointerEvents: (priceDisplay && priceDisplay !== 'unavailable') ? 'auto' : 'none' }}>
-                      <div style={{ flex: 1, display: 'flex', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden', height: '42px' }}>
-                        <button onClick={() => setVolumeOption('unit')} style={{ flex: 1, border: 'none', backgroundColor: volumeOption === 'unit' ? 'var(--primary)' : 'var(--color-bg-app)', color: volumeOption === 'unit' ? 'white' : 'var(--text-main)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Unit (×1)</button>
-                        <button onClick={() => setVolumeOption('kit')} style={{ flex: 1, border: 'none', backgroundColor: (volumeOption === 'kit' || volumeOption === 'tier_10') ? 'var(--secondary)' : 'var(--color-bg-app)', color: (volumeOption === 'kit' || volumeOption === 'tier_10') ? 'white' : 'var(--text-main)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>Tier ×10</button>
+                      <div style={{ flex: 1, display: 'flex', borderRadius: '8px', border: '1px solid var(--border, #e2e8f0)', overflow: 'hidden', height: '42px' }}>
+                        <button type="button" onClick={() => setVolumeOption('unit')} style={{ flex: 1, border: 'none', backgroundColor: volumeOption === 'unit' ? 'var(--color-primary, #003666)' : 'var(--color-bg-app, #f8fafc)', color: volumeOption === 'unit' ? '#ffffff' : 'var(--color-text-main, #0f172a)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>Unit (×1)</button>
+                        <button type="button" onClick={() => setVolumeOption('kit')} style={{ flex: 1, border: 'none', backgroundColor: (volumeOption === 'kit' || volumeOption === 'tier_10') ? 'var(--color-secondary, #0096cc)' : 'var(--color-bg-app, #f8fafc)', color: (volumeOption === 'kit' || volumeOption === 'tier_10') ? '#ffffff' : 'var(--color-text-main, #0f172a)', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s ease' }}>Tier ×10</button>
                       </div>
 
                       {(hasTier50 || hasTier100) && (
@@ -1526,19 +1532,29 @@ export default function PeptideDetail({
                   if (!targetVariant) return;
                   
                   let effectiveUnitPrice = null;
+                  const isKit = volumeOption === 'kit' || volumeOption === 'tier_10';
+                  const isTier50 = volumeOption === 'tier_50';
+                  const isTier100 = volumeOption === 'tier_100';
+
                   if (targetVariant) {
                     const rawPrice = targetVariant.unit_price ?? targetVariant.price ?? targetVariant.retailPrice ?? targetVariant.supplierCost ?? targetVariant.supplierUnitCostUSD ?? targetVariant.perVialPriceUSD ?? targetVariant.perUnit;
                     
                     if (rawPrice !== undefined && rawPrice !== null && rawPrice > 0) {
-                      if (volumeOption === 'kit') {
+                      if (isKit) {
                         const kitPrice = targetVariant.price_per_kit_10 ?? targetVariant.kitCost ?? targetVariant.supplierKitCostUSD ?? targetVariant.perKitPriceUSD ?? targetVariant.kitPriceUSD ?? targetVariant.cost_tiers?.cost_10 ?? (rawPrice * 10);
                         effectiveUnitPrice = kitPrice / 10;
+                      } else if (isTier50) {
+                        const t50Price = targetVariant.cost_tiers?.cost_50 ?? targetVariant.cost_50 ?? (rawPrice * 50);
+                        effectiveUnitPrice = t50Price / 50;
+                      } else if (isTier100) {
+                        const t100Price = targetVariant.cost_tiers?.cost_100 ?? targetVariant.cost_100 ?? (rawPrice * 100);
+                        effectiveUnitPrice = t100Price / 100;
                       } else {
                         effectiveUnitPrice = rawPrice;
                       }
                     } else if (targetVariant?.pricing) {
                       const resolved = resolveVariantPrice(targetVariant, { tier, countryCode: region });
-                      if (volumeOption === 'kit') {
+                      if (isKit) {
                         effectiveUnitPrice = resolved.kit != null ? (resolved.kit / 10) : resolved.perUnit;
                       } else {
                         effectiveUnitPrice = resolved.perUnit;
@@ -1555,7 +1571,8 @@ export default function PeptideDetail({
                     protocol_id: null
                   });
 
-                  onAddToCart(target, volumeOption === 'kit' ? 10 : 1);
+                  const addQty = isKit ? 10 : (isTier50 ? 50 : (isTier100 ? 100 : 1));
+                  onAddToCart(target, addQty);
                   setAddedRecently(true);
                   setTimeout(() => setAddedRecently(false), 1600);
                   window.dispatchEvent(new CustomEvent('open-cart'));
@@ -1563,8 +1580,8 @@ export default function PeptideDetail({
                 style={{ 
                   width: '100%', 
                   gap: '0.75rem', 
-                  backgroundColor: addedRecently ? '#16a34a' : ((priceDisplay && priceDisplay !== 'unavailable') ? (volumeOption === 'kit' ? 'var(--secondary)' : 'var(--primary)') : 'var(--border)'), 
-                  color: (priceDisplay && priceDisplay !== 'unavailable') ? 'white' : 'var(--text-muted)', 
+                  backgroundColor: addedRecently ? '#16a34a' : ((priceDisplay && priceDisplay !== 'unavailable') ? ((volumeOption === 'kit' || volumeOption === 'tier_10') ? 'var(--color-secondary, #0096cc)' : 'var(--color-primary, #003666)') : 'var(--color-border, #e2e8f0)'), 
+                  color: (priceDisplay && priceDisplay !== 'unavailable') ? '#ffffff' : 'var(--text-muted, #94a3b8)', 
                   padding: '1rem', 
                   fontSize: '1rem', 
                   fontWeight: 800, 
@@ -2352,8 +2369,11 @@ export default function PeptideDetail({
         <div style={{ padding: '2.5rem 0', borderTop: '1px solid var(--border)', backgroundColor: 'var(--background)' }}>
           <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
             <RelatedProductsCarousel
+              productId={activeProduct.objectID || activeProduct.id || ''}
               productObjectID={activeProduct.objectID || activeProduct.id || ''}
               productName={activeProduct.name || activeProduct.canonicalName || ''}
+              category={activeProduct.category || activeProduct.categoryId || ''}
+              goals={activeProduct.goals || []}
               maxItems={6}
             />
           </div>
@@ -2444,19 +2464,29 @@ export default function PeptideDetail({
               if (!targetVariant) return;
               
               let effectiveUnitPrice = null;
+              const isKit = volumeOption === 'kit' || volumeOption === 'tier_10';
+              const isTier50 = volumeOption === 'tier_50';
+              const isTier100 = volumeOption === 'tier_100';
+
               if (targetVariant) {
                 const rawPrice = targetVariant.unit_price ?? targetVariant.price ?? targetVariant.retailPrice ?? targetVariant.supplierCost ?? targetVariant.supplierUnitCostUSD ?? targetVariant.perVialPriceUSD ?? targetVariant.perUnit;
                 
                 if (rawPrice !== undefined && rawPrice !== null && rawPrice > 0) {
-                  if (volumeOption === 'kit') {
+                  if (isKit) {
                     const kitPrice = targetVariant.price_per_kit_10 ?? targetVariant.kitCost ?? targetVariant.supplierKitCostUSD ?? targetVariant.perKitPriceUSD ?? targetVariant.kitPriceUSD ?? targetVariant.cost_tiers?.cost_10 ?? (rawPrice * 10);
                     effectiveUnitPrice = kitPrice / 10;
+                  } else if (isTier50) {
+                    const t50Price = targetVariant.cost_tiers?.cost_50 ?? targetVariant.cost_50 ?? (rawPrice * 50);
+                    effectiveUnitPrice = t50Price / 50;
+                  } else if (isTier100) {
+                    const t100Price = targetVariant.cost_tiers?.cost_100 ?? targetVariant.cost_100 ?? (rawPrice * 100);
+                    effectiveUnitPrice = t100Price / 100;
                   } else {
                     effectiveUnitPrice = rawPrice;
                   }
                 } else if (targetVariant?.pricing) {
                   const resolved = resolveVariantPrice(targetVariant, { tier, countryCode: region });
-                  if (volumeOption === 'kit') {
+                  if (isKit) {
                     effectiveUnitPrice = resolved.kit != null ? (resolved.kit / 10) : resolved.perUnit;
                   } else {
                     effectiveUnitPrice = resolved.perUnit;
@@ -2473,15 +2503,16 @@ export default function PeptideDetail({
                 protocol_id: null
               });
 
-              onAddToCart(target, volumeOption === 'kit' ? 10 : 1);
+              const addQty = isKit ? 10 : (isTier50 ? 50 : (isTier100 ? 100 : 1));
+              onAddToCart(target, addQty);
               setAddedRecently(true);
               setTimeout(() => setAddedRecently(false), 1600);
               window.dispatchEvent(new CustomEvent('open-cart'));
             }}
             disabled={!priceDisplay || priceDisplay === 'unavailable'}
             style={{
-              backgroundColor: addedRecently ? '#16a34a' : (volumeOption === 'kit' ? 'var(--secondary)' : '#2563eb'),
-              color: 'white',
+              backgroundColor: addedRecently ? '#16a34a' : ((volumeOption === 'kit' || volumeOption === 'tier_10') ? 'var(--color-secondary, #0096cc)' : 'var(--color-primary, #003666)'),
+              color: '#ffffff',
               border: 'none',
               borderRadius: '10px',
               padding: '0.65rem 1.1rem',
