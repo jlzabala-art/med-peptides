@@ -370,7 +370,7 @@ function DesktopCatalogActions(props) {
 ───────────────────────────────────────────────────────────────── */
 function MobileCatalogActions(props) {
   return (
-    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
       <button
         type="button"
         onClick={props.onNewProduct}
@@ -381,14 +381,15 @@ function MobileCatalogActions(props) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.35rem',
-          padding: '0.45rem 0.5rem',
-          minHeight: '42px',
+          padding: '0.5rem 0.6rem',
+          minHeight: '44px',
           whiteSpace: 'nowrap',
-          fontSize: '0.82rem',
+          fontSize: '0.84rem',
           fontWeight: 700,
+          borderRadius: '10px',
         }}
       >
-        <Plus size={15} />
+        <Plus size={16} />
         <span>New Product</span>
       </button>
       <button
@@ -397,15 +398,21 @@ function MobileCatalogActions(props) {
         className="gcp-btn-secondary"
         title="Import Price List"
         style={{ 
-          flex: '0 0 42px',
-          padding: 0, 
-          minHeight: '42px', 
+          flex: 1,
+          padding: '0.5rem 0.4rem', 
+          minHeight: '44px', 
           display: 'inline-flex', 
           alignItems: 'center', 
-          justifyContent: 'center' 
+          justifyContent: 'center',
+          gap: '0.3rem',
+          fontSize: '0.84rem',
+          fontWeight: 700,
+          borderRadius: '10px',
+          whiteSpace: 'nowrap'
         }}
       >
-        <FileText size={16} />
+        <FileText size={15} />
+        <span>Import</span>
       </button>
       <button
         type="button"
@@ -417,15 +424,16 @@ function MobileCatalogActions(props) {
           display: 'inline-flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          gap: '0.35rem',
-          padding: '0.45rem 0.5rem', 
-          minHeight: '42px', 
+          gap: '0.3rem',
+          padding: '0.5rem 0.4rem', 
+          minHeight: '44px', 
           whiteSpace: 'nowrap',
-          fontSize: '0.82rem',
+          fontSize: '0.84rem',
           fontWeight: 700,
+          borderRadius: '10px'
         }}
       >
-        <Download size={14} />
+        <Download size={15} />
         <span>Export</span>
       </button>
     </div>

@@ -193,17 +193,21 @@ export default function PageHeader({
           width: 100%;
           display: flex;
           align-items: center;
-          justify-content: flex-end;
+          justify-content: stretch;
           gap: 0.5rem;
           margin-top: 0.75rem;
           box-sizing: border-box;
+        }
+
+        .page-header-actions-row > * {
+          width: 100%;
         }
 
         .page-header-quick-btn-label {
           display: inline;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .page-header {
             padding: 0.45rem 0;
             margin-bottom: 0.5rem;
@@ -235,8 +239,13 @@ export default function PageHeader({
           }
           .page-header-actions-row {
             margin-top: 0.45rem;
-            width: 100%;
-            justify-content: stretch;
+            width: 100% !important;
+            justify-content: stretch !important;
+            align-items: stretch !important;
+          }
+          .page-header-actions-row > * {
+            width: 100% !important;
+            flex: 1 1 100% !important;
           }
         }
       `}</style>
