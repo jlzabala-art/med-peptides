@@ -1029,6 +1029,12 @@ export default function PeptideDetail({
           color: var(--primary) !important;
           background: rgba(0,54,102,0.04) !important;
         }
+
+        @media (max-width: 768px) {
+          .pd-inline-buy-btn {
+            display: none !important;
+          }
+        }
       `}</style>
 
         <div className="pd-grid">
@@ -1526,7 +1532,7 @@ export default function PeptideDetail({
               </button>
 
               <button
-                className="btn"
+                className="btn pd-inline-buy-btn"
                 disabled={!priceDisplay || priceDisplay === 'unavailable'}
                 onClick={() => {
                   const targetVariant = selectedVariant ?? productVariants[0] ?? activeProduct ?? null;
