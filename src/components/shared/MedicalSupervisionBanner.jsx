@@ -8,97 +8,154 @@ export default function MedicalSupervisionBanner({ itemName, itemType = 'protoco
 
   return (
     <>
-      <div 
-        style={{
-          background: 'linear-gradient(135deg, rgba(0, 54, 102, 0.04) 0%, rgba(2, 132, 199, 0.07) 100%)',
-          border: '1px solid rgba(2, 132, 199, 0.2)',
-          borderRadius: '16px',
-          padding: '1.25rem 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          margin: '1.5rem 0',
-          ...style
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 300px' }}>
-          <div style={{
-            width: 44, height: 44,
-            borderRadius: '12px',
-            background: 'rgba(2, 132, 199, 0.12)',
-            color: '#0284c7',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0
-          }}>
+      <div className="msb-banner" style={style}>
+        <div className="msb-info">
+          <div className="msb-icon-box">
             <Stethoscope size={22} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="msb-tag-row">
+              <span className="msb-tag-label">
                 Clinical Network
               </span>
             </div>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>
+            <h4 className="msb-heading">
               Looking for Clinical Guidance or Prescription?
             </h4>
-            <p style={{ margin: '0.15rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            <p className="msb-subtext">
               Connect with an affiliated physician to evaluate this {itemType} for your specific profile.
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="msb-actions-row">
           <button
+            type="button"
+            className="msb-btn msb-btn-whatsapp"
             onClick={() => {
               const text = `Hello Atlas Clinical Network, I am looking for clinical guidance regarding ${itemName || 'this product'}.`;
               window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
-            }}
-            style={{
-              padding: '0.65rem 1.1rem',
-              minHeight: '44px',
-              borderRadius: '999px',
-              background: '#25d366',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '0.84rem',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 2px 8px rgba(37, 211, 102, 0.25)',
-              transition: 'all 0.2s'
             }}
           >
             💬 Direct Medical WhatsApp
           </button>
 
           <button
+            type="button"
+            className="msb-btn msb-btn-primary"
             onClick={() => setModalOpen(true)}
-            style={{
-              padding: '0.65rem 1.25rem',
-              minHeight: '44px',
-              borderRadius: '999px',
-              background: 'var(--primary, #003666)',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '0.84rem',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 2px 8px rgba(0, 54, 102, 0.15)',
-              transition: 'all 0.2s'
-            }}
           >
             Request Doctor Review <ArrowRight size={14} />
           </button>
         </div>
+
+        <style jsx>{`
+          .msb-banner {
+            background: linear-gradient(135deg, rgba(0, 54, 102, 0.04) 0%, rgba(2, 132, 199, 0.07) 100%);
+            border: 1px solid rgba(2, 132, 199, 0.2);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+          }
+          .msb-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1 1 280px;
+          }
+          .msb-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(2, 132, 199, 0.12);
+            color: #0284c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .msb-tag-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.2rem;
+          }
+          .msb-tag-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #0284c7;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          .msb-heading {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+          }
+          .msb-subtext {
+            margin: 0.15rem 0 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+          }
+          .msb-actions-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+          }
+          .msb-btn {
+            padding: 0.65rem 1.1rem;
+            min-height: 44px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.84rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+          }
+          .msb-btn:active {
+            transform: scale(0.98);
+          }
+          .msb-btn-whatsapp {
+            background: #25d366;
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25);
+          }
+          .msb-btn-primary {
+            background: var(--primary, #003666);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 54, 102, 0.15);
+          }
+
+          @media (max-width: 768px) {
+            .msb-banner {
+              padding: 1rem;
+              flex-direction: column;
+              align-items: stretch;
+            }
+            .msb-info {
+              flex: 1 1 100%;
+            }
+            .msb-actions-row {
+              flex-direction: column;
+              width: 100%;
+            }
+            .msb-btn {
+              width: 100%;
+            }
+          }
+        `}</style>
       </div>
 
       <MedicalSupervisionModal 

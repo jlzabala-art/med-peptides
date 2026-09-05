@@ -15,6 +15,7 @@ import ProceduralPeptideAnalysis from '@/components/product/ProceduralPeptideAna
 import ReconstitutionCalculator from '@/components/product/ReconstitutionCalculator';
 import CoaModal from '@/components/product/CoaModal';
 import WidgetErrorBoundary from '@/components/shared/WidgetErrorBoundary';
+import { openProductAI } from '@/utils/openModuleAI';
 
 
 
@@ -1482,20 +1483,25 @@ export default function PeptideDetail({
               {/* Unified Single AI Assistant Button */}
               <button
                 onClick={() => {
-                  try {
-                    localStorage.removeItem('clinical_ai_messages_v2');
-                    sessionStorage.removeItem('clinical_ai_messages');
-                  } catch (e) {
-                    /* ignore */
-                  }
-                  window.dispatchEvent(new CustomEvent('open-clinical-ai', {
-                    detail: {
-                      action: 'ask_about_entity',
-                      entityName: activeProduct?.name || 'this product',
-                      section: 'ProductPage',
-                      autoSend: false
-                    }
-                  }));
+                  triggerHaptic('light');
+                  const targetVar = selectedVariant || productVariants[0] || {};
+                  const formatName = selectedFormatId || targetVar.format || 'Vial';
+                  const supplierName = selectedSupplierId || targetVar.supplier || 'Supplier';
+                  const dosageStr = targetVar.dosage || targetVar.strength || 'Standard';
+
+                  const richPrompt = `Provide a comprehensive clinical overview and guidance for ${activeProduct.name} (${dosageStr} ${formatName} by ${supplierName}). Include mechanism of action, recommended administration protocols, HPLC purity standards, cold-chain storage requirements, and clinical contraindications.`;
+
+                  openProductAI({
+                    ...activeProduct,
+                    selectedVariant: targetVar,
+                    selectedFormat: selectedFormatId,
+                    selectedSupplier: selectedSupplierId
+                  }, {
+                    initialPrompt: richPrompt,
+                    autoSend: true,
+                    clearHistory: true,
+                    displayText: `Clinical AI: ${activeProduct.name}`
+                  });
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.1)';
@@ -1643,29 +1649,6 @@ export default function PeptideDetail({
 
                 {/* Cross-Integration: Medical Supervision On-Ramp */}
                 <MedicalSupervisionBanner itemName={activeProduct?.name} itemType="peptide" style={{ margin: '0.5rem 0 0.75rem' }} />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const prompt = `Provide detailed assistance for product: ${activeProduct.name}. Include dosage recommendations, protocol suggestions, and any relevant clinical information.`;
-
-                    openCopilot({ contextData: { productId: activeProduct.id }, initialPrompt: prompt });
-                  }}
-                  aria-label="Ask Atlas Copilot for product assistance"
-                  style={{
-                    width: '100%',
-                    gap: '0.75rem',
-                    backgroundColor: 'var(--secondary)',
-                    color: 'white',
-                    padding: '1rem',
-                    fontSize: '1rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    marginTop: '0.5rem'
-                  }}
-                >
-                  <Bot size={18} /> Ask Atlas Copilot
-                </button>
 
             </div>
             </div> {/* Close Right Column */}

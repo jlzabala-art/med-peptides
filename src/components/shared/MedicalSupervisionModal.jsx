@@ -51,53 +51,17 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
 
   return (
     <div 
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(2, 14, 28, 0.65)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-        animation: 'fadeIn 0.2s ease-out'
-      }}
+      className="msm-backdrop"
       onClick={onClose}
     >
       <div 
-        style={{
-          background: 'var(--surface, #ffffff)',
-          border: '1px solid var(--border, #e2e8f0)',
-          borderRadius: '24px',
-          maxWidth: '520px',
-          width: '100%',
-          padding: '2rem',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.18)',
-          position: 'relative',
-          maxHeight: '90vh',
-          overflowY: 'auto'
-        }}
+        className="msm-sheet"
         onClick={e => e.stopPropagation()}
       >
+        <div className="msm-drag-handle" />
         <button
           onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '1.25rem',
-            right: '1.25rem',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--text-muted, #64748b)',
-            padding: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%',
-            transition: 'all 0.2s'
-          }}
+          className="msm-close-btn"
           aria-label="Close modal"
         >
           <X size={20} />
@@ -123,17 +87,7 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
             </p>
             <button
               onClick={onClose}
-              style={{
-                padding: '0.75rem 2rem',
-                borderRadius: '999px',
-                background: 'var(--primary, #003666)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(0, 54, 102, 0.15)'
-              }}
+              className="msm-btn-done"
             >
               Done
             </button>
@@ -174,21 +128,11 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   placeholder="e.g. Carlos Mendez / Jane Doe"
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border, #cbd5e1)',
-                    background: 'var(--background)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
+                  className="msm-input"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="msm-grid-2col">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
                     Email *
@@ -199,17 +143,7 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="name@domain.com"
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border, #cbd5e1)',
-                      background: 'var(--background)',
-                      color: 'var(--text-main)',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
+                    className="msm-input"
                   />
                 </div>
                 <div>
@@ -221,17 +155,7 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     placeholder="+1 (555) 000-0000"
-                    style={{
-                      width: '100%',
-                      padding: '0.65rem 0.85rem',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border, #cbd5e1)',
-                      background: 'var(--background)',
-                      color: 'var(--text-main)',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
+                    className="msm-input"
                   />
                 </div>
               </div>
@@ -245,17 +169,7 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
                   value={cityCountry}
                   onChange={e => setCityCountry(e.target.value)}
                   placeholder="e.g. Madrid, Spain / Miami, USA"
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border, #cbd5e1)',
-                    background: 'var(--background)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
+                  className="msm-input"
                 />
               </div>
 
@@ -268,23 +182,12 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   placeholder="Briefly describe your objectives or questions for the doctor..."
-                  style={{
-                    width: '100%',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border, #cbd5e1)',
-                    background: 'var(--background)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    resize: 'vertical'
-                  }}
+                  className="msm-input msm-textarea"
                 />
               </div>
 
               {errorMsg && (
-                <div style={{ color: 'var(--color-danger, #ef4444)', fontSize: '0.8rem' }}>
+                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 600 }}>
                   {errorMsg}
                 </div>
               )}
@@ -292,23 +195,7 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                style={{
-                  marginTop: '0.5rem',
-                  padding: '0.85rem 1.5rem',
-                  borderRadius: '999px',
-                  background: 'var(--primary, #003666)',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: '0.95rem',
-                  border: 'none',
-                  cursor: status === 'submitting' ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  boxShadow: '0 4px 14px rgba(0, 54, 102, 0.15)',
-                  transition: 'all 0.2s'
-                }}
+                className="msm-btn-submit"
               >
                 {status === 'submitting' ? 'Submitting...' : 'Connect with Doctor →'}
               </button>
@@ -321,6 +208,134 @@ export default function MedicalSupervisionModal({ isOpen, onClose, itemName, ite
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .msm-backdrop {
+          position: fixed;
+          inset: 0;
+          background-color: rgba(2, 14, 28, 0.65);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          animation: fadeIn 0.2s ease-out;
+        }
+        .msm-sheet {
+          background: var(--surface, #ffffff);
+          border: 1px solid var(--border, #e2e8f0);
+          border-radius: 24px;
+          max-width: 520px;
+          width: 100%;
+          padding: 2rem;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+          position: relative;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-sizing: border-box;
+        }
+        .msm-drag-handle {
+          display: none;
+        }
+        .msm-close-btn {
+          position: absolute;
+          top: 1.25rem;
+          right: 1.25rem;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--text-muted, #64748b);
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s;
+        }
+        .msm-close-btn:hover {
+          background: rgba(0, 0, 0, 0.05);
+        }
+        .msm-input {
+          width: 100%;
+          padding: 0.75rem 0.85rem;
+          border-radius: 10px;
+          border: 1px solid var(--border, #cbd5e1);
+          background: var(--background, #f8fafc);
+          color: var(--text-main, #0f172a);
+          font-size: 0.92rem;
+          min-height: 44px;
+          outline: none;
+          box-sizing: border-box;
+        }
+        .msm-textarea {
+          min-height: 80px;
+          resize: vertical;
+          font-family: inherit;
+        }
+        .msm-grid-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+        }
+        .msm-btn-submit {
+          width: 100%;
+          min-height: 48px;
+          border-radius: 999px;
+          background: var(--primary, #003666);
+          color: white;
+          font-weight: 700;
+          font-size: 0.95rem;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          box-shadow: 0 4px 14px rgba(0, 54, 102, 0.15);
+          transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .msm-btn-submit:active {
+          transform: scale(0.98);
+        }
+        .msm-btn-done {
+          padding: 0.75rem 2rem;
+          border-radius: 999px;
+          background: var(--primary, #003666);
+          color: white;
+          font-weight: 700;
+          font-size: 0.9rem;
+          border: none;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(0, 54, 102, 0.15);
+        }
+
+        @media (max-width: 768px) {
+          .msm-backdrop {
+            align-items: flex-end;
+            padding: 0;
+          }
+          .msm-sheet {
+            border-radius: 24px 24px 0 0;
+            max-width: 100%;
+            max-height: 88vh;
+            padding: 1.5rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom));
+            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          .msm-drag-handle {
+            display: block;
+            width: 36px;
+            height: 4px;
+            border-radius: 2px;
+            background: #cbd5e1;
+            margin: 0 auto 1.25rem auto;
+          }
+          .msm-grid-2col {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
     </div>
   );
 }
