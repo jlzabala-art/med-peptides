@@ -697,13 +697,13 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
                 align-items: center;
                 gap: 0.4rem;
               }
-              @media (max-width: 768px) {
+              @media (max-width: 1024px) {
                 .catalog-header-actions-wrap {
                   flex-direction: column !important;
                   align-items: stretch !important;
-                  gap: 0.4rem;
-                  width: 100%;
-                  max-width: 100%;
+                  gap: 0.5rem;
+                  width: 100% !important;
+                  max-width: 100% !important;
                   box-sizing: border-box;
                   overflow-x: hidden;
                   margin-top: 0.2rem;
@@ -712,26 +712,32 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
                   width: 100% !important;
                   display: flex !important;
                   box-sizing: border-box;
-                  padding: 2px !important;
+                  padding: 3px !important;
                 }
                 .catalog-view-switcher-btn {
-                  flex: 1 !important;
+                  flex: 1 1 50% !important;
                   display: inline-flex !important;
                   align-items: center !important;
                   justify-content: center !important;
-                  padding: 6px 8px !important;
-                  font-size: 0.75rem !important;
-                  min-height: 34px !important;
+                  padding: 8px 10px !important;
+                  font-size: 0.82rem !important;
+                  font-weight: 700 !important;
+                  min-height: 38px !important;
                   text-align: center;
                 }
                 .catalog-toolbar-actions {
                   width: 100% !important;
                   display: flex !important;
                   align-items: center !important;
-                  justify-content: flex-start !important;
-                  flex-wrap: wrap !important;
-                  gap: 0.35rem;
+                  justify-content: stretch !important;
                   box-sizing: border-box;
+                }
+                .catalog-header-actions-desktop {
+                  display: none !important;
+                }
+                .catalog-header-actions-mobile {
+                  width: 100% !important;
+                  display: flex !important;
                 }
               }
             `}</style>
