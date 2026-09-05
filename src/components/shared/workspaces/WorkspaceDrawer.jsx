@@ -61,12 +61,12 @@ export default function WorkspaceDrawer() {
   const [mounted, setMounted] = useState(false);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
 
-  // Accordion Section Expansion States
+  // Accordion Section Expansion States: Products ALWAYS expanded (true), rest collapsed (false)
   const [sectionExpanded, setSectionExpanded] = useState({
     products: true,
-    recipient: true,
+    recipient: false,
     shipping: false,
-    financial: true
+    financial: false
   });
 
   // Accordion Staged Product Item Details Expansion States ({ [itemId]: boolean })
@@ -207,14 +207,39 @@ export default function WorkspaceDrawer() {
 
   if (!isDrawerOpen || !activeWs || !mounted) return null;
 
-  // ─── Price & Financial Calculations (Multi-Fallback Resolver) ────────────────
+  // ─── Price & Financial Calculations (Deep Multi-Fallback Variant Price Resolver) ────────────────
   const getItemUnitPrice = (it) => {
+    if (!it) return 0;
+    // 1. Direct scalar price fields
     if (typeof it.unitPrice === 'number' && it.unitPrice > 0) return it.unitPrice;
     if (typeof it.price === 'number' && it.price > 0) return it.price;
     if (typeof it.unitRate === 'number' && it.unitRate > 0) return it.unitRate;
     if (typeof it.unit_price === 'number' && it.unit_price > 0) return it.unit_price;
     if (typeof it.msrp === 'number' && it.msrp > 0) return it.msrp;
-    return Number(it.unitPrice || it.price || it.unitRate || 0);
+    if (typeof it.tier1Price === 'number' && it.tier1Price > 0) return it.tier1Price;
+    if (typeof it.tier1_price === 'number' && it.tier1_price > 0) return it.tier1_price;
+    if (typeof it.retailPrice === 'number' && it.retailPrice > 0) return it.retailPrice;
+    if (typeof it.wholesalerPrice === 'number' && it.wholesalerPrice > 0) return it.wholesalerPrice;
+    if (typeof it.resolvedPrice?.perUnit === 'number' && it.resolvedPrice.perUnit > 0) return it.resolvedPrice.perUnit;
+
+    // 2. Nested variant properties
+    const v = it.variant || it.selectedVariant || it.variants?.[0] || {};
+    if (typeof v.unitPrice === 'number' && v.unitPrice > 0) return v.unitPrice;
+    if (typeof v.price === 'number' && v.price > 0) return v.price;
+    if (typeof v.unitRate === 'number' && v.unitRate > 0) return v.unitRate;
+    if (typeof v.unit_price === 'number' && v.unit_price > 0) return v.unit_price;
+    if (typeof v.tier1Price === 'number' && v.tier1Price > 0) return v.tier1Price;
+    if (typeof v.tier1_price === 'number' && v.tier1_price > 0) return v.tier1_price;
+    if (typeof v.retailPrice === 'number' && v.retailPrice > 0) return v.retailPrice;
+    if (typeof v.retail_price === 'number' && v.retail_price > 0) return v.retail_price;
+    if (typeof v.wholesalerPrice === 'number' && v.wholesalerPrice > 0) return v.wholesalerPrice;
+    if (typeof v.vialPrice === 'number' && v.vialPrice > 0) return v.vialPrice;
+    if (typeof v.cartridgePrice === 'number' && v.cartridgePrice > 0) return v.cartridgePrice;
+    if (typeof v.resolvedPrice?.perUnit === 'number' && v.resolvedPrice.perUnit > 0) return v.resolvedPrice.perUnit;
+
+    // 3. Fallback string-to-number parse
+    const rawVal = Number(it.unitPrice || it.price || it.unitRate || it.unit_price || it.msrp || v.price || v.unitPrice || v.tier1Price || 0);
+    return rawVal > 0 ? rawVal : 0;
   };
 
   const totalItemsCount = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
@@ -346,16 +371,26 @@ export default function WorkspaceDrawer() {
 
   const handleLoadProtocol = (proto) => {
     const peptides = proto.peptides || [];
-    const itemsToAdd = (peptides.length > 0 ? peptides : [{ id: proto.id, canonicalName: proto.name }]).map(pep => ({
-      id: pep.id || `pep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-      productId: pep.productId || pep.id,
-      canonicalName: pep.name || pep.canonicalName || pep.title || 'Protocol Peptide',
-      dosage: pep.dosage || pep.dose || '1 vial',
-      quantity: 1,
-      unitPrice: Number(pep.price || pep.unitPrice || 0),
-      supplierCost: Number(pep.costPrice || pep.supplierCost || 0),
-      format: pep.format || 'Vial',
-    }));
+    const itemsToAdd = (peptides.length > 0 ? peptides : [{ id: proto.id, canonicalName: proto.name }]).map(pep => {
+      const v0 = pep.variants?.[0] || pep.variant || {};
+      const resolvedUnitPrice = Number(
+        pep.unitPrice || pep.price || pep.unitRate || pep.unit_price ||
+        v0.resolvedPrice?.perUnit || v0.unitPrice || v0.price || v0.tier1Price || v0.tier1_price || v0.retailPrice ||
+        pep.tier1Price || pep.tier1_price || pep.retailPrice || 0
+      );
+      const supplierCost = Number(pep.costPrice || pep.supplierCost || v0.supplierCost || 0);
+
+      return {
+        id: pep.id || `pep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        productId: pep.productId || pep.id,
+        canonicalName: pep.name || pep.canonicalName || pep.title || 'Protocol Peptide',
+        dosage: pep.dosage || pep.dose || v0.dosage || 'Standard',
+        format: pep.format || v0.format || 'Vial',
+        quantity: 1,
+        unitPrice: resolvedUnitPrice,
+        supplierCost: supplierCost,
+      };
+    });
 
     addItems(itemsToAdd, activeWs.id);
     setActivePicker(null);
@@ -363,14 +398,22 @@ export default function WorkspaceDrawer() {
   };
 
   const handleAddProduct = (prod) => {
+    const v0 = prod.variants?.[0] || prod.variant || {};
+    const resolvedUnitPrice = Number(
+      prod.unitPrice || prod.price || prod.unitRate || prod.unit_price ||
+      v0.resolvedPrice?.perUnit || v0.unitPrice || v0.price || v0.tier1Price || v0.tier1_price || v0.retailPrice ||
+      prod.pricing?.retailPrice || prod.pricing?.tier1Price || prod.tier1_price || prod.tier1Price || prod.retailPrice || 0
+    );
+    const supplierCost = Number(prod.supplierCost || v0.supplierCost || prod.pricing?.supplierCost || 0);
+
     addItem({
-      id: prod.id,
+      id: prod.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       productId: prod.id,
-      canonicalName: prod.canonicalName || prod.name,
-      dosage: prod.dosage || (prod.variants?.[0]?.dosage) || 'Standard',
-      format: prod.format || (prod.variants?.[0]?.format) || 'Vial',
-      unitPrice: Number(prod.price || prod.unit_price || prod.variants?.[0]?.unit_price || 0),
-      supplierCost: Number(prod.variants?.[0]?.supplierCost || 0),
+      canonicalName: prod.canonicalName || prod.name || 'Catalog Item',
+      dosage: prod.dosage || v0.dosage || 'Standard',
+      format: prod.format || v0.format || 'Vial',
+      unitPrice: resolvedUnitPrice,
+      supplierCost: supplierCost,
       quantity: 1,
     }, activeWs.id);
     notifier.success(`Added "${prod.canonicalName || prod.name}" to workspace!`);
@@ -843,10 +886,14 @@ export default function WorkspaceDrawer() {
                                 <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                   {it.canonicalName}
                                 </div>
-                                <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', gap: '4px', marginTop: '2px' }}>
+                                <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px', flexWrap: 'wrap' }}>
                                   <span>{it.dosage || 'Standard'}</span>
                                   <span>•</span>
                                   <span>{it.format || 'Vial'}</span>
+                                  <span style={{ margin: '0 2px', color: '#cbd5e1' }}>|</span>
+                                  <span style={{ color: unitRate > 0 ? '#0284c7' : '#dc2626', fontWeight: 800 }}>
+                                    ${unitRate.toFixed(2)} / unit
+                                  </span>
                                 </div>
                               </div>
                             </div>
