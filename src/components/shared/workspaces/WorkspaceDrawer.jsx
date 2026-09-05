@@ -47,11 +47,17 @@ export default function WorkspaceDrawer() {
     removeItem,
     updateItemQuantity,
     updateItemPrice,
+    updateItemFormat,
+    updateItemDosage,
     applyDiscountPercentage,
     multiplyQuantities,
     addReconstitutionBacteriostaticWater,
     setWorkspaceIntent,
-    setTargetEntity
+    setTargetEntity,
+    savedKits,
+    saveWorkspaceAsKit,
+    loadKitIntoWorkspace,
+    deleteSavedKit
   } = useWorkspaceStore();
 
   const { openDrawer } = useDrawer();
@@ -85,9 +91,10 @@ export default function WorkspaceDrawer() {
 
   const [protocols, setProtocols] = useState([]);
   const [availableProducts, setAvailableProducts] = useState([]);
-  const [activePicker, setActivePicker] = useState(null); // 'products' | 'protocols' | null
+  const [activePicker, setActivePicker] = useState(null); // 'products' | 'protocols' | 'kits' | null
   const [pickerSearch, setPickerSearch] = useState('');
   const [searchingCatalog, setSearchingCatalog] = useState(false);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
 
   const wsList = Object.values(workspaces || {});
   const activeWs = workspaces[activeWorkspaceId] || wsList[0] || null;
@@ -674,6 +681,25 @@ export default function WorkspaceDrawer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
               <button
                 type="button"
+                onClick={() => {
+                  if (items.length === 0) {
+                    notifier.warning('Add products to the workspace before saving as a kit.');
+                    return;
+                  }
+                  const name = window.prompt('Enter a name for this reusable kit template:', `${activeWs.name} Kit`);
+                  if (name && name.trim()) {
+                    saveWorkspaceAsKit(name.trim(), activeWs.id);
+                    notifier.success(`Saved kit "${name.trim()}" successfully!`);
+                  }
+                }}
+                className="gcp-btn-secondary"
+                style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 700, color: '#0284c7', borderRadius: '6px', border: '1px solid #bae6fd', backgroundColor: '#f0f9ff' }}
+                title="Save current workspace items as a reusable kit"
+              >
+                + Save Kit
+              </button>
+              <button
+                type="button"
                 onClick={() => duplicateWorkspace(activeWs.id)}
                 className="gcp-btn-secondary"
                 style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
@@ -961,6 +987,39 @@ export default function WorkspaceDrawer() {
                                 </div>
                               </div>
 
+                              {/* Interactive Format & Presentation Switcher */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', backgroundColor: '#f8fafc', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>Quick Format Switcher:</span>
+                                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                  {['Vial', 'Single Cartridge', 'Double Cartridge', 'Sublingual', 'Oral Drops'].map(fmtOption => {
+                                    const isCurrent = (it.format || 'Vial').toLowerCase() === fmtOption.toLowerCase();
+                                    return (
+                                      <button
+                                        key={fmtOption}
+                                        type="button"
+                                        onClick={() => {
+                                          updateItemFormat(it.id, fmtOption, activeWs.id);
+                                          notifier.info(`Format set to "${fmtOption}"`);
+                                        }}
+                                        style={{
+                                          padding: '3px 8px',
+                                          borderRadius: '5px',
+                                          border: `1px solid ${isCurrent ? '#003666' : '#cbd5e1'}`,
+                                          backgroundColor: isCurrent ? '#003666' : '#ffffff',
+                                          color: isCurrent ? '#ffffff' : '#475569',
+                                          fontSize: '0.72rem',
+                                          fontWeight: isCurrent ? 800 : 600,
+                                          cursor: 'pointer',
+                                          transition: 'all 0.15s ease'
+                                        }}
+                                      >
+                                        {fmtOption}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
                               {/* Editable Pricing & Commercial Margin Row */}
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', padding: '8px 10px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -996,8 +1055,8 @@ export default function WorkspaceDrawer() {
                       );
                     })}
 
-                    {/* Quick Add Pickers Trigger */}
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
+                    {/* Quick Add Pickers Trigger (Protocols, Catalog, Saved Kits) */}
+                    <div style={{ display: 'flex', gap: '6px', marginTop: '2px', flexWrap: 'wrap' }}>
                       <button
                         type="button"
                         onClick={() => {
@@ -1006,17 +1065,18 @@ export default function WorkspaceDrawer() {
                         }}
                         style={{
                           flex: 1,
-                          padding: '7px 10px',
-                          backgroundColor: '#ffffff',
-                          color: '#1d4ed8',
+                          minWidth: '110px',
+                          padding: '7px 8px',
+                          backgroundColor: activePicker === 'protocols' ? '#003666' : '#ffffff',
+                          color: activePicker === 'protocols' ? '#ffffff' : '#1d4ed8',
                           border: '1px solid #bfdbfe',
                           borderRadius: '7px',
-                          fontSize: '0.76rem',
+                          fontSize: '0.74rem',
                           fontWeight: 700,
                           cursor: 'pointer',
                         }}
                       >
-                        + Add Protocol Item
+                        + Protocol Item
                       </button>
                       <button
                         type="button"
@@ -1026,17 +1086,39 @@ export default function WorkspaceDrawer() {
                         }}
                         style={{
                           flex: 1,
-                          padding: '7px 10px',
-                          backgroundColor: '#ffffff',
-                          color: '#15803d',
+                          minWidth: '110px',
+                          padding: '7px 8px',
+                          backgroundColor: activePicker === 'products' ? '#003666' : '#ffffff',
+                          color: activePicker === 'products' ? '#ffffff' : '#15803d',
                           border: '1px solid #bbf7d0',
                           borderRadius: '7px',
-                          fontSize: '0.76rem',
+                          fontSize: '0.74rem',
                           fontWeight: 700,
                           cursor: 'pointer',
                         }}
                       >
-                        + Add Catalog Item
+                        + Catalog Item
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActivePicker(activePicker === 'kits' ? null : 'kits');
+                          setPickerSearch('');
+                        }}
+                        style={{
+                          flex: 1,
+                          minWidth: '110px',
+                          padding: '7px 8px',
+                          backgroundColor: activePicker === 'kits' ? '#003666' : '#ffffff',
+                          color: activePicker === 'kits' ? '#ffffff' : '#0369a1',
+                          border: '1px solid #bae6fd',
+                          borderRadius: '7px',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        📦 Reusable Kits ({savedKits?.length || 0})
                       </button>
                     </div>
                   </div>
@@ -1112,6 +1194,61 @@ export default function WorkspaceDrawer() {
                         >
                           <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{prod.canonicalName}</span>
                           <span style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 800 }}>+ Add</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Reusable Kit / Template Picker Modal/Panel */}
+                {activePicker === 'kits' && (
+                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #0284c7', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>Select Reusable Kit Template</span>
+                      <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={15} /></button>
+                    </div>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {(savedKits || []).map(kit => (
+                        <div
+                          key={kit.id}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: '7px',
+                            border: '1px solid #e2e8f0',
+                            backgroundColor: '#f8fafc',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>{kit.name}</div>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{(kit.items || []).length} items • {kit.intent === 'buy' ? 'Supplier PO' : 'Quote/Rx'}</div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                loadKitIntoWorkspace(kit.id, activeWs.id);
+                                setActivePicker(null);
+                                notifier.success(`Loaded kit "${kit.name}"!`);
+                              }}
+                              style={{ padding: '4px 8px', backgroundColor: '#0284c7', color: 'white', border: 'none', borderRadius: '5px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer' }}
+                            >
+                              + Load Kit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                deleteSavedKit(kit.id);
+                                notifier.info(`Deleted kit "${kit.name}"`);
+                              }}
+                              style={{ padding: '4px 6px', backgroundColor: '#fff5f5', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '5px', fontSize: '0.7rem', cursor: 'pointer' }}
+                              title="Delete kit"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1681,6 +1818,157 @@ export default function WorkspaceDrawer() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
+                }}
+              >
+                <ShieldCheck size={16} /> Create Rx Prescription
+              </button>
+            </>
+          )}
+
+          {/* Live PDF Quick Preview Shortcut */}
+          <button
+            type="button"
+            onClick={() => setShowPdfPreview(true)}
+            disabled={items.length === 0}
+            style={{
+              width: '100%',
+              padding: '6px',
+              backgroundColor: '#f8fafc',
+              color: '#475569',
+              borderRadius: '7px',
+              border: '1px solid #cbd5e1',
+              fontSize: '0.74rem',
+              fontWeight: 700,
+              cursor: items.length > 0 ? 'pointer' : 'not-allowed',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <FileText size={13} /> 👁️ Quick Live PDF Summary Preview
+          </button>
+        </div>
+      </div>
+
+      {/* 📄 LIVE PDF QUICK PREVIEW MODAL */}
+      {showPdfPreview && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999999,
+            backgroundColor: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setShowPdfPreview(false)}
+        >
+          <div
+            style={{
+              width: 'min(640px, 95vw)',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #cbd5e1'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '1rem 1.25rem', backgroundColor: '#003666', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '12px 12px 0 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={18} />
+                <span style={{ fontWeight: 800, fontSize: '0.96rem' }}>Live PDF Preview — {activeWs.name}</span>
+              </div>
+              <button type="button" onClick={() => setShowPdfPreview(false)} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer' }}><X size={18} /></button>
+            </div>
+
+            {/* Modal Document Sheet */}
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', backgroundColor: '#ffffff' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #003666', paddingBottom: '0.8rem' }}>
+                <div>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#003666', margin: 0 }}>REGENPEPT BIOLOGICS</h2>
+                  <span style={{ fontSize: '0.76rem', color: '#64748b' }}>Clinical & Commercial Workspace Document</span>
+                </div>
+                <div style={{ textAlign: 'right', fontSize: '0.76rem', color: '#475569' }}>
+                  <div><b>Date:</b> {new Date().toLocaleDateString()}</div>
+                  <div><b>Target:</b> {activeWs.targetEntity?.name || 'General Clinic'}</div>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f1f5f9', color: '#0f172a', textAlign: 'left' }}>
+                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1' }}>Item / Compound</th>
+                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1' }}>Dose / Format</th>
+                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1', textAlign: 'center' }}>Qty</th>
+                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Rate</th>
+                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((it, idx) => {
+                    const rate = getItemUnitPrice(it);
+                    return (
+                      <tr key={it.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '8px', fontWeight: 700, color: '#0f172a' }}>{it.canonicalName}</td>
+                        <td style={{ padding: '8px', color: '#475569' }}>{it.dosage || 'Standard'} • {it.format || 'Vial'}</td>
+                        <td style={{ padding: '8px', textAlign: 'center', fontWeight: 700 }}>{it.quantity || 1}</td>
+                        <td style={{ padding: '8px', textAlign: 'right' }}>${rate.toFixed(2)}</td>
+                        <td style={{ padding: '8px', textAlign: 'right', fontWeight: 800, color: '#003666' }}>${((it.quantity || 1) * rate).toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Totals Summary */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', paddingTop: '0.5rem', borderTop: '2px solid #cbd5e1' }}>
+                <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Subtotal: <b>${subtotalSaleAmount.toFixed(2)}</b></div>
+                <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Shipping ({selectedShippingMethod}): <b>${shippingCost.toFixed(2)}</b></div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#003666', marginTop: '4px' }}>Grand Total: ${grandTotal.toFixed(2)}</div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '0.85rem 1.25rem', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '8px', borderRadius: '0 0 12px 12px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  window.print();
+                }}
+                style={{ padding: '8px 14px', backgroundColor: '#003666', color: '#ffffff', border: 'none', borderRadius: '7px', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer' }}
+              >
+                🖨️ Print / Export PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPdfPreview(false)}
+                style={{ padding: '8px 14px', backgroundColor: '#ffffff', color: '#475569', border: '1px solid #cbd5e1', borderRadius: '7px', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>,
+    document.body
+  );
+}tifyContent: 'center',
                   gap: '8px',
                   boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
                 }}

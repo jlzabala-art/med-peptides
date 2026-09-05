@@ -299,6 +299,42 @@ export const useWorkspaceStore = create(
         }));
       },
 
+      updateItemFormat: (itemId, format, targetWorkspaceId = null) => {
+        const { workspaces, activeWorkspaceId } = get();
+        const wsId = targetWorkspaceId || activeWorkspaceId;
+        const ws = workspaces[wsId];
+        if (!ws) return;
+
+        const nextItems = ws.items.map((it) =>
+          it.id === itemId ? { ...it, format } : it
+        );
+
+        set((s) => ({
+          workspaces: {
+            ...s.workspaces,
+            [wsId]: { ...ws, items: nextItems, updatedAt: Date.now() },
+          },
+        }));
+      },
+
+      updateItemDosage: (itemId, dosage, targetWorkspaceId = null) => {
+        const { workspaces, activeWorkspaceId } = get();
+        const wsId = targetWorkspaceId || activeWorkspaceId;
+        const ws = workspaces[wsId];
+        if (!ws) return;
+
+        const nextItems = ws.items.map((it) =>
+          it.id === itemId ? { ...it, dosage } : it
+        );
+
+        set((s) => ({
+          workspaces: {
+            ...s.workspaces,
+            [wsId]: { ...ws, items: nextItems, updatedAt: Date.now() },
+          },
+        }));
+      },
+
       // ─── Batch Modifiers & Financial Simulators ────────────────────────────
       applyDiscountPercentage: (percent, targetWorkspaceId = null) => {
         const { workspaces, activeWorkspaceId } = get();
@@ -447,6 +483,67 @@ export const useWorkspaceStore = create(
             [wsId]: { ...ws, notes, updatedAt: Date.now() },
           },
         }));
+      },
+
+      // ─── Reusable Staging Kits & Templates ──────────────────────────────────
+      savedKits: [
+        {
+          id: 'kit_glp1_starter',
+          name: 'GLP-1 Weight Loss Starter Kit',
+          intent: 'sell',
+          items: [
+            { id: 'kit_item_1', productId: 'semaglutide-5mg', canonicalName: 'Semaglutide 5mg Vial', dosage: '5mg', format: 'Vial', quantity: 2, unitPrice: 120.00, supplierCost: 35.00 },
+            { id: 'kit_item_2', productId: 'bac-water-30ml', canonicalName: 'Bacteriostatic Water 30ml', dosage: '30ml Vial', format: 'Vial', quantity: 1, unitPrice: 15.00, supplierCost: 4.50 }
+          ]
+        },
+        {
+          id: 'kit_longevity_trio',
+          name: 'Peptide Longevity & Repair Trio',
+          intent: 'sell',
+          items: [
+            { id: 'kit_item_3', productId: 'bpc-157-10mg', canonicalName: 'BPC-157 10mg Vial', dosage: '10mg', format: 'Vial', quantity: 2, unitPrice: 85.00, supplierCost: 22.00 },
+            { id: 'kit_item_4', productId: 'tb-500-10mg', canonicalName: 'TB-500 (Thymosin Beta-4) 10mg', dosage: '10mg', format: 'Vial', quantity: 2, unitPrice: 95.00, supplierCost: 28.00 },
+            { id: 'kit_item_5', productId: 'ghrp-2-5mg', canonicalName: 'GHRP-2 5mg Vial', dosage: '5mg', format: 'Vial', quantity: 1, unitPrice: 65.00, supplierCost: 18.00 }
+          ]
+        }
+      ],
+
+      saveWorkspaceAsKit: (kitName, targetWorkspaceId = null) => {
+        const { workspaces, activeWorkspaceId, savedKits } = get();
+        const wsId = targetWorkspaceId || activeWorkspaceId;
+        const ws = workspaces[wsId];
+        if (!ws || !ws.items.length) return null;
+
+        const kitId = `kit_${Date.now()}`;
+        const newKit = {
+          id: kitId,
+          name: kitName || `${ws.name} Kit`,
+          intent: ws.intent,
+          createdAt: Date.now(),
+          items: ws.items.map(it => ({ ...it })),
+        };
+
+        const updatedKits = [...(savedKits || []), newKit];
+        set({ savedKits: updatedKits });
+        return newKit;
+      },
+
+      loadKitIntoWorkspace: (kitId, targetWorkspaceId = null) => {
+        const { workspaces, activeWorkspaceId, savedKits, addItems } = get();
+        const wsId = targetWorkspaceId || activeWorkspaceId;
+        const kit = (savedKits || []).find(k => k.id === kitId);
+        if (!kit) return;
+
+        addItems(kit.items.map(it => ({
+          ...it,
+          id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`
+        })), wsId);
+      },
+
+      deleteSavedKit: (kitId) => {
+        const { savedKits } = get();
+        const updatedKits = (savedKits || []).filter(k => k.id !== kitId);
+        set({ savedKits: updatedKits });
       },
 
       // ─── Computed Getters ──────────────────────────────────────────────────
