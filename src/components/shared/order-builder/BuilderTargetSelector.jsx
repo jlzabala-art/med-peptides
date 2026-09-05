@@ -26,6 +26,7 @@ export default function BuilderTargetSelector({ mode, selectedTarget, onSelectTa
       <UniversalUserSelector
         roleFilter={roleFilter}
         value={selectedTarget?.id || selectedTarget?.objectID || ''}
+        selectedUserObject={selectedTarget}
         onChange={(user) => onSelectTarget(user)}
         currentUserId={currentUserId}
         label={label}

@@ -190,6 +190,7 @@ export const useWorkspaceStore = create(
         }
 
         set((s) => ({
+          isDrawerOpen: true, // Automatically open workspace drawer so user sees loaded item
           workspaces: {
             ...s.workspaces,
             [ws.id]: { ...ws, items: nextItems, updatedAt: Date.now() },
@@ -237,6 +238,7 @@ export const useWorkspaceStore = create(
         });
 
         set((s) => ({
+          isDrawerOpen: true, // Automatically open workspace drawer so user sees loaded items
           workspaces: {
             ...s.workspaces,
             [ws.id]: { ...ws, items: nextItems, updatedAt: Date.now() },

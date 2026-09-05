@@ -437,6 +437,51 @@ export default function UniversalOrderBuilder({
     );
   };
 
+  // ─── Product Variant Context Banner (shows pre-selected item from catalog) ───
+  const ProductVariantContextBanner = () => {
+    if (!draftItems || draftItems.length === 0) return null;
+    const firstItem = draftItems[0];
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0.85rem 1rem',
+        background: 'linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%)',
+        border: '1px solid #bfdbfe',
+        borderRadius: '12px',
+        marginBottom: '1rem',
+        gap: '0.75rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+          <div style={{
+            padding: '0.35rem 0.65rem',
+            background: 'var(--color-primary, #003666)',
+            color: '#fff',
+            borderRadius: '6px',
+            fontWeight: 700,
+            fontSize: '0.72rem',
+            letterSpacing: '0.03em',
+            flexShrink: 0
+          }}>
+            PRESCRIBING ITEM
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e3a8a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {firstItem.name || firstItem.productName}
+              {draftItems.length > 1 ? ` (+${draftItems.length - 1} more items)` : ''}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 500 }}>
+              {firstItem.dosage ? `${firstItem.dosage} · ` : ''}
+              {firstItem.presentation || 'Magistral Formulation'}
+              {firstItem.quantity ? ` · Qty: ${firstItem.quantity}` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const DraftBanner = () => {
     if (!activeCart || draftItems.length === 0) return null;
     const lastMod = activeCart.lastModified ? new Date(activeCart.lastModified).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -567,12 +612,15 @@ export default function UniversalOrderBuilder({
 
       {/* ── PATIENT STEP ── */}
       {currentStepDef?.id === 'patient' && (
-        <BuilderTargetSelector
-          mode={mode}
-          selectedTarget={selectedTarget}
-          onSelectTarget={setSelectedTarget}
-          currentUserId={currentUser?.uid}
-        />
+        <>
+          <ProductVariantContextBanner />
+          <BuilderTargetSelector
+            mode={mode}
+            selectedTarget={selectedTarget}
+            onSelectTarget={setSelectedTarget}
+            currentUserId={currentUser?.uid}
+          />
+        </>
       )}
 
       {/* ── PROTOCOL / ITEMS STEP ── */}
