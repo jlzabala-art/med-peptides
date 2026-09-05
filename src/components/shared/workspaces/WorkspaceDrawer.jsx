@@ -1968,18 +1968,4 @@ export default function WorkspaceDrawer() {
     </>,
     document.body
   );
-}tifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
-                }}
-              >
-                <ShieldCheck size={16} /> Create Rx Prescription
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    </>,
-    document.body
-  );
 }
