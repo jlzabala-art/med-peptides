@@ -110,8 +110,26 @@ export default function CatalogVariantExpander({
   const family = detectProductFamily(row);
   const fallbackData = getPeptideScientificData(row.canonicalName || row.name || row.id);
 
+  const getCleanCas = () => {
+    const candidates = [
+      row.cas,
+      row.casNumber,
+      row.cas_number,
+      row.casNo,
+      row.molecular?.casNumber,
+      row.scientificData?.casNumber,
+      fallbackData?.casNumber
+    ];
+    for (const c of candidates) {
+      if (c && typeof c === 'string' && c.trim() !== '' && c !== 'Available on Request') {
+        return c.trim();
+      }
+    }
+    return '';
+  };
+
   const molecular = {
-    casNumber: row.molecular?.casNumber || row.scientificData?.casNumber || row.casNumber || fallbackData?.casNumber || '',
+    casNumber: getCleanCas(),
     molecularFormula: row.molecular?.molecularFormula || row.scientificData?.molecularFormula || row.molecularFormula || row.formula || fallbackData?.molecularFormula || '',
     molecularWeight: row.molecular?.molecularWeight || row.scientificData?.molecularWeight || row.molecularWeight || fallbackData?.molecularWeight || '',
     sequence: row.molecular?.sequence || row.scientificData?.sequence || row.sequence || '',
@@ -120,8 +138,8 @@ export default function CatalogVariantExpander({
   const apiSpecs = row.apiSpecs || row.scientificData || {};
   
   const goalsList = Array.isArray(row.goals) && row.goals.length > 0 
-    ? row.goals.map(g => getGoalLabel(g) || g).slice(0, 3).join(', ') 
-    : (row.primaryGoal || row.goal || (row.category ? row.category.charAt(0).toUpperCase() + row.category.slice(1) : 'Therapeutic Formulation'));
+    ? row.goals.map(g => getGoalLabel(g)).filter(Boolean).slice(0, 3).join(', ') 
+    : (row.primaryGoal ? getGoalLabel(row.primaryGoal) : (row.goal ? getGoalLabel(row.goal) : (row.category ? getGoalLabel(row.category) : 'Therapeutic Formulation')));
 
   const gradeLabel = row.grade 
     ? (row.grade === 'finished' ? 'Injectable Ready / Finished' : row.grade === 'raw_api' ? 'Raw Material API' : row.grade === 'clinical_grade' ? 'Clinical Grade' : row.grade) 
@@ -438,7 +456,7 @@ export default function CatalogVariantExpander({
                 <span className="meta-card-tag">Molecular Identity</span>
               </div>
               <div className="meta-card-title">
-                CAS: <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 800 }}>{molecular.casNumber || 'Available on Request'}</span>
+                CAS: <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 800 }}>{getCleanCas(row) || 'N/A'}</span>
               </div>
               <div className="meta-card-sub">
                 {molecular.molecularFormula ? `Formula: ${molecular.molecularFormula}` : 'Standard Reference API'}

@@ -35,13 +35,19 @@ export const CLINICAL_GOAL_IMAGES = {
  * @returns {string} Public URL of the clinical image
  */
 export function resolveVariantClinicalImage(variantOrPresentation, product = {}) {
-  const isRaw = (typeof variantOrPresentation === 'object' && (variantOrPresentation?.type === 'raw_material' || variantOrPresentation?.productType === 'raw_material' || variantOrPresentation?.format === 'bulk_api')) ||
-                product?.type === 'raw_material' || 
-                product?.primaryType === 'raw_material';
+  const isRaw = (typeof variantOrPresentation === 'object' && (
+    variantOrPresentation?.type === 'raw_material' ||
+    variantOrPresentation?.productType === 'raw_material' ||
+    variantOrPresentation?.format === 'bulk_api' ||
+    variantOrPresentation?.formatId === 'bulk_api' ||
+    variantOrPresentation?.selectedFormat === 'bulk_api'
+  )) ||
+  product?.type === 'raw_material' || 
+  product?.primaryType === 'raw_material';
 
   const text = typeof variantOrPresentation === 'string' 
     ? variantOrPresentation 
-    : `${variantOrPresentation?.presentation || ''} ${variantOrPresentation?.dosage || ''} ${variantOrPresentation?.format || ''} ${variantOrPresentation?.penConfig?.cartridgeType || ''} ${variantOrPresentation?.name || ''} ${product?.canonicalName || ''} ${product?.category || ''}`;
+    : `${variantOrPresentation?.selectedFormat || ''} ${variantOrPresentation?.formatId || ''} ${variantOrPresentation?.format || ''} ${variantOrPresentation?.presentation || ''} ${variantOrPresentation?.dosage || ''} ${variantOrPresentation?.penConfig?.cartridgeType || ''} ${variantOrPresentation?.name || ''} ${product?.category || ''}`;
   
   const lower = text.toLowerCase();
 

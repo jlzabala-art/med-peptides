@@ -5,7 +5,8 @@ import RoleDashboard from '../../../templates/RoleDashboard';
 import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
 
 export default function DynamicRoute({ params }) {
-  const slug = params.slug || [];
+  const resolvedParams = React.use(params);
+  const slug = resolvedParams?.slug || [];
   const path = slug.join('/');
   
   

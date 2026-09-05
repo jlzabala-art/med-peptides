@@ -45,6 +45,7 @@ export default function MobileRecordCard({
   const hasExpandable = detailCols.length > 0 || !!expandableRender;
 
   const renderValue = (col, row) => {
+    const colKey = col.key || col.id || col.accessor;
     if (col.render) {
       try {
         // Match DataTable's call signature: col.render(row)
@@ -52,13 +53,13 @@ export default function MobileRecordCard({
         return col.render(row);
       } catch {
         // Fallback: read raw key value
-        const rawValue = row[col.key];
+        const rawValue = colKey ? row[colKey] : undefined;
         return rawValue !== null && rawValue !== undefined && rawValue !== ''
           ? String(rawValue)
           : '—';
       }
     }
-    const rawValue = row[col.key];
+    const rawValue = colKey ? row[colKey] : undefined;
     if (rawValue === null || rawValue === undefined || rawValue === '') return '—';
     return String(rawValue);
   };
@@ -74,8 +75,8 @@ export default function MobileRecordCard({
         onKeyDown={onRowClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onRowClick(row); } : undefined}
       >
         <div className="mobile-record-card-title-area">
-          {effectiveHeaderCols.map(col => (
-            <div key={col.key} className="mobile-record-card-title">
+          {effectiveHeaderCols.map((col, idx) => (
+            <div key={col.key || col.id || col.accessor || `header-col-${idx}`} className="mobile-record-card-title">
               {renderValue(col, row)}
             </div>
           ))}
@@ -87,8 +88,9 @@ export default function MobileRecordCard({
             onClick={(e) => { e.stopPropagation(); setExpanded(x => !x); }}
             aria-label={expanded ? 'Collapse details' : 'Expand details'}
             aria-expanded={expanded}
+            style={{ minWidth: '44px', minHeight: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
           >
-            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           </button>
         )}
       </div>
@@ -96,12 +98,12 @@ export default function MobileRecordCard({
       {/* ── BODY — key metadata ──────────────────────────────────────── */}
       {effectiveBodyCols.length > 0 && (
         <div className="mobile-record-card-body">
-          {effectiveBodyCols.map(col => (
-            <div key={col.key} className="mobile-record-card-field">
+          {effectiveBodyCols.map((col, idx) => (
+            <div key={col.key || col.id || col.accessor || `body-col-${idx}`} className="mobile-record-card-field">
               <span className="mobile-record-card-label">
-                {col.header || col.label || col.key}
+                {col.header || col.label || col.key || col.id || `Field ${idx + 1}`}
               </span>
-              <span className="mobile-record-card-value">
+              <span className="mobile-record-card-value" style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                 {renderValue(col, row)}
               </span>
             </div>
@@ -112,10 +114,10 @@ export default function MobileRecordCard({
       {/* ── EXPANDABLE DETAIL ────────────────────────────────────────── */}
       {expanded && (
         <div className="mobile-record-card-detail">
-          {detailCols.map(col => (
-            <div key={col.key} className="mobile-record-card-field">
+          {detailCols.map((col, idx) => (
+            <div key={col.key || col.id || col.accessor || `detail-col-${idx}`} className="mobile-record-card-field">
               <span className="mobile-record-card-label">
-                {col.header || col.label || col.key}
+                {col.header || col.label || col.key || col.id || `Detail ${idx + 1}`}
               </span>
               <span className="mobile-record-card-value">
                 {renderValue(col, row)}
@@ -141,9 +143,9 @@ export default function MobileRecordCard({
 
       {/* ── ACTIONS FOOTER ───────────────────────────────────────────── */}
       {actionCols.length > 0 && (
-        <div className="mobile-record-card-actions">
-          {actionCols.map(col => (
-            <div key={col.key}>
+        <div className="mobile-record-card-actions" style={{ width: '100%' }}>
+          {actionCols.map((col, idx) => (
+            <div key={col.key || col.id || col.accessor || `action-col-${idx}`} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               {renderValue(col, row)}
             </div>
           ))}

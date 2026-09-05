@@ -149,7 +149,8 @@ function LeadsWrapper() {
 
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
 export default function DynamicRoute({ params }) {
-  const slug = params.slug || [];
+  const resolvedParams = React.use(params);
+  const slug = resolvedParams?.slug || [];
   const path = slug.join('/');
 
   switch (path) {

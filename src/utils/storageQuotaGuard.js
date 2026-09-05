@@ -15,25 +15,43 @@ export function pruneHeavyCaches() {
   try {
     // 1. Claves conocidas que acumulan payloads masivos
     const heavyKeys = [
+      '__rg_catalog_cache_v3',
+      '__rg_catalog_cache_v2',
       '__rg_catalog_cache',
       '__rg_suppliers_cache',
       '__rg_wholesellers_cache',
       'regenpept_recent_imported',
-      'cmd-palette-recent'
+      'cmd-palette-recent',
+      'clinical_ai_messages_v2',
     ];
 
     for (const key of heavyKeys) {
       try {
         const item = localStorage.getItem(key);
-        // Si la clave supera los 150KB en localStorage, se purga
-        if (item && item.length > 150000) {
+        // Si la clave supera los 100KB en localStorage, se purga
+        if (item && item.length > 100000) {
           localStorage.removeItem(key);
           console.info(`[StorageQuotaGuard] Purged oversized localStorage key "${key}" (${Math.round(item.length / 1024)} KB)`);
         }
       } catch (e) {}
     }
 
-    // 2. Claves de capa de caché expiradas (cache:*)
+    // 2. Scan general: si alguna otra clave supera los 150KB, purgarla
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if (k.startsWith('firebase:authUser')) continue; // Nunca tocar auth
+
+      try {
+        const item = localStorage.getItem(k);
+        if (item && item.length > 150000) {
+          localStorage.removeItem(k);
+          console.info(`[StorageQuotaGuard] Purged heavy key "${k}" (${Math.round(item.length / 1024)} KB)`);
+        }
+      } catch (e) {}
+    }
+
+    // 3. Claves de capa de caché expiradas (cache:*)
     const now = Date.now();
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const k = localStorage.key(i);

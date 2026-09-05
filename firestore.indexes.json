@@ -657,6 +657,22 @@
         { "fieldPath": "reminderSent", "order": "ASCENDING" },
         { "fieldPath": "start",        "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "calendar_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "start",   "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "calendar_events",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "start",   "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [

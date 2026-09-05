@@ -370,33 +370,37 @@ function DesktopCatalogActions(props) {
 ───────────────────────────────────────────────────────────────── */
 function MobileCatalogActions(props) {
   return (
-    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', width: '100%' }}>
+    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
       <button
+        type="button"
         onClick={props.onNewProduct}
         className="gcp-btn-primary"
         style={{
-          flex: 1,
-          display: 'flex',
+          flex: 2,
+          display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.35rem',
-          padding: '0.45rem 0.75rem',
-          minHeight: '44px',
-          whiteSpace: 'nowrap'
+          padding: '0.45rem 0.5rem',
+          minHeight: '42px',
+          whiteSpace: 'nowrap',
+          fontSize: '0.82rem',
+          fontWeight: 700,
         }}
       >
-        <Plus size={16} />
-        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>New Product</span>
+        <Plus size={15} />
+        <span>New Product</span>
       </button>
       <button
+        type="button"
         onClick={props.onImportPriceList}
         className="gcp-btn-secondary"
         title="Import Price List"
         style={{ 
-          padding: '0.45rem', 
-          minHeight: '44px', 
-          minWidth: '44px', 
-          display: 'flex', 
+          flex: '0 0 42px',
+          padding: 0, 
+          minHeight: '42px', 
+          display: 'inline-flex', 
           alignItems: 'center', 
           justifyContent: 'center' 
         }}
@@ -404,21 +408,25 @@ function MobileCatalogActions(props) {
         <FileText size={16} />
       </button>
       <button
+        type="button"
         onClick={props.onOpenExportHub}
         className="gcp-btn-secondary"
         title="Export Hub & Price Lists"
         style={{ 
-          display: 'flex', 
+          flex: 1,
+          display: 'inline-flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           gap: '0.35rem',
-          padding: '0.45rem 0.75rem', 
-          minHeight: '44px', 
-          minWidth: '44px' 
+          padding: '0.45rem 0.5rem', 
+          minHeight: '42px', 
+          whiteSpace: 'nowrap',
+          fontSize: '0.82rem',
+          fontWeight: 700,
         }}
       >
-        <Download size={15} />
-        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Export</span>
+        <Download size={14} />
+        <span>Export</span>
       </button>
     </div>
   );

@@ -211,3 +211,28 @@
   background: linear-gradient(135deg, #0369a1 0%, #02507d 100%);
   color: #ffffff;
 }
+
+@media (max-width: 640px) {
+  .footer {
+    width: 100%;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .actionBtn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    box-sizing: border-box;
+  }
+  .askAtlasBtn {
+    grid-column: span 2;
+    padding: 9px 12px;
+    font-weight: 700;
+  }
+}

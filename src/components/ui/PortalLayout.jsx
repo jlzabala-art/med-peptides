@@ -25,6 +25,7 @@ import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext.jsx';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import AvatarGenerator from './AvatarGenerator';
+import UserProfileMenu from './UserProfileMenu';
 import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
 import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDropdown';
 import RoleImpersonatorSelector from '../shell/RoleImpersonatorSelector';
@@ -1044,16 +1045,7 @@ export default function PortalLayout({
           <div
             style={{ marginLeft: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            <AvatarGenerator
-              name={
-                userProfile?.firstName && userProfile?.lastName
-                  ? `${userProfile.firstName} ${userProfile.lastName}`
-                  : userProfile?.fullName || userProfile?.displayName
-              }
-              email={userProfile?.email || user?.email}
-              size={36}
-              onClick={() => routerNavigate(`/${roleContext}/my-profile`)}
-            />
+            <UserProfileMenu roleContext={roleContext} isMobile={isMobile} />
             {/* Role Impersonator Tool (Rule #14) — hidden on mobile topbar */}
             <span className="portal-header-impersonator-wrap">
               <RoleImpersonatorSelector />

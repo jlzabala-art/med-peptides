@@ -591,7 +591,7 @@ export default function AdminPortalSwitcher() {
                       } else {
                         return (
                           <PortalRow
-                            key={item.portal.id}
+                            key={`mob-portal-${item.portal.id}-${i}`}
                             portal={item.portal}
                             index={i}
                             isCurrent={item.portal.id === currentPortal.id}

@@ -44,7 +44,20 @@ export default function MetricCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {alert && (
-        <div style={{ position: 'absolute', top: '-8px', right: '-8px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'var(--color-danger, #d93025)', border: '2px solid var(--surface)' }} />
+        <div 
+          title="Attention required"
+          style={{ 
+            position: 'absolute', 
+            top: '10px', 
+            right: '10px', 
+            width: '10px', 
+            height: '10px', 
+            borderRadius: '50%', 
+            backgroundColor: 'var(--color-danger, #dc2626)', 
+            boxShadow: '0 0 0 2px #ffffff, 0 0 6px rgba(220, 38, 38, 0.4)',
+            zIndex: 2 
+          }} 
+        />
       )}
       
       {/* Top Row: Icon + Trend */}

@@ -185,14 +185,196 @@ export default function ProtocolMasterDetailRow({
         </div>
       </div>
 
-      {/* 3. Interactive Clinical Gantt Timeline */}
+      {/* 3. Clinical Pharmacology & Rationale */}
+      {(protocol.clinical_rationale || protocol.overview_summary || protocol.description) && (
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0',
+          padding: '0.85rem 1.1rem',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.35rem' }}>
+            <FlaskConical size={14} color="#0284c7" />
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Clinical Pharmacology & Mechanism of Action
+            </span>
+          </div>
+          <p style={{ fontSize: '0.82rem', color: '#334155', lineHeight: 1.6, margin: 0 }}>
+            {protocol.clinical_rationale || protocol.overview_summary || protocol.description}
+          </p>
+        </div>
+      )}
+
+      {/* 4. Compounds & Dosing Schedule (Bill of Materials - BOM) */}
+      {Array.isArray(protocol.bom) && protocol.bom.length > 0 && (
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0',
+          padding: '0.85rem 1.1rem',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Pill size={14} color="#15803d" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Active Compounds & Clinical Dosing Schedule ({protocol.bom.length})
+              </span>
+            </div>
+            {protocol.dosage_schedule && protocol.dosage_schedule.length > 0 && (
+              <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
+                {protocol.dosage_schedule.length} schedule regimens defined
+              </span>
+            )}
+          </div>
+
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Active Compound</th>
+                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Target Dosage</th>
+                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Administration Frequency</th>
+                  <th style={{ padding: '6px 10px', fontWeight: 700, color: '#475569' }}>Treatment Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {protocol.bom.map((item, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>
+                      {item.product_name || item.name || item.productId}
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#15803d', fontWeight: 600 }}>
+                      {item.dosage || 'Prescribed Clinical Concentration'}
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#334155' }}>
+                      {item.frequency || 'Once daily or as directed'}
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#64748b' }}>
+                      {item.duration || `${durationWeeks} Weeks`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Required Laboratory Biomarkers & Monitoring Cadence */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem' }}>
+        {/* Required Labs */}
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0',
+          padding: '0.75rem 1rem',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+            <CheckCircle2 size={13} color="#0284c7" />
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Required Laboratory Biomarkers
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+            {((Array.isArray(protocol.required_labs) && protocol.required_labs.length > 0)
+              ? protocol.required_labs
+              : ['CBC', 'CMP', 'Lipid Panel', 'Baseline Vitals']
+            ).map((lab, i) => (
+              <span key={i} style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                background: '#eff6ff',
+                color: '#1e40af',
+                border: '1px solid #bfdbfe',
+                padding: '2px 8px',
+                borderRadius: '6px'
+              }}>
+                {lab}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Clinical Monitoring Cadence */}
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0',
+          padding: '0.75rem 1rem',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.4rem' }}>
+            <Clock size={13} color="#7c3aed" />
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Clinical Monitoring Cadence
+            </span>
+          </div>
+          <p style={{ fontSize: '0.78rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+            {protocol.monitoring_cadence || 'Baseline evaluation, Week 4 tolerance check, Week 8 biomarker review, Week 12 consolidation'}
+          </p>
+          {Array.isArray(protocol.check_in_weeks) && protocol.check_in_weeks.length > 0 && (
+            <div style={{ display: 'flex', gap: '4px', marginTop: '0.35rem', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Checkpoints:</span>
+              {protocol.check_in_weeks.map((wk, idx) => (
+                <span key={idx} style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  padding: '1px 5px',
+                  background: '#f1f5f9',
+                  color: '#334155',
+                  borderRadius: '4px'
+                }}>
+                  Wk {wk}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 6. Clinical Contraindications & Safety Profile */}
+      {Array.isArray(protocol.contraindications) && protocol.contraindications.length > 0 && (
+        <div style={{
+          background: '#fef2f2',
+          borderRadius: '8px',
+          border: '1px solid #fecaca',
+          padding: '0.75rem 1rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.35rem' }}>
+            <ShieldAlert size={14} color="#dc2626" />
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Clinical Contraindications & Exclusion Criteria ({protocol.contraindications.length})
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+            {protocol.contraindications.map((contra, idx) => (
+              <span key={idx} style={{
+                fontSize: '0.72rem',
+                color: '#991b1b',
+                background: '#ffffff',
+                border: '1px solid #fca5a5',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                lineHeight: 1.4
+              }}>
+                ⛔ {typeof contra === 'string' ? contra : (contra.condition || JSON.stringify(contra))}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 7. Interactive Clinical Gantt Timeline */}
       <ClinicalGanttTimeline protocol={protocol} />
 
-      {/* 4. Clinical Guidelines & Biomarkers (if available) */}
-      {(protocol.instructions || protocol.clinical_notes || protocol.biomarkers?.length > 0) && (
+      {/* 8. Additional Clinical Notes (if available) */}
+      {(protocol.instructions || protocol.clinical_notes || protocol.administration_notes) && (
         <div style={{ background: '#ffffff', padding: '0.75rem 1rem', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.78rem', color: '#475569' }}>
-          <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px' }}>Clinical Monitoring & Notes:</strong>
-          <span>{protocol.instructions || protocol.clinical_notes || (protocol.biomarkers ? `Monitored biomarkers: ${protocol.biomarkers.join(', ')}` : '')}</span>
+          <strong style={{ color: '#0f172a', display: 'block', marginBottom: '2px' }}>Administration Guidelines:</strong>
+          <span>{protocol.administration_notes || protocol.instructions || protocol.clinical_notes}</span>
         </div>
       )}
     </div>

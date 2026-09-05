@@ -12,6 +12,9 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+import { resolveCasNumber } from '../utils/casResolver';
+import { getPeptideScientificData } from '../utils/knownPeptideData';
+
 export const AUTHORITATIVE_PEPTIDE_KNOWLEDGE_BASE = {
   calcitonin: {
     canonicalName: 'Calcitonin Peptide (Bulk API)',
@@ -247,29 +250,49 @@ function classifyProductForEnrichment(productData) {
     name.includes('versabase')
   ) return 'vehicle';
 
-  // Peptides / APIs / Hormones / Pharma raw materials
-  if (['peptide', 'hormone', 'raw_material', 'api_raw_material', 'hormone optimization'].includes(cat)) return 'peptide';
+  // Raw Active Pharmaceutical Ingredients (APIs) & Compounding Chemicals
+  if (
+    cat === 'raw_material' || 
+    cat === 'api_raw_material' || 
+    cat === 'api' ||
+    type === 'raw_material' || 
+    type === 'api_raw_material'
+  ) return 'api';
+
+  // Tests / Genomics / Biomarkers
+  if (
+    cat === 'genomics_biomarkers' ||
+    cat === 'diagnostic' ||
+    cat === 'diagnostic_test' || 
+    cat === 'genetic_test' || 
+    cat === 'lab_test' ||
+    cat.includes('genom') ||
+    cat.includes('biomarker') ||
+    cat.includes('test') ||
+    type === 'test' ||
+    type === 'genomics_biomarkers' ||
+    type === 'dna_testing_kit' ||
+    type === 'biomarker_testing_kit'
+  ) return 'test';
+
+  // Peptides & Hormones
+  if (['peptide', 'hormone', 'hormone optimization'].includes(cat)) return 'peptide';
   if (cat.startsWith('cardiovascular') || cat.startsWith('metabolic')) return 'peptide';
 
   // Supplements / Nutraceuticals
   if (['supplement', 'nutricosmetics', 'weight_loss', 'nutraceutical'].includes(cat)) return 'supplement';
 
   // Equipment / Consumables
-  if (['medical_device_consumable', 'equipment'].includes(cat)) return 'equipment';
-
-  // Tests / Diagnostics / Genetics
-  if (['diagnostic_test', 'genetic_test', 'lab_test'].includes(cat)) return 'test';
-  if (type === 'test') return 'test';
+  if (['medical_device_consumable', 'equipment', 'clinical_supplies'].includes(cat)) return 'equipment';
 
   // Services
-  if (cat === 'service' || type === 'subscription') return 'service';
+  if (cat === 'service' || type === 'subscription' || type === 'service') return 'service';
 
   // Skincare
   if (cat === 'skincare') return 'skincare';
 
   // ── Type-based fallbacks ────────────────────────────────────────────────────
-  if (type === 'raw_material' || type === 'api_raw_material') return 'peptide';
-  if (/api|raw material|bulk|materia prima/i.test(name)) return 'peptide';
+  if (/api|raw material|bulk|materia prima/i.test(name)) return 'api';
 
   // Name-based detection for known peptides
   if (/peptide|bpc|tb-500|tb500|nad\+|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|tesamorelin|retatrutide|tirzepatide|oxytocin|calcitonin|thymosin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) return 'peptide';
@@ -287,15 +310,17 @@ export async function enrichProductDocument(productData = {}) {
   const enrichmentType = classifyProductForEnrichment(productData);
   const name = productData.canonicalName || productData.name || '';
   const known = enrichmentType === 'peptide' ? findEnrichmentData(name) : null;
+  const knownScientific = enrichmentType === 'peptide' ? getPeptideScientificData(name) : null;
+  const resolvedCas = await resolveCasNumber(name, productData.category || productData.categoryId);
 
   // ── PEPTIDE / HORMONE / RAW API ────────────────────────────────────────────
   if (enrichmentType === 'peptide') {
     const molecular = {
-      casNumber:        known?.casNumber        || productData.molecular?.casNumber        || productData.casNumber        || 'Available on Request',
-      molecularFormula: known?.molecularFormula || productData.molecular?.molecularFormula || productData.molecularFormula || '',
-      molecularWeight:  known?.molecularWeight  || productData.molecular?.molecularWeight  || productData.molecularWeight  || 'Research Grade Spec',
+      casNumber:        known?.casNumber        || knownScientific?.casNumber || resolvedCas || productData.molecular?.casNumber || productData.casNumber || 'Available on Request',
+      molecularFormula: known?.molecularFormula || knownScientific?.molecularFormula || productData.molecular?.molecularFormula || productData.molecularFormula || '',
+      molecularWeight:  known?.molecularWeight  || (knownScientific?.molecularWeight ? `${knownScientific.molecularWeight} g/mol` : null) || productData.molecular?.molecularWeight  || productData.molecularWeight  || 'Research Grade Spec',
       sequence:         known?.sequence         || productData.molecular?.sequence         || productData.sequence         || '',
-      pubchemCid:       known?.pubchemCid       || productData.molecular?.pubchemCid       || productData.pubchemCid       || '',
+      pubchemCid:       known?.pubchemCid       || (knownScientific?.pubchemCid ? String(knownScientific.pubchemCid) : null) || productData.molecular?.pubchemCid       || productData.pubchemCid       || '',
       uniprotId:        known?.uniprotId        || productData.molecular?.uniprotId        || productData.uniprotId        || '',
       halfLife:         known?.halfLife         || productData.molecular?.halfLife         || 'Compound Specific'
     };
@@ -354,6 +379,72 @@ export async function enrichProductDocument(productData = {}) {
       requiresColdChain: productData.requiresColdChain !== false,
       enrichedAt: new Date().toISOString(),
       _enrichmentType: 'peptide'
+    };
+  }
+
+  // ── ACTIVE PHARMACEUTICAL INGREDIENT (API) / COMPOUNDING RAW MATERIAL ─────
+  if (enrichmentType === 'api') {
+    const nameTokens = name.toLowerCase().split(/\s+/);
+    const cleanChemName = name
+      .replace(/\b(usp|ep|bp|ph\.?\s*eur|api|bulk|powder|pure|grade|sterile|solution)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const isBenzocaine = cleanChemName.toLowerCase() === 'benzocaine';
+
+    const defaultCompounding = productData.compoundingRules || {
+      recommendedConcentration: isBenzocaine 
+        ? 'Topical Anesthetic: 5% – 20% w/w in gel, ointment or mucosal spray'
+        : 'Custom compounding: 1% – 20% according to medical prescription',
+      dosageRange: isBenzocaine 
+        ? 'Apply thin film to affected mucosal or dermal area up to 3-4 times daily'
+        : 'Apply or administer as prescribed by physician',
+      optimalPh: isBenzocaine ? '4.5 – 6.5' : '5.0 – 6.5',
+      compatibleVehicles: ['VersaBase Gel', 'TrichoSol', 'Ethanol 96%', 'Propylene Glycol', 'Liposomal Base'],
+      incompatibilities: 'Strong oxidizing agents, silver salts, extreme pH (< 3.5 or > 8.0)',
+      solubility: 'Freely soluble in ethanol, ether, chloroform; sparingly soluble in water'
+    };
+
+    const molecular = {
+      casNumber:        resolvedCas || productData.molecular?.casNumber || productData.casNumber || productData.scientificData?.casNumber || (isBenzocaine ? '94-09-7' : 'Available on Request'),
+      molecularFormula: productData.molecular?.molecularFormula || productData.scientificData?.molecularFormula || (isBenzocaine ? 'C9H11NO2' : ''),
+      molecularWeight:  productData.molecular?.molecularWeight || productData.scientificData?.molecularWeight || (isBenzocaine ? '165.19 g/mol' : 'Research Grade Spec'),
+      pubchemCid:       productData.molecular?.pubchemCid || productData.pubchemCid || productData.scientificData?.pubchemCid || (isBenzocaine ? '2337' : ''),
+      halfLife:         productData.molecular?.halfLife || 'Compound Specific'
+    };
+
+    const searchTokens = Array.from(new Set([
+      ...nameTokens, cleanChemName.toLowerCase(), 'api', 'raw material', 'compounding', 'usp', 'pharma grade',
+      productData.supplier?.toLowerCase() || 'lotusland'
+    ].filter(Boolean)));
+
+    return {
+      ...productData,
+      canonicalName:    productData.canonicalName || productData.name,
+      casNumber:        molecular.casNumber,
+      description:      productData.description || `${name} is a high-purity active pharmaceutical ingredient (API) compliant with pharmacopeial compounding specifications.`,
+      primaryGoal:      productData.primaryGoal || (isBenzocaine ? 'Local Anesthesia & Pain Relief' : 'Custom Compounding Formulation'),
+      goals:            productData.goals || ['cellular_health'],
+      compoundingRules: defaultCompounding,
+      molecular,
+      scientificData: {
+        ...(productData.scientificData || {}),
+        ...molecular,
+        solubility: defaultCompounding.solubility || 'Soluble in organic solvents',
+        purityPercentage: productData.purity || productData.apiSpecs?.purityPercentage || 99.0,
+        grade: productData.grade || 'USP / EP Compounding Grade',
+        storage: productData.storage || 'Controlled Room Temperature (15°C to 25°C), tightly closed'
+      },
+      purity: productData.purity || '≥ 99.0% (USP Grade)',
+      grade: productData.grade || 'USP / EP Pharmaceutical Grade',
+      hasCOA: productData.hasCOA ?? true,
+      programs: (Array.isArray(productData.programs) && productData.programs.length > 0) ? productData.programs : [
+        { id: 'magistral-compounding', name: 'Personalized Compounding Formulas', priority: 'A' }
+      ],
+      searchTokens,
+      requiresColdChain: productData.requiresColdChain ?? false,
+      enrichedAt:       new Date().toISOString(),
+      _enrichmentType:  'api'
     };
   }
 

@@ -16,6 +16,8 @@
   --color-primary-light: #eff6ff;
   --color-primary-hover: #002547;
   --color-secondary: #0096CC;
+  --secondary: #0096CC;
+  --secondary-rgb: 0, 150, 204;
   
   --color-bg-app: #f8fafc;
   --color-bg-surface: #ffffff;

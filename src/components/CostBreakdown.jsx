@@ -45,31 +45,10 @@ export default function CostBreakdown({ protocol = {}, products = [], onClose, i
   };
 
   return (
-    <div className="modal-overlay" style={{ 
-      position: 'fixed', 
-      top: 0, 
-      left: 0, 
-      right: 0, 
-      bottom: 0, 
-      backgroundColor: 'rgba(0,0,0,0.5)', 
-      display: 'flex', 
-      alignItems: 'flex-end', 
-      justifyContent: 'center',
-      zIndex: 1000
-    }}>
-      <div className="cost-breakdown-sheet" style={{ 
-        backgroundColor: 'white', 
-        width: '100%', 
-        maxWidth: '600px', 
-        borderTopLeftRadius: '24px', 
-        borderTopRightRadius: '24px', 
-        padding: '2rem 1.5rem',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        animation: 'slideUp 0.3s ease-out'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+    <div className="cal-dialog-overlay" onClick={onClose}>
+      <div className="cal-dialog" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="cal-dialog-header">
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
              <TrendingUp size={24} color="var(--primary)" /> {t('costBreakdown.title', 'Economic Audit')}
           </h2>
           <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>

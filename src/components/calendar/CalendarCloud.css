@@ -149,30 +149,55 @@ body {
 
 .fc .fc-daygrid-day-top {
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 4px 8px;
 }
 
 .fc .fc-daygrid-day-number {
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--cal-color-text-secondary);
 }
 
+/* Today cell highlighting and centered number badge */
 .fc .fc-day-today {
-  background-color: #f8fafc !important; /* Very subtle blue tint */
+  background-color: rgba(0, 54, 102, 0.04) !important;
+  border-top: 3px solid var(--cal-color-primary, #003666) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-top {
+  justify-content: center !important;
+  text-align: center !important;
 }
 
 .fc .fc-day-today .fc-daygrid-day-number {
-  background-color: var(--cal-color-primary);
-  color: #ffffff;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2px;
+  background-color: var(--cal-color-primary, #003666) !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  margin: 2px auto !important;
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.25) !important;
+}
+
+/* Day Column Header Titles (SUN ... SAT) */
+.fc .fc-col-header-cell {
+  background-color: #f8fafc !important;
+  padding: 8px 0 !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #003666 !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
 }
 
 .regenera-calendar-wrapper .fc {
@@ -257,29 +282,42 @@ body {
   border-color: var(--cal-color-primary);
 }
 
-/* Dialog / Modal / Bottom Sheet */
+/* Dialog / Slide-Over Drawer / Bottom Sheet */
 .cal-dialog-overlay {
   position: fixed;
-  inset: 0;
-  background-color: rgba(19, 32, 29, 0.6);
-  backdrop-filter: blur(4px);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   z-index: 9999;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 0;
 }
 
 .cal-dialog {
-  background: white;
-  border-radius: 16px;
+  background: #ffffff;
+  border-radius: 0;
   width: 100%;
-  max-width: 460px;
-  box-shadow: 0 24px 40px -10px rgba(0, 0, 0, 0.2);
+  max-width: 480px;
+  height: 100vh;
+  height: 100dvh;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--cal-color-border);
+  border-left: 1px solid var(--cal-color-border);
   z-index: 10000;
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .cal-dialog-header {
@@ -343,14 +381,45 @@ body {
 }
 
 .cal-dialog-footer {
+  position: sticky;
+  bottom: 0;
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--cal-color-border);
+  border-top: 1px solid var(--cal-color-border, #e2e8f0);
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 0.75rem;
-  background: var(--cal-bg-header);
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
+  background: #ffffff;
+  z-index: 20;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+  margin-top: auto;
+}
+
+/* Day Cell Hover Styling (Notion Calendar / Google Calendar style) */
+.fc-daygrid-day:hover {
+  background-color: rgba(0, 54, 102, 0.03) !important;
+  cursor: pointer;
+  position: relative;
+}
+
+.fc-daygrid-day:hover::after {
+  content: '+';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cal-color-primary, #003666);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.2);
+  pointer-events: none;
 }
 
 /* Empty State */
@@ -646,38 +715,6 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-}
-
-.day-cell-hover-actions {
-  display: none;
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: var(--cal-bg-surface);
-  border: 1px solid var(--cal-border);
-  border-radius: var(--cal-radius-sm);
-  box-shadow: var(--cal-shadow-sm);
-  z-index: 10;
-}
-
-.fc-daygrid-day:hover .day-cell-hover-actions {
-  display: flex;
-  flex-direction: column;
-}
-
-.hover-action-btn {
-  background: none;
-  border: none;
-  padding: 4px 8px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  text-align: left;
-  color: var(--cal-color-text-secondary);
-}
-
-.hover-action-btn:hover {
-  background-color: var(--cal-bg-panel);
-  color: var(--cal-color-text-primary);
 }
 
 .regenera-calendar-wrapper .fc .fc-button-primary:hover {

@@ -28,11 +28,18 @@ const ROLE_BOTTOM_ITEMS = {
     { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   doctor: [
+    { id: 'home', label: 'Hub', path: '/admin', icon: Home },
     { id: 'patients', label: 'Patients', path: '/doctor/patients', icon: Users },
     { id: 'prescriptions', label: 'Prescriptions', path: '/admin/prescriptions', icon: FileText },
     { id: 'catalog', label: 'Formulary', path: '/admin/catalog', icon: BookOpen },
     { id: 'ai', label: 'Clinical AI', action: 'open_ai', icon: Sparkles, isAi: true },
-    { id: 'menu', label: 'More', action: 'open_sidebar', icon: Menu },
+  ],
+  medical_director: [
+    { id: 'home', label: 'Hub', path: '/admin', icon: Home },
+    { id: 'patients', label: 'Patients', path: '/doctor/patients', icon: Users },
+    { id: 'prescriptions', label: 'Prescriptions', path: '/admin/prescriptions', icon: FileText },
+    { id: 'catalog', label: 'Formulary', path: '/admin/catalog', icon: BookOpen },
+    { id: 'ai', label: 'Clinical AI', action: 'open_ai', icon: Sparkles, isAi: true },
   ],
   patient: [
     { id: 'home', label: 'Home', path: '/patient', icon: Home },
@@ -69,7 +76,8 @@ export default function MobileBottomNav({ onOpenSidebar, onOpenAi }) {
   const { simulatedRole } = useSimulationStore();
   const effectiveRole = simulatedRole || activeRole || 'guest';
 
-  const items = ROLE_BOTTOM_ITEMS[effectiveRole] || ROLE_BOTTOM_ITEMS.guest;
+  const normalizedRole = effectiveRole === 'medical_director' ? 'doctor' : effectiveRole;
+  const items = ROLE_BOTTOM_ITEMS[normalizedRole] || ROLE_BOTTOM_ITEMS[effectiveRole] || ROLE_BOTTOM_ITEMS.guest;
 
   const handleAction = (item, e) => {
     if (item.action === 'open_sidebar') {

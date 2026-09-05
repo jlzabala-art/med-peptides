@@ -36,12 +36,16 @@ export default function DataModule({
   filterOptions = [],    // filter dimension dropdowns → Line 2
   onClearAllFilters,     // clears all active filters at once
   resultCount,
+  totalItems,
+  totalCount,
   searchLoading,
   namespace = "search",
   data = [],
   loading = false,
   hasMore = undefined,   // undefined → DataTable uses local pagination logic; explicit true/false → server-side mode
+  hasNextPage,
   loadMore,
+  onLoadMore,
   isFetchingMore = false,
   isSearchActive = false,
   columns = [],
@@ -300,8 +304,9 @@ export default function DataModule({
                 enableExport={false}
                 onRowClick={onRowClick} 
                 expandableRender={expandableRender}
-                hasNextPage={hasMore}
-                onNextPage={loadMore}
+                totalItems={totalItems || totalCount || resultCount}
+                hasNextPage={hasNextPage !== undefined ? hasNextPage : hasMore}
+                onNextPage={loadMore || onLoadMore}
                 isLoading={loading}
                 mobileCardComponent={mobileCardComponent}
                 mobileCardProps={enhancedMobileCardProps}

@@ -11,22 +11,30 @@ import { ShieldCheck, Snowflake, Thermometer, Droplets, Zap, Activity, Microscop
  * Overlays dynamic pharmaceutical labels, storage conditions, and technical HUD badges
  * on top of master photos with 100% responsive stability.
  */
-export default function DynamicProductVisualOverlay({ product, variant, className = '' }) {
+export default function DynamicProductVisualOverlay({ product, variant, selectedFormat, className = '' }) {
   const activeVariant = variant || product?.variants?.[0] || {};
-  const imgSrc = resolveVariantClinicalImage(activeVariant, product);
+  
+  const effectiveVariant = {
+    ...activeVariant,
+    selectedFormat: selectedFormat || activeVariant?.formatId || activeVariant?.format,
+    format: selectedFormat || activeVariant?.format || activeVariant?.formatId || product?.format,
+    formatId: selectedFormat || activeVariant?.formatId || activeVariant?.format
+  };
+
+  const imgSrc = resolveVariantClinicalImage(effectiveVariant, product);
 
   const productType = product?.productType || product?.type || activeVariant?.type || 'finished_product';
-  const format = (activeVariant?.format || product?.format || '').toLowerCase();
-  const presentation = (activeVariant?.presentation || product?.presentation || '').toLowerCase();
+  const format = String(selectedFormat || activeVariant?.formatId || activeVariant?.format || product?.format || '').toLowerCase();
+  const presentation = String(activeVariant?.presentation || product?.presentation || '').toLowerCase();
 
-  const isRaw = productType === 'raw_material' || format === 'bulk_api' || presentation.includes('bulk') || presentation.includes('api');
-  const isPen = format.includes('pen') || presentation.includes('pen') || activeVariant?.penConfig;
-  const isDualChamber = isPen && (activeVariant?.penConfig?.cartridgeType === 'double_cartridge' || presentation.includes('double') || presentation.includes('dual'));
+  const isRaw = productType === 'raw_material' || format.includes('bulk') || format.includes('api') || presentation.includes('bulk') || presentation.includes('api');
+  const isPen = format.includes('pen') || format.includes('cartridge') || presentation.includes('pen') || presentation.includes('cartridge') || activeVariant?.penConfig;
+  const isDualChamber = isPen && (activeVariant?.penConfig?.cartridgeType === 'double_cartridge' || presentation.includes('double') || presentation.includes('dual') || format.includes('double') || format.includes('dual'));
   const isDevice = productType === 'clinical_supplies' && (presentation.includes('device') || presentation.includes('reusable') || presentation.includes('injector'));
   const isDiluent = presentation.includes('water') || presentation.includes('bac') || presentation.includes('diluent') || presentation.includes('saline');
   const isDiagnostic = productType === 'diagnostic' || product?.category === 'Diagnostic' || presentation.includes('test') || presentation.includes('panel');
   const isService = productType === 'service' || product?.category === 'Service' || presentation.includes('consultation') || presentation.includes('protocol');
-  const isVial = !isRaw && !isPen && !isDevice && !isDiluent && !isDiagnostic && !isService && (presentation.includes('vial') || format.includes('vial') || !format);
+  const isVial = !isRaw && !isPen && !isDevice && !isDiluent && !isDiagnostic && !isService && (presentation.includes('vial') || format.includes('vial') || !format || format === 'vial');
 
   // Dynamic Label Information
   const brandName = (product?.canonicalName || product?.name || 'Peptide Compound').toUpperCase();

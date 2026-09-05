@@ -143,6 +143,10 @@
   /* Legacy variable mappings (to prevent immediate breakage) */
   --primary: var(--color-primary);
   --primary-soft: var(--color-primary-light);
+  --color-secondary: #0096CC;
+  --secondary: var(--color-secondary, #0096CC);
+  --secondary-hover: #0077a3;
+  --secondary-rgb: 0, 150, 204;
   --surface: var(--color-bg-surface);
   --border: var(--color-border);
   --border-light: var(--color-border);

@@ -267,6 +267,62 @@ export const KNOWN_PEPTIDE_DATA = {
     pubchemCid: 5280343,
     targetSystem: 'Senolytic Flavonoid / BCL-2 & PI3K/Akt Pathway',
     mechanismOfAction: 'Eliminates senescent cells and modulates inflammatory NF-kB signaling'
+  },
+  '17-a estradiol': {
+    casNumber: '57-91-0',
+    molecularFormula: 'C18H24O2',
+    molecularWeight: '272.38',
+    pubchemCid: 5757,
+    targetSystem: 'Estrogen Receptor Alpha/Beta Modulator & 5α-Reductase Inhibitor',
+    mechanismOfAction: 'Topical non-feminizing estrogen isomer reducing local DHT and stimulating hair follicle proliferation'
+  },
+  '17-alpha estradiol': {
+    casNumber: '57-91-0',
+    molecularFormula: 'C18H24O2',
+    molecularWeight: '272.38',
+    pubchemCid: 5757,
+    targetSystem: 'Estrogen Receptor Alpha/Beta Modulator & 5α-Reductase Inhibitor',
+    mechanismOfAction: 'Topical non-feminizing estrogen isomer reducing local DHT and stimulating hair follicle proliferation'
+  },
+  'alfatradiol': {
+    casNumber: '57-91-0',
+    molecularFormula: 'C18H24O2',
+    molecularWeight: '272.38',
+    pubchemCid: 5757,
+    targetSystem: 'Estrogen Receptor Alpha/Beta Modulator & 5α-Reductase Inhibitor',
+    mechanismOfAction: 'Topical non-feminizing estrogen isomer reducing local DHT and stimulating hair follicle proliferation'
+  },
+  'minoxidil': {
+    casNumber: '38304-91-5',
+    molecularFormula: 'C9H15N5O',
+    molecularWeight: '209.25',
+    pubchemCid: 4658,
+    targetSystem: 'KATP Channel Opener & Arterial Vasodilator',
+    mechanismOfAction: 'Hyperpolarizes cell membranes increasing dermal papilla blood flow and follicle growth'
+  },
+  'finasteride': {
+    casNumber: '98319-26-7',
+    molecularFormula: 'C23H36N2O2',
+    molecularWeight: '372.54',
+    pubchemCid: 57363,
+    targetSystem: 'Type II 5-Alpha Reductase Inhibitor',
+    mechanismOfAction: 'Competitive inhibitor blocking serum and follicular conversion of testosterone to DHT'
+  },
+  'dutasteride': {
+    casNumber: '164656-23-9',
+    molecularFormula: 'C27H30F6N2O2',
+    molecularWeight: '528.53',
+    pubchemCid: 6918296,
+    targetSystem: 'Dual Type I & Type II 5-Alpha Reductase Inhibitor',
+    mechanismOfAction: 'Potent dual isoenzyme blocker providing >90% systemic DHT suppression'
+  },
+  'latanoprost': {
+    casNumber: '130209-82-4',
+    molecularFormula: 'C26H40O5',
+    molecularWeight: '432.60',
+    pubchemCid: 5311221,
+    targetSystem: 'Prostaglandin F2-alpha Analogue (FP Receptor Agonist)',
+    mechanismOfAction: 'Induces anagen phase prolongment in hair follicles and enhances eyelash/hair density'
   }
 };
 

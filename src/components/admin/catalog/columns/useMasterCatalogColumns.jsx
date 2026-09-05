@@ -26,7 +26,8 @@ import {
   Pause,
   Archive,
   Briefcase,
-  ClipboardList
+  ClipboardList,
+  FileText
 } from 'lucide-react';
 
 export function useMasterCatalogColumns({
@@ -101,12 +102,13 @@ export function useMasterCatalogColumns({
                 {(() => {
                   const types = getProductAvailableTypes(row);
                   const TYPE_CONFIG = {
-                    finished_product:  { label: 'FINISHED',  icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
-                    raw_material:      { label: 'BULK API',   icon: <FlaskConical size={11} strokeWidth={2.2} />,  bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
-                    clinical_supplies: { label: 'CLINICAL',   icon: <Stethoscope size={11} strokeWidth={2.2} />,   bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
-                    diagnostic:        { label: 'DIAGNOSTIC', icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: '#fef9c3', color: '#854d0e', border: '#fde047' },
-                    service:           { label: 'SERVICE',    icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
-                    dual:              { label: 'DUAL',       icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: 'linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)', color: '#6d28d9', border: '#ddd6fe' },
+                    finished_product:    { label: 'FINISHED',  icon: <PackageCheck size={11} strokeWidth={2.2} />, bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+                    raw_material:        { label: 'BULK API',   icon: <FlaskConical size={11} strokeWidth={2.2} />,  bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' },
+                    clinical_supplies:   { label: 'CLINICAL',   icon: <Stethoscope size={11} strokeWidth={2.2} />,   bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
+                    genomics_biomarkers: { label: 'GENOMICS & BIOMARKERS', icon: <Sparkles size={11} strokeWidth={2.2} />, bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
+                    diagnostic:          { label: 'GENOMICS & BIOMARKERS', icon: <Sparkles size={11} strokeWidth={2.2} />, bg: '#eef2ff', color: '#4338ca', border: '#c7d2fe' },
+                    service:             { label: 'SERVICE',    icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: '#fdf4ff', color: '#7e22ce', border: '#e9d5ff' },
+                    dual:                { label: 'DUAL',       icon: <Sparkles size={11} strokeWidth={2.2} />,      bg: 'linear-gradient(135deg, #f5f3ff 0%, #eff6ff 100%)', color: '#6d28d9', border: '#ddd6fe' },
                   };
                   return (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
@@ -547,6 +549,12 @@ export function useMasterCatalogColumns({
             icon: Eye,
             label: 'View Product Details',
             onClick: () => { setSelectedProduct?.(row); onOpenDrawer?.('quick-view'); }
+          },
+          {
+            type: 'datasheet',
+            icon: FileText,
+            label: 'Product Sheet (Clinical Monograph)',
+            onClick: () => { setSelectedProduct?.(row); onOpenDrawer?.('datasheet'); }
           },
           {
             type: 'sparkles',

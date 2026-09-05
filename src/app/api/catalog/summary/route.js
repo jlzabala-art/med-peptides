@@ -649,6 +649,7 @@ export async function buildCatalogSummary(searchParams) {
         categoryFacets:     Object.fromEntries(categoryFacetMap),
         presentationFacets: Object.fromEntries(presentationFacetMap),
         supplierFacets:     Object.fromEntries(supplierFacetMap),
+        genomicsMetrics:    metaFacets?.genomics || null,
       },
     };
 

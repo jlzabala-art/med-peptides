@@ -52,7 +52,7 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
       title: 'Active Enrolled Patients',
       value: `${metrics.activePatients || '0'} Patients`,
       icon: Users,
-      route: '/admin/users?role=patient&status=active',
+      route: '/doctor/patients',
       styleClass: styles.revenueIcon,
     },
     pendingPrescriptions: {
@@ -73,7 +73,7 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
       title: 'Patient Follow-Ups Due',
       value: `${metrics.dueFollowUps || '0'} Due`,
       icon: AlertTriangle,
-      route: '/admin/users?filter=followup_due',
+      route: '/doctor/patients',
       styleClass: styles.inventoryIcon,
     },
     grossProfit: {
@@ -132,7 +132,7 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
             <button className={styles.actionBtn} onClick={() => router.push('/admin/prescriptions?status=pending')}>
               Review Prescriptions
             </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/users?role=patient')}>
+            <button className={styles.actionBtn} onClick={() => router.push('/doctor/patients')}>
               Manage Patients
             </button>
           </>
@@ -239,7 +239,13 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
           {renderContextualButtons()}
           <button
             className={`${styles.actionBtn} ${styles.askAtlasBtn}`}
-            onClick={() => router.push('/admin/analytics')}
+            onClick={() => {
+              if (currentRolePreset === 'Clinical') {
+                window.dispatchEvent(new CustomEvent('open-clinical-ai'));
+              } else {
+                router.push('/admin/analytics');
+              }
+            }}
           >
             Ask Atlas AI
           </button>

@@ -14,6 +14,7 @@ const ProductMergeModal = dynamic(() => import('../ProductMergeModal'), { ssr: f
 const ProductEnrichmentModal = dynamic(() => import('../ProductEnrichmentModal'), { ssr: false });
 const ScanPriceListWidget = dynamic(() => import('../../ScanPriceListWidget'), { ssr: false });
 const ProductTransactionsDrawer = dynamic(() => import('./ProductTransactionsDrawer'), { ssr: false });
+const ProductDatasheetDrawer = dynamic(() => import('../components/ProductDatasheetDrawer'), { ssr: false });
 
 export default function CatalogModalsContainer({
   activeDrawer,
@@ -195,6 +196,12 @@ export default function CatalogModalsContainer({
         onClose={() => setTransactionsProduct(null)}
         product={transactionsProduct}
         onNavigate={handleNavigation}
+      />
+
+      <ProductDatasheetDrawer
+        product={selectedProduct}
+        isOpen={activeDrawer === 'datasheet'}
+        onClose={() => setActiveDrawer(null)}
       />
 
       <WorkspaceFloatingDock />

@@ -16,6 +16,7 @@ import { functions } from '../../firebase';
 import ProtocolDayBadge from './ProtocolDayBadge';
 import { useAuth } from '../../context/AuthContext';
 import CalendarContextDrawer from './CalendarContextDrawer';
+import CalendarFaqAccordion from './CalendarFaqAccordion';
 import ProductAutocomplete from '../shared/ProductAutocomplete';
 import { toast } from 'react-hot-toast';
 
@@ -443,29 +444,6 @@ export default function RegeneraCalendar({ viewMode = 'all' }) {
                 <span style={{ fontWeight: 500 }}>{count}</span>
               </div>
             ))}
-          </div>
-        )}
-
-        {!isMobile() && !isPatient && (
-          <div className="day-cell-hover-actions">
-            <button
-              className="hover-action-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDateClick({ dateStr: arg.date.toISOString() });
-              }}
-            >
-              + Quick Event
-            </button>
-            <button
-              className="hover-action-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                calendarRef.current.getApi().changeView('timeGridDay', arg.date);
-              }}
-            >
-              View Day
-            </button>
           </div>
         )}
       </div>
@@ -932,30 +910,20 @@ export default function RegeneraCalendar({ viewMode = 'all' }) {
                 </div>
               </div>
 
-              <div
-                className="cal-dialog-footer"
-                style={{
-                  paddingTop: '1.25rem',
-                  borderTop: '1px solid var(--cal-border)',
-                  marginTop: 'auto',
-                  background: 'var(--cal-bg-surface)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                }}
-              >
+              <div className="cal-dialog-footer">
                 {!isPatient && modalMode === 'edit' ? (
                   <Button variant="danger" onClick={handleDelete}>
                     Delete Event
                   </Button>
                 ) : (
-                  <Button variant="ghost" onClick={() => setModalOpen(false)}>
+                  <Button variant="ghost" type="button" onClick={() => setModalOpen(false)}>
                     Cancel
                   </Button>
                 )}
 
                 {!isPatient && (
                   <Button variant="primary" type="submit">
-                    {modalMode === 'create' ? 'Save Event' : 'Update'}
+                    {modalMode === 'create' ? '✔️ Save Event' : '✔️ Update Event'}
                   </Button>
                 )}
               </div>
@@ -1013,6 +981,9 @@ export default function RegeneraCalendar({ viewMode = 'all' }) {
           </div>
         </div>
       )}
+
+      {/* Calendar FAQ Accordion */}
+      <CalendarFaqAccordion />
 
       {/* Patient Context Drawer (Desktop Only) */}
       <CalendarContextDrawer

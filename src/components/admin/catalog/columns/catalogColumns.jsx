@@ -329,35 +329,75 @@ export const buildPeptideColumns = ({
   ].filter(Boolean);
 };
 
-export const buildGeneticTestColumns = ({
+export const buildGenomicsColumns = ({
   sharedCols = [],
   commercialChannel = 'cost',
   priceGapCol,
   activePriceCol,
   marginCol,
   waterfallCols = [],
-  activeMgCol,
   actionCol,
   updateVariantField
 }) => {
+  const panelCol = {
+    key: 'panel_name',
+    header: 'Panel / Report Type',
+    width: '240px',
+    render: (v) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <span style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0f172a' }}>
+          {v.name || v.label || v.dosage || 'Genomic Panel'}
+        </span>
+        <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+          {v.dose || '1 Kit'} • Non-Diagnostic Screening
+        </span>
+      </div>
+    )
+  };
+
+  const sampleCol = {
+    key: 'sample_type',
+    header: 'Sample Matrix',
+    width: '140px',
+    nowrap: true,
+    render: (v) => (
+      <InlineEditableCell
+        value={v.sampleType || v.extractionMethod || 'Saliva (Buccal Swab)'}
+        type="select"
+        options={[
+          { label: 'Saliva (Buccal Swab)', value: 'Saliva (Buccal Swab)' },
+          { label: 'Blood Spot (Capillary)', value: 'Blood Spot (Capillary)' },
+          { label: 'Whole Blood (EDTA)', value: 'Whole Blood (EDTA)' },
+          { label: 'Stool / Microbiome', value: 'Stool / Microbiome' },
+          { label: 'Urine Matrix', value: 'Urine Matrix' }
+        ]}
+        placeholder="Sample Type"
+        onSave={(newVal) => updateVariantField(v.id, 'sampleType', newVal)}
+      />
+    )
+  };
+
+  const tatCol = {
+    key: 'tat',
+    header: 'Turnaround (TAT)',
+    width: '120px',
+    nowrap: true,
+    render: (v) => (
+      <InlineEditableCell
+        value={v.turnaroundTime || '10-14 Business Days'}
+        type="text"
+        placeholder="e.g. 10-14 days"
+        onSave={(newVal) => updateVariantField(v.id, 'turnaroundTime', newVal)}
+      />
+    )
+  };
+
   if (commercialChannel === 'all' && waterfallCols.length > 0) {
     return [
       ...sharedCols,
-      {
-        key: 'sample_type',
-        header: 'Sample Type',
-        width: '15%',
-        nowrap: true,
-        render: (v) => (
-          <InlineEditableCell
-            value={v.sampleType || v.extractionMethod || v.dosage || ''}
-            type="select"
-            options={[{ label: 'Saliva', value: 'Saliva' }, { label: 'Blood', value: 'Blood' }]}
-            placeholder="Sample Type"
-            onSave={(newVal) => updateVariantField(v.id, 'sampleType', newVal)}
-          />
-        )
-      },
+      panelCol,
+      sampleCol,
+      tatCol,
       ...waterfallCols,
       actionCol
     ].filter(Boolean);
@@ -365,42 +405,96 @@ export const buildGeneticTestColumns = ({
 
   return [
     ...sharedCols,
-    {
-      key: 'sample_type',
-      header: 'Sample Type',
-      width: '16%',
-      nowrap: true,
-      render: (v) => (
-        <InlineEditableCell
-          value={v.sampleType || v.extractionMethod || v.dosage || ''}
-          type="select"
-          options={[{ label: 'Saliva', value: 'Saliva' }, { label: 'Blood', value: 'Blood' }]}
-          placeholder="Sample Type"
-          onSave={(newVal) => updateVariantField(v.id, 'sampleType', newVal)}
-        />
-      )
-    },
-    {
-      key: 'tat',
-      header: 'Turnaround (TAT)',
-      width: '12%',
-      nowrap: true,
-      render: (v) => (
-        <InlineEditableCell
-          value={v.turnaroundTime || ''}
-          type="text"
-          placeholder="e.g. 5-7 days"
-          onSave={(newVal) => updateVariantField(v.id, 'turnaroundTime', newVal)}
-        />
-      )
-    },
+    panelCol,
+    sampleCol,
+    tatCol,
     activePriceCol,
     ...(marginCol ? [marginCol] : []),
     ...(commercialChannel === 'cost' && priceGapCol ? [priceGapCol] : []),
-    ...(activeMgCol ? [activeMgCol] : []),
     actionCol
   ].filter(Boolean);
 };
+
+export const buildServiceColumns = ({
+  sharedCols = [],
+  commercialChannel = 'cost',
+  priceGapCol,
+  activePriceCol,
+  activeMonthlyCol,
+  marginCol,
+  waterfallCols = [],
+  actionCol,
+  updateVariantField
+}) => {
+  const planCol = {
+    key: 'plan_name',
+    header: 'Plan / Billing Term',
+    width: '210px',
+    render: (v) => {
+      const interval = (v.billingInterval || v.cadence || v.billingCycle || '').toLowerCase();
+      const isAnnual = interval.includes('annual') || interval.includes('year');
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontWeight: 700, fontSize: '0.84rem', color: '#0f172a' }}>
+            {v.dosage || v.label || v.name || 'Subscription Plan'}
+          </span>
+          <span style={{
+            fontSize: '0.66rem',
+            fontWeight: 700,
+            color: isAnnual ? '#059669' : '#0284c7',
+            background: isAnnual ? '#ecfdf5' : '#f0f9ff',
+            padding: '1px 5px',
+            borderRadius: '4px',
+            width: 'fit-content'
+          }}>
+            {isAnnual ? '📅 12 Months Contract' : '⚡ Monthly Flexible'}
+          </span>
+        </div>
+      );
+    }
+  };
+
+  const modalityCol = {
+    key: 'modality',
+    header: 'Service Modality',
+    width: '140px',
+    nowrap: true,
+    render: (v) => (
+      <span style={{
+        fontSize: '0.74rem',
+        fontWeight: 600,
+        color: '#475569',
+        background: '#f1f5f9',
+        padding: '2px 8px',
+        borderRadius: '4px'
+      }}>
+        {v.presentationName || v.format || 'Digital Service'}
+      </span>
+    )
+  };
+
+  if (commercialChannel === 'all' && waterfallCols.length > 0) {
+    return [
+      ...sharedCols,
+      planCol,
+      modalityCol,
+      ...waterfallCols,
+      actionCol
+    ].filter(Boolean);
+  }
+
+  return [
+    ...sharedCols,
+    planCol,
+    modalityCol,
+    activePriceCol,
+    ...(activeMonthlyCol ? [activeMonthlyCol] : []),
+    ...(marginCol ? [marginCol] : []),
+    actionCol
+  ].filter(Boolean);
+};
+
+export const buildGeneticTestColumns = buildGenomicsColumns;
 
 export const buildApiColumns = ({
   sharedCols = [],

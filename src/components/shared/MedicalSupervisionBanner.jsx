@@ -49,27 +49,56 @@ export default function MedicalSupervisionBanner({ itemName, itemType = 'protoco
           </div>
         </div>
 
-        <button
-          onClick={() => setModalOpen(true)}
-          style={{
-            padding: '0.65rem 1.25rem',
-            borderRadius: '999px',
-            background: 'var(--primary, #003666)',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '0.84rem',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 2px 8px rgba(0, 54, 102, 0.15)',
-            transition: 'all 0.2s'
-          }}
-        >
-          Request Doctor Review <ArrowRight size={14} />
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => {
+              const text = `Hello Atlas Clinical Network, I am looking for clinical guidance regarding ${itemName || 'this product'}.`;
+              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+            }}
+            style={{
+              padding: '0.65rem 1.1rem',
+              minHeight: '44px',
+              borderRadius: '999px',
+              background: '#25d366',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.84rem',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(37, 211, 102, 0.25)',
+              transition: 'all 0.2s'
+            }}
+          >
+            💬 Direct Medical WhatsApp
+          </button>
+
+          <button
+            onClick={() => setModalOpen(true)}
+            style={{
+              padding: '0.65rem 1.25rem',
+              minHeight: '44px',
+              borderRadius: '999px',
+              background: 'var(--primary, #003666)',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.84rem',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(0, 54, 102, 0.15)',
+              transition: 'all 0.2s'
+            }}
+          >
+            Request Doctor Review <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
 
       <MedicalSupervisionModal 

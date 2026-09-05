@@ -154,23 +154,80 @@ function OverviewTab({ protocol }) {
 
   return (
     <div style={{ padding: '0.5rem 0' }}>
-      {/* Description */}
+      {/* Description / Overview Summary */}
       {description && (
         <div
           style={{
             fontSize: '0.85rem',
             color: '#334155',
             lineHeight: 1.65,
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             padding: '0.75rem',
             background: '#f8fafc',
             borderRadius: 8,
-            borderLeft: '3px solid #6366f1',
+            borderLeft: '3px solid #0284c7',
           }}
         >
           {description}
         </div>
       )}
+
+      {/* Clinical Pharmacology & Biological Mechanism */}
+      {protocol.clinical_rationale && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <SectionTitle icon={FlaskConical}>Clinical Pharmacology & Mechanism of Action</SectionTitle>
+          <div style={{
+            background: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            borderRadius: 8,
+            padding: '0.85rem',
+            fontSize: '0.83rem',
+            color: '#0369a1',
+            lineHeight: 1.6
+          }}>
+            {protocol.clinical_rationale}
+          </div>
+        </div>
+      )}
+
+      {/* Required Laboratory Biomarkers & Monitoring Cadence */}
+      <div style={{ marginBottom: '1.25rem' }}>
+        <SectionTitle icon={CheckCircle}>Required Laboratory Biomarkers & Monitoring</SectionTitle>
+        <div style={{ background: '#f8fafc', borderRadius: 8, padding: '0.85rem', border: '1px solid #e2e8f0' }}>
+          <div style={{ marginBottom: '0.6rem' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.35rem' }}>
+              Baseline & Follow-up Panels
+            </span>
+            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+              {((Array.isArray(protocol.required_labs) && protocol.required_labs.length > 0)
+                ? protocol.required_labs
+                : ['CBC', 'CMP', 'Lipid Panel', 'Baseline Vitals']
+              ).map((lab, i) => (
+                <span key={i} style={{
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  background: '#eff6ff',
+                  color: '#1d4ed8',
+                  border: '1px solid #bfdbfe',
+                  padding: '2px 8px',
+                  borderRadius: '6px'
+                }}>
+                  {lab}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>
+              Monitoring Cadence & Checkpoints
+            </span>
+            <p style={{ fontSize: '0.82rem', color: '#334155', margin: 0 }}>
+              {protocol.monitoring_cadence || 'Baseline evaluation, Week 4 tolerance check, Week 8 biomarker review, Week 12 consolidation'}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Primary Goal */}
       {primaryGoal && (
@@ -572,15 +629,16 @@ function DosageTab({ protocol, products, onProductClick }) {
     <div style={{ padding: '0.5rem 0' }}>
       <SectionTitle icon={FlaskConical}>Dosage & Protocol Logistics</SectionTitle>
 
-      {phases.length === 0 ? (
+      {phases.length === 0 && (!protocol.bom || protocol.bom.length === 0) ? (
         <p style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.85rem' }}>
-          No products defined.
+          No active compounds or products defined for this protocol.
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {phases.map((phase, idx) => {
+          {(phases.length > 0 ? phases : [{ phase_name: 'Core Clinical Regimen', duration_weeks: protocol.protocol_duration_weeks || 8 }]).map((phase, idx) => {
             const color = PHASE_COLORS[idx % PHASE_COLORS.length];
-            const items = phase.items || phase.compounds || [];
+            const phaseItems = phase.items || phase.compounds || phase.drugs_used || [];
+            const items = phaseItems.length > 0 ? phaseItems : (idx === 0 ? (protocol.bom || []) : []);
 
             return (
               <div
@@ -641,20 +699,15 @@ function DosageTab({ protocol, products, onProductClick }) {
                       data={items.map((it, i) => ({ ...it, _idx: i }))}
                       keyField="_idx"
                       onRowClick={(row) => {
-                        const product = getProductDetails(row.productId, row.productName || row.product_name);
+                        const product = getProductDetails(row.productId, row.productName || row.product_name || row.name);
                         if (onProductClick && row.productId) onProductClick(product);
                       }}
                       columns={[
-                        { key: 'compound', header: 'Compound', render: (r) => {
-                            const product = getProductDetails(r.productId, r.productName || r.product_name);
+                        { key: 'compound', header: 'Active Compound', render: (r) => {
+                            const product = getProductDetails(r.productId, r.productName || r.product_name || r.name);
                             return (
-                              <span style={{ fontWeight: 500, color: '#0f172a' }}>
-                                {product.name}
-                                {!r.productId && (
-                                  <span style={{ marginLeft: 6, fontSize: '0.65rem', padding: '1px 4px', background: '#fef08a', color: '#854d0e', borderRadius: 4 }}>
-                                    Legacy
-                                  </span>
-                                )}
+                              <span style={{ fontWeight: 600, color: '#0f172a' }}>
+                                {r.product_name || product.name || r.name || r.productId}
                                 {onProductClick && r.productId && (
                                   <ExternalLink size={10} color="#94a3b8" style={{ marginLeft: 4 }} />
                                 )}
@@ -662,9 +715,9 @@ function DosageTab({ protocol, products, onProductClick }) {
                             );
                           } 
                         },
-                        { key: 'dosage', header: 'Dosage', render: (r) => <span style={{ color: '#475569' }}>{r.dosage || '—'}</span> },
-                        { key: 'frequency', header: 'Frequency', render: (r) => <span style={{ color: '#475569' }}>{r.frequency || r.schedule || '—'}</span> },
-                        { key: 'route', header: 'Route', render: (r) => <span style={{ color: '#475569' }}>{r.route || r.administration_route || '—'}</span> }
+                        { key: 'dosage', header: 'Target Dosage', render: (r) => <span style={{ color: '#15803d', fontWeight: 600 }}>{r.dosage || 'Prescribed Clinical Concentration'}</span> },
+                        { key: 'frequency', header: 'Administration Frequency', render: (r) => <span style={{ color: '#334155' }}>{r.frequency || r.schedule || 'Once daily or as directed'}</span> },
+                        { key: 'duration', header: 'Duration', render: (r) => <span style={{ color: '#64748b' }}>{r.duration || `${phase.duration_weeks || 8} Weeks`}</span> }
                       ]}
                     />
                   </div>

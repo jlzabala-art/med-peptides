@@ -119,14 +119,14 @@ export default function PriceListImportModal({ onClose, onImportSuccess, onAddTo
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '800px', width: '90%' }}>
-        <div className="modal-header">
+    <div className="cal-dialog-overlay" onClick={onClose}>
+      <div className="cal-dialog" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="cal-dialog-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Sparkles size={24} color="#8b5cf6" />
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>Atlas AI Import</h2>
           </div>
-          <button onClick={onClose} className="icon-btn"><X size={20} /></button>
+          <button onClick={onClose} className="icon-btn" style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
         </div>
 
         <div className="modal-body" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

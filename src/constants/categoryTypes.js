@@ -6,21 +6,22 @@
  */
 
 export const CATEGORY_TYPES = {
-  PEPTIDE:         'peptide',          // All peptides (monotherapies and blends)
-  SUPPLEMENT:      'supplement',       // Capsules, nutraceuticals, oral supplements
-  DIAGNOSTIC:      'diagnostic',       // Blood draw, DNA kits, biomarker tests
-  RAW_MATERIAL:    'raw_material',     // API, compounding raw materials, excipients
-  SERVICE:         'service',          // Digital services, SaaS, subscriptions
+  PEPTIDE:             'peptide',              // All peptides (monotherapies and blends)
+  SUPPLEMENT:          'supplement',           // Capsules, nutraceuticals, oral supplements
+  GENOMICS_BIOMARKERS: 'genomics_biomarkers',  // Non-diagnostic genomic panels, DNA tests, biomarker kits
+  RAW_MATERIAL:        'raw_material',         // API, compounding raw materials, excipients
+  SERVICE:             'service',              // Digital services, SaaS, subscriptions
 };
 
 export const VALID_CATEGORIES = new Set(Object.values(CATEGORY_TYPES));
 
 export const CATEGORY_LABELS = {
-  peptide:         'Peptide',
-  supplement:      'Supplement & Nutraceutical',
-  diagnostic:      'Diagnostic & Biomarker Test',
-  raw_material:    'Raw Material / API',
-  service:         'Digital Service / SaaS',
+  peptide:             'Peptide',
+  supplement:          'Supplement & Nutraceutical',
+  genomics_biomarkers: 'Genomics & Biomarkers',
+  diagnostic:          'Genomics & Biomarkers',
+  raw_material:        'Raw Material / API',
+  service:             'Digital Service / SaaS',
 };
 
 export const CATEGORY_ALIASES = {
@@ -39,13 +40,17 @@ export const CATEGORY_ALIASES = {
   'capsules & consumables':    'supplement',
   'capsules_and_consumables':  'supplement',
 
-  // Diagnostics & Tests
-  'diagnostic':                'diagnostic',
-  'dna_test':                  'diagnostic',
-  'test_kit':                  'diagnostic',
-  'biomarker_test':            'diagnostic',
-  'blood_analysis':            'diagnostic',
-  'proteomics':                'diagnostic',
+  // Genomics, DNA Panels & Biomarkers (Formerly Diagnostic)
+  'genomics_biomarkers':       'genomics_biomarkers',
+  'genomics':                  'genomics_biomarkers',
+  'genetic_test':              'genomics_biomarkers',
+  'diagnostic':                'genomics_biomarkers',
+  'diagnostic_test':           'genomics_biomarkers',
+  'dna_test':                  'genomics_biomarkers',
+  'test_kit':                  'genomics_biomarkers',
+  'biomarker_test':            'genomics_biomarkers',
+  'blood_analysis':            'genomics_biomarkers',
+  'proteomics':                'genomics_biomarkers',
 
   // Raw Materials
   'raw_material':              'raw_material',

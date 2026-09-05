@@ -36,5 +36,28 @@ export const CLINICAL_GOALS = [
   { id: 'fertility',             label: 'Fertility',                icon: Flame      },
 ];
 
+export const GOAL_ALIASES = {
+  'fat_loss': 'Fat Loss & Metabolic Health',
+  'weight_loss': 'Weight Loss & Metabolic Health',
+  'weight_loss_glp1': 'Weight Loss / GLP-1',
+  'hair_loss': 'Hair Loss & Follicular Health',
+  'nutricosmetics': 'Nutricosmetics & Aesthetics',
+  'raw_material': 'Raw Material API / Compounding',
+  'supplement': 'Nutritional Supplement',
+  'skincare': 'Clinical Skincare',
+  'logistics_service': 'Clinical Logistics Service',
+  'genomics_biomarkers': 'Genomics & Biomarkers'
+};
+
 export const getGoalById    = (id) => CLINICAL_GOALS.find(g => g.id === id);
-export const getGoalLabel   = (id) => getGoalById(id)?.label || id;
+export const getGoalLabel   = (id) => {
+  if (!id || typeof id !== 'string') return id || '';
+  const match = getGoalById(id);
+  if (match) return match.label;
+  if (GOAL_ALIASES[id.toLowerCase()]) return GOAL_ALIASES[id.toLowerCase()];
+  return id
+    .replace(/_/g, ' ')
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+};
+

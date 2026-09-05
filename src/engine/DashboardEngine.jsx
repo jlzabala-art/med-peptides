@@ -12,6 +12,9 @@ import { useTranslation } from 'react-i18next';
 
 import DashboardCustomizer from './DashboardCustomizer';
 import { Settings, X } from '@/lib/icons';
+import PatientCommandHub from '../components/patient/PatientCommandHub';
+import SupplierCommandHub from '../components/supplier/SupplierCommandHub';
+import WholesalerCommandHub from '../components/wholesaler/WholesalerCommandHub';
 
 export default function DashboardEngine({ role, dataContext }) {
   const { user } = useAuth();
@@ -91,6 +94,11 @@ export default function DashboardEngine({ role, dataContext }) {
 
   return (
     <div style={{ position: 'relative' }}>
+      {/* Role-Specific Action Command Hub */}
+      {role === 'patient' && <PatientCommandHub userId={dataContext?.uid || user?.uid} />}
+      {role === 'supplier' && <SupplierCommandHub userId={dataContext?.uid || user?.uid} />}
+      {(role === 'wholesaler' || role === 'wholeseller') && <WholesalerCommandHub userId={dataContext?.uid || user?.uid} />}
+
       {/* Customize Button */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
         <button 

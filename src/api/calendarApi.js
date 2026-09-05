@@ -95,23 +95,52 @@ function mapSnapshotToEvents(snap) {
  * @returns {Function} unsubscribe – call to tear down the listener
  */
 export function subscribeToCalendarEvents(uid, callback, onError) {
-  const q = query(
+  const primaryQ = query(
     collection(db, 'calendar_events'),
     where('ownerIds', 'array-contains', uid),
     orderBy('start', 'asc')
   );
 
-  return onSnapshot(
-    q,
+  let unsub = null;
+
+  const setupFallback = () => {
+    const fallbackQ = query(
+      collection(db, 'calendar_events'),
+      where('ownerIds', 'array-contains', uid)
+    );
+    return onSnapshot(
+      fallbackQ,
+      (snap) => {
+        const raw = mapSnapshotToEvents(snap).sort((a, b) => new Date(a.start || 0) - new Date(b.start || 0));
+        callback(detectConflicts(raw));
+      },
+      (err) => {
+        if (onError) onError(err);
+      }
+    );
+  };
+
+  unsub = onSnapshot(
+    primaryQ,
     (snap) => {
       const raw = mapSnapshotToEvents(snap);
       callback(detectConflicts(raw));
     },
     (err) => {
-      console.error('[calendarApi] onSnapshot error:', err);
-      if (onError) onError(err);
+      if (err?.message?.includes('index') || err?.code === 'failed-precondition') {
+        console.warn('[calendarApi] Firestore composite index building, seamlessly using client-sorted fallback');
+        if (typeof unsub === 'function') unsub();
+        unsub = setupFallback();
+      } else {
+        console.error('[calendarApi] onSnapshot error:', err);
+        if (onError) onError(err);
+      }
     }
   );
+
+  return () => {
+    if (typeof unsub === 'function') unsub();
+  };
 }
 
 // ─── Mutations ───────────────────────────────────────────────────────────────

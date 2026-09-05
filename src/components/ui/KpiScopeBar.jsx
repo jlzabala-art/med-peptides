@@ -44,20 +44,27 @@ export default function KpiScopeBar({
         .kpi-scope-btn-text-desktop {
           display: inline;
         }
+        .kpi-scope-label-mobile-hide {
+          display: inline;
+        }
         @media (max-width: 640px) {
           .kpi-scope-bar {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.4rem;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 0.35rem;
+            margin-bottom: 0.35rem;
+          }
+          .kpi-scope-label-mobile-hide {
+            display: none !important;
           }
           .kpi-scope-switcher {
-            width: 100%;
+            width: auto !important;
+            flex-shrink: 0;
           }
           .kpi-scope-switcher > button {
-            flex: 1;
-            text-align: center;
-            justify-content: center;
-            padding: 6px 4px !important;
+            padding: 3px 8px !important;
+            font-size: 0.7rem !important;
           }
           .kpi-scope-btn-text-mobile {
             display: inline;
@@ -69,7 +76,7 @@ export default function KpiScopeBar({
       `}</style>
       <div className="kpi-scope-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-text-secondary, #64748b)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span className="kpi-scope-label-mobile-hide" style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-text-secondary, #64748b)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Metrics Scope:
           </span>
           <span style={{ 
@@ -107,7 +114,7 @@ export default function KpiScopeBar({
                 {filteredLabel} {isFiltered && filteredCount != null && `(${filteredCount})`}
               </span>
               <span className="kpi-scope-btn-text-mobile">
-                Filtered {filteredCount != null ? `(${filteredCount})` : ''}
+                {String(filteredLabel).split('·')[0].split('Prods')[0].trim()}
               </span>
             </button>
             <button
@@ -130,7 +137,7 @@ export default function KpiScopeBar({
                 {globalLabel} {globalCount != null && `(${globalCount})`}
               </span>
               <span className="kpi-scope-btn-text-mobile">
-                All Global {globalCount != null ? `(${globalCount})` : ''}
+                {String(globalLabel).split('·')[0].split('Prods')[0].trim()}
               </span>
             </button>
           </div>

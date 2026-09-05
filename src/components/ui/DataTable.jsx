@@ -39,6 +39,8 @@ export default function DataTable({
   hasPrevPage,
   onNextPage,
   onPrevPage,
+  statusText = 'Data up to date',
+  showStatusFooter = true,
   paginationText,
   // Batch Actions
   renderBatchActions,
@@ -1338,133 +1340,185 @@ export default function DataTable({
       </div>
 
       {/* Pagination Footer (Google Cloud Style) */}
-      {!hidePagination && pagination !== false && (onPageChange || sortedData.length > (activeRowsPerPage || 25) || (totalItems > 0 && totalItems > (activeRowsPerPage || 25))) && (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          padding: '8px 24px',
-          borderTop: '1px solid var(--color-border)',
-          backgroundColor: 'var(--color-bg-app)',
-          gap: '24px',
-          minHeight: '48px',
-        }}
-      >
-        {/* Rows per page selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rows per page:</span>
-          <select
-            value={activeRowsPerPage}
-            onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              fontSize: '12px',
-              color: 'var(--color-text-primary)',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none',
-            }}
-          >
-            {[25, 50, 100].map((val) => (
-              <option key={`rpp-${val}`} value={val}>
-                {val}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Item count (e.g. 1-20 of 152) */}
-        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-          {paginationText || (() => {
-            const total = onPageChange ? totalItems : sortedData.length;
-            if (total === 0) return '0-0 of 0';
-            const start = (activePage - 1) * activeRowsPerPage + 1;
-            const end = Math.min(activePage * activeRowsPerPage, total);
-            return `${start}-${end} of ${total}`;
-          })()}
-        </span>
-
-        {/* Pagination controls */}
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => (onPrevPage ? onPrevPage() : handlePageChange(activePage - 1))}
-            disabled={hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1}
+      {!hidePagination && pagination !== false && (
+        <>
+          <div
             style={{
               display: 'flex',
+              justifyContent: 'flex-end',
               alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              borderRadius: '4px',
-              border: 'none',
-              background: 'transparent',
-              color: (hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)
-                ? 'var(--color-border)'
-                : 'var(--color-text-primary)',
-              cursor: (hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)
-                ? 'not-allowed'
-                : 'pointer',
+              padding: '10px 24px',
+              borderTop: '1px solid var(--color-border, #e2e8f0)',
+              backgroundColor: '#ffffff',
+              gap: '24px',
+              minHeight: '48px',
             }}
           >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={() => {
-              if (onPageChange) {
-                if (onNextPage) onNextPage();
-                else handlePageChange(activePage + 1);
-              } else {
-                const isLastLocalPage = activePage >= Math.ceil(sortedData.length / activeRowsPerPage);
-                if (isLastLocalPage && onNextPage) {
-                  onNextPage();
-                  handlePageChange(activePage + 1);
-                } else {
-                  handlePageChange(activePage + 1);
+            {/* Rows per page selector */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500 }}>Rows per page:</span>
+              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                <select
+                  value={activeRowsPerPage}
+                  onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+                  style={{
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '3px 24px 3px 10px',
+                    backgroundColor: '#ffffff',
+                    fontSize: '13px',
+                    color: 'var(--color-text-primary, #0f172a)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    outline: 'none',
+                  }}
+                >
+                  {[25, 50, 100].map((val) => (
+                    <option key={`rpp-${val}`} value={val}>
+                      {val}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ position: 'absolute', right: '6px', pointerEvents: 'none', fontSize: '11px', color: '#64748b' }}>↕</span>
+              </div>
+            </div>
+
+            {/* Item count (e.g. 1-25 of 460) */}
+            <span style={{ fontSize: '13px', color: 'var(--text-muted, #64748b)', fontWeight: 500, letterSpacing: '0.01em' }}>
+              {paginationText || (() => {
+                const total = (totalItems != null && totalItems > 0) ? totalItems : sortedData.length;
+                if (total === 0) return '0-0 of 0';
+                const start = (activePage - 1) * activeRowsPerPage + 1;
+                const end = Math.min(activePage * activeRowsPerPage, total);
+                return `${start}-${end} of ${total}`;
+              })()}
+            </span>
+
+            {/* Pagination controls */}
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                onClick={() => (onPrevPage ? onPrevPage() : handlePageChange(activePage - 1))}
+                disabled={hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1}
+                title="Previous page"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: (hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)
+                    ? '#cbd5e1'
+                    : '#475569',
+                  cursor: (hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)
+                    ? 'not-allowed'
+                    : 'pointer',
+                  transition: 'background-color 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!(hasPrevPage !== undefined ? !hasPrevPage : activePage <= 1)) {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={() => {
+                  if (onPageChange) {
+                    if (onNextPage) onNextPage();
+                    else handlePageChange(activePage + 1);
+                  } else {
+                    const nextPg = activePage + 1;
+                    const neededCount = nextPg * activeRowsPerPage;
+                    if (neededCount > sortedData.length && onNextPage) {
+                      onNextPage();
+                    }
+                    handlePageChange(nextPg);
+                  }
+                }}
+                disabled={
+                  hasNextPage !== undefined && !hasNextPage && (activePage >= Math.ceil(sortedData.length / activeRowsPerPage))
+                    ? true
+                    : (totalItems != null && totalItems > 0)
+                      ? activePage >= Math.ceil(totalItems / activeRowsPerPage)
+                      : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
                 }
-              }
-            }}
-            disabled={
-              hasNextPage !== undefined
-                ? !hasNextPage
-                : onPageChange
-                  ? (totalPages ? activePage >= totalPages : true)
-                  : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
-            }
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '32px',
-              height: '32px',
-              borderRadius: '4px',
-              border: 'none',
-              background: 'transparent',
-              color: (
-                hasNextPage !== undefined
-                  ? !hasNextPage
-                  : onPageChange
-                    ? (totalPages ? activePage >= totalPages : true)
-                    : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
-              )
-                ? 'var(--color-border)'
-                : 'var(--color-text-primary)',
-              cursor: (
-                hasNextPage !== undefined
-                  ? !hasNextPage
-                  : onPageChange
-                    ? (totalPages ? activePage >= totalPages : true)
-                    : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
-              )
-                ? 'not-allowed'
-                : 'pointer',
-            }}
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
-      </div>
+                title="Next page"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: (
+                    hasNextPage !== undefined
+                      ? !hasNextPage
+                      : onPageChange
+                        ? (totalPages ? activePage >= totalPages : true)
+                        : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
+                  )
+                    ? '#cbd5e1'
+                    : '#475569',
+                  cursor: (
+                    hasNextPage !== undefined
+                      ? !hasNextPage
+                      : onPageChange
+                        ? (totalPages ? activePage >= totalPages : true)
+                        : activePage >= Math.ceil(sortedData.length / activeRowsPerPage)
+                  )
+                    ? 'not-allowed'
+                    : 'pointer',
+                  transition: 'background-color 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  const isDisabled = hasNextPage !== undefined
+                    ? !hasNextPage
+                    : onPageChange
+                      ? (totalPages ? activePage >= totalPages : true)
+                      : activePage >= Math.ceil(sortedData.length / activeRowsPerPage);
+                  if (!isDisabled) {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+
+          {showStatusFooter && (
+            <div
+              style={{
+                padding: '10px 24px',
+                borderTop: '1px solid var(--color-border, #e2e8f0)',
+                backgroundColor: 'var(--color-bg-subtle, #f8fafc)',
+                fontSize: '13px',
+                color: 'var(--text-muted, #64748b)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                letterSpacing: '0.01em',
+              }}
+            >
+              {statusText}
+            </div>
+          )}
+        </>
       )}
       {/* Mobile Contextual Action Bar — reserved for mobile touch layout */}
       

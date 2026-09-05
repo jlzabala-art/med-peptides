@@ -80,6 +80,19 @@ export default function VariantAccordion({
   // Active nature (API in Grams vs Clinical Units)
   const activeIsApi = variantTypeFilter === 'raw_material' || (variantTypeFilter === 'all' && rawCount > 0 && finishedCount === 0) || isApi;
 
+  const isService = selectedProduct?.category?.toLowerCase().includes('service') ||
+                    selectedProduct?.category?.toLowerCase().includes('subscription') ||
+                    selectedProduct?.productType === 'service' ||
+                    selectedProduct?.primaryType === 'service' ||
+                    selectedProduct?.product_type === 'service';
+
+  const isGenomicsOrTest = selectedProduct?.category?.toLowerCase().includes('genom') ||
+                           selectedProduct?.category?.toLowerCase().includes('biomarker') ||
+                           selectedProduct?.category === 'genomics_biomarkers' ||
+                           selectedProduct?.category?.toLowerCase().includes('diagnostic') ||
+                           selectedProduct?.productType === 'genomics_biomarkers' ||
+                           selectedProduct?.product_type === 'dna_testing_kit';
+
   // Filter variants by type first
   const typeFilteredVariants = useMemo(() => {
     if (variantTypeFilter === 'finished') return sortedVariants.filter(v => !isVariantRaw(v));
@@ -289,8 +302,36 @@ export default function VariantAccordion({
           paddingTop: '0.5rem',
           borderTop: '1px solid #edf2f7'
         }}>
-          {/* Left: Volume / Weight Range selector ONLY when not in mixed all-view */}
-          {(!hasMixedTypes || variantTypeFilter !== 'all') ? (
+          {/* Left: Volume / Weight Range selector OR Domain indicator for Services / Genomics */}
+          {isService ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: '#0284c7',
+                background: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                padding: '3px 10px',
+                borderRadius: '6px'
+              }}>
+                ⚡ Subscription & Recurring Billing Plans
+              </span>
+            </div>
+          ) : isGenomicsOrTest ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: '#4338ca',
+                background: '#eef2ff',
+                border: '1px solid #c7d2fe',
+                padding: '3px 10px',
+                borderRadius: '6px'
+              }}>
+                🧬 Non-Diagnostic Screening & Genomic Lab Panels
+              </span>
+            </div>
+          ) : (!hasMixedTypes || variantTypeFilter !== 'all') ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
               <span style={{
                 fontSize: '0.72rem',

@@ -8,13 +8,19 @@ import { triggerHaptic } from '../../utils/haptics';
 
 export default function RelatedProductsCarousel({
   productId,
+  productObjectID,
   category = '',
   goals = [],
-  title = 'Compuestos Sinergicos y Relacionados',
-  subtitle = 'Recomendaciones clínicas basadas en mecanismos de acción complementarios',
+  title = 'Synergistic & Related Compounds',
+  subtitle = 'Clinical recommendations based on complementary mechanisms of action',
+  maxItems = 4,
+  maxRecommendations,
 }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const effectiveId = productId || productObjectID;
+  const effectiveMax = maxRecommendations || maxItems || 4;
 
   useEffect(() => {
     let isMounted = true;
@@ -22,10 +28,10 @@ export default function RelatedProductsCarousel({
       setLoading(true);
       try {
         const items = await getRelatedProducts({
-          objectID: productId,
+          objectID: effectiveId,
           category,
           goals,
-          maxRecommendations: 4,
+          maxRecommendations: effectiveMax,
         });
         if (isMounted) setRecommendations(items);
       } catch (e) {
@@ -34,9 +40,9 @@ export default function RelatedProductsCarousel({
         if (isMounted) setLoading(false);
       }
     }
-    if (productId) load();
+    if (effectiveId) load();
     return () => { isMounted = false; };
-  }, [productId, category, JSON.stringify(goals)]);
+  }, [effectiveId, category, JSON.stringify(goals), effectiveMax]);
 
   if (!loading && recommendations.length === 0) return null;
 
@@ -81,7 +87,7 @@ export default function RelatedProductsCarousel({
         ) : (
           recommendations.map((item) => {
             const slug = item.slug || item.id || item.objectID;
-            const name = item.name || item.title || 'Compuesto';
+            const name = item.name || item.title || 'Compound';
             const cat = item.categoryId || item.category || 'Peptide';
             const itemGoals = Array.isArray(item.goals) ? item.goals.slice(0, 2) : [];
 

@@ -244,7 +244,10 @@ const renderStructuredReferences = (doc, yPos, evidence) => {
  */
 const summarizeToBullets = (text, max = 5) => {
   if (!text) return [];
-  const lines = text.split(/\n|•|(?<=\.)\s+/)
+  // Safari-safe: split by newline, bullet, or period followed by space
+  const lines = text
+    .replace(/\.\s+/g, '.\n')
+    .split(/\n|•/)
     .map(line => line.trim())
     .filter(line => line.length > 5);
   return lines.slice(0, max);

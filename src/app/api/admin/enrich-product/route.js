@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { calculateProductCompleteness } from '@/utils/calculateProductCompleteness';
 import { enrichProductDocument } from '@/services/clinicalEnrichmentEngine';
+import { resolveCasNumber } from '@/utils/casResolver';
 
 export async function POST(request) {
   try {
@@ -59,19 +60,67 @@ export async function POST(request) {
     let enriched = await enrichProductDocument(productData);
 
     // If still missing PubChem CID or AI Description, try to fetch them dynamically
-    const nameToFetch = enriched.canonicalName || enriched.name;
+    const rawNameToFetch = enriched.canonicalName || enriched.name || '';
+    const cleanChemName = rawNameToFetch
+      .replace(/\b(usp|ep|bp|ph\.?\s*eur|api|bulk|powder|pure|grade|sterile|solution)\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     
-    // 1. Fetch PubChem CID dynamically if missing
+    // 1. Fetch PubChem CID and chemical properties dynamically if missing
     if (!enriched.scientificData?.pubchemCid && !enriched.pubchemCid) {
       try {
-        const pubchemRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(nameToFetch)}/cids/JSON`);
+        const pubchemRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(cleanChemName)}/cids/JSON`);
         if (pubchemRes.ok) {
           const pbData = await pubchemRes.json();
           if (pbData.IdentifierList?.CID?.[0]) {
             const cid = String(pbData.IdentifierList.CID[0]);
             enriched.pubchemCid = cid;
-            if (enriched.scientificData) enriched.scientificData.pubchemCid = cid;
-            if (enriched.molecular) enriched.molecular.pubchemCid = cid;
+            if (!enriched.scientificData) enriched.scientificData = {};
+            if (!enriched.molecular) enriched.molecular = {};
+            enriched.scientificData.pubchemCid = cid;
+            enriched.molecular.pubchemCid = cid;
+
+            try {
+              const propsRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularWeight,MolecularFormula,IUPACName/JSON`);
+              if (propsRes.ok) {
+                const propsData = await propsRes.json();
+                const props = propsData?.PropertyTable?.Properties?.[0];
+                if (props) {
+                  if (props.MolecularWeight) {
+                    const mwStr = `${props.MolecularWeight} g/mol`;
+                    enriched.molecularWeight = mwStr;
+                    enriched.scientificData.molecularWeight = mwStr;
+                    enriched.molecular.molecularWeight = mwStr;
+                  }
+                  if (props.MolecularFormula) {
+                    enriched.molecularFormula = props.MolecularFormula;
+                    enriched.scientificData.molecularFormula = props.MolecularFormula;
+                    enriched.molecular.molecularFormula = props.MolecularFormula;
+                  }
+                  if (props.IUPACName) {
+                    enriched.scientificData.iupacName = props.IUPACName;
+                  }
+                }
+              }
+
+              // Extract CAS Number from PubChem synonyms if missing
+              if (!enriched.casNumber || enriched.casNumber === 'Available on Request') {
+                const synRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/synonyms/JSON`);
+                if (synRes.ok) {
+                  const synData = await synRes.json();
+                  const syns = synData?.InformationList?.Information?.[0]?.Synonym || [];
+                  const foundCas = syns.find(s => /^\d{2,7}-\d{2}-\d$/.test(s.trim()));
+                  if (foundCas) {
+                    const cleanCas = foundCas.trim();
+                    enriched.casNumber = cleanCas;
+                    enriched.molecular.casNumber = cleanCas;
+                    enriched.scientificData.casNumber = cleanCas;
+                  }
+                }
+              }
+            } catch (pErr) {
+              console.warn('PubChem properties/synonyms fetch error:', pErr.message);
+            }
           }
         }
       } catch (e) {
@@ -86,7 +135,7 @@ export async function POST(request) {
         const aiRes = await fetch(`${baseUrl}/api/ai-enrich-product-details`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productName: nameToFetch, category: enriched.category })
+          body: JSON.stringify({ productName: rawNameToFetch, category: enriched.category })
         });
         
         if (aiRes.ok) {
@@ -101,10 +150,30 @@ export async function POST(request) {
               enriched.sequence = aiData.data.sequence;
               if (enriched.scientificData) enriched.scientificData.sequence = aiData.data.sequence;
             }
+            if (aiData.data.casNumber && (!enriched.casNumber || enriched.casNumber === 'Available on Request')) {
+              const aiCas = aiData.data.casNumber.trim();
+              enriched.casNumber = aiCas;
+              if (!enriched.molecular) enriched.molecular = {};
+              if (!enriched.scientificData) enriched.scientificData = {};
+              enriched.molecular.casNumber = aiCas;
+              enriched.scientificData.casNumber = aiCas;
+            }
           }
         }
       } catch (e) {
         console.warn('Failed to fetch AI Clinical Overview:', e.message);
+      }
+    }
+
+    // 3. Fallback CAS resolution via casResolver
+    if (!enriched.casNumber || enriched.casNumber === 'Available on Request') {
+      const autoCas = await resolveCasNumber(rawNameToFetch, enriched.category || enriched.categoryId);
+      if (autoCas) {
+        enriched.casNumber = autoCas;
+        if (!enriched.molecular) enriched.molecular = {};
+        if (!enriched.scientificData) enriched.scientificData = {};
+        enriched.molecular.casNumber = autoCas;
+        enriched.scientificData.casNumber = autoCas;
       }
     }
 

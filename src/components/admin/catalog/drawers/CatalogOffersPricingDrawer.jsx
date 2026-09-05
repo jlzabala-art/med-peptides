@@ -7,7 +7,9 @@ import VariantCompetitorComparisonTable from '../VariantCompetitorComparisonTabl
 import { 
   buildSharedCols, 
   buildPeptideColumns, 
-  buildGeneticTestColumns, 
+  buildGeneticTestColumns,
+  buildGenomicsColumns,
+  buildServiceColumns,
   buildApiColumns 
 } from '../columns/catalogColumns';
 import { UploadCloud, FileText, Share2, Layers, TrendingUp, Copy, Star } from 'lucide-react';
@@ -84,10 +86,24 @@ export default function CatalogOffersPricingDrawer({
     }
   }, [isOpen, selectedProduct?.id]);
 
-  const isTest = selectedProduct?.category?.toLowerCase().includes('test') || 
+  const isGenomics = selectedProduct?.category?.toLowerCase().includes('genom') || 
+                     selectedProduct?.category?.toLowerCase().includes('biomarker') || 
+                     selectedProduct?.category === 'genomics_biomarkers' ||
+                     selectedProduct?.product_type === 'genomics_biomarkers' ||
+                     selectedProduct?.product_type === 'dna_testing_kit' || 
+                     selectedProduct?.product_type === 'biomarker_testing_kit' ||
+                     selectedProduct?.primaryType === 'genomics_biomarkers' ||
+                     selectedProduct?.availableTypes?.includes('genomics_biomarkers');
+
+  const isService = selectedProduct?.category?.toLowerCase().includes('service') || 
+                    selectedProduct?.category?.toLowerCase().includes('subscription') || 
+                    selectedProduct?.productType === 'service' || 
+                    selectedProduct?.primaryType === 'service' ||
+                    selectedProduct?.product_type === 'service';
+
+  const isTest = isGenomics ||
+                 selectedProduct?.category?.toLowerCase().includes('test') || 
                  selectedProduct?.product_type?.toLowerCase().includes('test') || 
-                 selectedProduct?.product_type === 'dna_testing_kit' || 
-                 selectedProduct?.product_type === 'biomarker_testing_kit' ||
                  selectedProduct?.availableTypes?.includes('diagnostic') ||
                  selectedProduct?.primaryType === 'diagnostic';
 
@@ -378,6 +394,43 @@ export default function CatalogOffersPricingDrawer({
     }
   }), [commercialChannel, priceView, displayCurrency, settings, currencySymbol, selectedProduct]);
 
+  const activeMonthlyCol = useMemo(() => ({
+    key: 'price_per_month',
+    header: commercialChannel === 'cost' ? 'Cost / mo' : 'Price / mo',
+    width: '110px',
+    nowrap: true,
+    render: (v) => {
+      const res = resolveChannelPrice(v, commercialChannel, priceView);
+      const rawUsd = res.price;
+      if (!rawUsd || rawUsd <= 0) return <span style={{ color: '#94a3b8' }}>—</span>;
+
+      const interval = (v.billingInterval || v.cadence || v.billingCycle || '').toLowerCase();
+      const months = v.periodMonths || (interval.includes('annual') || interval.includes('year') ? 12 : 1);
+
+      let convertedPerMonth = rawUsd / months;
+      if (displayCurrency === 'EUR') {
+        convertedPerMonth *= (settings?.exchangeRates?.euro || 0.92);
+      }
+      if (displayCurrency === 'AED') {
+        convertedPerMonth *= (settings?.exchangeRates?.uae || 3.67);
+      }
+
+      const isAnnual = months === 12;
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.2' }}>
+          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#003666' }}>
+            {currencySymbol}{convertedPerMonth.toFixed(2)}/mo
+          </span>
+          {isAnnual && (
+            <span style={{ fontSize: '0.62rem', fontWeight: 700, color: '#059669' }}>
+              Billed annually
+            </span>
+          )}
+        </div>
+      );
+    }
+  }), [commercialChannel, priceView, displayCurrency, settings, currencySymbol]);
+
   const marginCol = useMemo(() => {
     if (commercialChannel === 'cost' || commercialChannel === 'all') return null;
     return {
@@ -553,6 +606,7 @@ export default function CatalogOffersPricingDrawer({
     handleCloneVariant,
     activePriceCol,
     activeMgCol,
+    activeMonthlyCol,
     marginCol,
     waterfallCols,
     actionCol,
@@ -563,8 +617,10 @@ export default function CatalogOffersPricingDrawer({
   };
 
   const peptideCols = useMemo(() => buildPeptideColumns(columnParams), [columnParams]);
-  const testCols = useMemo(() => buildGeneticTestColumns(columnParams), [columnParams]);
+  const testCols = useMemo(() => buildGenomicsColumns(columnParams), [columnParams]);
   const apiCols = useMemo(() => buildApiColumns(columnParams), [columnParams]);
+  const serviceCols = useMemo(() => buildServiceColumns(columnParams), [columnParams]);
+  const activeVariantCols = isService ? serviceCols : (isGenomics || isTest ? testCols : (isApi ? apiCols : peptideCols));
 
   if (!isOpen || !selectedProduct) return null;
 
@@ -761,7 +817,7 @@ export default function CatalogOffersPricingDrawer({
               setDisplayCurrency={setDisplayCurrency}
               commercialChannel={commercialChannel}
               setCommercialChannel={setCommercialChannel}
-              columns={isTest ? testCols : peptideCols}
+              columns={activeVariantCols}
               apiColumns={apiCols}
               resolveSupplierName={resolveSupplierName}
               onExportPdf={handleExportProductPdf}

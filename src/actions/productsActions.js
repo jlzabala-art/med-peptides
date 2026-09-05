@@ -68,6 +68,7 @@ export async function fetchProductsMetricsAction() {
         presentationFacets: data.presentations || {},
         supplierFacets: data.suppliers || {},
         productTypeFacets: data.productTypes || {},
+        genomicsMetrics: data.genomics || null,
       }));
     }
 

@@ -147,7 +147,7 @@ const PUBLIC_STYLES = `
     z-index: 400;
     background: white;
     border-top: 1px solid #e2e8f0;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.5rem max(0.75rem, env(safe-area-inset-bottom));
     display: flex;
     gap: 0.75rem;
     justify-content: center;
@@ -158,8 +158,10 @@ const PUBLIC_STYLES = `
   .public-bottom-bar button {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.45rem;
     padding: 0.65rem 1.25rem;
+    min-height: 44px;
     border-radius: 10px;
     border: none;
     font-weight: 700;
@@ -245,14 +247,18 @@ function WaIcon() {
 }
 
 export default function PublicProductPage({ product, slug, baseUrl }) {
-  // Lazy initializer: detect browser language at mount time (no effect needed)
-  const [lang, setLang] = useState(() => {
-    if (typeof navigator === 'undefined') return 'en';
-    const browserLang = navigator.language?.slice(0, 2)?.toLowerCase();
-    return (browserLang && SUPPORTED_LANGUAGES.some(l => l.code === browserLang)) ? browserLang : 'en';
-  });
+  const [lang, setLang] = useState('en');
   const [copied, setCopied] = useState(false);
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      const browserLang = navigator.language?.slice(0, 2)?.toLowerCase();
+      if (browserLang && SUPPORTED_LANGUAGES.some(l => l.code === browserLang)) {
+        setLang(browserLang);
+      }
+    }
+  }, []);
 
   const publicUrl = `${baseUrl}/p/${slug}`;
   const t = getTranslations(lang);
@@ -314,7 +320,7 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
       <style dangerouslySetInnerHTML={{ __html: PUBLIC_STYLES }} />
 
       {/* ── Top brand banner ── */}
-      <div className="public-product-banner">
+      <div className="public-product-banner" suppressHydrationWarning>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <strong>{t.brandName}</strong>
           <span className="pbb-badge">{t.datasheetBadge}</span>
@@ -372,7 +378,7 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
       </div>
 
       {/* ── Floating bottom bar ── */}
-      <div className="public-bottom-bar">
+      <div className="public-bottom-bar" suppressHydrationWarning>
         <button className="pbb-whatsapp" onClick={handleWhatsApp}>
           <WaIcon /> {t.shareWhatsapp}
         </button>

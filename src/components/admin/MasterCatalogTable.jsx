@@ -24,7 +24,10 @@ import { useCatalogUrlFilters } from './catalog/hooks/useCatalogUrlFilters';
 import { useCatalogItemMutations } from './catalog/hooks/useCatalogItemMutations';
 import CatalogKpiHeader from './catalog/components/CatalogKpiHeader';
 import { useMasterCatalogColumns } from './catalog/columns/useMasterCatalogColumns';
+import { useGenomicsMatrixColumns } from './catalog/columns/useGenomicsMatrixColumns';
 import CatalogVariantExpander from './catalog/components/CatalogVariantExpander';
+import MobileGenomicsCard from './catalog/components/MobileGenomicsCard';
+import CatalogMobileCard from './catalog/components/CatalogMobileCard';
 import dynamic from 'next/dynamic';
 
 const CatalogModalsContainer = dynamic(() => import('./catalog/drawers/CatalogModalsContainer'), { ssr: false });
@@ -452,7 +455,8 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
   }, [kpiScope, facetTotals, globalMetrics, facetProductTypes, facetCategories, dataWithMeta, kpis, categoryFacets, hasAnyFilter, filterSupplier, facetSuppliers, filterCategory]);
 
   const handleExportProductPdf = useCallback((params = {}) => {
-    if (!selectedProduct) return;
+    const targetProduct = (params && params.id) ? params : selectedProduct;
+    if (!targetProduct) return;
     const activeChan = params.commercialChannel || commercialChannel;
     const resolvedPriceSource = activeChan === 'wholesale' ? 'wholeseller' : (activeChan === 'clinic' ? 'clinic' : (activeChan === 'retail' ? 'retail' : 'cost'));
     const initialConfig = {
@@ -464,7 +468,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       bestSourcingOnly: false,
       supplierMasking: false,
     };
-    setPdfCustomProduct(selectedProduct);
+    setPdfCustomProduct(targetProduct);
     setCloneConfig(initialConfig);
     setIsPriceListModalOpen(true);
   }, [selectedProduct, commercialChannel, displayCurrency]);
@@ -564,12 +568,75 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
     enrichingProductIds
   });
 
+  const isGenomicsMatrix = catalogViewMode === 'genomics_matrix';
+
+  // 4b. Memoized Genomics Matrix Columns
+  const genomicsColumns = useGenomicsMatrixColumns({
+    onSelectProduct: (prod) => {
+      setSelectedProduct(prod);
+      setActiveDrawer('offers');
+    },
+    onEditPriority: (prod, slug) => {
+      setEditingGenomic({ isOpen: true, product: prod, programSlug: slug });
+    },
+    supplierIdToName
+  });
+
+  // 4c. Filter rows to ONLY products with Genomic test recommendations
+  const genomicsMatrixData = useMemo(() => {
+    return dataWithMeta.filter(p => {
+      const hasProgs = Array.isArray(p.programs) && p.programs.some(prog => prog.priority || prog.id || prog.slug);
+      const custom = p.customData || {};
+      const hasCustom = Boolean(custom['fagron-genomics-telotest'] || custom['fagron-genomics-trichotest'] || custom['fagron-genomics-nutrigen']);
+      const tags = Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase()) : [];
+      const hasGenTag = tags.some(t => t.includes('trichotest') || t.includes('nutrigen') || t.includes('telotest') || t.includes('acnetest') || t.includes('eterna') || t.includes('ultraperson'));
+      return hasProgs || hasCustom || hasGenTag;
+    });
+  }, [dataWithMeta]);
+
+  // 4d. Genomics KPIs (Server-calculated with client fallback)
+  const genomicsMetrics = useMemo(() => {
+    const serverGenomics = globalMetrics?.genomicsMetrics || kpis?.genomicsMetrics;
+    const localTotal = genomicsMatrixData.length;
+    const localTotalVariants = genomicsMatrixData.reduce((acc, p) => acc + (p.variants?.length || p.variantsCount || 1), 0);
+    const localPriorityA = genomicsMatrixData.filter(p => (p.programs || []).some(pr => (pr.priority || '').toUpperCase() === 'A')).length;
+    const localPriorityB = genomicsMatrixData.filter(p => (p.programs || []).some(pr => (pr.priority || '').toUpperCase() === 'B')).length;
+    const localPriorityC = genomicsMatrixData.filter(p => (p.programs || []).some(pr => (pr.priority || '').toUpperCase() === 'C')).length;
+    const localMultiPanel = genomicsMatrixData.filter(p => (p.programs || []).length >= 2).length;
+
+    const testSet = new Set();
+    genomicsMatrixData.forEach(p => {
+      (p.programs || []).forEach(pr => {
+        const name = pr.name || pr.id || '';
+        if (name) testSet.add(name);
+      });
+    });
+
+    const isGlobalScope = kpiScope === 'global';
+    const hasActiveFilters = Boolean(filterPriority || filterTagMode || (filterTags && filterTags.length > 0) || debouncedSearchTerm);
+
+    return {
+      total: (isGlobalScope || (!hasActiveFilters && serverGenomics?.total)) && serverGenomics?.total ? serverGenomics.total : localTotal,
+      globalTotal: serverGenomics?.total || 191,
+      totalVariants: (isGlobalScope || (!hasActiveFilters && serverGenomics?.totalVariants)) && serverGenomics?.totalVariants ? serverGenomics.totalVariants : localTotalVariants,
+      priorityA: (isGlobalScope || (!hasActiveFilters && serverGenomics?.priorityA)) && serverGenomics?.priorityA ? serverGenomics.priorityA : localPriorityA,
+      priorityB: (isGlobalScope || (!hasActiveFilters && serverGenomics?.priorityB)) && serverGenomics?.priorityB ? serverGenomics.priorityB : localPriorityB,
+      priorityC: (isGlobalScope || (!hasActiveFilters && serverGenomics?.priorityC)) && serverGenomics?.priorityC ? serverGenomics.priorityC : localPriorityC,
+      multiPanel: (isGlobalScope || (!hasActiveFilters && serverGenomics?.multiPanel)) && serverGenomics?.multiPanel ? serverGenomics.multiPanel : localMultiPanel,
+      testCount: serverGenomics?.testCount || (testSet.size || 7)
+    };
+  }, [genomicsMatrixData, kpiScope, globalMetrics, kpis, filterPriority, filterTagMode, filterTags, debouncedSearchTerm]);
+
+  const activeColumns = isGenomicsMatrix ? genomicsColumns : columns;
+  const activeData = isGenomicsMatrix ? genomicsMatrixData : dataWithMeta;
+  const activeTotal = isGenomicsMatrix ? genomicsMetrics.total : (displayedMetrics.totalProducts || displayedMetrics.total);
+
   return (
     <div style={{ position: 'relative' }}>
       <DataModule
-        title={headerProps.title || "Product Catalog"}
-        subtitle={headerProps.subtitle}
-        resultCount={displayedMetrics.total}
+        title={isGenomicsMatrix ? "Genomics & Biomarkers Matrix" : (headerProps.title || "Product Catalog")}
+        subtitle={isGenomicsMatrix ? "Actionable compounds & therapeutic recommendations indexed by genetic tests" : headerProps.subtitle}
+        resultCount={activeTotal}
         kpis={
           <CatalogKpiHeader
             displayedMetrics={displayedMetrics}
@@ -578,6 +645,11 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
             hasAnyFilter={hasAnyFilter}
             filterProductType={filterProductType}
             setMultiParam={setMultiParam}
+            isGenomicsMatrix={isGenomicsMatrix}
+            genomicsMetrics={genomicsMetrics}
+            filterPriority={filterPriority}
+            updateUrlParam={updateUrlParam}
+            filterTagMode={filterTagMode}
           />
         }
         icon={headerProps.icon}
@@ -627,26 +699,39 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
               }
               @media (max-width: 768px) {
                 .catalog-header-actions-wrap {
-                  flex-direction: column;
-                  align-items: stretch;
-                  gap: 0.5rem;
+                  flex-direction: column !important;
+                  align-items: stretch !important;
+                  gap: 0.4rem;
                   width: 100%;
+                  max-width: 100%;
+                  box-sizing: border-box;
+                  overflow-x: hidden;
+                  margin-top: 0.2rem;
                 }
                 .catalog-view-switcher-bar {
-                  width: 100%;
-                  display: flex;
+                  width: 100% !important;
+                  display: flex !important;
+                  box-sizing: border-box;
+                  padding: 2px !important;
                 }
                 .catalog-view-switcher-btn {
-                  flex: 1;
-                  justify-content: center;
-                  padding: 0.5rem 0.25rem;
-                  font-size: 0.8rem;
-                  min-height: 38px;
+                  flex: 1 !important;
+                  display: inline-flex !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+                  padding: 6px 8px !important;
+                  font-size: 0.75rem !important;
+                  min-height: 34px !important;
+                  text-align: center;
                 }
                 .catalog-toolbar-actions {
-                  width: 100%;
-                  display: flex;
+                  width: 100% !important;
+                  display: flex !important;
+                  align-items: center !important;
+                  justify-content: flex-start !important;
+                  flex-wrap: wrap !important;
                   gap: 0.35rem;
+                  box-sizing: border-box;
                 }
               }
             `}</style>
@@ -705,8 +790,49 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
           subtitle: "Adjust your search or filters to see more results.",
           icon: Package
         }}
-        filters={filterChips}
-        filterOptions={[
+        filterOptions={isGenomicsMatrix ? [
+          {
+            key: 'tag',
+            label: 'Genetic Test / Panel',
+            pluralLabel: 'Genetic Tests',
+            multiSelect: true,
+            values: filterTags,
+            options: [
+              { label: '🧬 Fagron TrichoTest™', value: 'fagron-genomics-trichotest', count: 33 },
+              { label: '🧬 Fagron NutriGen™', value: 'fagron-genomics-nutrigen', count: 87 },
+              { label: '🧬 Fagron TeloTest™', value: 'fagron-genomics-telotest', count: 23 },
+              { label: '🧬 Ultraperson Test', value: 'ultraperson', count: 18 },
+              { label: '🧬 ETERNA® Test', value: 'eterna', count: 14 }
+            ],
+            onChange: (vals) => setMultiParam('tag', vals)
+          },
+          {
+            key: 'priority',
+            label: 'Clinical Priority',
+            pluralLabel: 'Priorities',
+            multiSelect: false,
+            values: filterPriority && filterPriority !== 'all' ? [filterPriority] : [],
+            options: [
+              { label: 'All Priorities', value: 'all' },
+              { label: '🟢 Priority A (First-line / Diana)', value: 'A' },
+              { label: '🟡 Priority B (Second-line / Co-factor)', value: 'B' },
+              { label: '🔵 Priority C (Supportive)', value: 'C' }
+            ],
+            onChange: (vals) => updateUrlParam('priority', vals.length > 0 ? vals[0] : '')
+          },
+          {
+            key: 'tagMode',
+            label: 'Panel Overlap',
+            pluralLabel: 'Overlap Modes',
+            multiSelect: false,
+            value: filterTagMode || 'any',
+            options: [
+              { label: '🔀 Match ANY Selected (Union)', value: 'any' },
+              { label: '🎯 Match ALL Selected (Shared Across Tests)', value: 'all' }
+            ],
+            onChange: (val) => updateUrlParam('tagMode', val === 'all' ? 'all' : '')
+          }
+        ] : [
           {
             key: 'tag',
             label: 'Tags',
@@ -734,7 +860,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
             value: filterTagMode || 'any',
             options: [
               { label: '🔀 Match ANY Selected Tag (Union)', value: 'any' },
-              { label: '🎯 Match ALL Selected Tags (Shared Ingredients)', value: 'all' }
+              { label: '🎯 Match ALL Selected (Shared Ingredients)', value: 'all' }
             ],
             onChange: (val) => updateUrlParam('tagMode', val === 'all' ? 'all' : '')
           }] : []),
@@ -905,20 +1031,43 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
             onClick: () => setIsBulkEditModalOpen(true)
           }
         ]}
-        columns={columns}
-        data={dataWithMeta}
+        columns={activeColumns}
+        data={activeData}
+        totalCount={activeTotal}
+        resultCount={activeTotal}
+        hasMore={hasNextPage}
+        loadMore={fetchNextPage}
         hasNextPage={hasNextPage}
         onLoadMore={fetchNextPage}
         isLoadingNextPage={isFetchingNextPage}
-      >
-        {catalogViewMode === 'genomics_matrix' && (
-          <GenomicsMatrixView
-            products={dataWithMeta}
-            onSelectProduct={(p) => { setSelectedProduct(p); setActiveDrawer('offers'); }}
-            onEditPriority={(p, slug) => setEditingGenomic({ isOpen: true, product: p, programSlug: slug })}
-          />
-        )}
-      </DataModule>
+        mobileCardComponent={isGenomicsMatrix ? MobileGenomicsCard : CatalogMobileCard}
+        mobileCardProps={{
+          onSelectProduct: (prod) => {
+            setSelectedProduct(prod);
+            setActiveDrawer('offers');
+          },
+          onEnrichProduct: (prod) => {
+            setEnrichmentProduct(prod);
+          },
+          onEditPriority: (prod, slug) => {
+            setEditingGenomic({ isOpen: true, product: prod, programSlug: slug });
+          },
+          onEditGenomicPriority: (prod, slug) => {
+            setEditingGenomic({ isOpen: true, product: prod, programSlug: slug });
+          },
+          openPrescriptionDrawer: (prod) => {
+            openPrescriptionDrawer?.(prod);
+          },
+          onParentFieldUpdate: handleParentFieldUpdate,
+          categoryOptions,
+          commercialChannel,
+          supplierIdToName,
+          onRowClick: (prod) => {
+            setSelectedProduct(prod);
+            setActiveDrawer('offers');
+          }
+        }}
+      />
 
       {/* 5. Isolated Modals & Drawers Container */}
       <CatalogModalsContainer

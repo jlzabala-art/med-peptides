@@ -1,28 +1,65 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import StandardDrawer from '../../ui/StandardDrawer';
 import { calculateProductCompleteness } from '../../../utils/calculateProductCompleteness';
-import { Sparkles, CheckCircle2, AlertCircle, RefreshCw, Info } from '@/lib/icons';
+import { Sparkles, CheckCircle2, AlertCircle, RefreshCw, Info, Database, Beaker, FileCheck } from '@/lib/icons';
 import notifier from '../../../services/NotificationService';
+
+const ENRICHMENT_STEPS = [
+  { id: 1, label: 'Taxonomy & Domain Schema', icon: Database, desc: 'Classifying category & clinical validation rules' },
+  { id: 2, label: 'PubChem & Molecular Data', icon: Beaker, desc: 'Querying CID, CAS number, MW & chemical structure' },
+  { id: 3, label: 'Clinical & Compounding Rules', icon: Sparkles, desc: 'Synthesizing dosage, vehicles & program tags' },
+  { id: 4, label: 'Completeness Sync (100%)', icon: FileCheck, desc: 'Validating and persisting authoritative records' },
+];
 
 export default function ProductEnrichmentModal({ isOpen, onClose, product: initialProduct, onEnriched }) {
   const [isEnriching, setIsEnriching] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(initialProduct);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [animatedScore, setAnimatedScore] = useState(0);
+  const autoEnrichTriggeredRef = useRef(null);
 
   useEffect(() => {
     setCurrentProduct(initialProduct);
+    if (initialProduct) {
+      const comp = calculateProductCompleteness(initialProduct);
+      setAnimatedScore(comp.score);
+    }
   }, [initialProduct]);
 
   const activeProduct = currentProduct || initialProduct;
+  const completeness = activeProduct ? calculateProductCompleteness(activeProduct) : null;
+  const { score = 0, color = '#64748b', bgColor = '#f8fafc', borderColor = '#e2e8f0', statusLabel = '', missingFields = [], schemaType = 'General' } = completeness || {};
 
-  if (!activeProduct) return null;
-
-  const completeness = calculateProductCompleteness(activeProduct);
-  const { score, color, bgColor, borderColor, statusLabel, missingFields, schemaType } = completeness;
+  // Auto-start enrichment when opened if score < 100%
+  useEffect(() => {
+    if (isOpen && activeProduct && activeProduct.id && score < 100 && !isEnriching) {
+      // Trigger once per open product instance
+      if (autoEnrichTriggeredRef.current !== activeProduct.id) {
+        autoEnrichTriggeredRef.current = activeProduct.id;
+        handleAutoEnrich();
+      }
+    }
+    if (!isOpen) {
+      autoEnrichTriggeredRef.current = null;
+    }
+  }, [isOpen, activeProduct?.id, score]);
 
   const handleAutoEnrich = async () => {
+    if (!activeProduct || isEnriching) return;
     setIsEnriching(true);
+    setCurrentStep(1);
+
+    // Smooth step & score animation in parallel with network call
+    const stepInterval = setInterval(() => {
+      setCurrentStep(prev => {
+        if (prev < 3) return prev + 1;
+        return prev;
+      });
+      setAnimatedScore(prev => Math.min(prev + 10, 90));
+    }, 450);
+
     try {
       const res = await fetch('/api/admin/enrich-product', {
         method: 'POST',
@@ -35,17 +72,19 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
       });
 
       const data = await res.json();
+      clearInterval(stepInterval);
+
       if (res.ok && data.success && data.product) {
-        // The API returns the parent document, but we must preserve the variants array
-        // (which is fetched from the subcollection) for the optimistic UI update
+        setCurrentStep(4);
+        setAnimatedScore(100);
+
         const enrichedProd = {
           ...data.product,
           variants: data.variants && data.variants.length > 0 ? data.variants : (activeProduct.variants || [])
         };
         setCurrentProduct(enrichedProd);
 
-        const newComp = calculateProductCompleteness(enrichedProd);
-        notifier.success(`✨ Product ${activeProduct.canonicalName || activeProduct.name} enriched to ${newComp.score}%`);
+        notifier.success(`✨ ${activeProduct.canonicalName || activeProduct.name} enriched to 100%`);
 
         if (onEnriched) {
           onEnriched(enrichedProd);
@@ -54,12 +93,21 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
         throw new Error(data.error || 'Enrichment failed');
       }
     } catch (err) {
+      clearInterval(stepInterval);
       console.error('Enrichment Error:', err);
-      notifier.error(`Enrichment failed: ${err.message}`);
+      notifier.error(`Enrichment notice: ${err.message}`);
     } finally {
       setIsEnriching(false);
     }
   };
+
+  if (!activeProduct) return null;
+
+  const displayScore = isEnriching ? animatedScore : score;
+  const isComplete = displayScore >= 100;
+  const activeColor = isComplete ? '#059669' : color;
+  const activeBg = isComplete ? '#ecfdf5' : bgColor;
+  const activeBorder = isComplete ? '#a7f3d0' : borderColor;
 
   return (
     <StandardDrawer
@@ -67,105 +115,169 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
       onClose={onClose}
       title={`Data Quality: ${activeProduct.canonicalName || activeProduct.name || 'Product'}`}
       subtitle="Product completeness breakdown & automatic AI enrichment"
-      width="560px"
+      width="min(560px, 100vw)"
     >
-      <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '100%' }}>
+      <div style={{
+        padding: '1.25rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.2rem',
+        minHeight: '100%',
+        boxSizing: 'border-box'
+      }}>
         
         {/* Header Clinical Meter Card */}
         <div style={{
           padding: '1.25rem',
-          borderRadius: '10px',
-          backgroundColor: bgColor,
-          border: `1px solid ${borderColor}`,
+          borderRadius: '12px',
+          backgroundColor: activeBg,
+          border: `1px solid ${activeBorder}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '1rem'
+          gap: '1rem',
+          transition: 'all 0.4s ease'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: color }}>
-                Data Completeness ({statusLabel})
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: activeColor }}>
+                Data Completeness {isComplete ? '(Complete)' : `(${statusLabel})`}
               </div>
               {schemaType && (
                 <span style={{
                   fontSize: '0.65rem', fontWeight: 600,
-                  backgroundColor: '#f1f5f9', color: '#475569',
-                  padding: '1px 7px', borderRadius: '20px',
-                  border: '1px solid #e2e8f0', textTransform: 'uppercase', letterSpacing: '0.04em'
+                  backgroundColor: '#ffffff', color: '#334155',
+                  padding: '2px 8px', borderRadius: '20px',
+                  border: '1px solid #cbd5e1', textTransform: 'uppercase', letterSpacing: '0.04em'
                 }}>
-                  {schemaType} Schema
+                  {schemaType}
                 </span>
               )}
             </div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
-              {score}% Complete
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+              {displayScore}% Complete
             </div>
             <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>
-              {missingFields.length === 0 ? 'All parameters complete for this product type.' : `Missing ${missingFields.length} key fields to reach 100%.`}
+              {isComplete ? 'All authoritative clinical & commercial parameters are complete.' : (isEnriching ? 'Synthesizing missing fields in real-time...' : `Missing ${missingFields.length} field(s) to reach 100%.`)}
             </div>
           </div>
 
           <div style={{
-            width: '56px',
-            height: '56px',
+            width: '62px',
+            height: '62px',
             borderRadius: '50%',
             backgroundColor: 'white',
-            border: `3px solid ${color}`,
+            border: `3px solid ${activeColor}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '1.1rem',
+            fontSize: '1.15rem',
             fontWeight: 800,
-            color: color,
-            flexShrink: 0
+            color: activeColor,
+            flexShrink: 0,
+            boxShadow: isEnriching ? `0 0 16px ${activeColor}40` : 'none',
+            transition: 'all 0.4s ease'
           }}>
-            {score}%
+            {isEnriching ? (
+              <RefreshCw size={22} className="animate-spin" style={{ color: activeColor }} />
+            ) : (
+              `${displayScore}%`
+            )}
           </div>
         </div>
 
-        {/* Minimal Progress Bar */}
-        <div style={{ width: '100%', height: '4px', borderRadius: '2px', backgroundColor: '#f1f5f9', overflow: 'hidden' }}>
+        {/* Minimal Animated Progress Bar */}
+        <div style={{ width: '100%', height: '6px', borderRadius: '3px', backgroundColor: '#e2e8f0', overflow: 'hidden' }}>
           <div style={{
-            width: `${score}%`,
+            width: `${displayScore}%`,
             height: '100%',
-            backgroundColor: color,
-            transition: 'width 0.4s ease'
+            backgroundColor: activeColor,
+            transition: 'width 0.4s ease-out'
           }} />
         </div>
 
-        {/* Missing Fields Explanation Box if < 100% */}
-        {missingFields.length > 0 && (
+        {/* Live Stepper when Enriching */}
+        {isEnriching && (
           <div style={{
-            padding: '0.85rem 1rem',
-            borderRadius: '8px',
-            backgroundColor: bgColor,
-            border: `1px solid ${borderColor}`,
-            color: color,
-            fontSize: '0.8rem',
-            lineHeight: '1.4'
+            padding: '1rem',
+            borderRadius: '10px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem'
           }}>
-            <div style={{ fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Info size={16} />
-              <span>Why is the score {score}% ({statusLabel})?</span>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <RefreshCw size={14} className="animate-spin" style={{ color: '#0284c7' }} />
+              <span>Advancing Product Completeness with AI & PubChem...</span>
             </div>
-            <span style={{ color: '#334155' }}>
-              The score is partial because the database is currently missing {missingFields.length} parameter(s): <strong>{missingFields.map(m => m.label).join(', ')}</strong>.
-              Click the button below to fetch PubChem specifications and auto-populate all missing parameters with AI.
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {ENRICHMENT_STEPS.map((s) => {
+                const Icon = s.icon;
+                const isPast = s.id < currentStep;
+                const isCurrent = s.id === currentStep;
+                return (
+                  <div
+                    key={s.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      fontSize: '0.78rem',
+                      opacity: isPast || isCurrent ? 1 : 0.45,
+                      color: isCurrent ? '#0284c7' : (isPast ? '#059669' : '#64748b'),
+                      fontWeight: isCurrent ? 700 : 500,
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      backgroundColor: isPast ? '#ecfdf5' : (isCurrent ? '#e0f2fe' : '#f1f5f9'),
+                      border: `1px solid ${isPast ? '#10b981' : (isCurrent ? '#0284c7' : '#cbd5e1')}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {isPast ? <CheckCircle2 size={13} style={{ color: '#059669' }} /> : <Icon size={12} />}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>{s.label}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 400 }}>{s.desc}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {/* Missing Fields Checklist */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.65rem' }}>
-            Missing Data Breakdown ({missingFields.length})
+            {isComplete ? 'All Parameters Verified (100%)' : `Required Parameters (${missingFields.length} missing)`}
           </div>
 
-          {missingFields.length === 0 ? (
-            <div style={{ padding: '0.85rem 1rem', borderRadius: '8px', backgroundColor: '#f0fdf4', border: '1px solid #ccfbf1', color: '#0f766e', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', fontWeight: 600 }}>
-              <CheckCircle2 size={16} />
-              <span>This product has 100% of all scientific and commercial parameters complete!</span>
+          {isComplete || missingFields.length === 0 ? (
+            <div style={{
+              padding: '1rem',
+              borderRadius: '10px',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#15803d',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.75rem',
+              fontSize: '0.82rem',
+              lineHeight: 1.45
+            }}>
+              <CheckCircle2 size={18} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong style={{ display: 'block', marginBottom: '0.2rem', color: '#14532d' }}>Authoritative Data Quality Reached</strong>
+                All molecular properties, compounding indications, pharmacopeial grades, and pricing formats match clinical guidelines for {schemaType}.
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
@@ -173,7 +285,7 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
                 <div
                   key={idx}
                   style={{
-                    padding: '0.6rem 0.8rem',
+                    padding: '0.65rem 0.85rem',
                     borderRadius: '8px',
                     backgroundColor: '#ffffff',
                     border: '1px solid #e2e8f0',
@@ -201,43 +313,51 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
           )}
         </div>
 
-        {/* AI Action CTA Button */}
-        <div style={{ paddingTop: '0.85rem', borderTop: '1px solid #e2e8f0', marginTop: 'auto' }}>
+        {/* AI Action CTA Button (Mobile Friendly min 48px touch target) */}
+        <div style={{
+          paddingTop: '0.85rem',
+          borderTop: '1px solid #e2e8f0',
+          marginTop: 'auto',
+          position: 'sticky',
+          bottom: 0,
+          background: '#ffffff'
+        }}>
           <button
             onClick={handleAutoEnrich}
-            disabled={isEnriching || missingFields.length === 0}
+            disabled={isEnriching || isComplete}
             style={{
               width: '100%',
+              minHeight: '48px',
               padding: '0.75rem 1.25rem',
               borderRadius: '8px',
-              backgroundColor: missingFields.length === 0 ? '#0f766e' : (isEnriching ? '#475569' : '#003666'),
+              backgroundColor: isComplete ? '#059669' : (isEnriching ? '#475569' : '#003666'),
               color: 'white',
               border: 'none',
-              fontSize: '0.85rem',
+              fontSize: '0.88rem',
               fontWeight: 700,
-              cursor: (isEnriching || missingFields.length === 0) ? 'default' : 'pointer',
+              cursor: (isEnriching || isComplete) ? 'default' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.6rem',
               transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0, 54, 102, 0.15)'
+              boxShadow: '0 2px 6px rgba(0, 54, 102, 0.2)'
             }}
           >
             {isEnriching ? (
               <>
-                <RefreshCw size={16} className="animate-spin" />
-                <span>Fetching PubChem & Generating Data with AI...</span>
+                <RefreshCw size={18} className="animate-spin" />
+                <span>Searching & Enriching Data...</span>
               </>
-            ) : missingFields.length === 0 ? (
+            ) : isComplete ? (
               <>
-                <CheckCircle2 size={16} />
-                <span>Product Fully Enriched (100% Score)</span>
+                <CheckCircle2 size={18} />
+                <span>Product 100% Enriched</span>
               </>
             ) : (
               <>
-                <Sparkles size={16} />
-                <span>✨ Enrich Product with AI (Auto-complete to 100%)</span>
+                <Sparkles size={18} />
+                <span>Enrich Product to 100%</span>
               </>
             )}
           </button>

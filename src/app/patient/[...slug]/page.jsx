@@ -71,8 +71,9 @@ function ProfileWrapper() {
 }
 
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
-export default function DynamicRoute({ params }) {
-  const slug = params.slug || [];
+export default function PatientDynamicRoute({ params }) {
+  const resolvedParams = React.use(params);
+  const slug = resolvedParams?.slug || [];
   const path = slug.join('/');
   
   

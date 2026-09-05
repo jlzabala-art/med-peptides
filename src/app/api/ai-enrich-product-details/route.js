@@ -23,11 +23,13 @@ export async function POST(request) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Structured Schema for Product Clinical & Reconstitution Enrichment
+    // Structured Schema for Product Clinical, CAS & Reconstitution Enrichment
     const schema = {
       type: Type.OBJECT,
       properties: {
         scientificName: { type: Type.STRING, description: 'Standardized scientific chemical / INN / peptide name' },
+        casNumber: { type: Type.STRING, description: 'Official CAS Registry Number formatted as digits-digits-digit (e.g. 137525-51-0, 910463-68-2, 57-91-0). If a medical device, injection pen, or diagnostic test, return "N/A"' },
+        pubchemCid: { type: Type.STRING, description: 'PubChem Compound Identification number (CID) if found, or empty string' },
         molecularFormula: { type: Type.STRING, description: 'Chemical or peptide formula if known (e.g. C62H98N16O22)' },
         sequence: { type: Type.STRING, description: 'Amino acid sequence if a peptide (e.g. Gly-Glu-Pro-Pro-Pro-Gly-Lys-Pro-Ala-Asp-Asp-Ala-Gly-Leu-Val)' },
         mechanismOfAction: { type: Type.STRING, description: 'Detailed physiological and cellular mechanism of action' },
@@ -64,10 +66,10 @@ export async function POST(request) {
           description: 'Categorization tags (e.g. Longevity, Tissue Repair, GH Secretagogue, Nootropic, Incretin)'
         }
       },
-      required: ['scientificName', 'mechanismOfAction', 'targetReceptors', 'therapeuticIndications', 'reconstitution', 'knownSynergies']
+      required: ['scientificName', 'casNumber', 'mechanismOfAction', 'targetReceptors', 'therapeuticIndications', 'reconstitution', 'knownSynergies']
     };
 
-    const systemPrompt = `You are the Chief Medicinal Chemist and Peptide Pharmacologist for RegenPept Master Catalog.
+    const systemPrompt = `You are the Chief Medicinal Chemist and Peptide Pharmacologist for Atlas Solutions Master Catalog.
 Generate comprehensive, verified scientific data for the specified product.
 
 Product Input:
@@ -78,8 +80,9 @@ Product Input:
 
 Rules:
 1. Provide accurate chemical and pharmacological details (MOA, receptors, sequence).
-2. Detail the exact reconstitution protocol: solvent, recommended volume in mL, resulting mg/mL concentration, and temperature stability.
-3. Identify evidence-backed clinical indications and synergistic companion peptides.`;
+2. Look up and supply the official CAS Registry Number (e.g. 137525-51-0 for BPC-157, 910463-68-2 for Semaglutide, 2023788-19-2 for Tirzepatide, 57-91-0 for 17-a-Estradiol). For non-chemical items (devices, injection pens, diagnostic panels, supplies), return "N/A".
+3. Detail the exact reconstitution protocol: solvent, recommended volume in mL, resulting mg/mL concentration, and temperature stability.
+4. Identify evidence-backed clinical indications and synergistic companion peptides.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',

@@ -13,8 +13,10 @@ export function normalizeProductTitle(rawName) {
   if (!rawName || typeof rawName !== 'string') return 'Unnamed Product';
 
   let clean = rawName
-    // Remove dosages like "60mg", "60 mg", "5mg/vial", "1000mcg/ml", "10 mg/ml in 5 ml"
-    .replace(/(?<![A-Za-z0-9-])\d+(?:\.\d+)?\s*(?:mg|mcg|iu|g|ml)(?:\s*\/\s*(?:vial|ml|amp))?(?:\s+in\s+\d+\s*ml)?/gi, '')
+    // Remove dosages like "60mg", "60 mg", "5mg/vial", "1000mcg/ml", "10 mg/ml in 5 ml" (Safari-safe: no lookbehind)
+    .replace(/(?:^|[^A-Za-z0-9-])\d+(?:\.\d+)?\s*(?:mg|mcg|iu|g|ml)(?:\s*\/\s*(?:vial|ml|amp))?(?:\s+in\s+\d+\s*ml)?/gi, (match) => {
+      return /^[^A-Za-z0-9-]/.test(match) ? match.charAt(0) : '';
+    })
     // Remove combined dosages like "5mg + 5mg", "1000mcg + 2000mcg"
     .replace(/\b\d+(?:\.\d+)?\s*(?:mg|mcg|iu)\s*\+\s*\d+(?:\.\d+)?\s*(?:mg|mcg|iu)\b/gi, '')
     // Remove presentation terms

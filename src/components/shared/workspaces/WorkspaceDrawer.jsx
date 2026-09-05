@@ -347,90 +347,106 @@ export default function WorkspaceDrawer() {
           }
         `}</style>
 
-        {/* ─── 1. Header & Tabs ──────────────────────────────────────────────── */}
+        {/* ─── 1. Header & Workspace Tabs ──────────────────────────────────────── */}
         <div
           style={{
-            padding: '1rem',
-            backgroundColor: '#f8fafc',
+            padding: '1rem 1.25rem',
+            backgroundColor: '#ffffff',
             borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem',
+            gap: '0.85rem',
             flexShrink: 0,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div
                 style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '8px',
-                  backgroundColor: '#003666',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
                   color: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 800,
                   flexShrink: 0,
+                  boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
                 }}
               >
-                <Briefcase size={18} />
+                <Briefcase size={19} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2, letterSpacing: '-0.01em' }}>
                   Operational Workspaces
                 </h3>
-                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  {wsList.length} active workspace{wsList.length > 1 ? 's' : ''} • Concurrent staging
+                <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
+                  {wsList.length} Active Workspace{wsList.length > 1 ? 's' : ''} • Concurrent Staging
                 </span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
+                type="button"
                 onClick={() => createWorkspace()}
                 className="gcp-btn-secondary"
                 style={{
-                  fontSize: '0.75rem',
-                  padding: '4px 8px',
-                  display: 'flex',
+                  fontSize: '0.78rem',
+                  padding: '6px 12px',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  borderRadius: '6px',
-                  fontWeight: 600,
+                  gap: '5px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#f8fafc',
+                  color: '#0f172a',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  transition: 'all 0.15s ease',
                 }}
                 title="Create new workspace"
               >
-                <Plus size={13} /> New
+                <Plus size={14} /> New
               </button>
               <button
+                type="button"
                 onClick={() => setDrawerOpen(false)}
                 style={{
-                  background: 'none',
-                  border: 'none',
+                  background: '#f1f5f9',
+                  border: '1px solid #e2e8f0',
                   padding: '6px',
                   cursor: 'pointer',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   color: '#64748b',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  transition: 'all 0.15s ease',
                 }}
-                title="Close"
+                title="Close Drawer"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
           </div>
 
-          {/* Workspace Tabs */}
+          {/* Workspace Segmented Tabs */}
           <div
             style={{
               display: 'flex',
-              gap: '6px',
+              gap: '4px',
+              backgroundColor: '#f1f5f9',
+              padding: '3px',
+              borderRadius: '9px',
+              border: '1px solid #e2e8f0',
               overflowX: 'auto',
-              paddingBottom: '2px',
               scrollbarWidth: 'none',
             }}
           >
@@ -441,32 +457,36 @@ export default function WorkspaceDrawer() {
               return (
                 <button
                   key={ws.id}
+                  type="button"
                   onClick={() => setActiveWorkspace(ws.id)}
                   style={{
+                    flex: 1,
+                    minWidth: '110px',
                     display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: '6px',
-                    padding: '5px 10px',
-                    borderRadius: '6px',
-                    border: isActive ? '1px solid #003666' : '1px solid #cbd5e1',
-                    backgroundColor: isActive ? '#003666' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#334155',
-                    fontSize: '0.75rem',
-                    fontWeight: isActive ? 700 : 500,
+                    padding: '6px 12px',
+                    borderRadius: '7px',
+                    border: 'none',
+                    backgroundColor: isActive ? '#ffffff' : 'transparent',
+                    color: isActive ? '#003666' : '#64748b',
+                    fontSize: '0.78rem',
+                    fontWeight: isActive ? 800 : 600,
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
+                    boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                     transition: 'all 0.15s ease',
-                    flexShrink: 0,
                   }}
                 >
                   <span>{ws.intent === 'buy' ? '🏭' : '💼'}</span>
                   <span>{ws.name}</span>
                   <span
                     style={{
-                      fontSize: '0.65rem',
-                      padding: '1px 5px',
+                      fontSize: '0.68rem',
+                      padding: '1px 6px',
                       borderRadius: '99px',
-                      backgroundColor: isActive ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
+                      backgroundColor: isActive ? '#003666' : '#e2e8f0',
                       color: isActive ? '#ffffff' : '#475569',
                       fontWeight: 700,
                     }}
@@ -482,13 +502,13 @@ export default function WorkspaceDrawer() {
         {/* ─── 2. Active Workspace Toolbar ────────────────────────────────────── */}
         <div
           style={{
-            padding: '0.6rem 1rem',
-            backgroundColor: '#f1f5f9',
+            padding: '0.65rem 1.25rem',
+            backgroundColor: '#f8fafc',
             borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '8px',
+            gap: '10px',
             flexShrink: 0,
           }}
         >
@@ -501,10 +521,10 @@ export default function WorkspaceDrawer() {
                   onChange={(e) => setNameInput(e.target.value)}
                   autoFocus
                   style={{
-                    padding: '3px 8px',
+                    padding: '4px 8px',
                     fontSize: '0.82rem',
-                    border: '1px solid #2563eb',
-                    borderRadius: '5px',
+                    border: '1px solid #0284c7',
+                    borderRadius: '6px',
                     outline: 'none',
                     fontWeight: 700,
                     flex: 1,
@@ -512,85 +532,90 @@ export default function WorkspaceDrawer() {
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
                 />
-                <button onClick={handleSaveName} style={{ border: 'none', background: '#16a34a', color: 'white', padding: '4px 6px', borderRadius: '4px', cursor: 'pointer' }}>
+                <button type="button" onClick={handleSaveName} style={{ border: 'none', background: '#16a34a', color: 'white', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
                   <Check size={13} />
                 </button>
-                <button onClick={() => setIsEditingName(false)} style={{ border: 'none', background: '#94a3b8', color: 'white', padding: '4px 6px', borderRadius: '4px', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setIsEditingName(false)} style={{ border: 'none', background: '#94a3b8', color: 'white', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
                   <X size={13} />
                 </button>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                   {activeWs.name}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setIsEditingName(true)}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px', flexShrink: 0 }}
+                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '3px', borderRadius: '4px', flexShrink: 0 }}
                   title="Rename workspace"
                 >
-                  <Edit2 size={12} />
+                  <Edit2 size={13} />
                 </button>
               </div>
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
             <button
+              type="button"
               onClick={() => duplicateWorkspace(activeWs.id)}
               className="gcp-btn-secondary"
-              style={{ padding: '3px 7px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px', borderRadius: '4px' }}
+              style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
               title="Duplicate workspace"
             >
               <Copy size={12} /> Duplicate
             </button>
             <button
+              type="button"
               onClick={() => clearWorkspaceItems(activeWs.id)}
               className="gcp-btn-secondary"
-              style={{ padding: '3px 7px', fontSize: '0.72rem', color: '#dc2626', borderRadius: '4px' }}
+              style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, color: '#dc2626', borderRadius: '6px', border: '1px solid #fca5a5', backgroundColor: '#fff5f5' }}
               title="Clear items"
             >
               Clear
             </button>
             {wsList.length > 1 && (
               <button
+                type="button"
                 onClick={() => deleteWorkspace(activeWs.id)}
                 className="gcp-btn-secondary"
-                style={{ padding: '3px 7px', fontSize: '0.72rem', color: '#dc2626', borderRadius: '4px' }}
+                style={{ padding: '4px 7px', fontSize: '0.75rem', color: '#dc2626', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
                 title="Delete workspace"
               >
-                <Trash2 size={12} />
+                <Trash2 size={13} />
               </button>
             )}
           </div>
         </div>
 
         {/* ─── 3. Staged Items List / Empty State with Loaders ──────────────── */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {items.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: 'auto 0' }}>
               <div
                 style={{
-                  padding: '1.75rem 1rem',
+                  padding: '2rem 1.25rem',
                   textAlign: 'center',
-                  backgroundColor: '#f8fafc',
-                  borderRadius: '10px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
                   border: '1px dashed #cbd5e1',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '0.5rem',
+                  gap: '0.6rem',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
                 }}
               >
-                <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-                  <Briefcase size={20} />
+                <div style={{ width: '46px', height: '46px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003666' }}>
+                  <Briefcase size={22} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', margin: '0 0 3px 0' }}>
-                    Workspace is empty
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
+                    Workspace is Empty
                   </h4>
-                  <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
-                    Choose how you want to populate this workspace:
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                    Populate this workspace using clinical protocols or master catalog items:
                   </p>
                 </div>
 
@@ -607,12 +632,12 @@ export default function WorkspaceDrawer() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
-                      padding: '8px 12px',
+                      padding: '10px 14px',
                       backgroundColor: activePicker === 'protocols' ? '#003666' : '#eff6ff',
                       color: activePicker === 'protocols' ? '#ffffff' : '#1d4ed8',
                       border: '1px solid #bfdbfe',
                       borderRadius: '8px',
-                      fontSize: '0.82rem',
+                      fontSize: '0.84rem',
                       fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
@@ -632,12 +657,12 @@ export default function WorkspaceDrawer() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '8px',
-                      padding: '8px 12px',
+                      padding: '10px 14px',
                       backgroundColor: activePicker === 'products' ? '#003666' : '#f0fdf4',
                       color: activePicker === 'products' ? '#ffffff' : '#15803d',
                       border: '1px solid #bbf7d0',
                       borderRadius: '8px',
-                      fontSize: '0.82rem',
+                      fontSize: '0.84rem',
                       fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all 0.15s ease'
@@ -650,39 +675,39 @@ export default function WorkspaceDrawer() {
 
               {/* Protocol Picker Panel */}
               {activePicker === 'protocols' && (
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b' }}>Select Clinical Protocol</span>
-                    <button onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}><X size={14} /></button>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>Select Clinical Protocol</span>
+                    <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}><X size={15} /></button>
                   </div>
                   <input
                     type="text"
                     placeholder="Search protocol name..."
                     value={pickerSearch}
                     onChange={(e) => setPickerSearch(e.target.value)}
-                    style={{ padding: '6px 10px', fontSize: '0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }}
+                    style={{ padding: '8px 12px', fontSize: '0.82rem', border: '1px solid #cbd5e1', borderRadius: '7px', outline: 'none' }}
                   />
-                  <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {protocols.filter(p => !pickerSearch || p.name?.toLowerCase().includes(pickerSearch.toLowerCase())).slice(0, 15).map(proto => (
                       <div
                         key={proto.id}
                         onClick={() => handleLoadProtocol(proto)}
                         style={{
-                          padding: '6px 10px',
-                          borderRadius: '6px',
+                          padding: '8px 12px',
+                          borderRadius: '7px',
                           border: '1px solid #f1f5f9',
                           backgroundColor: '#f8fafc',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          transition: 'background 0.1s'
+                          transition: 'background 0.15s ease'
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
                       >
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>{proto.name}</span>
-                        <span style={{ fontSize: '0.7rem', color: '#0284c7', fontWeight: 700 }}>+ Load</span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{proto.name}</span>
+                        <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 800 }}>+ Load</span>
                       </div>
                     ))}
                   </div>
@@ -691,39 +716,39 @@ export default function WorkspaceDrawer() {
 
               {/* Product Picker Panel */}
               {activePicker === 'products' && (
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '6px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b' }}>Select Catalog Product</span>
-                    <button onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}><X size={14} /></button>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>Select Catalog Product</span>
+                    <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}><X size={15} /></button>
                   </div>
                   <input
                     type="text"
                     placeholder="Search product name..."
                     value={pickerSearch}
                     onChange={(e) => setPickerSearch(e.target.value)}
-                    style={{ padding: '6px 10px', fontSize: '0.8rem', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }}
+                    style={{ padding: '8px 12px', fontSize: '0.82rem', border: '1px solid #cbd5e1', borderRadius: '7px', outline: 'none' }}
                   />
-                  <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {availableProducts.filter(p => !pickerSearch || p.canonicalName?.toLowerCase().includes(pickerSearch.toLowerCase())).slice(0, 15).map(prod => (
                       <div
                         key={prod.id}
                         onClick={() => handleAddProduct(prod)}
                         style={{
-                          padding: '6px 10px',
-                          borderRadius: '6px',
+                          padding: '8px 12px',
+                          borderRadius: '7px',
                           border: '1px solid #f1f5f9',
                           backgroundColor: '#f8fafc',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          transition: 'background 0.1s'
+                          transition: 'background 0.15s ease'
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dcfce7'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
                       >
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>{prod.canonicalName}</span>
-                        <span style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 700 }}>+ Add</span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{prod.canonicalName}</span>
+                        <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 800 }}>+ Add</span>
                       </div>
                     ))}
                   </div>
@@ -731,13 +756,13 @@ export default function WorkspaceDrawer() {
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '2px' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Staged Compounds ({items.length})
                 </span>
-                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                  Total Units: <b>{totalItemsCount}</b>
+                <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                  Total Units: <b style={{ color: '#0f172a' }}>{totalItemsCount}</b>
                 </span>
               </div>
 
@@ -747,42 +772,44 @@ export default function WorkspaceDrawer() {
                   style={{
                     backgroundColor: '#ffffff',
                     border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    padding: '0.65rem 0.85rem',
+                    borderRadius: '10px',
+                    padding: '0.75rem 0.95rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '6px',
+                    gap: '8px',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a', lineHeight: 1.2 }}>
                         {it.canonicalName}
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
                         {it.dosage && <span><b>Dose:</b> {it.dosage}</span>}
                         {it.format && <span>• <b>Format:</b> {it.format}</span>}
                         {it.sku && <span>• <b>SKU:</b> {it.sku}</span>}
                       </div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => removeItem(activeWs.id, it.id)}
-                      style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px' }}
+                      style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '3px', borderRadius: '4px' }}
                       title="Remove item"
                     >
-                      <X size={15} />
+                      <X size={16} />
                     </button>
                   </div>
 
                   {/* Quantity & Unit Pricing Controls */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '4px', borderTop: '1px solid #f1f5f9' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
                     {/* Quantity controls */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Qty:</span>
+                      <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Qty:</span>
                       <button
+                        type="button"
                         onClick={() => updateItemQuantity(activeWs.id, it.id, Math.max(1, (it.quantity || 1) - 1))}
-                        style={{ width: '22px', height: '22px', border: '1px solid #cbd5e1', borderRadius: '4px', background: '#f8fafc', cursor: 'pointer', fontWeight: 700, fontSize: '0.75rem' }}
+                        style={{ width: '26px', height: '26px', border: '1px solid #cbd5e1', borderRadius: '5px', background: '#f8fafc', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', color: '#334155' }}
                       >
                         -
                       </button>
@@ -791,11 +818,12 @@ export default function WorkspaceDrawer() {
                         min="1"
                         value={it.quantity || 1}
                         onChange={(e) => updateItemQuantity(activeWs.id, it.id, parseInt(e.target.value, 10) || 1)}
-                        style={{ width: '38px', textAlign: 'center', padding: '2px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 700 }}
+                        style={{ width: '42px', textAlign: 'center', padding: '3px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.82rem', fontWeight: 800, outline: 'none' }}
                       />
                       <button
+                        type="button"
                         onClick={() => updateItemQuantity(activeWs.id, it.id, (it.quantity || 1) + 1)}
-                        style={{ width: '22px', height: '22px', border: '1px solid #cbd5e1', borderRadius: '4px', background: '#f8fafc', cursor: 'pointer', fontWeight: 700, fontSize: '0.75rem' }}
+                        style={{ width: '26px', height: '26px', border: '1px solid #cbd5e1', borderRadius: '5px', background: '#f8fafc', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', color: '#334155' }}
                       >
                         +
                       </button>
@@ -803,19 +831,19 @@ export default function WorkspaceDrawer() {
 
                     {/* Unit Price */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Rate: $</span>
+                      <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Rate: $</span>
                       <input
                         type="number"
                         step="0.1"
                         value={it.unitPrice || 0}
                         onChange={(e) => updateItemPrice(activeWs.id, it.id, parseFloat(e.target.value) || 0)}
-                        style={{ width: '58px', textAlign: 'right', padding: '2px 4px', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.78rem', fontWeight: 700 }}
+                        style={{ width: '64px', textAlign: 'right', padding: '3px 6px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.82rem', fontWeight: 800, outline: 'none' }}
                       />
                     </div>
 
                     {/* Line Total */}
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#003666' }}>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#003666' }}>
                         ${((it.quantity || 1) * (it.unitPrice || 0)).toFixed(2)}
                       </div>
                     </div>
@@ -829,53 +857,59 @@ export default function WorkspaceDrawer() {
         {/* ─── 4. Intent & Operational Routing Module ─────────────────────────── */}
         <div
           style={{
-            padding: '0.85rem 1rem',
+            padding: '1rem 1.25rem',
             backgroundColor: '#f8fafc',
             borderTop: '1px solid #e2e8f0',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.65rem',
+            gap: '0.75rem',
             flexShrink: 0,
           }}
         >
           {/* Intent Toggle */}
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '9px' }}>
             <button
+              type="button"
               onClick={() => setWorkspaceIntent(activeWs.id, 'sell')}
               style={{
                 flex: 1,
-                padding: '7px 8px',
-                borderRadius: '6px',
-                border: activeWs.intent === 'sell' ? '1px solid #003666' : '1px solid #cbd5e1',
-                backgroundColor: activeWs.intent === 'sell' ? '#003666' : '#ffffff',
+                padding: '8px 10px',
+                borderRadius: '7px',
+                border: 'none',
+                backgroundColor: activeWs.intent === 'sell' ? '#003666' : 'transparent',
                 color: activeWs.intent === 'sell' ? '#ffffff' : '#475569',
-                fontSize: '0.78rem',
-                fontWeight: 700,
+                fontSize: '0.8rem',
+                fontWeight: 800,
                 cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
+                boxShadow: activeWs.intent === 'sell' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.15s ease',
               }}
             >
               <DollarSign size={14} /> SELL (Quote / Rx)
             </button>
             <button
+              type="button"
               onClick={() => setWorkspaceIntent(activeWs.id, 'buy')}
               style={{
                 flex: 1,
-                padding: '7px 8px',
-                borderRadius: '6px',
-                border: activeWs.intent === 'buy' ? '1px solid #c2410c' : '1px solid #cbd5e1',
-                backgroundColor: activeWs.intent === 'buy' ? '#c2410c' : '#ffffff',
+                padding: '8px 10px',
+                borderRadius: '7px',
+                border: 'none',
+                backgroundColor: activeWs.intent === 'buy' ? '#c2410c' : 'transparent',
                 color: activeWs.intent === 'buy' ? '#ffffff' : '#475569',
-                fontSize: '0.78rem',
-                fontWeight: 700,
+                fontSize: '0.8rem',
+                fontWeight: 800,
                 cursor: 'pointer',
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '6px',
+                boxShadow: activeWs.intent === 'buy' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.15s ease',
               }}
             >
               <Truck size={14} /> BUY (Supplier PO)
@@ -884,14 +918,14 @@ export default function WorkspaceDrawer() {
 
           {/* Target Entity Selector (On-Demand & Scalable) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.68rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span>{activeWs.intent === 'buy' ? 'Target Supplier / Compounder' : 'Target Recipient'}</span>
-              {loadingTargetType && <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 500 }}>Loading...</span>}
+              {loadingTargetType && <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 600 }}>Loading...</span>}
             </label>
 
             {/* Target Type Switcher Tabs (Only if SELL) */}
             {activeWs.intent === 'sell' && (
-              <div style={{ display: 'flex', gap: '4px', backgroundColor: '#f1f5f9', padding: '2px', borderRadius: '6px' }}>
+              <div style={{ display: 'flex', gap: '3px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '8px' }}>
                 {[
                   { type: 'clinic', label: '🏥 Clinic' },
                   { type: 'wholeseller', label: '🏢 Wholesaler' },
@@ -907,15 +941,15 @@ export default function WorkspaceDrawer() {
                     }}
                     style={{
                       flex: 1,
-                      padding: '4px 2px',
-                      fontSize: '0.68rem',
-                      fontWeight: selectedTargetType === tab.type ? 700 : 500,
+                      padding: '5px 2px',
+                      fontSize: '0.72rem',
+                      fontWeight: selectedTargetType === tab.type ? 800 : 600,
                       backgroundColor: selectedTargetType === tab.type ? '#ffffff' : 'transparent',
                       color: selectedTargetType === tab.type ? '#003666' : '#64748b',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: '6px',
                       cursor: 'pointer',
-                      boxShadow: selectedTargetType === tab.type ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                      boxShadow: selectedTargetType === tab.type ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                       transition: 'all 0.15s ease',
                       whiteSpace: 'nowrap'
                     }}
@@ -928,24 +962,24 @@ export default function WorkspaceDrawer() {
 
             {/* Selected Recipient Card or Search & Select Dropdown */}
             {activeWs.targetEntity ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.85rem' }}>{activeWs.targetEntity.type === 'supplier' ? '🏭' : activeWs.targetEntity.type === 'clinic' ? '🏥' : activeWs.targetEntity.type === 'wholeseller' ? '🏢' : '👤'}</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '0.95rem' }}>{activeWs.targetEntity.type === 'supplier' ? '🏭' : activeWs.targetEntity.type === 'clinic' ? '🏥' : activeWs.targetEntity.type === 'wholeseller' ? '🏢' : '👤'}</span>
                   <div>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e293b' }}>{activeWs.targetEntity.name}</div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'capitalize' }}>{activeWs.targetEntity.type}</div>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1e293b' }}>{activeWs.targetEntity.name}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'capitalize' }}>{activeWs.targetEntity.type}</div>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setTargetEntity(activeWs.id, null)}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '0.72rem', fontWeight: 700, padding: '2px 6px' }}
+                  style={{ border: 'none', background: '#dbeafe', color: '#1e40af', fontSize: '0.74rem', fontWeight: 800, padding: '4px 8px', borderRadius: '5px', cursor: 'pointer' }}
                 >
                   ✕ Clear
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <input
                   type="text"
                   placeholder={`Search ${activeWs.intent === 'buy' ? 'suppliers' : selectedTargetType + 's'} by name...`}
@@ -953,10 +987,10 @@ export default function WorkspaceDrawer() {
                   onChange={(e) => setTargetSearchQuery(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '6px 8px',
-                    borderRadius: '6px',
+                    padding: '8px 10px',
+                    borderRadius: '7px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '0.78rem',
+                    fontSize: '0.8rem',
                     outline: 'none',
                     boxSizing: 'border-box'
                   }}
@@ -974,11 +1008,11 @@ export default function WorkspaceDrawer() {
                   }}
                   style={{
                     width: '100%',
-                    padding: '6px 8px',
-                    borderRadius: '6px',
+                    padding: '8px 10px',
+                    borderRadius: '7px',
                     border: '1px solid #cbd5e1',
                     backgroundColor: '#ffffff',
-                    fontSize: '0.78rem',
+                    fontSize: '0.8rem',
                     color: '#334155',
                     outline: 'none',
                     boxSizing: 'border-box'
@@ -1001,10 +1035,10 @@ export default function WorkspaceDrawer() {
 
           {/* Clinical Reconstitution Suggestion (if lyophilized vials are present and BAC Water is missing) */}
           {items.some(it => (it.format?.toLowerCase().includes('vial') || it.presentation?.toLowerCase().includes('vial')) && !it.canonicalName?.toLowerCase().includes('water')) && !items.some(it => it.canonicalName?.toLowerCase().includes('water')) && (
-            <div style={{ backgroundColor: '#eff6ff', border: '1px dashed #93c5fd', borderRadius: '8px', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '0.9rem' }}>💧</span>
-                <span style={{ fontSize: '0.72rem', color: '#1e40af', fontWeight: 600 }}>Lyophilized Vials staged</span>
+            <div style={{ backgroundColor: '#eff6ff', border: '1px dashed #93c5fd', borderRadius: '9px', padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1rem' }}>💧</span>
+                <span style={{ fontSize: '0.76rem', color: '#1e40af', fontWeight: 700 }}>Lyophilized Vials staged</span>
               </div>
               <button
                 type="button"
@@ -1013,14 +1047,15 @@ export default function WorkspaceDrawer() {
                   notifier.success('Added Bacteriostatic Water 30ml companion!');
                 }}
                 style={{
-                  padding: '3px 8px',
+                  padding: '5px 10px',
                   backgroundColor: '#2563eb',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
+                  borderRadius: '6px',
+                  fontSize: '0.74rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                 }}
               >
                 + Add BAC Water ($15)
@@ -1031,8 +1066,8 @@ export default function WorkspaceDrawer() {
           {/* Rapid Multipliers & Volume Scaling */}
           {items.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Volume Scaling:</span>
-              <div style={{ display: 'flex', gap: '3px' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Volume Scaling:</span>
+              <div style={{ display: 'flex', gap: '4px' }}>
                 {[1, 2, 5, 10].map(m => (
                   <button
                     key={m}
@@ -1042,12 +1077,12 @@ export default function WorkspaceDrawer() {
                       notifier.info(`Adjusted quantities by ${m}x`);
                     }}
                     style={{
-                      padding: '2px 6px',
-                      fontSize: '0.68rem',
+                      padding: '3px 8px',
+                      fontSize: '0.74rem',
                       fontWeight: 700,
-                      backgroundColor: '#f1f5f9',
+                      backgroundColor: '#ffffff',
                       border: '1px solid #cbd5e1',
-                      borderRadius: '4px',
+                      borderRadius: '5px',
                       cursor: 'pointer',
                       color: '#334155'
                     }}
@@ -1064,18 +1099,19 @@ export default function WorkspaceDrawer() {
             style={{
               backgroundColor: '#ffffff',
               border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              padding: '0.65rem 0.85rem',
+              borderRadius: '10px',
+              padding: '0.75rem 0.95rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: '5px',
+              gap: '6px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
             }}
           >
             {/* Quick Discount Selector (Sell mode) */}
             {activeWs.intent === 'sell' && items.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '5px' }}>
-                <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Discount:</span>
-                <div style={{ display: 'flex', gap: '3px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700 }}>Discount:</span>
+                <div style={{ display: 'flex', gap: '4px' }}>
                   {[0, 5, 10, 15, 20].map(pct => (
                     <button
                       key={pct}
@@ -1085,14 +1121,14 @@ export default function WorkspaceDrawer() {
                         applyDiscountPercentage(pct, activeWs.id);
                       }}
                       style={{
-                        padding: '2px 5px',
-                        fontSize: '0.65rem',
-                        fontWeight: selectedDiscount === pct ? 800 : 500,
+                        padding: '3px 7px',
+                        fontSize: '0.7rem',
+                        fontWeight: selectedDiscount === pct ? 800 : 600,
                         backgroundColor: selectedDiscount === pct ? '#003666' : '#f8fafc',
                         color: selectedDiscount === pct ? '#ffffff' : '#64748b',
                         border: '1px solid',
                         borderColor: selectedDiscount === pct ? '#003666' : '#e2e8f0',
-                        borderRadius: '3px',
+                        borderRadius: '5px',
                         cursor: 'pointer'
                       }}
                     >
@@ -1103,24 +1139,24 @@ export default function WorkspaceDrawer() {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#64748b' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
               <span>Subtotal (Sales Value):</span>
-              <span style={{ fontWeight: 700, color: '#0f172a' }}>${totalSaleAmount.toFixed(2)}</span>
+              <span style={{ fontWeight: 800, color: '#0f172a' }}>${totalSaleAmount.toFixed(2)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#64748b' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
               <span>Supplier Cost:</span>
               <span style={{ fontWeight: 700, color: '#64748b' }}>${totalCostAmount.toFixed(2)}</span>
             </div>
 
             {/* Margin Health Bar */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderTop: '1px solid #f1f5f9', paddingTop: '4px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 800, color: '#003666' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 800, color: '#003666' }}>
                 <span>Estimated Gross Margin:</span>
                 <span style={{ color: marginPercent >= 40 ? '#16a34a' : marginPercent >= 25 ? '#0284c7' : '#ea580c' }}>
                   ${marginAmount.toFixed(2)} ({marginPercent}%)
                 </span>
               </div>
-              <div style={{ width: '100%', height: '4px', backgroundColor: '#e2e8f0', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '5px', backgroundColor: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
                 <div
                   style={{
                     width: `${Math.min(100, Math.max(0, marginPercent))}%`,
@@ -1134,75 +1170,81 @@ export default function WorkspaceDrawer() {
           </div>
 
           {/* Primary Action Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
             {activeWs.intent === 'buy' ? (
               <button
+                type="button"
                 onClick={handleExecutePurchaseOrder}
                 disabled={items.length === 0}
                 className="gcp-btn-primary"
                 style={{
                   width: '100%',
-                  padding: '9px',
+                  padding: '11px',
                   backgroundColor: '#c2410c',
                   color: 'white',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   border: 'none',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
+                  fontSize: '0.86rem',
+                  fontWeight: 800,
                   cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '8px',
+                  boxShadow: '0 2px 6px rgba(194, 65, 12, 0.25)',
                 }}
               >
-                <Truck size={15} /> Generate Purchase Order (PO)
+                <Truck size={16} /> Generate Purchase Order (PO)
               </button>
             ) : (
               <>
                 <button
+                  type="button"
                   onClick={handleExecuteQuotation}
                   disabled={items.length === 0}
                   className="gcp-btn-primary"
                   style={{
                     width: '100%',
-                    padding: '9px',
+                    padding: '11px',
                     backgroundColor: '#003666',
                     color: 'white',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     border: 'none',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
+                    fontSize: '0.86rem',
+                    fontWeight: 800,
                     cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
+                    gap: '8px',
+                    boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
                   }}
                 >
-                  <FileText size={15} /> Generate B2B Quotation
+                  <FileText size={16} /> Generate B2B Quotation
                 </button>
                 <button
+                  type="button"
                   onClick={handleExecutePrescription}
                   disabled={items.length === 0}
                   className="gcp-btn-secondary"
                   style={{
                     width: '100%',
-                    padding: '9px',
+                    padding: '11px',
                     backgroundColor: '#0d9488',
                     color: 'white',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     border: 'none',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
+                    fontSize: '0.86rem',
+                    fontWeight: 800,
                     cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
+                    gap: '8px',
+                    boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
                   }}
                 >
-                  <ShieldCheck size={15} /> Create Rx Prescription
+                  <ShieldCheck size={16} /> Create Rx Prescription
                 </button>
               </>
             )}

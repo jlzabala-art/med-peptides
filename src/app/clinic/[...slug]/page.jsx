@@ -6,7 +6,8 @@ import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBounda
 
 export default function ClinicDynamicRoute({ params }) {
   const router = useRouter();
-  const slug = params.slug || [];
+  const resolvedParams = React.use(params);
+  const slug = resolvedParams?.slug || [];
   const path = slug.join('/');
   const defaultTab = slug[0] || 'patients';
 

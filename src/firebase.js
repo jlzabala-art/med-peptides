@@ -23,14 +23,33 @@ if (getApps().length === 0) {
   if (typeof window !== 'undefined') {
     initStorageQuotaGuard();
     try {
-      firestoreDb = initializeFirestore(app, {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager()
-        })
-      });
+      // In Safari/WebKit, persistentMultipleTabManager causes WebLocks deadlocks
+      // and IndexedDB quota contention that forces Firestore into offline error state.
+      const isSafari = typeof navigator !== 'undefined' && 
+        (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+         (/AppleWebKit/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent)));
+
+      if (isSafari) {
+        console.info('[Firebase] Safari/WebKit detected: initializing resilient single-tab localCache');
+        firestoreDb = initializeFirestore(app, {
+          localCache: persistentLocalCache({})
+        });
+      } else {
+        firestoreDb = initializeFirestore(app, {
+          localCache: persistentLocalCache({
+            tabManager: persistentMultipleTabManager()
+          })
+        });
+      }
     } catch (e) {
-      console.warn('[Firebase] Fallback to standard Firestore instance:', e?.message || e);
-      firestoreDb = getFirestore(app);
+      console.warn('[Firebase] Fallback to standard/memory Firestore instance:', e?.message || e);
+      try {
+        firestoreDb = initializeFirestore(app, {
+          localCache: memoryLocalCache()
+        });
+      } catch {
+        firestoreDb = getFirestore(app);
+      }
     }
   } else {
     firestoreDb = getFirestore(app);

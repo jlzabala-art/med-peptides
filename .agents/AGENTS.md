@@ -432,3 +432,32 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - Todas las acciones adicionales (partiendo de la 4ª acción en adelante) **DEBEN agruparse automáticamente en un menú desplegable de tres puntos (`⋯` / `MoreHorizontal`)**.
 - **Beneficios UX**: Evita el desbordamiento horizontal de celdas en portátiles, mantiene el ancho de la columna de acciones compacto (≤130px), y garantiza una interfaz ultra limpia y corporativa sin importar cuántas acciones secundarias tenga un registro.
 
+## 46. Arquitectura de Tarjetas Móviles (Mobile-First Card Architecture — Golden Rule)
+- **Toda tarjeta móvil en la plataforma DEBE seguir una estructura equilibrada y ergonómica de 5 zonas**, evitando estrictamente el amontonamiento asimétrico a la izquierda (*left-clumping*) y el vacío en la botonera de acciones.
+- **Anatomía Estándar de la Tarjeta Móvil**:
+  1. **Contenedor Elevado e Independiente**:
+     - Cada elemento es una tarjeta blanca independiente (`background: #ffffff`, `border: 1px solid #e2e8f0`, `border-radius: 12px`, `box-shadow: 0 2px 6px rgba(0,0,0,0.05)`, `margin-bottom: 12px`).
+     - Opcional: franja semántica de color en el borde lateral izquierdo para indicar estado o prioridad clínica (verde = Prioridad A / Activo, ámbar = Prioridad B / Pendiente, azul = Prioridad C / Cotizado).
+  2. **Cabecera Equilibrada (Patrón Z — Anti Left-Clumping)**:
+     - **Esquina Superior Izquierda**: Identidad principal del registro (Título o Nombre en negrita `0.95rem`, ID con `CopyableId`, indicador de salud o completitud).
+     - **Esquina Superior Derecha**: Badge de tipo o estado (`FINISHED`, `BULK API`, `Active`, `Rx Approved`) y botón de apertura o expansión `▼`. **Prohibido dejar la esquina superior derecha vacía**.
+  3. **Fila Única de Metadatos (Unified Metadata Strip)**:
+     - **Prohibido apilar 3 o 4 micro-filas cortadas verticalmente a la izquierda**.
+     - La categoría, el formato/presentación y las etiquetas complementarias deben agruparse en **una sola línea fluida** con separadores sutiles (`•`) o píldoras compactas (ej. `[clinical_supplies] • 1 Var (1 Vial) • 🧬 TrichoTest™ C`).
+  4. **Cuadrícula de Datos Operativos (Mini-Grid de 2 Columnas)**:
+     - Para datos operacionales y transaccionales (Proveedor y Estado, Médico y Paciente, Duración y Fases, Monto y Moneda).
+     - Etiqueta en mayúsculas micro (`0.65rem`, color atenuado) y valor legible en semibold con alto contraste.
+  5. **Botonera Táctil Ergonómica (Thumb-Zone Action Bar — 100% Ancho)**:
+     - **Prohibido colocar 2 o 3 iconos pequeños (32px) aislados a la izquierda dejando el 70% del ancho derecho vacío**.
+     - La botonera inferior DEBE ocupar el 100% del ancho de la tarjeta (`width: 100%`, `display: flex`, `gap: 8px`):
+       - **Acción Primaria**: Botón principal expansible (`flex: 1`, altura táctil ≥38-44px, con icono y texto claro, ej. `[📚 Offers & Pricing]`, `[📋 Ver Prescripción]`, `[⚡ Procesar]`).
+       - **Acción Secundaria**: Botón contextual rápido con icono y label (ej. `[🪄 Enrich]`, `[✏️ Editar]`).
+       - **Menú de Opciones (`•••`)**: Menú desplegable para acciones de baja frecuencia (`Add to Workspace`, `Archivar`, `Clonar`, `Compartir`).
+  6. **Divulgación Progresiva (Progressive Disclosure)**:
+     - Detalles avanzados (BOM de compuestos, tablas de dosis, desgloses de precios por escala) permanecen colapsados por defecto y se revelan suavemente al pulsar la tarjeta o el chevron mediante `expandableRender`.
+- **Componentes de Referencia**:
+  - `src/components/admin/catalog/components/CatalogMobileCard.jsx` (Catálogo Maestro)
+  - `src/components/admin/catalog/components/MobileGenomicsCard.jsx` (Matriz Genómica)
+  - `src/components/ui/MobileRecordCard.jsx` (Renderizador universal de `DataTable`)
+
+

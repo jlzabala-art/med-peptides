@@ -1040,6 +1040,7 @@ export default function PeptideDetail({
                 <DynamicProductVisualOverlay
                   product={activeProduct}
                   variant={selectedVariant || productVariants[0]}
+                  selectedFormat={selectedFormatId}
                 />
 
             {/* Trust badges — visible below image */}

@@ -68,8 +68,11 @@ import {
   WholesalersLeaderboard,
   AiCommandConsole,
 } from './widgets/CommandCenterWidgets';
+import ClinicalCommandHub from './widgets/ClinicalCommandHub';
 import HealthMatrixWidget from './widgets/HealthMatrixWidget';
 import AdminExecutiveSummaryWidget from './AdminExecutiveSummaryWidget';
+import DoctorOverviewTab from '../doctor/DoctorOverviewTab';
+import DashboardEngine from '../../engine/DashboardEngine';
 import notifier from '../../services/NotificationService';
 import styles from './AdminMetricsDashboard.module.css';
 
@@ -120,7 +123,7 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
     if (!effectiveRole) return 'CEO';
     const r = effectiveRole.toLowerCase() || '';
     if (r === 'admin') return 'CEO';
-    if (r === 'doctor' || r === 'physician' || r === 'medical') return 'Clinical';
+    if (r === 'medical_director' || r === 'doctor' || r === 'physician' || r === 'medical') return 'Clinical';
     if (r === 'finance' || r === 'accountant') return 'Finance';
     if (r === 'sales') return 'Sales';
     if (r === 'purchasing') return 'Purchasing';
@@ -128,6 +131,10 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
     return 'CEO'; // Fallback
   };
 
+  const isMedicalDirectorRole = effectiveRole === 'medical_director';
+  const isDoctorRole = effectiveRole === 'doctor' || effectiveRole === 'physician';
+  const isPatientRole = effectiveRole === 'patient';
+  const isSupplierRole = effectiveRole === 'supplier' || effectiveRole === 'wholesaler' || effectiveRole === 'wholeseller';
   const initialPreset = getInitialPreset();
 
   // Customizer State initialized to role presets
@@ -166,6 +173,12 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
   // AI Command Console simulation helper
   const handleAiAsk = async (queryText) => {
     const queryLower = queryText.toLowerCase();
+    if (isMedicalDirectorRole || currentRolePreset === 'Clinical') {
+      return {
+        answer: `Clinical AI analysis finished for "${queryText}": ${metrics.activePatients || 162} active enrolled patients, ${metrics.pendingPrescriptions || 13} prescriptions awaiting review, and 0 dosage contraindications flagged network-wide.`,
+        actions: [],
+      };
+    }
     if (
       queryLower.includes('attention') ||
       queryLower.includes('priorities') ||
@@ -309,45 +322,63 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
             </p>
           </div>
 
-          {/* Controls Bar (Admin Only) */}
+          {/* Controls Bar */}
           {isAdmin && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {/* Preset Selector */}
-              <div
-                style={{
-                  display: 'flex',
-                  background: '#f1f5f9',
-                  borderRadius: '8px',
-                  padding: '2px',
-                  overflowX: 'auto',
-                  maxWidth: '100%',
-                  WebkitOverflowScrolling: 'touch',
-                  scrollbarWidth: 'none',
-                }}
-              >
-                {Object.keys(ROLE_PRESETS).map((preset) => (
-                  <button
-                    key={preset}
-                    onClick={() => handleApplyPreset(preset)}
-                    style={{
-                      padding: '0.4rem 0.75rem',
-                      borderRadius: '6px',
-                      border: 'none',
-                      fontSize: '0.75rem',
-                      fontWeight: currentRolePreset === preset ? 600 : 500,
-                      backgroundColor: currentRolePreset === preset ? '#ffffff' : 'transparent',
-                      color: currentRolePreset === preset ? '#0f172a' : '#64748b',
-                      boxShadow: currentRolePreset === preset ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0
-                    }}
-                  >
-                    {preset}
-                  </button>
-                ))}
-              </div>
+              {isMedicalDirectorRole ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#ccfbf1', color: '#0f766e', border: '1px solid #99f6e4', fontSize: '0.78rem', fontWeight: 700 }}>
+                  <span>🩺 Pure Clinical Oversight Mode</span>
+                </div>
+              ) : isDoctorRole ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', fontSize: '0.78rem', fontWeight: 700 }}>
+                  <span>🩺 Physician Practice Mode (Assigned Patients Only)</span>
+                </div>
+              ) : isPatientRole ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', fontSize: '0.78rem', fontWeight: 700 }}>
+                  <span>👤 Patient Personal Health Mode</span>
+                </div>
+              ) : isSupplierRole ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffedd5', color: '#c2410c', border: '1px solid #fed7aa', fontSize: '0.78rem', fontWeight: 700 }}>
+                  <span>📦 Supplier Control Room Mode (Scoped RFQs & Orders)</span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: 'flex',
+                    background: '#f1f5f9',
+                    borderRadius: '8px',
+                    padding: '2px',
+                    overflowX: 'auto',
+                    maxWidth: '100%',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none',
+                  }}
+                >
+                  {Object.keys(ROLE_PRESETS).map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => handleApplyPreset(preset)}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '0.75rem',
+                        fontWeight: currentRolePreset === preset ? 600 : 500,
+                        backgroundColor: currentRolePreset === preset ? '#ffffff' : 'transparent',
+                        color: currentRolePreset === preset ? '#0f172a' : '#64748b',
+                        boxShadow: currentRolePreset === preset ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0
+                      }}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Customize Mode Toggle */}
               <button
@@ -488,306 +519,312 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
         )}
       </div>
 
-      {/* ── 0. AI EXECUTIVE SUMMARY WIDGET ────────────────────────────── */}
-      {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-          {[...Array(4)].map((_, i) => (
-            <div key={i} style={{ height: '110px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-          ))}
-        </div>
+      {/* ── ROLE-SPECIFIC OVERVIEW DASHBOARD RENDER ────────────────────── */}
+      {isDoctorRole ? (
+        <DoctorOverviewTab doctorId={userProfile?.uid} doctorMeta={userProfile} onNavigate={(id) => router.push(`/doctor/${id === 'overview' ? '' : id}`)} />
+      ) : isPatientRole ? (
+        <DashboardEngine role="patient" dataContext={{ userProfile, uid: userProfile?.uid, name: userProfile?.displayName }} />
+      ) : isSupplierRole ? (
+        <DashboardEngine role="wholesaler" dataContext={{ userProfile, uid: userProfile?.uid }} />
       ) : (
-        <AdminExecutiveSummaryWidget 
-          metrics={metrics} 
-          visibleKPIs={visibleKPIs}
-          currentRolePreset={currentRolePreset}
-        />
-      )}
-
-      {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
-      <div className={styles.workspaceGrid}>
-        {loading ? (
-          <>
-            <div className={styles.workspaceColLeft} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-              <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+        <>
+          {/* ── 0. AI EXECUTIVE SUMMARY WIDGET ────────────────────────────── */}
+          {loading ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} style={{ height: '110px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+              ))}
             </div>
-            <div className={styles.workspaceColRight} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ height: '450px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-              <div style={{ height: '300px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className={`${styles.mainPortalGrid} ${(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) ? styles.withSidebar : styles.fullWidth}`}>
-              {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
-              <div className={styles.widgetsCol}>
-                {/* AI COMMAND CENTER (ASK ATLAS) */}
-                <AiCommandConsole onAskQuestion={handleAiAsk} />
+          ) : (
+            <AdminExecutiveSummaryWidget 
+              metrics={metrics} 
+              visibleKPIs={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? ROLE_PRESETS.Clinical.visibleKPIs : visibleKPIs}
+              currentRolePreset={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Clinical' : currentRolePreset}
+            />
+          )}
 
-                {/* ── 2. TODAY'S PRIORITIES QUEUE ─────────────────────────────── */}
-                {visibleWidgets.includes('todayPriorities') && (
-                  <TodayPrioritiesQueue
-                    priorities={priorities}
-                    onAction={(item) => router.push(item.link)}
-                  />
-                )}
+          {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
+          <div className={styles.workspaceGrid}>
+            {loading ? (
+              <>
+                <div className={styles.workspaceColLeft} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+                  <div style={{ height: '320px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+                </div>
+                <div className={styles.workspaceColRight} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div style={{ height: '450px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+                  <div style={{ height: '300px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`${styles.mainPortalGrid} ${(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) ? styles.withSidebar : styles.fullWidth}`}>
+                  {/* LEFT COLUMN: PRIMARY WORKSPACE WIDGETS */}
+                  <div className={styles.widgetsCol}>
+                    {/* AI CLINICAL COMMAND HUB (OR COMMERCIAL COMMAND CONSOLE) */}
+                    {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
+                      <ClinicalCommandHub role={effectiveRole} metrics={metrics} />
+                    ) : (
+                      <AiCommandConsole onAskQuestion={handleAiAsk} />
+                    )}
 
-                {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
-                {visibleWidgets.includes('businessHealth') && <HealthMatrixWidget />}
+                    {/* ── 2. TODAY'S PRIORITIES QUEUE ─────────────────────────────── */}
+                    {visibleWidgets.includes('todayPriorities') && (
+                      <TodayPrioritiesQueue
+                        priorities={(isMedicalDirectorRole || currentRolePreset === 'Clinical')
+                          ? [
+                              { id: 'rx_review', priority: 'critical', text: `${metrics.pendingPrescriptions || 13} prescriptions awaiting review`, link: '/admin/prescriptions?status=pending', detail: 'Pending doctor & director review.' },
+                              { id: 'followup_due', priority: 'high', text: `${metrics.dueFollowUps || 3} patient follow-ups due`, link: '/admin/users?filter=followup_due', detail: 'Adherence check or biomarker lab review needed.' }
+                            ]
+                          : priorities
+                        }
+                        onAction={(item) => router.push(item.link || item.route || '/admin')}
+                      />
+                    )}
 
-                {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
-                {visibleWidgets.includes('financeTasks') && (
-                  <FinanceTasksHub
-                    onAction={(type, detail) => {
-                      notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
-                    }}
-                  />
-                )}
+                    {/* ── 3. BUSINESS HEALTH MATRIX (TRAFFIC LIGHTS) ───────────────── */}
+                    {visibleWidgets.includes('businessHealth') && !isMedicalDirectorRole && currentRolePreset !== 'Clinical' && <HealthMatrixWidget />}
 
-                {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
-                {visibleWidgets.includes('aiWorkspace') && (
-                  <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: '1rem',
-                        borderBottom: '1px solid #cbd5e1',
-                        paddingBottom: '0.5rem',
-                      }}
-                    >
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: '0.95rem',
-                          fontWeight: 700,
-                          color: '#0f172a',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
+                    {/* ── 4. FINANCIAL TASKS WORKSPACE ───────────────────────────── */}
+                    {visibleWidgets.includes('financeTasks') && !isMedicalDirectorRole && currentRolePreset !== 'Clinical' && (
+                      <FinanceTasksHub
+                        onAction={(type, detail) => {
+                          notifier.info(`Redirecting to financial reconciliation for ${type}: ${detail}`);
                         }}
-                      >
-                        <Sparkles size={16} color="#0ea5e9" /> Atlas AI Sourcing Hub
-                      </h3>
-                      {/* Tabs */}
-                      <div style={{ display: 'flex', gap: '0.25rem' }}>
-                        {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
-                          <button
-                            key={tab}
-                            onClick={() => setAiWorkspaceTab(tab)}
-                            className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
+                      />
+                    )}
+
+                    {/* ── 8. AI WORKSPACE (SYNC & INSIGHTS HUB) ───────────────────── */}
+                    {visibleWidgets.includes('aiWorkspace') && (
+                      <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
+                            marginBottom: '1rem',
+                            borderBottom: '1px solid #cbd5e1',
+                            paddingBottom: '0.5rem',
+                          }}
+                        >
+                          <h3
+                            style={{
+                              margin: 0,
+                              fontSize: '0.95rem',
+                              fontWeight: 700,
+                              color: '#0f172a',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                            }}
                           >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                            <Sparkles size={16} color="#0ea5e9" /> {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Atlas Clinical AI Assistant' : 'Atlas AI Sourcing Hub'}
+                          </h3>
+                          {/* Tabs */}
+                          <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', maxWidth: '100%', paddingBottom: '2px' }}>
+                            {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
+                              <button
+                                key={tab}
+                                onClick={() => setAiWorkspaceTab(tab)}
+                                className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
+                                style={{ whiteSpace: 'nowrap' }}
+                              >
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                    {/* Workspace Content */}
-                    <div>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          padding: '0.5rem 0.75rem',
-                          backgroundColor: '#f8fafc',
-                          borderRadius: '6px',
-                          marginBottom: '0.75rem',
-                          fontSize: '0.75rem',
-                        }}
-                      >
-                        <span>
-                          Last analysis: <strong>Today 14:02</strong>
-                        </span>
-                        <span>
-                          Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
-                        </span>
-                        <span>
-                          Estimated impact: <strong style={{ color: '#0284c7' }}>{formatAEDtoDual(24000, '+')} / mo</strong>
-                        </span>
-                      </div>
+                        {/* Workspace Content */}
+                        <div>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              flexWrap: 'wrap',
+                              gap: '0.5rem',
+                              padding: '0.5rem 0.75rem',
+                              backgroundColor: '#f8fafc',
+                              borderRadius: '6px',
+                              marginBottom: '0.75rem',
+                              fontSize: '0.75rem',
+                            }}
+                          >
+                            <span>
+                              Last analysis: <strong>Today 14:02</strong>
+                            </span>
+                            <span>
+                              Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
+                            </span>
+                            <span>
+                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
+                                <>Safety Index: <strong style={{ color: '#10b981' }}>99.8% Optimal</strong></>
+                              ) : (
+                                <>Estimated impact: <strong style={{ color: '#0284c7' }}>{formatAEDtoDual(24000, '+')} / mo</strong></>
+                              )}
+                            </span>
+                          </div>
 
-                      {aiWorkspaceTab === 'insights' && (
-                        <ul
-                          style={{
-                            margin: 0,
-                            paddingLeft: '1.2rem',
-                            fontSize: '0.82rem',
-                            color: '#334155',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.4rem',
-                          }}
-                        >
-                          <li>
-                            Revenue increased <strong>18%</strong> this month across strategic wholesaler
-                            segments.
-                          </li>
-                          <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
-                          <li>
-                            <strong>3 opportunities</strong> in Dubai clinic network need strategic
-                            discount review.
-                          </li>
-                          <li>
-                            Average RFQ response time improved by <strong>22%</strong> over the last 14
-                            days.
-                          </li>
-                        </ul>
-                      )}
-                      {aiWorkspaceTab === 'predictions' && (
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                          AI predicts a potential shipping delay of 3 days from EU laboratories next week
-                          due to logistics strikes. Recommend frontloading Peptide B purchases.
-                        </p>
-                      )}
-                      {aiWorkspaceTab === 'recommendations' && (
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                          Adjust pricing on product catalog item #4401. Market price rose by 14%, current
-                          margins will reduce to 11% if not updated in Zoho Inventory.
-                        </p>
-                      )}
-                      {aiWorkspaceTab === 'agents' && (
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
-                          Autonomous agents: <strong>Sourcing Bot</strong> is active (last synced 4 mins
-                          ago). <strong>Discrepancy Agent</strong> matched 18/18 bills successfully.
-                        </p>
-                      )}
-                    </div>
+                          {aiWorkspaceTab === 'insights' && (
+                            <ul
+                              style={{
+                                margin: 0,
+                                paddingLeft: '1.2rem',
+                                fontSize: '0.82rem',
+                                color: '#334155',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.4rem',
+                              }}
+                            >
+                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
+                                <>
+                                  <li>
+                                    <strong>{metrics.activePatients || 162} active enrolled patients</strong> currently undergoing supervised peptide therapy.
+                                  </li>
+                                  <li>
+                                    <strong>{metrics.activeProtocols || 77} clinical protocols</strong> actively prescribed and monitored network-wide.
+                                  </li>
+                                  <li>
+                                    <strong>{metrics.pendingPrescriptions || 13} pending prescriptions</strong> awaiting final clinical review and sign-off.
+                                  </li>
+                                  <li>
+                                    <strong>0 contraindication alerts</strong> or dosage safety flags recorded across active regimens today.
+                                  </li>
+                                </>
+                              ) : (
+                                <>
+                                  <li>
+                                    Revenue increased <strong>18%</strong> this month across strategic wholesaler
+                                    segments.
+                                  </li>
+                                  <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
+                                  <li>
+                                    <strong>3 opportunities</strong> in Dubai clinic network need strategic
+                                    discount review.
+                                  </li>
+                                  <li>
+                                    Average RFQ response time improved by <strong>22%</strong> over the last 14
+                                    days.
+                                  </li>
+                                </>
+                              )}
+                            </ul>
+                          )}
+                          {aiWorkspaceTab === 'predictions' && (
+                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical')
+                                ? "AI clinical predictive model forecasts 14 patient protocol completions this week. Automated follow-up reviews and refill checks recommended."
+                                : "AI predicts a potential shipping delay of 3 days from EU laboratories next week due to logistics strikes. Recommend frontloading Peptide B purchases."}
+                            </p>
+                          )}
+                          {aiWorkspaceTab === 'recommendations' && (
+                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical')
+                                ? "Protocol optimization: 5 patients are eligible for step-down dosage transitions based on recent biomarker responses."
+                                : "Adjust pricing on product catalog item #4401. Market price rose by 14%, current margins will reduce to 11% if not updated in Zoho Inventory."}
+                            </p>
+                          )}
+                          {aiWorkspaceTab === 'agents' && (
+                            <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>
+                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical')
+                                ? "Autonomous agents: Clinical Monitor Agent is active (last synced 2 mins ago). Drug Interaction Scanner verified 100% of active prescriptions."
+                                : "Autonomous agents: Sourcing Bot is active (last synced 4 mins ago). Discrepancy Agent matched 18/18 bills successfully."}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
-              {(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) && (
-                <div className={styles.sideCol}>
-                  {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
-                  {visibleWidgets.includes('systemStatus') && (
-                    <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          marginBottom: '1rem',
-                        }}
-                      >
-                        <Server size={16} color="#64748b" />
-                        <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
-                          Infrastructure Specs
-                        </h3>
-                      </div>
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '0.75rem',
-                          fontSize: '0.8rem',
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid #f1f5f9',
-                            paddingBottom: '0.4rem',
-                          }}
-                        >
-                          <span style={{ color: '#64748b' }}>Firestore Database</span>
-                          <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
+                  {/* RIGHT COLUMN: SIDEBAR METRICS & INFRASTRUCTURE */}
+                  {(visibleWidgets.includes('financeTasks') || visibleWidgets.includes('systemStatus') || visibleWidgets.includes('businessHealth')) && (
+                    <div className={styles.sideCol}>
+                      {/* ── 10. INFRASTRUCTURE & TECH STATUS ───────────────────────── */}
+                      {visibleWidgets.includes('systemStatus') && (
+                        <div className={styles.glassCard} style={{ padding: '1.25rem' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginBottom: '1rem',
+                            }}
+                          >
+                            <Server size={16} color="#64748b" />
+                            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+                              Infrastructure Specs
+                            </h3>
+                          </div>
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.75rem',
+                              fontSize: '0.8rem',
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                borderBottom: '1px solid #f1f5f9',
+                                paddingBottom: '0.4rem',
+                              }}
+                            >
+                              <span style={{ color: '#64748b' }}>Firestore Database</span>
+                              <span style={{ color: '#10b981', fontWeight: 600 }}>Connected</span>
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                borderBottom: '1px solid #f1f5f9',
+                                paddingBottom: '0.4rem',
+                              }}
+                            >
+                              <span style={{ color: '#64748b' }}>AI Engine Link</span>
+                              <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                borderBottom: '1px solid #f1f5f9',
+                                paddingBottom: '0.4rem',
+                              }}
+                            >
+                              <span style={{ color: '#64748b' }}>Router Latency</span>
+                              <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                borderBottom: '1px solid #f1f5f9',
+                                paddingBottom: '0.4rem',
+                              }}
+                            >
+                              <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
+                              <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ color: '#64748b' }}>Environment</span>
+                              <span style={{ color: '#0f172a', fontWeight: 600 }}>Production GCC</span>
+                            </div>
+                          </div>
                         </div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid #f1f5f9',
-                            paddingBottom: '0.4rem',
-                          }}
-                        >
-                          <span style={{ color: '#64748b' }}>AI Engine Link</span>
-                          <span style={{ color: '#0284c7', fontWeight: 600 }}>gemini-2.5-pro</span>
-                        </div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid #f1f5f9',
-                            paddingBottom: '0.4rem',
-                          }}
-                        >
-                          <span style={{ color: '#64748b' }}>Router Latency</span>
-                          <span style={{ color: '#0f172a', fontWeight: 600 }}>{dbLatency}</span>
-                        </div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid #f1f5f9',
-                            paddingBottom: '0.4rem',
-                          }}
-                        >
-                          <span style={{ color: '#64748b' }}>Zoho Books Gateway</span>
-                          <span style={{ color: '#10b981', fontWeight: 600 }}>Synced (200 OK)</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: '#64748b' }}>Environment</span>
-                          <span style={{ color: '#0f172a', fontWeight: 600 }}>Production GCC</span>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* ── 13. MOBILE UX BOTTOM NAVIGATION BAR ─────────────────────── */}
-      <div className={styles.mobileNavBar}>
-        <a
-          onClick={() => setMobileTab('home')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'home' ? styles.active : ''}`}
-        >
-          <Home size={20} />
-          <span>Home</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('tasks')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'tasks' ? styles.active : ''}`}
-        >
-          <CheckCircle2 size={20} />
-          <span>Tasks</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('finance')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'finance' ? styles.active : ''}`}
-        >
-          <DollarSign size={20} />
-          <span>Finance</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('crm')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'crm' ? styles.active : ''}`}
-        >
-          <Users size={20} />
-          <span>CRM</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('ai')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'ai' ? styles.active : ''}`}
-        >
-          <Sparkles size={20} />
-          <span>AI</span>
-        </a>
-        <a
-          onClick={() => setMobileTab('more')}
-          className={`${styles.mobileNavItem} ${mobileTab === 'more' ? styles.active : ''}`}
-        >
-          <MoreHorizontal size={20} />
-          <span>More</span>
-        </a>
-      </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

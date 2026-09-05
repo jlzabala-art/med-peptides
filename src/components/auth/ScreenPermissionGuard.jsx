@@ -52,11 +52,14 @@ const TAB_TO_ACTION_MAP = {
  * @param {string} tabId - The ID of the tab to check permissions for.
  * @param {React.ReactNode} children - The component to render if permitted.
  */
+import { useAuth } from '../../context/AuthContext';
+
 export default function ScreenPermissionGuard({ tabId, children }) {
   const { can, is } = useRoleAccess();
+  const { isAdmin } = useAuth();
 
-  // If the user is an admin, always allow access to tabs inside panels.
-  if (is('admin')) {
+  // If the user is an admin (or wildcard), always allow access inside panels during simulation
+  if (is('admin') || isAdmin) {
     return children;
   }
 

@@ -35,6 +35,7 @@ import { useMemo } from 'react';
 const ROLE_ALIASES = Object.freeze({
   wholeseller: 'wholesaler', // canonical spelling is 'wholesaler'
   pharmacy:    'compounding_pharmacy',
+  medical:     'medical_director',
 });
 
 // ── Action-based permissions per canonical role ───────────────────────────────
@@ -51,6 +52,18 @@ const ROLE_ALIASES = Object.freeze({
  */
 const ROLE_ACTION_PERMISSIONS = Object.freeze({
   admin: ['*'],
+
+  medical_director: [
+    'view:admin',
+    'view:patients', 'create:patients', 'edit:patients',
+    'create:prescriptions', 'view:prescriptions', 'edit:prescriptions',
+    'view:protocols', 'create:protocols', 'edit:protocols',
+    'view:products',
+    'view:clinical_logs',
+    'view:quotations',
+    'view:orders', 'create:orders',
+    'manage:staff',
+  ],
 
   doctor: [
     'view:patients', 'edit:patients',
@@ -69,6 +82,31 @@ const ROLE_ACTION_PERMISSIONS = Object.freeze({
     'create:orders', 'view:orders',
     'view:quotations',
     'manage:staff',
+  ],
+
+  account_manager: [
+    'view:admin',
+    'view:clients',
+    'view:quotations', 'create:quotations',
+    'view:orders', 'create:orders',
+    'view:products',
+    'manage:staff',
+  ],
+
+  patient_coordinator: [
+    'view:admin',
+    'view:patients', 'edit:patients',
+    'view:prescriptions',
+    'view:protocols',
+    'view:orders',
+  ],
+
+  fagron_clinic: [
+    'view:admin',
+    'view:patients',
+    'create:prescriptions', 'view:prescriptions',
+    'view:protocols',
+    'view:orders', 'create:orders',
   ],
 
   patient: [

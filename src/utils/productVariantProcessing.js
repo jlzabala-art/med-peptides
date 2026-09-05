@@ -1,3 +1,16 @@
+import { PRESENTATION_LABELS } from '../constants/presentationTypes';
+
+export function getHumanFormatName(formatId, rawFormat) {
+  if (!formatId && !rawFormat) return 'Standard Formulation';
+  const cleanId = (formatId || '').toLowerCase().trim();
+  if (PRESENTATION_LABELS[cleanId]) return PRESENTATION_LABELS[cleanId];
+  const cleanRaw = (rawFormat || '').toLowerCase().trim();
+  if (PRESENTATION_LABELS[cleanRaw]) return PRESENTATION_LABELS[cleanRaw];
+  const noUnderscores = cleanId.replace(/_/g, ' ');
+  if (PRESENTATION_LABELS[noUnderscores]) return PRESENTATION_LABELS[noUnderscores];
+  return noUnderscores.replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export function processProductVariants(variants) {
   if (!variants || !Array.isArray(variants)) return { suppliers: [], formats: [], strengths: [], variantIndex: {} };
 
@@ -43,10 +56,11 @@ export function processProductVariants(variants) {
       });
     }
 
+    const formatDisplayName = getHumanFormatName(formatId, rawFormat);
     if (!formatMap.has(formatId)) {
       formatMap.set(formatId, {
         id: formatId,
-        name: rawFormat,
+        name: formatDisplayName,
         strengths: new Set()
       });
     }

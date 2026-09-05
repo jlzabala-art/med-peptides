@@ -252,3 +252,5 @@ export { default as Combine } from 'lucide-react/dist/esm/icons/combine';
 export { default as GitMerge } from 'lucide-react/dist/esm/icons/git-merge';
 export { default as Merge } from 'lucide-react/dist/esm/icons/merge';
 export { default as Warehouse } from 'lucide-react/dist/esm/icons/warehouse';
+export { default as RotateCw } from 'lucide-react/dist/esm/icons/rotate-cw';
+export { default as PenTool } from 'lucide-react/dist/esm/icons/pen-tool';

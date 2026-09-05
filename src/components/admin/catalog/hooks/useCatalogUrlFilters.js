@@ -24,14 +24,16 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
   }, [searchParams]);
 
   const updateUrlParam = useCallback((key, val) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search || searchParams.toString());
     if (val) {
       params.set(key, val);
     } else {
       params.delete(key);
     }
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [searchParams, pathname, router]);
+    const queryString = params.toString();
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+    window.history.replaceState(null, '', newUrl);
+  }, [searchParams, pathname]);
 
   const setMultiParam = useCallback((key, values) => {
     const uniqueVals = Array.from(new Set(values));
@@ -65,11 +67,14 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      if (searchTerm !== (searchParams.get('q') || '')) {
+      const currentQ = new URLSearchParams(window.location.search).get('q') || '';
+      if (searchTerm !== currentQ) {
         const params = new URLSearchParams(window.location.search);
         if (searchTerm) params.set('q', searchTerm);
         else params.delete('q');
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        const queryString = params.toString();
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        window.history.replaceState(null, '', newUrl);
         
         try {
           const currentPrefs = JSON.parse(localStorage.getItem('regenpept-admin-catalog-prefs') || '{}');
@@ -79,7 +84,7 @@ export function useCatalogUrlFilters({ supplierIdToName = {} } = {}) {
       }
     }, 500);
     return () => clearTimeout(handler);
-  }, [searchTerm, searchParams, pathname, router]);
+  }, [searchTerm, pathname]);
 
   // Dynamically compute available subcategories based on selected categories
   const availableSubcategories = useMemo(() => {

@@ -355,28 +355,56 @@ function resolveSchema(product) {
     return EXCIPIENT_VEHICLE_SCHEMA;
   }
 
-  // Peptides / APIs / Hormones / Pharma raw materials
+  // Raw Active Pharmaceutical Ingredients (APIs) & Compounding Chemicals
+  if (
+    cat === 'raw_material' || 
+    cat === 'api_raw_material' || 
+    cat === 'api' || 
+    type === 'raw_material' || 
+    type === 'api_raw_material'
+  ) return API_RAW_MATERIAL_SCHEMA;
+
+  // Tests / Genomics / Biomarkers
+  if (
+    cat === 'genomics_biomarkers' ||
+    cat === 'genomics' ||
+    cat === 'diagnostic' ||
+    cat === 'diagnostic_test' || 
+    cat === 'genetic_test' || 
+    cat === 'lab_test' ||
+    cat.includes('genom') ||
+    cat.includes('biomarker') ||
+    type === 'test' ||
+    type === 'genomics_biomarkers' ||
+    type === 'dna_testing_kit' ||
+    type === 'biomarker_testing_kit' ||
+    name.includes('dna test') ||
+    name.includes('trichotest') ||
+    name.includes('nutrigen')
+  ) return DIAGNOSTIC_TEST_SCHEMA;
+
+  // Peptides & Hormones
   if (cat === 'hormone') return HORMONE_SCHEMA;
-  if (['peptide', 'hormone', 'raw_material', 'api_raw_material', 'hormone optimization'].includes(cat)) return PEPTIDE_SCHEMA;
+  if (['peptide', 'peptides', 'hormone optimization'].includes(cat)) return PEPTIDE_SCHEMA;
   if (cat.startsWith('cardiovascular') || cat.startsWith('metabolic')) return PEPTIDE_SCHEMA;
 
   // Supplements / Nutraceuticals
   if (['supplement', 'nutricosmetics', 'weight_loss', 'nutraceutical'].includes(cat)) return SUPPLEMENT_SCHEMA;
 
-  // Equipment / Consumables / Excipients
-  if (['medical_device_consumable', 'equipment', 'excipient_vehicle', 'excipient'].includes(cat)) return EQUIPMENT_SCHEMA;
+  // Equipment / Medical Consumables / Clinical Supplies
+  if (['clinical_supplies', 'medical_device_consumable', 'equipment', 'consumables'].includes(cat)) return EQUIPMENT_SCHEMA;
 
-  // Tests / Diagnostics / Genetics
-  if (['diagnostic_test', 'genetic_test', 'lab_test'].includes(cat) || type === 'test') return DIAGNOSTIC_TEST_SCHEMA;
+  // Vehicles / Excipients
+  if (['excipient_vehicle', 'excipient'].includes(cat)) return EXCIPIENT_VEHICLE_SCHEMA;
 
-  // Services
-  if (cat === 'service' || type === 'subscription') return SERVICE_SCHEMA;
+  // Services & Logistics
+  if (cat === 'service' || cat === 'logistics_service' || type === 'subscription') return SERVICE_SCHEMA;
 
-  // Skincare
-  if (cat === 'skincare') return SKINCARE_SCHEMA;
+  // Skincare & Cosmeceuticals
+  if (cat === 'skincare' || cat === 'skin_anti_aging') return SKINCARE_SCHEMA;
 
   // Type-based fallbacks
-  if (type === 'raw_material' || type === 'api_raw_material') return API_RAW_MATERIAL_SCHEMA;
+  if (/api|raw material|bulk|materia prima/i.test(name)) return API_RAW_MATERIAL_SCHEMA;
 
   // Infer from name as last resort
   if (/peptide|bpc|tb-500|nad\+|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) {
@@ -451,15 +479,16 @@ function resolveSchemaLabel(product) {
     return 'Galenic Vehicle / Excipient';
   }
 
+  if (cat === 'raw_material' || cat === 'api_raw_material' || cat === 'api' || type === 'raw_material' || type === 'api_raw_material') return 'Active API / Compounding';
+  if (cat === 'genomics_biomarkers' || cat === 'genomics' || cat === 'diagnostic' || cat === 'diagnostic_test' || cat === 'genetic_test' || cat === 'lab_test' || cat.includes('genom') || type === 'test' || type === 'genomics_biomarkers' || name.includes('dna test') || name.includes('trichotest')) return 'Genomics & Biomarkers';
   if (cat === 'hormone') return 'Hormone';
-  if (['peptide', 'raw_material', 'api_raw_material', 'hormone optimization'].includes(cat)) return 'Peptide / API';
+  if (['peptide', 'hormone optimization'].includes(cat)) return 'Peptide / API';
   if (cat.startsWith('cardiovascular') || cat.startsWith('metabolic')) return 'Pharma Compound';
   if (['supplement', 'nutricosmetics', 'weight_loss', 'nutraceutical'].includes(cat)) return 'Supplement';
   if (['medical_device_consumable', 'equipment', 'excipient_vehicle', 'excipient'].includes(cat)) return 'Medical Device';
-  if (['diagnostic_test', 'genetic_test', 'lab_test'].includes(cat) || type === 'test') return 'Diagnostic Test';
   if (cat === 'service' || type === 'subscription') return 'Service';
   if (cat === 'skincare') return 'Skincare';
-  if (type === 'raw_material' || type === 'api_raw_material') return 'Active API / Compounding';
+  if (/api|raw material|bulk|materia prima/i.test(name)) return 'Active API / Compounding';
   if (/peptide|bpc|tb-500|nad\+|semaglutide|melanotan|sermorelin|ipamorelin|cjc|ghrh|ghrp|hexarelin|epithalon|selank|semax|kisspeptin|mots-c|humanin|gonadorelin|naltrexone|ldn|fenbendazole|rapamycin|metformin|spironolactone|tadalafil|nadolol/i.test(name)) return 'Peptide / API';
   return 'General';
 }

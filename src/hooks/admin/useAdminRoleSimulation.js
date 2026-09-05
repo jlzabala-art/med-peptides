@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useSimulationStore } from '../../stores/useSimulationStore';
 
 export const ADMIN_ROLES = {
   admin: {
@@ -98,16 +99,20 @@ export function useAdminRoleSimulation() {
   }, [sync]);
 
   const setSimulatedRole = useCallback((newRoleId) => {
-    if (ADMIN_ROLES[newRoleId] || newRoleId === 'admin') {
-      globalSimulatedRole = newRoleId;
-      listeners.forEach((listener) => listener());
-    }
+    globalSimulatedRole = newRoleId;
+    try {
+      useSimulationStore.getState().setSimulatedRole(newRoleId === 'admin' ? null : newRoleId);
+    } catch (e) {}
+    listeners.forEach((listener) => listener());
   }, []);
 
   const impersonateUser = useCallback((userObj) => {
     globalImpersonatedUser = userObj;
     if (userObj?.role) {
       globalSimulatedRole = userObj.role;
+      try {
+        useSimulationStore.getState().setSimulatedRole(userObj.role);
+      } catch (e) {}
     }
     listeners.forEach((listener) => listener());
   }, []);
@@ -115,6 +120,9 @@ export function useAdminRoleSimulation() {
   const exitImpersonation = useCallback(() => {
     globalImpersonatedUser = null;
     globalSimulatedRole = 'admin';
+    try {
+      useSimulationStore.getState().exitSimulation();
+    } catch (e) {}
     listeners.forEach((listener) => listener());
   }, []);
 

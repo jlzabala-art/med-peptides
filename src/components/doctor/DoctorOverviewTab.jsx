@@ -36,6 +36,7 @@ import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import UniversalOrderBuilder from '../shared/order-builder/UniversalOrderBuilder';
 import ClinicalCopilotWidget from './ClinicalCopilotWidget';
 import PatientAdherenceWidget from './PatientAdherenceWidget';
+import ClinicalCommandHub from '../admin/widgets/ClinicalCommandHub';
 import { Card, MetricCard } from '../ui';
 import Spinner from '../ui/Spinner';
 import { useTranslation } from 'react-i18next';
@@ -164,6 +165,8 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
       </div>
 
       <div className="overview-content" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <ClinicalCommandHub role="doctor" metrics={{ pendingPrescriptions: drafts, activePatients: totalPatients }} />
+
         {drafts > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderRadius: '8px', background: 'var(--color-warning-bg)', border: '1px solid #fcd34d' }}>
             <AlertCircle size={20} color="var(--color-warning)" />
