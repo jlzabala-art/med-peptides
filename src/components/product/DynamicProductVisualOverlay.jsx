@@ -56,7 +56,7 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
 
       {/* Illustrative Sample Image Disclaimer Badge */}
       <div className="dpv-sample-disclaimer">
-        <span>* Imagen de muestra orientativa</span>
+        <span>* Illustrative sample image</span>
       </div>
 
       {/* 2. Top-Left Delivery & Archetype HUD Badge */}
