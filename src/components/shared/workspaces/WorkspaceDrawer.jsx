@@ -16,10 +16,13 @@ import {
   ShieldCheck,
   Truck,
   DollarSign,
-  Package
+  Package,
+  Thermometer,
+  MapPin,
+  Sparkles,
+  Info,
+  Clock
 } from 'lucide-react';
-import { collection, getDocs, query, limit } from 'firebase/firestore';
-import { db } from '../../../firebase';
 import notifier from '../../../services/NotificationService';
 import { getRecentEntitiesFast, searchCatalogFast } from '../../../repositories/workspaceSearchRepository';
 
@@ -54,7 +57,12 @@ export default function WorkspaceDrawer() {
   const [mounted, setMounted] = useState(false);
   const [selectedDiscount, setSelectedDiscount] = useState(0);
 
-  // On-demand Target Recipient States
+  // Shipping & Logistics States
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState('cold_chain'); // 'cold_chain' | 'express' | 'pickup'
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [shippingNotes, setShippingNotes] = useState('');
+
+  // Target Recipient States
   const [selectedTargetType, setSelectedTargetType] = useState('clinic'); // 'clinic' | 'wholeseller' | 'patient' | 'doctor' | 'supplier'
   const [targetTypeEntities, setTargetTypeEntities] = useState([]);
   const [loadingTargetType, setLoadingTargetType] = useState(false);
@@ -73,6 +81,17 @@ export default function WorkspaceDrawer() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Sync address preview when target entity changes
+  useEffect(() => {
+    if (activeWs?.targetEntity) {
+      const ent = activeWs.targetEntity;
+      const computedAddr = ent.address || ent.shippingAddress || (ent.city ? `${ent.city}, ${ent.state || ''} ${ent.zip || ''}` : '');
+      if (computedAddr && !shippingAddress) {
+        setShippingAddress(computedAddr);
+      }
+    }
+  }, [activeWs?.targetEntity]);
 
   // Global Keyboard Shortcuts (Alt+W to toggle, Esc to close, Cmd+Enter to execute)
   useEffect(() => {
@@ -103,7 +122,7 @@ export default function WorkspaceDrawer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDrawerOpen, activePicker, activeWs?.intent, items.length]);
 
-  // 1. Instant Fast Search for Catalog & Protocols (Algolia + RAM Cache)
+  // Fast Catalog Search
   useEffect(() => {
     if (!isDrawerOpen || !activePicker) return;
 
@@ -125,7 +144,7 @@ export default function WorkspaceDrawer() {
           if (isMounted) setSearchingCatalog(false);
         }
       }
-    }, 150); // 150ms debounce for ultra-fast typing
+    }, 150);
 
     return () => {
       isMounted = false;
@@ -133,7 +152,7 @@ export default function WorkspaceDrawer() {
     };
   }, [pickerSearch, activePicker, isDrawerOpen]);
 
-  // 2. High-Speed 0ms Target Entities Load (RAM + LocalStorage + SWR)
+  // Target Entities Loader
   useEffect(() => {
     if (!isDrawerOpen) return;
     const effectiveType = activeWs?.intent === 'buy' ? 'supplier' : selectedTargetType;
@@ -155,7 +174,7 @@ export default function WorkspaceDrawer() {
     return () => { isMounted = false; };
   }, [isDrawerOpen, selectedTargetType, activeWs?.intent]);
 
-  // Sync name input when active workspace changes
+  // Sync workspace name
   useEffect(() => {
     if (activeWs) {
       setNameInput(activeWs.name);
@@ -165,13 +184,32 @@ export default function WorkspaceDrawer() {
 
   if (!isDrawerOpen || !activeWs || !mounted) return null;
 
+  // ─── Price & Financial Calculations (Multi-Fallback Resolver) ────────────────
+  const getItemUnitPrice = (it) => {
+    if (typeof it.unitPrice === 'number' && it.unitPrice > 0) return it.unitPrice;
+    if (typeof it.price === 'number' && it.price > 0) return it.price;
+    if (typeof it.unitRate === 'number' && it.unitRate > 0) return it.unitRate;
+    if (typeof it.unit_price === 'number' && it.unit_price > 0) return it.unit_price;
+    if (typeof it.msrp === 'number' && it.msrp > 0) return it.msrp;
+    return Number(it.unitPrice || it.price || it.unitRate || 0);
+  };
+
   const totalItemsCount = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
 
-  const totalSaleAmount = items.reduce((sum, it) => {
+  const subtotalSaleAmount = items.reduce((sum, it) => {
     const qty = Number(it.quantity || 1);
-    const rate = Number(it.unitPrice || 0);
+    const rate = getItemUnitPrice(it);
     return sum + (qty * rate);
   }, 0);
+
+  const discountAmount = subtotalSaleAmount * (selectedDiscount / 100);
+  const netSubtotal = Math.max(0, subtotalSaleAmount - discountAmount);
+
+  // Shipping Cost Calculation
+  const shippingCost = selectedShippingMethod === 'cold_chain' ? 35 : selectedShippingMethod === 'express' ? 15 : 0;
+
+  // Grand Total
+  const grandTotal = netSubtotal + (items.length > 0 ? shippingCost : 0);
 
   const totalCostAmount = items.reduce((sum, it) => {
     const qty = Number(it.quantity || 1);
@@ -179,8 +217,15 @@ export default function WorkspaceDrawer() {
     return sum + (qty * cost);
   }, 0);
 
-  const marginAmount = totalSaleAmount - totalCostAmount;
-  const marginPercent = totalSaleAmount > 0 ? Math.round((marginAmount / totalSaleAmount) * 100) : 0;
+  const marginAmount = grandTotal - totalCostAmount;
+  const marginPercent = grandTotal > 0 ? Math.round((marginAmount / grandTotal) * 100) : 0;
+
+  // Detect Temperature-Sensitive Items
+  const hasSensitiveItems = items.some(it => {
+    const name = (it.canonicalName || '').toLowerCase();
+    const fmt = (it.format || '').toLowerCase();
+    return fmt.includes('vial') || name.includes('pep') || name.includes('bpc') || name.includes('semaglutide') || name.includes('tirzepatide') || name.includes('nad') || name.includes('glutathione') || name.includes('growth');
+  });
 
   const handleSaveName = () => {
     if (nameInput.trim()) {
@@ -189,7 +234,7 @@ export default function WorkspaceDrawer() {
     }
   };
 
-  // Execution Handlers (100% English)
+  // Execution Handlers
   const handleExecuteQuotation = () => {
     if (items.length === 0) {
       notifier.warning('Please add products to the workspace before generating a quote.');
@@ -202,19 +247,25 @@ export default function WorkspaceDrawer() {
         clientName: activeWs.targetEntity?.name || '',
         clientId: activeWs.targetEntity?.id || '',
         recipientType: activeWs.targetEntity?.type || 'clinic',
+        shippingMethod: selectedShippingMethod,
+        shippingCost: shippingCost,
+        shippingAddress: shippingAddress,
+        shippingNotes: shippingNotes,
+        discountPercentage: selectedDiscount,
+        grandTotal: grandTotal,
         items: items.map(it => ({
           compoundName: it.canonicalName,
           dosage: it.dosage,
           format: it.format,
           quantity: it.quantity,
-          unitRate: it.unitPrice,
+          unitRate: getItemUnitPrice(it),
           supplierCost: it.supplierCost,
           supplierName: it.supplierName,
-          totalPrice: it.quantity * it.unitPrice
+          totalPrice: (it.quantity || 1) * getItemUnitPrice(it)
         }))
       }
     }));
-    notifier.info(`Launching B2B Quotation Wizard with ${items.length} items.`);
+    notifier.info(`Launching B2B Quotation Wizard with ${items.length} items (${selectedShippingMethod.toUpperCase()} shipping).`);
   };
 
   const handleExecutePrescription = () => {
@@ -230,12 +281,14 @@ export default function WorkspaceDrawer() {
         productId: it.productId,
         name: it.canonicalName,
         sku: it.sku,
-        price: it.unitPrice,
+        price: getItemUnitPrice(it),
         quantity: it.quantity,
         dosage: it.dosage,
         format: it.format
       })),
       patientId: activeWs.targetEntity?.type === 'patient' ? activeWs.targetEntity.id : null,
+      shippingMethod: selectedShippingMethod,
+      shippingAddress: shippingAddress,
       sourceModule: 'workspace'
     });
   };
@@ -252,6 +305,8 @@ export default function WorkspaceDrawer() {
         payload: {
           supplierId: activeWs.targetEntity?.type === 'supplier' ? activeWs.targetEntity.id : '',
           supplierName: activeWs.targetEntity?.name || '',
+          shippingMethod: selectedShippingMethod,
+          shippingCost: shippingCost,
           items: items.map(it => ({
             productId: it.productId,
             variantId: it.variantId,
@@ -274,8 +329,8 @@ export default function WorkspaceDrawer() {
       canonicalName: pep.name || pep.canonicalName || pep.title || 'Protocol Peptide',
       dosage: pep.dosage || pep.dose || '1 vial',
       quantity: 1,
-      unitPrice: Number(pep.price || 0),
-      supplierCost: Number(pep.costPrice || 0),
+      unitPrice: Number(pep.price || pep.unitPrice || 0),
+      supplierCost: Number(pep.costPrice || pep.supplierCost || 0),
       format: pep.format || 'Vial',
     }));
 
@@ -291,7 +346,7 @@ export default function WorkspaceDrawer() {
       canonicalName: prod.canonicalName || prod.name,
       dosage: prod.dosage || (prod.variants?.[0]?.dosage) || 'Standard',
       format: prod.format || (prod.variants?.[0]?.format) || 'Vial',
-      unitPrice: Number(prod.price || prod.variants?.[0]?.unit_price || 0),
+      unitPrice: Number(prod.price || prod.unit_price || prod.variants?.[0]?.unit_price || 0),
       supplierCost: Number(prod.variants?.[0]?.supplierCost || 0),
       quantity: 1,
     }, activeWs.id);
@@ -316,7 +371,7 @@ export default function WorkspaceDrawer() {
         onClick={() => setDrawerOpen(false)}
       />
 
-      {/* 2. Side Panel - Pinned directly to the right edge */}
+      {/* 2. Side Panel */}
       <div
         style={{
           position: 'fixed',
@@ -326,7 +381,7 @@ export default function WorkspaceDrawer() {
           height: '100dvh',
           maxHeight: '100vh',
           zIndex: 999999,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#f8fafc',
           boxShadow: '-10px 0 35px rgba(0, 0, 0, 0.25)',
           display: 'flex',
           flexDirection: 'column',
@@ -347,7 +402,7 @@ export default function WorkspaceDrawer() {
           }
         `}</style>
 
-        {/* ─── 1. Header & Workspace Tabs ──────────────────────────────────────── */}
+        {/* ─── HEADER: Workspace Tabs & Navigation ────────────────────────────── */}
         <div
           style={{
             padding: '1rem 1.25rem',
@@ -357,7 +412,8 @@ export default function WorkspaceDrawer() {
             flexDirection: 'column',
             gap: '0.85rem',
             flexShrink: 0,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+            zIndex: 10
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
@@ -384,7 +440,7 @@ export default function WorkspaceDrawer() {
                   Operational Workspaces
                 </h3>
                 <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 500 }}>
-                  {wsList.length} Active Workspace{wsList.length > 1 ? 's' : ''} • Concurrent Staging
+                  {wsList.length} Active Workspace{wsList.length > 1 ? 's' : ''} • Staging Cart
                 </span>
               </div>
             </div>
@@ -406,8 +462,6 @@ export default function WorkspaceDrawer() {
                   backgroundColor: '#f8fafc',
                   color: '#0f172a',
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-                  transition: 'all 0.15s ease',
                 }}
                 title="Create new workspace"
               >
@@ -428,7 +482,6 @@ export default function WorkspaceDrawer() {
                   justifyContent: 'center',
                   width: '32px',
                   height: '32px',
-                  transition: 'all 0.15s ease',
                 }}
                 title="Close Drawer"
               >
@@ -437,7 +490,7 @@ export default function WorkspaceDrawer() {
             </div>
           </div>
 
-          {/* Workspace Segmented Tabs */}
+          {/* Workspace Tabs */}
           <div
             style={{
               display: 'flex',
@@ -497,130 +550,139 @@ export default function WorkspaceDrawer() {
               );
             })}
           </div>
-        </div>
 
-        {/* ─── 2. Active Workspace Toolbar ────────────────────────────────────── */}
-        <div
-          style={{
-            padding: '0.65rem 1.25rem',
-            backgroundColor: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px',
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-            {isEditingName ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', width: '100%' }}>
-                <input
-                  type="text"
-                  value={nameInput}
-                  onChange={(e) => setNameInput(e.target.value)}
-                  autoFocus
-                  style={{
-                    padding: '4px 8px',
-                    fontSize: '0.82rem',
-                    border: '1px solid #0284c7',
-                    borderRadius: '6px',
-                    outline: 'none',
-                    fontWeight: 700,
-                    flex: 1,
-                    minWidth: 0,
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                />
-                <button type="button" onClick={handleSaveName} style={{ border: 'none', background: '#16a34a', color: 'white', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
-                  <Check size={13} />
-                </button>
-                <button type="button" onClick={() => setIsEditingName(false)} style={{ border: 'none', background: '#94a3b8', color: 'white', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
-                  <X size={13} />
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                  {activeWs.name}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsEditingName(true)}
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '3px', borderRadius: '4px', flexShrink: 0 }}
-                  title="Rename workspace"
-                >
-                  <Edit2 size={13} />
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Active Workspace Title & Quick Tools */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              paddingTop: '2px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+              {isEditingName ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', width: '100%' }}>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    autoFocus
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '0.82rem',
+                      border: '1px solid #0284c7',
+                      borderRadius: '6px',
+                      outline: 'none',
+                      fontWeight: 700,
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                  />
+                  <button type="button" onClick={handleSaveName} style={{ border: 'none', background: '#16a34a', color: 'white', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                    <Check size={13} />
+                  </button>
+                  <button type="button" onClick={() => setIsEditingName(false)} style={{ border: 'none', background: '#94a3b8', color: 'white', padding: '5px 8px', borderRadius: '5px', cursor: 'pointer' }}>
+                    <X size={13} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    {activeWs.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingName(true)}
+                    style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '3px', borderRadius: '4px', flexShrink: 0 }}
+                    title="Rename workspace"
+                  >
+                    <Edit2 size={13} />
+                  </button>
+                </div>
+              )}
+            </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-            <button
-              type="button"
-              onClick={() => duplicateWorkspace(activeWs.id)}
-              className="gcp-btn-secondary"
-              style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-              title="Duplicate workspace"
-            >
-              <Copy size={12} /> Duplicate
-            </button>
-            <button
-              type="button"
-              onClick={() => clearWorkspaceItems(activeWs.id)}
-              className="gcp-btn-secondary"
-              style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, color: '#dc2626', borderRadius: '6px', border: '1px solid #fca5a5', backgroundColor: '#fff5f5' }}
-              title="Clear items"
-            >
-              Clear
-            </button>
-            {wsList.length > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
               <button
                 type="button"
-                onClick={() => deleteWorkspace(activeWs.id)}
+                onClick={() => duplicateWorkspace(activeWs.id)}
                 className="gcp-btn-secondary"
-                style={{ padding: '4px 7px', fontSize: '0.75rem', color: '#dc2626', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-                title="Delete workspace"
+                style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
+                title="Duplicate workspace"
               >
-                <Trash2 size={13} />
+                <Copy size={12} /> Duplicate
               </button>
-            )}
+              <button
+                type="button"
+                onClick={() => clearWorkspaceItems(activeWs.id)}
+                className="gcp-btn-secondary"
+                style={{ padding: '4px 9px', fontSize: '0.75rem', fontWeight: 600, color: '#dc2626', borderRadius: '6px', border: '1px solid #fca5a5', backgroundColor: '#fff5f5' }}
+                title="Clear items"
+              >
+                Clear
+              </button>
+              {wsList.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => deleteWorkspace(activeWs.id)}
+                  className="gcp-btn-secondary"
+                  style={{ padding: '4px 7px', fontSize: '0.75rem', color: '#dc2626', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
+                  title="Delete workspace"
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* ─── 3. Staged Items List / Empty State with Loaders ──────────────── */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {items.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: 'auto 0' }}>
+        {/* ─── MAIN SCROLLABLE BODY ────────────────────────────────────────────── */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+
+          {/* 📦 1. STAGED PRODUCTS SECTION (ALWAYS TOP & HIGH VISIBILITY) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Package size={15} /> Staged Products ({items.length})
+              </span>
+              {items.length > 0 && (
+                <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                  Total Units: <b style={{ color: '#0f172a' }}>{totalItemsCount}</b>
+                </span>
+              )}
+            </div>
+
+            {items.length === 0 ? (
               <div
                 style={{
-                  padding: '2rem 1.25rem',
+                  padding: '1.75rem 1.25rem',
                   textAlign: 'center',
                   backgroundColor: '#ffffff',
                   borderRadius: '12px',
-                  border: '1px dashed #cbd5e1',
+                  border: '2px dashed #cbd5e1',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '0.6rem',
+                  gap: '0.75rem',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
                 }}
               >
-                <div style={{ width: '46px', height: '46px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003666' }}>
-                  <Briefcase size={22} />
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003666' }}>
+                  <Package size={24} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
-                    Workspace is Empty
+                  <h4 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
+                    No Products Staged Yet
                   </h4>
                   <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
-                    Populate this workspace using clinical protocols or master catalog items:
+                    Add items from clinical protocols or master catalog to build your order:
                   </p>
                 </div>
 
-                {/* Quick Action Loaders */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '0.25rem' }}>
                   <button
                     type="button"
                     onClick={() => {
@@ -672,370 +734,399 @@ export default function WorkspaceDrawer() {
                   </button>
                 </div>
               </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {items.map((it, idx) => {
+                  const unitRate = getItemUnitPrice(it);
+                  const lineTotal = (it.quantity || 1) * unitRate;
 
-              {/* Protocol Picker Panel */}
-              {activePicker === 'protocols' && (
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>Select Clinical Protocol</span>
-                    <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}><X size={15} /></button>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search protocol name..."
-                    value={pickerSearch}
-                    onChange={(e) => setPickerSearch(e.target.value)}
-                    style={{ padding: '8px 12px', fontSize: '0.82rem', border: '1px solid #cbd5e1', borderRadius: '7px', outline: 'none' }}
-                  />
-                  <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {protocols.filter(p => !pickerSearch || p.name?.toLowerCase().includes(pickerSearch.toLowerCase())).slice(0, 15).map(proto => (
-                      <div
-                        key={proto.id}
-                        onClick={() => handleLoadProtocol(proto)}
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: '7px',
-                          border: '1px solid #f1f5f9',
-                          backgroundColor: '#f8fafc',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          transition: 'background 0.15s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0f2fe'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                      >
-                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{proto.name}</span>
-                        <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 800 }}>+ Load</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Product Picker Panel */}
-              {activePicker === 'products' && (
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1e293b' }}>Select Catalog Product</span>
-                    <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}><X size={15} /></button>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search product name..."
-                    value={pickerSearch}
-                    onChange={(e) => setPickerSearch(e.target.value)}
-                    style={{ padding: '8px 12px', fontSize: '0.82rem', border: '1px solid #cbd5e1', borderRadius: '7px', outline: 'none' }}
-                  />
-                  <div style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {availableProducts.filter(p => !pickerSearch || p.canonicalName?.toLowerCase().includes(pickerSearch.toLowerCase())).slice(0, 15).map(prod => (
-                      <div
-                        key={prod.id}
-                        onClick={() => handleAddProduct(prod)}
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: '7px',
-                          border: '1px solid #f1f5f9',
-                          backgroundColor: '#f8fafc',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          transition: 'background 0.15s ease'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dcfce7'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                      >
-                        <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{prod.canonicalName}</span>
-                        <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 800 }}>+ Add</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '2px' }}>
-                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Staged Compounds ({items.length})
-                </span>
-                <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
-                  Total Units: <b style={{ color: '#0f172a' }}>{totalItemsCount}</b>
-                </span>
-              </div>
-
-              {items.map((it, idx) => (
-                <div
-                  key={it.id || idx}
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '10px',
-                    padding: '0.75rem 0.95rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a', lineHeight: 1.2 }}>
-                        {it.canonicalName}
-                      </div>
-                      <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '3px' }}>
-                        {it.dosage && <span><b>Dose:</b> {it.dosage}</span>}
-                        {it.format && <span>• <b>Format:</b> {it.format}</span>}
-                        {it.sku && <span>• <b>SKU:</b> {it.sku}</span>}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(activeWs.id, it.id)}
-                      style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '3px', borderRadius: '4px' }}
-                      title="Remove item"
+                  return (
+                    <div
+                      key={it.id || idx}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '11px',
+                        padding: '0.85rem 1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '9px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                        position: 'relative'
+                      }}
                     >
-                      <X size={16} />
-                    </button>
-                  </div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a', lineHeight: 1.25 }}>
+                            {it.canonicalName}
+                          </div>
+                          <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+                            {it.dosage && <span style={{ backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}><b>Dose:</b> {it.dosage}</span>}
+                            {it.format && <span style={{ backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}><b>Format:</b> {it.format}</span>}
+                            {it.sku && <span style={{ backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}><b>SKU:</b> {it.sku}</span>}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(it.id, activeWs.id)}
+                          style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', cursor: 'pointer', padding: '4px 6px', borderRadius: '6px', display: 'flex', alignItems: 'center' }}
+                          title="Remove item"
+                        >
+                          <X size={15} />
+                        </button>
+                      </div>
 
-                  {/* Quantity & Unit Pricing Controls */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
-                    {/* Quantity controls */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Qty:</span>
-                      <button
-                        type="button"
-                        onClick={() => updateItemQuantity(activeWs.id, it.id, Math.max(1, (it.quantity || 1) - 1))}
-                        style={{ width: '26px', height: '26px', border: '1px solid #cbd5e1', borderRadius: '5px', background: '#f8fafc', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', color: '#334155' }}
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        min="1"
-                        value={it.quantity || 1}
-                        onChange={(e) => updateItemQuantity(activeWs.id, it.id, parseInt(e.target.value, 10) || 1)}
-                        style={{ width: '42px', textAlign: 'center', padding: '3px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.82rem', fontWeight: 800, outline: 'none' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => updateItemQuantity(activeWs.id, it.id, (it.quantity || 1) + 1)}
-                        style={{ width: '26px', height: '26px', border: '1px solid #cbd5e1', borderRadius: '5px', background: '#f8fafc', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', color: '#334155' }}
-                      >
-                        +
-                      </button>
-                    </div>
+                      {/* Quantity & Unit Rate Inputs */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                        {/* Quantity Controls */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 700 }}>Qty:</span>
+                          <button
+                            type="button"
+                            onClick={() => updateItemQuantity(it.id, Math.max(1, (it.quantity || 1) - 1), activeWs.id)}
+                            style={{ width: '28px', height: '28px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#f8fafc', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', color: '#334155' }}
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={it.quantity || 1}
+                            onChange={(e) => updateItemQuantity(it.id, parseInt(e.target.value, 10) || 1, activeWs.id)}
+                            style={{ width: '44px', textAlign: 'center', padding: '4px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 800, outline: 'none' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updateItemQuantity(it.id, (it.quantity || 1) + 1, activeWs.id)}
+                            style={{ width: '28px', height: '28px', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#f8fafc', cursor: 'pointer', fontWeight: 800, fontSize: '0.85rem', color: '#334155' }}
+                          >
+                            +
+                          </button>
+                        </div>
 
-                    {/* Unit Price */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Rate: $</span>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={it.unitPrice || 0}
-                        onChange={(e) => updateItemPrice(activeWs.id, it.id, parseFloat(e.target.value) || 0)}
-                        style={{ width: '64px', textAlign: 'right', padding: '3px 6px', border: '1px solid #cbd5e1', borderRadius: '5px', fontSize: '0.82rem', fontWeight: 800, outline: 'none' }}
-                      />
-                    </div>
+                        {/* Unit Rate */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 700 }}>Rate: $</span>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={unitRate}
+                            onChange={(e) => updateItemPrice(it.id, parseFloat(e.target.value) || 0, activeWs.id)}
+                            style={{ width: '68px', textAlign: 'right', padding: '4px 6px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 800, outline: 'none' }}
+                          />
+                        </div>
 
-                    {/* Line Total */}
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#003666' }}>
-                        ${((it.quantity || 1) * (it.unitPrice || 0)).toFixed(2)}
+                        {/* Line Total */}
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
+                            ${lineTotal.toFixed(2)}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  );
+                })}
 
-        {/* ─── 4. Intent & Operational Routing Module ─────────────────────────── */}
-        <div
-          style={{
-            padding: '1rem 1.25rem',
-            backgroundColor: '#f8fafc',
-            borderTop: '1px solid #e2e8f0',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-            flexShrink: 0,
-          }}
-        >
-          {/* Intent Toggle */}
-          <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '9px' }}>
-            <button
-              type="button"
-              onClick={() => setWorkspaceIntent(activeWs.id, 'sell')}
-              style={{
-                flex: 1,
-                padding: '8px 10px',
-                borderRadius: '7px',
-                border: 'none',
-                backgroundColor: activeWs.intent === 'sell' ? '#003666' : 'transparent',
-                color: activeWs.intent === 'sell' ? '#ffffff' : '#475569',
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                boxShadow: activeWs.intent === 'sell' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <DollarSign size={14} /> SELL (Quote / Rx)
-            </button>
-            <button
-              type="button"
-              onClick={() => setWorkspaceIntent(activeWs.id, 'buy')}
-              style={{
-                flex: 1,
-                padding: '8px 10px',
-                borderRadius: '7px',
-                border: 'none',
-                backgroundColor: activeWs.intent === 'buy' ? '#c2410c' : 'transparent',
-                color: activeWs.intent === 'buy' ? '#ffffff' : '#475569',
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                boxShadow: activeWs.intent === 'buy' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <Truck size={14} /> BUY (Supplier PO)
-            </button>
-          </div>
-
-          {/* Target Entity Selector (On-Demand & Scalable) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span>{activeWs.intent === 'buy' ? 'Target Supplier / Compounder' : 'Target Recipient'}</span>
-              {loadingTargetType && <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 600 }}>Loading...</span>}
-            </label>
-
-            {/* Target Type Switcher Tabs (Only if SELL) */}
-            {activeWs.intent === 'sell' && (
-              <div style={{ display: 'flex', gap: '3px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '8px' }}>
-                {[
-                  { type: 'clinic', label: '🏥 Clinic' },
-                  { type: 'wholeseller', label: '🏢 Wholesaler' },
-                  { type: 'patient', label: '👤 Patient' },
-                  { type: 'doctor', label: '🩺 Doctor' },
-                ].map(tab => (
+                {/* Quick Add Buttons when items exist */}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
                   <button
-                    key={tab.type}
                     type="button"
                     onClick={() => {
-                      setSelectedTargetType(tab.type);
-                      setTargetSearchQuery('');
+                      setActivePicker(activePicker === 'protocols' ? null : 'protocols');
+                      setPickerSearch('');
                     }}
                     style={{
                       flex: 1,
-                      padding: '5px 2px',
-                      fontSize: '0.72rem',
-                      fontWeight: selectedTargetType === tab.type ? 800 : 600,
-                      backgroundColor: selectedTargetType === tab.type ? '#ffffff' : 'transparent',
-                      color: selectedTargetType === tab.type ? '#003666' : '#64748b',
-                      border: 'none',
-                      borderRadius: '6px',
+                      padding: '7px 10px',
+                      backgroundColor: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '7px',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
                       cursor: 'pointer',
-                      boxShadow: selectedTargetType === tab.type ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap'
                     }}
                   >
-                    {tab.label}
+                    + Add Protocol Item
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePicker(activePicker === 'products' ? null : 'products');
+                      setPickerSearch('');
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '7px 10px',
+                      backgroundColor: '#f0fdf4',
+                      color: '#15803d',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '7px',
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    + Add Catalog Item
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* Selected Recipient Card or Search & Select Dropdown */}
-            {activeWs.targetEntity ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '0.95rem' }}>{activeWs.targetEntity.type === 'supplier' ? '🏭' : activeWs.targetEntity.type === 'clinic' ? '🏥' : activeWs.targetEntity.type === 'wholeseller' ? '🏢' : '👤'}</span>
-                  <div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1e293b' }}>{activeWs.targetEntity.name}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'capitalize' }}>{activeWs.targetEntity.type}</div>
-                  </div>
+            {/* Protocol Picker Panel */}
+            {activePicker === 'protocols' && (
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #003666', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>Select Clinical Protocol</span>
+                  <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={15} /></button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setTargetEntity(activeWs.id, null)}
-                  style={{ border: 'none', background: '#dbeafe', color: '#1e40af', fontSize: '0.74rem', fontWeight: 800, padding: '4px 8px', borderRadius: '5px', cursor: 'pointer' }}
-                >
-                  ✕ Clear
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <input
                   type="text"
-                  placeholder={`Search ${activeWs.intent === 'buy' ? 'suppliers' : selectedTargetType + 's'} by name...`}
-                  value={targetSearchQuery}
-                  onChange={(e) => setTargetSearchQuery(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '7px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.8rem',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
+                  placeholder="Search protocol name..."
+                  value={pickerSearch}
+                  onChange={(e) => setPickerSearch(e.target.value)}
+                  style={{ padding: '8px 12px', fontSize: '0.82rem', border: '1px solid #cbd5e1', borderRadius: '7px', outline: 'none' }}
                 />
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const targetId = e.target.value;
-                    if (!targetId) return;
-                    const found = targetTypeEntities.find(it => it.id === targetId);
-                    if (found) {
-                      setTargetEntity(activeWs.id, { id: found.id, name: found.name, type: found.type || (activeWs.intent === 'buy' ? 'supplier' : selectedTargetType) });
-                      setTargetSearchQuery('');
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '7px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    fontSize: '0.8rem',
-                    color: '#334155',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <option value="">
-                    {loadingTargetType ? 'Loading recent...' : `-- Select ${activeWs.intent === 'buy' ? 'Supplier' : selectedTargetType} (${targetTypeEntities.length} recent) --`}
-                  </option>
-                  {targetTypeEntities
-                    .filter(ent => !targetSearchQuery || ent.name?.toLowerCase().includes(targetSearchQuery.toLowerCase()))
-                    .map(ent => (
-                      <option key={ent.id} value={ent.id}>
-                        {ent.name} {ent.email ? `(${ent.email})` : ''}
-                      </option>
-                    ))}
-                </select>
+                <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {protocols.filter(p => !pickerSearch || p.name?.toLowerCase().includes(pickerSearch.toLowerCase())).slice(0, 15).map(proto => (
+                    <div
+                      key={proto.id}
+                      onClick={() => handleLoadProtocol(proto)}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '7px',
+                        border: '1px solid #f1f5f9',
+                        backgroundColor: '#f8fafc',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{proto.name}</span>
+                      <span style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 800 }}>+ Load</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Product Picker Panel */}
+            {activePicker === 'products' && (
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #16a34a', borderRadius: '10px', padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>Select Catalog Product</span>
+                  <button type="button" onClick={() => setActivePicker(null)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8' }}><X size={15} /></button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search product name..."
+                  value={pickerSearch}
+                  onChange={(e) => setPickerSearch(e.target.value)}
+                  style={{ padding: '8px 12px', fontSize: '0.82rem', border: '1px solid #cbd5e1', borderRadius: '7px', outline: 'none' }}
+                />
+                <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {availableProducts.filter(p => !pickerSearch || p.canonicalName?.toLowerCase().includes(pickerSearch.toLowerCase())).slice(0, 15).map(prod => (
+                    <div
+                      key={prod.id}
+                      onClick={() => handleAddProduct(prod)}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '7px',
+                        border: '1px solid #f1f5f9',
+                        backgroundColor: '#f8fafc',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0f172a' }}>{prod.canonicalName}</span>
+                      <span style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 800 }}>+ Add</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Clinical Reconstitution Suggestion (if lyophilized vials are present and BAC Water is missing) */}
+          {/* 🎯 2. OPERATIONAL ROUTING & TARGET RECIPIENT */}
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '11px',
+              padding: '0.9rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+            }}
+          >
+            {/* Intent Toggle */}
+            <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '9px' }}>
+              <button
+                type="button"
+                onClick={() => setWorkspaceIntent(activeWs.id, 'sell')}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  backgroundColor: activeWs.intent === 'sell' ? '#003666' : 'transparent',
+                  color: activeWs.intent === 'sell' ? '#ffffff' : '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <DollarSign size={14} /> SELL (Quote / Rx)
+              </button>
+              <button
+                type="button"
+                onClick={() => setWorkspaceIntent(activeWs.id, 'buy')}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  backgroundColor: activeWs.intent === 'buy' ? '#c2410c' : 'transparent',
+                  color: activeWs.intent === 'buy' ? '#ffffff' : '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <Truck size={14} /> BUY (Supplier PO)
+              </button>
+            </div>
+
+            {/* Target Recipient Selector */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>{activeWs.intent === 'buy' ? 'Target Supplier / Compounder' : 'Target Recipient'}</span>
+                {loadingTargetType && <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 600 }}>Loading...</span>}
+              </label>
+
+              {activeWs.intent === 'sell' && (
+                <div style={{ display: 'flex', gap: '3px', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+                  {[
+                    { type: 'clinic', label: '🏥 Clinic' },
+                    { type: 'wholeseller', label: '🏢 Wholesaler' },
+                    { type: 'patient', label: '👤 Patient' },
+                    { type: 'doctor', label: '🩺 Doctor' },
+                  ].map(tab => (
+                    <button
+                      key={tab.type}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTargetType(tab.type);
+                        setTargetSearchQuery('');
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '5px 2px',
+                        fontSize: '0.72rem',
+                        fontWeight: selectedTargetType === tab.type ? 800 : 600,
+                        backgroundColor: selectedTargetType === tab.type ? '#ffffff' : 'transparent',
+                        color: selectedTargetType === tab.type ? '#003666' : '#64748b',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Selected Entity Badge or Search Dropdown */}
+              {activeWs.targetEntity ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.95rem' }}>{activeWs.targetEntity.type === 'supplier' ? '🏭' : activeWs.targetEntity.type === 'clinic' ? '🏥' : activeWs.targetEntity.type === 'wholeseller' ? '🏢' : '👤'}</span>
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1e293b' }}>{activeWs.targetEntity.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'capitalize' }}>{activeWs.targetEntity.type}</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTargetEntity(activeWs.id, null)}
+                    style={{ border: 'none', background: '#dbeafe', color: '#1e40af', fontSize: '0.74rem', fontWeight: 800, padding: '4px 8px', borderRadius: '5px', cursor: 'pointer' }}
+                  >
+                    ✕ Clear
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  <input
+                    type="text"
+                    placeholder={`Search ${activeWs.intent === 'buy' ? 'suppliers' : selectedTargetType + 's'} by name...`}
+                    value={targetSearchQuery}
+                    onChange={(e) => setTargetSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: '7px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.8rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      const targetId = e.target.value;
+                      if (!targetId) return;
+                      const found = targetTypeEntities.find(it => it.id === targetId);
+                      if (found) {
+                        setTargetEntity(activeWs.id, { id: found.id, name: found.name, type: found.type || (activeWs.intent === 'buy' ? 'supplier' : selectedTargetType), address: found.address, city: found.city, state: found.state, zip: found.zip });
+                        setTargetSearchQuery('');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: '7px',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#ffffff',
+                      fontSize: '0.8rem',
+                      color: '#334155',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="">
+                      {loadingTargetType ? 'Loading recent...' : `-- Select ${activeWs.intent === 'buy' ? 'Supplier' : selectedTargetType} (${targetTypeEntities.length} recent) --`}
+                    </option>
+                    {targetTypeEntities
+                      .filter(ent => !targetSearchQuery || ent.name?.toLowerCase().includes(targetSearchQuery.toLowerCase()))
+                      .map(ent => (
+                        <option key={ent.id} value={ent.id}>
+                          {ent.name} {ent.email ? `(${ent.email})` : ''}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 💧 3. CLINICAL COMPANION SUGGESTION */}
           {items.some(it => (it.format?.toLowerCase().includes('vial') || it.presentation?.toLowerCase().includes('vial')) && !it.canonicalName?.toLowerCase().includes('water')) && !items.some(it => it.canonicalName?.toLowerCase().includes('water')) && (
-            <div style={{ backgroundColor: '#eff6ff', border: '1px dashed #93c5fd', borderRadius: '9px', padding: '0.6rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ backgroundColor: '#eff6ff', border: '1px dashed #93c5fd', borderRadius: '9px', padding: '0.65rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '1rem' }}>💧</span>
                 <span style={{ fontSize: '0.76rem', color: '#1e40af', fontWeight: 700 }}>Lyophilized Vials staged</span>
@@ -1055,7 +1146,6 @@ export default function WorkspaceDrawer() {
                   fontSize: '0.74rem',
                   fontWeight: 800,
                   cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                 }}
               >
                 + Add BAC Water ($15)
@@ -1063,54 +1153,132 @@ export default function WorkspaceDrawer() {
             </div>
           )}
 
-          {/* Rapid Multipliers & Volume Scaling */}
-          {items.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '2px 0' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Volume Scaling:</span>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {[1, 2, 5, 10].map(m => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => {
-                      multiplyQuantities(m, activeWs.id);
-                      notifier.info(`Adjusted quantities by ${m}x`);
-                    }}
-                    style={{
-                      padding: '3px 8px',
-                      fontSize: '0.74rem',
-                      fontWeight: 700,
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                      color: '#334155'
-                    }}
-                  >
-                    x{m}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Financial Breakdown & Margin Simulator */}
+          {/* 🚚 4. SHIPPING & COLD-CHAIN LOGISTICS INFORMATION */}
           <div
             style={{
               backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '0.75rem 0.95rem',
+              border: '1px solid #cbd5e1',
+              borderRadius: '11px',
+              padding: '0.9rem',
               display: 'flex',
               flexDirection: 'column',
-              gap: '6px',
+              gap: '0.8rem',
               boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
             }}
           >
-            {/* Quick Discount Selector (Sell mode) */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Truck size={15} /> Shipping & Logistics Method
+              </span>
+              <span style={{ fontSize: '0.74rem', fontWeight: 800, color: selectedShippingMethod === 'cold_chain' ? '#0284c7' : '#16a34a' }}>
+                {selectedShippingMethod === 'cold_chain' ? 'Cold-Chain ($35.00)' : selectedShippingMethod === 'express' ? 'Express ($15.00)' : 'Pickup ($0.00)'}
+              </span>
+            </div>
+
+            {/* Smart Biologics Alert */}
+            {hasSensitiveItems && (
+              <div style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Thermometer size={16} style={{ color: '#0284c7', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.73rem', color: '#0369a1', fontWeight: 600, lineHeight: 1.3 }}>
+                  <b>Cold-Chain Recommended:</b> Biologic peptides detected. 2-8°C temp-controlled insulation protects compound integrity during transit.
+                </span>
+              </div>
+            )}
+
+            {/* Shipping Option Pills */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {[
+                { id: 'cold_chain', icon: '🧊', title: 'Cold-Chain Temp-Controlled', sub: '2°C - 8°C Thermal Box • Priority Overnight', cost: 35 },
+                { id: 'express', icon: '🚚', title: 'Standard Express Courier', sub: '2-3 Business Days • Tracked Delivery', cost: 15 },
+                { id: 'pickup', icon: '🏥', title: 'Clinic / Direct Pickup', sub: 'On-site pickup at facility', cost: 0 },
+              ].map(opt => {
+                const isSel = selectedShippingMethod === opt.id;
+                return (
+                  <div
+                    key={opt.id}
+                    onClick={() => setSelectedShippingMethod(opt.id)}
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: '8px',
+                      border: `1.5px solid ${isSel ? '#003666' : '#e2e8f0'}`,
+                      backgroundColor: isSel ? '#f0f7ff' : '#f8fafc',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1rem' }}>{opt.icon}</span>
+                      <div>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: isSel ? '#003666' : '#0f172a' }}>{opt.title}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{opt.sub}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: isSel ? '#003666' : '#475569' }}>
+                      {opt.cost === 0 ? 'Free' : `$${opt.cost}.00`}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Recipient Shipping Address & Delivery Notes */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingTop: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem', color: '#475569', fontWeight: 700 }}>
+                <MapPin size={13} /> Delivery Destination & Special Instructions
+              </div>
+              <input
+                type="text"
+                placeholder="Shipping Street Address, City, State, Zip..."
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '7px 10px',
+                  borderRadius: '7px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.78rem',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Special delivery notes (e.g. Leave at clinic reception)..."
+                value={shippingNotes}
+                onChange={(e) => setShippingNotes(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '6px 10px',
+                  borderRadius: '7px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '0.76rem',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* 💰 5. FINANCIAL BREAKDOWN & MARGIN SIMULATOR */}
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '11px',
+              padding: '0.9rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '7px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+            }}
+          >
+            {/* Quick Discount Selector */}
             {activeWs.intent === 'sell' && items.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
-                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700 }}>Discount:</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '7px' }}>
+                <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 700 }}>Discount:</span>
                 <div style={{ display: 'flex', gap: '4px' }}>
                   {[0, 5, 10, 15, 20].map(pct => (
                     <button
@@ -1121,8 +1289,8 @@ export default function WorkspaceDrawer() {
                         applyDiscountPercentage(pct, activeWs.id);
                       }}
                       style={{
-                        padding: '3px 7px',
-                        fontSize: '0.7rem',
+                        padding: '3px 8px',
+                        fontSize: '0.72rem',
                         fontWeight: selectedDiscount === pct ? 800 : 600,
                         backgroundColor: selectedDiscount === pct ? '#003666' : '#f8fafc',
                         color: selectedDiscount === pct ? '#ffffff' : '#64748b',
@@ -1139,19 +1307,38 @@ export default function WorkspaceDrawer() {
               </div>
             )}
 
+            {/* Financial Rows */}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
-              <span>Subtotal (Sales Value):</span>
-              <span style={{ fontWeight: 800, color: '#0f172a' }}>${totalSaleAmount.toFixed(2)}</span>
+              <span>Items Subtotal:</span>
+              <span style={{ fontWeight: 800, color: '#0f172a' }}>${subtotalSaleAmount.toFixed(2)}</span>
             </div>
+
+            {selectedDiscount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#dc2626' }}>
+                <span>Discount ({selectedDiscount}%):</span>
+                <span style={{ fontWeight: 800 }}>-${discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
-              <span>Supplier Cost:</span>
-              <span style={{ fontWeight: 700, color: '#64748b' }}>${totalCostAmount.toFixed(2)}</span>
+              <span>Shipping ({selectedShippingMethod === 'cold_chain' ? 'Cold-Chain' : selectedShippingMethod === 'express' ? 'Express' : 'Pickup'}):</span>
+              <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                {items.length > 0 ? (shippingCost === 0 ? '$0.00 (Free)' : `+$${shippingCost.toFixed(2)}`) : '$0.00'}
+              </span>
+            </div>
+
+            {/* Grand Total Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px solid #e2e8f0', paddingTop: '7px', marginTop: '2px' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0f172a' }}>Grand Total:</span>
+              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#003666' }}>
+                ${grandTotal.toFixed(2)}
+              </span>
             </div>
 
             {/* Margin Health Bar */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 800, color: '#003666' }}>
-                <span>Estimated Gross Margin:</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 800, color: '#475569' }}>
+                <span>Estimated Margin:</span>
                 <span style={{ color: marginPercent >= 40 ? '#16a34a' : marginPercent >= 25 ? '#0284c7' : '#ea580c' }}>
                   ${marginAmount.toFixed(2)} ({marginPercent}%)
                 </span>
@@ -1169,20 +1356,84 @@ export default function WorkspaceDrawer() {
             </div>
           </div>
 
-          {/* Primary Action Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '2px' }}>
-            {activeWs.intent === 'buy' ? (
+        </div>
+
+        {/* ─── STICKY FOOTER: Primary Action CTA Buttons ───────────────────────── */}
+        <div
+          style={{
+            padding: '0.85rem 1.25rem',
+            backgroundColor: '#ffffff',
+            borderTop: '1px solid #e2e8f0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            flexShrink: 0,
+            boxShadow: '0 -4px 12px rgba(0,0,0,0.04)',
+            zIndex: 10
+          }}
+        >
+          {activeWs.intent === 'buy' ? (
+            <button
+              type="button"
+              onClick={handleExecutePO}
+              disabled={items.length === 0}
+              className="gcp-btn-primary"
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#c2410c',
+                color: 'white',
+                borderRadius: '9px',
+                border: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 800,
+                cursor: items.length > 0 ? 'pointer' : 'not-allowed',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 8px rgba(194, 65, 12, 0.25)',
+              }}
+            >
+              <Truck size={17} /> Generate Purchase Order (${grandTotal.toFixed(2)})
+            </button>
+          ) : (
+            <>
               <button
                 type="button"
-                onClick={handleExecutePurchaseOrder}
+                onClick={handleExecuteQuotation}
                 disabled={items.length === 0}
                 className="gcp-btn-primary"
                 style={{
                   width: '100%',
-                  padding: '11px',
-                  backgroundColor: '#c2410c',
+                  padding: '12px',
+                  backgroundColor: '#003666',
                   color: 'white',
-                  borderRadius: '8px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 800,
+                  cursor: items.length > 0 ? 'pointer' : 'not-allowed',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)',
+                }}
+              >
+                <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
+              </button>
+              <button
+                type="button"
+                onClick={handleExecutePrescription}
+                disabled={items.length === 0}
+                className="gcp-btn-secondary"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#0d9488',
+                  color: 'white',
+                  borderRadius: '9px',
                   border: 'none',
                   fontSize: '0.86rem',
                   fontWeight: 800,
@@ -1191,64 +1442,13 @@ export default function WorkspaceDrawer() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  boxShadow: '0 2px 6px rgba(194, 65, 12, 0.25)',
+                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
                 }}
               >
-                <Truck size={16} /> Generate Purchase Order (PO)
+                <ShieldCheck size={16} /> Create Rx Prescription
               </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={handleExecuteQuotation}
-                  disabled={items.length === 0}
-                  className="gcp-btn-primary"
-                  style={{
-                    width: '100%',
-                    padding: '11px',
-                    backgroundColor: '#003666',
-                    color: 'white',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.86rem',
-                    fontWeight: 800,
-                    cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
-                  }}
-                >
-                  <FileText size={16} /> Generate B2B Quotation
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExecutePrescription}
-                  disabled={items.length === 0}
-                  className="gcp-btn-secondary"
-                  style={{
-                    width: '100%',
-                    padding: '11px',
-                    backgroundColor: '#0d9488',
-                    color: 'white',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.86rem',
-                    fontWeight: 800,
-                    cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
-                  }}
-                >
-                  <ShieldCheck size={16} /> Create Rx Prescription
-                </button>
-              </>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </>,
