@@ -69,7 +69,7 @@ export default function MobileFloatingDock({ primaryAction, secondaryAction, cla
       <style jsx>{`
         .mfd-dock-wrapper {
           position: fixed;
-          bottom: 0;
+          bottom: calc(56px + env(safe-area-inset-bottom, 0px));
           left: 0;
           right: 0;
           z-index: 90;

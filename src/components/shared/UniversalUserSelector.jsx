@@ -4,7 +4,7 @@ import { db } from '../../firebase';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { useAlgoliaSearch } from '../../hooks/data/useAlgoliaSearch';
 import User from "lucide-react/dist/esm/icons/user";
-import { Search, Plus, X, UserPlus, Check, RefreshCw } from "lucide-react";
+import { Search, Plus, X, UserPlus, Check, RefreshCw, History } from "lucide-react";
 import toast from 'react-hot-toast';
 
 /**
@@ -244,24 +244,50 @@ export default function UniversalUserSelector({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onChange(null)}
-            disabled={disabled}
-            style={{
-              padding: '0.35rem 0.65rem',
-              borderRadius: '6px',
-              border: '1px solid var(--border, #d1d5db)',
-              background: '#fff',
-              color: 'var(--text-secondary, #4b5563)',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              flexShrink: 0
-            }}
-          >
-            Change
-          </button>
+          <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+            {roleFilter === 'patient' && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.open(`/admin/prescriptions?patientId=${selectedTarget.id || selectedTarget.objectID}`, '_blank');
+                }}
+                style={{
+                  padding: '0.35rem 0.65rem',
+                  borderRadius: '6px',
+                  border: '1px solid #bfdbfe',
+                  background: '#eff6ff',
+                  color: 'var(--color-primary, #003666)',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem'
+                }}
+                title="View patient prescription & dosage history"
+              >
+                <History size={13} />
+                History
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              disabled={disabled}
+              style={{
+                padding: '0.35rem 0.65rem',
+                borderRadius: '6px',
+                border: '1px solid var(--border, #d1d5db)',
+                background: '#fff',
+                color: 'var(--text-secondary, #4b5563)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Change
+            </button>
+          </div>
         </div>
       ) : (
         /* Search & Dropdown Selector */

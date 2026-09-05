@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { useNotificationContext } from '../../context/NotificationContext';
 import IOSPushBanner from '../ui/IOSPushBanner';
+import MobileNavDock from './MobileNavDock';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
 const GlobalDrawerManager = dynamic(() => import('../shared/GlobalDrawerManager'), { ssr: false });
