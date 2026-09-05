@@ -54,6 +54,11 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
       {/* Subtle Medical Vignette */}
       <div className="dpv-vignette" />
 
+      {/* Illustrative Sample Image Disclaimer Badge */}
+      <div className="dpv-sample-disclaimer">
+        <span>* Imagen de muestra orientativa</span>
+      </div>
+
       {/* 2. Top-Left Delivery & Archetype HUD Badge */}
       <div className="dpv-top-left">
         {isDualChamber && (
@@ -179,6 +184,23 @@ export default function DynamicProductVisualOverlay({ product, variant, selected
           inset: 0;
           pointer-events: none;
           background: radial-gradient(circle at 50% 45%, rgba(0, 54, 102, 0) 45%, rgba(2, 6, 23, 0.4) 100%);
+        }
+        .dpv-sample-disclaimer {
+          position: absolute;
+          bottom: 58px;
+          right: 12px;
+          z-index: 6;
+          font-size: 0.65rem;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.65);
+          background: rgba(15, 23, 42, 0.7);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          padding: 2px 8px;
+          border-radius: 4px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          pointer-events: none;
+          letter-spacing: 0.02em;
         }
         .dpv-top-left {
           position: absolute;
