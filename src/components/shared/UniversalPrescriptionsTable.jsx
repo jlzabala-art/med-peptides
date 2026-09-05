@@ -558,6 +558,11 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               onClick: () => openDrawer('rx-builder', mobileActionRx?.id, { existingRx: mobileActionRx }),
             },
             {
+              label: 'Refill / Re-prescribe',
+              icon: RefreshCw,
+              onClick: () => handleRefill(mobileActionRx),
+            },
+            {
               label: 'Cancel Prescription',
               icon: XCircle,
               variant: 'danger',

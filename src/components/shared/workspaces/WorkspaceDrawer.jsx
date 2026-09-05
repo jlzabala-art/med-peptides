@@ -322,7 +322,7 @@ export default function WorkspaceDrawer() {
           position: 'fixed',
           top: 0,
           right: 0,
-          width: 'min(420px, 94vw)',
+          width: 'min(460px, 100vw)',
           height: '100dvh',
           maxHeight: '100vh',
           zIndex: 999999,
