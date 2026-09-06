@@ -30,7 +30,7 @@ import { collection, query, orderBy, getDocs, updateDoc, doc } from 'firebase/fi
 import { db } from '../../firebase';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import { useToast } from '../../hooks/useToast';
-import { useLeadStore } from '../../store/useLeadStore';
+import { useLeadStore } from '../../stores/useLeadStore';
 import { useLeadAggregates } from '../../hooks/data/useLeadAggregates';
 import PageHeader from '../ui/PageHeader';
 import DataTable from '../ui/DataTable';

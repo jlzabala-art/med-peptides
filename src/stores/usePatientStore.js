@@ -3,15 +3,15 @@ import { persist } from 'zustand/middleware';
 import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
-export const usePrescriptionStore = create(
+export const usePatientStore = create(
   persist(
     (set, get) => ({
-      prescriptions: [],
+      patients: [],
       loading: false,
       lastFetched: null,
       error: null,
 
-      fetchPrescriptions: async (forceRefresh = false) => {
+      fetchPatients: async (forceRefresh = false) => {
         const now = Date.now();
         const state = get();
         // Cache TTL of 10 minutes
@@ -22,7 +22,7 @@ export const usePrescriptionStore = create(
         set({ loading: true, error: null });
         try {
           const q = query(
-            collection(db, 'prescriptions'), 
+            collection(db, 'patients'), 
             orderBy('createdAt', 'desc'), 
             limit(300)
           );
@@ -31,22 +31,26 @@ export const usePrescriptionStore = create(
           const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
           set({
-            prescriptions: data,
+            patients: data,
             loading: false,
             lastFetched: now,
           });
         } catch (error) {
-          console.error('Failed to fetch prescriptions:', error);
+          console.error('Failed to fetch patients:', error);
           set({ error: error.message, loading: false });
         }
       },
 
       invalidateCache: () => {
-        set({ lastFetched: null, prescriptions: [] });
+        set({ lastFetched: null, patients: [] });
       }
     }),
     {
-      name: 'prescription-storage', // unique name for localStorage key
+      name: 'patient-storage',
+      partialize: (state) => ({
+        patients: state.patients,
+        lastFetched: state.lastFetched,
+      }),
     }
   )
 );

@@ -3,15 +3,15 @@ import { persist } from 'zustand/middleware';
 import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
-export const usePatientStore = create(
+export const usePrescriptionStore = create(
   persist(
     (set, get) => ({
-      patients: [],
+      prescriptions: [],
       loading: false,
       lastFetched: null,
       error: null,
 
-      fetchPatients: async (forceRefresh = false) => {
+      fetchPrescriptions: async (forceRefresh = false) => {
         const now = Date.now();
         const state = get();
         // Cache TTL of 10 minutes
@@ -21,10 +21,8 @@ export const usePatientStore = create(
 
         set({ loading: true, error: null });
         try {
-          // Golden Rule #1: limit results to prevent freezing the client. 
-          // We fetch 300 to keep it lightweight while ensuring good coverage for local filtering.
           const q = query(
-            collection(db, 'patients'), 
+            collection(db, 'prescriptions'), 
             orderBy('createdAt', 'desc'), 
             limit(300)
           );
@@ -33,22 +31,26 @@ export const usePatientStore = create(
           const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
           set({
-            patients: data,
+            prescriptions: data,
             loading: false,
             lastFetched: now,
           });
         } catch (error) {
-          console.error('Failed to fetch patients:', error);
+          console.error('Failed to fetch prescriptions:', error);
           set({ error: error.message, loading: false });
         }
       },
 
       invalidateCache: () => {
-        set({ lastFetched: null, patients: [] });
+        set({ lastFetched: null, prescriptions: [] });
       }
     }),
     {
-      name: 'patient-storage', // unique name for localStorage key
+      name: 'prescription-storage',
+      partialize: (state) => ({
+        prescriptions: state.prescriptions,
+        lastFetched: state.lastFetched,
+      }),
     }
   )
 );

@@ -9,7 +9,8 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { useNotificationContext } from '../../context/NotificationContext';
 import IOSPushBanner from '../ui/IOSPushBanner';
-import MobileNavDock from './MobileNavDock';
+import OfflineSyncProvider from '../shared/OfflineSyncProvider';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
 const GlobalDrawerManager = dynamic(() => import('../shared/GlobalDrawerManager'), { ssr: false });
@@ -67,43 +68,47 @@ export default function PanelShell({
     };
   }, [themeRole]);
 
+  useKeyboardShortcuts();
+
   if (loading || !user || (allowedRoles.length > 0 && !allowedRoles.includes(activeRole))) {
     return <AtlasLoadingScreen />;
   }
 
   return (
-    <div className={`universal-layout-wrapper theme-${themeRole}`}>
-      <style>{`
-        /* 
-          Ensure the PanelShell completely fills the viewport 
-          so PortalLayout renders correctly within it.
-        */
-        .universal-layout-wrapper {
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-          width: 100%;
-          overflow: hidden;
-        }
-      `}</style>
-      <IOSPushBanner />
-      <PushNotificationPrompt />
-      <PortalLayout
-        sidebarNavGroups={sidebarNavGroups}
-        sidebarPinnedItems={sidebarPinnedItems}
-        activeNavId={activeNavId}
-        onNavigate={onNavigate}
-        portalTitle={portalTitle}
-        roleContext={themeRole}
-        pageContext={pageContext}
-        headerActions={headerActions}
-      >
-        {children}
-      </PortalLayout>
-      <GlobalQuickCreateHandler />
-      <Suspense fallback={null}>
-        <GlobalDrawerManager />
-      </Suspense>
-    </div>
+    <OfflineSyncProvider>
+      <div className={`universal-layout-wrapper theme-${themeRole}`}>
+        <style>{`
+          /* 
+            Ensure the PanelShell completely fills the viewport 
+            so PortalLayout renders correctly within it.
+          */
+          .universal-layout-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+          }
+        `}</style>
+        <IOSPushBanner />
+        <PushNotificationPrompt />
+        <PortalLayout
+          sidebarNavGroups={sidebarNavGroups}
+          sidebarPinnedItems={sidebarPinnedItems}
+          activeNavId={activeNavId}
+          onNavigate={onNavigate}
+          portalTitle={portalTitle}
+          roleContext={themeRole}
+          pageContext={pageContext}
+          headerActions={headerActions}
+        >
+          {children}
+        </PortalLayout>
+        <GlobalQuickCreateHandler />
+        <Suspense fallback={null}>
+          <GlobalDrawerManager />
+        </Suspense>
+      </div>
+    </OfflineSyncProvider>
   );
 }

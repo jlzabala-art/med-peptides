@@ -5,10 +5,12 @@
  * Patient, Doctor, and Account Manager that apply to new prescriptions
  * and clinical workflows across the admin panel.
  *
- * Persisted to localStorage with an 8-hour TTL.
+ * Persisted to localStorage with an 8-hour TTL, storage hygiene (partialize),
+ * and useShallow selector helpers.
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 const TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 
@@ -81,7 +83,9 @@ export const useClinicalContextStore = create(
     }),
     {
       name: 'clinical-context-v1',
-      // Only persist the entity objects and timestamps
+      version: 1,
+      migrate: (persistedState) => persistedState || {},
+      // 🔒 Storage Hygiene: Persist only entities and timestamps
       partialize: (state) => ({
         activePatient: state.activePatient,
         activeDoctor: state.activeDoctor,
@@ -94,7 +98,17 @@ export const useClinicalContextStore = create(
   )
 );
 
-// Convenience selector hooks
-export const useActivePatient = () => useClinicalContextStore(s => s.activePatient);
-export const useActiveDoctor = () => useClinicalContextStore(s => s.activeDoctor);
-export const useActiveManager = () => useClinicalContextStore(s => s.activeManager);
+// ─── Granular Selector Hooks (useShallow) ──────────────────────────────────
+export const useActivePatient = () => useClinicalContextStore((s) => s.activePatient);
+export const useActiveDoctor = () => useClinicalContextStore((s) => s.activeDoctor);
+export const useActiveManager = () => useClinicalContextStore((s) => s.activeManager);
+
+export const useActiveClinicalEntities = () =>
+  useClinicalContextStore(
+    useShallow((s) => ({
+      patient: s.activePatient,
+      doctor: s.activeDoctor,
+      manager: s.activeManager,
+      hasContext: !!(s.activePatient || s.activeDoctor || s.activeManager),
+    }))
+  );

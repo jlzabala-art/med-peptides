@@ -43,7 +43,6 @@ export const useLeadStore = create(
 
       updateLead: async (id, updates) => {
         const previousLeads = get().leads;
-        // Optimistic update
         set(state => ({
           leads: state.leads.map(lead => lead.id === id ? { ...lead, ...updates } : lead)
         }));
@@ -51,7 +50,6 @@ export const useLeadStore = create(
           await updateDoc(doc(db, 'leads', id), updates);
         } catch (error) {
           console.error('Failed to update lead:', error);
-          // Rollback on failure
           set({ leads: previousLeads, error: error.message });
           throw error;
         }
@@ -62,7 +60,11 @@ export const useLeadStore = create(
       }
     }),
     {
-      name: 'lead-storage', // unique name for localStorage key
+      name: 'lead-storage',
+      partialize: (state) => ({
+        leads: state.leads,
+        lastFetched: state.lastFetched,
+      }),
     }
   )
 );

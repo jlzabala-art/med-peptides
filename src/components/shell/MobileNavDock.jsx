@@ -16,12 +16,12 @@ export default function MobileNavDock() {
   const pathname = usePathname();
   const router = useRouter();
   const { activeRole } = useAuth();
-  const { toggleDrawer, isDrawerOpen, getActiveItemCount } = useWorkspaceStore();
-
-  const [visible, setVisible] = useState(true);
-  const lastScrollRef = useRef(0);
-
-  const activeItemCount = getActiveItemCount();
+  const isDrawerOpen = useWorkspaceStore((state) => state.isDrawerOpen);
+  const toggleDrawer = useWorkspaceStore((state) => state.toggleDrawer);
+  const activeItemCount = useWorkspaceStore((state) => {
+    const ws = state.workspaces[state.activeWorkspaceId] || Object.values(state.workspaces)[0];
+    return (ws?.items || []).reduce((sum, it) => sum + (it.quantity || 1), 0);
+  });
 
   // Scroll detection for auto-hiding on scroll down
   useEffect(() => {

@@ -46,7 +46,12 @@ export const useCatalogStore = create(
       }
     }),
     {
-      name: 'catalog-storage', // unique name for localStorage key
+      name: 'catalog-storage',
+      partialize: (state) => ({
+        products: state.products,
+        protocols: state.protocols,
+        lastFetched: state.lastFetched,
+      }),
     }
   )
 );

@@ -9,7 +9,7 @@ import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { db } from '../../firebase';
-import { useCatalogStore } from '../../store/useCatalogStore';
+import { useCatalogStore } from '../../stores/useCatalogStore';
 import { AtlasImportAgent } from '../../services/AtlasImportAgent';
 import toast from 'react-hot-toast';
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
+import { useWorkspaceStore, useShallow } from '../../../stores/useWorkspaceStore';
 import { Briefcase, Plus, Check, ChevronDown, Layers, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -13,7 +13,16 @@ export default function WorkspaceAddPopover({ item, children, buttonStyle = {}, 
     createWorkspace,
     setActiveWorkspace,
     setDrawerOpen
-  } = useWorkspaceStore();
+  } = useWorkspaceStore(
+    useShallow((s) => ({
+      workspaces: s.workspaces,
+      activeWorkspaceId: s.activeWorkspaceId,
+      addItem: s.addItem,
+      createWorkspace: s.createWorkspace,
+      setActiveWorkspace: s.setActiveWorkspace,
+      setDrawerOpen: s.setDrawerOpen
+    }))
+  );
 
   const [isOpen, setIsOpen] = useState(false);
   const [newWsName, setNewWsName] = useState('');

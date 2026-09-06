@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
+import { useWorkspaceStore, useShallow } from '../../../stores/useWorkspaceStore';
 import { useDrawer } from '../../../context/DrawerContext';
 import {
   Briefcase,
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import notifier from '../../../services/NotificationService';
 import { getRecentEntitiesFast, searchCatalogFast } from '../../../repositories/workspaceSearchRepository';
+import { resolvePriceForRole, resolveVariantPrice } from '../../../services/pricingService';
 
 export default function WorkspaceDrawer() {
   const {
@@ -58,7 +59,36 @@ export default function WorkspaceDrawer() {
     saveWorkspaceAsKit,
     loadKitIntoWorkspace,
     deleteSavedKit
-  } = useWorkspaceStore();
+  } = useWorkspaceStore(
+    useShallow((s) => ({
+      workspaces: s.workspaces,
+      activeWorkspaceId: s.activeWorkspaceId,
+      isDrawerOpen: s.isDrawerOpen,
+      setDrawerOpen: s.setDrawerOpen,
+      setActiveWorkspace: s.setActiveWorkspace,
+      createWorkspace: s.createWorkspace,
+      renameWorkspace: s.renameWorkspace,
+      duplicateWorkspace: s.duplicateWorkspace,
+      deleteWorkspace: s.deleteWorkspace,
+      clearWorkspaceItems: s.clearWorkspaceItems,
+      addItem: s.addItem,
+      addItems: s.addItems,
+      removeItem: s.removeItem,
+      updateItemQuantity: s.updateItemQuantity,
+      updateItemPrice: s.updateItemPrice,
+      updateItemFormat: s.updateItemFormat,
+      updateItemDosage: s.updateItemDosage,
+      applyDiscountPercentage: s.applyDiscountPercentage,
+      multiplyQuantities: s.multiplyQuantities,
+      addReconstitutionBacteriostaticWater: s.addReconstitutionBacteriostaticWater,
+      setWorkspaceIntent: s.setWorkspaceIntent,
+      setTargetEntity: s.setTargetEntity,
+      savedKits: s.savedKits,
+      saveWorkspaceAsKit: s.saveWorkspaceAsKit,
+      loadKitIntoWorkspace: s.loadKitIntoWorkspace,
+      deleteSavedKit: s.deleteSavedKit
+    }))
+  );
 
   const { openDrawer } = useDrawer();
 
@@ -215,38 +245,71 @@ export default function WorkspaceDrawer() {
   if (!isDrawerOpen || !activeWs || !mounted) return null;
 
   // ─── Price & Financial Calculations (Deep Multi-Fallback Variant Price Resolver) ────────────────
+  const extractNumericPrice = (val) => {
+    if (val === null || val === undefined) return 0;
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    if (typeof val === 'string') {
+      const p = parseFloat(val.replace(/[^0-9.]/g, ''));
+      return isNaN(p) ? 0 : p;
+    }
+    if (typeof val === 'object') {
+      if (typeof val.base === 'number') return val.base;
+      if (typeof val.perUnit === 'number') return val.perUnit;
+      if (typeof val.price === 'number') return val.price;
+      if (typeof val.value === 'number') return val.value;
+      if (typeof val.amount === 'number') return val.amount;
+    }
+    return 0;
+  };
+
   const getItemUnitPrice = (it) => {
     if (!it) return 0;
-    // 1. Direct scalar price fields
-    if (typeof it.unitPrice === 'number' && it.unitPrice > 0) return it.unitPrice;
-    if (typeof it.price === 'number' && it.price > 0) return it.price;
-    if (typeof it.unitRate === 'number' && it.unitRate > 0) return it.unitRate;
-    if (typeof it.unit_price === 'number' && it.unit_price > 0) return it.unit_price;
-    if (typeof it.msrp === 'number' && it.msrp > 0) return it.msrp;
-    if (typeof it.tier1Price === 'number' && it.tier1Price > 0) return it.tier1Price;
-    if (typeof it.tier1_price === 'number' && it.tier1_price > 0) return it.tier1_price;
-    if (typeof it.retailPrice === 'number' && it.retailPrice > 0) return it.retailPrice;
-    if (typeof it.wholesalerPrice === 'number' && it.wholesalerPrice > 0) return it.wholesalerPrice;
-    if (typeof it.resolvedPrice?.perUnit === 'number' && it.resolvedPrice.perUnit > 0) return it.resolvedPrice.perUnit;
 
-    // 2. Nested variant properties
+    // 1. Primary Canonical Pricing Engine Resolution
+    try {
+      const role = activeWs?.pricingTier || 'clinic';
+      const canonicalResolved = resolvePriceForRole(it, { role });
+      if (canonicalResolved && typeof canonicalResolved.perUnit === 'number' && canonicalResolved.perUnit > 0) {
+        return canonicalResolved.perUnit;
+      }
+    } catch (e) {
+      // Fallthrough to extractNumericPrice below
+    }
+
+    // 2. Direct scalar and pricing object fields
+    const directPrice = 
+      extractNumericPrice(it.unitPrice) ||
+      extractNumericPrice(it.price) ||
+      extractNumericPrice(it.unitRate) ||
+      extractNumericPrice(it.unit_price) ||
+      extractNumericPrice(it.msrp) ||
+      extractNumericPrice(it.retailPrice) ||
+      extractNumericPrice(it.wholesalerPrice) ||
+      extractNumericPrice(it.pricing?.clinicPrice) ||
+      extractNumericPrice(it.pricing?.retailPrice) ||
+      extractNumericPrice(it.pricing?.wholesalePrice) ||
+      extractNumericPrice(it.pricing?.masterPrice) ||
+      extractNumericPrice(it.pricing);
+    if (directPrice > 0) return directPrice;
+
+    // 2. Nested variant pricing fields
     const v = it.variant || it.selectedVariant || it.variants?.[0] || {};
-    if (typeof v.unitPrice === 'number' && v.unitPrice > 0) return v.unitPrice;
-    if (typeof v.price === 'number' && v.price > 0) return v.price;
-    if (typeof v.unitRate === 'number' && v.unitRate > 0) return v.unitRate;
-    if (typeof v.unit_price === 'number' && v.unit_price > 0) return v.unit_price;
-    if (typeof v.tier1Price === 'number' && v.tier1Price > 0) return v.tier1Price;
-    if (typeof v.tier1_price === 'number' && v.tier1_price > 0) return v.tier1_price;
-    if (typeof v.retailPrice === 'number' && v.retailPrice > 0) return v.retailPrice;
-    if (typeof v.retail_price === 'number' && v.retail_price > 0) return v.retail_price;
-    if (typeof v.wholesalerPrice === 'number' && v.wholesalerPrice > 0) return v.wholesalerPrice;
-    if (typeof v.vialPrice === 'number' && v.vialPrice > 0) return v.vialPrice;
-    if (typeof v.cartridgePrice === 'number' && v.cartridgePrice > 0) return v.cartridgePrice;
-    if (typeof v.resolvedPrice?.perUnit === 'number' && v.resolvedPrice.perUnit > 0) return v.resolvedPrice.perUnit;
+    const variantPrice =
+      extractNumericPrice(v.unitPrice) ||
+      extractNumericPrice(v.price) ||
+      extractNumericPrice(v.unitRate) ||
+      extractNumericPrice(v.retailPrice) ||
+      extractNumericPrice(v.tier1Price) ||
+      extractNumericPrice(v.vialPrice) ||
+      extractNumericPrice(v.cartridgePrice) ||
+      extractNumericPrice(v.pricing?.clinicPrice) ||
+      extractNumericPrice(v.pricing?.retailPrice) ||
+      extractNumericPrice(v.pricing?.wholesalePrice) ||
+      extractNumericPrice(v.pricing?.masterPrice) ||
+      extractNumericPrice(v.pricing);
+    if (variantPrice > 0) return variantPrice;
 
-    // 3. Fallback string-to-number parse
-    const rawVal = Number(it.unitPrice || it.price || it.unitRate || it.unit_price || it.msrp || v.price || v.unitPrice || v.tier1Price || 0);
-    return rawVal > 0 ? rawVal : 0;
+    return 0;
   };
 
   const totalItemsCount = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
@@ -610,14 +673,14 @@ export default function WorkspaceDrawer() {
                   <span
                     style={{
                       fontSize: '0.68rem',
-                      padding: '1px 6px',
+                      padding: '2px 7px',
                       borderRadius: '99px',
-                      backgroundColor: isActive ? '#003666' : '#e2e8f0',
-                      color: isActive ? '#ffffff' : '#475569',
+                      backgroundColor: isActive ? '#003666' : '#cbd5e1',
+                      color: isActive ? '#ffffff' : '#334155',
                       fontWeight: 700,
                     }}
                   >
-                    {count}
+                    {count} item{count === 1 ? '' : 's'}
                   </span>
                 </button>
               );
@@ -865,7 +928,18 @@ export default function WorkspaceDrawer() {
                     </div>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.55rem',
+                      maxHeight: '380px',
+                      overflowY: 'auto',
+                      paddingRight: '4px',
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#003666 #f1f5f9'
+                    }}
+                  >
                     {items.map((it, idx) => {
                       const unitRate = getItemUnitPrice(it);
                       const lineTotal = (it.quantity || 1) * unitRate;
@@ -909,17 +983,45 @@ export default function WorkspaceDrawer() {
                                 {isItemExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                               </button>
                               <div style={{ minWidth: 0, flex: 1 }}>
-                                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                  {it.canonicalName}
+                                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0f172a', lineHeight: 1.25, wordBreak: 'break-word' }}>
+                                  {it.canonicalName || it.name || it.displayName || it.title || 'Product Item'}
                                 </div>
-                                <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px', flexWrap: 'wrap' }}>
-                                  <span>{it.dosage || 'Standard'}</span>
+                                <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '3px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontWeight: 600, color: '#334155' }}>{it.dosage || 'Standard'}</span>
                                   <span>•</span>
-                                  <span>{it.format || 'Vial'}</span>
+                                  <span style={{ fontWeight: 600, color: '#0284c7' }}>{it.format || 'Vial'}</span>
                                   <span style={{ margin: '0 2px', color: '#cbd5e1' }}>|</span>
-                                  <span style={{ color: unitRate > 0 ? '#0284c7' : '#dc2626', fontWeight: 800 }}>
-                                    ${unitRate.toFixed(2)} / unit
-                                  </span>
+                                  {unitRate > 0 ? (
+                                    <span style={{ color: '#0284c7', fontWeight: 800 }}>
+                                      ${unitRate.toFixed(2)} / unit
+                                    </span>
+                                  ) : (
+                                    <div
+                                      style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '5px', border: '1px solid #fde68a' }}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#b45309' }}>$</span>
+                                      <input
+                                        type="number"
+                                        step="0.5"
+                                        placeholder="0.00"
+                                        onChange={(e) => updateItemPrice(it.id, parseFloat(e.target.value) || 0, activeWs.id)}
+                                        style={{
+                                          width: '56px',
+                                          fontSize: '0.74rem',
+                                          fontWeight: 800,
+                                          color: '#92400e',
+                                          backgroundColor: '#ffffff',
+                                          border: '1px solid #f59e0b',
+                                          borderRadius: '4px',
+                                          padding: '1px 4px',
+                                          outline: 'none',
+                                          textAlign: 'right'
+                                        }}
+                                      />
+                                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b45309' }}>/ unit</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -1290,9 +1392,28 @@ export default function WorkspaceDrawer() {
                 </span>
               </div>
 
-              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: activeWs.targetEntity ? '#1d4ed8' : '#64748b' }}>
-                {activeWs.targetEntity ? activeWs.targetEntity.name : 'Unassigned'}
-              </span>
+              {activeWs.targetEntity ? (
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#16a34a', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '99px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  ✓ {activeWs.targetEntity.name}
+                </span>
+              ) : (
+                <span
+                  style={{
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    color: '#d97706',
+                    backgroundColor: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    padding: '3px 8px',
+                    borderRadius: '99px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  + Assign Recipient
+                </span>
+              )}
             </div>
 
             {/* Accordion Body Content */}
@@ -1853,7 +1974,7 @@ export default function WorkspaceDrawer() {
         </div>
       </div>
 
-      {/* 📄 LIVE PDF QUICK PREVIEW MODAL */}
+      {/* 📄 LIVE PDF QUICK PREVIEW BOTTOM SHEET DRAWER */}
       {showPdfPreview && (
         <div
           style={{
@@ -1863,44 +1984,58 @@ export default function WorkspaceDrawer() {
             right: 0,
             bottom: 0,
             zIndex: 9999999,
-            backgroundColor: 'rgba(15, 23, 42, 0.7)',
-            backdropFilter: 'blur(5px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '1rem'
+            animation: 'fadeIn 0.2s ease',
           }}
           onClick={() => setShowPdfPreview(false)}
         >
+          <style>{`
+            @keyframes slideUpSheet {
+              from { transform: translateY(100%); }
+              to { transform: translateY(0); }
+            }
+          `}</style>
           <div
             style={{
-              width: 'min(640px, 95vw)',
-              maxHeight: '85vh',
-              overflowY: 'auto',
+              width: 'min(720px, 100vw)',
+              maxHeight: '88vh',
               backgroundColor: '#ffffff',
-              borderRadius: '12px',
-              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
+              borderRadius: '20px 20px 0 0',
+              boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.25)',
               display: 'flex',
               flexDirection: 'column',
-              border: '1px solid #cbd5e1'
+              border: '1px solid #cbd5e1',
+              animation: 'slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              overflow: 'hidden',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div style={{ padding: '1rem 1.25rem', backgroundColor: '#003666', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '12px 12px 0 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={18} />
-                <span style={{ fontWeight: 800, fontSize: '0.96rem' }}>Live PDF Preview — {activeWs.name}</span>
-              </div>
-              <button type="button" onClick={() => setShowPdfPreview(false)} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer' }}><X size={18} /></button>
+            {/* Top Drag Indicator */}
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '10px', paddingBottom: '4px', backgroundColor: '#003666' }}>
+              <div style={{ width: '44px', height: '5px', backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '99px' }} />
             </div>
 
-            {/* Modal Document Sheet */}
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', backgroundColor: '#ffffff' }}>
+            {/* Bottom Sheet Header */}
+            <div style={{ padding: '0.85rem 1.25rem', backgroundColor: '#003666', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={18} />
+                <span style={{ fontWeight: 800, fontSize: '0.96rem' }}>Live Summary Preview — {activeWs.name}</span>
+              </div>
+              <button type="button" onClick={() => setShowPdfPreview(false)} style={{ border: 'none', background: 'none', color: '#ffffff', cursor: 'pointer', display: 'flex' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Bottom Sheet Document Body */}
+            <div style={{ padding: '1.25rem 1.5rem', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.2rem', backgroundColor: '#ffffff' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #003666', paddingBottom: '0.8rem' }}>
                 <div>
-                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#003666', margin: 0 }}>REGENPEPT BIOLOGICS</h2>
-                  <span style={{ fontSize: '0.76rem', color: '#64748b' }}>Clinical & Commercial Workspace Document</span>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#003666', margin: 0, letterSpacing: '-0.02em' }}>ATLAS SERVICES</h2>
+                  <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>Clinical & Commercial Workspace Document</span>
                 </div>
                 <div style={{ textAlign: 'right', fontSize: '0.76rem', color: '#475569' }}>
                   <div><b>Date:</b> {new Date().toLocaleDateString()}</div>
@@ -1909,26 +2044,27 @@ export default function WorkspaceDrawer() {
               </div>
 
               {/* Items Table */}
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f1f5f9', color: '#0f172a', textAlign: 'left' }}>
-                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1' }}>Item / Compound</th>
-                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1' }}>Dose / Format</th>
-                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1', textAlign: 'center' }}>Qty</th>
-                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Rate</th>
-                    <th style={{ padding: '8px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Total</th>
+                    <th style={{ padding: '8px 10px', borderBottom: '1px solid #cbd5e1' }}>Item / Compound</th>
+                    <th style={{ padding: '8px 10px', borderBottom: '1px solid #cbd5e1' }}>Dose / Format</th>
+                    <th style={{ padding: '8px 10px', borderBottom: '1px solid #cbd5e1', textAlign: 'center' }}>Qty</th>
+                    <th style={{ padding: '8px 10px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Rate</th>
+                    <th style={{ padding: '8px 10px', borderBottom: '1px solid #cbd5e1', textAlign: 'right' }}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((it, idx) => {
                     const rate = getItemUnitPrice(it);
+                    const name = it.canonicalName || it.name || it.displayName || 'Product Item';
                     return (
                       <tr key={it.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '8px', fontWeight: 700, color: '#0f172a' }}>{it.canonicalName}</td>
-                        <td style={{ padding: '8px', color: '#475569' }}>{it.dosage || 'Standard'} • {it.format || 'Vial'}</td>
-                        <td style={{ padding: '8px', textAlign: 'center', fontWeight: 700 }}>{it.quantity || 1}</td>
-                        <td style={{ padding: '8px', textAlign: 'right' }}>${rate.toFixed(2)}</td>
-                        <td style={{ padding: '8px', textAlign: 'right', fontWeight: 800, color: '#003666' }}>${((it.quantity || 1) * rate).toFixed(2)}</td>
+                        <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>{name}</td>
+                        <td style={{ padding: '8px 10px', color: '#475569' }}>{it.dosage || 'Standard'} • {it.format || 'Vial'}</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700 }}>{it.quantity || 1}</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right' }}>${rate.toFixed(2)}</td>
+                        <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 800, color: '#003666' }}>${((it.quantity || 1) * rate).toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -1939,12 +2075,12 @@ export default function WorkspaceDrawer() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', paddingTop: '0.5rem', borderTop: '2px solid #cbd5e1' }}>
                 <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Subtotal: <b>${subtotalSaleAmount.toFixed(2)}</b></div>
                 <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Shipping ({selectedShippingMethod}): <b>${shippingCost.toFixed(2)}</b></div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#003666', marginTop: '4px' }}>Grand Total: ${grandTotal.toFixed(2)}</div>
+                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#003666', marginTop: '4px' }}>Grand Total: ${grandTotal.toFixed(2)}</div>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div style={{ padding: '0.85rem 1.25rem', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '8px', borderRadius: '0 0 12px 12px' }}>
+            {/* Bottom Sheet Footer */}
+            <div style={{ padding: '0.85rem 1.25rem', backgroundColor: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => {

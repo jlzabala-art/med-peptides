@@ -46,7 +46,11 @@ export const useOrderStore = create(
       }
     }),
     {
-      name: 'order-storage', // unique name for localStorage key
+      name: 'order-storage',
+      partialize: (state) => ({
+        orders: state.orders,
+        lastFetched: state.lastFetched,
+      }),
     }
   )
 );
