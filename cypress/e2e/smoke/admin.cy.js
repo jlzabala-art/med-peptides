@@ -12,9 +12,8 @@ describe('Admin — Smoke Test', () => {
     cy.url({ timeout: 20000 }).should('include', '/admin');
   });
 
-  it('shows Admin sidebar with Control Center header', () => {
-    cy.contains('Control Center', { timeout: 8000 }).should('be.visible');
-    cy.contains('Admin Portal').should('be.visible');
+  it('shows Admin header with Admin Portal title', () => {
+    cy.contains('Admin Portal', { timeout: 8000 }).should('be.visible');
   });
 
   it('sidebar shows all expected nav groups', () => {

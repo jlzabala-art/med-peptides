@@ -1,4 +1,4 @@
-import { LayoutDashboard, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Users2, LineChart, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, PieChart, BrainCircuit, Sparkles, TerminalSquare, LayoutTemplate, ShieldAlert, Settings, Factory, CheckSquare } from '@/lib/icons';
+import { LayoutDashboard, LayoutGrid, MessageSquare, Calendar, Bell, Users, Stethoscope, HeartPulse, FileText, Bot, Package, Search, Eye, TrendingUp, Tags, ShieldCheck, Database, ShoppingBag, Building, MapPin, Receipt, CreditCard, Users2, LineChart, Truck, ThermometerSnowflake, Navigation, ClipboardList, Mail, Newspaper, Share2, Ticket, PieChart, BrainCircuit, Sparkles, TerminalSquare, LayoutTemplate, ShieldAlert, Settings, Factory, CheckSquare } from '@/lib/icons';
 
 // Helper icons
 const HandshakeIcon = Users2;
@@ -29,7 +29,7 @@ export const NAVIGATION_REGISTRY = [
     icon: LayoutDashboard,
     roles: [...ALL_INTERNAL, 'patient'],
     items: [
-      { id: '',              label: 'Overview',       icon: LayoutDashboard, roles: [...ALL_INTERNAL, 'patient'] },
+      { id: '',              label: 'Overview',       icon: LayoutGrid,     roles: [...ALL_INTERNAL, 'patient'] },
       { id: 'messages',      label: 'Messages',       icon: MessageSquare,   roles: ['admin', 'doctor', 'medical_director', 'clinic_manager', 'sales', 'supplier', 'patient'] },
       { id: 'calendar',      label: 'Calendar',       icon: Calendar,        roles: ['admin', 'doctor', 'medical_director', 'clinic_manager', 'sales', 'patient'] },
       { id: 'notifications', label: 'Notifications',  icon: Bell,            roles: ALL_INTERNAL },

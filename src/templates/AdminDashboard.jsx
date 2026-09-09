@@ -334,7 +334,7 @@ export default function AdminDashboard({ children }) {
       sidebarPinnedItems={dynamicPinnedItems}
       activeNavId={activeTab}
       onNavigate={navToTab}
-      portalTitle="Control Center"
+      portalTitle="Admin Portal"
       roleContext="admin"
       pageContext={{
         activeTab: activeTab,
