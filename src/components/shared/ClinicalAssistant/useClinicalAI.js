@@ -465,18 +465,20 @@ export function useClinicalAI({
       const section = e?.detail?.section;
       const productMode = e?.detail?.productMode === true;
       const autoGenerate = e?.detail?.autoGenerate === true;
-      const moduleMode = e?.detail?.moduleMode || (productMode ? 'product' : null);
+      const eventRole = e?.detail?.role || ctx?.role;
+      const moduleMode = e?.detail?.moduleMode || ctx?.moduleMode || (productMode ? 'product' : eventRole === 'admin' ? 'admin' : eventRole === 'doctor' ? 'doctor' : null);
 
-      if (ctx) {
-        setDynamicPageContext(ctx);
-        eventContextRef.current = ctx;
+      if (ctx || eventRole) {
+        const enrichedCtx = { ...ctx, activeRole: eventRole };
+        setDynamicPageContext(enrichedCtx);
+        eventContextRef.current = enrichedCtx;
         // Anclar el modo y contexto de forma sticky para toda la sesión
-        if (moduleMode && ctx) {
-          setStickyProductContext(ctx);
+        if (moduleMode) {
+          setStickyProductContext(enrichedCtx);
           setStickyModuleMode(moduleMode);
           if (moduleMode === 'product') setIsProductMode(true);
-        } else if (productMode && ctx) {
-          setStickyProductContext(ctx);
+        } else if (productMode && enrichedCtx) {
+          setStickyProductContext(enrichedCtx);
           setIsProductMode(true);
           setStickyModuleMode('product');
         }
@@ -547,7 +549,7 @@ export function useClinicalAI({
       setIsOpen(true);
       if (resolvedMsg) {
         // Automatically send entity queries so the user gets an instant, clean product response
-        const shouldAutoSend = e?.detail?.autoSend !== false || action === 'ask_about_entity' || Boolean(entityName);
+        const shouldAutoSend = e?.detail?.autoSend !== false || action === 'ask_about_entity' || Boolean(entityName) || Boolean(eventRole);
         
         if (shouldAutoSend) {
           pendingContextRef.current = { message: resolvedMsg, displayText: label };
@@ -573,6 +575,7 @@ export function useClinicalAI({
 
 
   const handleSend = async (suggestion) => {
+    handleSendRef.current = handleSend;
     let messageText = input;
     let displayText = null;
     
@@ -873,9 +876,23 @@ export function useClinicalAI({
             }
 
             // ───────────────────────────────────────────────────
-            // RULE 5: ADMIN OPERATIONS (genérico, último recurso)
+            // RULE 5: CLINICAL DOCTOR OVERSIGHT MODE
             // ───────────────────────────────────────────────────
-            if (contextMode === 'admin') {
+            const currentActiveRole = activeProductCtx?.activeRole || userCtx?.role;
+            if (['doctor', 'medical_director'].includes(currentActiveRole) || effectiveModuleMode === 'doctor') {
+              return `
+--- CLINICAL OVERSIGHT & DOCTOR MODE ACTIVE ---
+You are "Clinical AI", the Atlas Health medical & clinical advisor. Help the physician evaluate clinical protocols, analyze patient cases, review prescriptions, and provide evidence-backed peptide intelligence.
+Active Role: ${currentActiveRole?.toUpperCase() || 'DOCTOR'}
+Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Clinical Oversight'}.
+MANDATORY: ALWAYS respond in ENGLISH regardless of the user's input language.
+`;
+            }
+
+            // ───────────────────────────────────────────────────
+            // RULE 6: ADMIN OPERATIONS (genérico, último recurso)
+            // ───────────────────────────────────────────────────
+            if (contextMode === 'admin' || currentActiveRole === 'admin') {
               return `
 --- ADMIN MODE ACTIVE ---
 You are "Atlas AI", the Atlas Health administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system.

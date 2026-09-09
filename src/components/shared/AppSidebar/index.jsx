@@ -12,6 +12,65 @@ import QuickCreateDropdown from './QuickCreateDropdown';
 import { prefetchModuleData } from '../../../utils/speculativePrefetch';
 import './AppSidebar.css';
 
+// ── Section Theme Registry (Distinct vibrant colors & icon backgrounds for top-level navigation) ──
+const GROUP_THEMES = {
+  dashboard: {
+    color: '#2563eb', // Royal Blue
+    bg: 'rgba(37, 99, 235, 0.12)',
+  },
+  clinical: {
+    color: '#0d9488', // Medical Teal / Emerald
+    bg: 'rgba(13, 148, 136, 0.12)',
+  },
+  catalog: {
+    color: '#d97706', // Warm Amber / Gold
+    bg: 'rgba(217, 119, 6, 0.12)',
+  },
+  sales: {
+    color: '#16a34a', // Emerald Green
+    bg: 'rgba(22, 163, 74, 0.12)',
+  },
+  purchasing: {
+    color: '#7c3aed', // Purple / Violet
+    bg: 'rgba(124, 58, 237, 0.12)',
+  },
+  logistics: {
+    color: '#0284c7', // Sky Blue
+    bg: 'rgba(2, 132, 199, 0.12)',
+  },
+  finance: {
+    color: '#e11d48', // Rose / Red
+    bg: 'rgba(225, 29, 72, 0.12)',
+  },
+  marketing: {
+    color: '#db2777', // Fuchsia / Pink
+    bg: 'rgba(219, 39, 119, 0.12)',
+  },
+  ai: {
+    color: '#9333ea', // Electric Purple
+    bg: 'rgba(147, 51, 234, 0.12)',
+  },
+  administration: {
+    color: '#475569', // Slate / Steel
+    bg: 'rgba(71, 85, 105, 0.12)',
+  },
+  health: {
+    color: '#0d9488',
+    bg: 'rgba(13, 148, 136, 0.12)',
+  },
+  discover: {
+    color: '#2563eb',
+    bg: 'rgba(37, 99, 235, 0.12)',
+  },
+  executive: {
+    color: '#6366f1',
+    bg: 'rgba(99, 102, 241, 0.12)',
+  },
+  ops: {
+    color: '#0284c7',
+    bg: 'rgba(2, 132, 199, 0.12)',
+  },
+};
 
 // ── Main AppSidebar ───────────────────────────────────────────────────────────
 export default function AppSidebar({
@@ -312,6 +371,10 @@ export default function AppSidebar({
         {filteredGroups.map((group) => {
           const isGroupExpanded = expandedGroups.includes(group.id);
           const GroupIcon = group.icon;
+          const theme = GROUP_THEMES[group.id] || {
+            color: 'var(--color-primary, #2563eb)',
+            bg: 'rgba(37, 99, 235, 0.12)',
+          };
 
           return (
             <div key={group.id} className="sb-group hierarchical">
@@ -321,14 +384,46 @@ export default function AppSidebar({
                   if (!expanded) setExpanded(true);
                   toggleGroup(group.id);
                 }}
+                data-tooltip={!expanded ? group.label : undefined}
               >
-                {GroupIcon && <GroupIcon size={18} strokeWidth={2} style={{ color: 'var(--text-muted)', marginRight: expanded ? 8 : 0 }} />}
+                {GroupIcon && (
+                  <span
+                    className="sb-group-icon-wrap"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
+                      backgroundColor: theme.bg,
+                      color: theme.color,
+                      marginRight: expanded ? 8 : 0,
+                      flexShrink: 0,
+                      transition: 'transform 0.15s ease, background-color 0.2s ease',
+                    }}
+                  >
+                    <GroupIcon size={15} strokeWidth={2.5} style={{ color: theme.color }} />
+                  </span>
+                )}
                 {expanded && (
                   <>
-                    <span style={{ flex: 1, textAlign: 'left', fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <span 
+                      className="sb-group-label"
+                      style={{ 
+                        flex: 1, 
+                        textAlign: 'left', 
+                        fontWeight: 700, 
+                        fontSize: '0.78rem', 
+                        letterSpacing: '0.04em',
+                        color: 'var(--sb-text, #0f172a)' 
+                      }}
+                    >
                       {group.label.toUpperCase()}
                     </span>
-                    {isGroupExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    <span style={{ color: 'var(--sb-muted, #64748b)', display: 'flex', alignItems: 'center' }}>
+                      {isGroupExpanded ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
+                    </span>
                   </>
                 )}
               </button>

@@ -65,11 +65,11 @@ export default function PatientCommandHub({ userId = null, initialData = null })
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)',
+        background: 'linear-gradient(135deg, #003666 0%, #0f172a 100%)',
         borderRadius: '16px',
         padding: '1.25rem 1.5rem',
         color: '#ffffff',
-        boxShadow: '0 4px 20px rgba(124, 58, 237, 0.25)',
+        boxShadow: '0 4px 20px rgba(0, 54, 102, 0.25)',
         marginBottom: '1.5rem',
         display: 'flex',
         flexDirection: 'column',
@@ -84,12 +84,12 @@ export default function PatientCommandHub({ userId = null, initialData = null })
               width: '42px',
               height: '42px',
               borderRadius: '12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.18)',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
               backdropFilter: 'blur(4px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#f0abfc',
+              color: '#38bdf8',
             }}
           >
             <HeartPulse size={24} />
@@ -98,7 +98,7 @@ export default function PatientCommandHub({ userId = null, initialData = null })
             <h2 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, letterSpacing: '-0.01em', color: '#ffffff' }}>
               My Patient Treatment Hub
             </h2>
-            <span style={{ fontSize: '0.78rem', color: '#e9d5ff', fontWeight: 500 }}>
+            <span style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 500 }}>
               Daily Dosage Tracker • Prescription Refills • Delivery Tracking
             </span>
           </div>
@@ -113,14 +113,14 @@ export default function PatientCommandHub({ userId = null, initialData = null })
             borderRadius: '10px',
             border: 'none',
             backgroundColor: doseTaken ? '#10b981' : '#ffffff',
-            color: doseTaken ? '#ffffff' : '#5b21b6',
+            color: doseTaken ? '#ffffff' : '#003666',
             fontSize: '0.82rem',
             fontWeight: 800,
             cursor: doseTaken ? 'default' : 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
           }}
         >
           <CheckCircle2 size={16} />
@@ -134,7 +134,7 @@ export default function PatientCommandHub({ userId = null, initialData = null })
           display: 'flex',
           gap: '8px',
           overflowX: 'auto',
-          paddingBottom: '4px',
+          paddingBottom: '6px',
           scrollbarWidth: 'none',
           WebkitOverflowScrolling: 'touch',
         }}
@@ -149,13 +149,14 @@ export default function PatientCommandHub({ userId = null, initialData = null })
             gap: '6px',
             padding: '7px 12px',
             borderRadius: '8px',
-            backgroundColor: refillRequested ? '#10b981' : 'rgba(255, 255, 255, 0.18)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backgroundColor: refillRequested ? '#10b981' : 'rgba(255, 255, 255, 0.16)',
+            border: '1px solid rgba(255, 255, 255, 0.28)',
             color: '#ffffff',
             fontSize: '0.78rem',
             fontWeight: 800,
             cursor: refillRequested ? 'default' : 'pointer',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           <RefreshCw size={14} />
@@ -180,6 +181,7 @@ export default function PatientCommandHub({ userId = null, initialData = null })
             fontWeight: 700,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           <Truck size={14} />
@@ -197,11 +199,12 @@ export default function PatientCommandHub({ userId = null, initialData = null })
             borderRadius: '8px',
             backgroundColor: showMonograph ? '#ffffff' : 'rgba(255, 255, 255, 0.14)',
             border: '1px solid rgba(255, 255, 255, 0.25)',
-            color: showMonograph ? '#5b21b6' : '#ffffff',
+            color: showMonograph ? '#003666' : '#ffffff',
             fontSize: '0.78rem',
             fontWeight: 800,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           <FileText size={14} />
@@ -226,6 +229,7 @@ export default function PatientCommandHub({ userId = null, initialData = null })
             fontWeight: 700,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           <UploadCloud size={14} />
@@ -237,7 +241,7 @@ export default function PatientCommandHub({ userId = null, initialData = null })
       {showMonograph && (
         <div style={{ backgroundColor: '#ffffff', color: '#0f172a', padding: '1rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#5b21b6', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <ShieldCheck size={16} /> Clinical Treatment Monograph
             </span>
             <button type="button" onClick={() => setShowMonograph(false)} style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontWeight: 800 }}>✕</button>
@@ -266,10 +270,10 @@ export default function PatientCommandHub({ userId = null, initialData = null })
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
               Current Regimen (Week {regimen.currentWeek} of {regimen.totalWeeks})
             </span>
-            <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#6d28d9', fontSize: '0.7rem', fontWeight: 800 }}>
+            <span style={{ padding: '2px 8px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', fontSize: '0.7rem', fontWeight: 800 }}>
               Active
             </span>
           </div>
@@ -282,12 +286,12 @@ export default function PatientCommandHub({ userId = null, initialData = null })
 
           {/* Progress Bar */}
           <div style={{ marginTop: '0.75rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#6d28d9', marginBottom: '0.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#0369a1', marginBottom: '0.25rem' }}>
               <span>Cycle Progress</span>
               <span>50% Complete</span>
             </div>
-            <div style={{ height: '6px', backgroundColor: '#f3e8ff', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ width: '50%', height: '100%', backgroundColor: '#7c3aed' }} />
+            <div style={{ height: '6px', backgroundColor: '#e0f2fe', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ width: '50%', height: '100%', backgroundColor: '#0284c7' }} />
             </div>
           </div>
         </div>

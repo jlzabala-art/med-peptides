@@ -10,7 +10,7 @@ const PatientPrescriptionsTab = dynamic(() => import('../../../components/patien
 const MessagingWidget = dynamic(() => import('../../../components/messaging/MessagingWidget'), { ssr: false });
 const ClinicalAIWidget = dynamic(() => import('../../../components/admin/ClinicalAIWidget'), { ssr: false });
 const PatientAppointments = dynamic(() => import('../../../templates/PatientAppointments'), { ssr: false });
-const OrdersTab = dynamic(() => import('../../../components/admin/OrdersTab'), { ssr: false });
+const PatientOrdersTab = dynamic(() => import('../../../components/patient/PatientOrdersTab'), { ssr: false });
 const UserSettings = dynamic(() => import('../../../templates/UserSettings'), { ssr: false });
 const UserProfileTab = dynamic(() => import('../../../components/shared/UserProfileTab'), { ssr: false });
 
@@ -52,7 +52,7 @@ function OrdersWrapper() {
   const { uid } = useContext(PatientContext) || {};
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 1.5rem 4rem' }}>
-      <OrdersTab buyerId={uid} readOnly={true} />
+      <PatientOrdersTab userId={uid} />
     </div>
   );
 }

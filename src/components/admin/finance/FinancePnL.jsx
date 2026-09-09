@@ -20,23 +20,37 @@ import {
 
 export default function FinancePnL({ pnl2026 }) {
   // Parse the Zoho Books pnl2026. 
-  // Normally Zoho returns an array or object. We'll ensure it maps to recharts data format.
-  // We'll mock the missing months if data isn't perfect, to ensure 12 months are shown.
   const chartData = useMemo(() => {
-    // Basic mock of 12 months for 2026 just in case real data is incomplete
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const data = months.map(m => ({
-      name: m,
-      Income: Math.floor(Math.random() * 50000) + 100000, // Mock base 100k - 150k
-      Expenses: Math.floor(Math.random() * 40000) + 60000, // Mock base 60k - 100k
-    }));
 
-    // If pnl2026 has actual data, we could map it here:
-    // e.g., if pnl2026.months ...
-    // For now we map over the base and add Profit
-    return data.map(item => ({
-      ...item,
-      Profit: item.Income - item.Expenses
+    if (Array.isArray(pnl2026) && pnl2026.length > 0) {
+      return pnl2026.map(item => ({
+        name: item.name || item.month || '',
+        Income: Number(item.Income || item.income || 0),
+        Expenses: Number(item.Expenses || item.expenses || 0),
+        Profit: Number(item.Profit ?? (Number(item.Income || item.income || 0) - Number(item.Expenses || item.expenses || 0)))
+      }));
+    }
+
+    if (pnl2026 && typeof pnl2026 === 'object' && pnl2026.months) {
+      return months.map((m, idx) => {
+        const monthData = pnl2026.months[m] || pnl2026.months[idx] || {};
+        const income = Number(monthData.Income || monthData.income || 0);
+        const expenses = Number(monthData.Expenses || monthData.expenses || 0);
+        return {
+          name: m,
+          Income: income,
+          Expenses: expenses,
+          Profit: monthData.Profit ?? (income - expenses)
+        };
+      });
+    }
+
+    return months.map(m => ({
+      name: m,
+      Income: 0,
+      Expenses: 0,
+      Profit: 0
     }));
   }, [pnl2026]);
 

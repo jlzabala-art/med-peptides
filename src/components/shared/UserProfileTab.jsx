@@ -372,9 +372,12 @@ export default function UserProfileTab() {
       </div>
 
       <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
-          Change Password
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '0.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+          Password & Credentials
         </h3>
+        <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+          Set or change your account password. If you originally registered using Google, setting a password here allows you to log in with your email and password directly on any device.
+        </p>
         <form onSubmit={handleUpdatePassword} style={{ display: 'grid', gap: '1rem' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', color: '#666' }}>New Password</label>

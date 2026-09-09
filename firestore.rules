@@ -5,28 +5,36 @@ service cloud.firestore {
     function isAuthenticated() { return request.auth != null; }
 
     function isAdmin() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
     }
 
     // ── B2B Portal Role Helpers ──────────────────────────────────────────────
     function isDoctor() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor';
+      return isAuthenticated() && (
+        request.auth.token.role == 'doctor' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor')
+      );
     }
 
     function isPatient() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient';
+      return isAuthenticated() && (
+        request.auth.token.role == 'patient' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient')
+      );
     }
 
     function isWholesaler() {
-      return isAuthenticated() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'wholesaler';
+      return isAuthenticated() && (
+        request.auth.token.role == 'wholesaler' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'wholesaler')
+      );
     }
 
     function isOwner(data) {
@@ -112,7 +120,7 @@ service cloud.firestore {
     match /global_rates/{id}           { allow read: if true; allow write: if isAdmin(); }
     match /rates/{id}                  { allow read: if true; allow write: if isAdmin(); }
     match /wholesellers/{id}           { allow read: if true; allow write: if isAdmin(); }
-    match /patients/{id}               { allow read: if isAdmin() || isDoctor() || request.auth.uid == id; allow write: if isAdmin(); }
+    match /patients/{id}               { allow read: if isAdmin() || isDoctor() || request.auth.uid == id; allow write: if isAdmin() || isDoctor() || request.auth.uid == id; }
     match /agency_rfqs/{id}            { allow read: if isAdmin(); allow write: if isAdmin(); }
     match /purchaseOrders/{id}         { allow read: if isAdmin() || isWholesaler(); allow write: if isAdmin(); }
     match /product_variants/{id}       { allow read: if true; allow write: if isAdmin(); }
@@ -200,8 +208,8 @@ service cloud.firestore {
 
       // Subcollections: users can read/write their own; admins have full access
       match /{document=**} {
-        allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin()) || userId == 'dev-admin';
-        allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin()) || userId == 'dev-admin';
+        allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+        allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       }
     }
 

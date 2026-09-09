@@ -1,5 +1,6 @@
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { NextResponse } from 'next/server';
+import { deriveCanonicalIdentity } from '@/utils/canonicalProductRegistry';
 
 const MAGENTA_DATA = [
   {
@@ -289,13 +290,18 @@ export async function POST(request) {
     const batch = adminDb.batch();
 
     for (const mp of MAGENTA_DATA) {
+      const canonical = deriveCanonicalIdentity({
+        name: mp.master_product.display_name,
+        canonicalName: mp.master_product.display_name
+      });
       const nameLower = mp.master_product.display_name.toLowerCase();
       const slug = nameLower.replace(/[^a-z0-9]+/g, '-');
       const productRef = adminDb.collection('products').doc(slug);
 
       batch.set(productRef, {
         name: mp.master_product.display_name,
-        canonicalName: mp.master_product.display_name,
+        canonicalKey: canonical.canonicalKey,
+        canonicalName: canonical.canonicalName,
         category: mp.master_product.product_type || 'Peptide',
         status: 'active',
         updatedAt: new Date().toISOString()

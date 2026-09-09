@@ -1,10 +1,12 @@
 "use client";
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Search, X, Command, Loader, Clock, ChevronDown, Filter } from '@/lib/icons';
 import '../../styles/search.css';
 import MultiSelectFilter from './MultiSelectFilter';
 import SingleSelectFilter from './SingleSelectFilter';
 import MobileFiltersSheet from '../mobile/MobileFiltersSheet';
+import { searchAlgolia } from '@/services/algoliaSearch';
+import { trackSearchClick } from '@/services/algoliaInsights';
 
 /**
  * GlobalSearchBar
@@ -89,6 +91,9 @@ export default function GlobalSearchBar({
   });
   const [showDropdown, setShowDropdown] = useState(false);
   const [openFilterKey, setOpenFilterKey] = useState(null); // For filter dropdowns
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -96,6 +101,93 @@ export default function GlobalSearchBar({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Debounced Algolia instant suggestions query
+  useEffect(() => {
+    if (!value || value.trim().length < 2) {
+      setSuggestions([]);
+      setIsSearchingSuggestions(false);
+      setSelectedIndex(-1);
+      return;
+    }
+
+    let isMounted = true;
+    setIsSearchingSuggestions(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchAlgolia(value.trim());
+        if (isMounted) {
+          // Products are now natively deduplicated by Algolia (attributeForDistinct: canonicalKey)
+          const seenProdKeys = new Set();
+          const prods = [];
+          for (const p of (res.products || [])) {
+            const key = (p.canonicalKey || p.canonicalName || p.name || '').trim().toLowerCase();
+            if (!key || seenProdKeys.has(key)) continue;
+            seenProdKeys.add(key);
+
+            const displayName = (p.canonicalName || p.name || p.productName || '').trim();
+            const varCount = Number(p.variantsCount || p.variantCount || 1);
+
+            prods.push({
+              key,
+              id: p.productId || p.objectID || p.id,
+              name: displayName,
+              category: p.category || 'Peptide',
+              variantCount: varCount,
+              indexName: 'products'
+            });
+            if (prods.length >= 4) break;
+          }
+
+          // Deduplicate protocols by title
+          const seenProtoKeys = new Set();
+          const protos = [];
+          for (const p of (res.protocols || [])) {
+            const rawTitle = (p.title || p.name || '').trim();
+            const key = rawTitle.toLowerCase();
+            if (!key || seenProtoKeys.has(key)) continue;
+            seenProtoKeys.add(key);
+
+            protos.push({
+              key,
+              id: p.objectID || p.id,
+              name: rawTitle,
+              category: 'Protocol',
+              indexName: 'protocols'
+            });
+            if (protos.length >= 2) break;
+          }
+
+          const combined = [...prods, ...protos];
+          setSuggestions(combined);
+          if (combined.length > 0 && isFocused) {
+            setShowDropdown(true);
+          }
+        }
+      } catch {
+        if (isMounted) setSuggestions([]);
+      } finally {
+        if (isMounted) setIsSearchingSuggestions(false);
+      }
+    }, 180);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [value, isFocused]);
+
+  const effectivePlaceholder = useMemo(() => {
+    if (isMobile && placeholder) {
+      if (placeholder.includes(' by ')) {
+        return placeholder.split(' by ')[0] + '...';
+      }
+      if (placeholder.length > 25) {
+        return placeholder.slice(0, 22) + '...';
+      }
+    }
+    return placeholder;
+  }, [isMobile, placeholder]);
 
   // ⌘K / Ctrl+K global shortcut to focus search
   useEffect(() => {
@@ -123,15 +215,15 @@ export default function GlobalSearchBar({
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
-    if (showRecent && recentSearches.length > 0 && !value) {
+    if ((showRecent && recentSearches.length > 0 && !value) || (value && suggestions.length > 0)) {
       setShowDropdown(true);
     }
     onFocus?.();
-  }, [recentSearches, value, showRecent, onFocus]);
+  }, [recentSearches, value, showRecent, suggestions.length, onFocus]);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    setTimeout(() => setShowDropdown(false), 150);
+    setTimeout(() => setShowDropdown(false), 200);
     onBlur?.();
   }, [onBlur]);
 
@@ -139,7 +231,11 @@ export default function GlobalSearchBar({
     (e) => {
       const term = e.target.value;
       onChange?.(term);
-      setShowDropdown(showRecent && !term && recentSearches.length > 0);
+      if (!term) {
+        setShowDropdown(showRecent && recentSearches.length > 0);
+      } else if (term.trim().length >= 2) {
+        setShowDropdown(true);
+      }
     },
     [onChange, showRecent, recentSearches]
   );
@@ -166,17 +262,51 @@ export default function GlobalSearchBar({
     [recentSearches, namespace]
   );
 
+  const handleSuggestionClick = useCallback(
+    (item) => {
+      onChange?.(item.name);
+      saveRecentSearch(item.name);
+      trackSearchClick({
+        indexName: item.indexName || 'products',
+        objectID: item.id,
+        eventName: 'GlobalSearchBar Suggestion Clicked'
+      });
+      setShowDropdown(false);
+      setSelectedIndex(-1);
+      inputRef.current?.focus();
+    },
+    [onChange, saveRecentSearch]
+  );
+
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === 'Enter' && value.trim()) {
-        saveRecentSearch(value.trim());
-        setShowDropdown(false);
+      if (e.key === 'ArrowDown' && suggestions.length > 0) {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
+        setShowDropdown(true);
+        return;
+      }
+      if (e.key === 'ArrowUp' && suggestions.length > 0) {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        return;
+      }
+      if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+          e.preventDefault();
+          handleSuggestionClick(suggestions[selectedIndex]);
+          return;
+        }
+        if (value.trim()) {
+          saveRecentSearch(value.trim());
+          setShowDropdown(false);
+        }
       }
       if (e.key === 'Escape') {
         handleClear();
       }
     },
-    [value, saveRecentSearch, handleClear]
+    [value, suggestions, selectedIndex, handleSuggestionClick, saveRecentSearch, handleClear]
   );
 
   const handleRecentClick = useCallback(
@@ -229,7 +359,7 @@ export default function GlobalSearchBar({
             ref={inputRef}
             type="text"
             className="atlas-search__input"
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             value={value}
             onChange={handleChange}
             onFocus={handleFocus}
@@ -366,8 +496,75 @@ export default function GlobalSearchBar({
           </div>
         )}
 
+        {/* ── ALGLOLIA INSTANT SUGGESTIONS DROPDOWN ───────────────────── */}
+        {showDropdown && value.trim().length >= 2 && (
+          <div className="atlas-search__dropdown" style={{ zIndex: 100 }}>
+            <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Algolia Suggestions
+              </span>
+              {isSearchingSuggestions && <Loader size={12} className="atlas-search__spinner" />}
+            </div>
+            {suggestions.length === 0 && !isSearchingSuggestions ? (
+              <div style={{ padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                No clinical matches found
+              </div>
+            ) : (
+              suggestions.map((item, idx) => (
+                <div
+                  key={item.id || idx}
+                  className={`atlas-search__dropdown-item ${selectedIndex === idx ? 'atlas-search__dropdown-item--selected' : ''}`}
+                  onClick={() => handleSuggestionClick(item)}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    backgroundColor: selectedIndex === idx ? '#f1f5f9' : 'transparent'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                    <Search size={13} color="#003666" />
+                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {item.variantCount > 1 && (
+                      <span
+                        style={{
+                          fontSize: '0.62rem',
+                          fontWeight: 600,
+                          padding: '2px 5px',
+                          borderRadius: '4px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#64748b',
+                          border: '1px solid #e2e8f0'
+                        }}
+                      >
+                        {item.variantCount} vars
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        padding: '2px 6px',
+                        borderRadius: '6px',
+                        backgroundColor: item.category === 'Protocol' ? '#ecfdf5' : '#eff6ff',
+                        color: item.category === 'Protocol' ? '#065f46' : '#1e40af',
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      {item.category}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
         {/* ── RECENT SEARCHES DROPDOWN ──────────────────────────────────── */}
-        {showDropdown && showRecent && recentSearches.length > 0 && (
+        {showDropdown && !value && showRecent && recentSearches.length > 0 && (
           <div className="atlas-search__dropdown">
             <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>

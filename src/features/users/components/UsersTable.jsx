@@ -931,7 +931,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             onClick={() => { setRoleFilter('all'); setStatusFilter('pending'); }}
             style={{ cursor: 'pointer' }}
           />
-          <style jsx>{`
+          <style>{`
             .users-kpi-grid {
               display: grid;
               grid-template-columns: repeat(4, 1fr);

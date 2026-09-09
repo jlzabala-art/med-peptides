@@ -9,7 +9,7 @@ export async function fetchViewsConfigAction() {
       return [];
     }
 
-    const snapshot = await adminDb.collection('viewConfigs').get();
+    const snapshot = await adminDb.collection('viewConfigs').limit(50).get();
     
     const configs = snapshot.docs.map(doc => {
       const data = doc.data();

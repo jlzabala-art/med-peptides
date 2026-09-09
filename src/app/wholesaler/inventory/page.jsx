@@ -1,12 +1,12 @@
 "use client";
 
 import React from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { PlaceholderTab } from '../../../templates/WholesalerHome';
+import RealTimeStockManagerWidget from '../../../components/wholesaler/gadgets/RealTimeStockManagerWidget';
 
 export default function InventoryPage() {
-  const { user } = useAuth();
-  const router = useRouter();
-  return <PlaceholderTab title="Inventory Manager" description="Real-time stock view, batch expiry tracking, and restock alerts — coming soon." />;
+  return (
+    <div style={{ padding: '0.5rem', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+      <RealTimeStockManagerWidget />
+    </div>
+  );
 }

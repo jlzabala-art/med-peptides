@@ -47,7 +47,7 @@ export default function AuthPage({ onBack }) {
   const redirectTo = typeof window !== 'undefined' && window.history.state?.from?.pathname
     ? `${window.history.state.from.pathname}${window.history.state.from.search || ''}`
     : null;
-  const { user, userProfile, updateProfileData, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, logout, resetPassword, loginWithGoogle, loading: authLoading } = useAuth();
+  const { user, userProfile, updateProfileData, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, logout, resetPassword, linkPassword, loginWithGoogle, loading: authLoading } = useAuth();
   const { register, loading: registerLoading, error: registerError } = useRegistration();
   const loading = authLoading || registerLoading;
   const { prefs, hasCompleted } = useGuestPreferences();
@@ -184,10 +184,12 @@ export default function AuthPage({ onBack }) {
         }
       }, 1200);
     } catch (err) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Invalid email or password.');
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+        setError('Invalid email or password. If this account was originally created with Google, use "Sign in with Google" below or click "Forgot Password?" to set a password.');
       } else if (err.code === 'auth/too-many-requests') {
         setError('Too many attempts. Please try again later.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network error: Unable to reach Firebase Auth server. Please check your internet connection, VPN, or ad-blocker settings.');
       } else {
         setError(err.message);
       }
@@ -201,9 +203,17 @@ export default function AuthPage({ onBack }) {
 
     const isGoogleOnboarding = user && userProfile?.role === 'pending';
 
-    // Password check only for new email registrations
+    // Password validation: required for standard email signups, optional (min 6 if provided) for Google onboarding
     if (!isGoogleOnboarding && password.length < 6) {
       setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (isGoogleOnboarding && password && password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (password && confirmPassword && password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
 
@@ -216,6 +226,13 @@ export default function AuthPage({ onBack }) {
       setSubmitting(true);
       try {
         if (isGoogleOnboarding) {
+          if (password) {
+            try {
+              await linkPassword(password);
+            } catch (passErr) {
+              console.warn('[AuthPage] Could not set password on Google account:', passErr);
+            }
+          }
           await updateProfileData({
             institution,
             taxId,
@@ -259,6 +276,13 @@ export default function AuthPage({ onBack }) {
       setSubmitting(true);
       try {
         if (isGoogleOnboarding) {
+          if (password) {
+            try {
+              await linkPassword(password);
+            } catch (passErr) {
+              console.warn('[AuthPage] Could not set password on Google account:', passErr);
+            }
+          }
           await updateProfileData({
             institution,
             licenseId,
@@ -294,13 +318,16 @@ export default function AuthPage({ onBack }) {
 
     // Patient/Customer flow
     if (accountType === 'patient' || accountType === 'customer') {
-      if (!isGoogleOnboarding && password !== confirmPassword) {
-        setError('Passwords do not match.');
-        return;
-      }
       setSubmitting(true);
       try {
         if (isGoogleOnboarding) {
+          if (password) {
+            try {
+              await linkPassword(password);
+            } catch (passErr) {
+              console.warn('[AuthPage] Could not set password on Google account:', passErr);
+            }
+          }
           await updateProfileData({
             role: 'patient',
             goals: selectedGoals,
@@ -900,7 +927,7 @@ export default function AuthPage({ onBack }) {
                   ← Back to account type selection
                 </button>
                 
-                {!(user && userProfile?.role === 'pending') && (
+                {!(user && userProfile?.role === 'pending') ? (
                   <>
                     <div style={{ position: 'relative' }}>
                       <div style={iconWrapStyle}><User size={18} /></div>
@@ -945,6 +972,24 @@ export default function AuthPage({ onBack }) {
                       </button>
                     </div>
                   </>
+                ) : (
+                  <div style={{ backgroundColor: 'rgba(0,54,102,0.04)', borderRadius: 'var(--radius-sm)', padding: '0.85rem', border: '1px solid var(--border)' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0' }}>
+                      Signed in with Google as <strong>{user?.email}</strong>.
+                    </p>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input
+                        type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Create Password (Optional - enables direct login)" style={{...inputStyle, paddingRight: '2.5rem', backgroundColor: 'white'}}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 <div style={{ marginTop: '0.5rem' }}>
@@ -1015,7 +1060,7 @@ export default function AuthPage({ onBack }) {
                 </div>
 
                 
-                {!(user && userProfile?.role === 'pending') && (
+                {!(user && userProfile?.role === 'pending') ? (
                   <>
                     <div style={{ position: 'relative' }}>
                       <div style={iconWrapStyle}><Mail size={18} /></div>
@@ -1037,6 +1082,21 @@ export default function AuthPage({ onBack }) {
                       />
                     </div>
                   </>
+                ) : (
+                  <div style={{ backgroundColor: 'rgba(0,54,102,0.04)', borderRadius: 'var(--radius-sm)', padding: '0.85rem', border: '1px solid var(--border)' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0' }}>
+                      Signed in with Google as <strong>{user?.email}</strong>.
+                    </p>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input 
+                        type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Create Password (Optional - enables direct login)" style={{...inputStyle, backgroundColor: 'white'}}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                  </div>
                 )}
 
                 {/* Admin approval notice */}
@@ -1078,7 +1138,7 @@ export default function AuthPage({ onBack }) {
                   />
                 </div>
 
-                {!(user && userProfile?.role === 'pending') && (
+                {!(user && userProfile?.role === 'pending') ? (
                   <>
                     <div style={{ position: 'relative' }}>
                       <div style={iconWrapStyle}><Mail size={18} /></div>
@@ -1100,6 +1160,21 @@ export default function AuthPage({ onBack }) {
                       />
                     </div>
                   </>
+                ) : (
+                  <div style={{ backgroundColor: 'rgba(0,54,102,0.04)', borderRadius: 'var(--radius-sm)', padding: '0.85rem', border: '1px solid var(--border)' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0' }}>
+                      Signed in with Google as <strong>{user?.email}</strong>.
+                    </p>
+                    <div style={{ position: 'relative' }}>
+                      <div style={iconWrapStyle}><Lock size={18} /></div>
+                      <input 
+                        type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Create Password (Optional - enables direct login)" style={{...inputStyle, backgroundColor: 'white'}}
+                        onFocus={(e) => { e.target.style.borderColor = 'var(--primary)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,54,102,0.08)'; }}
+                        onBlur={(e) => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; }}
+                      />
+                    </div>
+                  </div>
                 )}
                 
                 {/* Admin approval notice */}

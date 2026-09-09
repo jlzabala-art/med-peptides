@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { sanitizeForClient } from '../../../../utils/sanitizeForClient';
+import { searchAlgolia } from '../../../../services/algoliaSearch';
 
 // ── In-Memory Server RAM Cache (L1 Cache: 0ms response) ───────────────────────
 const catalogSummaryCache = new Map();
@@ -80,6 +81,21 @@ export async function buildCatalogSummary(searchParams) {
     let metaFacets = null;
     let productsList = []; // Array of { id, ref, data }
     const variantsByProduct = {};
+
+    // Algolia Search (supports medical synonyms e.g. Ozempic -> Semaglutide, Mounjaro -> Tirzepatide)
+    let algoliaMatchedIds = null;
+    if (qParam.length >= 2) {
+      try {
+        const algoliaRes = await searchAlgolia(qParam);
+        if (algoliaRes && Array.isArray(algoliaRes.products) && algoliaRes.products.length > 0) {
+          algoliaMatchedIds = new Set(
+            algoliaRes.products.flatMap(p => [p.objectID, p.id, p.productId, p.slug].filter(Boolean).map(s => String(s).toLowerCase()))
+          );
+        }
+      } catch (e) {
+        console.warn('[CatalogSummary] Algolia search error, fallback to db text match:', e.message);
+      }
+    }
 
     // ── 2. FETCH CATALOG FACETS (L1 Metadata read) ───────────────────────────
     try {
@@ -194,6 +210,7 @@ export async function buildCatalogSummary(searchParams) {
         const pProgSlugs = pPrograms.map(p => (p.slug || p.id || '').toLowerCase());
 
         const matchesSearch = 
+          (algoliaMatchedIds && (algoliaMatchedIds.has(docId) || algoliaMatchedIds.has(pSlug) || algoliaMatchedIds.has(cName) || algoliaMatchedIds.has(pName))) ||
           docId.includes(term) ||
           pName.includes(term) ||
           cName.includes(term) ||

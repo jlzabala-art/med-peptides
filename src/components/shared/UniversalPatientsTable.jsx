@@ -42,14 +42,6 @@ function capitalizeName(name) {
 
 import PatientsKPIs from '../admin/patients/PatientsKPIs';
 
-const ROBUST_PATIENT_FALLBACK = [
-  { id: 'pat-1', name: 'Carlos Méndez', email: 'carlos.mendez@example.com', status: 'Active', physician: 'Dr. Atlas Medical', physicianId: 'doc-atlas', activeProtocols: 2, lastVisit: '2026-09-02', healthGoals: ['Longevity', 'Metabolic Wellness'], riskLevel: 'low', allergies: ['Penicillin'] },
-  { id: 'pat-2', name: 'Elena Rostova', email: 'elena.rostova@example.com', status: 'Active', physician: 'Dr. Atlas Medical', physicianId: 'doc-atlas', activeProtocols: 1, lastVisit: '2026-09-01', healthGoals: ['Tissue Repair', 'Peptide Cycle'], riskLevel: 'moderate', allergies: ['None'] },
-  { id: 'pat-3', name: 'Marcus Vance', email: 'marcus.vance@example.com', status: 'Active', physician: 'Dr. Atlas Medical', physicianId: 'doc-atlas', activeProtocols: 1, lastVisit: '2026-08-28', healthGoals: ['Mitochondrial Longevity'], riskLevel: 'low', allergies: ['Sulfa'] },
-  { id: 'pat-4', name: 'Sophia Thorne', email: 'sophia.thorne@example.com', status: 'Active', physician: 'Dr. Atlas Medical', physicianId: 'doc-atlas', activeProtocols: 3, lastVisit: '2026-08-25', healthGoals: ['Fagron Precision Genomics'], riskLevel: 'low', allergies: ['None'] },
-  { id: 'pat-5', name: 'David Miller', email: 'david.miller@example.com', status: 'Active', physician: 'Dr. Atlas Medical', physicianId: 'doc-atlas', activeProtocols: 1, lastVisit: '2026-08-20', healthGoals: ['Nutraceutical Stack'], riskLevel: 'low', allergies: ['None'] },
-];
-
 export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.', initialData = null, serverKPIs = null }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -124,8 +116,12 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     const facetFilters = [];
     if (filters.productCategory) facetFilters.push(`prescribedProductCategories:${filters.productCategory}`);
     if (filters.algoliaDoctor) facetFilters.push(`prescribingDoctorNames:${filters.algoliaDoctor}`);
-    if (filters.status) facetFilters.push(`status:${filters.status}`);
-    if (filters.physicianId || doctorId) facetFilters.push(`physicianId:${filters.physicianId || doctorId}`);
+    if (filters.status) facetFilters.push(`status:${filters.status.toLowerCase()}`);
+    if (filters.physicianId) {
+      facetFilters.push(`physicianId:${filters.physicianId}`);
+    } else if (doctorId) {
+      facetFilters.push(`doctorIds:${doctorId}`);
+    }
     
     // Numeric filters for timeRange
     const numericFilters = [];
@@ -134,7 +130,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       let threshold = 0;
       if (filters.timeRange === '30d') threshold = now - 30 * 24 * 60 * 60 * 1000;
       if (filters.timeRange === '90d') threshold = now - 90 * 24 * 60 * 60 * 1000;
-      numericFilters.push(`createdAt >= ${threshold}`);
+      numericFilters.push(`createdAt_ts >= ${threshold}`);
     }
 
     return { 
@@ -161,8 +157,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     } else if (initialData && initialData.length > 0) {
       list = initialData.map(p => ({ ...p, id: p.id || p.objectID }));
     } else {
-      // 0ms fallback dataset so doctor NEVER sees an empty table
-      list = ROBUST_PATIENT_FALLBACK.map(p => ({ ...p, physicianId: doctorId || p.physicianId }));
+      list = [];
     }
 
     // Filter by doctorId if specified
@@ -192,6 +187,39 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
 
     return list;
   }, [algoliaHits, isAlgoliaActive, searchTerm, initialData, doctorId, filters.status]);
+
+  // Smart Auto-open Patient Detail Drawer if 1 match or openDetail=true
+  const autoOpenedRef = React.useRef(false);
+
+  useEffect(() => {
+    if (autoOpenedRef.current) return;
+    if (!finalFiltered || finalFiltered.length === 0) return;
+
+    const openDetailParam = searchParams.get('openDetail') === 'true';
+    const patientIdParam = searchParams.get('patientId') || searchParams.get('drawerId');
+    const searchParam = searchParams.get('search');
+
+    let targetPatient = null;
+
+    if (patientIdParam) {
+      targetPatient = finalFiltered.find(p => p.id === patientIdParam || p.objectID === patientIdParam);
+    } else if (openDetailParam && finalFiltered.length > 0) {
+      targetPatient = finalFiltered[0];
+    } else if (searchParam && finalFiltered.length === 1) {
+      const query = searchParam.trim().toLowerCase();
+      const p = finalFiltered[0];
+      const name = (p.name || `${p.firstName || ''} ${p.lastName || ''}`).toLowerCase();
+      const id = (p.id || '').toLowerCase();
+      if (name.includes(query) || id.includes(query) || query.includes(name)) {
+        targetPatient = p;
+      }
+    }
+
+    if (targetPatient) {
+      autoOpenedRef.current = true;
+      openDrawer('patient', targetPatient.id, { initialTab: 'overview', patient: targetPatient });
+    }
+  }, [finalFiltered, searchParams, openDrawer]);
 
   const { handleBulkStatusChange, handleFieldUpdate, handleBulkDelete } = usePatientActions((id, field, value) => {
   });

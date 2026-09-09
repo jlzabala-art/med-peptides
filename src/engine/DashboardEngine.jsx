@@ -43,7 +43,12 @@ export default function DashboardEngine({ role, dataContext }) {
         const userSnap = await getDoc(userRef);
         let loadedConfig = null;
         if (userSnap.exists() && userSnap.data().dashboardConfig) {
-          loadedConfig = userSnap.data().dashboardConfig;
+          const userDashboard = userSnap.data().dashboardConfig;
+          if (userDashboard[role]) {
+            loadedConfig = userDashboard[role];
+          } else if (userDashboard.role === role) {
+            loadedConfig = userDashboard;
+          }
         }
 
         // If no custom config or missing widgets, fallback to defaults
@@ -65,14 +70,14 @@ export default function DashboardEngine({ role, dataContext }) {
     setConfig(newConfig);
     if (!user?.uid) return;
     try {
-      await setDoc(doc(db, 'users', user.uid), { dashboardConfig: newConfig }, { merge: true });
+      await setDoc(doc(db, 'users', user.uid), { dashboardConfig: { [role]: newConfig, role } }, { merge: true });
     } catch (err) {
       console.error("Error saving dashboard config:", err);
     }
   };
 
   if (loading || !config) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>{t('dashboard.loading')}</div>;
+    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>{t('dashboard.loading', 'Loading workspace...')}</div>;
   }
 
   const activeWidgets = config.widgets
@@ -97,21 +102,27 @@ export default function DashboardEngine({ role, dataContext }) {
       {/* Role-Specific Action Command Hub */}
       {role === 'patient' && <PatientCommandHub userId={dataContext?.uid || user?.uid} />}
       {role === 'supplier' && <SupplierCommandHub userId={dataContext?.uid || user?.uid} />}
-      {(role === 'wholesaler' || role === 'wholeseller') && <WholesalerCommandHub userId={dataContext?.uid || user?.uid} />}
+      {(role === 'wholesaler' || role === 'wholeseller') && (
+        <WholesalerCommandHub 
+          userId={dataContext?.uid || user?.uid} 
+          initialData={dataContext?.initialData} 
+        />
+      )}
 
       {/* Customize Button */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.25rem' }}>
         <button 
           onClick={() => setIsCustomizing(true)}
           style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', 
-            padding: '0.5rem 1rem', background: 'white', color: 'var(--color-text-secondary)', 
-            border: '1px solid #e2e8f0', borderRadius: '8px', 
-            fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem', 
+            padding: '0.45rem 0.9rem', background: '#ffffff', color: '#475569', 
+            border: '1px solid #cbd5e1', borderRadius: '8px', 
+            fontSize: '0.8125rem', fontWeight: 700, cursor: 'pointer',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            transition: 'all 0.15s ease'
           }}
         >
-          <Settings size={16} /> {t('dashboard.customize')}
+          <Settings size={15} /> {t('dashboard.customize', 'Customize Layout')}
         </button>
       </div>
 
@@ -122,7 +133,7 @@ export default function DashboardEngine({ role, dataContext }) {
         style={{ 
           display: 'grid', 
           gridTemplateColumns: 'repeat(12, 1fr)', 
-          gap: '2rem' 
+          gap: '1.25rem' 
         }}
       >
         {activeWidgets.map(widgetConfig => {
@@ -155,7 +166,7 @@ export default function DashboardEngine({ role, dataContext }) {
         })}
 
         <style>{`
-          @media (max-width: 1300px) {
+          @media (max-width: 768px) {
             .widget-container {
               grid-column: span 12 !important;
             }

@@ -9,6 +9,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   serverTimestamp,
 } from 'firebase/firestore';
 import * as fb from '../../firebase';
@@ -17,15 +18,17 @@ const db = fb?.db;
 /**
  * useFirestoreCollection
  * A generic React Query wrapper for Firestore collections.
+ * Enforces Golden Rule #1 (Mandatory Pagination / Limits).
  *
  * @param {string} collectionPath - The path to the Firestore collection
  * @param {Object} options - Query options
  * @param {Array} options.whereConditions - Array of where clauses, e.g. [['doctorId', '==', id], ['status', '!=', 'archived']]
  * @param {Array} options.orderByFields - Array of orderBy clauses, e.g. [['createdAt', 'desc']]
+ * @param {number} [options.limitCount=100] - Mandatory query limit (default: 100)
  * @param {boolean} options.enabled - Whether the query is enabled (default: true)
  */
 export function useFirestoreCollection(collectionPath, options = {}) {
-  const { whereConditions = [], orderByFields = [], enabled = true, initialData } = options;
+  const { whereConditions = [], orderByFields = [], limitCount = 100, enabled = true, initialData } = options;
   const queryClient = useQueryClient();
 
   // 1. Fetching Data
@@ -36,7 +39,7 @@ export function useFirestoreCollection(collectionPath, options = {}) {
     refetch,
   } = useQuery({
     initialData,
-    queryKey: [collectionPath, JSON.stringify(whereConditions), JSON.stringify(orderByFields)],
+    queryKey: [collectionPath, JSON.stringify(whereConditions), JSON.stringify(orderByFields), limitCount],
     queryFn: async () => {
       let q = collection(db, collectionPath);
 
@@ -51,6 +54,11 @@ export function useFirestoreCollection(collectionPath, options = {}) {
       orderByFields.forEach(([field, direction = 'asc']) => {
         q = query(q, orderBy(field, direction));
       });
+
+      // Apply limit (Golden Rule #1)
+      if (limitCount && limitCount > 0) {
+        q = query(q, limit(limitCount));
+      }
 
       const snap = await getDocs(q);
       return snap.docs.map((docSnap) => {

@@ -1,33 +1,14 @@
 "use server";
 
 import { adminDb } from '../lib/firebaseAdmin';
-
-function serializeFirestoreData(obj) {
-  if (obj === null || obj === undefined) return obj;
-  if (typeof obj !== 'object') return obj;
-
-  if (obj.toDate && typeof obj.toDate === 'function') {
-    return obj.toDate().toISOString();
-  }
-  if (obj._seconds !== undefined && obj._nanoseconds !== undefined) {
-    return new Date(obj._seconds * 1000).toISOString();
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(serializeFirestoreData);
-  }
-
-  const result = {};
-  for (const key of Object.keys(obj)) {
-    result[key] = serializeFirestoreData(obj[key]);
-  }
-  return result;
-}
+import { serializeFirestoreData, serializeDoc } from '../lib/serializeFirestore';
+import { withRetry } from '../repositories/_resilience';
+import logger from '../utils/logger';
 
 export async function fetchPrescriptionsAction({ limitCount = 50, daysBack = 30 } = {}) {
   try {
     if (!adminDb) {
-      console.warn("adminDb is null, falling back to empty array");
+      logger.warn('fetchPrescriptionsAction: adminDb not initialized');
       return [];
     }
 
@@ -35,13 +16,15 @@ export async function fetchPrescriptionsAction({ limitCount = 50, daysBack = 30 
     const since = new Date();
     since.setDate(since.getDate() - daysBack);
 
-    let q = adminDb
-      .collection('prescriptions')
-      .orderBy('createdAt', 'desc')
-      .where('createdAt', '>=', since)
-      .limit(limitCount);
-
-    const snapshot = await q.get();
+    const snapshot = await withRetry(
+      () => adminDb
+        .collection('prescriptions')
+        .orderBy('createdAt', 'desc')
+        .where('createdAt', '>=', since)
+        .limit(limitCount)
+        .get(),
+      { entityName: 'Prescriptions:fetch' }
+    );
     const prescriptions = snapshot.docs.map(doc => {
       const data = doc.data();
       return { id: doc.id, ...serializeFirestoreData(data) };
@@ -50,7 +33,7 @@ export async function fetchPrescriptionsAction({ limitCount = 50, daysBack = 30 
     return prescriptions;
   } catch (error) {
     // Fallback: if composite index not yet deployed, fetch without date filter
-    console.warn("fetchPrescriptionsAction: orderBy+where failed, falling back:", error.message);
+    logger.warn("fetchPrescriptionsAction: index fallback", { message: error.message });
     try {
       const snap = await adminDb
         .collection('prescriptions')
@@ -59,7 +42,7 @@ export async function fetchPrescriptionsAction({ limitCount = 50, daysBack = 30 
         .get();
       return snap.docs.map(d => ({ id: d.id, ...serializeFirestoreData(d.data()) }));
     } catch (err2) {
-      console.error("fetchPrescriptionsAction fallback also failed:", err2);
+      logger.error("fetchPrescriptionsAction double-fallback failed", err2);
       return [];
     }
   }
@@ -67,7 +50,7 @@ export async function fetchPrescriptionsAction({ limitCount = 50, daysBack = 30 
 
 export async function fetchDoctorPrescriptionsAction(doctorId, { limitCount = 50 } = {}) {
   if (!adminDb) {
-    console.warn("adminDb is null, falling back to empty array");
+    logger.warn("fetchDoctorPrescriptionsAction: adminDb not initialized");
     return [];
   }
   if (!doctorId) return [];
@@ -86,7 +69,7 @@ export async function fetchDoctorPrescriptionsAction(doctorId, { limitCount = 50
       ...serializeFirestoreData(doc.data())
     }));
   } catch (error) {
-    console.error("Error fetching doctor prescriptions securely:", error);
+    logger.error("fetchDoctorPrescriptionsAction failed", error);
     return [];
   }
 }
@@ -107,7 +90,7 @@ export async function serverDuplicatePrescriptionAction(rxId, adminId = 'admin')
     // Create new prescription object based on original
     const duplicateData = {
       ...rxData,
-      status: 'Draft',
+      status: 'draft',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       dateIssued: new Date().toISOString(),
@@ -131,7 +114,7 @@ export async function serverDuplicatePrescriptionAction(rxId, adminId = 'admin')
     
     return { success: true, id: newDocRef.id };
   } catch (err) {
-    console.error("Failed to duplicate prescription:", err);
+    logger.error("serverDuplicatePrescriptionAction failed", err);
     throw err;
   }
 }
@@ -139,15 +122,16 @@ export async function serverDuplicatePrescriptionAction(rxId, adminId = 'admin')
 /**
  * PHASE 6: Automated Protocol Reminders
  * This function is intended to be called by a daily CRON job (e.g. Firebase Cloud Functions).
- * It scans all active prescriptions, checks their current phase based on dateIssued,
+ * It scans active prescriptions with a bounded query (Rule #1), checks their current phase based on dateIssued,
  * and queues/sends Email or WhatsApp reminders if they transition into a new phase.
  */
-export async function serverTriggerProtocolReminders() {
+export async function serverTriggerProtocolReminders(batchLimit = 100) {
   try {
     if (!adminDb) throw new Error("Firebase Admin not initialized.");
     
     const snapshot = await adminDb.collection('prescriptions')
-      .where('status', 'in', ['Active', 'Approved'])
+      .where('status', 'in', ['active', 'approved', 'Active', 'Approved'])
+      .limit(batchLimit)
       .get();
       
     let remindersSent = 0;
@@ -164,7 +148,7 @@ export async function serverTriggerProtocolReminders() {
       // Example logic: Send a reminder at Week 4
       if (weeksElapsed === 4 && !rx.week4ReminderSent) {
         // Integrate SendGrid / Twilio WhatsApp here...
-        console.log(`[Phase 6 Automation] Sending Week 4 Follow-up to Patient ID: ${rx.patientId || rx.patient?.name}`);
+        logger.info(`[Phase 6 Automation] Sending Week 4 Follow-up to Patient ID: ${rx.patientId || rx.patient?.name}`);
         
         // Mark as sent
         await adminDb.collection('prescriptions').doc(doc.id).update({
@@ -178,10 +162,91 @@ export async function serverTriggerProtocolReminders() {
         remindersSent++;
       }
     }
-    
+
     return { success: true, count: remindersSent };
   } catch (err) {
-    console.error("Failed to trigger protocol reminders:", err);
+    logger.error("triggerProtocolRemindersAction failed", err);
     throw err;
   }
 }
+
+/**
+ * Server Action: Authoritative Clinical Safety Validator
+ * Runs interaction checking, duplicate mechanism detection and dosage sanity on the server.
+ */
+export async function validatePrescriptionSafetyAction(prescriptionLines = []) {
+  try {
+    const { validateClinicalSafety } = await import('../services/clinicalSafetyValidator');
+    const result = validateClinicalSafety(prescriptionLines);
+    return { success: true, ...result };
+  } catch (error) {
+    logger.error('[validatePrescriptionSafetyAction] failed', error);
+    return { success: false, error: error.message, isValid: false, safetyScore: 0, warnings: [error.message] };
+  }
+}
+
+/**
+ * Server Action: Update Prescription Status & Timeline
+ * Runs securely on the server with Admin SDK, applies clinical safety validation, and records audit trail.
+ */
+export async function updatePrescriptionStatusAction({ prescriptionId, newStatus, reason = '', actorName = 'System' }) {
+  try {
+    if (!adminDb) throw new Error("Firebase Admin not initialized.");
+    if (!prescriptionId || !newStatus) throw new Error("Missing prescriptionId or newStatus.");
+
+    const normalizedStatus = String(newStatus).toLowerCase().trim();
+    const rxRef = adminDb.collection('prescriptions').doc(prescriptionId);
+    
+    const snap = await withRetry(
+      () => rxRef.get(),
+      { entityName: 'Prescriptions:getStatusDoc' }
+    );
+    if (!snap.exists) throw new Error(`Prescription ${prescriptionId} not found.`);
+
+    const now = new Date().toISOString();
+    const currentData = snap.data();
+
+    const timelineEntry = {
+      timestamp: now,
+      status: normalizedStatus,
+      event: `Status changed to ${normalizedStatus}`,
+      actor: actorName,
+      reason: reason || undefined
+    };
+
+    // If approving or moving to processing, run clinical safety audit
+    if (normalizedStatus === 'approved' || normalizedStatus === 'processing') {
+      try {
+        const { validateClinicalSafety } = await import('../services/clinicalSafetyValidator');
+        const lines = currentData.items || currentData.lines || currentData.prescriptionLines || [];
+        if (Array.isArray(lines) && lines.length > 0) {
+          const safety = validateClinicalSafety(lines);
+          timelineEntry.safetyScore = safety.safetyScore;
+          if (safety.warnings?.length > 0) {
+            timelineEntry.safetyWarnings = safety.warnings;
+          }
+        }
+      } catch (safetyErr) {
+        logger.warn('[updatePrescriptionStatusAction] Safety audit note', { message: safetyErr.message });
+      }
+    }
+
+    const currentTimeline = Array.isArray(currentData.timeline) ? currentData.timeline : [];
+
+    await withRetry(
+      () => rxRef.update({
+        status: normalizedStatus,
+        updatedAt: now,
+        timeline: [...currentTimeline, timelineEntry]
+      }),
+      { entityName: 'Prescriptions:updateStatus' }
+    );
+
+    return { success: true, prescriptionId, newStatus: normalizedStatus };
+  } catch (err) {
+    logger.error("updatePrescriptionStatusAction failed", err);
+    return { success: false, error: err.message };
+  }
+}
+
+

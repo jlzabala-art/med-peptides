@@ -7,7 +7,7 @@ import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
 import TabSkeleton from '../ui/TabSkeleton';
 import { Loader2 } from '@/lib/icons';
 
-export default function ProtectedRoute({ children, allowedRoles }) {
+export default function ProtectedRoute({ children, allowedRoles, requiredRole }) {
   const { user, activeRole, loading } = useAuth();
   const [mounted, setMounted] = React.useState(false);
   const pathname = usePathname();
@@ -17,14 +17,17 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     setMounted(true);
   }, []);
 
-  // In development/test, allow testing with dev_admin flag in localStorage
-  const isDevAdmin = mounted && (
+  // In development/test only: allow testing with dev_admin flag. Strictly blocked in production.
+  const isDevAdmin = mounted && process.env.NODE_ENV !== 'production' && (
     localStorage.getItem('dev_admin') === 'true' || 
     window.__DEV_ADMIN__ === true ||
     (user && (user.email === 'admin@regenpept.test' || activeRole === 'admin'))
   );
 
-  const isUnauthorized = mounted && !isDevAdmin && !loading && (!user || (allowedRoles && !allowedRoles.includes(activeRole)));
+  const effectiveRoles = allowedRoles || (requiredRole ? [requiredRole] : null);
+  const isUnauthorized = mounted && !isDevAdmin && !loading && (
+    !user || (effectiveRoles && !effectiveRoles.includes(activeRole))
+  );
 
   React.useEffect(() => {
     if (isUnauthorized) {

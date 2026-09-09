@@ -247,14 +247,22 @@ export default function AlgoliaProductPicker({ onProductSelect }) {
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.2rem', fontSize: '0.95rem' }}>
-                    {item.title || item.name}
+                    {item.canonicalName || item.title || item.name}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{item.category || 'Product'}</span>
-                    <span>•</span>
-                    <span>SKU: {item.sku || 'N/A'}</span>
-                    <span>•</span>
-                    <span style={{ color: searchMode === 'id' ? '#7c3aed' : 'var(--primary)', fontWeight: 600 }}>{item.vial_strength || item.mg_per_vial || 0}mg</span>
+                    {item.supplier && (
+                      <>
+                        <span>•</span>
+                        <span>{item.supplier}</span>
+                      </>
+                    )}
+                    {item.sku && (
+                      <>
+                        <span>•</span>
+                        <span>SKU: {item.sku}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

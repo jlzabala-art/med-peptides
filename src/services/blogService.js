@@ -1,5 +1,5 @@
  
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, limit } from 'firebase/firestore';
 import * as fb from '../firebase';
 const db = fb?.db;
 import logger from '../utils/logger.js';
@@ -20,9 +20,11 @@ export const addBlogPost = async (post) => {
 };
 
 /**
- * Retrieve all blog posts from Firestore.
+ * Retrieve blog posts from Firestore with safe limit.
+ * @param {number} [limitCount=50]
  */
-export const getBlogPosts = async () => {
-  const snapshot = await db.collection('blogPosts').get();
+export const getBlogPosts = async (limitCount = 50) => {
+  const q = query(collection(db, 'blogPosts'), limit(limitCount));
+  const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };

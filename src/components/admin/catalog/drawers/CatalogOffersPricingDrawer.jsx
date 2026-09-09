@@ -516,16 +516,18 @@ export default function CatalogOffersPricingDrawer({
   const actionCol = useMemo(() => ({
     key: 'actions',
     header: 'Quick Actions',
-    width: '160px',
+    width: '85px',
     align: 'right',
     nowrap: true,
     render: (v) => {
       const isPref = v.isPreferred || v.isDefault;
       return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }}>
           <button
             type="button"
-            title="Clone / Duplicate this variant with custom pricing or supplier"
+            data-tooltip="Clone variant"
+            title="Clone variant"
+            aria-label="Clone variant"
             onClick={(e) => {
               e.stopPropagation();
               handleCloneVariant(v);
@@ -533,24 +535,34 @@ export default function CatalogOffersPricingDrawer({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
               background: '#f8fafc',
               border: '1px solid #cbd5e1',
               borderRadius: '6px',
-              padding: '3px 7px',
               cursor: 'pointer',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              color: '#334155',
-              transition: 'all 0.15s ease'
+              color: '#0284c7',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
+              e.currentTarget.style.borderColor = '#94a3b8';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#f8fafc';
+              e.currentTarget.style.borderColor = '#cbd5e1';
             }}
           >
-            <Copy size={11} style={{ color: '#0284c7' }} />
-            <span>Clone</span>
+            <Copy size={13} style={{ color: '#0284c7' }} />
           </button>
           <button
             type="button"
-            title={isPref ? "Preferred default variant" : "Set as default variant"}
+            data-tooltip={isPref ? "Default variant (Active)" : "Set as default variant"}
+            title={isPref ? "Default variant (Active)" : "Set as default variant"}
+            aria-label={isPref ? "Default variant (Active)" : "Set as default variant"}
             onClick={(e) => {
               e.stopPropagation();
               handleSetPreferredVariant(v.id);
@@ -558,29 +570,36 @@ export default function CatalogOffersPricingDrawer({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '3px',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
               background: isPref ? '#fef3c7' : '#ffffff',
               border: isPref ? '1px solid #fde68a' : '1px solid #e2e8f0',
               borderRadius: '6px',
-              padding: '3px 7px',
               cursor: 'pointer',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              color: isPref ? '#b45309' : '#64748b',
-              transition: 'all 0.15s ease'
+              color: isPref ? '#d97706' : '#94a3b8',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
+            }}
+            onMouseOver={(e) => {
+              if (!isPref) {
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.borderColor = '#cbd5e1';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isPref) {
+                e.currentTarget.style.backgroundColor = '#ffffff';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+              }
             }}
           >
-            {isPref ? (
-              <>
-                <Star size={11} fill="#f59e0b" color="#f59e0b" />
-                <span>Default</span>
-              </>
-            ) : (
-              <>
-                <Star size={11} />
-                <span>Set Default</span>
-              </>
-            )}
+            <Star
+              size={13}
+              fill={isPref ? "#f59e0b" : "none"}
+              color={isPref ? "#f59e0b" : "#94a3b8"}
+            />
           </button>
         </div>
       );
@@ -629,6 +648,7 @@ export default function CatalogOffersPricingDrawer({
       isOpen={isOpen}
       onClose={onClose}
       width={isExpanded ? "min(1360px, 96vw)" : "clamp(480px, 62vw, 880px)"}
+      expandable={false}
       actions={
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {activeDrawer === 'offers' && (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
@@ -14,10 +14,60 @@ import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
 import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
 import Server from 'lucide-react/dist/esm/icons/server';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import { formatAEDtoDual } from '../../utils/currencies';
+import { useRoleAccess } from '../../hooks/useRoleAccess';
+import { fetchExecutiveBriefAction } from '../../actions/adminActions';
 
-export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs = [], currentRolePreset = 'CEO' }) {
+const TIME_RANGES = [
+  { id: 'today', label: 'Today' },
+  { id: 'week', label: 'This Week' },
+  { id: 'month', label: 'This Month' },
+  { id: 'year', label: 'This Year' },
+];
+
+export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = {}, visibleKPIs = [], currentRolePreset = 'CEO' }) {
   const router = useRouter();
+  const { effectiveRole } = useRoleAccess();
+  const [timeRange, setTimeRange] = useState('today');
+  const [serverMetrics, setServerMetrics] = useState(initialMetrics);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+
+  const activeRole = effectiveRole || 'admin';
+
+  // Fetch server-calculated metrics when role or timeRange changes
+  useEffect(() => {
+    let isMounted = true;
+    async function loadMetrics() {
+      setLoadingMetrics(true);
+      try {
+        const res = await fetchExecutiveBriefAction({ role: activeRole, timeRange });
+        if (isMounted && res?.metrics) {
+          setServerMetrics(res.metrics);
+        }
+      } catch (err) {
+        console.warn('Failed to load executive brief metrics:', err);
+      } finally {
+        if (isMounted) setLoadingMetrics(false);
+      }
+    }
+    loadMetrics();
+    return () => { isMounted = false; };
+  }, [activeRole, timeRange]);
+
+  const metrics = { ...initialMetrics, ...serverMetrics };
+
+  const ROLE_CARD_MAPPINGS = {
+    doctor: ['activePatients', 'pendingPrescriptions', 'activeProtocols', 'dueFollowUps'],
+    medical_director: ['activePatients', 'pendingPrescriptions', 'activeProtocols', 'dueFollowUps'],
+    patient: ['activeProtocols', 'dueFollowUps', 'openOrders', 'pendingPrescriptions'],
+    wholesaler: ['wholesaleSales', 'pendingPOs', 'openRFQs', 'openOrders'],
+    supplier: ['wholesaleSales', 'pendingPOs', 'openRFQs', 'openOrders'],
+    admin: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
+  };
+
+  const currentRoleKpis = ROLE_CARD_MAPPINGS[activeRole] || ROLE_CARD_MAPPINGS.admin;
 
   const CARD_CONFIG = {
     revenue: {
@@ -26,6 +76,20 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
       icon: TrendingUp,
       route: '/admin/revenue?filter=real',
       styleClass: styles.revenueIcon,
+    },
+    wholesaleSales: {
+      title: 'B2B Wholesale Volume',
+      value: formatAEDtoDual(metrics.wholesaleSales || 0),
+      icon: DollarSign,
+      route: '/admin/orders?type=wholesale',
+      styleClass: styles.revenueIcon,
+    },
+    pendingPOs: {
+      title: 'Pending Purchase Orders',
+      value: `${metrics.pendingPOs || '0'} POs`,
+      icon: Briefcase,
+      route: '/admin/orders?type=po',
+      styleClass: styles.shipmentIcon,
     },
     openRFQs: {
       title: 'Active RFQs Pending',
@@ -76,128 +140,18 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
       route: '/doctor/patients',
       styleClass: styles.inventoryIcon,
     },
-    grossProfit: {
-      title: 'Gross Margin Performance',
-      value: formatAEDtoDual(metrics.grossProfit || 0),
-      icon: DollarSign,
-      route: '/admin/revenue?view=margin',
-      styleClass: styles.revenueIcon,
-    },
-    cashPosition: {
-      title: 'Real-Time Cash Position',
-      value: formatAEDtoDual(metrics.cashPosition || 0),
-      icon: Briefcase,
-      route: '/admin/revenue?view=cash',
-      styleClass: styles.shipmentIcon,
-    },
-    pipelineValue: {
-      title: 'Active Sales Pipeline',
-      value: formatAEDtoDual(metrics.pipelineValue || 0),
-      icon: TrendingUp,
-      route: '/admin/orders?status=pipeline',
-      styleClass: styles.revenueIcon,
-    },
-    supplierHealth: {
-      title: 'Supplier Health Score',
-      value: `${metrics.supplierHealth || '98'}%`,
-      icon: ShieldCheck,
-      route: '/admin/rfqs?view=suppliers',
-      styleClass: styles.rfqIcon,
-    },
-    systemUptime: {
-      title: 'Infrastructure Uptime',
-      value: `${metrics.systemUptime || '99.9'}%`,
-      icon: Server,
-      route: '/admin/settings?tab=infrastructure',
-      styleClass: styles.inventoryIcon,
-    },
   };
 
   const getBriefTitle = () => {
-    switch(currentRolePreset) {
-      case 'Clinical': return 'Clinical AI Assistant';
-      case 'Finance': return 'Finance AI Overview';
-      case 'Sales': return 'Sales Velocity Brief';
-      case 'Purchasing': return 'Sourcing AI Hub';
-      case 'Operations': return 'Ops Command Brief';
-      default: return 'Executive AI Brief';
-    }
-  };
-
-  const renderContextualButtons = () => {
-    switch(currentRolePreset) {
-      case 'Clinical':
-        return (
-          <>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/prescriptions?status=pending')}>
-              Review Prescriptions
-            </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/doctor/patients')}>
-              Manage Patients
-            </button>
-          </>
-        );
-      case 'Finance':
-        return (
-          <>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/revenue?view=cash')}>
-              Cash Flow Analysis
-            </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/orders?status=invoiced')}>
-              Outstanding Invoices
-            </button>
-          </>
-        );
-      case 'Sales':
-        return (
-          <>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/orders?status=pipeline')}>
-              Pipeline Review
-            </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/users?role=wholeseller')}>
-              Key Accounts
-            </button>
-          </>
-        );
-      case 'Purchasing':
-        return (
-          <>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/rfqs?status=pending')}>
-              Review RFQs
-            </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/products?view=low_stock')}>
-              Low Stock Alerts
-            </button>
-          </>
-        );
-      case 'Operations':
-        return (
-          <>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/orders?status=processing')}>
-              Fulfillment Queue
-            </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/settings?tab=infrastructure')}>
-              System Health
-            </button>
-          </>
-        );
-      default: // CEO / Default
-        return (
-          <>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/revenue')}>
-              Executive Report
-            </button>
-            <button className={styles.actionBtn} onClick={() => router.push('/admin/approvals?status=pending')}>
-              Pending Approvals
-            </button>
-          </>
-        );
-    }
+    if (['doctor', 'medical_director'].includes(activeRole)) return 'Clinical AI Brief';
+    if (activeRole === 'patient') return 'Personal Health AI Brief';
+    if (['wholesaler', 'supplier'].includes(activeRole)) return 'Wholesale Sourcing AI Brief';
+    return 'Executive AI Brief';
   };
 
   return (
     <div className={styles.widgetContainer}>
-      <div className={styles.header}>
+      <div className={styles.header} style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
         <div className={styles.titleWrapper}>
           <div className={styles.iconWrapper}>
             <Sparkles size={18} className={styles.sparkleIcon} />
@@ -207,13 +161,41 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
             <span className={styles.liveDot}></span>
             AI Analysis Live
           </span>
+          {loadingMetrics && <RefreshCw size={14} className="spin-icon" style={{ color: '#0284c7', marginLeft: '6px' }} />}
         </div>
-        <div className={styles.headerActions}>
+
+        {/* Date Range Filter Selector (Server Calculated with Touch-Friendly Buttons) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', padding: '4px', borderRadius: '10px', flexWrap: 'wrap' }}>
+          <Calendar size={14} style={{ color: '#64748b', marginLeft: '6px', marginRight: '2px' }} />
+          {TIME_RANGES.map((tr) => (
+            <button
+              key={tr.id}
+              onClick={() => setTimeRange(tr.id)}
+              style={{
+                padding: '6px 12px',
+                minHeight: '34px',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: timeRange === tr.id ? 800 : 600,
+                backgroundColor: timeRange === tr.id ? '#ffffff' : 'transparent',
+                color: timeRange === tr.id ? '#003666' : '#64748b',
+                boxShadow: timeRange === tr.id ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {tr.label}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className="dashboard-kpi-grid">
-        {visibleKPIs.slice(0, 4).map((key) => {
+        {currentRoleKpis.map((key) => {
           const config = CARD_CONFIG[key];
           if (!config) return null;
           const IconComponent = config.icon;
@@ -236,18 +218,26 @@ export default function AdminExecutiveSummaryWidget({ metrics = {}, visibleKPIs 
 
       <div className={styles.footer}>
         <div className={styles.actions}>
-          {renderContextualButtons()}
           <button
             className={`${styles.actionBtn} ${styles.askAtlasBtn}`}
             onClick={() => {
-              if (currentRolePreset === 'Clinical') {
-                window.dispatchEvent(new CustomEvent('open-clinical-ai'));
-              } else {
-                router.push('/admin/analytics');
-              }
+              const isDoctor = ['doctor', 'medical_director'].includes(activeRole);
+              const label = isDoctor ? 'Ask Clinical AI' : activeRole === 'patient' ? 'Ask Personal AI' : 'Ask Atlas AI';
+              window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+                detail: {
+                  role: activeRole,
+                  message: `Provide a role-specific intelligence brief and key action items for my role as ${activeRole.toUpperCase()}.`,
+                  displayText: `${label} (${activeRole.toUpperCase()})`,
+                  context: {
+                    role: activeRole,
+                    moduleMode: isDoctor ? 'doctor' : activeRole === 'admin' ? 'admin' : 'general',
+                    isExecutiveBrief: true
+                  }
+                }
+              }));
             }}
           >
-            Ask Atlas AI
+            {['doctor', 'medical_director'].includes(activeRole) ? 'Ask Clinical AI (DOCTOR)' : activeRole === 'patient' ? 'Ask Personal AI (PATIENT)' : activeRole === 'wholesaler' || activeRole === 'supplier' ? 'Ask Wholesale AI (SUPPLY)' : 'Ask Atlas AI (ADMIN)'}
           </button>
         </div>
       </div>

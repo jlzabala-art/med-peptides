@@ -1,57 +1,32 @@
 "use server";
 
 import { adminDb } from '../lib/firebaseAdmin';
-
-function serializeData(val) {
-  if (val === null || val === undefined) return val;
-  if (typeof val === 'object') {
-    if (typeof val.toDate === 'function') {
-      return val.toDate().toISOString();
-    }
-    if (typeof val._seconds === 'number' && typeof val._nanoseconds === 'number') {
-      return new Date(val._seconds * 1000 + Math.round(val._nanoseconds / 1e6)).toISOString();
-    }
-    if (Array.isArray(val)) {
-      return val.map(serializeData);
-    }
-    const plain = {};
-    for (const [k, v] of Object.entries(val)) {
-      plain[k] = serializeData(v);
-    }
-    return plain;
-  }
-  return val;
-}
-
-function serializeDoc(doc) {
-  if (!doc || (doc.exists !== undefined && !doc.exists)) return null;
-  const data = typeof doc.data === 'function' ? doc.data() : doc;
-  return {
-    id: doc.id || data.id,
-    ...serializeData(data)
-  };
-}
+import { serializeFirestoreData, serializeDoc, serializeDocs } from '../lib/serializeFirestore';
+import { withRetry } from '../repositories/_resilience';
+import { PatientSchema } from '../schemas/patientSchema.zod';
+import logger from '../utils/logger';
 
 export async function fetchPatientsAction({ limitCount = 50 } = {}) {
   try {
     if (!adminDb) {
-      console.warn("adminDb is null, falling back to empty array");
+      logger.warn('fetchPatientsAction: adminDb not initialized, returning empty array');
       return [];
     }
 
-    const snapshot = await adminDb.collection('patients').limit(limitCount).get();
-    const patients = snapshot.docs.map(doc => serializeDoc(doc)).filter(Boolean);
-
-    return patients;
+    const snapshot = await withRetry(
+      () => adminDb.collection('patients').limit(limitCount).get(),
+      { entityName: 'Patients:fetchList' }
+    );
+    return serializeDocs(snapshot.docs);
   } catch (error) {
-    console.error("Error fetching patients securely:", error);
+    logger.error('fetchPatientsAction failed', error);
     return [];
   }
 }
 
 export async function fetchDoctorPatientsAction(doctorId) {
   if (!adminDb) {
-    console.warn("adminDb is null, falling back to empty array");
+    logger.warn('fetchDoctorPatientsAction: adminDb not initialized');
     return [];
   }
   if (!doctorId) return [];
@@ -97,9 +72,9 @@ export async function fetchDoctorPatientsAction(doctorId) {
       })
     );
     
-    return results.filter(Boolean).map(serializeData);
+    return results.filter(Boolean).map(serializeFirestoreData);
   } catch (error) {
-    console.error("Error fetching doctor patients securely:", error);
+    logger.error('fetchDoctorPatientsAction failed', error);
     return [];
   }
 }
@@ -144,7 +119,7 @@ export async function fetchPatientKPIsAction(forceRefresh = false) {
     lastKPIFetchTime = now;
     return kpis;
   } catch (error) {
-    console.error("Error fetching patient KPIs:", error);
+    logger.error('fetchPatientKPIsAction failed', error);
     return cachedKPIs || { totalPatients: 0, activePatients: 0, newPatients: 0, awaitingFollowUp: 0 };
   }
 }
@@ -169,7 +144,7 @@ export async function fetchPatientDetailsBundleAction(patientId) {
         .limit(20)
         .get()
         .catch(err => {
-          console.warn('[fetchPatientDetailsBundleAction] Rx query fallback without ordering:', err.message);
+          logger.warn('[fetchPatientDetailsBundleAction] Rx query fallback without ordering', { message: err.message });
           return adminDb.collection('prescriptions')
             .where('patientId', '==', patientId)
             .limit(20)
@@ -181,7 +156,7 @@ export async function fetchPatientDetailsBundleAction(patientId) {
         .limit(20)
         .get()
         .catch(err => {
-          console.warn('[fetchPatientDetailsBundleAction] Orders query fallback without ordering:', err.message);
+          logger.warn('[fetchPatientDetailsBundleAction] Orders query fallback without ordering', { message: err.message });
           return adminDb.collection('orders')
             .where('patientId', '==', patientId)
             .limit(20)
@@ -207,7 +182,7 @@ export async function fetchPatientDetailsBundleAction(patientId) {
       }
     };
   } catch (error) {
-    console.error("[fetchPatientDetailsBundleAction] Error loading patient bundle:", error);
+    logger.error('[fetchPatientDetailsBundleAction] Error loading patient bundle', error);
     return null;
   }
 }
@@ -236,18 +211,19 @@ export async function checkDuplicatePatientEmailAction(email) {
     }
     return { exists: false };
   } catch (error) {
-    console.error("Error checking duplicate email:", error);
+    logger.error('checkDuplicatePatientEmailAction failed', error);
     return { exists: false };
   }
 }
 
 /**
- * Search clinics from database
+ * Search clinics from database (Golden Rule #1: Bounded query)
  */
 export async function searchClinicsAction(searchQuery = '', limitCount = 50) {
   if (!adminDb) return [];
   try {
-    const snap = await adminDb.collection('clinics').get();
+    const fetchLimit = Math.min(Math.max(Number(limitCount) || 50, 1), 200);
+    const snap = await adminDb.collection('clinics').limit(fetchLimit).get();
     const q = (searchQuery || '').toLowerCase().trim();
     
     const list = snap.docs.map(d => {
@@ -268,25 +244,42 @@ export async function searchClinicsAction(searchQuery = '', limitCount = 50) {
       .filter(c => (c.name || '').toLowerCase().includes(q) || (c.city || '').toLowerCase().includes(q))
       .slice(0, limitCount);
   } catch (error) {
-    console.error("Error searching clinics:", error);
+    logger.error('searchClinicsAction failed', error);
     return [];
   }
 }
 
 /**
- * Search physicians/doctors from database (supporting both role == 'doctor' and roles contains 'doctor')
+ * Search physicians/doctors from database (Golden Rule #1: Bounded query)
+ * Queries users collection scoped by role or doctor flag with strict limit
  */
 export async function searchDoctorsAction(searchQuery = '', clinicId = null, limitCount = 50) {
   if (!adminDb) return [];
   try {
-    const snap = await adminDb.collection('users').get();
+    const fetchLimit = Math.min(Math.max(Number(limitCount) || 50, 1), 200);
+    
+    // First query users where role == 'doctor' or 'physician' with limit
+    let queryRef = adminDb.collection('users');
+    if (clinicId) {
+      queryRef = queryRef.where('clinicId', '==', clinicId);
+    }
+
+    let snap;
+    try {
+      snap = await queryRef.where('role', 'in', ['doctor', 'physician']).limit(fetchLimit).get();
+    } catch {
+      // If composite index is missing or field doesn't match 'in', fallback to bounded query
+      snap = await queryRef.limit(fetchLimit * 2).get();
+    }
+
     const q = (searchQuery || '').toLowerCase().trim();
 
     const doctors = [];
     snap.forEach(d => {
       const data = d.data();
       const isDoctor = data.role === 'doctor' || 
-        (Array.isArray(data.roles) && data.roles.includes('doctor')) || 
+        data.role === 'physician' ||
+        (Array.isArray(data.roles) && (data.roles.includes('doctor') || data.roles.includes('physician'))) || 
         Boolean(data.specialty) || 
         Boolean(data.isDoctor);
 
@@ -323,8 +316,144 @@ export async function searchDoctorsAction(searchQuery = '', clinicId = null, lim
 
     return filtered.slice(0, limitCount);
   } catch (error) {
-    console.error("Error searching doctors:", error);
+    logger.error('searchDoctorsAction failed', error);
     return [];
   }
 }
+
+/**
+ * Server Action: Creates a new clinical patient record and auto-links by email atomically.
+ */
+export async function createPatientAction(patientData = {}) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+
+    // Validate with Zod schema (guarantees canonical status and field types)
+    const validation = PatientSchema.safeParse(patientData);
+    const validData = validation.success ? validation.data : patientData;
+
+    const cleanEmail = (validData.email || patientData.email || '').trim().toLowerCase();
+
+    // Attempt auto-link by email in 'users' collection
+    let linkedUserId = validData.linkedUserId || null;
+    if (cleanEmail && !linkedUserId) {
+      try {
+        const userSnap = await adminDb.collection('users').where('email', '==', cleanEmail).limit(1).get();
+        if (!userSnap.empty) {
+          linkedUserId = userSnap.docs[0].id;
+        }
+      } catch (err) {
+        logger.warn('[createPatientAction] Auto-link email search note', { message: err.message });
+      }
+    }
+
+    const serverTimestamp = new Date();
+    const patientRef = adminDb.collection('patients').doc();
+    const batch = adminDb.batch();
+
+    const docData = {
+      ...validData,
+      email: cleanEmail,
+      linkedUserId: linkedUserId || null,
+      status: validData.status || 'unverified',
+      riskScore: validData.riskScore || patientData.riskScore || 'Pending',
+      createdAt: serverTimestamp,
+      updatedAt: serverTimestamp,
+    };
+
+    batch.set(patientRef, docData);
+
+    // If auto-linked, write back to the user document atomically
+    if (linkedUserId) {
+      const userRef = adminDb.collection('users').doc(linkedUserId);
+      batch.set(userRef, {
+        linkedPatientId: patientRef.id,
+        updatedAt: serverTimestamp
+      }, { merge: true });
+    }
+
+    await withRetry(
+      () => batch.commit(),
+      { entityName: 'Patients:create' }
+    );
+
+    return {
+      success: true,
+      id: patientRef.id,
+      linkedUserId
+    };
+  } catch (error) {
+    logger.error('[createPatientAction] Error', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Server Action: Atomically links a clinical patient to a portal user account.
+ */
+export async function linkPatientToUserAction({ patientId, userId }) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!patientId || !userId) throw new Error("patientId and userId are required.");
+
+    const patientRef = adminDb.collection('patients').doc(patientId);
+    const userRef = adminDb.collection('users').doc(userId);
+    const serverTimestamp = new Date();
+
+    const batch = adminDb.batch();
+    batch.update(patientRef, {
+      linkedUserId: userId,
+      updatedAt: serverTimestamp,
+    });
+    batch.set(userRef, {
+      linkedPatientId: patientId,
+      updatedAt: serverTimestamp,
+    }, { merge: true });
+
+    await withRetry(
+      () => batch.commit(),
+      { entityName: 'Patients:linkUser' }
+    );
+
+    return { success: true };
+  } catch (error) {
+    logger.error('[linkPatientToUserAction] Error', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Server Action: Atomically unlinks a clinical patient from a portal user account.
+ */
+export async function unlinkPatientFromUserAction({ patientId, userId }) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!patientId || !userId) throw new Error("patientId and userId are required.");
+
+    const patientRef = adminDb.collection('patients').doc(patientId);
+    const userRef = adminDb.collection('users').doc(userId);
+    const serverTimestamp = new Date();
+
+    const batch = adminDb.batch();
+    batch.update(patientRef, {
+      linkedUserId: null,
+      updatedAt: serverTimestamp,
+    });
+    batch.set(userRef, {
+      linkedPatientId: null,
+      updatedAt: serverTimestamp,
+    }, { merge: true });
+
+    await withRetry(
+      () => batch.commit(),
+      { entityName: 'Patients:unlinkUser' }
+    );
+
+    return { success: true };
+  } catch (error) {
+    logger.error('[unlinkPatientFromUserAction] Error', error);
+    return { success: false, error: error.message };
+  }
+}
+
 

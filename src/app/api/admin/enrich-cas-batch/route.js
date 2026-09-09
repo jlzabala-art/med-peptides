@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { resolveCasNumber, isValidCasChecksum } from '@/utils/casResolver';
+import { verifyAdminAuth } from '@/lib/serverAuth';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // 60s max execution
@@ -14,6 +15,11 @@ export async function POST(request) {
 }
 
 async function handleBatch(request) {
+  const authCheck = await verifyAdminAuth(request);
+  if (!authCheck.isAuthorized) {
+    return authCheck.response;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const limitCount = Math.min(Math.max(parseInt(searchParams.get('limit') || '50', 10), 1), 100);

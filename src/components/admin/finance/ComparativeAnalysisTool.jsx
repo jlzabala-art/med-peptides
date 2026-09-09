@@ -7,22 +7,48 @@ import { ArrowUpRight, ArrowDownRight, Scale, Filter } from '@/lib/icons';
 
 
 
-export default function ComparativeAnalysisTool() {
+export default function ComparativeAnalysisTool({ pnl2026 }) {
   const [periodA, setPeriodA] = useState('Q1');
   const [periodB, setPeriodB] = useState('Q2');
 
-  // MOCK DATA: In a real scenario, this would compute from pnl2026 or Zoho Reports API based on selected periods.
-  const dataMap = {
-    'Q1': { income: 320000, expenses: 210000, profit: 110000 },
-    'Q2': { income: 410000, expenses: 240000, profit: 170000 },
-    'Q3': { income: 390000, expenses: 250000, profit: 140000 },
-    'Q4': { income: 480000, expenses: 290000, profit: 190000 },
-  };
+  // Compute quarterly aggregates from real pnl2026
+  const dataMap = React.useMemo(() => {
+    const quarters = {
+      'Q1': { income: 0, expenses: 0, profit: 0 },
+      'Q2': { income: 0, expenses: 0, profit: 0 },
+      'Q3': { income: 0, expenses: 0, profit: 0 },
+      'Q4': { income: 0, expenses: 0, profit: 0 }
+    };
 
-  const a = dataMap[periodA];
-  const b = dataMap[periodB];
+    if (Array.isArray(pnl2026)) {
+      const monthToQuarter = {
+        'jan': 'Q1', 'feb': 'Q1', 'mar': 'Q1',
+        'apr': 'Q2', 'may': 'Q2', 'jun': 'Q2',
+        'jul': 'Q3', 'aug': 'Q3', 'sep': 'Q3',
+        'oct': 'Q4', 'nov': 'Q4', 'dec': 'Q4'
+      };
+
+      pnl2026.forEach(item => {
+        const key = (item.month || item.name || '').slice(0, 3).toLowerCase();
+        const q = monthToQuarter[key];
+        if (q && quarters[q]) {
+          const inc = Number(item.income || item.Income || 0);
+          const exp = Number(item.expenses || item.Expenses || 0);
+          quarters[q].income += inc;
+          quarters[q].expenses += exp;
+          quarters[q].profit += Number(item.profit ?? item.Profit ?? (inc - exp));
+        }
+      });
+    }
+
+    return quarters;
+  }, [pnl2026]);
+
+  const a = dataMap[periodA] || { income: 0, expenses: 0, profit: 0 };
+  const b = dataMap[periodB] || { income: 0, expenses: 0, profit: 0 };
 
   const calcVariance = (valA, valB) => {
+    if (valA === 0 && valB === 0) return 0;
     if (valA === 0) return 100;
     return (((valB - valA) / valA) * 100).toFixed(1);
   };

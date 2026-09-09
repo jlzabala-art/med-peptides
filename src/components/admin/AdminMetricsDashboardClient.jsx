@@ -57,6 +57,7 @@ import {
 import { db } from '../../firebase';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
 import BaseCard from '../ui/BaseCard';
 import {
   ExecutiveSummaryStrip,
@@ -258,14 +259,112 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
     );
   };
 
-  // Removed mock data for cash flow and wholesalers
+  const ROLE_CUSTOMIZATION_OPTIONS = {
+    doctor: {
+      title: 'Configure Physician Widgets & Metrics',
+      kpis: [
+        { id: 'activePatients', label: 'Active Enrolled Patients' },
+        { id: 'pendingPrescriptions', label: 'Prescriptions Pending Review' },
+        { id: 'activeProtocols', label: 'Active Clinical Protocols' },
+        { id: 'dueFollowUps', label: 'Patient Follow-Ups Due' },
+        { id: 'labTestsPending', label: 'Pending Lab Diagnostics' },
+      ],
+      widgets: [
+        { id: 'todayPriorities', label: 'Clinical Action Items' },
+        { id: 'clinicalAIBrief', label: 'Clinical AI Intelligence' },
+        { id: 'patientCases', label: 'Patient Case Monitoring' },
+        { id: 'labResultsHub', label: 'Lab & Diagnostics Stream' },
+      ],
+    },
+    medical_director: {
+      title: 'Configure Medical Oversight Widgets & Metrics',
+      kpis: [
+        { id: 'activePatients', label: 'Active Enrolled Patients' },
+        { id: 'pendingPrescriptions', label: 'Prescriptions Pending Review' },
+        { id: 'activeProtocols', label: 'Active Clinical Protocols' },
+        { id: 'dueFollowUps', label: 'Patient Follow-Ups Due' },
+        { id: 'labTestsPending', label: 'Pending Lab Diagnostics' },
+      ],
+      widgets: [
+        { id: 'todayPriorities', label: 'Clinical Action Items' },
+        { id: 'clinicalAIBrief', label: 'Clinical AI Intelligence' },
+        { id: 'patientCases', label: 'Patient Case Monitoring' },
+        { id: 'labResultsHub', label: 'Lab & Diagnostics Stream' },
+      ],
+    },
+    wholesaler: {
+      title: 'Configure B2B Supply Chain Widgets & Metrics',
+      kpis: [
+        { id: 'wholesaleSales', label: 'B2B Wholesale Volume' },
+        { id: 'pendingPOs', label: 'Pending Purchase Orders' },
+        { id: 'openRFQs', label: 'Active Purchase RFQs' },
+        { id: 'openOrders', label: 'Pending Order Processing' },
+      ],
+      widgets: [
+        { id: 'todayPriorities', label: 'Procurement Action Items' },
+        { id: 'rfqProcessing', label: 'RFQ Bidding & Quotation Hub' },
+        { id: 'inventoryAlerts', label: 'Warehouse & Stock Alerts' },
+        { id: 'aiWorkspace', label: 'Sourcing Intelligence Hub' },
+      ],
+    },
+    supplier: {
+      title: 'Configure Supplier Control Room Widgets & Metrics',
+      kpis: [
+        { id: 'wholesaleSales', label: 'B2B Wholesale Volume' },
+        { id: 'pendingPOs', label: 'Pending Purchase Orders' },
+        { id: 'openRFQs', label: 'Active Purchase RFQs' },
+        { id: 'openOrders', label: 'Pending Order Processing' },
+      ],
+      widgets: [
+        { id: 'todayPriorities', label: 'Procurement Action Items' },
+        { id: 'rfqProcessing', label: 'RFQ Bidding & Quotation Hub' },
+        { id: 'inventoryAlerts', label: 'Warehouse & Stock Alerts' },
+        { id: 'aiWorkspace', label: 'Sourcing Intelligence Hub' },
+      ],
+    },
+    patient: {
+      title: 'Configure Personal Health Widgets & Metrics',
+      kpis: [
+        { id: 'activeProtocols', label: 'My Active Protocols' },
+        { id: 'dueFollowUps', label: 'Upcoming Doses & Reminders' },
+        { id: 'pendingPrescriptions', label: 'My Prescriptions' },
+        { id: 'openOrders', label: 'My Orders' },
+      ],
+      widgets: [
+        { id: 'patientBrief', label: 'Personal Health AI Brief' },
+        { id: 'dailyTracker', label: 'Daily Check-in Tracker' },
+        { id: 'refillWidget', label: 'Prescription Refills' },
+      ],
+    },
+    admin: {
+      title: 'Configure Master Executive Widgets & Metrics',
+      kpis: [
+        { id: 'revenue', label: 'Real Revenue' },
+        { id: 'grossProfit', label: 'Gross Profit' },
+        { id: 'openOrders', label: 'Open Orders' },
+        { id: 'pendingApprovals', label: 'Pending Approvals' },
+        { id: 'openRFQs', label: 'Open RFQs' },
+        { id: 'aiAlerts', label: 'AI Risk Alerts' },
+        { id: 'cashPosition', label: 'Cash Position' },
+      ],
+      widgets: [
+        { id: 'todayPriorities', label: "Today's Priorities" },
+        { id: 'businessHealth', label: 'Business Health Lights' },
+        { id: 'financeTasks', label: 'Finance Workspace Tasks' },
+        { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
+        { id: 'systemStatus', label: 'Infrastructure Specs' },
+      ],
+    },
+  };
+
+  const customizationConfig = ROLE_CUSTOMIZATION_OPTIONS[effectiveRole] || ROLE_CUSTOMIZATION_OPTIONS.admin;
 
   return (
     <div className={styles.atlasCommandCenter}>
       {/* Dynamic Embedded CSS Styles */}
 
       {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
-      <div style={{ background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(226, 232, 240, 0.8)', padding: '1.5rem', marginBottom: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(148, 163, 184, 0.08)' }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(226, 232, 240, 0.8)', padding: '1.25rem 1.5rem', marginBottom: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(148, 163, 184, 0.12)' }}>
         <div
           style={{
             display: 'flex',
@@ -324,59 +423,27 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
 
           {/* Controls Bar */}
           {isAdmin && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
               {/* Preset Selector */}
               {isMedicalDirectorRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#ccfbf1', color: '#0f766e', border: '1px solid #99f6e4', fontSize: '0.78rem', fontWeight: 700 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f0fdf4', color: '#0d9488', border: '1px solid #99f6e4', fontSize: '0.8rem', fontWeight: 700 }}>
                   <span>🩺 Pure Clinical Oversight Mode</span>
                 </div>
               ) : isDoctorRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', fontSize: '0.78rem', fontWeight: 700 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
                   <span>🩺 Physician Practice Mode (Assigned Patients Only)</span>
                 </div>
               ) : isPatientRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', fontSize: '0.78rem', fontWeight: 700 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', fontSize: '0.8rem', fontWeight: 700 }}>
                   <span>👤 Patient Personal Health Mode</span>
                 </div>
               ) : isSupplierRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffedd5', color: '#c2410c', border: '1px solid #fed7aa', fontSize: '0.78rem', fontWeight: 700 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', border: '1px solid #fed7aa', fontSize: '0.8rem', fontWeight: 700 }}>
                   <span>📦 Supplier Control Room Mode (Scoped RFQs & Orders)</span>
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    background: '#f1f5f9',
-                    borderRadius: '8px',
-                    padding: '2px',
-                    overflowX: 'auto',
-                    maxWidth: '100%',
-                    WebkitOverflowScrolling: 'touch',
-                    scrollbarWidth: 'none',
-                  }}
-                >
-                  {Object.keys(ROLE_PRESETS).map((preset) => (
-                    <button
-                      key={preset}
-                      onClick={() => handleApplyPreset(preset)}
-                      style={{
-                        padding: '0.4rem 0.75rem',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '0.75rem',
-                        fontWeight: currentRolePreset === preset ? 600 : 500,
-                        backgroundColor: currentRolePreset === preset ? '#ffffff' : 'transparent',
-                        color: currentRolePreset === preset ? '#0f172a' : '#64748b',
-                        boxShadow: currentRolePreset === preset ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        whiteSpace: 'nowrap',
-                        flexShrink: 0
-                      }}
-                    >
-                      {preset}
-                    </button>
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#003666', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span>🛡️ Executive Role View: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
                 </div>
               )}
 
@@ -387,18 +454,19 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.4rem',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
+                  padding: '0.55rem 1.1rem',
+                  minHeight: '44px',
+                  borderRadius: '10px',
+                  border: '1px solid #cbd5e1',
                   backgroundColor: isCustomizing ? '#e0f2fe' : '#ffffff',
                   color: isCustomizing ? '#0369a1' : '#475569',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
               >
-                <Sliders size={14} />
+                <Sliders size={15} />
                 {isCustomizing ? 'Done Customizing' : 'Customize Layout'}
               </button>
             </div>
@@ -425,9 +493,9 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                 color: '#0f172a',
               }}
             >
-              Configure Active Widgets & Metrics
+              {customizationConfig.title}
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
               {/* KPIs */}
               <div>
                 <span
@@ -440,33 +508,31 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                     textTransform: 'uppercase',
                   }}
                 >
-                  Visible KPIs (Top Strip)
+                  Visible Role KPIs
                 </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {[
-                    'revenue',
-                    'grossProfit',
-                    'openOrders',
-                    'pendingApprovals',
-                    'openRFQs',
-                    'aiAlerts',
-                    'cashPosition',
-                  ].map((kpi) => (
+                  {customizationConfig.kpis.map((kpiObj) => (
                     <button
-                      key={kpi}
-                      onClick={() => toggleKPIVisibility(kpi)}
+                      key={kpiObj.id}
+                      onClick={() => toggleKPIVisibility(kpiObj.id)}
                       style={{
-                        padding: '0.35rem 0.65rem',
-                        fontSize: '0.75rem',
-                        borderRadius: '6px',
+                        padding: '0.45rem 0.75rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: visibleKPIs.includes(kpi) ? '#0284c7' : '#cbd5e1',
-                        backgroundColor: visibleKPIs.includes(kpi) ? '#f0f9ff' : '#ffffff',
-                        color: visibleKPIs.includes(kpi) ? '#0369a1' : '#475569',
+                        borderColor: visibleKPIs.includes(kpiObj.id) ? '#0284c7' : '#cbd5e1',
+                        backgroundColor: visibleKPIs.includes(kpiObj.id) ? '#f0f9ff' : '#ffffff',
+                        color: visibleKPIs.includes(kpiObj.id) ? '#0369a1' : '#475569',
                         cursor: 'pointer',
+                        minHeight: '36px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      {kpi.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+                      {kpiObj.label}
                     </button>
                   ))}
                 </div>
@@ -484,28 +550,28 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                     textTransform: 'uppercase',
                   }}
                 >
-                  Visible Workspace Widgets
+                  Visible Role Workspace Widgets
                 </span>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {[
-                    { id: 'todayPriorities', label: "Today's Priorities" },
-                    { id: 'businessHealth', label: 'Business Health Lights' },
-                    { id: 'financeTasks', label: 'Finance Workspace Tasks' },
-                    { id: 'aiWorkspace', label: 'AI Sync & Insights Hub' },
-                    { id: 'systemStatus', label: 'Infrastructure Specs' },
-                  ].map((w) => (
+                  {customizationConfig.widgets.map((w) => (
                     <button
                       key={w.id}
                       onClick={() => toggleWidgetVisibility(w.id)}
                       style={{
-                        padding: '0.35rem 0.65rem',
-                        fontSize: '0.75rem',
-                        borderRadius: '6px',
+                        padding: '0.45rem 0.75rem',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        borderRadius: '8px',
                         border: '1px solid',
                         borderColor: visibleWidgets.includes(w.id) ? '#0284c7' : '#cbd5e1',
                         backgroundColor: visibleWidgets.includes(w.id) ? '#f0f9ff' : '#ffffff',
                         color: visibleWidgets.includes(w.id) ? '#0369a1' : '#475569',
                         cursor: 'pointer',
+                        minHeight: '36px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.15s ease',
                       }}
                     >
                       {w.label}

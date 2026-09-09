@@ -121,14 +121,14 @@ export const DEFAULT_PATIENT_CONFIG = {
 export const DEFAULT_WHOLESALER_CONFIG = {
   layoutType: 'grid',
   widgets: [
-    { id: 'demand_forecasting', order: 0.1, enabled: true, colSpan: 12 },
-    { id: 'prescription_intake', order: 0.2, enabled: true, colSpan: 12 },
-    { id: 'turnover_analytics', order: 0.3, enabled: true, colSpan: 6 },
-    { id: 'batch_expiration', order: 0.5, enabled: true, colSpan: 6 },
-    { id: 'bulk_restock', order: 1, enabled: true, colSpan: 12 },
-    { id: 'bulk_order_tracker', order: 2, enabled: true, colSpan: 12 },
-    { id: 'stock_alerts', order: 3, enabled: true, colSpan: 6 },
-    { id: 'real_time_stock', order: 4, enabled: true, colSpan: 6 }
+    { id: 'turnover_analytics', order: 0.1, enabled: true, colSpan: 12 },
+    { id: 'demand_forecasting', order: 0.2, enabled: true, colSpan: 12 },
+    { id: 'batch_expiration', order: 0.3, enabled: true, colSpan: 6 },
+    { id: 'stock_alerts', order: 0.4, enabled: true, colSpan: 6 },
+    { id: 'real_time_stock', order: 0.5, enabled: true, colSpan: 6 },
+    { id: 'bulk_order_tracker', order: 0.6, enabled: true, colSpan: 6 },
+    { id: 'bulk_restock', order: 0.7, enabled: true, colSpan: 12 },
+    { id: 'prescription_intake', order: 0.8, enabled: true, colSpan: 12 }
   ]
 };
 

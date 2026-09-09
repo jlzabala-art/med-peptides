@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
+import { verifyAdminAuth } from '../../../../lib/serverAuth';
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const productsSnap = await adminDb.collection('products').get();
+    const authCheck = await verifyAdminAuth(request);
+    if (!authCheck.isAuthorized) {
+      return authCheck.response;
+    }
+
+    const productsSnap = await adminDb.collection('products').limit(500).get();
     
     let total = 0;
     const missing = [];

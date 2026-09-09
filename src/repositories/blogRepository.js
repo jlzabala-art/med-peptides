@@ -7,17 +7,18 @@
  * Usa siempre las funciones de este módulo.
  */
 
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const COLLECTION = 'blogPosts';
 
 /**
- * Obtiene todos los artículos del blog.
+ * Obtiene los artículos del blog acotados con límite seguro (Golden Rule #1).
+ * @param {number} [limitCount=50]
  * @returns {Promise<object[]>}
  */
-export async function getAllBlogPosts() {
-  const q = collection(db, COLLECTION);
+export async function getAllBlogPosts(limitCount = 50) {
+  const q = query(collection(db, COLLECTION), limit(limitCount));
   const snapshot = await getDocs(q);
   const fetchedPosts = [];
   snapshot.forEach(doc => {

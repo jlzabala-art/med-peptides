@@ -24,6 +24,7 @@ export default function PatientAppointments() {
 
   // State
   const [refills, setRefills] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   // Google sync state
   const [calendarConnected, setCalendarConnected] = useState(() => {
@@ -36,24 +37,44 @@ export default function PatientAppointments() {
 
   useEffect(() => {
     if (!uid) return;
-    const fetchRefills = async () => {
+    const fetchTimelineData = async () => {
       setLoading(true);
       try {
-        const q = query(
+        const qRefills = query(
           collection(db, 'refill_reminders'),
           where('patientId', '==', uid),
           limit(10)
         );
-        const snap = await getDocs(q);
+        const snap = await getDocs(qRefills);
         const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setRefills(docs);
+
+        const qApp = query(
+          collection(db, 'appointments'),
+          where('patientId', '==', uid),
+          limit(10)
+        );
+        const appSnap = await getDocs(qApp);
+        const apps = appSnap.docs.map(d => {
+          const data = d.data();
+          const dDate = data.date?.toDate ? data.date.toDate() : (data.date ? new Date(data.date) : new Date());
+          return {
+            id: d.id,
+            date: dDate.toLocaleDateString(),
+            time: data.time || dDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            doctor: data.doctorName || 'Assigned Physician',
+            type: data.type || 'Clinical Consultation',
+            status: data.status || 'Confirmed',
+          };
+        });
+        setAppointments(apps);
       } catch (err) {
-        console.error("Error loading patient refills:", err);
+        console.error("Error loading patient timeline:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchRefills();
+    fetchTimelineData();
   }, [uid]);
 
   const handleConnectCalendar = (e) => {
@@ -74,11 +95,6 @@ export default function PatientAppointments() {
       localStorage.removeItem(`gcal_connected_patient_${uid}`);
     });
   };
-
-  const mockAppointments = [
-    { date: 'Today', time: '12:00 PM', doctor: 'Dr. Sarah Jenkins', type: 'Clinical Consultation', status: 'Confirmed' },
-    { date: 'Next Tuesday', time: '03:15 PM', doctor: 'Dr. Sarah Jenkins', type: 'Peptide Progress Follow-up', status: 'Scheduled' }
-  ];
 
   return (
     <div style={styles.container}>
@@ -117,19 +133,27 @@ export default function PatientAppointments() {
               <h3 style={styles.cardTitle}>Upcoming Doctor Consultations</h3>
             </div>
             <div style={styles.list}>
-              {mockAppointments.map((app, idx) => (
-                <div key={idx} style={styles.appRow}>
-                  <div style={styles.dateBlock}>
-                    <div style={styles.dateText}>{app.date}</div>
-                    <div style={styles.timeText}>{app.time}</div>
-                  </div>
-                  <div style={{ flex: 1, paddingLeft: 12 }}>
-                    <div style={styles.docName}>{app.doctor}</div>
-                    <div style={styles.appType}>{app.type}</div>
-                  </div>
-                  <span style={styles.badgeSuccess}>{app.status}</span>
+              {appointments.length === 0 ? (
+                <div style={styles.empty}>
+                  <CalendarDays size={16} style={{ marginBottom: 6, color: 'var(--color-text-tertiary)' }} />
+                  <p style={{ margin: 0 }}>No upcoming doctor consultations scheduled.</p>
+                  <p style={{ margin: '4px 0 0 0', fontSize: 11, color: 'var(--color-text-tertiary)' }}>Consultation requests made through your care team will appear here.</p>
                 </div>
-              ))}
+              ) : (
+                appointments.map((app, idx) => (
+                  <div key={app.id || idx} style={styles.appRow}>
+                    <div style={styles.dateBlock}>
+                      <div style={styles.dateText}>{app.date}</div>
+                      <div style={styles.timeText}>{app.time}</div>
+                    </div>
+                    <div style={{ flex: 1, paddingLeft: 12 }}>
+                      <div style={styles.docName}>{app.doctor}</div>
+                      <div style={styles.appType}>{app.type}</div>
+                    </div>
+                    <span style={styles.badgeSuccess}>{app.status}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

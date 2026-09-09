@@ -6,18 +6,25 @@ import { getTokens } from 'next-firebase-auth-edge';
 import { serverConfig } from '../authConfig';
 import GlobalClientWrapper from './GlobalClientWrapper';
 import { Suspense } from 'react';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
 
 export const metadata = {
-  title: 'Atlas App',
-  description: 'Atlas Health — Precision Peptide & Protocol Intelligence',
+  title: 'Atlas Health — Precision Peptide & Protocol Intelligence',
+  description: 'Atlas Health — Precision Peptide & Protocol Intelligence Platform',
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/favicon.svg?v=3', type: 'image/svg+xml' },
-      { url: '/favicon.ico?v=3' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
-    shortcut: '/favicon.svg?v=3',
-    apple: '/favicon.svg?v=3',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
 };
 
@@ -25,13 +32,15 @@ async function AuthWrapper({ children }) {
   let serverUser = null;
   try {
     const cookieStore = await cookies();
-    const tokens = await getTokens(cookieStore, {
-      apiKey: serverConfig.firebaseApiKey,
-      cookieName: serverConfig.cookieName,
-      cookieSignatureKeys: serverConfig.cookieSignatureKeys,
-      serviceAccount: serverConfig.serviceAccount,
-    });
-    serverUser = tokens ? tokens.decodedToken : null;
+    if (cookieStore.has(serverConfig.cookieName)) {
+      const tokens = await getTokens(cookieStore, {
+        apiKey: serverConfig.firebaseApiKey,
+        cookieName: serverConfig.cookieName,
+        cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+        serviceAccount: serverConfig.serviceAccount,
+      });
+      serverUser = tokens ? tokens.decodedToken : null;
+    }
   } catch (err) {
     if (err?.digest?.startsWith('DYNAMIC_SERVER_USAGE') || err?.message?.includes('Dynamic server usage')) {
       throw err;
@@ -50,13 +59,13 @@ async function AuthWrapper({ children }) {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
-        <link rel="alternate icon" href="/favicon.ico?v=3" />
-        <link rel="apple-touch-icon" href="/favicon.svg?v=3" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
         <style>{`
           .global-spinner {
             width: 48px;
@@ -82,7 +91,7 @@ export default function RootLayout({ children }) {
           }
         `}</style>
       </head>
-      <body suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <div id="root">
           <Suspense fallback={<div className="spinner-container"><span className="global-spinner"></span></div>}>
             <AuthWrapper>

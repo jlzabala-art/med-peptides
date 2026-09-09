@@ -352,73 +352,54 @@ export const getSupplierColumns = ({
       width: '16%',
       header: 'Actions',
       render: (supplier) => (
-        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%', gap: '8px' }}>
-          {/* AI Procurement Review */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              openSupplierAI({
-                id: supplier.id,
-                name: supplier.name || supplier.companyName || supplier.displayName,
-                country: supplier.country,
-                statusB2B: supplier.statusB2B,
-                statusB2C: supplier.statusB2C,
-                variantsSupplied: supplier.variantsSupplied ?? supplier.analytics?.totalVariants,
-                productsSupplied: supplier.productsSupplied ?? supplier.analytics?.totalProducts,
-                categoryIds: supplier.categoryIds,
-                leadTime: supplier.leadTime,
-                minOrder: supplier.minOrder,
-                certifications: supplier.certifications,
-                rfqCount: supplier.rfqCount ?? supplier.analytics?.rfqCount,
-                orderCount: supplier.orderCount ?? supplier.analytics?.orderCount,
-                totalSpend: supplier.totalSpend ?? supplier.analytics?.totalSpend,
-                reliabilityScore: supplier.reliabilityScore,
-              });
-            }}
-            style={{
-              background: 'rgba(124, 58, 237, 0.07)',
-              border: '1px solid rgba(124, 58, 237, 0.2)',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              padding: '0.25rem 0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#7c3aed',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              flexShrink: 0,
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124, 58, 237, 0.14)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124, 58, 237, 0.07)'; }}
-            title="AI Procurement Intelligence"
-          >
-            <Sparkles size={13} />
-            AI
-          </button>
-          <AppActionGroup
-            maxVisible={2}
-            actions={[
-              {
-                label: 'View Catalog',
-                type: 'inventory',
-                onClick: (e) => { e.stopPropagation(); onAction?.('view-catalog', supplier); },
+        <AppActionGroup
+          maxVisible={3}
+          actions={[
+            {
+              label: 'AI Procurement Intelligence',
+              type: 'sparkles',
+              onClick: (e) => {
+                e.stopPropagation();
+                openSupplierAI({
+                  id: supplier.id,
+                  name: supplier.name || supplier.companyName || supplier.displayName,
+                  country: supplier.country,
+                  statusB2B: supplier.statusB2B,
+                  statusB2C: supplier.statusB2C,
+                  variantsSupplied: supplier.variantsSupplied ?? supplier.analytics?.totalVariants,
+                  productsSupplied: supplier.productsSupplied ?? supplier.analytics?.totalProducts,
+                  categoryIds: supplier.categoryIds,
+                  leadTime: supplier.leadTime,
+                  minOrder: supplier.minOrder,
+                  certifications: supplier.certifications,
+                  rfqCount: supplier.rfqCount ?? supplier.analytics?.rfqCount,
+                  orderCount: supplier.orderCount ?? supplier.analytics?.orderCount,
+                  totalSpend: supplier.totalSpend ?? supplier.analytics?.totalSpend,
+                  reliabilityScore: supplier.reliabilityScore,
+                });
               },
-              {
-                label: 'View Details',
-                type: 'edit',
-                onClick: (e) => { e.stopPropagation(); onAction?.('edit', supplier); },
-              },
-              supplier.statusB2B === 'active'
-                ? { label: 'Suspend B2B', type: 'pause',     danger: true, onClick: (e) => { e.stopPropagation(); onAction?.('suspend-b2b', supplier); } }
-                : { label: 'Activate B2B', type: 'activate',               onClick: (e) => { e.stopPropagation(); onAction?.('activate-b2b', supplier); } },
-              supplier.statusB2C === 'active'
-                ? { label: 'Suspend B2C', type: 'pause',     danger: true, onClick: (e) => { e.stopPropagation(); onAction?.('suspend-b2c', supplier); } }
-                : { label: 'Activate B2C', type: 'activate',               onClick: (e) => { e.stopPropagation(); onAction?.('activate-b2c', supplier); } },
-            ]}
-          />
-        </div>
+            },
+            {
+              label: 'View Catalog',
+              type: 'inventory',
+              onClick: (e) => { e.stopPropagation(); onAction?.('view-catalog', supplier); },
+            },
+            {
+              label: 'View Details',
+              type: 'edit',
+              onClick: (e) => { e.stopPropagation(); onAction?.('edit', supplier); },
+            },
+            supplier.statusB2B === 'active'
+              ? { label: 'Suspend B2B', type: 'pause',     danger: true, onClick: (e) => { e.stopPropagation(); onAction?.('suspend-b2b', supplier); } }
+              : { label: 'Activate B2B', type: 'activate',               onClick: (e) => { e.stopPropagation(); onAction?.('activate-b2b', supplier); } },
+            {
+              label: 'Archive Supplier',
+              type: 'archive',
+              danger: true,
+              onClick: (e) => { e.stopPropagation(); onAction?.('archive', supplier); },
+            },
+          ]}
+        />
       ),
     },
   ];

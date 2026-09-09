@@ -90,14 +90,14 @@ export async function GET(request) {
   <text x="855" y="364" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#f9a8d4">${pill4}</text>
 
   <!-- Security & Clinical Guarantee Badges -->
-  <rect x="100" y="405" width="160" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
-  <text x="118" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  Zero Financial Data</text>
+  <rect x="100" y="405" width="180" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
+  <text x="118" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  cGMP ISO 9001:2015</text>
 
-  <rect x="275" y="405" width="170" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
-  <text x="293" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  No Login Required</text>
+  <rect x="295" y="405" width="180" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
+  <text x="313" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  RP-HPLC ≥ 99% Purity</text>
 
-  <rect x="460" y="405" width="180" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
-  <text x="478" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  Direct QR Mobile Pass</text>
+  <rect x="490" y="405" width="190" height="28" rx="14" fill="#064e3b" opacity="0.85"/>
+  <text x="508" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  Dual ESI-MS Confirmed</text>
 
   <!-- Brand Footer -->
   <text x="100" y="505" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="white">RegenPept</text>

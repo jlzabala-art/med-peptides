@@ -53,3 +53,13 @@ functions-triggers/
 .env*
 cloudrun_backend/
 .vercel
+
+# Database dumps and sensitive JSON exports
+users.json
+*_dump.json
+*dump*.json
+audit_results*.json
+pricing_integrity_report.json
+scratch_api_response.json
+merge_log.json
+migration_id_map.json

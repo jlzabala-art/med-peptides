@@ -13,6 +13,23 @@ const BORDER_CLR  = rgb(0.88, 0.91, 0.94);   // #e2e8f0 (Grid Border)
 const WARN_BG     = rgb(1.0, 0.95, 0.95);    // #fef2f2 (Warning Box)
 const WARN_RED    = rgb(0.86, 0.15, 0.15);   // #dc2626 (Clinical Danger Red)
 
+// ⚡ Layer 1 In-Memory Buffer RAM Cache for Generated PDFs
+const PDF_RAM_CACHE = new Map();
+const PDF_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+export function invalidatePdfCache(id) {
+  if (!id) {
+    PDF_RAM_CACHE.clear();
+  } else {
+    const prefix = id.toLowerCase();
+    for (const key of PDF_RAM_CACHE.keys()) {
+      if (key.startsWith(prefix)) {
+        PDF_RAM_CACHE.delete(key);
+      }
+    }
+  }
+}
+
 // Public fields only — never expose commercial cost or private suppliers
 const PUBLIC_FIELDS = [
   'id', 'name', 'canonicalName', 'displayName', 'slug',
@@ -154,15 +171,35 @@ export async function GET(request, context) {
     } else if (formatParam === 'vial') {
       selectedFormat = 'vial';
     } else {
-      const variants = product.variants || [];
-      const hasDouble = variants.some(v => /double|dual|two.?chamber/i.test(v.presentation || v.format || ''));
-      if (hasDouble || /double|dual|two.?chamber/i.test(nameRaw) || /double|dual|two.?chamber/i.test(presRaw)) {
-        selectedFormat = 'double_cartridge_pen';
-      } else if (isPreFilledPen || variants.some(v => /single|cartridge|\bpen\b/i.test(v.presentation || v.format || '')) || /single|cartridge|\bpen\b/i.test(nameRaw) || /single|cartridge|\bpen\b/i.test(presRaw)) {
-        selectedFormat = 'single_cartridge_pen';
-      } else {
+      const isLotusland = /lotusland/i.test(product.supplierName || product.supplier || product.supplierId || '');
+      if (isLotusland) {
         selectedFormat = 'vial';
+      } else {
+        const variants = product.variants || [];
+        const hasDouble = variants.some(v => /double|dual|two.?chamber/i.test(v.presentation || v.format || ''));
+        if (hasDouble || /double|dual|two.?chamber/i.test(nameRaw) || /double|dual|two.?chamber/i.test(presRaw)) {
+          selectedFormat = 'double_cartridge_pen';
+        } else if (isPreFilledPen || variants.some(v => /single|cartridge|\bpen\b/i.test(v.presentation || v.format || '')) || /single|cartridge|\bpen\b/i.test(nameRaw) || /single|cartridge|\bpen\b/i.test(presRaw)) {
+          selectedFormat = 'single_cartridge_pen';
+        } else {
+          selectedFormat = 'vial';
+        }
       }
+    }
+
+    // ⚡ Check Layer 1 Buffer RAM Cache (< 1ms instant binary delivery)
+    const cacheKey = `${id.toLowerCase()}_${selectedFormat}`;
+    const cached = PDF_RAM_CACHE.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return new NextResponse(cached.bytes, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${cached.filename}"`,
+          'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400',
+          'X-Atlas-Cache': 'HIT-RAM',
+        },
+      });
     }
 
     const sciData = getPeptideScientificData(name) || {};
@@ -494,12 +531,20 @@ export async function GET(request, context) {
     const pdfBytes = await pdfDoc.save();
     const filename = `${(name || id).replace(/\s+/g, '_').toLowerCase()}_datasheet.pdf`;
 
+    // Cache in RAM for instant subsequent downloads
+    PDF_RAM_CACHE.set(cacheKey, {
+      bytes: pdfBytes,
+      filename,
+      expiresAt: Date.now() + PDF_CACHE_TTL_MS,
+    });
+
     return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400',
+        'X-Atlas-Cache': 'MISS',
       },
     });
   } catch (err) {

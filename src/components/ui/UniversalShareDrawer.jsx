@@ -95,14 +95,22 @@ export default function UniversalShareDrawer({
     }
   };
 
-  const markAsSentInCrm = async () => {
-    if (!logId) return;
+  const [activeLogId, setActiveLogId] = useState(logId);
+
+  // Sync activeLogId if logId prop changes
+  React.useEffect(() => {
+    setActiveLogId(logId);
+  }, [logId]);
+
+  const markAsSentInCrm = async (targetId) => {
+    const idToUpdate = targetId || activeLogId;
+    if (!idToUpdate) return;
     try {
       await fetch('/api/catalog/tracking-logs', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          id: logId, 
+          id: idToUpdate, 
           status: 'sent', 
           sharedWith: targetName, 
           sharedPhone: targetPhone,
@@ -114,21 +122,63 @@ export default function UniversalShareDrawer({
     }
   };
 
-  const handleCopyLink = () => {
+  // Helper to ensure tracking record exists and returns tracked URL
+  const getTrackedUrl = async () => {
+    if (!shareUrl) return '';
+    let currentLogId = activeLogId;
+
+    if (!currentLogId && (targetName || targetEmail || targetPhone)) {
+      try {
+        const res = await fetch('/api/catalog/tracking-logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            docType,
+            productName: itemName,
+            sharedWith: targetName,
+            sharedPhone: targetPhone,
+            sharedEmail: targetEmail,
+            targetType,
+            shareUrl,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.id) {
+            currentLogId = data.id;
+            setActiveLogId(data.id);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not create tracking log:', err);
+      }
+    } else if (currentLogId) {
+      markAsSentInCrm(currentLogId);
+    }
+
+    if (currentLogId) {
+      const separator = shareUrl.includes('?') ? '&' : '?';
+      return `${shareUrl}${separator}sid=${currentLogId}`;
+    }
+
+    return shareUrl;
+  };
+
+  const handleCopyLink = async () => {
     if (!shareUrl) {
       notifier.error('Share URL not available.');
       return;
     }
-    navigator.clipboard.writeText(shareUrl);
+    const finalUrl = await getTrackedUrl();
+    await navigator.clipboard.writeText(finalUrl);
     setCopied(true);
-    notifier.success('Direct link copied to clipboard ✓');
-    markAsSentInCrm();
+    notifier.success(targetName ? `Tracked link copied for ${targetName} ✓` : 'Direct link copied to clipboard ✓');
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const composeMessageText = () => {
+  const composeMessageText = (effectiveUrl = shareUrl) => {
     if (customMessageTemplate) {
-      return customMessageTemplate({ targetName, targetType, shareUrl, itemName, itemCount, accountManagerEmail });
+      return customMessageTemplate({ targetName, targetType, shareUrl: effectiveUrl, itemName, itemCount, accountManagerEmail });
     }
 
     const greeting = targetName ? `Dear ${targetName},\n\n` : '';
@@ -146,13 +196,14 @@ export default function UniversalShareDrawer({
       roleIntro = `Please find your requested ${desc}${countInfo} from ATLAS SOLUTIONS at the following secure link:`;
     }
 
-    return `${greeting}${roleIntro}\n\n🔗 ${shareUrl}\n\nFor inquiries or orders, please reply directly or contact: ${accountManagerEmail}`;
+    return `${greeting}${roleIntro}\n\n🔗 ${effectiveUrl}\n\nFor inquiries or orders, please reply directly or contact: ${accountManagerEmail}`;
   };
 
-  const handleShareWhatsApp = () => {
+  const handleShareWhatsApp = async () => {
     if (!shareUrl) return;
+    const finalUrl = await getTrackedUrl();
     const cleanPhone = (targetPhone || '').replace(/[^\d+]/g, '');
-    const msg = composeMessageText();
+    const msg = composeMessageText(finalUrl);
 
     const phoneParam = cleanPhone.replace('+', '');
     const waUrl = phoneParam 
@@ -160,21 +211,20 @@ export default function UniversalShareDrawer({
       : `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
     window.open(waUrl, '_blank');
-    markAsSentInCrm();
-    notifier.success('WhatsApp opened with formatted message ✓');
+    notifier.success('WhatsApp opened with tracked link ✓');
   };
 
-  const handleShareEmail = () => {
+  const handleShareEmail = async () => {
     if (!shareUrl) return;
+    const finalUrl = await getTrackedUrl();
     const recipient = targetEmail || initialRecipientEmail;
     const name = targetName || initialRecipientName;
     const subject = `ATLAS SOLUTIONS — ${itemName || docType.toUpperCase()}${name ? ` for ${name}` : ''}`;
-    const body = composeMessageText();
+    const body = composeMessageText(finalUrl);
 
     const mailtoUrl = `mailto:${encodeURIComponent(recipient || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoUrl, '_blank');
-    markAsSentInCrm();
-    notifier.success('Email composer opened ✓');
+    notifier.success('Email composer opened with tracked link ✓');
   };
 
   const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(shareUrl || '')}`;

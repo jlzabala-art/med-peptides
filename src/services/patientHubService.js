@@ -27,9 +27,11 @@ const db = fb?.db;
  * @returns {Promise<boolean>}
  */
 export const hasCheckedInToday = async (patientId) => {
+  if (!patientId || !db) return false;
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
   try {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
     const q = query(
       collection(db, 'daily_checkins'),
       where('patientId', '==', patientId),
@@ -38,8 +40,22 @@ export const hasCheckedInToday = async (patientId) => {
     const snap = await getDocs(q);
     return !snap.empty;
   } catch (err) {
-    logger.error('[patientHubService] hasCheckedInToday failed', { patientId, error: err.message });
-    throw err;
+    // Graceful fallback if Firestore composite index is missing/building
+    try {
+      const fallbackQuery = query(
+        collection(db, 'daily_checkins'),
+        where('patientId', '==', patientId)
+      );
+      const snap = await getDocs(fallbackQuery);
+      return snap.docs.some((doc) => {
+        const data = doc.data();
+        const created = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt || 0);
+        return created >= startOfDay;
+      });
+    } catch (fallbackErr) {
+      logger.warn('[patientHubService] hasCheckedInToday fallback warning', { patientId, error: fallbackErr.message });
+      return false;
+    }
   }
 };
 

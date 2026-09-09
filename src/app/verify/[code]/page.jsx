@@ -8,9 +8,27 @@ export const dynamicParams = true;
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://regenpept.com';
 
+// ⚡ Layer 1 In-Memory Server RAM Cache for Batch Verification Records
+const VERIFY_RAM_CACHE = new Map();
+const VERIFY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+export function invalidateVerifyBatchCache(code) {
+  if (!code) {
+    VERIFY_RAM_CACHE.clear();
+  } else {
+    VERIFY_RAM_CACHE.delete(decodeURIComponent(code).trim().toUpperCase());
+  }
+}
+
 async function getBatchVerificationData(code) {
   if (!code) return null;
   const cleanCode = decodeURIComponent(code).trim().toUpperCase();
+
+  // 1. Layer 1 Check: Instant RAM Cache (< 0.1ms)
+  const cached = VERIFY_RAM_CACHE.get(cleanCode);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
 
   let matchedProduct = null;
   let batchData = null;
@@ -39,7 +57,15 @@ async function getBatchVerificationData(code) {
   }
 
   // 🛡️ Zero-Trust Sanitization
-  return sanitizePublicBatch(batchData || { code: cleanCode }, matchedProduct);
+  const result = sanitizePublicBatch(batchData || { code: cleanCode }, matchedProduct);
+
+  // Populate Layer 1 RAM Cache
+  VERIFY_RAM_CACHE.set(cleanCode, {
+    data: result,
+    expiresAt: Date.now() + VERIFY_CACHE_TTL_MS,
+  });
+
+  return result;
 }
 
 export async function generateMetadata({ params }) {

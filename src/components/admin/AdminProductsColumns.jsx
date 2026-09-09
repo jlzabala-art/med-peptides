@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { UploadCloud, Plus, Share2, Copy, Check, ExternalLink } from '@/lib/icons';
+import { UploadCloud, Plus, Share2, Copy, Check, ExternalLink, User } from '@/lib/icons';
+import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AppEntityCell from '../ui/AppEntityCell';
 import InlineEditField from '../ui/InlineEditField';
@@ -7,7 +8,7 @@ import AppStatusToggle from '../ui/AppStatusToggle';
 import AppActionGroup from '../ui/AppActionGroup';
 import CopyableId from '../ui/CopyableId';
 import notifier from '../../services/NotificationService';
-import { getProductAvailableTypes } from '../../utils/productNormalizer';
+import { getProductAvailableTypes, isPeptideProduct } from '../../utils/productNormalizer';
 
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
 
@@ -19,6 +20,7 @@ const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https
 function QrShareButton({ product }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showShareDrawer, setShowShareDrawer] = useState(false);
   const ref = useRef(null);
   const slug = product.slug || product.id;
   const publicUrl = `${BASE_URL}/p/${slug}`;
@@ -67,8 +69,13 @@ function QrShareButton({ product }) {
           padding: '0.9rem',
         }}>
           {/* URL display */}
-          <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '0.4rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Public Product URL
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+            <span style={{ fontSize: '0.7rem', color: '#003666', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Open Datasheet (Zero Prices)
+            </span>
+            <span style={{ fontSize: '0.62rem', backgroundColor: '#dcfce7', color: '#166534', padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 700 }}>
+              Safe for Clients
+            </span>
           </div>
           <div style={{
             background: '#f8fafc', borderRadius: '6px', padding: '0.4rem 0.6rem',
@@ -171,14 +178,37 @@ function QrShareButton({ product }) {
                 cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600, color: '#475569',
                 textDecoration: 'none', transition: 'all 0.15s ease',
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
-            >
               📄 Clinical Datasheet (PDF)
             </a>
+
+            <button
+              onClick={() => {
+                setOpen(false);
+                setShowShareDrawer(true);
+              }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                marginTop: '0.45rem', padding: '0.45rem 0.6rem', borderRadius: '7px',
+                border: '1px solid #003666', background: '#003666',
+                cursor: 'pointer', fontSize: '0.75rem', fontWeight: 700, color: 'white',
+              }}
+            >
+              <User size={12} />
+              Share with Client (Tracked)
+            </button>
           </div>
         </div>
       )}
+
+      <UniversalShareDrawer
+        isOpen={showShareDrawer}
+        onClose={() => setShowShareDrawer(false)}
+        shareUrl={publicUrl}
+        docType="product_datasheet"
+        itemName={product.name || product.id}
+        title={`Share ${product.name || 'Product'} (Tracked)`}
+        subtitle="Select client to generate a tracked link and record view analytics."
+      />
     </div>
   );
 }
@@ -487,8 +517,8 @@ export function getAdminProductsColumns({
             {savingProduct === p.id && (
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Saving...</span>
             )}
-            {/* Share / QR public link button */}
-            <QrShareButton product={p} />
+            {/* Share / QR public link button (restricted to clinical peptides) */}
+            {isPeptideProduct(p) && <QrShareButton product={p} />}
             <AppActionGroup actions={actions} />
           </div>
         );

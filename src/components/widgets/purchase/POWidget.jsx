@@ -19,6 +19,7 @@ import {
 import DataTable from '../../ui/DataTable';
 import AppActionGroup from '../../ui/AppActionGroup';
 import InlineEditableCell from '../../ui/InlineEditableCell';
+import StatusBadge from '../../ui/StatusBadge';
 import notifier from '../../../services/NotificationService';
 import { toast } from 'react-hot-toast';
 
@@ -128,10 +129,10 @@ export default function POWidget({
             </div>
           )}
           {row.approvalStatus === 'pending_approval' && (
-            <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca' }}>PENDING APPROVAL</span>
+            <StatusBadge status="pending" customLabel="PENDING APPROVAL" />
           )}
           {row.approvalStatus === 'approved' && (
-            <span style={{ padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0' }}>APPROVED</span>
+            <StatusBadge status="approved" customLabel="APPROVED" />
           )}
         </div>
       ),

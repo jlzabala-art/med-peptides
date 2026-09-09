@@ -32,6 +32,16 @@ const PORTALS = [
     isSimulatedRole: true,
   },
   {
+    id: 'doctor',
+    label: 'Physician / Doctor Practice',
+    description: 'Prescriptions & physician practice',
+    icon: Stethoscope,
+    route: '/admin',
+    color: '#0d9488', // teal-600
+    group: 'Clinical',
+    isSimulatedRole: true,
+  },
+  {
     id: 'account_manager',
     label: 'Account Manager',
     description: 'Sales & clinic relationships',
@@ -62,6 +72,16 @@ const PORTALS = [
     isSimulatedRole: true,
   },
   {
+    id: 'patient',
+    label: 'Patient Personal Health',
+    description: 'Personal patient health view',
+    icon: User,
+    route: '/admin',
+    color: '#8b5cf6', // violet-500
+    group: 'Clinical',
+    isSimulatedRole: true,
+  },
+  {
     id: 'fagron_clinic',
     label: 'Fagron Clinic',
     description: 'Clinic & prescriptions',
@@ -79,24 +99,7 @@ const PORTALS = [
     route: '/',
     color: '#ec4899', // pink-500
     group: 'Commercial',
-  },
-  {
-    id: 'doctor',
-    label: 'Clinical Portal',
-    description: 'Prescriptions & doctor dashboard',
-    icon: Stethoscope,
-    route: '/doctor',
-    color: '#10b981', // emerald-500
-    group: 'Clinical',
-  },
-  {
-    id: 'patient',
-    label: 'Patient Portal',
-    description: 'Patient records & treatments',
-    icon: User,
-    route: '/patient',
-    color: '#8b5cf6', // violet-500
-    group: 'Clinical',
+    isSimulatedRole: false,
   },
   {
     id: 'compounding_pharmacy',
@@ -106,6 +109,7 @@ const PORTALS = [
     route: '/pharmacy-dashboard',
     color: '#06b6d4', // cyan-500
     group: 'Clinical',
+    isSimulatedRole: true,
   },
 ];
 
@@ -130,13 +134,15 @@ function addRecentPortal(id) {
 }
 
 export default function AdminPortalSwitcher() {
-  const { isAdmin, activeRole, switchActiveRole } = useAuth();
+  const { isAdmin, userProfile, activeRole, switchActiveRole } = useAuth();
   const { simulatedRole, setSimulatedRole } = useAdminRoleSimulation();
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   const [focusedIndex, setFocusedIndex] = useState(-1);
 
   const dropdownRef = useRef(null);
@@ -174,18 +180,18 @@ export default function AdminPortalSwitcher() {
 
   const currentPortal = useMemo(() => {
     // Check if we are simulating a role first
-    if (simulatedRole !== 'admin') {
-      const sim = PORTALS.find((p) => p.id === simulatedRole);
+    if (simulatedRole && simulatedRole !== 'admin') {
+      const sim = PORTALS.find((p) => p.id === simulatedRole || p.alias === simulatedRole);
       if (sim) return sim;
     }
     return (
-      PORTALS.find((p) => p.id === activeRole) || {
-        id: activeRole,
-        label: 'Portal Switcher',
-        description: 'Unknown Workspace',
-        icon: LayoutDashboard,
-        route: '/',
-        color: '#64748b',
+      PORTALS.find((p) => p.id === activeRole || p.alias === activeRole) || {
+        id: activeRole || 'admin',
+        label: 'Admin Console',
+        description: 'Full master access',
+        icon: Shield,
+        route: '/admin',
+        color: '#003666',
       }
     );
   }, [activeRole, simulatedRole]);
@@ -197,15 +203,24 @@ export default function AdminPortalSwitcher() {
 
   const handleSwitch = (portal) => {
     addRecentPortal(currentPortal.id);
-    if (portal.isSimulatedRole) {
-      setSimulatedRole(portal.id);
-      if (window.location.pathname !== '/admin') {
-        router.push('/admin');
+    const targetRoleId = portal.id;
+
+    if (portal.isSimulatedRole || isAdmin) {
+      setSimulatedRole(targetRoleId === 'admin' ? 'admin' : targetRoleId);
+      if (switchActiveRole) {
+        switchActiveRole(targetRoleId);
+      }
+      if (portal.route && window.location.pathname !== portal.route) {
+        router.push(portal.route);
       }
     } else {
       setSimulatedRole('admin');
-      switchActiveRole(portal.id);
-      router.push(portal.route);
+      if (switchActiveRole) {
+        switchActiveRole(targetRoleId);
+      }
+      if (portal.route) {
+        router.push(portal.route);
+      }
     }
     setIsOpen(false);
   };
@@ -256,6 +271,8 @@ export default function AdminPortalSwitcher() {
       .filter((x) => x.item.type === 'portal');
   }, [listItems]);
 
+  const isKeyboardNavRef = useRef(false);
+
   const handleKeyDown = (e) => {
     if (!isOpen) return;
 
@@ -269,6 +286,7 @@ export default function AdminPortalSwitcher() {
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
+      isKeyboardNavRef.current = true;
       setFocusedIndex((prev) => {
         const currentPos = clickableItems.findIndex((ci) => ci.index === prev);
         if (currentPos === -1 || currentPos === clickableItems.length - 1)
@@ -277,6 +295,7 @@ export default function AdminPortalSwitcher() {
       });
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
+      isKeyboardNavRef.current = true;
       setFocusedIndex((prev) => {
         const currentPos = clickableItems.findIndex((ci) => ci.index === prev);
         if (currentPos <= 0) return clickableItems[clickableItems.length - 1].index;
@@ -295,9 +314,9 @@ export default function AdminPortalSwitcher() {
     }
   };
 
-  // Scroll into view when focused
+  // Scroll into view ONLY when navigating via keyboard (not on mouse hover)
   useEffect(() => {
-    if (focusedIndex >= 0 && containerRef.current) {
+    if (focusedIndex >= 0 && containerRef.current && isKeyboardNavRef.current) {
       const el = containerRef.current.querySelector(`[data-index="${focusedIndex}"]`);
       if (el) {
         el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -305,7 +324,8 @@ export default function AdminPortalSwitcher() {
     }
   }, [focusedIndex]);
 
-  if (!isAdmin) return null;
+  const isMasterAdmin = isAdmin || userProfile?.role === 'admin' || userProfile?.roles?.includes('admin') || activeRole === 'admin' || Boolean(simulatedRole);
+  if (!isMasterAdmin) return null;
 
   // UI Components
   const PortalRow = ({ portal, index, isCurrent }) => {
@@ -314,8 +334,15 @@ export default function AdminPortalSwitcher() {
     return (
       <div
         data-index={index}
-        onMouseEnter={() => setFocusedIndex(index)}
-        onClick={() => handleSwitch(portal)}
+        onMouseEnter={() => {
+          isKeyboardNavRef.current = false;
+          setFocusedIndex(index);
+        }}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSwitch(portal);
+        }}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -614,7 +641,8 @@ export default function AdminPortalSwitcher() {
                 position: 'absolute',
                 top: 'calc(100% + 0.5rem)',
                 left: 0,
-                width: '640px',
+                width: 'min(580px, calc(100vw - 32px))',
+                maxWidth: 'calc(100vw - 32px)',
                 background: 'white',
                 borderRadius: '16px',
                 boxShadow: '0 10px 40px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05)',
@@ -715,7 +743,7 @@ export default function AdminPortalSwitcher() {
                   <div
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                       gap: '0.5rem',
                     }}
                   >

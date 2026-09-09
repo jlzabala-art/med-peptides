@@ -29,6 +29,7 @@ import { createPrescription } from '../../../services/prescriptionsService';
 import { createPurchaseOrder } from '../../../repositories/supplierRepository';
 import { PRESCRIPTION_STATUSES } from '../../../schemas/prescriptionSchema';
 import toast from 'react-hot-toast';
+import notifier from '../../../services/NotificationService';
 
 // ─── Step definitions (full flow) ─────────────────────────────────────────────
 const ALL_STEPS = [
@@ -499,9 +500,10 @@ export default function UniversalOrderBuilder({
         </div>
         <button
           onClick={() => {
-            if (confirm(`Are you sure you want to clear this draft for ${selectedTarget?.name}?`)) {
-              clear();
-            }
+            notifier.confirmCritical(
+              `Are you sure you want to clear this draft for ${selectedTarget?.name}?`,
+              () => clear()
+            );
           }}
           style={{
             background: 'none', border: 'none', color: 'var(--text-secondary)',

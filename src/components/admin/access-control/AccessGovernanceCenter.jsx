@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ExecutiveSummary from './ExecutiveSummary';
 import RoleCardsView from './RoleCardsView';
 import PermissionMatrixView from './PermissionMatrixView';
 import RoleEditorModal from './RoleEditorModal';
-import { List, Grid, Search, Filter, Plus, Copy, RefreshCw } from '@/lib/icons';
+import GlobalSearchBar from '../../ui/GlobalSearchBar';
+import { List, Grid, Plus, Copy, RefreshCw } from '@/lib/icons';
 
 
 
@@ -48,7 +49,19 @@ const DUMMY_CATEGORIES = [
 
 export default function AccessGovernanceCenter() {
   const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'matrix'
+  const [searchTerm, setSearchTerm] = useState('');
   const [editingRole, setEditingRole] = useState(null);
+
+  const filteredRoles = useMemo(() => {
+    if (!searchTerm.trim()) return DUMMY_ROLES;
+    const term = searchTerm.toLowerCase();
+    return DUMMY_ROLES.filter(r => 
+      r.name.toLowerCase().includes(term) ||
+      r.description.toLowerCase().includes(term) ||
+      r.id.toLowerCase().includes(term)
+    );
+  }, [searchTerm]);
+
   const handleEditRole = (roleId) => {
     const role = DUMMY_ROLES.find(r => r.id === roleId);
     setEditingRole(role);
@@ -97,18 +110,19 @@ export default function AccessGovernanceCenter() {
         backgroundColor: 'var(--color-bg-surface)', 
         padding: '0.75rem 1.25rem', 
         borderRadius: 'var(--radius-md)', 
-        border: '1px solid var(--border)' 
+        border: '1px solid var(--border)',
+        gap: '1rem',
+        flexWrap: 'wrap'
       }}>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          {/* Search Placeholder */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--background)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-            <Search size={14} color="var(--text-muted)" />
-            <input type="text" placeholder="Search roles or permissions..." style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.85rem', width: '200px' }} />
-          </div>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--text-main)' }}>
-            <Filter size={14} />
-            Filters
-          </button>
+        <div style={{ flex: 1, minWidth: '280px', maxWidth: '500px' }}>
+          <GlobalSearchBar 
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search roles, permissions, territories..."
+            namespace="access-governance"
+            size="sm"
+            resultCount={filteredRoles.length}
+          />
         </div>
 
         <div style={{ display: 'flex', gap: '0.25rem', backgroundColor: 'var(--background)', padding: '0.25rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
@@ -141,14 +155,14 @@ export default function AccessGovernanceCenter() {
 
       {viewMode === 'cards' ? (
         <RoleCardsView 
-          roles={DUMMY_ROLES} 
+          roles={filteredRoles} 
           onEditRole={handleEditRole} 
           onCloneRole={() => {}} 
           onDeleteRole={() => {}} 
         />
       ) : (
         <PermissionMatrixView 
-          roles={DUMMY_ROLES} 
+          roles={filteredRoles} 
           permissionCategories={DUMMY_CATEGORIES} 
         />
       )}

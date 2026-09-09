@@ -63,7 +63,7 @@ export default function ProductsTable({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const basePanel = pathname?.split('/')[1] || 'admin';
-  const initialSearch = searchParams.get('search') || '';
+  const initialSearch = searchParams.get('q') || searchParams.get('search') || '';
   const initialNew = searchParams.get('new') === 'true';
 
   const updateUrlParam = (key, value) => {
@@ -174,7 +174,10 @@ export default function ProductsTable({
     setFilter('isActive', filterStatus);
     setFilter('warehouse', filterWarehouse);
     setFilter('apiPlaceholder', filterApiPlaceholder);
-  }, [filterCategory, filterSupplier, filterStatus, filterWarehouse, filterApiPlaceholder, setFilter]);
+    if (initialSearch !== undefined && initialSearch !== searchTerm) {
+      setSearchTerm(initialSearch);
+    }
+  }, [filterCategory, filterSupplier, filterStatus, filterWarehouse, filterApiPlaceholder, initialSearch, setFilter, setSearchTerm]);
 
   // Algolia Setup with Facets and Numeric Filters
   const facetFilters = [];
@@ -197,6 +200,8 @@ export default function ProductsTable({
     },
     300
   );
+
+  console.log('[ProductsTable Algolia]', { searchTerm, isAlgoliaActive, algoliaLoading, algoliaHitsCount: algoliaHits?.length, algoliaError: algoliaError?.message, facetFilters });
 
   const baseFilteredProducts = (() => {
     let localHits = filteredProducts;
@@ -229,7 +234,13 @@ export default function ProductsTable({
 
     const algoliaMapped = isAlgoliaActive && !algoliaError
       ? algoliaHits.map(h => {
-          const matched = products.find(p => p.id === (h.objectID || h.id));
+          const hitProductId = h.productId || h.id;
+          const matched = products.find(p => 
+            p.id === (h.objectID || h.id) || 
+            p.id === hitProductId || 
+            p.slug === hitProductId ||
+            (p.name && h.name && p.name.toLowerCase() === h.name.toLowerCase())
+          );
           return matched ? { ...matched, _highlightResult: h._highlightResult } : { ...h, id: h.objectID || h.id };
         }).filter(Boolean)
       : [];

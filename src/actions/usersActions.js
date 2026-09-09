@@ -41,27 +41,20 @@ export async function fetchUsersAction({ limitCount = 50, role = null, search = 
 
 export async function fetchUsersAggregatesAction() {
   try {
-    if (!adminDb) return { total: 0, patients: 0, doctors: 0, new: 0 };
+    if (!adminDb) return { total: 0, patients: 0, doctors: 0, pending: 0 };
     
-    const usersSnap = await adminDb.collection('users').get();
-    let total = 0;
-    let patients = 0;
-    let doctors = 0;
-    let pending = 0;
-
-    usersSnap.forEach(doc => {
-      const data = doc.data();
-      total++;
-      if (data.role === 'patient') patients++;
-      if (data.role === 'doctor') doctors++;
-      if (data.approved !== true && data.role !== 'admin') pending++;
-    });
+    const [totalSnap, patientsSnap, doctorsSnap, pendingSnap] = await Promise.all([
+      adminDb.collection('users').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('users').where('role', '==', 'patient').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('users').where('role', '==', 'doctor').count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+      adminDb.collection('users').where('approved', '==', false).count().get().catch(() => ({ data: () => ({ count: 0 }) })),
+    ]);
 
     return {
-      total,
-      patients,
-      doctors,
-      pending
+      total: totalSnap.data().count,
+      patients: patientsSnap.data().count,
+      doctors: doctorsSnap.data().count,
+      pending: pendingSnap.data().count,
     };
   } catch (error) {
     console.error("Error fetching user aggregates:", error);

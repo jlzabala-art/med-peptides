@@ -13,19 +13,12 @@ import React, { useState, useEffect, useRef } from 'react';
 
 
 
-import { liteClient as algoliasearch } from 'algoliasearch/lite';
-
+import { searchAlgoliaFederated } from '@/services/algoliaSearch';
 import { Search, X, User, Building2, Stethoscope, Package, Loader2, ArrowRight, Activity, EyeOff, Tag, Terminal, Zap } from '@/lib/icons';
-
-// Initialize Algolia client (using placeholders or env variables)
-const searchClient = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'LATCOP1VMD',
-  process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || 'test_key'
-);
 
 export default function Omnibar({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState({ patients: [], clinics: [], physicians: [], products: [], commands: [] });
+  const [results, setResults] = useState({ patients: [], clinics: [], physicians: [], products: [], protocols: [], commands: [] });
   const [loading, setLoading] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const inputRef = useRef(null);
@@ -34,7 +27,7 @@ export default function Omnibar({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen) {
       setQuery('');
-      setResults({ patients: [], clinics: [], physicians: [], products: [], commands: [] });
+      setResults({ patients: [], clinics: [], physicians: [], products: [], protocols: [], commands: [] });
       setActivePreview(null);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
@@ -50,21 +43,21 @@ export default function Omnibar({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!query.trim() || query.length < 2) {
-      setResults({ patients: [], clinics: [], physicians: [], products: [], commands: [] });
+      setResults({ patients: [], clinics: [], physicians: [], products: [], protocols: [], commands: [] });
       setActivePreview(null);
       return;
     }
 
     if (query.startsWith('>')) {
       const commandQuery = query.substring(1).trim().toLowerCase();
-      const mockCommands = [
+      const systemCommands = [
         { id: 'c1', title: 'Show delayed shipments', action: '/admin/logistics?filter=delayed', desc: 'Filters logistics view by delayed packages' },
         { id: 'c2', title: 'Generate Q3 Revenue Report', action: '/admin/finance?report=q3', desc: 'Exports finance data to PDF' },
         { id: 'c3', title: 'Analyze Lead Conversion Rate', action: '/admin/crm?action=analyze', desc: 'Triggers Atlas AI analysis on recent leads' }
       ].filter(c => c.title.toLowerCase().includes(commandQuery));
       
-      setResults({ patients: [], clinics: [], physicians: [], products: [], commands: mockCommands });
-      if (mockCommands.length > 0) setActivePreview({ type: 'command', data: mockCommands[0] });
+      setResults({ patients: [], clinics: [], physicians: [], products: [], protocols: [], commands: systemCommands });
+      if (systemCommands.length > 0) setActivePreview({ type: 'command', data: systemCommands[0] });
       else setActivePreview(null);
       return;
     }
@@ -74,25 +67,24 @@ export default function Omnibar({ isOpen, onClose }) {
 
     const performSearch = async () => {
       try {
-        // Multi-index search using Algolia
-        const responses = await searchClient.search([
-          { indexName: 'atlas_patients', query, params: { hitsPerPage: 3 } },
-          { indexName: 'atlas_clinics', query, params: { hitsPerPage: 3 } },
-          { indexName: 'atlas_physicians', query, params: { hitsPerPage: 3 } },
-          { indexName: 'atlas_products', query, params: { hitsPerPage: 5 } }
-        ]);
-
+        const fed = await searchAlgoliaFederated(query, ['products', 'protocols', 'atlas_patients', 'atlas_users', 'prescriptions'], 4);
         if (isMounted) {
           const newResults = {
-            patients: responses.results[0]?.hits || [],
-            clinics: responses.results[1]?.hits || [],
-            physicians: responses.results[2]?.hits || [],
-            products: responses.results[3]?.hits || []
+            products: fed.products || [],
+            patients: fed.patients || [],
+            protocols: fed.protocols || [],
+            physicians: fed.users || [],
+            clinics: fed.clinics || [],
+            prescriptions: fed.prescriptions || []
           };
           setResults(newResults);
-          // Auto-select first product if available
+          // Auto-select first result if available
           if (newResults.products.length > 0) {
             setActivePreview({ type: 'product', data: newResults.products[0] });
+          } else if (newResults.protocols.length > 0) {
+            setActivePreview({ type: 'protocol', data: newResults.protocols[0] });
+          } else if (newResults.patients.length > 0) {
+            setActivePreview({ type: 'patient', data: newResults.patients[0] });
           } else {
             setActivePreview(null);
           }
@@ -184,6 +176,32 @@ export default function Omnibar({ isOpen, onClose }) {
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{p.name}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>SKU: {p.sku || 'N/A'}</div>
+                    </div>
+                    <ArrowRight size={16} color="#94a3b8" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Protocols */}
+            {results.protocols?.length > 0 && (
+              <div style={{ padding: '0.5rem 0' }}>
+                <div style={{ padding: '0.25rem 1.5rem', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Protocols</div>
+                {results.protocols.map(p => (
+                  <div 
+                    key={p.objectID} 
+                    className="hover-bg" 
+                    onMouseEnter={() => setActivePreview({ type: 'protocol', data: p })}
+                    onClick={() => handleNavigate(`/admin/protocols`)} 
+                    style={{ 
+                      padding: '0.75rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
+                      background: activePreview?.data?.objectID === p.objectID ? '#f1f5f9' : 'transparent'
+                    }}
+                  >
+                    <div style={{ width: 32, height: 32, borderRadius: '6px', backgroundColor: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Activity size={16} /></div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{p.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.category || 'Clinical Protocol'}</div>
                     </div>
                     <ArrowRight size={16} color="#94a3b8" />
                   </div>
@@ -285,6 +303,29 @@ export default function Omnibar({ isOpen, onClose }) {
                   <button onClick={() => handleNavigate(`/admin/products?search=${activePreview.data.name}`)} style={{ flex: 1, padding: '8px', background: '#0071bd', border: 'none', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 500 }}>Edit Item</button>
                 </div>
 
+              </div>
+            ) : activePreview?.type === 'protocol' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: 48, height: 48, background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Activity size={24} color="#0284c7" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '18px', color: '#0f172a' }}>{activePreview.data.name}</h3>
+                    <span style={{ fontSize: '13px', color: '#0369a1', background: '#e0f2fe', padding: '2px 8px', borderRadius: '12px' }}>{activePreview.data.category || 'Protocol'}</span>
+                  </div>
+                </div>
+                {activePreview.data.description && (
+                  <p style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+                    {activePreview.data.description}
+                  </p>
+                )}
+                <button 
+                  onClick={() => handleNavigate(`/admin/protocols`)}
+                  style={{ width: '100%', padding: '10px', background: '#0284c7', border: 'none', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, marginTop: '1rem' }}
+                >
+                  View Full Protocol
+                </button>
               </div>
             ) : activePreview?.type === 'command' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>

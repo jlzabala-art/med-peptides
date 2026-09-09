@@ -312,8 +312,15 @@ export function useCatalogData(options = {}) {
           const searchRes = results[0];
 
           if (searchRes.hits.length === 0) {
-            console.warn("Algolia returned 0 hits. Falling back to Firestore in case index is empty...");
-            // Do not return early, let it fall through to Firestore below
+            // Algolia returned 0 hits — the index is authoritative.
+            // Show empty results instead of falling through to Firestore,
+            // which would incorrectly show ALL products (e.g. KLOW showing 12 unrelated products).
+            console.warn("Algolia returned 0 hits for query:", searchQuery);
+            setProducts([]);
+            setVariants([]);
+            setHasMore(false);
+            setLoading(false);
+            return;
           } else {
             setHasMore(searchRes.page < searchRes.nbPages - 1);
 

@@ -49,6 +49,7 @@ const PUBLIC_STYLES = `
   .guest-mode-banner,
   .price-transparency-section,
   .compare-tray,
+  .bottom-tab-bar,
   [class*="CompareBar"],
   [class*="GuestMode"],
   [class*="RegionBar"],
@@ -304,6 +305,11 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
 
   const handlePrint = () => window.print();
 
+  const handleDownloadPdf = () => {
+    const targetId = product?.id || slug;
+    window.open(`/api/product-sheet/${encodeURIComponent(targetId)}?format=vial`, '_blank');
+  };
+
   const handleWhatsApp = () => {
     const text = `*${name}* — ${t.whatsappText}\n\n${description}${description.length >= 200 ? '…' : ''}\n\n${t.scannedForGuide}:\n${publicUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
@@ -324,6 +330,9 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <strong>{t.brandName}</strong>
           <span className="pbb-badge">{t.datasheetBadge}</span>
+          <span style={{ fontSize: '0.72rem', color: '#93c5fd', fontWeight: 600, display: 'none' }} className="desktop-only-badge">
+            • Verified Clinical Specification
+          </span>
         </div>
 
         <div className="pbb-actions">
@@ -341,6 +350,9 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
             ))}
           </select>
 
+          <button onClick={handleDownloadPdf} title="Download Official PDF Monograph" style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.4)', fontWeight: 700 }}>
+            📄 Download Monograph PDF
+          </button>
           <button onClick={handleCopyUrl} title={t.copyLink}>
             {copied ? `✓ ${t.copied}` : `🔗 ${t.copyLink}`}
           </button>
@@ -367,14 +379,6 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
           compareList={[]}
           allFaqs={[]}
         />
-
-        <div style={{ maxWidth: '1200px', margin: '0 auto 4rem', padding: '0 1.5rem' }}>
-          <RelatedProductsCarousel
-            productId={product?.id || slug}
-            category={product?.categoryId || product?.category}
-            goals={product?.goals}
-          />
-        </div>
       </div>
 
       {/* ── Floating bottom bar ── */}
@@ -382,8 +386,8 @@ export default function PublicProductPage({ product, slug, baseUrl }) {
         <button className="pbb-whatsapp" onClick={handleWhatsApp}>
           <WaIcon /> {t.shareWhatsapp}
         </button>
-        <button className="pbb-print" onClick={handlePrint}>
-          🖨 {t.downloadPdf}
+        <button className="pbb-print" onClick={handleDownloadPdf} style={{ backgroundColor: '#003666', color: '#ffffff', borderColor: '#003666' }}>
+          📄 {t.downloadPdf || 'Download Monograph PDF'}
         </button>
         <button className="pbb-copy" onClick={handleCopyUrl}>
           {copied ? `✓ ${t.copied}` : `🔗 ${t.copyLink}`}

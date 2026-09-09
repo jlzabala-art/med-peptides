@@ -1,0 +1,703 @@
+/* ==========================================================================
+   InteractiveReconstitutionGuide.css
+   Precision Clinical Reconstitution Simulator & U-100 Syringe Visualizer
+   ========================================================================== */
+
+.irg-wrapper {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 54, 102, 0.05);
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* ── Header ── */
+.irg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+}
+
+.irg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.irg-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #003666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.01em;
+}
+
+.irg-subtitle {
+  font-size: 0.86rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+  max-width: 800px;
+}
+
+/* ── Workspace 2-Column Grid ── */
+.irg-workspace {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+/* ── Left Column: Controls ── */
+.irg-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.irg-control-group {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.irg-control-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.irg-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.irg-val-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid #bae6fd;
+}
+
+.irg-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.irg-pill-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 34px;
+}
+
+.irg-pill-btn:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+  background: #f0f9ff;
+}
+
+.irg-pill-btn.active {
+  background: #003666;
+  border-color: #003666;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 54, 102, 0.2);
+}
+
+.irg-slider-row {
+  margin-top: 0.25rem;
+}
+
+.irg-range-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  outline: none;
+  cursor: pointer;
+  accent-color: #0284c7;
+}
+
+.irg-concentration-tag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  margin-top: 0.2rem;
+}
+
+.irg-ct-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.irg-ct-val {
+  color: #0f172a;
+  font-size: 0.82rem;
+}
+
+/* Dose Stepper & Unit Toggle */
+.irg-unit-toggle {
+  display: inline-flex;
+  background: #e2e8f0;
+  padding: 2px;
+  border-radius: 6px;
+  gap: 2px;
+}
+
+.irg-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.irg-toggle-btn.active {
+  background: #ffffff;
+  color: #003666;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.irg-dose-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.irg-step-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #003666;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.irg-step-btn:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
+}
+
+.irg-dose-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.irg-dose-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 2.5rem 0 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.irg-dose-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+.irg-dose-unit-affix {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* ── Right Column: Syringe Visualizer Panel ── */
+.irg-visualizer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.irg-result-highlight-card {
+  background: linear-gradient(145deg, #f0fdf4 0%, #f0f9ff 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.irg-rh-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(2, 132, 199, 0.15);
+  padding-bottom: 0.5rem;
+}
+
+.irg-rh-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #003666;
+}
+
+.irg-rh-spec {
+  font-size: 0.75rem;
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.irg-rh-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.irg-metric-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.irg-mb-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.irg-mb-val {
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.irg-mb-val small {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Alerts */
+.irg-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+}
+
+.irg-alert-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.irg-alert-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+/* ── Realistic Interactive U-100 Syringe Stage ── */
+.irg-syringe-stage {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 2.25rem 1.25rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.irg-syringe-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  height: 90px;
+}
+
+/* Needle Component */
+.irg-syringe-needle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.irg-needle-steel {
+  width: 32px;
+  height: 1.8px;
+  background: linear-gradient(to bottom, #f8fafc, #94a3b8);
+  border-radius: 1px 0 0 1px;
+}
+
+.irg-needle-hub {
+  width: 14px;
+  height: 18px;
+  background: #e2e8f0;
+  border: 1px solid #94a3b8;
+  border-radius: 3px 0 0 3px;
+}
+
+/* Glass Barrel */
+.irg-syringe-barrel {
+  position: relative;
+  flex: 1;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0 4px 4px 0;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+/* Medical Liquid Fill */
+.irg-syringe-liquid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(2, 132, 199, 0.85) 0%, rgba(56, 189, 248, 0.95) 100%);
+  border-radius: 0 2px 2px 0;
+  transition: width 0.35s cubic-bezier(0.34, 1.3, 0.64, 1);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.45);
+  overflow: hidden;
+}
+
+.irg-syringe-liquid.overfill {
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.85) 0%, rgba(248, 113, 113, 0.95) 100%);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+.irg-liquid-meniscus {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50% 0 0 50%;
+}
+
+.irg-liquid-gloss {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 3px;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35), transparent);
+}
+
+/* Rubber Stopper */
+.irg-syringe-stopper {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  transition: left 0.35s cubic-bezier(0.34, 1.3, 0.64, 1);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.irg-stopper-rubber {
+  width: 10px;
+  height: 48px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.irg-stopper-shaft {
+  width: 12px;
+  height: 6px;
+  background: #64748b;
+}
+
+/* Ticks Graduations */
+.irg-syringe-ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.irg-tick-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.irg-tick-line {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.irg-tick-mark.medium .irg-tick-line {
+  height: 15px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.irg-tick-mark.major .irg-tick-line {
+  height: 20px;
+  width: 1.5px;
+  background: #ffffff;
+}
+
+.irg-tick-num {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: auto;
+  margin-bottom: 2px;
+  line-height: 1;
+}
+
+/* Dynamic Pointer Arrow */
+.irg-syringe-pointer {
+  position: absolute;
+  bottom: -28px;
+  transform: translateX(-50%);
+  transition: left 0.35s cubic-bezier(0.34, 1.3, 0.64, 1);
+  white-space: nowrap;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.irg-pointer-pill {
+  background: #38bdf8;
+  color: #082f49;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Finger Flange */
+.irg-syringe-flange {
+  width: 8px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.irg-syringe-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 1.5rem;
+}
+
+/* ── 4-Step Clinical Protocol ── */
+.irg-protocol-steps {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.5rem;
+}
+
+.irg-steps-heading {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #003666;
+  margin: 0 0 1rem 0;
+}
+
+.irg-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.irg-step-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.irg-step-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 10px rgba(0, 54, 102, 0.04);
+}
+
+.irg-step-card.highlight {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
+
+.irg-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #003666;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.irg-step-card.highlight .irg-step-number {
+  background: #0284c7;
+}
+
+.irg-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.irg-step-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.irg-step-desc {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Clinical Disclaimer ── */
+.irg-disclaimer {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.irg-disclaimer strong {
+  color: #334155;
+}
+
+/* ── Responsive Overrides ── */
+@media (max-width: 960px) {
+  .irg-workspace {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .irg-wrapper {
+    padding: 1.25rem;
+  }
+
+  .irg-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .irg-rh-metrics {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .irg-syringe-container {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .irg-rh-metrics {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .irg-pills-row {
+    gap: 0.3rem;
+  }
+
+  .irg-pill-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.55rem;
+  }
+}

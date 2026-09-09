@@ -2,28 +2,28 @@ import React from 'react';
 import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, ArrowDownRight, Package, Receipt, FileText } from '@/lib/icons';
 import { formatAEDtoDual } from '../../../../utils/currencies';
 
-export default function ExecutiveSummaryBar({ data, totalBalance }) {
+export default function ExecutiveSummaryBar({ data, totalBalance = 0 }) {
   const pnl = data?.dashboardData?.profitAndLoss || {};
-  // Extract or fallback to basic numbers
-  const revenue = pnl?.total_income || 248000;
-  const netProfit = pnl?.net_profit || 85000;
-  const expenses = pnl?.total_expense || (revenue - netProfit);
-  const grossMargin = revenue > 0 ? Math.round(((revenue - expenses) / revenue) * 100) : 46;
-  // Static mock fallbacks for things not natively in current P&L response
-  const ar = data?.dashboardData?.receivables || 42000;
-  const ap = data?.dashboardData?.payables || 18500;
-  const inventoryValue = 125000;
-  const taxLiability = 12400;
+  const trends = data?.dashboardData?.trends || {};
+
+  const revenue = Number(pnl?.total_income || 0);
+  const netProfit = Number(pnl?.net_profit || 0);
+  const expenses = Number(pnl?.total_expense || (revenue > netProfit ? revenue - netProfit : 0));
+  const grossMargin = revenue > 0 ? Math.round(((revenue - expenses) / revenue) * 100) : 0;
+  const ar = Number(data?.dashboardData?.receivables || 0);
+  const ap = Number(data?.dashboardData?.payables || 0);
+  const inventoryValue = Number(data?.dashboardData?.inventoryValue || data?.inventoryValue || 0);
+  const taxLiability = Number(data?.dashboardData?.taxLiability || data?.taxLiability || 0);
 
   const kpis = [
-    { label: 'Revenue (MTD)', value: formatAEDtoDual(revenue), trend: '+12.4%', isPositive: true, icon: DollarSign },
-    { label: 'Net Profit', value: formatAEDtoDual(netProfit), trend: '+8.2%', isPositive: true, icon: TrendingUp },
-    { label: 'Gross Margin', value: `${grossMargin}%`, trend: '+2.1%', isPositive: true, icon: ArrowUpRight },
-    { label: 'Cash Position', value: formatAEDtoDual(totalBalance), trend: '+5.0%', isPositive: true, icon: DollarSign },
-    { label: 'A/R', value: formatAEDtoDual(ar), trend: '-1.2%', isPositive: true, icon: Receipt },
-    { label: 'A/P', value: formatAEDtoDual(ap), trend: '+4.5%', isPositive: false, icon: FileText },
-    { label: 'Inventory Value', value: formatAEDtoDual(inventoryValue), trend: '+1.1%', isPositive: true, icon: Package },
-    { label: 'Tax Liability', value: formatAEDtoDual(taxLiability), trend: '+12.0%', isPositive: false, icon: TrendingDown },
+    { label: 'Revenue (MTD)', value: formatAEDtoDual(revenue), trend: trends.revenue || (revenue > 0 ? 'Active' : '0%'), isPositive: revenue >= 0, icon: DollarSign },
+    { label: 'Net Profit', value: formatAEDtoDual(netProfit), trend: trends.netProfit || (netProfit > 0 ? 'Profitable' : '0%'), isPositive: netProfit >= 0, icon: TrendingUp },
+    { label: 'Gross Margin', value: `${grossMargin}%`, trend: trends.margin || (grossMargin > 0 ? 'Healthy' : '0%'), isPositive: grossMargin >= 20, icon: ArrowUpRight },
+    { label: 'Cash Position', value: formatAEDtoDual(totalBalance), trend: trends.cash || (totalBalance > 0 ? 'Liquid' : '0%'), isPositive: totalBalance >= 0, icon: DollarSign },
+    { label: 'A/R', value: formatAEDtoDual(ar), trend: trends.ar || (ar > 0 ? `${formatAEDtoDual(ar)} open` : '0%'), isPositive: true, icon: Receipt },
+    { label: 'A/P', value: formatAEDtoDual(ap), trend: trends.ap || (ap > 0 ? `${formatAEDtoDual(ap)} due` : '0%'), isPositive: ap === 0, icon: FileText },
+    { label: 'Inventory Value', value: formatAEDtoDual(inventoryValue), trend: trends.inventory || (inventoryValue > 0 ? 'In Stock' : '0%'), isPositive: true, icon: Package },
+    { label: 'Tax Liability', value: formatAEDtoDual(taxLiability), trend: trends.tax || (taxLiability > 0 ? 'Estimated' : '0%'), isPositive: taxLiability === 0, icon: TrendingDown },
   ];
 
   return (

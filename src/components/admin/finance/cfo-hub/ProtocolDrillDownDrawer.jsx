@@ -15,15 +15,39 @@ import React from 'react';
 export default function ProtocolDrillDownDrawer({ selectedProtocol, onClose }) {
   if (!selectedProtocol) return null;
 
-  const { originalProduct } = selectedProtocol;
-  const price = originalProduct.price || 0;
-  const cost = originalProduct.costPrice || 0;
-  // Calculate mock components
-  const mockComponents = [
-    { name: originalProduct.name || 'Base Compound', cost: cost * 0.8 },
-    { name: 'Consumables', cost: cost * 0.1 },
-    { name: 'Logistics', cost: cost * 0.1 },
-  ];
+  const originalProduct = selectedProtocol.originalProduct || selectedProtocol;
+  const price = Number(originalProduct.price || selectedProtocol.price || 0);
+  const cost = Number(originalProduct.costPrice || selectedProtocol.costPrice || 0);
+  const margin = Number(selectedProtocol.margin || (price > 0 ? (((price - cost) / price) * 100).toFixed(1) : 0));
+  
+  // Real components or single base product component
+  const components = (selectedProtocol.components && selectedProtocol.components.length > 0)
+    ? selectedProtocol.components
+    : [
+        { name: originalProduct.name || selectedProtocol.name || 'Base Compound', cost: cost }
+      ];
+
+  const supplierName = originalProduct.supplier || selectedProtocol.supplier || 'Unassigned';
+  const leadTime = originalProduct.leadTime ? `${originalProduct.leadTime} Days` : 'Standard (7-14 Days)';
+  const reliabilityScore = originalProduct.reliabilityScore ?? 95;
+  const stockCount = originalProduct.stockCount ?? originalProduct.stock ?? originalProduct.inventory ?? 0;
+  const profitAtRisk = (stockCount <= 5) ? Math.max(0, (price - cost) * (10 - stockCount)) : 0;
+
+  // Real dynamic recommendations based on financials
+  const recommendations = [];
+  if (margin < 15) {
+    recommendations.push(`Margin (${margin}%) is below target threshold. Review supplier COGS or adjust retail pricing.`);
+  } else if (margin >= 40) {
+    recommendations.push(`Strong margin performance (${margin}%). Good candidate for volume scaling.`);
+  } else {
+    recommendations.push(`Margin (${margin}%) is operating within normal parameters.`);
+  }
+
+  if (stockCount <= 5) {
+    recommendations.push(`Current stock (${stockCount} units) is low. Issue purchase order to prevent supply disruption.`);
+  } else {
+    recommendations.push(`Current stock (${stockCount} units) meets short-term demand requirements.`);
+  }
 
   return (
     <div style={{
@@ -59,11 +83,11 @@ export default function ProtocolDrillDownDrawer({ selectedProtocol, onClose }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
               <span style={{ 
                 padding: '2px 8px', 
-                backgroundColor: selectedProtocol.isTop ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', 
-                color: selectedProtocol.isTop ? 'var(--color-success)' : 'var(--color-danger)', 
+                backgroundColor: margin >= 30 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', 
+                color: margin >= 30 ? 'var(--color-success)' : 'var(--color-danger)', 
                 borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 
               }}>
-                {selectedProtocol.margin}% Margin
+                {margin}% Margin
               </span>
             </div>
           </div>
@@ -80,10 +104,10 @@ export default function ProtocolDrillDownDrawer({ selectedProtocol, onClose }) {
                 <DollarSign size={14} /> Component Cost Analysis
               </h3>
               <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {mockComponents.map((c, i) => (
+                {components.map((c, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                     <span style={{ color: 'var(--text-main)' }}>{c.name}</span>
-                    <span style={{ fontWeight: 600 }}>AED {c.cost.toFixed(2)}</span>
+                    <span style={{ fontWeight: 600 }}>AED {Number(c.cost || 0).toFixed(2)}</span>
                   </div>
                 ))}
                 <div style={{ borderTop: '1px solid var(--border)', margin: '0.5rem 0' }}></div>
@@ -106,16 +130,18 @@ export default function ProtocolDrillDownDrawer({ selectedProtocol, onClose }) {
               <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', fontSize: '0.85rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Primary Supplier:</span>
-                  <span style={{ fontWeight: 600 }}>{originalProduct.supplier || 'Lotusland'}</span>
+                  <span style={{ fontWeight: 600 }}>{supplierName}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Lead Time:</span>
-                  <span style={{ fontWeight: 600 }}>14 Days</span>
+                  <span style={{ fontWeight: 600 }}>{leadTime}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Reliability Score:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-success)' }}>92/100</span>
-                </div>
+                {reliabilityScore && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Reliability Score:</span>
+                    <span style={{ fontWeight: 600, color: 'var(--color-success)' }}>{reliabilityScore}/100</span>
+                  </div>
+                )}
               </div>
           </div>
 
@@ -124,15 +150,15 @@ export default function ProtocolDrillDownDrawer({ selectedProtocol, onClose }) {
              <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <AlertCircle size={14} /> Inventory Profit Risk
               </h3>
-              <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'rgba(245,158,11,0.05)' }}>
+              <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: profitAtRisk > 0 ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.85rem' }}>
                   <div>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Stock Remaining</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#d97706' }}>{originalProduct.stockCount || 12} days</div>
+                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Current Stock</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: stockCount <= 5 ? 'var(--color-danger)' : '#d97706' }}>{stockCount} units</div>
                   </div>
                   <div>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Profit At Risk</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-danger)' }}>AED 12,600</div>
+                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Est. Profit At Risk</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: profitAtRisk > 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>AED {profitAtRisk.toFixed(2)}</div>
                   </div>
                 </div>
               </div>
@@ -144,9 +170,9 @@ export default function ProtocolDrillDownDrawer({ selectedProtocol, onClose }) {
               </h3>
               <div style={{ backgroundColor: 'rgba(26,115,232,0.05)', border: '1px solid rgba(26,115,232,0.2)', borderRadius: 'var(--radius-md)', padding: '1rem', fontSize: '0.85rem', color: 'var(--text-main)' }}>
                 <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <li>Create Purchase Order immediately to avoid stockout.</li>
-                  <li>Consider raising price by 5% due to high demand.</li>
-                  <li>Switch logistics provider to save 2% on COGS.</li>
+                  {recommendations.map((rec, i) => (
+                    <li key={i}>{rec}</li>
+                  ))}
                 </ul>
               </div>
           </div>

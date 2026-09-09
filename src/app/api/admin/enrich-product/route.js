@@ -3,9 +3,15 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { calculateProductCompleteness } from '@/utils/calculateProductCompleteness';
 import { enrichProductDocument } from '@/services/clinicalEnrichmentEngine';
 import { resolveCasNumber } from '@/utils/casResolver';
+import { verifyAdminAuth } from '@/lib/serverAuth';
 
 export async function POST(request) {
   try {
+    const authCheck = await verifyAdminAuth(request);
+    if (!authCheck.isAuthorized) {
+      return authCheck.response;
+    }
+
     const { productId, canonicalName, currentProduct } = await request.json();
 
     if (!productId && !canonicalName) {

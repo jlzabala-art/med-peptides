@@ -1,26 +1,8 @@
 "use server";
 
 import { adminDb } from '../lib/firebaseAdmin';
-
-// ─── Re-use serialize helper from patientsActions ─────────────────────────────
-function serializeDoc(doc) {
-  if (!doc || !doc.exists) return null;
-  const data = doc.data();
-  const serialized = { id: doc.id, ...data };
-  for (const [key, val] of Object.entries(serialized)) {
-    if (val && typeof val === 'object' && typeof val.toDate === 'function') {
-      serialized[key] = val.toDate().toISOString();
-    } else if (val && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
-      // Recursively serialize nested objects
-      for (const [nestedKey, nestedVal] of Object.entries(val)) {
-        if (nestedVal && typeof nestedVal === 'object' && typeof nestedVal.toDate === 'function') {
-          serialized[key] = { ...val, [nestedKey]: nestedVal.toDate().toISOString() };
-        }
-      }
-    }
-  }
-  return serialized;
-}
+import { serializeDoc, serializeDocs, serializeFirestoreData } from '../lib/serializeFirestore';
+import logger from '../utils/logger';
 
 // ─── In-memory cache ──────────────────────────────────────────────────────────
 let cachedPhysicianKPIs = null;
@@ -40,7 +22,7 @@ export async function fetchPhysiciansAction({ limitCount = 50 } = {}) {
 
     return snapshot.docs.map(d => serializeDoc(d)).filter(Boolean);
   } catch (error) {
-    console.error('[fetchPhysiciansAction] Error:', error);
+    logger.error('[fetchPhysiciansAction] failed', error);
     return [];
   }
 }
@@ -81,7 +63,7 @@ export async function fetchPhysiciansKPIsAction(forceRefresh = false) {
     lastPhysicianKPIFetch = now;
     return kpis;
   } catch (error) {
-    console.error('[fetchPhysiciansKPIsAction] Error:', error);
+    logger.error('[fetchPhysiciansKPIsAction] failed', error);
     return cachedPhysicianKPIs || { total: 0, active: 0, pending: 0, avgPatients: 0 };
   }
 }
@@ -197,7 +179,7 @@ export async function fetchPhysicianWorkspaceBundleAction(physicianId) {
       }
     };
   } catch (error) {
-    console.error('[fetchPhysicianWorkspaceBundleAction] Error:', error);
+    logger.error('[fetchPhysicianWorkspaceBundleAction] failed', error);
     return null;
   }
 }
@@ -286,7 +268,123 @@ export async function assignDoctorToPatientAction({ patientId, physicianId, rela
       }
     };
   } catch (error) {
-    console.error('[assignDoctorToPatientAction] Transaction error:', error);
+    logger.error('[assignDoctorToPatientAction] Transaction error', error);
     return { success: false, error: error.message || 'Assignment failed' };
   }
 }
+
+/**
+ * Server Action: Creates a doctor-patient relationship with atomic array synchronization.
+ */
+export async function createRelationshipAction({
+  patientId,
+  doctorId,
+  initiatedBy,
+  initiatedByRole,
+  notes = '',
+  status = 'pending',
+}) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!patientId || !doctorId || !initiatedBy || !initiatedByRole) {
+      throw new Error("Missing required fields for createRelationshipAction.");
+    }
+
+    // Check duplicate
+    const existingSnap = await adminDb.collection('doctor_patient_relationships')
+      .where('patientId', '==', patientId)
+      .where('doctorId', '==', doctorId)
+      .where('status', 'in', ['pending', 'active'])
+      .limit(1)
+      .get();
+
+    if (!existingSnap.empty) {
+      return { success: false, error: 'A relationship between this patient and doctor already exists.' };
+    }
+
+    const now = new Date();
+    const relRef = adminDb.collection('doctor_patient_relationships').doc();
+    const batch = adminDb.batch();
+
+    const rel = {
+      patientId,
+      doctorId,
+      status,
+      initiatedBy,
+      initiatedByRole,
+      notes,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      activatedAt: status === 'active' ? now.toISOString() : null,
+    };
+
+    batch.set(relRef, rel);
+
+    if (status === 'active') {
+      const patientRef = adminDb.collection('users').doc(patientId);
+      const doctorRef = adminDb.collection('users').doc(doctorId);
+      batch.set(patientRef, {
+        assignedDoctorIds: [doctorId],
+        updatedAt: now.toISOString()
+      }, { merge: true });
+      batch.set(doctorRef, {
+        assignedPatientIds: [patientId],
+        updatedAt: now.toISOString()
+      }, { merge: true });
+    }
+
+    await batch.commit();
+
+    return { success: true, id: relRef.id };
+  } catch (error) {
+    logger.error('[createRelationshipAction] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Server Action: Updates doctor-patient relationship status with array sync on activation.
+ */
+export async function updateRelationshipStatusAction({ relId, newStatus, notes }) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!relId || !newStatus) throw new Error("relId and newStatus are required.");
+
+    const relRef = adminDb.collection('doctor_patient_relationships').doc(relId);
+    const snap = await relRef.get();
+    if (!snap.exists) return { success: false, error: `Relationship ${relId} not found.` };
+
+    const data = snap.data();
+    const now = new Date();
+    const batch = adminDb.batch();
+
+    const update = {
+      status: newStatus,
+      updatedAt: now.toISOString(),
+    };
+    if (notes !== undefined) update.notes = notes;
+    if (newStatus === 'active' && !data.activatedAt) {
+      update.activatedAt = now.toISOString();
+
+      const patientRef = adminDb.collection('users').doc(data.patientId);
+      const doctorRef = adminDb.collection('users').doc(data.doctorId);
+      batch.set(patientRef, {
+        assignedDoctorIds: [data.doctorId],
+        updatedAt: now.toISOString()
+      }, { merge: true });
+      batch.set(doctorRef, {
+        assignedPatientIds: [data.patientId],
+        updatedAt: now.toISOString()
+      }, { merge: true });
+    }
+
+    batch.update(relRef, update);
+    await batch.commit();
+
+    return { success: true };
+  } catch (error) {
+    logger.error('[updateRelationshipStatusAction] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+

@@ -89,9 +89,23 @@ export default function Omnibar() {
     const timer = setTimeout(async () => {
       if (isMounted) setSearching(true);
       try {
-        const results = await searchAlgoliaFederated(query, ['products', 'protocols', 'users'], 3);
+        const results = await searchAlgoliaFederated(query, ['products', 'protocols', 'atlas_patients', 'atlas_users', 'prescriptions'], 6);
         if (isMounted) {
-          setAlgoliaResults(results || { products: [], protocols: [], users: [] });
+          const seen = new Set();
+          const uniqueProducts = [];
+          for (const p of (results?.products || [])) {
+            const pName = p.name || p.title || p.id;
+            const pDose = p.dosage || p.dose || '';
+            const key = `${pName.toLowerCase()}_${pDose.toLowerCase()}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              uniqueProducts.push(p);
+            }
+          }
+          setAlgoliaResults({
+            ...(results || {}),
+            products: uniqueProducts.slice(0, 4),
+          });
         }
       } catch (err) {
         console.error('Algolia federated search failed', err);
@@ -262,10 +276,17 @@ export default function Omnibar() {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                    <Pill size={16} color="#003666" />
-                    <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>
-                      {p.name || p.title}
-                    </span>
+                    <Pill size={16} color="#003666" style={{ flexShrink: 0 }} />
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.88rem', fontWeight: 600, color: '#0f172a' }}>
+                        {p.name || p.title}
+                      </span>
+                      {(p.dosage || p.dose || p.presentation || p.category) && (
+                        <span style={{ fontSize: '0.73rem', color: '#64748b' }}>
+                          {[p.dosage || p.dose, p.presentation, p.category].filter(Boolean).join(' · ')}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <ChevronRight size={14} color="#94a3b8" />
                 </div>

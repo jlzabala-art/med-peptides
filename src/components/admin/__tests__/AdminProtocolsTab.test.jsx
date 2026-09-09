@@ -83,7 +83,7 @@ describe('AdminProtocolsTab', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Protocols & Pathways/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Protocols & Pathways/i)[0]).toBeInTheDocument();
     });
   });
 });

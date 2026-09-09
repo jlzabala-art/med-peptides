@@ -147,7 +147,7 @@ export default function PrescriptionIntakeWidget() {
     } catch (err) {
       console.error("Error calling Prescription Ingestion Agent:", err);
       // Fallback if backend fails
-      setWarnings(["Hubo un error al conectar con el servidor de IA. Mostrando resultados aproximados."]);
+      setWarnings(["AI processing server connection offline. Displaying approximate formulation matches."]);
       const lines = prescriptionText.split('\n').map(l => l.trim()).filter(l => l.length > 2);
       const catalogMatch = [];
       const compoundingMatch = [];
@@ -309,10 +309,15 @@ export default function PrescriptionIntakeWidget() {
       }} />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', zIndex: 1 }}>
-        <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <Clipboard size={20} color="var(--primary)" /> Prescription Management
-        </h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', zIndex: 1, flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <Clipboard size={18} color="#003666" /> Clinic Compounding & Inbound Rx Intake
+          </h3>
+          <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+            Process clinic compounding orders and match commercial formulas in real time
+          </p>
+        </div>
         {mode !== 'select' && (
           <button 
             onClick={resetWidget}
@@ -336,9 +341,9 @@ export default function PrescriptionIntakeWidget() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', zIndex: 1 }}>
         {/* SELECT MODE STATE */}
         {mode === 'select' && (
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', gap: '1.5rem', flex: 1 }}>
-            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: '1.5', textAlign: 'center' }}>
-              Process medical prescriptions in real time. The AI will classify compounds available in the commercial catalog or send them to the compounding lab.
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', gap: '1.25rem', flex: 1 }}>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: '1.5', textAlign: 'center' }}>
+              Process clinic prescriptions and bulk compounding requests. The clinical AI parser automatically categorizes stock items and compounding formulas.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
               <div 

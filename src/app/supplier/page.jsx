@@ -1,12 +1,15 @@
-'use client';
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import DashboardEngine from '../../engine/DashboardEngine';
+import { fetchPortalDashboardDataAction } from '../../actions/portalDashboardActions';
+import SupplierPageClient from './SupplierPageClient';
 
-export default function SupplierRootPage() {
+/**
+ * Server Component (RSC) for Supplier Root Page.
+ * Follows Golden Rule #21.
+ */
+export default async function SupplierRootPage() {
+  const initialData = await fetchPortalDashboardDataAction('supplier');
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <DashboardEngine role="supplier" dataContext={{}} />
-    </div>
+    <SupplierPageClient initialData={initialData} />
   );
 }

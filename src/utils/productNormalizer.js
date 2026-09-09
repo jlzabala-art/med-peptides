@@ -266,3 +266,42 @@ export function normalizeProductMeta(product) {
     purity: product.apiSpecs?.purityPercentage || product.purity || (inferProductType(product) === 'raw_material' ? 99.0 : null)
   };
 }
+
+/**
+ * Accurately determines if a product is a genuine clinical Peptide (vs raw API, medical supply, supplement, etc.)
+ * Used to restrict peptide-specific features (such as the Universal Datasheet / Barcode share function).
+ */
+export function isPeptideProduct(product) {
+  if (!product) return false;
+  const name = (product.name || product.title || '').toLowerCase();
+  const cat = (product.category || product.classification || '').toLowerCase();
+  const type = (product.productType || product.type || '').toLowerCase();
+
+  // Explicit non-peptides (supplies, syringes, solvents, non-peptide raw chemicals)
+  if (type === 'clinical_supplies' || cat.includes('supplies') || /syringe|needle|bac water|solvent|filter|diluent/i.test(name)) {
+    return false;
+  }
+
+  // Non-peptide small molecules, enzymes, anesthetics, vitamins
+  if (/lidocaine|benzocaine|methylene blue|serrapeptase|bromelain|naltrexone|minoxidil|tadalafil|sildenafil|finasteride|dutasteride|alpha lipoic|vitamin d/i.test(name)) {
+    return false;
+  }
+
+  // Explicit peptide indicators
+  if (cat.includes('peptide') || cat === 'prefilled peptide pens' || Boolean(product.sequence || product.molecular?.sequence)) {
+    return true;
+  }
+
+  // Common peptide families
+  if (/retatrutide|tirzepatide|semaglutide|bpc-?157|tb-?500|cjc|ipamorelin|sermorelin|epithalon|tesamorelin|aod-?9604|ghk-?cu|semax|selank|hexarelin|kisspeptin|mots-c|oxytocin|pt-?141|thymosin/i.test(name)) {
+    return true;
+  }
+
+  // If category is raw_material or api, only allow if it has peptide signature
+  if (type === 'raw_material' || cat === 'api' || cat === 'raw_material') {
+    return Boolean(product.sequence || product.molecular?.sequence || /peptide/i.test(cat) || /peptide/i.test(name));
+  }
+
+  return true;
+}
+

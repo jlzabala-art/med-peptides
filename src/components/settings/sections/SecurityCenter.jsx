@@ -88,9 +88,12 @@ export default function SecurityCenter() {
 
       {/* Password Update */}
       <div style={{ marginBottom: '3rem' }}>
-        <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>
-          <KeyRound size={18} color="var(--primary)" /> Change Password
+        <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>
+          <KeyRound size={18} color="var(--primary)" /> Password & Credentials
         </h4>
+        <p style={{ margin: '0 0 1rem 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          Set or change your account password. If you originally created your account with Google, setting a password here enables you to sign in with your email and password directly on any device.
+        </p>
         <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border)' }}>
           <form onSubmit={handleUpdatePassword} style={{ display: 'grid', gap: '1.5rem', maxWidth: '400px' }}>
             <div>

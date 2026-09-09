@@ -2,10 +2,11 @@
 
 import '../i18n';
 import React from 'react';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { get, set, del } from 'idb-keyval';
+import { usePathname } from 'next/navigation';
 
 // Contexts
 import { AuthProvider } from '../context/AuthContext';
@@ -25,11 +26,11 @@ import GlobalDrawerManager from '../components/shared/GlobalDrawerManager';
 import Omnibar from '../components/ui/Omnibar';
 import NetworkStatusBanner from '../components/ui/NetworkStatusBanner';
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 60 * 24,    // 24 hours — serve from cache by default
-      gcTime: 1000 * 60 * 60 * 48,        // 48 hours — keep even unused queries longer
+      staleTime: 1000 * 60 * 5,          // 5 minutes — aligned with repository RAM/LocalStorage TTL (Golden Rule #2)
+      gcTime: 1000 * 60 * 60 * 2,         // 2 hours — keep in memory
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: 'always',        // Re-sync on network restore
@@ -55,6 +56,20 @@ const persister = createAsyncStoragePersister({
 });
 
 export default function NextProviders({ children, serverUser }) {
+  const pathname = usePathname();
+  const isPublicStandalone = pathname?.startsWith('/p/') || pathname?.startsWith('/verify');
+
+  // 🚀 Fast-path for public standalone routes: Zero Auth listeners, Zero AI Copilot, Zero Cart, Zero Omnibar
+  if (isPublicStandalone) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+  }
+
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       <AuthProvider serverUser={serverUser}>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
+import { verifyAdminAuth } from '../../../../lib/serverAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,8 +40,13 @@ const FALLBACK_CLINIC_CLIENTS = [
   { name: 'Alexander Wright (Patient)', doctor: 'Dr. Elena Suarez', clinic: 'BioRegen Wellness Center', category: 'patient' }
 ];
 
-export async function POST() {
+export async function POST(request) {
   try {
+    const authCheck = await verifyAdminAuth(request);
+    if (!authCheck.isAuthorized) {
+      return authCheck.response;
+    }
+
     if (!adminDb) {
       return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
     }

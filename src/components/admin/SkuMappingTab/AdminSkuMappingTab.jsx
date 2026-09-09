@@ -1061,7 +1061,7 @@ function ResolveFamilyModal({ firebaseProductId, onClose, getToken, agentBody, a
         <div style={modalStyles.header}>
           <div>
             <h3 style={modalStyles.title}>Align Product Family</h3>
-            <p style={modalStyles.subtitle}>Firebase ID: <CopyableId value={firebaseProductId} /></p>
+            <div style={modalStyles.subtitle}>Firebase ID: <CopyableId value={firebaseProductId} /></div>
           </div>
           <button style={modalStyles.closeBtn} onClick={onClose}>
             <X size={18} />

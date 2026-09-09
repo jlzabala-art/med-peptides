@@ -6,13 +6,20 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 import { initStorageQuotaGuard } from './utils/storageQuotaGuard';
 
+// ── Security: Never use hardcoded keys — fail loudly on missing env vars ──────
+if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY && process.env.NODE_ENV === 'production') {
+  // In production a missing key is a configuration error, not a runtime fallback
+  console.error('[Firebase] NEXT_PUBLIC_FIREBASE_API_KEY is not set. Check your .env or hosting environment variables.');
+}
+
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "med-peptides-app-27a3a.firebaseapp.com",
+  // Non-secret identifiers — safe to have fallbacks for local dev convenience
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "med-peptides-app.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "med-peptides-app",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "med-peptides-app.firebasestorage.app",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "514143707883",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:514143707883:web:6c12470433ef6c992714ae"
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:514143707883:web:6c12470433ef6c992714ae",
 };
 
 let app;

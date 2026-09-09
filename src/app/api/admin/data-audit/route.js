@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
+import { verifyAdminAuth } from '../../../../lib/serverAuth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const authCheck = await verifyAdminAuth(request);
+    if (!authCheck.isAuthorized) {
+      return authCheck.response;
+    }
+
     if (!adminDb) {
       return NextResponse.json({ error: "Database not initialized" }, { status: 500 });
     }

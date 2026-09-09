@@ -143,7 +143,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
 
   const algoliaFacetFilters = useMemo(() => {
     const filters = [];
-    if (statusFilter) filters.push(`status:${statusFilter}`);
+    if (statusFilter) filters.push(`status:${statusFilter.toLowerCase()}`);
     return filters;
   }, [statusFilter]);
 

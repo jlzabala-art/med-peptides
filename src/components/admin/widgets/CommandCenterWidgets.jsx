@@ -18,8 +18,9 @@ const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: fa
 const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
 
-// Mock Sparkline Component
+// Sparkline Component
 function MiniSparkline({ data, color }) {
+  if (!data || !Array.isArray(data) || data.length < 2) return null;
   return (
     <div
       style={{
@@ -48,147 +49,125 @@ function MiniSparkline({ data, color }) {
 
 // 1. EXECUTIVE SUMMARY STRIP (KPI CARDS)
 export function ExecutiveSummaryStrip({ metrics = {}, visibleKPIs = [], onCardClick }) {
-  const mockSparkDataUp = [
-    { value: 10 },
-    { value: 15 },
-    { value: 13 },
-    { value: 20 },
-    { value: 25 },
-    { value: 30 },
-  ];
-  const mockSparkDataDown = [
-    { value: 30 },
-    { value: 25 },
-    { value: 28 },
-    { value: 20 },
-    { value: 15 },
-    { value: 10 },
-  ];
-  const mockSparkDataFlat = [
-    { value: 15 },
-    { value: 15 },
-    { value: 16 },
-    { value: 15 },
-    { value: 15 },
-    { value: 16 },
-  ];
+  const getSpark = (id) => metrics.sparklines?.[id] || metrics[`${id}Sparkline`] || null;
+  const getTrend = (id, fallback) => metrics.trends?.[id] || metrics[`${id}Trend`] || fallback;
 
   const kpis = [
     {
       id: 'revenue',
       label: 'Revenue',
       value: formatAEDtoDual(metrics.revenue || 0),
-      trend: '+18.4%',
-      trendUp: true,
-      spark: mockSparkDataUp,
+      trend: getTrend('revenue', metrics.revenue > 0 ? 'Active' : 'No revenue'),
+      trendUp: metrics.revenue > 0 ? true : null,
+      spark: getSpark('revenue'),
     },
     {
       id: 'grossProfit',
       label: 'Gross Profit',
       value: formatAEDtoDual(metrics.grossProfit || 0),
-      trend: 'Margin 30%',
+      trend: getTrend('grossProfit', metrics.grossProfit > 0 ? 'Margin active' : 'Zero margin'),
       trendUp: null,
-      spark: mockSparkDataFlat,
+      spark: getSpark('grossProfit'),
     },
     {
       id: 'cashPosition',
       label: 'Cash Position',
       value: formatAEDtoDual(metrics.cashPosition || 0),
-      trend: 'Optimal',
-      trendUp: true,
-      spark: mockSparkDataUp,
+      trend: getTrend('cashPosition', metrics.cashPosition > 0 ? 'Active balance' : 'Zero balance'),
+      trendUp: metrics.cashPosition > 0 ? true : null,
+      spark: getSpark('cashPosition'),
     },
     {
       id: 'openOrders',
       label: 'Open Orders',
       value: metrics.openOrders || 0,
-      trend: '-2% delay',
-      trendUp: false,
-      spark: mockSparkDataDown,
+      trend: getTrend('openOrders', metrics.openOrders > 0 ? `${metrics.openOrders} pending` : 'No orders'),
+      trendUp: metrics.openOrders > 0 ? false : null,
+      spark: getSpark('openOrders'),
     },
     {
       id: 'pendingApprovals',
       label: 'Approvals',
       value: metrics.pendingApprovals || 0,
-      trend: 'Requires Action',
+      trend: getTrend('pendingApprovals', metrics.pendingApprovals > 0 ? 'Requires Action' : 'All clear'),
       trendUp: false,
-      alert: true,
-      spark: mockSparkDataFlat,
+      alert: (metrics.pendingApprovals || 0) > 0,
+      spark: getSpark('pendingApprovals'),
     },
     {
       id: 'openRFQs',
       label: 'Open RFQs',
       value: metrics.openRFQs || 0,
-      trend: '+7 today',
+      trend: getTrend('openRFQs', metrics.openRFQs > 0 ? `${metrics.openRFQs} active` : 'None open'),
       trendUp: null,
-      spark: mockSparkDataFlat,
+      spark: getSpark('openRFQs'),
     },
     {
       id: 'aiAlerts',
       label: 'AI Alerts',
       value: metrics.aiAlerts || 0,
-      trend: 'Pricing alerts',
+      trend: getTrend('aiAlerts', metrics.aiAlerts > 0 ? 'Action required' : 'No alerts'),
       trendUp: false,
-      alert: true,
-      spark: mockSparkDataUp,
+      alert: (metrics.aiAlerts || 0) > 0,
+      spark: getSpark('aiAlerts'),
     },
     {
       id: 'activePatients',
       label: 'Active Patients',
       value: metrics.activePatients || 0,
-      trend: '+4 this week',
+      trend: getTrend('activePatients', metrics.activePatients > 0 ? `${metrics.activePatients} total` : 'No patients'),
       trendUp: true,
-      spark: mockSparkDataUp,
+      spark: getSpark('activePatients'),
     },
     {
       id: 'pendingPrescriptions',
       label: 'Prescriptions',
       value: metrics.pendingPrescriptions || 0,
-      trend: 'Awaiting Sign',
+      trend: getTrend('pendingPrescriptions', metrics.pendingPrescriptions > 0 ? 'Awaiting sign' : 'All signed'),
       trendUp: false,
-      alert: true,
-      spark: mockSparkDataFlat,
+      alert: (metrics.pendingPrescriptions || 0) > 0,
+      spark: getSpark('pendingPrescriptions'),
     },
     {
       id: 'activeProtocols',
       label: 'Active Protocols',
       value: metrics.activeProtocols || 0,
-      trend: 'Up to date',
+      trend: getTrend('activeProtocols', metrics.activeProtocols > 0 ? 'Up to date' : 'No protocols'),
       trendUp: true,
-      spark: mockSparkDataFlat,
+      spark: getSpark('activeProtocols'),
     },
     {
       id: 'dueFollowUps',
       label: 'Due Follow-Ups',
       value: metrics.dueFollowUps || 0,
-      trend: 'Requires Action',
+      trend: getTrend('dueFollowUps', metrics.dueFollowUps > 0 ? 'Requires Action' : 'Up to date'),
       trendUp: false,
-      alert: metrics.dueFollowUps > 0,
-      spark: mockSparkDataDown,
+      alert: (metrics.dueFollowUps || 0) > 0,
+      spark: getSpark('dueFollowUps'),
     },
     {
       id: 'pipelineValue',
       label: 'Pipeline Value',
       value: formatAEDtoDual(metrics.pipelineValue || 0),
-      trend: '+12%',
+      trend: getTrend('pipelineValue', metrics.pipelineValue > 0 ? 'Active' : 'Empty'),
       trendUp: true,
-      spark: mockSparkDataUp,
+      spark: getSpark('pipelineValue'),
     },
     {
       id: 'supplierHealth',
       label: 'Supplier Health',
-      value: `${metrics.supplierHealth || '98'}%`,
-      trend: 'Stable',
+      value: `${metrics.supplierHealth !== undefined ? metrics.supplierHealth : '100'}%`,
+      trend: getTrend('supplierHealth', 'Stable'),
       trendUp: true,
-      spark: mockSparkDataFlat,
+      spark: getSpark('supplierHealth'),
     },
     {
       id: 'systemUptime',
       label: 'System Uptime',
-      value: `${metrics.systemUptime || '99.9'}%`,
-      trend: 'Operational',
+      value: `${metrics.systemUptime !== undefined ? metrics.systemUptime : '100'}%`,
+      trend: getTrend('systemUptime', 'Operational'),
       trendUp: true,
-      spark: mockSparkDataUp,
+      spark: getSpark('systemUptime'),
     },
   ];
 

@@ -18,19 +18,15 @@ import AtlasAIDrawer from '../components/shared/AtlasAIDrawer';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 
 // Routes that have their own dashboard/portal layout or are standalone public views — B2C shell must be hidden
-const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/session-ended', '/shared', '/quotation'];
+const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/session-ended', '/shared', '/quotation', '/p', '/verify'];
 
-export default function GlobalClientWrapper({ children }) {
+function StorefrontShell({ children }) {
   const { isProfessional, activeRole } = useAuth();
   const { activeModal, setActiveModal, searchQuery, setSearchQuery, setSearchInitialTab } = useUIStore();
   const { catalogue: products, protocols, supplements } = useFirestoreData();
   const router = useRouter();
   const pathname = usePathname();
 
-  const isPortalRoute = PORTAL_PREFIXES.some((prefix) => pathname?.startsWith(prefix));
-
-
-  // Basic routing handlers since the original Header needed them
   const handleCategorySelect = (cat) => {
     if (cat === 'Home') return router.push(activeRole === 'admin' ? '/admin' : '/');
     if (cat === 'Peptides' || cat === 'Products') return router.push('/collection/peptides');
@@ -68,17 +64,6 @@ export default function GlobalClientWrapper({ children }) {
     const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     router.push(`/collection/${slug}`);
   };
-
-  // Portal routes have their own layout — just render children
-  if (isPortalRoute) {
-    return (
-      <AppErrorBoundary>
-        <Toaster containerStyle={{ zIndex: 99999 }} />
-        {children}
-        <PWAInstallPrompt />
-      </AppErrorBoundary>
-    );
-  }
 
   return (
     <AppErrorBoundary>
@@ -127,5 +112,23 @@ export default function GlobalClientWrapper({ children }) {
       <PWAInstallPrompt />
     </AppErrorBoundary>
   );
+}
+
+export default function GlobalClientWrapper({ children }) {
+  const pathname = usePathname();
+  const isPortalRoute = PORTAL_PREFIXES.some((prefix) => pathname?.startsWith(prefix));
+
+  // Portal routes have their own layout — just render children without loading B2C data
+  if (isPortalRoute) {
+    return (
+      <AppErrorBoundary>
+        <Toaster containerStyle={{ zIndex: 99999 }} />
+        {children}
+        <PWAInstallPrompt />
+      </AppErrorBoundary>
+    );
+  }
+
+  return <StorefrontShell>{children}</StorefrontShell>;
 }
 

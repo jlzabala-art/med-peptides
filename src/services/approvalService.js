@@ -5,9 +5,10 @@
  * Decouples approval queue fetching and resolution actions from UI components.
  */
 
-import { collection, query, where, getDocs, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase.js';
 import logger from '../utils/logger.js';
+import { resolveFinancialApprovalAction } from '../actions/adminActions';
 
 /**
  * Fetch pending financial approvals sorted by creation date descending.
@@ -30,33 +31,19 @@ export async function fetchPendingApprovals() {
 
 /**
  * Resolve an approval item (approve or reject) and trigger side-effects.
+ * Executes atomically on the server via Server Action.
  */
 export async function resolveApproval({ approvalId, type, data, action, resolvedBy }) {
   try {
-    const approvalRef = doc(db, 'financial_approvals', approvalId);
-    await updateDoc(approvalRef, {
-      status: action === 'approve' ? 'approved' : 'rejected',
-      resolvedBy: resolvedBy || 'cfo@atlas.com',
-      resolvedAt: new Date().toISOString(),
-      serverResolvedAt: serverTimestamp()
-    });
-
-    if (action === 'approve') {
-      if (type === 'cost_update' && data?.productId && data?.updates) {
-        const productRef = doc(db, 'products', data.productId);
-        await updateDoc(productRef, data.updates);
-        logger.info('[approvalService] Applied approved cost update for product:', data.productId);
-      } else if (type === 'payout_auth' && data?.payoutId) {
-        const payoutRef = doc(db, 'payouts', data.payoutId);
-        await updateDoc(payoutRef, { status: 'paid', paidAt: new Date().toISOString() });
-        logger.info('[approvalService] Applied approved payout for:', data.payoutId);
-      }
+    // ⚡ Execute on server side with atomic batch write and audit log
+    const res = await resolveFinancialApprovalAction({ approvalId, type, data, action, resolvedBy });
+    if (res?.success) {
+      logger.info(`[approvalService] Approval ${approvalId} ${action}d via Server Action.`);
+      return { success: true };
     }
-
-    logger.info(`[approvalService] Approval ${approvalId} ${action}d successfully.`);
-    return { success: true };
   } catch (err) {
-    logger.error(`[approvalService] Failed to resolve approval ${approvalId}:`, err);
-    throw err;
+    logger.error(`[approvalService] Failed to resolve approval ${approvalId}:`, err.message);
+    return { success: false, error: err.message || 'Failed to resolve approval' };
   }
 }
+

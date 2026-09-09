@@ -7,6 +7,7 @@ import {
   createUserWithEmailAndPassword, 
   signOut,
   updateProfile,
+  updatePassword,
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup
@@ -404,6 +405,11 @@ export function AuthProvider({ children, serverUser = null }) {
     return { cred, profile };
   };
 
+  const linkPassword = async (newPassword) => {
+    if (!auth.currentUser) throw new Error('No user is currently authenticated.');
+    await updatePassword(auth.currentUser, newPassword);
+  };
+
   const updateProfileData = async (data) => {
     if (!user) return;
     const docRef = doc(db, 'users', user.uid);
@@ -436,6 +442,7 @@ export function AuthProvider({ children, serverUser = null }) {
     login,
     logout,
     resetPassword,
+    linkPassword,
     loginWithGoogle,
     updateProfileData,
     activeRole,

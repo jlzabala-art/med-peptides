@@ -852,78 +852,108 @@ export default function WorkspaceDrawer() {
             {sectionExpanded.products && (
               <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', backgroundColor: '#f8fafc' }}>
                 {items.length === 0 ? (
-                  <div
-                    style={{
-                      padding: '1.5rem 1rem',
-                      textAlign: 'center',
-                      backgroundColor: '#ffffff',
-                      borderRadius: '10px',
-                      border: '2px dashed #cbd5e1',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.65rem',
-                    }}
-                  >
-                    <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#003666' }}>
-                      <Package size={22} />
-                    </div>
-                    <div>
-                      <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0f172a', margin: '0 0 3px 0' }}>
-                        No Products Staged Yet
-                      </h4>
-                      <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0 }}>
-                        Select clinical protocols or master catalog items to build your workspace:
-                      </p>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', marginTop: '0.2rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', padding: '0.2rem 0' }}>
+                    {/* Card 1: Load Clinical Protocol */}
+                    <div
+                      onClick={() => {
+                        setActivePicker(activePicker === 'protocols' ? null : 'protocols');
+                        setPickerSearch('');
+                      }}
+                      style={{
+                        backgroundColor: activePicker === 'protocols' ? '#e0f2fe' : '#ffffff',
+                        border: `1.5px solid ${activePicker === 'protocols' ? '#0284c7' : '#bfdbfe'}`,
+                        borderRadius: '12px',
+                        padding: '1.1rem 1.15rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        transition: 'all 0.18s ease',
+                        boxShadow: '0 2px 6px rgba(2, 132, 199, 0.05)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                        <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#003666', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <FileText size={22} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#003666' }}>
+                            Load Clinical Protocol
+                          </h4>
+                          <p style={{ margin: '3px 0 0', fontSize: '0.76rem', color: '#0284c7', fontWeight: 600 }}>
+                            Import pre-configured multi-compound treatment regimens
+                          </p>
+                        </div>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setActivePicker(activePicker === 'protocols' ? null : 'protocols');
-                          setPickerSearch('');
-                        }}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px',
-                          padding: '9px 12px',
-                          backgroundColor: activePicker === 'protocols' ? '#003666' : '#eff6ff',
-                          color: activePicker === 'protocols' ? '#ffffff' : '#1d4ed8',
-                          border: '1px solid #bfdbfe',
+                          border: 'none',
+                          backgroundColor: '#003666',
+                          color: '#ffffff',
+                          padding: '7px 14px',
                           borderRadius: '8px',
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          fontWeight: 800,
                           cursor: 'pointer',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <span>📋</span> Load from Clinical Protocol
+                        Select →
                       </button>
+                    </div>
 
+                    {/* Card 2: Add from Master Catalog */}
+                    <div
+                      onClick={() => {
+                        setActivePicker(activePicker === 'products' ? null : 'products');
+                        setPickerSearch('');
+                      }}
+                      style={{
+                        backgroundColor: activePicker === 'products' ? '#dcfce7' : '#ffffff',
+                        border: `1.5px solid ${activePicker === 'products' ? '#16a34a' : '#bbf7d0'}`,
+                        borderRadius: '12px',
+                        padding: '1.1rem 1.15rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        transition: 'all 0.18s ease',
+                        boxShadow: '0 2px 6px rgba(22, 163, 74, 0.05)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                        <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Package size={22} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#14532d' }}>
+                            Add from Master Catalog
+                          </h4>
+                          <p style={{ margin: '3px 0 0', fontSize: '0.76rem', color: '#16a34a', fontWeight: 600 }}>
+                            Search & add individual active compounds, vials & cartridges
+                          </p>
+                        </div>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => {
-                          setActivePicker(activePicker === 'products' ? null : 'products');
-                          setPickerSearch('');
-                        }}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '8px',
-                          padding: '9px 12px',
-                          backgroundColor: activePicker === 'products' ? '#003666' : '#f0fdf4',
-                          color: activePicker === 'products' ? '#ffffff' : '#15803d',
-                          border: '1px solid #bbf7d0',
+                          border: 'none',
+                          backgroundColor: '#15803d',
+                          color: '#ffffff',
+                          padding: '7px 14px',
                           borderRadius: '8px',
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
+                          fontSize: '0.78rem',
+                          fontWeight: 800,
                           cursor: 'pointer',
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        <span>📦</span> Add from Master Catalog
+                        Browse →
                       </button>
                     </div>
                   </div>
@@ -991,37 +1021,48 @@ export default function WorkspaceDrawer() {
                                   <span>•</span>
                                   <span style={{ fontWeight: 600, color: '#0284c7' }}>{it.format || 'Vial'}</span>
                                   <span style={{ margin: '0 2px', color: '#cbd5e1' }}>|</span>
-                                  {unitRate > 0 ? (
-                                    <span style={{ color: '#0284c7', fontWeight: 800 }}>
-                                      ${unitRate.toFixed(2)} / unit
-                                    </span>
-                                  ) : (
-                                    <div
-                                      style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', backgroundColor: '#fef3c7', padding: '1px 6px', borderRadius: '5px', border: '1px solid #fde68a' }}
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#b45309' }}>$</span>
-                                      <input
-                                        type="number"
-                                        step="0.5"
-                                        placeholder="0.00"
-                                        onChange={(e) => updateItemPrice(it.id, parseFloat(e.target.value) || 0, activeWs.id)}
-                                        style={{
-                                          width: '56px',
-                                          fontSize: '0.74rem',
-                                          fontWeight: 800,
-                                          color: '#92400e',
-                                          backgroundColor: '#ffffff',
-                                          border: '1px solid #f59e0b',
-                                          borderRadius: '4px',
-                                          padding: '1px 4px',
-                                          outline: 'none',
-                                          textAlign: 'right'
-                                        }}
-                                      />
-                                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#b45309' }}>/ unit</span>
-                                    </div>
-                                  )}
+                                  {/* Inline Price Badge & Editor (Arrow-free, Clean Input) */}
+                                  <div
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '3px',
+                                      backgroundColor: unitRate > 0 ? '#f0f9ff' : '#fffbeb',
+                                      padding: '2px 6px',
+                                      borderRadius: '6px',
+                                      border: `1px solid ${unitRate > 0 ? '#bae6fd' : '#fde68a'}`,
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    title="Click to edit unit price"
+                                  >
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: unitRate > 0 ? '#0284c7' : '#d97706' }}>$</span>
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={unitRate > 0 ? unitRate.toString() : ''}
+                                      placeholder="0.00"
+                                      onChange={(e) => {
+                                        const raw = e.target.value;
+                                        if (/^\d*\.?\d*$/.test(raw)) {
+                                          const parsed = parseFloat(raw) || 0;
+                                          updateItemPrice(it.id, parsed, activeWs.id);
+                                        }
+                                      }}
+                                      style={{
+                                        width: '54px',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800,
+                                        color: unitRate > 0 ? '#0369a1' : '#b45309',
+                                        backgroundColor: '#ffffff',
+                                        border: `1px solid ${unitRate > 0 ? '#38bdf8' : '#f59e0b'}`,
+                                        borderRadius: '4px',
+                                        padding: '1px 4px',
+                                        outline: 'none',
+                                        textAlign: 'right',
+                                      }}
+                                    />
+                                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: unitRate > 0 ? '#0284c7' : '#d97706' }}>/ unit</span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -1127,10 +1168,17 @@ export default function WorkspaceDrawer() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                   <span style={{ fontSize: '0.75rem', color: '#1e40af', fontWeight: 700 }}>Unit Rate: $</span>
                                   <input
-                                    type="number"
-                                    step="0.1"
-                                    value={unitRate}
-                                    onChange={(e) => updateItemPrice(it.id, parseFloat(e.target.value) || 0, activeWs.id)}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={unitRate > 0 ? unitRate.toString() : ''}
+                                    placeholder="0.00"
+                                    onChange={(e) => {
+                                      const raw = e.target.value;
+                                      if (/^\d*\.?\d*$/.test(raw)) {
+                                        const parsed = parseFloat(raw) || 0;
+                                        updateItemPrice(it.id, parsed, activeWs.id);
+                                      }
+                                    }}
                                     style={{ width: '70px', textAlign: 'right', padding: '4px 6px', border: '1px solid #93c5fd', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 800, outline: 'none', backgroundColor: '#ffffff' }}
                                   />
                                 </div>
@@ -1870,107 +1918,125 @@ export default function WorkspaceDrawer() {
             zIndex: 10
           }}
         >
-          {activeWs.intent === 'buy' ? (
-            <button
-              type="button"
-              onClick={handleExecutePO}
-              disabled={items.length === 0}
-              className="gcp-btn-primary"
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: '#c2410c',
-                color: 'white',
-                borderRadius: '9px',
-                border: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 800,
-                cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 2px 8px rgba(194, 65, 12, 0.25)',
-              }}
-            >
-              <Truck size={17} /> Generate Purchase Order (${grandTotal.toFixed(2)})
-            </button>
+          {items.length === 0 ? (
+            <div style={{
+              padding: '10px 14px',
+              backgroundColor: '#f8fafc',
+              border: '1px border-dashed #cbd5e1',
+              borderRadius: '8px',
+              textAlign: 'center',
+              color: '#64748b',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '1rem' }}>💡</span>
+              <span>Workspace is empty — Add items above to unlock Quotations & Prescriptions</span>
+            </div>
           ) : (
             <>
+              {activeWs.intent === 'buy' ? (
+                <button
+                  type="button"
+                  onClick={handleExecutePO}
+                  className="gcp-btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    backgroundColor: '#c2410c',
+                    color: 'white',
+                    borderRadius: '9px',
+                    border: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 2px 8px rgba(194, 65, 12, 0.25)',
+                  }}
+                >
+                  <Truck size={17} /> Generate Purchase Order (${grandTotal.toFixed(2)})
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleExecuteQuotation}
+                    className="gcp-btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      backgroundColor: '#003666',
+                      color: 'white',
+                      borderRadius: '9px',
+                      border: 'none',
+                      fontSize: '0.9rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)',
+                    }}
+                  >
+                    <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExecutePrescription}
+                    className="gcp-btn-secondary"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      backgroundColor: '#0d9488',
+                      color: 'white',
+                      borderRadius: '9px',
+                      border: 'none',
+                      fontSize: '0.86rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
+                    }}
+                  >
+                    <ShieldCheck size={16} /> Create Rx Prescription
+                  </button>
+                </>
+              )}
+
+              {/* Live PDF Quick Preview Shortcut */}
               <button
                 type="button"
-                onClick={handleExecuteQuotation}
-                disabled={items.length === 0}
-                className="gcp-btn-primary"
+                onClick={() => setShowPdfPreview(true)}
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#003666',
-                  color: 'white',
-                  borderRadius: '9px',
-                  border: 'none',
-                  fontSize: '0.9rem',
-                  fontWeight: 800,
-                  cursor: items.length > 0 ? 'pointer' : 'not-allowed',
+                  padding: '6px',
+                  backgroundColor: '#f8fafc',
+                  color: '#475569',
+                  borderRadius: '7px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)',
+                  gap: '6px'
                 }}
               >
-                <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
-              </button>
-              <button
-                type="button"
-                onClick={handleExecutePrescription}
-                disabled={items.length === 0}
-                className="gcp-btn-secondary"
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  backgroundColor: '#0d9488',
-                  color: 'white',
-                  borderRadius: '9px',
-                  border: 'none',
-                  fontSize: '0.86rem',
-                  fontWeight: 800,
-                  cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
-                }}
-              >
-                <ShieldCheck size={16} /> Create Rx Prescription
+                <FileText size={13} /> 👁️ Quick Live PDF Summary Preview
               </button>
             </>
           )}
-
-          {/* Live PDF Quick Preview Shortcut */}
-          <button
-            type="button"
-            onClick={() => setShowPdfPreview(true)}
-            disabled={items.length === 0}
-            style={{
-              width: '100%',
-              padding: '6px',
-              backgroundColor: '#f8fafc',
-              color: '#475569',
-              borderRadius: '7px',
-              border: '1px solid #cbd5e1',
-              fontSize: '0.74rem',
-              fontWeight: 700,
-              cursor: items.length > 0 ? 'pointer' : 'not-allowed',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px'
-            }}
-          >
-            <FileText size={13} /> 👁️ Quick Live PDF Summary Preview
-          </button>
         </div>
       </div>
 

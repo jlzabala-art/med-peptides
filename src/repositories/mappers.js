@@ -6,6 +6,8 @@
  * before it reaches the UI. It prevents React crashes due to legacy data structures.
  */
 
+import { getPeptideScientificData } from '../utils/knownPeptideData';
+
 function safeString(val, fallback = '') {
   if (val === null || val === undefined) return fallback;
   if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
@@ -152,7 +154,7 @@ function cleanProductName(name) {
   if (!name) return name;
   let cleaned = name.replace(/\s*\d+(?:\.\d+)?\s*(?:mg|mcg|iu|ml|g|kg|unit)s?\b/gi, '');
   cleaned = cleaned.replace(/\s*\b(?:vial|vials|drops|pen|capsules?|tablets?|kit|pack|amp|amps)s?\b/gi, '');
-  cleaned = cleaned.replace(/\s*-\s*$/, '').trim();
+  cleaned = cleaned.replace(/[\s\/\-|]+$/, '').trim();
   return cleaned || name;
 }
 
@@ -162,6 +164,7 @@ export function normalizeProduct(data, id = null) {
   }
 
   const rawName = safeString(data.name, 'Unnamed Product');
+  const sciData = getPeptideScientificData(data.canonicalName || data.name || rawName) || {};
 
   // ── Safe array coercion ──
   const safeArray = (val) => {
@@ -211,10 +214,27 @@ export function normalizeProduct(data, id = null) {
     searchAliases:    safeArray(data.searchAliases),
     supplierIds:      safeArray(data.supplierIds),
 
-    // ── Science (always strings) ──
-    objective:       safeString(data.objective, ''),
-    desc:            safeString(data.desc || data.description, ''),
-    scientificName:  safeString(data.scientificName, ''),
+    // ── Science & Molecular Specifications (Schema v2) ──
+    objective:        safeString(data.objective, ''),
+    desc:             safeString(data.desc || data.description, ''),
+    scientificName:   safeString(data.scientificName || sciData.scientificName, ''),
+    casNumber:        safeString(data.casNumber || data.cas || sciData.casNumber, ''),
+    cas:              safeString(data.casNumber || data.cas || sciData.casNumber, ''),
+    molecularWeight:  safeString(data.molecularWeight || data.molecular_weight || sciData.molecularWeight, ''),
+    molecular_weight: safeString(data.molecularWeight || data.molecular_weight || sciData.molecularWeight, ''),
+    molecularFormula: safeString(data.molecularFormula || data.molecular_formula || sciData.molecularFormula, ''),
+    molecular_formula: safeString(data.molecularFormula || data.molecular_formula || sciData.molecularFormula, ''),
+    targetSystem:     safeString(data.targetSystem || data.target || sciData.targetSystem, ''),
+    target:           safeString(data.targetSystem || data.target || sciData.targetSystem, ''),
+    sequence:         safeString(data.sequence, ''),
+    mechanismOfAction: safeString(data.mechanismOfAction || sciData.mechanismOfAction, ''),
+
+    // ── Quality & Batch Traceability (Schema v2) ──
+    batchNumber:      safeString(data.batchNumber || data.lotNumber || data.batchCode, ''),
+    lotNumber:        safeString(data.batchNumber || data.lotNumber || data.batchCode, ''),
+    expirationDate:   safeString(data.expirationDate || data.expiryDate, ''),
+    coaUrl:           safeString(data.coaUrl, ''),
+    purity:           safeString(data.purity || data.purity_level, '≥ 99%'),
 
     // ── Flags (always boolean) ──
     isProfessional:      typeof data.isProfessional === 'boolean' ? data.isProfessional : false,

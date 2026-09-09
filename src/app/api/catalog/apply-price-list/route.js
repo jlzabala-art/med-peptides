@@ -186,7 +186,23 @@ export async function POST(request) {
       } 
       // CASE B: Create new product in catalog
       else {
-        const newProdRef = await dbAdmin.collection('products').add({
+        const cleanSlug = String(item.peptide_name || 'product')
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+
+        let targetDocId = cleanSlug;
+        const existingDoc = await dbAdmin.collection('products').doc(targetDocId).get();
+        if (existingDoc.exists) {
+          targetDocId = existingDoc.id;
+        }
+
+        const newProdRef = dbAdmin.collection('products').doc(targetDocId);
+        await newProdRef.set({
+          id: targetDocId,
+          slug: targetDocId,
+          canonicalSlug: targetDocId,
           canonicalName: item.peptide_name,
           name: item.peptide_name,
           category: targetCategory || 'Recovery & Repair',
@@ -205,12 +221,12 @@ export async function POST(request) {
           maxPrice: newCostNum,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        });
+        }, { merge: true });
 
-        currentProductId = newProdRef.id;
+        currentProductId = targetDocId;
 
         // Always write the variant to the subcollection — never to the parent doc array
-        const newVarDoc = await dbAdmin.collection('products').doc(newProdRef.id).collection('variants').add({
+        const newVarDoc = await dbAdmin.collection('products').doc(targetDocId).collection('variants').add({
           dose: `${qtyNum}${uom}`,
           dosage: `${qtyNum}${uom}`,
           purity: item.purity_or_grade || 'USP Grade',

@@ -7,41 +7,59 @@
  * and the logic cannot be tampered with on the client.
  */
 
-// import { getAuth } from 'firebase-admin/auth';
-import { adminDb } from '../lib/firebaseAdmin';
+import { adminDb, admin } from '../lib/firebaseAdmin';
+import { serializeDoc, serializeFirestoreData } from '../lib/serializeFirestore';
+import logger from '../utils/logger';
 
 /**
- * Approves a user and assigns them a specific role (e.g., 'wholesaler', 'clinic').
+ * Approves a user and assigns them a specific role via Firebase Custom Claims.
+ * Also writes the role to the user's Firestore document for client-side access.
+ *
  * @param {string} userId - The Firebase UID of the user to approve.
- * @param {string} role - The role to assign.
+ * @param {string} role   - The role to assign ('wholesaler', 'clinic', 'doctor', etc.)
  * @returns {Promise<{success: boolean, message: string}>}
  */
 export async function approveUserRoleAction(userId, role) {
+  const VALID_ROLES = ['admin', 'doctor', 'clinic', 'wholesaler', 'supplier', 'pharmacy', 'patient'];
+
   try {
-    // 1. Verify that the caller is actually an admin!
-    // In Next.js App Router, you can check the session cookies here.
-    // const session = await getSession();
-    // if (!session?.user?.isAdmin) throw new Error("Unauthorized");
+    if (!userId || typeof userId !== 'string') throw new Error('userId is required');
+    if (!role || !VALID_ROLES.includes(role)) throw new Error(`Invalid role: "${role}"`);
+    if (!adminDb) throw new Error('Firebase Admin SDK is not initialized');
 
-    // 2. Initialize Firebase Admin
-    // initAdmin();
-    // const auth = getAuth();
+    // ── Step 1: Set Firebase Auth Custom Claims ───────────────────────────
+    // This is the authoritative gate for server-side role checks.
+    const adminAuth = admin?.auth ? admin.auth() : null;
+    if (adminAuth) {
+      await adminAuth.setCustomUserClaims(userId, { role, approved: true });
+      logger.info('approveUserRoleAction: Custom Claims set', { userId, role });
+    } else {
+      logger.warn('approveUserRoleAction: admin.auth() unavailable — skipping Custom Claims', { userId });
+    }
 
-    // 3. Set the Custom Claims
-    // await auth.setCustomUserClaims(userId, { role, approved: true });
+    // ── Step 2: Write role to Firestore user document ─────────────────────
+    // Keeps the client-side useAuth() hook in sync without waiting for token refresh.
+    await adminDb.collection('users').doc(userId).set(
+      { role, approved: true, updatedAt: new Date() },
+      { merge: true }
+    );
 
-    // Simulando la operación por ahora:
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // ── Step 3: Write audit entry ─────────────────────────────────────────
+    await adminDb.collection('audit_logs').add({
+      action: 'USER_ROLE_APPROVED',
+      targetId: userId,
+      metadata: { role },
+      timestamp: new Date(),
+      operatorId: 'system',
+      operatorRole: 'admin',
+      fingerprint: { source: 'server' },
+    });
 
-    console.log(`[SERVER ACTION] User ${userId} approved as ${role}.`);
-
-    return { 
-      success: true, 
-      message: `User successfully approved as ${role}.` 
-    };
+    logger.audit('USER_ROLE_APPROVED', 'system', userId, { role });
+    return { success: true, message: `User ${userId} approved as ${role}.` };
 
   } catch (error) {
-    console.error("Admin Server Action failed:", error);
+    logger.error('approveUserRoleAction failed', error);
     return { success: false, message: error.message };
   }
 }
@@ -61,7 +79,7 @@ export async function fetchAuditLogsAction({ limitCount = 100 } = {}) {
       return { id: doc.id, ...data };
     });
   } catch (e) {
-    console.error('fetchAuditLogsAction error:', e);
+    logger.error('fetchAuditLogsAction failed', e);
     return [];
   }
 }
@@ -81,7 +99,7 @@ export async function fetchClinicalLogsAction({ limitCount = 1000 } = {}) {
       return { id: doc.id, ...data };
     });
   } catch (e) {
-    console.error('fetchClinicalLogsAction error:', e);
+    logger.error('fetchClinicalLogsAction failed', e);
     return [];
   }
 }
@@ -103,7 +121,7 @@ export async function fetchRfqsAction({ limitCount = 100 } = {}) {
       return { id: doc.id, ...data };
     });
   } catch (e) {
-    console.error('fetchRfqsAction error:', e);
+    logger.error('fetchRfqsAction failed', e);
     return [];
   }
 }
@@ -165,7 +183,7 @@ export async function updateVariantPriceAction({ productId, variantId, fieldPath
 
     return { success: true, message: 'Price updated successfully' };
   } catch (error) {
-    console.error('updateVariantPriceAction error:', error);
+    logger.error('updateVariantPriceAction failed', error);
     return { success: false, message: error.message };
   }
 }
@@ -212,7 +230,83 @@ export async function fetchGlobalAnalyticsAction() {
       totalUsers: usersCountSnap.data().count,
     };
   } catch (error) {
-    console.error('fetchGlobalAnalytics error:', error);
+    logger.error('fetchGlobalAnalyticsAction failed', error);
     return null;
   }
 }
+
+/**
+ * Server Action: Calculates executive brief metrics for a role and date range
+ */
+export async function fetchExecutiveBriefAction({ role = 'admin', timeRange = 'today', userId = null }) {
+  try {
+    const { getExecutiveBriefMetrics } = await import('../services/executiveBriefService');
+    return await getExecutiveBriefMetrics({ role, timeRange, userId });
+  } catch (error) {
+    logger.error('fetchExecutiveBriefAction failed', error);
+    return {
+      timeRange,
+      role,
+      metrics: {
+        revenue: 0,
+        openOrders: 0,
+        pendingApprovals: 0,
+        openRFQs: 0,
+      },
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Server Action: Resolves financial approvals (cost updates, payouts) atomically with audit logging.
+ */
+export async function resolveFinancialApprovalAction({ approvalId, type, data, action, resolvedBy }) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!approvalId) throw new Error("approvalId is required.");
+
+    const approvalRef = adminDb.collection('financial_approvals').doc(approvalId);
+    const batch = adminDb.batch();
+
+    const resolvedAtIso = new Date().toISOString();
+    const serverTimestamp = new Date();
+
+    batch.update(approvalRef, {
+      status: action === 'approve' ? 'approved' : 'rejected',
+      resolvedBy: resolvedBy || 'cfo@atlas.com',
+      resolvedAt: resolvedAtIso,
+      updatedAt: serverTimestamp,
+    });
+
+    if (action === 'approve') {
+      if (type === 'cost_update' && data?.productId && data?.updates) {
+        const productRef = adminDb.collection('products').doc(data.productId);
+        batch.set(productRef, data.updates, { merge: true });
+      } else if (type === 'payout_auth' && data?.payoutId) {
+        const payoutRef = adminDb.collection('payouts').doc(data.payoutId);
+        batch.update(payoutRef, { status: 'paid', paidAt: resolvedAtIso, updatedAt: serverTimestamp });
+      }
+    }
+
+    // Write audit log
+    const auditRef = adminDb.collection('audit_logs').doc();
+    batch.set(auditRef, {
+      type: 'FINANCIAL_APPROVAL_RESOLVED',
+      approvalId,
+      approvalType: type || null,
+      action,
+      resolvedBy: resolvedBy || 'system',
+      timestamp: serverTimestamp,
+      source: 'server_action'
+    });
+
+    await batch.commit();
+
+    return { success: true };
+  } catch (error) {
+    logger.error('[resolveFinancialApprovalAction] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+

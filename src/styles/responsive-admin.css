@@ -293,7 +293,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 38px;
+    min-height: 44px;
   }
   /* Primary CTA button: always spans full width (last in visual order) */
   .page-header-actions-wrap > *:last-child:not(:nth-child(2n)) {
@@ -361,8 +361,8 @@
 
   .catalog-toolbar-actions button:has(> svg:only-child),
   .catalog-header-actions-mobile button {
-    min-width: 38px !important;
-    min-height: 38px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
   }
 
   /* 4. Active state feedback for cards (native-like press) */

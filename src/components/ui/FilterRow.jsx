@@ -314,7 +314,7 @@ export default function FilterRow({
           </button>
         )}
 
-        <style jsx global>{`
+        <style>{`
           .filter-row::-webkit-scrollbar { display: none; }
           @media (max-width: 640px) {
             .filter-row { gap: 5px; }

@@ -50,6 +50,27 @@ export const updatePrescription = async (id, updateData) => {
   }
 };
 
+/**
+ * Updates prescription status and records audit timeline via Server Action.
+ */
+export const updatePrescriptionStatus = async (prescriptionId, newStatus, reason = '', actorName = 'System') => {
+  try {
+    const { updatePrescriptionStatusAction } = await import('../actions/prescriptionsActions');
+    const res = await updatePrescriptionStatusAction({ prescriptionId, newStatus, reason, actorName });
+    if (res?.success) return res;
+    throw new Error(res?.error || 'updatePrescriptionStatusAction failed');
+  } catch (err) {
+    logger.warn('[prescriptionsService] updatePrescriptionStatus fallback to client updateDoc', { error: err.message });
+    const docRef = doc(db, COLLECTION_NAME, prescriptionId);
+    await updateDoc(docRef, {
+      status: newStatus,
+      updatedAt: serverTimestamp()
+    });
+    return { success: true, prescriptionId, newStatus };
+  }
+};
+
+
 export const getPrescription = async (id) => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);

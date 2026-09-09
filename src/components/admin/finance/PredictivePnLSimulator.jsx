@@ -16,18 +16,21 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
   const [projectedData, setProjectedData] = useState(null);
   const [insights, setInsights] = useState(null);
 
-  // Fallback data if no pnl2026 is provided yet
-  const safeData = pnl2026 || [
-    { month: 'Jan', income: 45000, expenses: 32000, profit: 13000 },
-    { month: 'Feb', income: 52000, expenses: 35000, profit: 17000 },
-    { month: 'Mar', income: 48000, expenses: 33000, profit: 15000 },
-    { month: 'Apr', income: 61000, expenses: 38000, profit: 23000 },
-    { month: 'May', income: 59000, expenses: 36000, profit: 23000 },
-    { month: 'Jun', income: 65000, expenses: 40000, profit: 25000 }
-  ];
+  // Real P&L data or empty array
+  const safeData = React.useMemo(() => {
+    if (Array.isArray(pnl2026) && pnl2026.length > 0) {
+      return pnl2026.map(item => ({
+        month: item.month || item.name || '',
+        income: Number(item.income || item.Income || 0),
+        expenses: Number(item.expenses || item.Expenses || 0),
+        profit: Number(item.profit ?? item.Profit ?? ((item.income || item.Income || 0) - (item.expenses || item.Expenses || 0)))
+      }));
+    }
+    return [];
+  }, [pnl2026]);
 
   const handleSimulate = () => {
-    if (!query.trim()) return;
+    if (!query.trim() || safeData.length === 0) return;
     setSimulating(true);
 
     // Simulate Atlas AI processing time
@@ -141,7 +144,7 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
           </div>
           <button 
             onClick={handleSimulate}
-            disabled={simulating || !query.trim()}
+            disabled={simulating || !query.trim() || safeData.length === 0}
             className="hover-lift"
             style={{
               padding: '0 2rem',
@@ -150,8 +153,8 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
               border: 'none',
               borderRadius: '12px',
               fontWeight: 700,
-              cursor: simulating || !query.trim() ? 'not-allowed' : 'pointer',
-              opacity: simulating || !query.trim() ? 0.7 : 1,
+              cursor: simulating || !query.trim() || safeData.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: simulating || !query.trim() || safeData.length === 0 ? 0.6 : 1,
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
@@ -161,6 +164,11 @@ export default function PredictivePnLSimulator({ pnl2026 }) {
             {simulating ? 'Simulando...' : 'Simular'}
           </button>
         </div>
+        {safeData.length === 0 && (
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0.5rem 0 0 0' }}>
+            Se requiere sincronizar datos de P&L de Zoho Books para habilitar la simulación proyectiva.
+          </p>
+        )}
 
         {/* Results Area */}
         {projectedData && !simulating && (

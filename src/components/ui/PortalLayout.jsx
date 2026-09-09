@@ -554,42 +554,9 @@ export default function PortalLayout({
               </span>
             </>
           ) : (
-            (() => {
-              const roleBadge = ROLE_BADGE_CONFIG[roleContext] || ROLE_BADGE_CONFIG.admin;
-              return (
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '999px',
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.04em',
-                    background: roleBadge.bg,
-                    color: roleBadge.color,
-                    border: `1px solid ${roleBadge.border}`,
-                    marginLeft: '0.25rem',
-                    flexShrink: 0,
-                    boxShadow: `0 1px 4px ${roleBadge.color}15`,
-                  }}
-                  title={`Active Portal Role: ${roleBadge.name}`}
-                >
-                  <span
-                    style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      backgroundColor: roleBadge.color,
-                      boxShadow: `0 0 6px ${roleBadge.color}`,
-                      display: 'inline-block',
-                    }}
-                  />
-                  {roleBadge.label}
-                </span>
-              );
-            })()
+            <span className="portal-header-switcher">
+              <AdminPortalSwitcher />
+            </span>
           )}
         </div>
 

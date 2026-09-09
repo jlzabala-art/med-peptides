@@ -218,7 +218,7 @@ export default function FinanceReporting({ dashboardData, totalBalance, activeSu
       </div>
       <FinancePnL pnl2026={pnl2026} />
       <PredictivePnLSimulator pnl2026={pnl2026} />
-      <ComparativeAnalysisTool />
+      <ComparativeAnalysisTool pnl2026={pnl2026} />
 
     </div>
   );

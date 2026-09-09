@@ -15,8 +15,12 @@ import { liteClient as algoliasearch } from 'algoliasearch/lite';
 import { resolveChannelPrice } from '../utils/commercialPricingHelper';
 import logger from '../utils/logger.js';
 
-const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '14102Y4B4O';
-const SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || 'f11b6ecbe89fbabcfdbd0a3d46cb0a43';
+const APP_ID = (typeof process !== 'undefined'
+  ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID)
+  : '') || 'G722EVODUJ';
+const SEARCH_KEY = (typeof process !== 'undefined'
+  ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY)
+  : '') || '609364d5500e57e9547d6e6ab05e04cb';
 const INDEX_COMPETITORS = 'competitor_prices';
 
 let client = null;
@@ -26,6 +30,28 @@ try {
   }
 } catch (e) {
   logger.warn('[AlgoliaCompetitorService] Client init failed:', e.message);
+}
+
+// ── In-Memory LRU/TTL Cache (5 min TTL) ───────────────────────────────────────
+const competitorCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getCached(key) {
+  const item = competitorCache.get(key);
+  if (!item) return null;
+  if (Date.now() - item.ts > CACHE_TTL_MS) {
+    competitorCache.delete(key);
+    return null;
+  }
+  return item.data;
+}
+
+function setCached(key, data) {
+  if (competitorCache.size > 100) {
+    const firstKey = competitorCache.keys().next().value;
+    competitorCache.delete(firstKey);
+  }
+  competitorCache.set(key, { data, ts: Date.now() });
 }
 
 // ── Fallback Benchmark Reference Database (used when Algolia index is empty) ──
@@ -73,6 +99,10 @@ export async function getCompetitorBenchmark({
   dosageMg = 5,
 }) {
   const normKey = cleanCompound(productName);
+  const cacheKey = `comp:${normKey}:${ourPrice}:${dosageMg}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   let competitors = [];
   let avgPrice = 0;
   let minPrice = 0;
@@ -160,7 +190,7 @@ export async function getCompetitorBenchmark({
     isCompetitive = priceDeltaPercent >= 0; // cheaper or equal to market average
   }
 
-  return {
+  const result = {
     productName,
     ourPrice: numericOurPrice,
     ourPpm,
@@ -173,6 +203,9 @@ export async function getCompetitorBenchmark({
     competitorsCount: competitors.length,
     competitors,
   };
+
+  setCached(cacheKey, result);
+  return result;
 }
 
 /**

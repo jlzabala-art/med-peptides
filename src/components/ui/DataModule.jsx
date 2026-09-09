@@ -315,6 +315,7 @@ export default function DataModule({
                 forceMobileSelectionMode={isMobileSelectionMode}
                 onForceMobileSelectionModeChange={setIsMobileSelectionMode}
                 virtualize={virtualize}
+                showStatusFooter={false}
                 emptyTitle={
                   (searchTerm || (filters && filters.length > 0)) && !emptyState.title
                     ? "No results for these filters"

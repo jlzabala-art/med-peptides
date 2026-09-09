@@ -51,18 +51,21 @@ export function generateProductJsonLd(product, baseUrl = 'https://regenpept.com'
       {
         '@type': 'PropertyValue',
         name: 'Analytical Purity (RP-HPLC)',
-        value: `≥ ${purity}%`
+        value: typeof purity === 'number' ? `≥ ${purity}%` : String(purity)
       }
     ].filter(Boolean),
-    offers: {
-      '@type': 'AggregateOffer',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-      seller: {
-        '@type': 'Organization',
-        name: 'RegenPept'
+    ...(product?.price && product?.price !== '0.00' ? {
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'USD',
+        price: product.price,
+        availability: 'https://schema.org/InStock',
+        seller: {
+          '@type': 'Organization',
+          name: 'RegenPept'
+        }
       }
-    }
+    } : {})
   };
 
   return schema;

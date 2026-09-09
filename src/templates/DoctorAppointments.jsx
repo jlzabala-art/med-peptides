@@ -89,42 +89,14 @@ export default function DoctorAppointments() {
           });
         });
 
-        // Add some hardcoded operational schedule
-        const mockOp = [
-          {
-            id: 'm1',
-            title: 'Consult: Arthur Pendragon',
-            type: 'Consultation',
-            date: new Date(),
-            time: '09:00 AM',
-            color: '#10b981',
-          },
-          {
-            id: 'm2',
-            title: 'Peptide Protocol Review: Gwen Stacy',
-            type: 'Protocol Review',
-            date: new Date(),
-            time: '10:30 AM',
-            color: '#8b5cf6',
-          },
-          {
-            id: 'm3',
-            title: 'Genetic Test Results: Bruce Banner',
-            type: 'Genetic Test',
-            date: new Date(),
-            time: '14:00 PM',
-            color: '#ec4899',
-          },
-        ];
-
-        const allEvents = [...loadedEvents, ...mockOp].sort((a, b) => a.date - b.date);
+        const allEvents = [...loadedEvents].sort((a, b) => a.date - b.date);
         setEvents(allEvents);
 
         setKpis({
-          prescriptionsToday: rxToday + 2, // Mocking some extra
-          pendingFollowUps: refillSnap.size + 1,
-          testsDue: 3,
-          totalConsultations: 5,
+          prescriptionsToday: rxToday,
+          pendingFollowUps: refillSnap.size,
+          testsDue: 0,
+          totalConsultations: loadedEvents.length,
         });
       } catch (err) {
         console.error('Error loading clinical schedule:', err);

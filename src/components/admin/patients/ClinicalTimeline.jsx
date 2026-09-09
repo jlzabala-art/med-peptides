@@ -112,25 +112,9 @@ export default function ClinicalTimeline({ patientId, patientName, patientCreate
     whereConditions: [['patientId', '==', patientId]]
   });
 
-  // Mock notes for the social feed
-  const mockNotes = [
-    {
-      id: 'note_1',
-      type: 'note',
-      title: 'Initial Consultation',
-      description: `Patient ${patientName || 'completed'} initial onboarding. Reported low energy levels and poor sleep quality. Blood work requested.`,
-      timestamp: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
-      metadata: { Medic: 'Dr. Sarah Jenkins' }
-    },
-    {
-      id: 'note_2',
-      type: 'note',
-      title: 'Lab Results Reviewed',
-      description: 'HbA1c slightly elevated. Testosterone levels lower than baseline. Recommending Tirzepatide and NAD+ protocol.',
-      timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
-      metadata: { Medic: 'Dr. Sarah Jenkins' }
-    }
-  ];
+  const { data: clinicalNotes, isLoading: loadingNotes } = useFirestoreCollection('clinical_notes', {
+    whereConditions: [['patientId', '==', patientId]]
+  });
 
   const events = [];
 
@@ -163,7 +147,18 @@ export default function ClinicalTimeline({ patientId, patientName, patientCreate
     });
   }
 
-  events.push(...mockNotes);
+  if (clinicalNotes) {
+    clinicalNotes.forEach(note => {
+      events.push({
+        id: note.id,
+        type: 'note',
+        title: note.title || 'Clinical Note',
+        description: note.description || note.content || note.text || '',
+        timestamp: note.createdAt || note.date || new Date().toISOString(),
+        metadata: { Medic: note.doctorName || note.medic || 'Attending Physician' }
+      });
+    });
+  }
 
   // Add Patient Registration Baseline Event
   const patientCreationDate = patientCreatedAt 
@@ -186,7 +181,7 @@ export default function ClinicalTimeline({ patientId, patientName, patientCreate
     ? events 
     : events.filter(e => e.type === filter + (filter === 'prescription' ? '' : '')); // Just simple filter
 
-  if (loadingRx || loadingOrders) {
+  if (loadingRx || loadingOrders || loadingNotes) {
     return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading clinical feed...</div>;
   }
 

@@ -2,6 +2,8 @@
 
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import PanelShell from '../components/shell/PanelShell';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
 import { useTranslation } from 'react-i18next';
@@ -1075,5 +1077,26 @@ export function PlaceholderTab({ title, description }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function WholesalerHome({ children }) {
-  return <>{children}</>;
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Extract active tab from pathname: /wholesaler/[tab]
+  const segments = pathname ? pathname.split('/') : [];
+  const activeTab = segments[2] || 'overview';
+
+  return (
+    <PanelShell
+      allowedRoles={['wholesaler', 'admin']}
+      sidebarNavGroups={WHOLESALER_NAV_GROUPS}
+      activeNavId={activeTab}
+      onNavigate={(id) => router.push(id === 'overview' ? '/wholesaler' : `/wholesaler/${id}`)}
+      portalTitle="B2B Wholesaler Portal"
+      roleContext="wholesaler"
+      pageContext={{ activeTab }}
+    >
+      <div style={{ padding: '1.25rem', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
+        {children}
+      </div>
+    </PanelShell>
+  );
 }

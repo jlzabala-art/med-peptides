@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { algoliasearch } from 'algoliasearch';
+import { liteClient as algoliasearch } from 'algoliasearch/lite';
 
-const APP_ID = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '';
-const SEARCH_KEY = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '';
+const APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'G722EVODUJ';
+const SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '609364d5500e57e9547d6e6ab05e04cb';
 
 let _client = null;
 function getClient() {
   if (!_client && APP_ID && SEARCH_KEY) {
-    _client = algoliasearch(APP_ID, SEARCH_KEY);
+    try {
+      _client = algoliasearch(APP_ID, SEARCH_KEY);
+    } catch (e) {
+      console.warn('[useAlgoliaSearch] Client initialization error:', e);
+    }
   }
   return _client;
 }

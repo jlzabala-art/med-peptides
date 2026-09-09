@@ -1,11 +1,14 @@
 "use server";
 
 import { adminDb } from '../lib/firebaseAdmin';
+import { serializeFirestoreData } from '../lib/serializeFirestore';
+import { withRetry } from '../repositories/_resilience';
+import logger from '../utils/logger';
 
 export async function fetchOrdersAction({ limitCount = 50, buyerId = null, accountManagerId = null, doctorId = null } = {}) {
   try {
     if (!adminDb) {
-      console.warn("adminDb is null, falling back to empty array");
+      logger.warn('fetchOrdersAction: adminDb not initialized');
       return [];
     }
 
@@ -37,7 +40,7 @@ export async function fetchOrdersAction({ limitCount = 50, buyerId = null, accou
 
     return orders;
   } catch (error) {
-    console.error("Error fetching orders securely:", error);
+    logger.error("fetchOrdersAction failed", error);
     return [];
   }
 }
@@ -82,7 +85,7 @@ export async function fetchOrdersMetricsAction({ buyerId = null, accountManagerI
       totalRevenue: revenueSnap.data().totalRevenue || 0
     };
   } catch (error) {
-    console.error("Error fetching orders metrics:", error);
+    logger.error("fetchOrdersMetricsAction failed", error);
     return { total: 0, pending: 0, shipped: 0, completed: 0, totalRevenue: 0 };
   }
 }
@@ -241,7 +244,7 @@ export async function submitValidatedOrderAction({
     
     return { success: true, orderId: newId, totals: { subtotal, shippingCost, total }, items };
   } catch (err) {
-    console.error("submitValidatedOrderAction failed:", err);
+    logger.error("submitValidatedOrderAction failed", err);
     throw new Error("Order validation failed on the server.");
   }
 }
@@ -250,7 +253,7 @@ export async function submitValidatedOrderAction({
 export async function fetchBulkOrdersAction({ limitCount = 50 } = {}) {
   try {
     if (!adminDb) {
-      console.warn("adminDb is null, falling back to empty array");
+      logger.warn("fetchBulkOrdersAction: adminDb not initialized");
       return [];
     }
 
@@ -272,7 +275,65 @@ export async function fetchBulkOrdersAction({ limitCount = 50 } = {}) {
 
     return orders;
   } catch (error) {
-    console.error("Error fetching bulk orders securely:", error);
+    logger.error("fetchBulkOrdersAction failed", error);
     return [];
   }
 }
+
+/**
+ * Server Action: Creates or updates a Purchase Order (PO) with server timestamp and integrity validation.
+ */
+export async function savePurchaseOrderAction(poData = {}, poId = null) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+
+    const serverTimestamp = new Date();
+    const payload = {
+      ...poData,
+      updatedAt: serverTimestamp,
+    };
+
+    if (poId) {
+      await withRetry(
+        () => adminDb.collection('purchaseOrders').doc(poId).set(payload, { merge: true }),
+        { entityName: 'PurchaseOrders:update' }
+      );
+      return { success: true, id: poId };
+    } else {
+      payload.createdAt = serverTimestamp;
+      const ref = await withRetry(
+        () => adminDb.collection('purchaseOrders').add(payload),
+        { entityName: 'PurchaseOrders:create' }
+      );
+      return { success: true, id: ref.id };
+    }
+  } catch (error) {
+    logger.error('[savePurchaseOrderAction] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Server Action: Updates Purchase Order status or fields with server timestamp.
+ */
+export async function updatePurchaseOrderAction(poId, updates = {}) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!poId) throw new Error("poId is required.");
+
+    const serverTimestamp = new Date();
+    await withRetry(
+      () => adminDb.collection('purchaseOrders').doc(poId).set({
+        ...updates,
+        updatedAt: serverTimestamp,
+      }, { merge: true }),
+      { entityName: 'PurchaseOrders:setFields' }
+    );
+
+    return { success: true, id: poId };
+  } catch (error) {
+    logger.error('[updatePurchaseOrderAction] failed', error);
+    return { success: false, error: error.message };
+  }
+}
+

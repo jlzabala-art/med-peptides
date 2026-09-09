@@ -25,7 +25,7 @@
   gap: 1rem;
   /* never shrinks, never grows */
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .app-header-hamburger {

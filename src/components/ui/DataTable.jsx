@@ -1112,8 +1112,8 @@ export default function DataTable({
                   return (
                     <React.Fragment key={rowReactKey}>
                       <tr
-                        ref={virtualize ? rowVirtualizer.measureElement : null}
-                        data-index={virtualize ? virtualRowOrRow.index : index}
+                        ref={isVirtual ? rowVirtualizer.measureElement : null}
+                        data-index={isVirtual ? virtualRowOrRow.index : index}
                         className={customProps.className || ''}
                         style={{
                           borderBottom: '1px solid var(--color-border)',

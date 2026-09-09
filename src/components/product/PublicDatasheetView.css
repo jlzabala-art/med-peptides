@@ -1,0 +1,882 @@
+/* ══════════════════════════════════════════════════════════════════
+   PublicDatasheetView — Pharmaceutical Monograph Styles
+   Extracted from <style jsx global> to eliminate FOUC on page load.
+   Next.js bundles imported CSS into <head> during SSR.
+   ══════════════════════════════════════════════════════════════════ */
+
+.public-datasheet-root {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+  padding-bottom: 5rem;
+}
+
+.pds-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #003666;
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 54, 102, 0.15);
+}
+
+.pds-bar-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pds-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pds-brand-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.pds-badge-pill {
+  background: rgba(255, 255, 255, 0.18);
+  color: #e0f2fe;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.pds-zero-price-badge {
+  font-size: 0.72rem;
+  color: #93c5fd;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .pds-zero-price-badge {
+    display: none;
+  }
+}
+
+.pds-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pds-lang-select {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.pds-lang-select option {
+  background: #003666;
+  color: #ffffff;
+}
+
+.pds-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.pds-btn-pdf {
+  background: #ffffff;
+  color: #003666;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+.pds-btn-pdf:hover {
+  background: #f1f5f9;
+}
+
+.pds-btn-ghost {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.pds-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.pds-btn-wa {
+  background: #25d366;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.pds-btn-wa:hover {
+  background: #1da851;
+}
+
+.pds-btn-barcode {
+  background: rgba(56, 189, 248, 0.15);
+  color: #e0f2fe;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-weight: 700;
+}
+
+.pds-btn-barcode:hover {
+  background: rgba(56, 189, 248, 0.28);
+  color: #ffffff;
+}
+
+.pds-container {
+  max-width: 1140px;
+  margin: 1.75rem auto 0 auto;
+  padding: 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pds-notice-card {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.pds-notice-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.82rem;
+  color: #0369a1;
+  line-height: 1.4;
+}
+
+.pds-notice-text strong {
+  color: #0c4a6e;
+  font-weight: 700;
+}
+
+.pds-hero {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pds-tag-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.pds-cat-tag {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pds-purity-tag {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pds-cgmp-tag {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+}
+
+.pds-supplier-tag {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+}
+
+.pds-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: #003666;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.15;
+}
+
+.pds-target {
+  font-size: 0.95rem;
+  color: #475569;
+  margin: 0;
+}
+
+.pds-target strong {
+  color: #0f172a;
+}
+
+.pds-description-card {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pds-section-heading {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #003666;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pds-description-body {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0;
+}
+
+/* ── Available Formats & Strengths Matrix ── */
+.pds-matrix-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pds-matrix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pds-matrix-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.pds-supplier-badge {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #0284c7;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pds-format-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pds-format-tab-btn {
+  position: relative;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pds-format-tab-btn:hover {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.pds-format-tab-btn.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.pds-format-tab-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.pds-format-tab-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pds-format-tab-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pds-format-tab-btn.active .pds-format-tab-name {
+  color: #1d4ed8;
+}
+
+.pds-format-tab-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.pds-format-active-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+.pds-strengths-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.pds-strengths-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.pds-sublabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pds-count-badge {
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.pds-strength-chips {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.pds-strength-chip {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.15s ease;
+  color: #1e293b;
+}
+
+.pds-strength-chip:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.pds-strength-chip.selected {
+  background: #003666;
+  border-color: #003666;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 54, 102, 0.25);
+}
+
+.pds-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.pds-strength-chip.selected .pds-chip-dot {
+  background: #38bdf8;
+}
+
+.pds-selected-detail-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.pds-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.pds-detail-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pds-dlabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pds-dval {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.pds-price-suppressed {
+  color: #0284c7;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+/* ── Chemical & Molecular Specifications ── */
+.pds-specs-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pds-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.pds-spec-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pds-spec-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pds-spec-val {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+.pds-sequence-box {
+  margin-top: 1.25rem;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pds-sequence-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #003666;
+  letter-spacing: 0.06em;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+/* ── Reconstitution Guide (2×2 Grid) ── */
+.pds-guide-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pds-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+/* ── Provenance & Alliance (bottom of page) ── */
+.pds-provenance-section {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pds-alliance-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.pds-alliance-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #003666;
+}
+
+.pds-alliance-body {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.pds-alliance-title {
+  color: #003666;
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.pds-guide-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.pds-guide-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #003666;
+  margin: 0;
+}
+
+.pds-guide-card p {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #475569;
+  margin: 0;
+}
+
+/* ── Footer ── */
+.pds-page-footer {
+  margin-top: 1rem;
+}
+
+.pds-footer-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.pds-footer-text {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #64748b;
+  margin: 0 0 0.75rem 0;
+}
+
+.pds-footer-meta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Floating Mobile Bar ── */
+.pds-mobile-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 0.65rem 1rem max(0.65rem, env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  align-items: center;
+  justify-content: space-around;
+  gap: 0.5rem;
+}
+
+.pds-mbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  flex: 1;
+  text-decoration: none;
+}
+
+.pds-mbtn-pdf {
+  background: #003666;
+  color: #ffffff;
+}
+
+.pds-mbtn-copy {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+
+.pds-mbtn-wa {
+  background: #25d366;
+  color: #ffffff;
+}
+
+/* ── Scannable Vial Label Card ── */
+.pds-vial-label-section {
+  margin-top: 2rem;
+}
+
+.pds-vial-label-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -4px rgba(0, 54, 102, 0.08);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.pds-vial-label-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pds-vial-label-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.pds-vial-label-icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pds-vial-label-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.pds-vial-label-subtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0.2rem 0 0 0;
+}
+
+.pds-vial-label-preview-wrap {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75rem;
+}
+
+.pds-vial-label-img {
+  width: 100%;
+  max-width: 960px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 34, 68, 0.08);
+  display: block;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.pds-vial-label-img svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pds-vial-label-skeleton {
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 1200 / 630;
+  background: linear-gradient(90deg, #f0f4f8 25%, #e2e8f0 50%, #f0f4f8 75%);
+  background-size: 200% 100%;
+  animation: pds-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes pds-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.pds-vial-label-error {
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 1200 / 630;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  .pds-mobile-bar {
+    display: flex;
+  }
+  .pds-actions-group .pds-btn-pdf,
+  .pds-actions-group .pds-btn-barcode,
+  .pds-actions-group .pds-btn-wa,
+  .pds-actions-group .pds-btn-ghost {
+    display: none;
+  }
+  .pds-title {
+    font-size: 1.75rem;
+  }
+  .pds-hero, .pds-specs-section, .pds-guide-section, .pds-matrix-section {
+    padding: 1.25rem;
+  }
+  .pds-guide-grid {
+    grid-template-columns: 1fr;
+  }
+  .pds-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Print Stylesheet ── */
+@media print {
+  .pds-top-bar,
+  .pds-mobile-bar,
+  .pds-actions-group,
+  button {
+    display: none !important;
+  }
+
+  .public-datasheet-root {
+    background: #ffffff !important;
+    padding-bottom: 0 !important;
+  }
+
+  .pds-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pds-hero, .pds-specs-section, .pds-guide-section, .pds-matrix-section, .pds-footer-box {
+    border: 1pt solid #cbd5e1 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+}

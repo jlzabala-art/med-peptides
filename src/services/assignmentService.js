@@ -42,6 +42,7 @@ import {
   arrayUnion,
 } from 'firebase/firestore';
 import * as fb from '../firebase';
+import { createRelationshipAction, updateRelationshipStatusAction } from '../actions/physiciansActions';
 const db = fb?.db;
 
 const RELATIONSHIPS_COL = 'doctor_patient_relationships';
@@ -71,6 +72,7 @@ async function syncUserRelationshipArrays(patientId, doctorId) {
 
 /**
  * Create a new doctor-patient relationship.
+ * Executes on the server with atomic user array synchronization.
  *
  * @param {{ patientId, doctorId, initiatedBy, initiatedByRole, notes?, status? }} params
  * @returns {Promise<string>} — The new document ID
@@ -83,68 +85,85 @@ export async function createRelationship({
   notes = '',
   status = 'pending',
 }) {
-  if (!patientId || !doctorId || !initiatedBy || !initiatedByRole) {
-    throw new Error('[assignmentService] Missing required fields for createRelationship.');
+  try {
+    // ⚡ Execute on server side with atomic batch write & user array sync
+    const res = await createRelationshipAction({ patientId, doctorId, initiatedBy, initiatedByRole, notes, status });
+    if (res?.success) return res.id;
+    throw new Error(res?.error || 'createRelationshipAction failed');
+  } catch (err) {
+    console.warn('[assignmentService] Server action fallback, applying client write:', err.message);
+    if (!patientId || !doctorId || !initiatedBy || !initiatedByRole) {
+      throw new Error('[assignmentService] Missing required fields for createRelationship.');
+    }
+
+    // Prevent duplicates
+    const existing = await getActiveRelationship(patientId, doctorId);
+    if (existing) {
+      throw new Error('[assignmentService] A relationship between this patient and doctor already exists.');
+    }
+
+    const rel = {
+      patientId,
+      doctorId,
+      status,
+      initiatedBy,
+      initiatedByRole,
+      notes,
+      createdAt: now(),
+      updatedAt: now(),
+      activatedAt: null,
+    };
+
+    const colRef = collection(db, RELATIONSHIPS_COL);
+    const docRef = await addDoc(colRef, rel);
+
+    // If admin creates directly as 'active', sync the arrays immediately
+    if (status === 'active') {
+      await syncUserRelationshipArrays(patientId, doctorId);
+    }
+
+    return docRef.id;
   }
-
-  // Prevent duplicates
-  const existing = await getActiveRelationship(patientId, doctorId);
-  if (existing) {
-    throw new Error('[assignmentService] A relationship between this patient and doctor already exists.');
-  }
-
-  const rel = {
-    patientId,
-    doctorId,
-    status,
-    initiatedBy,
-    initiatedByRole,
-    notes,
-    createdAt: now(),
-    updatedAt: now(),
-    activatedAt: null,
-  };
-
-  const colRef = collection(db, RELATIONSHIPS_COL);
-  const docRef = await addDoc(colRef, rel);
-
-  // If admin creates directly as 'active', sync the arrays immediately
-  if (status === 'active') {
-    await syncUserRelationshipArrays(patientId, doctorId);
-  }
-
-  return docRef.id;
 }
 
 // ── Update Relationship Status ────────────────────────────────────────────────
 
 /**
  * Update the status of an existing relationship.
+ * Executes on the server via Server Action with auto array synchronization on activation.
  *
  * @param {string} relId    — Firestore document ID
  * @param {string} newStatus — 'active' | 'paused' | 'revoked'
  * @param {string} [notes]   — optional note to attach
  */
 export async function updateRelationshipStatus(relId, newStatus, notes) {
-  const ref = doc(db, RELATIONSHIPS_COL, relId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) throw new Error(`[assignmentService] Relationship ${relId} not found.`);
+  try {
+    const res = await updateRelationshipStatusAction({ relId, newStatus, notes });
+    if (res?.success) return;
+    throw new Error(res?.error || 'updateRelationshipStatusAction failed');
+  } catch (err) {
+    console.warn('[assignmentService] Server action fallback, applying client update:', err.message);
+    const ref = doc(db, RELATIONSHIPS_COL, relId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) throw new Error(`[assignmentService] Relationship ${relId} not found.`);
 
-  const data = snap.data();
-  const update = {
-    status: newStatus,
-    updatedAt: now(),
-  };
+    const data = snap.data();
+    const update = {
+      status: newStatus,
+      updatedAt: now(),
+    };
 
-  if (notes !== undefined) update.notes = notes;
-  if (newStatus === 'active' && !data.activatedAt) {
-    update.activatedAt = now();
-    // Sync user arrays when activating
-    await syncUserRelationshipArrays(data.patientId, data.doctorId);
+    if (notes !== undefined) update.notes = notes;
+    if (newStatus === 'active' && !data.activatedAt) {
+      update.activatedAt = now();
+      // Sync user arrays when activating
+      await syncUserRelationshipArrays(data.patientId, data.doctorId);
+    }
+
+    await updateDoc(ref, update);
   }
-
-  await updateDoc(ref, update);
 }
+
 
 // ── Queries ───────────────────────────────────────────────────────────────────
 

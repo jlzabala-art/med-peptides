@@ -147,6 +147,59 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
   },
 });
 
+// ─── Price Extraction Helper ───────────────────────────────────────────────────
+function extractNumericVal(val) {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  if (typeof val === 'string') {
+    const p = parseFloat(val.replace(/[^0-9.]/g, ''));
+    return isNaN(p) ? 0 : p;
+  }
+  if (typeof val === 'object') {
+    if (typeof val.perUnit === 'number' && val.perUnit > 0) return val.perUnit;
+    if (typeof val.base === 'number' && val.base > 0) return val.base;
+    if (typeof val.price === 'number' && val.price > 0) return val.price;
+    if (typeof val.value === 'number' && val.value > 0) return val.value;
+    if (typeof val.amount === 'number' && val.amount > 0) return val.amount;
+  }
+  return 0;
+}
+
+function extractItemPrice(item) {
+  if (!item) return 0;
+  const direct =
+    extractNumericVal(item.unitPrice) ||
+    extractNumericVal(item.price) ||
+    extractNumericVal(item.unitRate) ||
+    extractNumericVal(item.resolvedPrice?.perUnit) ||
+    extractNumericVal(item.resolvedPrice);
+  if (direct > 0) return direct;
+
+  const pricing = item.pricing;
+  if (pricing) {
+    const p =
+      extractNumericVal(pricing.clinicPrice) ||
+      extractNumericVal(pricing.retailPrice) ||
+      extractNumericVal(pricing.wholesalePrice) ||
+      extractNumericVal(pricing.masterPrice) ||
+      extractNumericVal(pricing.clinic) ||
+      extractNumericVal(pricing.retail) ||
+      extractNumericVal(pricing.wholesale) ||
+      extractNumericVal(pricing.master) ||
+      extractNumericVal(pricing);
+    if (p > 0) return p;
+  }
+
+  if (Array.isArray(item.variants) && item.variants.length > 0) {
+    for (const v of item.variants) {
+      const vp = extractItemPrice(v);
+      if (vp > 0) return vp;
+    }
+  }
+
+  return 0;
+}
+
 // ─── 2. Items & Batch Modifiers Slice ──────────────────────────────────────────
 const createWorkspaceItemsSlice = (set, get) => ({
   addItem: (item, targetWorkspaceId = null) => {
@@ -160,12 +213,17 @@ const createWorkspaceItemsSlice = (set, get) => ({
       (it) => (it.id && it.id === canonicalId) || (it.variantId && it.variantId === item.variantId)
     );
 
+    const resolvedPrice = extractItemPrice(item);
+
     let nextItems = [...ws.items];
     if (existingIndex >= 0) {
       const existing = nextItems[existingIndex];
       nextItems[existingIndex] = {
         ...existing,
         quantity: (existing.quantity || 1) + (item.quantity || 1),
+        unitPrice: existing.unitPrice || resolvedPrice,
+        price: existing.price || resolvedPrice,
+        unitRate: existing.unitRate || resolvedPrice,
       };
     } else {
       nextItems.push({
@@ -177,7 +235,9 @@ const createWorkspaceItemsSlice = (set, get) => ({
         dosage: item.dosage || item.unit || '',
         format: item.format || item.dosage_form || 'Vial',
         quantity: item.quantity || 1,
-        unitPrice: Number(item.unitPrice || item.price || item.unitRate || 0),
+        unitPrice: resolvedPrice,
+        price: resolvedPrice,
+        unitRate: resolvedPrice,
         supplierCost: Number(item.supplierCost || item.costPrice || item.pricing?.supplierCost || 0),
         supplierId: item.supplierId || item.supplier || '',
         supplierName: item.supplierName || '',
@@ -209,10 +269,15 @@ const createWorkspaceItemsSlice = (set, get) => ({
         (it) => (it.id && it.id === canonicalId) || (it.variantId && it.variantId === item.variantId)
       );
 
+      const resolvedPrice = extractItemPrice(item);
+
       if (existingIndex >= 0) {
         nextItems[existingIndex] = {
           ...nextItems[existingIndex],
           quantity: (nextItems[existingIndex].quantity || 1) + (item.quantity || 1),
+          unitPrice: nextItems[existingIndex].unitPrice || resolvedPrice,
+          price: nextItems[existingIndex].price || resolvedPrice,
+          unitRate: nextItems[existingIndex].unitRate || resolvedPrice,
         };
       } else {
         nextItems.push({
@@ -224,7 +289,9 @@ const createWorkspaceItemsSlice = (set, get) => ({
           dosage: item.dosage || item.unit || '',
           format: item.format || item.dosage_form || 'Vial',
           quantity: item.quantity || 1,
-          unitPrice: Number(item.unitPrice || item.price || item.unitRate || 0),
+          unitPrice: resolvedPrice,
+          price: resolvedPrice,
+          unitRate: resolvedPrice,
           supplierCost: Number(item.supplierCost || item.costPrice || item.pricing?.supplierCost || 0),
           supplierId: item.supplierId || item.supplier || '',
           supplierName: item.supplierName || '',
@@ -286,7 +353,7 @@ const createWorkspaceItemsSlice = (set, get) => ({
 
     const nextPrice = Math.max(0, parseFloat(price) || 0);
     const nextItems = ws.items.map((it) =>
-      it.id === itemId ? { ...it, unitPrice: nextPrice } : it
+      it.id === itemId ? { ...it, unitPrice: nextPrice, price: nextPrice, unitRate: nextPrice } : it
     );
 
     set((s) => ({

@@ -151,8 +151,6 @@ export default function AppHeader({
         <div className="app-header-divider"></div>
         {/* Portal switcher sits in left — it's a context indicator, not a utility action */}
         <AdminPortalSwitcher />
-        {/* Role Simulation Dropdown */}
-        <RoleSimulationDropdown />
       </div>
 
       {/* Center: Dynamic Utility Content OR Global Search */}

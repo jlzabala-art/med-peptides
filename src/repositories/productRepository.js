@@ -54,8 +54,11 @@ import {
   ProductValidationError,
 } from './productWriteGuard';
 import { deriveProductTypes } from '../schemas/firestoreProductSchema.js';
+import { deriveCanonicalIdentity } from '../utils/canonicalProductRegistry';
+import { syncProductToAlgolia, removeObjectFromAlgolia } from '../services/algoliaSyncService';
 
 import { createCacheManager } from '../utils/cacheManager';
+import { withRetry } from './_resilience';
 
 // ── Collection helpers ────────────────────────────────────────────────────────
 const productsCol  = ()          => collection(db, 'products');
@@ -214,12 +217,15 @@ export async function getActiveProducts({ forceRefresh = false } = {}) {
   let cursor = null;
 
   try {
+    let pageCount = 0;
+    const MAX_PAGES = 10; // Safety circuit breaker (Golden Rule #1)
+
     do {
       const q = cursor
         ? query(productsCol(), orderBy('__name__'), startAfter(cursor), limit(PAGE_SIZE))
         : query(productsCol(), orderBy('__name__'), limit(PAGE_SIZE));
 
-      const snap = await getDocs(q);
+      const snap = await withRetry(() => getDocs(q), { entityName: 'Products-getActive' });
 
       for (const d of snap.docs) {
         const data = d.data();
@@ -234,7 +240,8 @@ export async function getActiveProducts({ forceRefresh = false } = {}) {
         }
       }
 
-      cursor = snap.docs.length === PAGE_SIZE ? snap.docs[snap.docs.length - 1] : null;
+      pageCount++;
+      cursor = (snap.docs.length === PAGE_SIZE && pageCount < MAX_PAGES) ? snap.docs[snap.docs.length - 1] : null;
     } while (cursor);
 
     cache.write(results);
@@ -260,7 +267,7 @@ export async function getActiveProductsPaginated(pageSize = 50, lastDoc = null) 
       q = query(productsCol(), orderBy('name'), startAfter(lastDoc), limit(pageSize));
     }
     
-    const snap = await getDocs(q);
+    const snap = await withRetry(() => getDocs(q), { entityName: 'Products-getActivePaginated' });
     const results = [];
     
     for (const d of snap.docs) {
@@ -289,7 +296,7 @@ export async function getActiveProductsPaginated(pageSize = 50, lastDoc = null) 
 export async function getProduct(productId) {
   try {
     const ref = doc(db, 'products', productId);
-    const snap = await getDoc(ref);
+    const snap = await withRetry(() => getDoc(ref), { entityName: 'Products-getProduct' });
     return snap.exists() ? normalizeProduct(snap.data(), snap.id) : null;
   } catch (err) {
     console.error('[productRepository] getProduct:', err);
@@ -737,6 +744,11 @@ export async function createProduct(data, opts = {}) {
 
   const validated = validateProductWrite(dataWithoutVariants, { isUpdate: false, strict });
 
+  // Ensure deterministic canonical identity for cross-supplier deduplication
+  const canonical = deriveCanonicalIdentity({ ...dataWithoutVariants, ...validated });
+  if (!validated.canonicalKey) validated.canonicalKey = canonical.canonicalKey;
+  if (!validated.canonicalName) validated.canonicalName = canonical.canonicalName;
+
   // Stamp timestamps & variantsCount
   validated.createdAt = serverTimestamp();
   validated.updatedAt = serverTimestamp();
@@ -770,6 +782,7 @@ export async function createProduct(data, opts = {}) {
   }
 
   invalidateProductsCache();
+  syncProductToAlgolia({ id: docRef.id, ...validated, ...dataWithoutVariants }).catch(() => {});
   return { id: docRef.id, data: validated };
 }
 
@@ -791,12 +804,19 @@ export async function updateProduct(productId, data, opts = {}) {
   const { strict = false } = opts;
   const validated = validateProductWrite(data, { isUpdate: true, strict });
 
+  if (data.name || data.canonicalName || data.canonicalKey) {
+    const canonical = deriveCanonicalIdentity({ ...data, ...validated });
+    if (!validated.canonicalKey) validated.canonicalKey = canonical.canonicalKey;
+    if (!validated.canonicalName) validated.canonicalName = canonical.canonicalName;
+  }
+
   validated.updatedAt = serverTimestamp();
 
   const docRef = doc(productsCol(), productId);
   await updateDoc(docRef, validated);
 
   invalidateProductsCache();
+  syncProductToAlgolia({ id: productId, ...validated, ...data }).catch(() => {});
   return { id: productId, data: validated };
 }
 
@@ -822,6 +842,7 @@ export async function deleteProduct(productId) {
   // Then delete the product document itself
   await deleteDoc(doc(productsCol(), productId));
   invalidateProductsCache();
+  removeObjectFromAlgolia('products', productId).catch(() => {});
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   doc, onSnapshot, serverTimestamp, orderBy, limit, increment
 } from 'firebase/firestore';
 import logger from '../utils/logger';
+import { savePurchaseOrderAction, updatePurchaseOrderAction } from '../actions/ordersActions';
 
 const db = fb?.db;
 
@@ -38,13 +39,21 @@ export const subscribeToPurchaseOrders = (collectionName = 'purchaseOrders', onD
 };
 
 /**
- * Creates or updates a Purchase Order.
+ * Creates or updates a Purchase Order via Server Action.
  * @param {object} poData
  * @param {string|null} poId
  * @returns {Promise<string>}
  */
 export const savePurchaseOrder = async (poData, poId = null) => {
   try {
+    const res = await savePurchaseOrderAction(poData, poId);
+    if (res?.success) {
+      logger.info('[procurementService] PO saved via Server Action', { id: res.id });
+      return res.id;
+    }
+    throw new Error(res?.error || 'savePurchaseOrderAction failed');
+  } catch (err) {
+    logger.warn('[procurementService] savePurchaseOrder fallback to client write', { error: err.message });
     const payload = {
       ...poData,
       updatedAt: serverTimestamp()
@@ -59,30 +68,33 @@ export const savePurchaseOrder = async (poData, poId = null) => {
       logger.info('[procurementService] PO created', { id: docRef.id });
       return docRef.id;
     }
-  } catch (err) {
-    logger.error('[procurementService] savePurchaseOrder failed', { poId, error: err.message });
-    throw err;
   }
 };
 
 /**
- * Updates PO status or single field.
+ * Updates PO status or single field via Server Action.
  * @param {string} poId
  * @param {object} updates
  * @returns {Promise<void>}
  */
 export const updatePurchaseOrder = async (poId, updates) => {
   try {
+    const res = await updatePurchaseOrderAction(poId, updates);
+    if (res?.success) {
+      logger.info('[procurementService] PO updated via Server Action', { poId, updates });
+      return;
+    }
+    throw new Error(res?.error || 'updatePurchaseOrderAction failed');
+  } catch (err) {
+    logger.warn('[procurementService] updatePurchaseOrder fallback to client write', { error: err.message });
     await updateDoc(doc(db, 'purchaseOrders', poId), {
       ...updates,
       updatedAt: serverTimestamp()
     });
     logger.info('[procurementService] PO field updated', { poId, updates });
-  } catch (err) {
-    logger.error('[procurementService] updatePurchaseOrder failed', { poId, error: err.message });
-    throw err;
   }
 };
+
 
 /**
  * Deletes a Purchase Order.

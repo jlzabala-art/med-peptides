@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { logger } from '../utils/logger';
+import { withRetry } from './_resilience';
 
 /**
  * Real-time subscription to low-stock items for a wholesaler.
@@ -66,13 +67,21 @@ export function subscribeToInventory(wholesalerId, onData) {
 export async function updateInventoryQuantity(wholesalerId, productId, quantity, productName = '') {
   try {
     const docRef = doc(db, 'wholesaler_inventory', `${wholesalerId}_${productId}`);
-    await setDoc(docRef, {
-      wholesalerId,
-      productId,
-      productName: productName || productId,
-      quantity,
-      updatedAt: serverTimestamp(),
-    }, { merge: true });
+    await withRetry(
+      () =>
+        setDoc(
+          docRef,
+          {
+            wholesalerId,
+            productId,
+            productName: productName || productId,
+            quantity,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        ),
+      { entityName: 'Inventory-UpdateQty' }
+    );
     logger.info('[inventoryRepository] Updated inventory qty', { wholesalerId, productId, quantity });
   } catch (err) {
     logger.error('[inventoryRepository] updateInventoryQuantity failed', { wholesalerId, productId, error: err.message });
@@ -95,7 +104,7 @@ export async function fetchExpiringBatches(wholesalerId, maxLimit = 10) {
       orderBy('expiryDate', 'asc'),
       limit(maxLimit)
     );
-    const snap = await getDocs(q);
+    const snap = await withRetry(() => getDocs(q), { entityName: 'Inventory-ExpiringBatches' });
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
     logger.error('[inventoryRepository] fetchExpiringBatches failed', { wholesalerId, error: err.message });
@@ -159,10 +168,10 @@ export async function fetchWholesalerAnalytics(wholesalerId) {
     const snap = await getDocs(q);
     if (snap.empty) {
       return {
-        monthlyRevenue: 14500,
-        unitsSold: 450,
-        activeOrders: 8,
-        growth: 15.2,
+        monthlyRevenue: 0,
+        unitsSold: 0,
+        activeOrders: 0,
+        growth: 0,
       };
     }
     let rev = 0;
@@ -170,30 +179,74 @@ export async function fetchWholesalerAnalytics(wholesalerId) {
     let active = 0;
     snap.docs.forEach((d) => {
       const data = d.data();
-      rev += data.total || 0;
-      units += (data.items || []).reduce((acc, item) => acc + (item.quantity || 1), 0);
+      rev += Number(data.total || data.totalAmount || 0);
+      units += (data.items || []).reduce((acc, item) => acc + Number(item.quantity || 1), 0);
       if (data.status === 'pending' || data.status === 'processing') active++;
     });
     return {
       monthlyRevenue: rev,
       unitsSold: units,
       activeOrders: active,
-      growth: 12.5,
+      growth: 0,
     };
   } catch (err) {
     logger.error('[inventoryRepository] fetchWholesalerAnalytics failed', { wholesalerId, error: err.message });
     return {
-      monthlyRevenue: 14500,
-      unitsSold: 450,
-      activeOrders: 8,
-      growth: 15.2,
+      monthlyRevenue: 0,
+      unitsSold: 0,
+      activeOrders: 0,
+      growth: 0,
     };
   }
+}
+
+/**
+ * Real-time subscription to active outbound wholesale orders / shipments.
+ * Follows Golden Rule #1 (limit 20) and #2 (Firestore source of truth).
+ * @param {string|null} wholesalerId
+ * @param {function} onData
+ * @returns {function} unsubscribe
+ */
+export function subscribeToWholesaleOrders(wholesalerId, onData) {
+  let q;
+  if (wholesalerId) {
+    q = query(
+      collection(db, 'orders'),
+      where('wholesalerId', '==', wholesalerId),
+      limit(20)
+    );
+  } else {
+    q = query(
+      collection(db, 'orders'),
+      limit(20)
+    );
+  }
+
+  return onSnapshot(q, (snap) => {
+    const orders = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id.startsWith('PO-') || d.id.startsWith('ORD-') ? d.id : `ORD-${d.id.slice(0, 6).toUpperCase()}`,
+        clinic: data.clinicName || data.customerName || data.shippingAddress?.company || 'Partner Clinic',
+        status: (data.status || 'processing').toLowerCase(),
+        items: Array.isArray(data.items)
+          ? data.items.map(i => `${i.quantity || 1}x ${i.productName || i.name || 'Item'}`).join(', ')
+          : (data.itemsSummary || `${data.itemsCount || 1} items`),
+        date: data.estimatedDeliveryDate || (data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Pending dispatch'),
+        rawId: d.id,
+      };
+    });
+    onData(orders);
+  }, (err) => {
+    logger.error('[inventoryRepository] subscribeToWholesaleOrders failed', { error: err.message });
+    onData([]);
+  });
 }
 
 export const inventoryRepository = {
   subscribeToLowStock,
   subscribeToInventory,
+  subscribeToWholesaleOrders,
   updateInventoryQuantity,
   fetchExpiringBatches,
   createBulkRestockOrder,
@@ -202,4 +255,5 @@ export const inventoryRepository = {
 };
 
 export default inventoryRepository;
+
 

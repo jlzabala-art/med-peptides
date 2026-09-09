@@ -1,24 +1,11 @@
 "use server";
 
 import { adminDb } from '../lib/firebaseAdmin';
+import { serializeFirestoreData } from '../lib/serializeFirestore';
+import logger from '../utils/logger';
 
-// Recursive serialization helper to strip Timestamps/Dates/References
-function serializeData(obj) {
-  if (obj === null || obj === undefined) return obj;
-  if (typeof obj?.toDate === 'function') return obj.toDate().toISOString();
-  if (typeof obj === 'object' && obj._seconds !== undefined && obj._nanoseconds !== undefined) {
-    return new Date(obj._seconds * 1000).toISOString();
-  }
-  if (Array.isArray(obj)) return obj.map(serializeData);
-  if (typeof obj === 'object') {
-    const newObj = {};
-    for (const key in obj) {
-      newObj[key] = serializeData(obj[key]);
-    }
-    return newObj;
-  }
-  return obj;
-}
+// Alias for backward compat within this file
+const serializeData = serializeFirestoreData;
 
 /**
  * Server-Side Clinic Workspace Data Bundler
@@ -27,7 +14,7 @@ function serializeData(obj) {
 export async function fetchClinicWorkspaceBundle(clinicId) {
   try {
     if (!adminDb) {
-      console.warn("adminDb is null in fetchClinicWorkspaceBundle");
+      logger.warn('fetchClinicWorkspaceBundle: adminDb not initialized');
       return null;
     }
 

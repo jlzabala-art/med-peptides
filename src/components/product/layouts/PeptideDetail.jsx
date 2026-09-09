@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { trackPeptideView, trackPurchaseIntent } from '@/hooks/useAnalytics';
+import { trackProductView } from '@/services/algoliaInsights';
 import { trackRecentView } from '@/utils/recentViews';
 import { usePageMeta } from '@/hooks/usePageMeta';
 import { formatDose } from '@/data/dosageUnits';
@@ -49,6 +50,7 @@ import SprayDosingGuide from '../SprayDosingGuide';
 import OralDosingGuide from '../OralDosingGuide';
 import SmartDosageGuide from '../SmartDosageGuide';
 import VialLabelPrinter from '../VialLabelPrinter';
+import ProductTraceabilityCard from '../ProductTraceabilityCard';
 import ProtocolTOC from '@/components/protocol/ProtocolTOC';
 import ClinicalAssistant from '@/components/shared/ClinicalAssistant';
 import MedicalSupervisionBanner from '@/components/shared/MedicalSupervisionBanner';
@@ -59,7 +61,6 @@ import { collection, doc, updateDoc, addDoc, serverTimestamp } from 'firebase/fi
 import * as protocolRepository from '@/repositories/protocolRepository';
 import * as productRepository from '@/repositories/productRepository';
 import { mapSourcingToCategory } from '@/repositories/mappers';
-import { getRelatedProducts } from '@/utils/discoveryEngine';
 import { lockScroll, unlockScroll } from '@/utils/scrollLock';
 import { getHumanFormatName } from '@/utils/productVariantProcessing';
 import RelatedProductsCarousel from '@/components/shared/RelatedProductsCarousel';
@@ -217,13 +218,16 @@ export default function PeptideDetail({
         peptide_name: activeProduct.name,
         protocol_id: (typeof window !== 'undefined' && window.history?.state?.protocol_id) || null
       });
+      trackProductView({
+        objectID: activeProduct.objectID || activeProduct.id || activeProduct.slug
+      });
       trackRecentView({
         type: 'peptide',
         slug: activeProduct.slug || activeProduct.id,
         name: activeProduct.name,
       });
     }
-  }, [activeProduct?.name, activeProduct?.slug]);
+  }, [activeProduct?.name, activeProduct?.slug, activeProduct?.id]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -1800,8 +1804,9 @@ export default function PeptideDetail({
                 const storageLiq = activeProduct.storage_conditions?.reconstituted || 'Refrigerate (2-8°C)';
                 const isLiquid = presentationClass === 'pen' || presentationClass === 'spray' || presentationClass === 'topical';
                 const isOral = presentationClass === 'oral';
-                const mw = activeProduct.molecular_weight ? `${activeProduct.molecular_weight} Da` : null;
-                const formula = activeProduct.molecular_formula || null;
+                const rawMw = activeProduct.molecularWeight || activeProduct.molecular_weight;
+                const mw = rawMw ? (String(rawMw).includes('Da') ? rawMw : `${rawMw} Da`) : null;
+                const formula = activeProduct.molecularFormula || activeProduct.molecular_formula || null;
 
                 const baseSpecs = [
                   { label: 'Analytical Purity', value: '≥ 99%', icon: <Target size={14} color="var(--primary)" /> },
@@ -1857,7 +1862,10 @@ export default function PeptideDetail({
                 return factsContent;
               })()}
 
-              {/* 3. Clinical Evidence Hub */}
+              {/* 3. Institutional Quality & Traceability Hub */}
+              <ProductTraceabilityCard product={activeProduct} />
+
+              {/* 4. Clinical Evidence Hub */}
               <div
                 onClick={() => setShowPubMedPanel(true)}
                 style={{
@@ -2052,13 +2060,20 @@ export default function PeptideDetail({
                 {/* 2. Specifications Accordion */}
                 {(() => {
                   const specs = [];
-                  if (activeProduct.molecular_formula) specs.push({ label: 'Molecular Formula', value: activeProduct.molecular_formula });
-                  if (activeProduct.molecular_weight) specs.push({ label: 'Molecular Weight', value: typeof activeProduct.molecular_weight === 'number' || !isNaN(activeProduct.molecular_weight) ? `${activeProduct.molecular_weight} Da` : activeProduct.molecular_weight });
-                  if (activeProduct.cas) specs.push({ label: 'CAS Number', value: activeProduct.cas });
+                  const formula = activeProduct.molecularFormula || activeProduct.molecular_formula;
+                  if (formula) specs.push({ label: 'Molecular Formula', value: formula });
+                  const rawMw = activeProduct.molecularWeight || activeProduct.molecular_weight;
+                  if (rawMw) specs.push({ label: 'Molecular Weight', value: typeof rawMw === 'number' || !isNaN(rawMw) ? `${rawMw} Da` : rawMw });
+                  const cas = activeProduct.casNumber || activeProduct.cas;
+                  if (cas) specs.push({ label: 'CAS Number', value: cas });
                   if (activeProduct.sequence) specs.push({ label: 'Sequence', value: activeProduct.sequence, isSequence: true });
+                  const targetSys = activeProduct.targetSystem || activeProduct.target;
+                  if (targetSys) specs.push({ label: 'Target Receptor / Axis', value: targetSys });
                   if (activeProduct.typeData?.typicalResearchUse) specs.push({ label: 'Typical Research Use', value: activeProduct.typeData.typicalResearchUse });
                   const purityVal = activeProduct.purity || activeProduct.purity_level;
                   if (purityVal) specs.push({ label: 'Purity Level', value: purityVal });
+                  const batch = activeProduct.batchNumber || activeProduct.lotNumber;
+                  if (batch) specs.push({ label: 'Batch / Lot Code', value: batch });
 
                   if (specs.length === 0) return null;
 

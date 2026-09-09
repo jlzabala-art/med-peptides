@@ -221,16 +221,25 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 8px var(--sb-padding-x);
+  padding: 6px var(--sb-padding-x);
   background: transparent;
   border: none;
   cursor: pointer;
   border-radius: var(--sb-item-radius);
-  transition: background 0.2s;
+  transition: background 0.15s ease;
 }
 
 .sb-group-toggle:hover {
   background: var(--sb-hover-bg);
+}
+
+.sb-group-toggle:hover .sb-group-icon-wrap {
+  transform: scale(1.08);
+}
+
+.app-sidebar.collapsed .sb-group-toggle {
+  justify-content: center;
+  padding: 6px 0;
 }
 
 .sb-quick-create {
@@ -311,21 +320,45 @@
   margin: 16px var(--sb-padding-x);
 }
 
-/* ── Collapsed Tooltips ──────────────────────────────────────────────────────── */
-.app-sidebar.collapsed .sb-item[data-tooltip]:hover::after {
+/* ── Sidebar Tooltips (Always project to the RIGHT into the open viewport) ── */
+.app-sidebar [data-tooltip]:hover::after {
   content: attr(data-tooltip);
   position: fixed;
-  left: calc(var(--sb-w-mini) + 8px);
-  background: #1e293b;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-  z-index: 10000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  pointer-events: none;
+  left: calc(var(--sidebar-current-width, 64px) + 12px) !important;
+  transform: translateY(-50%) !important;
+  margin-top: 0 !important;
+  margin-left: 0 !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  z-index: 999999 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  letter-spacing: 0.01em !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.app-sidebar [data-tooltip]:hover::before {
+  content: '' !important;
+  position: fixed;
+  left: calc(var(--sidebar-current-width, 64px) + 6px) !important;
+  transform: translateY(-50%) !important;
+  margin-top: 0 !important;
+  margin-left: 0 !important;
+  border: 6px solid transparent !important;
+  border-right-color: #0f172a !important;
+  border-top-color: transparent !important;
+  border-left-color: transparent !important;
+  border-bottom-color: transparent !important;
+  pointer-events: none !important;
+  z-index: 999999 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* ── Footer ──────────────────────────────────────────────────────────────────── */

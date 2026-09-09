@@ -28,7 +28,7 @@ export default function UserFormDrawer({
   
   const [currentRoles, setCurrentRoles] = useState(initialRoles);
   const [isClinicDrawerOpen, setIsClinicDrawerOpen] = useState(false);
-  const { data: clinics } = useFirestoreCollection('atlas_clinics');
+  const { data: clinics } = useFirestoreCollection('clinics', { limitCount: 100 });
 
   // Sync state if user or modal open changes
   useEffect(() => {

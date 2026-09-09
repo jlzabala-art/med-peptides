@@ -90,7 +90,7 @@ export default function AppActionGroup({ actions = [], maxVisible = 2 }) {
   const buttonRef = useRef(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     const mqlCompact = window.matchMedia('(max-width: 1280px)');
     const mqlMobile = window.matchMedia('(max-width: 768px)');
     

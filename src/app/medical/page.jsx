@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useDoctorPatients } from '../../hooks/data/useDoctorPatients';
 import { useDoctorPrescriptions } from '../../hooks/data/useDoctorPrescriptions';
+import EmptyState from '../../components/ui/EmptyState';
 import { Users, ClipboardList, Brain, Calendar } from '@/lib/icons';
 
 export default function MedicalOverviewPage() {
@@ -91,7 +92,12 @@ export default function MedicalOverviewPage() {
                 {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)}
               </div>
             ) : patients.length === 0 ? (
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0' }}>No patients assigned yet.</p>
+              <EmptyState
+                icon={Users}
+                title="No patients assigned yet"
+                subtitle="Patients assigned to your clinic or practice will appear here."
+                compact
+              />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {patients.map(p => (
@@ -124,7 +130,12 @@ export default function MedicalOverviewPage() {
                 {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)}
               </div>
             ) : prescriptions.length === 0 ? (
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0' }}>No recent prescriptions.</p>
+              <EmptyState
+                icon={ClipboardList}
+                title="No recent prescriptions"
+                subtitle="New and active prescriptions will appear here once generated."
+                compact
+              />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {prescriptions.map(rx => (

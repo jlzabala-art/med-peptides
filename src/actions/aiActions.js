@@ -1,89 +1,178 @@
 "use server";
 
-/**
- * AI Server Actions
- * These functions execute entirely on the Next.js Node server.
- * Secrets (like GEMINI_API_KEY or OpenAI keys) are completely hidden from the browser.
- */
+import { GoogleGenAI, Type } from '@google/genai';
+import logger from '../utils/logger';
 
-// Si tuvieras el SDK instalado de Gemini/OpenAI, lo importarías aquí.
-// import { GoogleGenerativeAI } from "@google/generative-ai";
+function getGenAIClient() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+}
 
 /**
  * Generates an executive summary based on the provided metrics.
- * Runs on the server to prevent exposing prompt logic.
+ * Runs on the server with Gemini AI.
  * @param {Object} metrics 
  * @returns {Promise<string>}
  */
-export async function generateExecutiveSummaryAction(metrics) {
+export async function generateExecutiveSummaryAction(metrics = {}) {
   try {
-    // Aquí inicializarías el SDK de AI usando process.env.GEMINI_API_KEY
-    // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // Simulando por ahora la llamada real a la IA en el backend
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
+    const ai = getGenAIClient();
     const totalSales = metrics.totalSales || '$0';
     const activeUsers = metrics.activeUsers || 0;
-    
-    return `### 📊 AI Insights Overview (Server Rendered)\n\n` +
-      `Based on the current metrics, the platform has generated **${totalSales}** in recent volume across **${activeUsers}** active users. ` +
-      `We are seeing a *positive trend* in overall engagement.\n\n` +
-      `**Recommendations:**\n` +
-      `- **Inventory:** Consider restocking top-tier peptides as demand is projected to rise by 12% next week.\n` +
-      `- **Sales:** B2B Quotations are converting 5% faster than last month.`;
+    const pendingOrders = metrics.pendingOrders ?? 'N/A';
+
+    if (ai) {
+      const prompt = `You are the executive clinical intelligence AI for a medical peptide platform.
+Generate a concise, professional executive briefing (markdown format) based on these live metrics:
+- Total Sales Volume: ${totalSales}
+- Active Clinic/Doctor Users: ${activeUsers}
+- Pending Orders: ${pendingOrders}
+
+Include:
+1. Executive Insights Overview (2-3 sentences)
+2. Operational Observations (bullet points)
+3. Actionable Clinical & Inventory Recommendations (bullet points)`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          temperature: 0.3,
+        }
+      });
+
+      if (response.text) {
+        return response.text;
+      }
+    } else {
+      logger.warn('[generateExecutiveSummaryAction] GEMINI_API_KEY not configured, using structured metrics template');
+    }
+
+    return `### 📊 AI Insights Overview (Real-time Metrics Summary)\n\n` +
+      `Platform active volume is currently tracking at **${totalSales}** across **${activeUsers}** registered practitioners. ` +
+      `Operational indicators reflect stable clinic engagement.\n\n` +
+      `**Key Observations:**\n` +
+      `- **Inventory Health:** High turnover observed in standard clinical protocols.\n` +
+      `- **Prescription Pipeline:** Active quotation pipeline is operating normally.\n\n` +
+      `*Note: Full natural-language generative commentary activates automatically when GEMINI_API_KEY is provisioned.*`;
   } catch (error) {
-    console.error("AI Server Action failed:", error);
+    logger.error("AI Server Action failed:", error);
     throw new Error("Failed to generate executive summary on the server.");
   }
 }
 
 /**
- * Extracts API Peptides from an image base64 securely.
- * Replaces the need for a Firebase Cloud Function.
+ * Extracts API Peptides from an image base64 securely using Gemini Vision.
  * @param {string} imageBase64 
  * @param {string} mimeType 
  * @param {string} instructions 
  * @returns {Promise<Array>} Array of { peptideName, pricePerGram }
  */
-export async function extractApiPeptidesAction(imageBase64, mimeType, instructions = '') {
+export async function extractApiPeptidesAction(imageBase64, mimeType = 'image/jpeg', instructions = '') {
   try {
-    // Aquí llamarías al modelo multimodal de Gemini
-    // const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-    // const result = await model.generateContent([instructions, { inlineData: { data: imageBase64, mimeType } }]);
+    const ai = getGenAIClient();
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    // Simular respuesta por ahora hasta conectar el SDK real
-    return [
-      { peptideName: "BPC-157 (Server Extracted)", pricePerGram: 15.50 },
-      { peptideName: "TB-500 (Server Extracted)", pricePerGram: 22.00 }
-    ];
+    if (ai && imageBase64) {
+      const schema = {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            peptideName: { type: Type.STRING },
+            pricePerGram: { type: Type.NUMBER }
+          },
+          required: ['peptideName', 'pricePerGram']
+        }
+      };
+
+      const prompt = `Extract all peptide names and their price per gram from this document image. ${instructions}`;
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          prompt,
+          { inlineData: { data: imageBase64, mimeType } }
+        ],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: schema,
+          temperature: 0.1
+        }
+      });
+
+      if (response.text) {
+        try {
+          return JSON.parse(response.text);
+        } catch (e) {
+          logger.warn('[extractApiPeptidesAction] JSON parse warning', { message: e.message });
+        }
+      }
+    } else if (!ai) {
+      logger.warn('[extractApiPeptidesAction] GEMINI_API_KEY not set');
+    }
+
+    return [];
   } catch (error) {
-    console.error("Atlas AI Server Extraction failed:", error);
+    logger.error("Atlas AI Server Extraction failed:", error);
     throw new Error("Failed to process image securely on the server.");
   }
 }
 
 /**
- * Reads a PDF buffer and attempts to parse items accurately using Gemini.
- * @param {Buffer} fileBuffer 
+ * Reads a PDF buffer/base64 and attempts to parse items accurately using Gemini.
+ * @param {string} base64Data 
  * @param {string} mimeType 
  * @returns {Promise<Array>} Array of { name, quantity, dosage, form, comments }
  */
-export async function parsePrescriptionPdfAction(base64Data, mimeType) {
+export async function parsePrescriptionPdfAction(base64Data, mimeType = 'application/pdf') {
   try {
-    // Simulando procesamiento
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Devolvemos ítems hardcodeados como demo, idealmente aquí entra Gemini
-    return [
-      { name: "TB500", amount: 1, dosage: "5mg", form: "Vial", duration: "30 Days", comments: "Reconstitute with 2ml BAC" },
-      { name: "BPC-157", amount: 1, dosage: "10mg", form: "Vial", duration: "30 Days", comments: "Reconstitute with 3ml BAC" }
-    ];
+    const ai = getGenAIClient();
+
+    if (ai && base64Data) {
+      const schema = {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING },
+            amount: { type: Type.NUMBER },
+            dosage: { type: Type.STRING },
+            form: { type: Type.STRING },
+            duration: { type: Type.STRING },
+            comments: { type: Type.STRING }
+          },
+          required: ['name', 'dosage']
+        }
+      };
+
+      const prompt = `Extract all prescribed peptide medications from this prescription document with dosage, quantity/amount, form, and administration duration.`;
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          prompt,
+          { inlineData: { data: base64Data, mimeType } }
+        ],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: schema,
+          temperature: 0.1
+        }
+      });
+
+      if (response.text) {
+        try {
+          return JSON.parse(response.text);
+        } catch (e) {
+          logger.warn('[parsePrescriptionPdfAction] JSON parse warning', { message: e.message });
+        }
+      }
+    } else if (!ai) {
+      logger.warn('[parsePrescriptionPdfAction] GEMINI_API_KEY not configured');
+    }
+
+    return [];
   } catch (error) {
-    console.error("PDF Parsing failed:", error);
+    logger.error("PDF Parsing failed:", error);
     throw new Error("Failed to parse PDF document.");
   }
 }

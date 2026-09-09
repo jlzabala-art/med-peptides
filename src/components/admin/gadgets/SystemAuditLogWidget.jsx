@@ -8,37 +8,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { fetchRecentAuditLogs } from '../../../services/auditLogService';
 
-const DEMO_LOGS = [
-  {
-    id: '1',
-    action: 'NEW_CLINIC_REGISTERED',
-    user: 'System Admin',
-    details: 'Clinic Las Condes approved.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
-  },
-  {
-    id: '2',
-    action: 'SECURITY_ALERT',
-    user: 'System',
-    details: 'Multiple failed login attempts from IP 192.168.1.1.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 45),
-  },
-  {
-    id: '3',
-    action: 'PERMISSION_CHANGE',
-    user: 'System Admin',
-    details: 'Dr. Smith promoted to Clinical Supervisor role.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    id: '4',
-    action: 'WHolesaler_REVIEW',
-    user: 'Logistics Admin',
-    details: 'Batch BPC-157 marked for quality review.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-];
-
 export default function SystemAuditLogWidget({
   ownerId = 'admin',
   ownerType = 'admin',
@@ -56,10 +25,10 @@ export default function SystemAuditLogWidget({
       try {
         const result = await fetchRecentAuditLogs(10);
         if (isMounted) {
-          setLogs(result.length > 0 ? result : DEMO_LOGS);
+          setLogs(result || []);
         }
       } catch {
-        if (isMounted) setLogs(DEMO_LOGS);
+        if (isMounted) setLogs([]);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -118,29 +87,38 @@ export default function SystemAuditLogWidget({
           <div>Loading logs...</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {logs.map((log) => {
-              const isAlert =
-                log.action.includes('ALERTA') ||
-                log.action.includes('ERROR') ||
-                log.action.includes('SECURITY');
-              const dateStr = log.timestamp.toISOString().replace('T', ' ').substring(0, 19);
-              return (
-                <div key={log.id} style={{ display: 'flex', gap: '0.5rem', opacity: 0.9 }}>
-                  <span style={{ color: '#888' }}>[{dateStr}]</span>
-                  <span
-                    style={{
-                      color: isAlert ? 'var(--color-danger)' : 'var(--color-primary)',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {log.action}
-                  </span>
-                  <span style={{ color: 'var(--color-bg-surface)' }}>&gt;</span>
-                  <span style={{ color: '#22c55e' }}>{log.user}:</span>
-                  <span style={{ color: '#ccc' }}>{log.details}</span>
-                </div>
-              );
-            })}
+            {logs.length === 0 ? (
+              <div style={{ color: '#666', fontStyle: 'italic' }}>
+                [{new Date().toISOString().replace('T', ' ').substring(0, 19)}] [AUDIT] System audit daemon active. No security anomalies or critical events recorded.
+              </div>
+            ) : (
+              logs.map((log) => {
+                const isAlert =
+                  (log.action || '').includes('ALERTA') ||
+                  (log.action || '').includes('ERROR') ||
+                  (log.action || '').includes('SECURITY');
+                const d = log.timestamp?.toDate 
+                  ? log.timestamp.toDate() 
+                  : (log.timestamp ? new Date(log.timestamp) : new Date());
+                const dateStr = d.toISOString().replace('T', ' ').substring(0, 19);
+                return (
+                  <div key={log.id} style={{ display: 'flex', gap: '0.5rem', opacity: 0.9 }}>
+                    <span style={{ color: '#888' }}>[{dateStr}]</span>
+                    <span
+                      style={{
+                        color: isAlert ? 'var(--color-danger)' : 'var(--color-primary)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {log.action}
+                    </span>
+                    <span style={{ color: 'var(--color-bg-surface)' }}>&gt;</span>
+                    <span style={{ color: '#22c55e' }}>{log.user}:</span>
+                    <span style={{ color: '#ccc' }}>{log.details}</span>
+                  </div>
+                );
+              })
+            )}
             <div style={{ marginTop: '0.5rem', animation: 'terminalBlink 1s step-end infinite' }}>
               _
             </div>

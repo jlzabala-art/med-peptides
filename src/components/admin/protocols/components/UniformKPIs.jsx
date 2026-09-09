@@ -15,10 +15,10 @@ export default function UniformKPIs({
     data.reduce((acc, d) => acc + (d.protocol_duration_weeks || d.duration_weeks || d.durationWeeks || 8), 0) / (data.length || 1)
   );
 
-  const globalTotal = globalMetrics?.totalCount ?? globalMetrics?.total ?? 77;
-  const globalActive = globalMetrics?.activeCount ?? globalMetrics?.active ?? 68;
-  const globalPeptides = globalMetrics?.peptideCount ?? 45;
-  const globalAvgDuration = globalMetrics?.avgDuration ?? 10;
+  const globalTotal = globalMetrics?.totalCount ?? globalMetrics?.total ?? filteredTotal;
+  const globalActive = globalMetrics?.activeCount ?? globalMetrics?.active ?? filteredActive;
+  const globalPeptides = globalMetrics?.peptideCount ?? filteredPeptides;
+  const globalAvgDuration = globalMetrics?.avgDuration ?? filteredAvgDuration;
 
   const currentTotal = kpiScope === 'global' ? globalTotal : filteredTotal;
   const currentActive = kpiScope === 'global' ? globalActive : filteredActive;
@@ -166,7 +166,7 @@ export default function UniformKPIs({
           </div>
         ))}
       </div>
-      <style jsx>{`
+      <style>{`
         .protocols-kpi-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);

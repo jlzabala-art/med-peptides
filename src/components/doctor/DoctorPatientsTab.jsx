@@ -26,10 +26,10 @@ export default function DoctorPatientsTab({ doctorId }) {
   }, [searchParams]);
 
   const COHORT_TABS = [
-    { id: 'all', fullLabel: '🌐 All Patients', shortLabel: '🌐 All', count: 214, color: '#003666' },
-    { id: 'peptides', fullLabel: '🧬 Peptides Cohort', shortLabel: '🧬 Peptides', count: 162, color: '#059669' },
-    { id: 'supplements', fullLabel: '💊 Supplements Cohort', shortLabel: '💊 Supplements', count: 94, color: '#7c3aed' },
-    { id: 'genomics', fullLabel: '🧪 Fagron Genomics', shortLabel: '🧪 Genomics', count: 48, color: '#2563eb' },
+    { id: 'all', fullLabel: '🌐 All Patients', shortLabel: '🌐 All', color: '#003666' },
+    { id: 'peptides', fullLabel: '🧬 Peptides Cohort', shortLabel: '🧬 Peptides', color: '#059669' },
+    { id: 'supplements', fullLabel: '💊 Supplements Cohort', shortLabel: '💊 Supplements', color: '#7c3aed' },
+    { id: 'genomics', fullLabel: '🧪 Fagron Genomics', shortLabel: '🧪 Genomics', color: '#2563eb' },
   ];
 
   return (
@@ -127,23 +127,25 @@ export default function DoctorPatientsTab({ doctorId }) {
             >
               <span className="cohort-label-full">{tab.fullLabel}</span>
               <span className="cohort-label-short">{tab.shortLabel}</span>
-              <span
-                style={{
-                  backgroundColor: isActive ? tab.color : '#f1f5f9',
-                  color: isActive ? '#ffffff' : '#475569',
-                  padding: '1px 6px',
-                  borderRadius: '10px',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  marginLeft: '2px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: '20px',
-                }}
-              >
-                {tab.count}
-              </span>
+              {tab.count !== undefined && (
+                <span
+                  style={{
+                    backgroundColor: isActive ? tab.color : '#f1f5f9',
+                    color: isActive ? '#ffffff' : '#475569',
+                    padding: '1px 6px',
+                    borderRadius: '10px',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    marginLeft: '2px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '20px',
+                  }}
+                >
+                  {tab.count}
+                </span>
+              )}
             </button>
           );
         })}

@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { verifyAdminAuth } from '../../../../lib/serverAuth';
 
-export async function POST() {
+export async function POST(request) {
   try {
+    const authCheck = await verifyAdminAuth(request);
+    if (!authCheck.isAuthorized) {
+      return authCheck.response;
+    }
+
     console.log('Fetching official suppliers...');
     const suppliersSnap = await adminDb.collection('suppliers').get();
     

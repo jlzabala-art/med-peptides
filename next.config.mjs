@@ -1,10 +1,4 @@
 /** @type {import('next').NextConfig} */
-import bundleAnalyzer from '@next/bundle-analyzer';
-
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-});
-
 const nextConfig = {
   reactStrictMode: false, // Keep off during ongoing migration to avoid double-render issues
   // TypeScript errors are suppressed during build — enable gradually as types are fixed
@@ -35,5 +29,15 @@ const nextConfig = {
   output: "standalone",
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default async function config() {
+  if (process.env.ANALYZE === 'true') {
+    try {
+      const bundleAnalyzer = (await import('@next/bundle-analyzer')).default;
+      return bundleAnalyzer({ enabled: true })(nextConfig);
+    } catch {
+      return nextConfig;
+    }
+  }
+  return nextConfig;
+}
 

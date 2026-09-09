@@ -114,25 +114,80 @@ export const formatDosage = (val, variant = null) => {
     return renderPart(parts[0], 0);
   }
 
+  // 2 parts: clean horizontal pair
+  if (parts.length === 2) {
+    return (
+      <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap' }}>
+        {renderPart(parts[0], 0)}
+        <span style={{
+          fontSize: '0.65rem',
+          fontWeight: 800,
+          color: '#0284c7',
+          backgroundColor: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: '3px',
+          padding: '0 3px',
+          lineHeight: '1.2'
+        }}>+</span>
+        {renderPart(parts[1], 1)}
+      </div>
+    );
+  }
+
+  // 3 or 4 parts: Option A (2x2 compact grid layout for blends like KLOW / GLOW)
+  const row1 = parts.slice(0, 2);
+  const row2 = parts.slice(2);
+
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap' }}>
-      {parts.map((part, idx) => (
-        <React.Fragment key={idx}>
-          {idx > 0 && (
-            <span style={{
-              fontSize: '0.65rem',
-              fontWeight: 800,
-              color: '#0284c7',
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              borderRadius: '3px',
-              padding: '0 3px',
-              lineHeight: '1.2'
-            }}>+</span>
-          )}
-          {renderPart(part, idx)}
-        </React.Fragment>
-      ))}
+    <div
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '2px',
+        padding: '2px 0'
+      }}
+      title={`Full blend: ${str}`}
+    >
+      <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap' }}>
+        {row1.map((part, idx) => (
+          <React.Fragment key={idx}>
+            {idx > 0 && (
+              <span style={{
+                fontSize: '0.62rem',
+                fontWeight: 800,
+                color: '#0284c7',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                borderRadius: '3px',
+                padding: '0 2px',
+                lineHeight: '1.1'
+              }}>+</span>
+            )}
+            {renderPart(part, idx)}
+          </React.Fragment>
+        ))}
+      </div>
+      <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'nowrap' }}>
+        {row2.map((part, idx) => (
+          <React.Fragment key={idx + 2}>
+            {idx > 0 && (
+              <span style={{
+                fontSize: '0.62rem',
+                fontWeight: 800,
+                color: '#0284c7',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                borderRadius: '3px',
+                padding: '0 2px',
+                lineHeight: '1.1'
+              }}>+</span>
+            )}
+            {renderPart(part, idx + 2)}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 };
@@ -242,8 +297,9 @@ export const buildPeptideColumns = ({
     {
       key: 'dosage',
       header: 'Dosage / Scale',
-      width: '105px',
-      nowrap: true,
+      width: '140px',
+      minWidth: '130px',
+      align: 'center',
       sortValue: (v) => parseFloat(v.dosage || v.dose || v.moq) || 0,
       render: (v) => {
         const isRawApi = v.unitOfMeasure === 'g' || v.unitOfMeasure === 'kg' || v.supplierPricing?.unitOfMeasure === 'g' || v.type === 'raw_material' || v.format === 'raw_api' || (v.moq && v.moq > 50);

@@ -6,17 +6,16 @@ import { useRouter } from 'next/navigation';
 import { DoctorContext } from '../../../templates/DoctorDashboard';
 import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
 
-// ── Eager imports (small, always used) ───────────────────────────────────────
-// DoctorOverviewTab is kept eager as it's the default
+// ── Eager imports (high traffic, primary navigation) ──────────────────────────
 import DoctorOverviewTab from '../../../components/doctor/DoctorOverviewTab';
+import PhysicianPatientsTab from '../../../components/doctor/DoctorPatientsTab';
+import DoctorPrescriptionsTab from '../../../components/doctor/DoctorPrescriptionsTab';
 
 // ── Dynamic imports ──────────────────────────────────────────────────────────
-const PhysicianPatientsTab = dynamic(() => import('../../../components/doctor/DoctorPatientsTab'), { ssr: false });
 const DoctorLeadsTab = dynamic(() => import('../../../components/doctor/DoctorLeadsTab'), { ssr: false });
 const PhysicianRecommendationsTab = dynamic(() => import('../../../components/doctor/DoctorRecommendationsTab'), { ssr: false });
 const PhysicianOrdersTab = dynamic(() => import('../../../components/doctor/DoctorOrdersTab'), { ssr: false });
 const PhysicianProtocolsTab = dynamic(() => import('../../../components/doctor/DoctorProtocolsTab'), { ssr: false });
-const DoctorPrescriptionsTab = dynamic(() => import('../../../components/doctor/DoctorPrescriptionsTab'), { ssr: false });
 const PhysicianAssistantsTab = dynamic(() => import('../../../components/doctor/DoctorAssistantsTab'), { ssr: false });
 const DoctorMessagesTab = dynamic(() => import('../../../components/doctor/DoctorMessagesTab'), { ssr: false });
 

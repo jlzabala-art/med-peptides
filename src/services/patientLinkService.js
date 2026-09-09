@@ -25,6 +25,11 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase.js';
+import {
+  createPatientAction,
+  linkPatientToUserAction,
+  unlinkPatientFromUserAction,
+} from '../actions/patientsActions';
 
 const PATIENTS_COL = 'patients';
 const USERS_COL = 'users';
@@ -33,52 +38,62 @@ const USERS_COL = 'users';
 
 /**
  * Create a new patient clinical record in Firestore.
- * Automatically attempts to find and link a portal user by email.
+ * Automatically attempts to find and link a portal user by email via Server Action.
  *
  * @param {Object} patientData - Patient form fields (name, email, dob, etc.)
  * @returns {Promise<{id: string, linkedUserId: string|null}>}
  */
 export async function createPatient(patientData) {
-  const cleanEmail = patientData.email?.trim().toLowerCase() || '';
+  try {
+    // ⚡ Execute on server side with atomic batch write and secure user linking
+    const result = await createPatientAction(patientData);
+    if (result?.success) {
+      return { id: result.id, linkedUserId: result.linkedUserId };
+    }
+    throw new Error(result?.error || 'Server action failed');
+  } catch (err) {
+    console.warn('[patientLinkService] createPatientAction fallback, using client write:', err.message);
+    const cleanEmail = patientData.email?.trim().toLowerCase() || '';
 
-  // Attempt auto-link by email
-  let linkedUserId = null;
-  if (cleanEmail) {
-    try {
-      const q = query(collection(db, USERS_COL), where('email', '==', cleanEmail));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        linkedUserId = snap.docs[0].id;
+    // Attempt auto-link by email
+    let linkedUserId = null;
+    if (cleanEmail) {
+      try {
+        const q = query(collection(db, USERS_COL), where('email', '==', cleanEmail));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          linkedUserId = snap.docs[0].id;
+        }
+      } catch {
+        // Non-fatal: link can be established manually later
       }
-    } catch {
-      // Non-fatal: link can be established manually later
     }
-  }
 
-  const docData = {
-    ...patientData,
-    email: cleanEmail,
-    linkedUserId,
-    status: patientData.status || 'New',
-    riskScore: 'Pending',
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
+    const docData = {
+      ...patientData,
+      email: cleanEmail,
+      linkedUserId,
+      status: patientData.status || 'New',
+      riskScore: 'Pending',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
 
-  const ref = await addDoc(collection(db, PATIENTS_COL), docData);
+    const ref = await addDoc(collection(db, PATIENTS_COL), docData);
 
-  // If auto-linked, write back to the user document
-  if (linkedUserId) {
-    try {
-      await updateDoc(doc(db, USERS_COL, linkedUserId), {
-        linkedPatientId: ref.id,
-      });
-    } catch {
-      // Non-fatal
+    // If auto-linked, write back to the user document
+    if (linkedUserId) {
+      try {
+        await updateDoc(doc(db, USERS_COL, linkedUserId), {
+          linkedPatientId: ref.id,
+        });
+      } catch {
+        // Non-fatal
+      }
     }
-  }
 
-  return { id: ref.id, linkedUserId };
+    return { id: ref.id, linkedUserId };
+  }
 }
 
 // ── Link / Unlink ─────────────────────────────────────────────────────────────
@@ -93,15 +108,23 @@ export async function createPatient(patientData) {
 export async function linkPatientToUser(patientId, userId) {
   if (!patientId || !userId) throw new Error('patientId and userId are required');
 
-  await Promise.all([
-    updateDoc(doc(db, PATIENTS_COL, patientId), {
-      linkedUserId: userId,
-      updatedAt: serverTimestamp(),
-    }),
-    updateDoc(doc(db, USERS_COL, userId), {
-      linkedPatientId: patientId,
-    }),
-  ]);
+  try {
+    // ⚡ Execute atomic link on server side
+    const res = await linkPatientToUserAction({ patientId, userId });
+    if (res?.success) return;
+    throw new Error(res?.error || 'linkPatientToUserAction failed');
+  } catch (err) {
+    console.warn('[patientLinkService] linkPatientToUserAction fallback, using client write:', err.message);
+    await Promise.all([
+      updateDoc(doc(db, PATIENTS_COL, patientId), {
+        linkedUserId: userId,
+        updatedAt: serverTimestamp(),
+      }),
+      updateDoc(doc(db, USERS_COL, userId), {
+        linkedPatientId: patientId,
+      }),
+    ]);
+  }
 }
 
 /**
@@ -111,16 +134,27 @@ export async function linkPatientToUser(patientId, userId) {
  * @param {string} userId    - Firebase UID / Firestore doc ID in `users/`
  */
 export async function unlinkPatientFromUser(patientId, userId) {
-  await Promise.all([
-    updateDoc(doc(db, PATIENTS_COL, patientId), {
-      linkedUserId: null,
-      updatedAt: serverTimestamp(),
-    }),
-    updateDoc(doc(db, USERS_COL, userId), {
-      linkedPatientId: null,
-    }),
-  ]);
+  if (!patientId || !userId) throw new Error('patientId and userId are required');
+
+  try {
+    // ⚡ Execute atomic unlink on server side
+    const res = await unlinkPatientFromUserAction({ patientId, userId });
+    if (res?.success) return;
+    throw new Error(res?.error || 'unlinkPatientFromUserAction failed');
+  } catch (err) {
+    console.warn('[patientLinkService] unlinkPatientFromUserAction fallback, using client write:', err.message);
+    await Promise.all([
+      updateDoc(doc(db, PATIENTS_COL, patientId), {
+        linkedUserId: null,
+        updatedAt: serverTimestamp(),
+      }),
+      updateDoc(doc(db, USERS_COL, userId), {
+        linkedPatientId: null,
+      }),
+    ]);
+  }
 }
+
 
 // ── Query ─────────────────────────────────────────────────────────────────────
 

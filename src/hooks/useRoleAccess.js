@@ -28,7 +28,7 @@
  */
 import { useAuth } from '../context/AuthContext';
 import { useAdminRoleSimulation } from './admin/useAdminRoleSimulation';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 // ── Role aliases — normalise legacy/typo role strings ─────────────────────────
 /** @type {Record<string, string>} */
@@ -182,31 +182,33 @@ export function useRoleAccess() {
 
   /**
    * Action-based permission check.
+   * Wrapped in useCallback to stabilise reference — prevents unnecessary
+   * re-renders in child components that receive `can` as a prop or dep.
    * @param {string} action — e.g. 'edit:products'
    */
-  const can = (action) => {
+  const can = useCallback((action) => {
     if (permissions.includes('*')) return true;
     return permissions.includes(action);
-  };
+  }, [permissions]);
 
   /**
    * Feature-flag check — backed by Firestore /settings/permissions
    * with per-user overrides (via AuthContext.activePermissions).
    * @param {string} flag — e.g. 'canBulkOrder', 'clinicalLogs'
    */
-  const feature = (flag) => {
+  const feature = useCallback((flag) => {
     if (isAdmin) return true; // admin has all features
     return Boolean(activePermissions?.[flag]);
-  };
+  }, [isAdmin, activePermissions]);
 
   /**
    * Role identity check. Normalises legacy 'wholeseller' alias.
    * @param {string} roleToCheck
    */
-  const is = (roleToCheck) => {
+  const is = useCallback((roleToCheck) => {
     const normalised = ROLE_ALIASES[roleToCheck] || roleToCheck;
     return effectiveRole === normalised;
-  };
+  }, [effectiveRole]);
 
   return { can, feature, is, effectiveRole, permissions };
 }

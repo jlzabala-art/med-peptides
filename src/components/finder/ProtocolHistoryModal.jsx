@@ -16,6 +16,7 @@ import Download from "lucide-react/dist/esm/icons/download";
 import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
+import notifier from '../../services/NotificationService';
 
 
 
@@ -69,12 +70,15 @@ const ProtocolHistoryModal = ({ isOpen, onClose, onSelect, onCompare }) => {
   };
 
   const handleDelete = async (id) => {
-      if (confirm("Are you sure you want to delete this protocol? This action cannot be undone.")) {
-          const success = await deleteProtocol(id);
-          if (success) {
-              setProtocols(prev => prev.filter(p => p.id !== id));
-          }
+    notifier.confirmCritical(
+      "Are you sure you want to delete this protocol? This action cannot be undone.",
+      async () => {
+        const success = await deleteProtocol(id);
+        if (success) {
+          setProtocols(prev => prev.filter(p => p.id !== id));
+        }
       }
+    );
   };
 
   const filtered = protocols.filter(p => {

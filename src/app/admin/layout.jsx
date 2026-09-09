@@ -5,7 +5,7 @@ import ProtectedRoute from '../../components/auth/ProtectedRoute';
 
 export default function AdminLayout({ children }) {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRole="admin">
       <AdminDashboard>
         {children}
       </AdminDashboard>

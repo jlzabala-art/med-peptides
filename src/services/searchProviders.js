@@ -67,8 +67,8 @@ export async function searchFederatedEntities(q, portalType = 'admin', routePref
         label: pat.fullName || pat.name || pat.email,
         sublabel: pat.phone || pat.email || undefined,
         path: portalType === 'doctor' 
-          ? `/doctor/patients?search=${encodeURIComponent(pat.fullName || pat.name || pat.email)}`
-          : `/admin/patients?search=${encodeURIComponent(pat.fullName || pat.name || pat.email)}`,
+          ? `/doctor/patients?search=${encodeURIComponent(pat.fullName || pat.name || pat.email)}&openDetail=true`
+          : `/admin/patients?search=${encodeURIComponent(pat.fullName || pat.name || pat.email)}&openDetail=true`,
         type: 'Patient',
         icon: User
       });

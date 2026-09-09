@@ -77,54 +77,42 @@ export const ADMIN_ROLES = {
   },
 };
 
-let globalSimulatedRole = 'admin';
 let globalImpersonatedUser = null;
 const listeners = new Set();
 
 /**
  * Global singleton state for simulated role and user impersonation inside the Admin Dashboard.
+ * Reactively synced with Zustand `useSimulationStore`.
  */
 export function useAdminRoleSimulation() {
-  const [role, setRole] = useState(globalSimulatedRole);
+  const storeSimulatedRole = useSimulationStore((state) => state.simulatedRole);
+  const setStoreSimulatedRole = useSimulationStore((state) => state.setSimulatedRole);
+  const exitStoreSimulation = useSimulationStore((state) => state.exitSimulation);
+
   const [impersonatedUser, setImpersonatedUser] = useState(globalImpersonatedUser);
 
-  const sync = useCallback(() => {
-    setRole(globalSimulatedRole);
-    setImpersonatedUser(globalImpersonatedUser);
-  }, []);
-
-  useEffect(() => {
-    listeners.add(sync);
-    return () => listeners.delete(sync);
-  }, [sync]);
+  const role = storeSimulatedRole || 'admin';
 
   const setSimulatedRole = useCallback((newRoleId) => {
-    globalSimulatedRole = newRoleId;
-    try {
-      useSimulationStore.getState().setSimulatedRole(newRoleId === 'admin' ? null : newRoleId);
-    } catch (e) {}
+    setStoreSimulatedRole(newRoleId === 'admin' ? null : newRoleId);
     listeners.forEach((listener) => listener());
-  }, []);
+  }, [setStoreSimulatedRole]);
 
   const impersonateUser = useCallback((userObj) => {
     globalImpersonatedUser = userObj;
+    setImpersonatedUser(userObj);
     if (userObj?.role) {
-      globalSimulatedRole = userObj.role;
-      try {
-        useSimulationStore.getState().setSimulatedRole(userObj.role);
-      } catch (e) {}
+      setStoreSimulatedRole(userObj.role);
     }
     listeners.forEach((listener) => listener());
-  }, []);
+  }, [setStoreSimulatedRole]);
 
   const exitImpersonation = useCallback(() => {
     globalImpersonatedUser = null;
-    globalSimulatedRole = 'admin';
-    try {
-      useSimulationStore.getState().exitSimulation();
-    } catch (e) {}
+    setImpersonatedUser(null);
+    exitStoreSimulation();
     listeners.forEach((listener) => listener());
-  }, []);
+  }, [exitStoreSimulation]);
 
   const currentRoleConfig = ADMIN_ROLES[role] || ADMIN_ROLES.admin;
 

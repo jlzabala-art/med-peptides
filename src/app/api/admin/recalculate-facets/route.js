@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { getProductAvailableTypes } from '../../../../utils/productNormalizer';
+import { verifyAdminAuth } from '../../../../lib/serverAuth';
 
 const TYPE_LABELS = {
   finished_product:  'Finished Products',
@@ -11,6 +12,11 @@ const TYPE_LABELS = {
 };
 
 export async function POST(request) {
+  const authCheck = await verifyAdminAuth(request);
+  if (!authCheck.isAuthorized) {
+    return authCheck.response;
+  }
+
   if (!adminDb) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
   
   try {

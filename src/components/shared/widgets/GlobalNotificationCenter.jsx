@@ -20,46 +20,11 @@ import React, { useState, useRef, useEffect } from 'react';
 
 
 
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'critical',
-    title: 'BPC-157 UAE Registration Expired',
-    message: 'Product is now hidden in UAE. Upload renewed CoA.',
-    time: '2 hours ago',
-    icon: AlertTriangle,
-    color: '#ef4444',
-    bg: '#fef2f2',
-    action: '/admin/pricing-visibility'
-  },
-  {
-    id: 2,
-    type: 'warning',
-    title: '3 Zoho Books Conflicts',
-    message: 'SKU mapping errors detected during the last sync.',
-    time: '4 hours ago',
-    icon: Database,
-    color: '#f59e0b',
-    bg: '#fffbeb',
-    action: '/admin/pricing-visibility'
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: '15 Prescriptions Pending',
-    message: 'New prescriptions require AI validation review.',
-    time: '1 day ago',
-    icon: Clock,
-    color: '#0071bd',
-    bg: '#eff6ff',
-    action: '/admin/prescriptions'
-  }
-];
+import { useNotifications } from '../../../context/NotificationContext';
 
 export default function GlobalNotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-  const unreadCount = notifications.length;
+  const { notifications = [], unreadCount = 0, markAsRead, markAllAsRead } = useNotifications();
   const router = useRouter();
   const dropdownRef = useRef(null);
 
@@ -74,14 +39,15 @@ export default function GlobalNotificationCenter() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const handleAction = (path) => {
+  const handleAction = (path, id) => {
+    if (id) markAsRead?.(id);
     setIsOpen(false);
-    router.push(path);
+    if (path) router.push(path);
   };
 
   const removeNotification = (e, id) => {
     e.stopPropagation();
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    markAsRead?.(id);
   };
 
   return (
@@ -164,17 +130,28 @@ export default function GlobalNotificationCenter() {
               />
             ) : (
               notifications.map((notif) => {
-                const Icon = notif.icon;
+                const isCritical = notif.type === 'critical' || notif.type === 'error';
+                const isWarning = notif.type === 'warning';
+                const isInfo = notif.type === 'info';
+                
+                const Icon = notif.icon || (isCritical ? AlertTriangle : isWarning ? AlertTriangle : isInfo ? Clock : CheckCircle2);
+                const color = notif.color || (isCritical ? '#ef4444' : isWarning ? '#f59e0b' : isInfo ? '#0071bd' : '#16a34a');
+                const bg = notif.bg || (isCritical ? '#fef2f2' : isWarning ? '#fffbeb' : isInfo ? '#eff6ff' : '#f0fdf4');
+                const title = notif.title || notif.subject || 'Notification';
+                const message = notif.message || notif.text || notif.body || '';
+                const time = notif.time || (notif.createdAt?.toDate ? notif.createdAt.toDate().toLocaleDateString() : 'Recent');
+                const actionUrl = notif.action || notif.link || notif.url;
+
                 return (
                   <div 
                     key={notif.id}
-                    onClick={() => handleAction(notif.action)}
+                    onClick={() => handleAction(actionUrl, notif.id)}
                     style={{
                       padding: '16px',
                       borderBottom: '1px solid #e2e8f0',
                       display: 'flex',
                       gap: '12px',
-                      cursor: 'pointer',
+                      cursor: actionUrl ? 'pointer' : 'default',
                       transition: 'background 0.2s'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
@@ -182,27 +159,30 @@ export default function GlobalNotificationCenter() {
                   >
                     <div style={{ 
                       width: '36px', height: '36px', borderRadius: '50%', 
-                      background: notif.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <Icon size={18} color={notif.color} />
+                      <Icon size={18} color={color} />
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{notif.title}</h4>
+                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#0f172a' }}>{title}</h4>
                         <button 
                           onClick={(e) => removeNotification(e, notif.id)}
                           style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+                          title="Dismiss"
                         >
                           <X size={14} />
                         </button>
                       </div>
-                      <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#64748b', lineHeight: 1.4 }}>{notif.message}</p>
+                      {message && <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#64748b', lineHeight: 1.4 }}>{message}</p>}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 500 }}>{notif.time}</span>
-                        <span style={{ fontSize: '12px', color: '#0071bd', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          Resolve <ArrowRight size={12} />
-                        </span>
+                        <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 500 }}>{time}</span>
+                        {actionUrl && (
+                          <span style={{ fontSize: '12px', color: '#0071bd', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            Resolve <ArrowRight size={12} />
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -215,10 +195,10 @@ export default function GlobalNotificationCenter() {
           {notifications.length > 0 && (
             <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', textAlign: 'center', background: '#f8fafc' }}>
               <button 
-                onClick={() => setNotifications([])}
+                onClick={() => markAllAsRead?.()}
                 style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
               >
-                Clear all notifications
+                Mark all as read
               </button>
             </div>
           )}

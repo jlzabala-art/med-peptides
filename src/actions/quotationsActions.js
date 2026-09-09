@@ -2,23 +2,13 @@
 
 import { adminDb } from '../lib/firebaseAdmin';
 import { validateOrderWrite } from '../repositories/orderWriteGuard';
+import { serializeDoc, serializeFirestoreData } from '../lib/serializeFirestore';
+import logger from '../utils/logger';
 
 // ── In-Memory TTL Cache for Quotations KPIs (60s) ───────────────────────────
 let cachedQuotationsKPIs = null;
 let lastQuotationsKPIFetchTime = 0;
 const KPI_CACHE_TTL_MS = 60 * 1000;
-
-function serializeDoc(doc) {
-  if (!doc.exists) return null;
-  const data = doc.data();
-  const serialized = { id: doc.id, ...data };
-  for (const [key, val] of Object.entries(serialized)) {
-    if (val && typeof val === 'object' && typeof val.toDate === 'function') {
-      serialized[key] = val.toDate().toISOString();
-    }
-  }
-  return serialized;
-}
 
 /**
  * Server-Side Authoritative Quotations KPIs with in-memory TTL caching

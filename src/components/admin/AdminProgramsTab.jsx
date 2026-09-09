@@ -3,11 +3,9 @@
 import Activity from "lucide-react/dist/esm/icons/activity";
 import Users from "lucide-react/dist/esm/icons/users";
 import DollarSign from "lucide-react/dist/esm/icons/dollar-sign";
-import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Dna from "lucide-react/dist/esm/icons/dna";
 import TrendingUp from "lucide-react/dist/esm/icons/trending-up";
-import Archive from "lucide-react/dist/esm/icons/archive";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
@@ -15,24 +13,48 @@ import DataTable from '../ui/DataTable';
 import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
 import MetricCard from '../ui/MetricCard';
-
-const MOCK_PROGRAMS = [
-  { id: 'prg_1', name: 'Longevity Base Protocol', type: 'Anti-Aging', patients: 1250, revenue: 1250000, status: 'active', trend: '+12%' },
-  { id: 'prg_2', name: 'Metabolic Reset 90-Day', type: 'Weight Loss', patients: 840, revenue: 2100000, status: 'active', trend: '+24%' },
-  { id: 'prg_3', name: 'Athletic Recovery Stack', type: 'Performance', patients: 420, revenue: 315000, status: 'active', trend: '+5%' },
-  { id: 'prg_4', name: 'Hair Restoration', type: 'Aesthetics', patients: 65, revenue: 45000, status: 'beta', trend: '+45%' }
-];
+import EmptyState from '../ui/EmptyState';
+import { getAllProtocols } from '../../repositories/protocolRepository';
 
 export default function AdminProgramsTab({ isSubTab = false }) {
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState([]); // string[]
+  const [typeFilter, setTypeFilter] = useState([]);
 
-  const ALL_TYPES = [
-    { label: 'Anti-Aging',   value: 'Anti-Aging' },
-    { label: 'Weight Loss',  value: 'Weight Loss' },
-    { label: 'Performance',  value: 'Performance' },
-    { label: 'Aesthetics',   value: 'Aesthetics' },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    async function loadPrograms() {
+      setLoading(true);
+      try {
+        const protocols = await getAllProtocols();
+        if (isMounted) {
+          const mapped = (protocols || []).map(p => ({
+            id: p.id,
+            name: p.title || p.name || 'Clinical Program',
+            type: p.category || p.condition || p.objective || 'General Health',
+            patients: p.enrolledPatients || p.patientsCount || 0,
+            revenue: p.totalRevenue || p.revenue || 0,
+            status: (p.status || 'active').toLowerCase(),
+            trend: p.trend || '+0%'
+          }));
+          setPrograms(mapped);
+        }
+      } catch (err) {
+        console.error('Error fetching programs:', err);
+        if (isMounted) setPrograms([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadPrograms();
+    return () => { isMounted = false; };
+  }, []);
+
+  const allTypes = useMemo(() => {
+    const types = new Set(programs.map(p => p.type).filter(Boolean));
+    return Array.from(types).map(t => ({ label: t, value: t }));
+  }, [programs]);
 
   const activeFilters = typeFilter.map(val => ({
     key: `type-${val}`,
@@ -43,136 +65,135 @@ export default function AdminProgramsTab({ isSubTab = false }) {
 
   const filterOptions = [
     {
-      key: 'type',
+      id: 'type',
       label: 'Program Type',
-      multiSelect: true,
-      values: typeFilter,
-      options: ALL_TYPES.map(t => ({
+      type: 'select',
+      value: typeFilter,
+      options: allTypes.map(t => ({
         ...t,
-        count: MOCK_PROGRAMS.filter(p => p.type === t.value).length || null,
+        count: programs.filter(p => p.type === t.value).length || null,
       })),
       onChange: setTypeFilter
     }
   ];
 
   const filtered = useMemo(() => {
-    if (typeFilter.length === 0) return MOCK_PROGRAMS;
-    return MOCK_PROGRAMS.filter(p => typeFilter.includes(p.type));
-  }, [typeFilter]);
-
+    let list = programs;
+    if (typeFilter.length > 0) {
+      list = list.filter(p => typeFilter.includes(p.type));
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(p => p.name.toLowerCase().includes(q) || p.type.toLowerCase().includes(q));
+    }
+    return list;
+  }, [programs, typeFilter, searchQuery]);
 
   const columns = useMemo(() => [
     {
       key: 'id',
       header: 'ID',
-      render: (val, row) => <CopyableId value={val} />
+      width: '18%',
+      render: (val) => <CopyableId value={val} />
     },
     {
       key: 'name',
       header: 'Program Name',
+      width: '32%',
       render: (val) => <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{val}</span>
     },
     {
       key: 'type',
-      header: 'Type'
+      header: 'Type',
+      width: '20%'
     },
     {
       key: 'patients',
       header: 'Enrolled Patients',
-      render: (val) => val.toLocaleString()
-    },
-    {
-      key: 'revenue',
-      header: 'Total Revenue',
-      render: (val, row) => (
-        <span>
-          ${val.toLocaleString()}
-          <span style={{ fontSize: '0.75rem', color: '#16a34a', marginLeft: '0.5rem' }}>{row.trend}</span>
-        </span>
-      )
+      width: '15%',
+      render: (val) => (val || 0).toLocaleString()
     },
     {
       key: 'status',
       header: 'Status',
+      width: '15%',
       render: (val) => <StatusChip status={val} />
     }
   ], []);
 
-  // Master-Detail Pattern implementation (Golden Rule #4)
   const expandableRender = (row) => (
     <div style={{ padding: '1.5rem', backgroundColor: '#f8fafc', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
       <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-main)' }}>Program Configuration: {row.name}</h4>
       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-        Detailed insights and protocol phases for this program would be configured here, avoiding the need for a separate modal.
+        Detailed insights and protocol phases for this program are configured through the Master Protocol repository.
       </p>
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <button className="gcp-btn gcp-btn--secondary">View Enrolled Patients</button>
-        <button className="gcp-btn gcp-btn--secondary">Edit Financials</button>
-      </div>
     </div>
   );
 
+  const totalPatients = useMemo(() => programs.reduce((acc, p) => acc + (p.patients || 0), 0), [programs]);
+  const activeCount = useMemo(() => programs.filter(p => p.status === 'active').length, [programs]);
+
   return (
     <div style={{ padding: '0 2rem 2rem 2rem' }}>
-      {/* Header (Golden Rule #9) */}
       <PageHeader
-        title="Programas"
-        subtitle="Gestión de programas de salud"
+        title="Programs"
+        subtitle="Clinical protocol program templates and patient enrolments"
       />
 
-      {/* KPI Cards */}
+      {/* KPI Cards (Golden Rule #22) */}
       <div className="kpi-scroll-row" style={{ marginBottom: '2rem' }}>
         <MetricCard
           title="Active Programs"
-          value={MOCK_PROGRAMS.filter(p => p.status === 'active').length}
+          value={activeCount}
           icon={Dna}
           color="var(--color-primary)"
         />
         <MetricCard
           title="Enrolled Patients"
-          value={MOCK_PROGRAMS.reduce((acc, p) => acc + p.patients, 0).toLocaleString()}
+          value={totalPatients.toLocaleString()}
           icon={Users}
           color="var(--color-success)"
         />
         <MetricCard
-          title="Program Revenue"
-          value={`$${(MOCK_PROGRAMS.reduce((acc, p) => acc + p.revenue, 0) / 1000000).toFixed(1)}M`}
-          icon={DollarSign}
-          color="var(--color-warning)"
+          title="Program Categories"
+          value={allTypes.length}
+          icon={Activity}
+          color="var(--color-info)"
         />
         <MetricCard
-          title="Draft / Archived"
-          value={MOCK_PROGRAMS.filter(p => p.status === 'draft' || p.status === 'archived').length}
-          icon={Archive}
-          color="var(--color-danger)"
+          title="Total Programs"
+          value={programs.length}
+          icon={TrendingUp}
+          color="var(--color-primary)"
         />
       </div>
 
-      {/* Global Search & Filters (Golden Rule #7) */}
+      {/* Search and Filters (Golden Rule #7) */}
       <div style={{ marginBottom: '1.5rem' }}>
         <GlobalSearchBar
+          placeholder="Search clinical programs by name or objective..."
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="Search programs..."
-          resultCount={filtered.length}
-          namespace="admin-programs"
-          size="lg"
-          filters={activeFilters}
-          filterOptions={filterOptions}
+          filters={filterOptions}
+          activeFilters={activeFilters}
+          resultsCount={filtered.length}
         />
       </div>
 
-      {/* Program List (Golden Rule #3) */}
-      <div className="gcp-table-container">
-        <DataTable
-          columns={columns}
-          data={filtered}
-          keyField={(row) => row.id}
-          globalSearch={true}
-          searchQuery={searchQuery}
-          expandableRender={expandableRender}
-        />
-      </div>
+      {/* DataTable (Golden Rule #3) */}
+      <DataTable
+        columns={columns}
+        data={filtered}
+        isLoading={loading}
+        expandableRender={expandableRender}
+        emptyState={
+          <EmptyState
+            icon={Dna}
+            title="No clinical programs found"
+            subtitle="Programs and therapy templates configured in the protocols module will appear here."
+          />
+        }
+      />
     </div>
   );
 }

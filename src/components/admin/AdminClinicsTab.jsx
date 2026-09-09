@@ -9,7 +9,7 @@ import Mail from "lucide-react/dist/esm/icons/mail";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Archive from "lucide-react/dist/esm/icons/archive";
 import React, { useState, useEffect, useMemo } from 'react';
-import { StatusBadge, CopyableId, QuoteQuickActionDropdown } from '../ui';
+import { StatusBadge, CopyableId, QuoteQuickActionDropdown, MetricCard, KpiScopeBar } from '../ui';
 import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
 import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 import ClinicProfileWorkspace from './clinics/ClinicProfileWorkspace';
@@ -24,8 +24,8 @@ import AdminTabErrorBoundary from './AdminTabErrorBoundary';
 import useDataModuleState from '../../hooks/useDataModuleState';
 import MobileClinicCard from '../shared/mobile/MobileClinicCard';
 
-// ── Dashboard KPI Cards (Computed from genuine Firestore records) ───────────────
-function ClinicKPIs({ data }) {
+// ── Dashboard KPI Cards (Standard MetricCard & KpiScopeBar - Golden Rule #22 & #38) ──
+function ClinicKPIs({ data, isFiltered, scope, onScopeChange, totalCount }) {
   const totals = useMemo(() => {
     const list = Array.isArray(data) ? data : [];
     const uniqueCountries = new Set(list.map(c => c.country).filter(Boolean)).size;
@@ -41,34 +41,45 @@ function ClinicKPIs({ data }) {
   }, [data]);
 
   return (
-    <div className="kpi-grid-4" style={{ marginBottom: '1rem', flexShrink: 0 }}>
-      <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '50%', color: '#1d4ed8' }}><Building2 size={24} /></div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Total Clinics</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.clinics}</div>
-        </div>
-      </div>
-      <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ padding: '12px', background: '#f0fdf4', borderRadius: '50%', color: '#15803d' }}><Users size={24} /></div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Assigned Physicians</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.physicians}</div>
-        </div>
-      </div>
-      <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ padding: '12px', background: '#fdf4ff', borderRadius: '50%', color: '#a21caf' }}><Target size={24} /></div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Territories / Countries</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.countries}</div>
-        </div>
-      </div>
-      <div style={{ background: 'white', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ padding: '12px', background: '#fefce8', borderRadius: '50%', color: '#a16207' }}><FileText size={24} /></div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Active Facility Status</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>{totals.active} / {totals.clinics}</div>
-        </div>
+    <div style={{ marginBottom: '1.25rem', flexShrink: 0 }}>
+      <KpiScopeBar
+        scope={scope}
+        onScopeChange={onScopeChange}
+        isFiltered={isFiltered}
+        filteredCount={data.length}
+        totalCount={totalCount || data.length}
+        entityName="Clinics"
+        scopeLabel={scope === 'global' ? 'Entire Database (Unfiltered)' : (isFiltered ? 'Matching Active Filters' : 'Active Clinic Network')}
+      />
+      <div className="kpi-grid-4" style={{ marginTop: '0.75rem' }}>
+        <MetricCard
+          title="Total Clinics"
+          value={totals.clinics}
+          icon={Building2}
+          color="#1d4ed8"
+          subtitle="Registered facilities"
+        />
+        <MetricCard
+          title="Assigned Physicians"
+          value={totals.physicians}
+          icon={Users}
+          color="#15803d"
+          subtitle="Active medical staff"
+        />
+        <MetricCard
+          title="Territories / Countries"
+          value={totals.countries}
+          icon={Target}
+          color="#a21caf"
+          subtitle="Global reach"
+        />
+        <MetricCard
+          title="Active Facility Status"
+          value={`${totals.active} / ${totals.clinics}`}
+          icon={FileText}
+          color="#a16207"
+          subtitle="Operating facilities"
+        />
       </div>
     </div>
   );
@@ -95,6 +106,7 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
 
 
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [kpiScope, setKpiScope] = useState('filtered');
   const selectedTerritory = getUrlParam('territory', 'All');
   const setSelectedTerritory = (val) => updateUrlParam('territory', val);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -282,7 +294,15 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
           }
         />
         <div className="tab-container" style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
-          {!loading && <ClinicKPIs data={clinics} />}
+          {!loading && (
+            <ClinicKPIs
+              data={kpiScope === 'global' ? clinics : filtered}
+              isFiltered={Boolean(searchTerm.trim() || (selectedTerritory && selectedTerritory !== 'All'))}
+              scope={kpiScope}
+              onScopeChange={setKpiScope}
+              totalCount={clinics.length}
+            />
+          )}
 
           <GlobalSearchBar
             namespace="admin-clinics"

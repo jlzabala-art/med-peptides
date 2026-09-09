@@ -5,6 +5,19 @@
  * margins, distributor markups, or private clinical admin notes to public endpoints.
  */
 
+// ─── Whitelist of Allowed Public Variant Fields (Safe-by-Default) ───────────
+// IMPORTANT: Any new variant field must be explicitly added here to be exposed.
+// Do NOT use only stripSensitiveFields on variants — new financial fields not
+// yet in the blacklist would silently leak to the public endpoint.
+export const VARIANT_PUBLIC_WHITELIST = [
+  'id', 'name', 'dosage', 'dose', 'strength', 'route', 'format',
+  'presentation', 'storage', 'storageConditions',
+  'purity', 'analyticalSpecs', 'testingStandards',
+  'batchNumber', 'lotNumber', 'expirationDate', 'expiryDate', 'mfgDate',
+  'coaUrl', 'isActive', 'status',
+  'reconstitutionGuide', 'warnings',
+];
+
 // ─── Whitelist of Allowed Public Product Fields ──────────────────────────────
 export const PRODUCT_PUBLIC_WHITELIST = [
   'id', 'name', 'originalName', 'displayName', 'slug', 'canonicalName',
@@ -12,11 +25,15 @@ export const PRODUCT_PUBLIC_WHITELIST = [
   'description', 'desc', 'objective', 'summary',
   'casNumber', 'cas', 'scientificName', 'purity',
   'goals', 'mechanisms', 'tags', 'synonyms', 'semanticKeywords',
-  'primary_goal', 'target', 'pharmacology', 'aiContent', 'translations',
+  'primary_goal', 'target', 'targetSystem', 'pharmacology', 'aiContent', 'translations',
   'isProfessional', 'requiresPrescription',
   'status', 'isActive', 'qrScans',
-  'images', 'imageUrl', 'molecularWeight', 'sequence', 'formula', 'molecular',
-  'format', 'presentation', 'storage', 'route'
+  'images', 'imageUrl', 'molecularWeight', 'molecularFormula', 'sequence', 'formula', 'molecular',
+  'format', 'presentation', 'storage', 'route',
+  'batchNumber', 'lotNumber', 'expirationDate', 'expiryDate', 'coaUrl',
+  'analyticalSpecs', 'testingStandards', 'storageConditions', 'mfgDate',
+  'reconstitutionGuide', 'warnings', 'contraindications',
+  'supplier', 'supplierName', 'laboratory', 'provenance', 'processedHierarchy'
 ];
 
 // ─── Blacklist of Sensitive Fields to NEVER Expose ────────────────────────────
@@ -26,7 +43,7 @@ export const SENSITIVE_FINANCIAL_FIELDS = [
   'price', 'pricing', 'cost_tiers', 'price_tiers', 'tierPricing',
   'perUnit', 'perKitPriceUSD', 'kitPriceUSD', 'kitCost', 'supplierKitCostUSD',
   'price_per_kit_10', 'price_per_kit_50', 'price_per_kit_100',
-  'supplierId', 'supplier', 'supplierName', 'supplierSku', 'supplierRef',
+  'supplierSku', 'supplierRef',
   'margin', 'marginPercent', 'markup', 'profit', 'zoho_item_id', 'zoho_vendor_id',
   'internalNotes', 'procurementNotes', 'privateNotes',
 ];
@@ -65,10 +82,13 @@ function stripSensitiveFields(obj) {
 export function sanitizePublicProduct(rawProduct, rawVariants = []) {
   if (!rawProduct) return null;
 
-  // 1. Clean variants
+  // 1. Clean variants — whitelist approach (safe-by-default)
+  // Uses pickWhitelistedFields first, then strips any remaining sensitive fields
+  // as a secondary defense layer. This ensures new fields added to variants
+  // are NOT exposed unless explicitly added to VARIANT_PUBLIC_WHITELIST.
   const cleanVariants = (rawVariants || []).map(v => {
-    const stripped = stripSensitiveFields(v);
-    return stripped;
+    const whitelisted = pickWhitelistedFields(v, VARIANT_PUBLIC_WHITELIST);
+    return stripSensitiveFields(whitelisted);
   });
 
   // 2. Pick only whitelisted fields from root doc

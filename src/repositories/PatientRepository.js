@@ -36,6 +36,7 @@ import { logPHIAccess, PHI_ACTIONS } from '../services/PHIAuditService';
 import { withRetry } from './_resilience';
 import { logger } from '../utils/logger';
 
+const PATIENTS_COLLECTION = 'patients';
 const USERS_COLLECTION = 'users';
 
 export const patientRepository = {
@@ -65,12 +66,23 @@ export const patientRepository = {
       return cached;
     }
 
-    const docSnap = await withRetry(
-      () => getDoc(doc(db, USERS_COLLECTION, patientId)),
-      { entityName: 'patientRepository.getPatientById' }
+    let docSnap = await withRetry(
+      () => getDoc(doc(db, PATIENTS_COLLECTION, patientId)),
+      { entityName: 'patientRepository.getPatientById:patients' }
     );
 
-    if (!docSnap.exists()) return null;
+    // Backward-compatibility fallback to users collection
+    if (!docSnap || (typeof docSnap.exists === 'function' && !docSnap.exists())) {
+      const fallbackSnap = await withRetry(
+        () => getDoc(doc(db, USERS_COLLECTION, patientId)),
+        { entityName: 'patientRepository.getPatientById:users' }
+      );
+      if (fallbackSnap && typeof fallbackSnap.exists === 'function' && fallbackSnap.exists()) {
+        docSnap = fallbackSnap;
+      }
+    }
+
+    if (!docSnap || (typeof docSnap.exists === 'function' && !docSnap.exists())) return null;
     const data = { id: docSnap.id, ...docSnap.data() };
     setCache(cacheKey, data);
 
@@ -95,10 +107,12 @@ export const patientRepository = {
     if (!patientId) return;
     invalidateCache(`patients/${patientId}`);
     invalidateCache('users/list');
+    invalidateCache('patients/list');
   },
 
   /**
    * Creates a new patient record with write guard validation and PHI logging.
+   * Target is canonical 'patients' collection.
    * @param {object} patientData
    * @param {object} [opts]
    * @param {string} [opts.actorId]
@@ -109,7 +123,7 @@ export const patientRepository = {
     const cleanData = validatePatientWrite(patientData, { isUpdate: false });
 
     const ref = await withRetry(
-      () => addDoc(collection(db, USERS_COLLECTION), {
+      () => addDoc(collection(db, PATIENTS_COLLECTION), {
         ...cleanData,
         role: 'patient',
         createdAt: serverTimestamp(),
@@ -136,6 +150,7 @@ export const patientRepository = {
 
   /**
    * Updates an existing patient document with write guard validation and PHI logging.
+   * Writes to canonical 'patients' collection, falling back to 'users' if exists there.
    * @param {string} patientId
    * @param {object} updates
    * @param {object} [opts]
@@ -148,13 +163,24 @@ export const patientRepository = {
 
     const cleanData = validatePatientWrite(updates, { isUpdate: true });
 
-    await withRetry(
-      () => updateDoc(doc(db, USERS_COLLECTION, patientId), {
-        ...cleanData,
-        updatedAt: serverTimestamp(),
-      }),
-      { entityName: 'patientRepository.updatePatient' }
-    );
+    // Check target collection or write to patients
+    try {
+      await withRetry(
+        () => updateDoc(doc(db, PATIENTS_COLLECTION, patientId), {
+          ...cleanData,
+          updatedAt: serverTimestamp(),
+        }),
+        { entityName: 'patientRepository.updatePatient:patients' }
+      );
+    } catch {
+      await withRetry(
+        () => updateDoc(doc(db, USERS_COLLECTION, patientId), {
+          ...cleanData,
+          updatedAt: serverTimestamp(),
+        }),
+        { entityName: 'patientRepository.updatePatient:users' }
+      );
+    }
 
     this.invalidatePatientCache(patientId);
 
@@ -191,10 +217,17 @@ export const patientRepository = {
       });
     }
 
-    await withRetry(
-      () => deleteDoc(doc(db, USERS_COLLECTION, patientId)),
-      { entityName: 'patientRepository.deletePatient' }
-    );
+    try {
+      await withRetry(
+        () => deleteDoc(doc(db, PATIENTS_COLLECTION, patientId)),
+        { entityName: 'patientRepository.deletePatient:patients' }
+      );
+    } catch {
+      await withRetry(
+        () => deleteDoc(doc(db, USERS_COLLECTION, patientId)),
+        { entityName: 'patientRepository.deletePatient:users' }
+      );
+    }
 
     this.invalidatePatientCache(patientId);
   },
@@ -211,7 +244,7 @@ export const patientRepository = {
   async addBiomarkerEntry(patientId, biomarkerData, { actorId = null, actorRole = 'doctor' } = {}) {
     if (!patientId) throw new Error('patientId is required for addBiomarkerEntry');
 
-    const subColRef = collection(db, USERS_COLLECTION, patientId, 'biomarkers');
+    const subColRef = collection(db, PATIENTS_COLLECTION, patientId, 'biomarkers');
     const ref = await withRetry(
       () => addDoc(subColRef, {
         ...biomarkerData,
@@ -245,7 +278,7 @@ export const patientRepository = {
   subscribeToPatientBiomarkers(patientId, onData, maxLimit = 50) {
     if (!patientId) return () => {};
     const q = query(
-      collection(db, USERS_COLLECTION, patientId, 'biomarkers'),
+      collection(db, PATIENTS_COLLECTION, patientId, 'biomarkers'),
       orderBy('recordedAt', 'desc'),
       limit(maxLimit)
     );
@@ -255,13 +288,12 @@ export const patientRepository = {
       logger.error('[patientRepository] subscribeToPatientBiomarkers error', { patientId, error: err.message });
     });
   },
+
   /**
-   * Retrieves a paginated list of patients with filtering.
-   * @param {object} [opts]
+   * Builds a Firestore query for patients matching filters, order and pagination.
    */
-  async getPatientsPage({ filters = {}, pageSize = 50, pageParam = null, orderByDesc = true } = {}) {
+  buildQuery(filters = {}, pageSize = 50, pageParam = null, orderByDesc = true) {
     const constraints = [
-      where('role', '==', 'patient'),
       orderBy('createdAt', orderByDesc ? 'desc' : 'asc'),
       limit(pageSize),
     ];
@@ -273,13 +305,41 @@ export const patientRepository = {
       constraints.push(startAfter(pageParam));
     }
 
-    const q = query(collection(db, USERS_COLLECTION), ...constraints);
+    return query(collection(db, PATIENTS_COLLECTION), ...constraints);
+  },
+
+  /**
+   * Retrieves a paginated list of patients with filtering.
+   * @param {object} [opts]
+   */
+  async getPatientsPage({ filters = {}, pageSize = 50, pageParam = null, orderByDesc = true } = {}) {
+    const q = this.buildQuery(filters, pageSize, pageParam, orderByDesc);
     const snap = await withRetry(
       () => getDocs(q),
       { entityName: 'patientRepository.getPatientsPage' }
     );
 
-    const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    // If 'patients' collection is currently empty during transition, check users fallback
+    if (data.length === 0 && !pageParam) {
+      const fallbackConstraints = [
+        where('role', '==', 'patient'),
+        orderBy('createdAt', orderByDesc ? 'desc' : 'asc'),
+        limit(pageSize),
+      ];
+      if (filters.status) fallbackConstraints.unshift(where('status', '==', filters.status));
+      try {
+        const fallbackQ = query(collection(db, USERS_COLLECTION), ...fallbackConstraints);
+        const fallbackSnap = await getDocs(fallbackQ);
+        if (fallbackSnap && fallbackSnap.docs.length > 0) {
+          data = fallbackSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        }
+      } catch (e) {
+        logger.warn('[patientRepository] Fallback users query note:', e.message);
+      }
+    }
+
     const lastDoc = snap.docs[snap.docs.length - 1] ?? null;
 
     return {

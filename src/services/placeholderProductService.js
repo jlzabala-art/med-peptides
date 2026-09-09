@@ -9,7 +9,7 @@
  *  - isApiPlaceholder: true → visible in Admin "APIs pendientes" filter
  *  - productType: 'small_molecule' → correct for compounding APIs
  */
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, limit, getDocs, serverTimestamp } from 'firebase/firestore';
 import * as fb from '../firebase.js';
 const db = fb?.db;
 
@@ -43,7 +43,8 @@ async function findExistingPlaceholder(baseName) {
     const q = query(
       collection(db, 'products'),
       where('isApiPlaceholder', '==', true),
-      where('name', '==', baseName)
+      where('name', '==', baseName),
+      limit(1)
     );
     const snap = await getDocs(q);
     if (!snap.empty) {

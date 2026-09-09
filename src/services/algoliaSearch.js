@@ -10,16 +10,23 @@
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 import logger from '../utils/logger.js';
 
-const APP_ID = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '';
-const SEARCH_KEY = typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '';
+const APP_ID = (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || process.env.VITE_ALGOLIA_APP_ID) : '') || 'G722EVODUJ';
+const SEARCH_KEY = (typeof process !== 'undefined' ? (process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || process.env.VITE_ALGOLIA_SEARCH_KEY) : '') || '609364d52903d7aefa3080d0fe63db2a';
 
 let client = null;
-try {
-  if (APP_ID && SEARCH_KEY) {
-    client = algoliasearch(APP_ID, SEARCH_KEY);
+function getClient() {
+  if (!client) {
+    const appId = APP_ID;
+    const searchKey = SEARCH_KEY;
+    if (appId && searchKey) {
+      try {
+        client = algoliasearch(appId, searchKey);
+      } catch (e) {
+        logger.warn('[AlgoliaSearch] Failed to initialize client:', e.message);
+      }
+    }
   }
-} catch (e) {
-  logger.warn('[AlgoliaSearch] Failed to initialize client:', e.message);
+  return client;
 }
 
 // ── In-memory Query Cache (5 min TTL) ─────────────────────────────────────────
@@ -96,9 +103,15 @@ export function checkAlgoliaQuota() {
 /**
  * Perform a multi-index Algolia search (products + protocols).
  * Returns { products: [], protocols: [] }
+ *
+ * @param {string} query
+ * @param {Object} [options]
+ * @param {boolean} [options.distinct=true] - Collapse duplicate peptide hits by canonicalKey natively
+ * @param {number} [options.hitsPerPage=15]
  */
-export async function searchAlgolia(query) {
-  if (!client) {
+export async function searchAlgolia(query, { distinct = true, hitsPerPage = 15 } = {}) {
+  const currentClient = getClient();
+  if (!currentClient) {
     return { products: [], protocols: [], source: 'disabled' };
   }
 
@@ -107,7 +120,7 @@ export async function searchAlgolia(query) {
   }
 
   const cleanQuery = query.trim();
-  const cacheKey = `basic:${cleanQuery.toLowerCase()}`;
+  const cacheKey = `basic:${cleanQuery.toLowerCase()}:${distinct ? 1 : 0}:${hitsPerPage}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -118,9 +131,15 @@ export async function searchAlgolia(query) {
   }
 
   try {
-    const results = await client.search({
+    const results = await currentClient.search({
       requests: [
-        { indexName: 'products', query: cleanQuery, hitsPerPage: 6, clickAnalytics: true },
+        {
+          indexName: 'products',
+          query: cleanQuery,
+          hitsPerPage,
+          distinct: distinct ? 1 : 0,
+          clickAnalytics: true
+        },
         { indexName: 'protocols', query: cleanQuery, hitsPerPage: 6, clickAnalytics: true },
       ]
     });
@@ -147,13 +166,19 @@ export async function searchAlgolia(query) {
  * Perform a federated Algolia search across all platform entities.
  * Returns { products, protocols, patients, prescriptions, clinics, queryID }
  */
-export async function searchAlgoliaFederated(query, indices = ['products', 'protocols', 'users'], hitsPerPage = 4) {
-  if (!client || !query || query.trim().length < 2) {
+export async function searchAlgoliaFederated(
+  query,
+  indices = ['products', 'protocols', 'atlas_patients', 'atlas_users', 'prescriptions'],
+  hitsPerPage = 4,
+  { distinct = true } = {}
+) {
+  const currentClient = getClient();
+  if (!currentClient || !query || query.trim().length < 2) {
     return { products: [], protocols: [], patients: [], prescriptions: [], clinics: [], users: [] };
   }
 
   const cleanQuery = query.trim();
-  const cacheKey = `federated:${cleanQuery.toLowerCase()}:${indices.join(',')}`;
+  const cacheKey = `federated:${cleanQuery.toLowerCase()}:${indices.join(',')}:${distinct ? 1 : 0}:${hitsPerPage}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -162,10 +187,11 @@ export async function searchAlgoliaFederated(query, indices = ['products', 'prot
       indexName: idx,
       query: cleanQuery,
       hitsPerPage,
+      ...(idx === 'products' ? { distinct: distinct ? 1 : 0 } : {}),
       clickAnalytics: true,
     }));
 
-    const results = await client.search({ requests });
+    const results = await currentClient.search({ requests });
 
     incrementUsage();
 
@@ -177,9 +203,10 @@ export async function searchAlgoliaFederated(query, indices = ['products', 'prot
     const data = {
       products: resMap.products || [],
       protocols: resMap.protocols || [],
-      users: resMap.users || resMap.patients || [],
+      patients: resMap.atlas_patients || resMap.patients || [],
+      users: resMap.atlas_users || resMap.users || [],
       prescriptions: resMap.prescriptions || [],
-      clinics: resMap.clinics || [],
+      clinics: resMap.atlas_clinics || resMap.clinics || [],
       queryID: results.results[0]?.queryID,
       source: 'algolia'
     };

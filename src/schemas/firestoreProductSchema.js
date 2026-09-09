@@ -213,10 +213,12 @@ export const PRODUCT_FIELD_CONTRACT = Object.freeze({
   supplierIds:  { type: 'string[]',  required: false, auto: true, default: [] },
 
   // ── Content ──
-  displayName:  { type: 'string',    required: false, default: '' },
-  description:  { type: 'string',    required: false, default: '' },
-  shortDesc:    { type: 'string',    required: false, default: '' },
-  imageUrl:     { type: 'string',    required: false, default: '' },
+  displayName:   { type: 'string',    required: false, default: '' },
+  canonicalKey:  { type: 'string',    required: false, default: '' },
+  canonicalName: { type: 'string',    required: false, default: '' },
+  description:   { type: 'string',    required: false, default: '' },
+  shortDesc:     { type: 'string',    required: false, default: '' },
+  imageUrl:      { type: 'string',    required: false, default: '' },
 
   // ── Search & classification ──
   goals:            { type: 'string[]', required: false, default: [] },

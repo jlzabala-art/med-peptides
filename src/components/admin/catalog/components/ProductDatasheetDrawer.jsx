@@ -33,7 +33,15 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedPdf, setCopiedPdf] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // ── Delivery Triad Detection (vial, single_cartridge_pen, double_cartridge_pen) ──
   const defaultFormat = React.useMemo(() => {
@@ -979,7 +987,7 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
         </div>
       </div>
 
-      {/* ── Share Clinical Monograph Bottom Sheet (Anchored to Bottom) ───────── */}
+      {/* ── Share Clinical Monograph (Lateral Drawer on Desktop / Bottom Sheet on Mobile) ── */}
       {isShareOpen && (
         <div
           style={{
@@ -987,12 +995,12 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
             inset: 0,
             zIndex: 100065,
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: isMobile ? 'flex-end' : 'flex-end',
+            alignItems: isMobile ? 'center' : 'stretch',
+            background: isMobile ? 'rgba(15, 23, 42, 0.65)' : 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: isMobile ? 'blur(6px)' : 'blur(4px)',
+            WebkitBackdropFilter: isMobile ? 'blur(6px)' : 'blur(4px)',
             animation: 'fadeIn 0.15s ease'
           }}
           onClick={(e) => {
@@ -1002,7 +1010,7 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
           }}
         >
           <div
-            style={{
+            style={isMobile ? {
               width: '100%',
               maxWidth: '520px',
               background: '#ffffff',
@@ -1016,21 +1024,34 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
               flexDirection: 'column',
               maxHeight: '85vh',
               animation: 'slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+            } : {
+              width: '100%',
+              maxWidth: '460px',
+              height: '100%',
+              background: '#ffffff',
+              boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.25)',
+              borderLeft: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              animation: 'slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Tactile Bottom Sheet Drag Handle */}
-            <div
-              style={{
-                width: '44px',
-                height: '5px',
-                borderRadius: '3px',
-                background: '#cbd5e1',
-                alignSelf: 'center',
-                marginTop: '12px',
-                marginBottom: '4px'
-              }}
-            />
+            {/* Tactile Bottom Sheet Drag Handle (Mobile Only) */}
+            {isMobile && (
+              <div
+                style={{
+                  width: '44px',
+                  height: '5px',
+                  borderRadius: '3px',
+                  background: '#cbd5e1',
+                  alignSelf: 'center',
+                  marginTop: '12px',
+                  marginBottom: '4px'
+                }}
+              />
+            )}
 
             {/* Header: Title & Close */}
             <div
@@ -1038,8 +1059,9 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '12px 20px 14px 20px',
-                borderBottom: '1px solid #f1f5f9'
+                padding: isMobile ? '12px 20px 14px 20px' : '18px 20px',
+                borderBottom: '1px solid #f1f5f9',
+                flexShrink: 0
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

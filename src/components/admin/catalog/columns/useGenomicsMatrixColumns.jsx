@@ -236,49 +236,26 @@ export function useGenomicsMatrixColumns({
       width: '90px',
       align: 'right',
       isAction: true,
-      render: (row) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelectProduct?.(row);
-            }}
-            className="gcp-icon-btn"
-            title="View Offers & Pricing"
-            style={{
-              padding: '6px',
-              borderRadius: '6px',
-              border: '1px solid #e2e8f0',
-              background: '#ffffff',
-              cursor: 'pointer',
-              color: '#0284c7'
-            }}
-          >
-            <Eye size={15} />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              const firstProg = (row.programs && row.programs[0]) ? (row.programs[0].slug || row.programs[0].id) : null;
-              onEditPriority?.(row, firstProg);
-            }}
-            className="gcp-icon-btn"
-            title="Edit Genomic Priority"
-            style={{
-              padding: '6px',
-              borderRadius: '6px',
-              border: '1px solid #e2e8f0',
-              background: '#ffffff',
-              cursor: 'pointer',
-              color: '#15803d'
-            }}
-          >
-            <Edit3 size={15} />
-          </button>
-        </div>
-      )
+      render: (row) => {
+        const firstProg = (row.programs && row.programs[0]) ? (row.programs[0].slug || row.programs[0].id) : null;
+        return (
+          <AppActionGroup
+            maxVisible={3}
+            actions={[
+              {
+                label: 'View Offers & Pricing',
+                icon: Eye,
+                onClick: () => onSelectProduct?.(row)
+              },
+              {
+                label: 'Edit Genomic Priority',
+                icon: Edit3,
+                onClick: () => onEditPriority?.(row, firstProg)
+              }
+            ]}
+          />
+        );
+      }
     }
   ], [onSelectProduct, onEditPriority, supplierIdToName]);
 }

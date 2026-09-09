@@ -21,93 +21,7 @@ import Building from 'lucide-react/dist/esm/icons/building';
 import BarChart2 from 'lucide-react/dist/esm/icons/bar-chart-2';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import DataTable from '../../../ui/DataTable';
-
-
-const MOCK_SUPPLIERS = [
-  {
-    id: 'sup-001',
-    name: 'Lotusland Pharma',
-    healthScore: 92,
-    productsSupplied: 14,
-    avgLeadTime: 12,
-    moq: '500g',
-    reliability: 98,
-    qualityScore: 95,
-    status: 'active',
-    alerts: [],
-    recentPOs: 45,
-    totalSpent: '$1.2M',
-    pricingTrend: 'stable',
-    compliance: 'ISO9001, cGMP',
-    recommendation:
-      'Top performing supplier. Consider consolidating more volume here for tier discounts.',
-    trendData: [65, 78, 82, 85, 90, 92],
-  },
-  {
-    id: 'sup-002',
-    name: 'Zenith Synthetics',
-    healthScore: 76,
-    productsSupplied: 8,
-    avgLeadTime: 22,
-    moq: '1kg',
-    reliability: 82,
-    qualityScore: 88,
-    status: 'at-risk',
-    alerts: ['Lead time increased by 4 days', 'Pricing up 8%'],
-    recentPOs: 12,
-    totalSpent: '$450k',
-    pricingTrend: 'up',
-    compliance: 'ISO9001',
-    recommendation: 'Prices increased 8%. Backup supplier recommended for Semaglutide.',
-    trendData: [85, 82, 80, 78, 77, 76],
-  },
-  {
-    id: 'sup-003',
-    name: 'Aegis Bio',
-    healthScore: 85,
-    productsSupplied: 3,
-    avgLeadTime: 15,
-    moq: '100g',
-    reliability: 90,
-    qualityScore: 92,
-    status: 'active',
-    alerts: ['Missing COA for latest batch'],
-    recentPOs: 8,
-    totalSpent: '$120k',
-    pricingTrend: 'down',
-    compliance: 'cGMP',
-    recommendation: 'Request updated COA for Batch #4092 immediately.',
-    trendData: [80, 81, 84, 85, 85, 85],
-  },
-  {
-    id: 'sup-004',
-    name: 'Apex Peptides',
-    healthScore: 64,
-    productsSupplied: 5,
-    avgLeadTime: 28,
-    moq: '2kg',
-    reliability: 70,
-    qualityScore: 80,
-    status: 'critical',
-    alerts: ['Supplier concentration risk detected', 'Delivery delayed > 7 days'],
-    recentPOs: 5,
-    totalSpent: '$800k',
-    pricingTrend: 'stable',
-    compliance: 'Pending Review',
-    recommendation: 'High concentration risk. Onboard secondary supplier for Tirzepatide ASAP.',
-    trendData: [75, 72, 70, 68, 65, 64],
-  },
-];
-
-const MOCK_STATS = [
-  { label: 'Total Suppliers', value: '24', icon: Building, color: '#3b82f6' },
-  { label: 'Active Suppliers', value: '18', icon: Activity, color: '#10b981' },
-  { label: 'Risk Alerts', value: '4', icon: AlertTriangle, color: '#ef4444' },
-  { label: 'Avg Lead Time', value: '16 Days', icon: Clock, color: '#8b5cf6' },
-  { label: 'Open RFQs', value: '12', icon: FileText, color: '#f59e0b' },
-  { label: 'Avg Health Score', value: '84', icon: ShieldCheck, color: '#0ea5e9' },
-];
+import EmptyState from '../../../ui/EmptyState';
 
 export default function SupplierInsightsView({ variants = [], onAction }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
@@ -219,8 +133,8 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
           avgLeadTime,
           priceDisplay: avgPrice > 0 ? `$${avgPrice.toFixed(2)} avg` : 'Varies',
           moqDisplay: minMoq !== '100' ? `${minMoq} units` : 'Varies',
-          recentPOs: (s.name.length % 10) + 1, // Mock POs
-          totalSpent: `$${((s.name.charCodeAt(0) % 100) + 10).toFixed(1)}k`, // Mock Spend
+          recentPOs: s.recentPOs || 0,
+          totalSpent: s.totalSpent || '$0',
           compliance:
             missingGMPs === 0 && missingCOAs === 0
               ? 'Fully Compliant'
@@ -229,10 +143,19 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
                 : 'Missing GMP',
         };
       })
-      .sort((a, b) => a.healthScore - b.healthScore); // Sort lowest score first
+      .sort((a, b) => a.healthScore - b.healthScore);
   }, [variants]);
 
-  const suppliers = suppliersData.length > 0 ? suppliersData : MOCK_SUPPLIERS;
+  const suppliers = suppliersData;
+
+  const computedStats = React.useMemo(() => [
+    { label: 'Total Suppliers', value: String(suppliers.length), icon: Building, color: '#3b82f6' },
+    { label: 'Active Suppliers', value: String(suppliers.filter(s => s.status === 'active').length), icon: Activity, color: '#10b981' },
+    { label: 'Risk Alerts', value: String(suppliers.filter(s => s.alerts && s.alerts.length > 0).length), icon: AlertTriangle, color: '#ef4444' },
+    { label: 'Avg Lead Time', value: suppliers.length > 0 ? `${Math.round(suppliers.reduce((acc, s) => acc + (s.avgLeadTime || 14), 0) / suppliers.length)} Days` : 'N/A', icon: Clock, color: '#8b5cf6' },
+    { label: 'Open RFQs', value: '0', icon: FileText, color: '#f59e0b' },
+    { label: 'Avg Health Score', value: suppliers.length > 0 ? String(Math.round(suppliers.reduce((acc, s) => acc + (s.healthScore || 80), 0) / suppliers.length)) : 'N/A', icon: ShieldCheck, color: '#0ea5e9' },
+  ], [suppliers]);
 
   const getHealthColor = (score) => {
     if (score >= 90) return '#10b981';
@@ -424,7 +347,7 @@ export default function SupplierInsightsView({ variants = [], onAction }) {
       </div>
 
       <div className="si-grid si-stats" style={{ marginBottom: '2rem' }}>
-        {MOCK_STATS.map((stat, idx) => (
+        {computedStats.map((stat, idx) => (
           <motion.div
             key={idx}
             className="si-glass"
