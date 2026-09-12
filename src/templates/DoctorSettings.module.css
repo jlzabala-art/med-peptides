@@ -1,6 +1,6 @@
 /* DoctorSettings.module.css */
 
-:root {
+:global(:root) {
   --bg-primary: hsl(210, 30%, 12%);
   --bg-surface: rgba(255, 255, 255, 0.08);
   --text-primary: hsl(0, 0%, 95%);
