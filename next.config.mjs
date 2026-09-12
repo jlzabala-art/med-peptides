@@ -28,6 +28,19 @@ const nextConfig = {
   allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.1.47', '192.168.1.*'],
   output: "standalone",
 
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        child_process: false,
+      };
+    }
+    return config;
+  },
+
   async headers() {
     return [
       {

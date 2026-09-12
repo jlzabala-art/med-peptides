@@ -78,7 +78,7 @@ export async function logAction(operatorId, operatorRole, action, targetId, meta
     if (isServer) {
       // Server path: use Admin SDK (imported lazily to avoid client bundle bloat)
       try {
-        const { adminDb } = await import('../lib/firebaseAdmin');
+        const { adminDb } = await import(/* webpackIgnore: true */ '../lib/firebaseAdmin.js');
         if (adminDb) {
           await adminDb.collection(AUDIT_COL).add({
             ...payload,
