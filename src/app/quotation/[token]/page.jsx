@@ -87,12 +87,21 @@ export default function PublicQuotationPage() {
     triggerHaptic('light');
     if (!quotation) return;
     const quoteUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const text = `📋 *Cotización Oficial — RegenPept*\n` +
-      `• *Nº Cotización:* ${quotation.quotationNumber}\n` +
-      `• *Cliente:* ${quotation.clientName}\n` +
-      `• *Importe Total:* $${quotation.grandTotal?.toFixed(2)} ${quotation.currency || 'USD'}\n` +
-      `• *Estado:* ${isApproved ? 'Aprobada ✓' : 'Pendiente de Aprobación'}\n\n` +
-      `🔗 *Ver y Aprobar en línea:* ${quoteUrl}`;
+    const activeLang = typeof window !== 'undefined' ? (localStorage.getItem('share_message_lang') || 'en') : 'en';
+    const isEs = activeLang === 'es';
+    const text = isEs
+      ? `📋 *Cotización Oficial — Med-Peptides*\n` +
+        `• *Nº Cotización:* ${quotation.quotationNumber}\n` +
+        `• *Cliente:* ${quotation.clientName}\n` +
+        `• *Importe Total:* $${quotation.grandTotal?.toFixed(2)} ${quotation.currency || 'USD'}\n` +
+        `• *Estado:* ${isApproved ? 'Aprobada ✓' : 'Pendiente de Aprobación'}\n\n` +
+        `🔗 *Ver y Aprobar en línea:* ${quoteUrl}`
+      : `📋 *Official Quotation — Med-Peptides*\n` +
+        `• *Quote #:* ${quotation.quotationNumber}\n` +
+        `• *Client:* ${quotation.clientName}\n` +
+        `• *Grand Total:* $${quotation.grandTotal?.toFixed(2)} ${quotation.currency || 'USD'}\n` +
+        `• *Status:* ${isApproved ? 'Approved ✓' : 'Awaiting Approval'}\n\n` +
+        `🔗 *View and Approve online:* ${quoteUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -259,7 +268,7 @@ export default function PublicQuotationPage() {
                             rel="noopener noreferrer"
                             style={{ fontSize: '0.74rem', color: '#003666', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
                           >
-                            <ExternalLink size={12} /> Ficha Técnica
+                            <ExternalLink size={12} /> Tech Monograph
                           </a>
                           <a
                             href={`/api/vial-label/${prodSlug}?format=38x90`}
@@ -267,7 +276,7 @@ export default function PublicQuotationPage() {
                             rel="noopener noreferrer"
                             style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
                           >
-                            <Tag size={12} /> Etiqueta Vial (38x90)
+                            <Tag size={12} /> Vial Label (38x90)
                           </a>
                         </div>
                       </td>
@@ -317,7 +326,7 @@ export default function PublicQuotationPage() {
                       rel="noopener noreferrer"
                       style={{ fontSize: '0.75rem', color: '#003666', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      <ExternalLink size={13} /> Ficha Técnica
+                      <ExternalLink size={13} /> Tech Monograph
                     </a>
                     <a
                       href={`/api/vial-label/${prodSlug}?format=38x90`}
@@ -325,7 +334,7 @@ export default function PublicQuotationPage() {
                       rel="noopener noreferrer"
                       style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      <Tag size={13} /> Etiqueta Vial
+                      <Tag size={13} /> Vial Label
                     </a>
                   </div>
                 </div>

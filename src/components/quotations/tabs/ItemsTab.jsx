@@ -58,7 +58,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                           alignItems: 'center',
                           gap: 3
                         }}>
-                          <Tag size={10} /> Kit 10 Viales
+                          <Tag size={10} /> Kit 10 Vials
                         </span>
                       )}
                     </div>
@@ -79,7 +79,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                       )}
                     </div>
 
-                    {/* Ficha Técnica & Etiqueta Vial Links */}
+                    {/* Tech Monograph & Vial Label Links */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
                       <a
                         href={`/p/${slug}${supplierParam}`}
@@ -99,7 +99,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                           gap: 3
                         }}
                       >
-                        <FileText size={11} /> Ficha Técnica ↗
+                        <FileText size={11} /> Tech Monograph ↗
                       </a>
 
                       <a
@@ -120,7 +120,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                           gap: 3
                         }}
                       >
-                        <Tag size={11} /> Etiqueta 38x90 ↗
+                        <Tag size={11} /> Vial Label 38x90 ↗
                       </a>
                     </div>
                   </div>

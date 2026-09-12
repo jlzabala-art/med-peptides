@@ -711,12 +711,12 @@ export default function DocumentUploadModule() {
                             ) : suggestedProduct ? (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f0fdf4', padding: '0.3rem', borderRadius: '6px', border: '1px dashed #4ade80' }}>
                                 <span style={{ fontSize: '0.75rem', color: '#166534' }}>
-                                  Asociar a: <b>{suggestedProduct.name} {suggestedVariant ? `(${suggestedVariant.label || suggestedVariant.dosage})` : ''}</b>?
+                                  Link to: <b>{suggestedProduct.name} {suggestedVariant ? `(${suggestedVariant.label || suggestedVariant.dosage})` : ''}</b>?
                                 </span>
-                                <button onClick={() => handleAssignProduct(variant.id, `${guessed.productId}::${guessed.variantId || 'master'}`)} style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', padding: '0.15rem', display: 'flex', alignItems: 'center' }} title="Confirmar">
+                                <button onClick={() => handleAssignProduct(variant.id, `${guessed.productId}::${guessed.variantId || 'master'}`)} style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', padding: '0.15rem', display: 'flex', alignItems: 'center' }} title="Confirm">
                                   <CheckCircle size={12} />
                                 </button>
-                                <button onClick={() => handleAssignProduct(variant.id, 'rejected')} style={{ background: 'transparent', color: '#64748b', border: 'none', cursor: 'pointer', padding: '0.15rem', display: 'flex', alignItems: 'center' }} title="Rechazar">
+                                <button onClick={() => handleAssignProduct(variant.id, 'rejected')} style={{ background: 'transparent', color: '#64748b', border: 'none', cursor: 'pointer', padding: '0.15rem', display: 'flex', alignItems: 'center' }} title="Reject">
                                   <X size={12} />
                                 </button>
                               </div>

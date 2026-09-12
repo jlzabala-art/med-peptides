@@ -741,13 +741,13 @@ export default function LotuslandSyncDashboard() {
             />
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={() => setShowConfirm(false)} style={STYLE.btnSecondary}>Cancelar</button>
+            <button onClick={() => setShowConfirm(false)} style={STYLE.btnSecondary}>Cancel</button>
             <button
               onClick={applyChanges}
               disabled={confirmText !== 'CONFIRM'}
               style={{ ...STYLE.btnDanger, opacity: confirmText !== 'CONFIRM' ? 0.4 : 1 }}
             >
-              <Zap size={14} /> Aplicar en producción
+              <Zap size={14} /> Apply to Production
             </button>
           </div>
         </div>

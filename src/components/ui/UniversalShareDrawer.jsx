@@ -39,9 +39,9 @@ export default function UniversalShareDrawer({
   const [showQr, setShowQr] = useState(false);
   const [messageLang, setMessageLang] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('share_message_lang') || 'es';
+      return localStorage.getItem('share_message_lang') || 'en';
     }
-    return 'es';
+    return 'en';
   });
 
   const handleLanguageChange = (lang) => {
@@ -436,7 +436,7 @@ export default function UniversalShareDrawer({
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}>
           <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
-            🌐 {messageLang === 'es' ? 'Idioma del Mensaje' : 'Message Language'}
+            🌐 Message Language
           </span>
           <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', padding: '3px', borderRadius: 6 }}>
             <button

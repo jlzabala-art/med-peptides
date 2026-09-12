@@ -304,7 +304,7 @@ export default function AdminQuotationsTab() {
   const activeKPIs = kpiScope === 'filtered' ? filteredKPIs : realKPIs;
 
   const handleShareWhatsApp = (quote, lang = null) => {
-    const activeLang = lang || (typeof window !== 'undefined' ? (localStorage.getItem('share_message_lang') || 'es') : 'es');
+    const activeLang = lang || (typeof window !== 'undefined' ? (localStorage.getItem('share_message_lang') || 'en') : 'en');
     const total = Number(quote.grandTotal || 0).toFixed(2);
     const itemsCount = (quote.items || []).length;
     const client = quote.clientName || 'Valued Client';
@@ -752,8 +752,8 @@ export default function AdminQuotationsTab() {
                 },
                 {
                   type: 'sync_bigin',
-                  label: 'Cargar datos desde Zoho Bigin',
-                  tooltip: 'Buscar o sincronizar dirección y contacto desde Bigin CRM',
+                  label: 'Load Data from Zoho Bigin',
+                  tooltip: 'Search or sync address and contact details from Zoho Bigin CRM',
                   onClick: () => setBiginModalData({ isOpen: true, quote: row })
                 },
                 {
@@ -942,7 +942,7 @@ export default function AdminQuotationsTab() {
                           onClick={(e) => e.stopPropagation()}
                           style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
                         >
-                          📄 Ficha Técnica ↗
+                          📄 Tech Monograph ↗
                         </a>
                         <a
                           href={`/api/vial-label/${slug}?format=38x90`}
@@ -951,7 +951,7 @@ export default function AdminQuotationsTab() {
                           onClick={(e) => e.stopPropagation()}
                           style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4338ca', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
                         >
-                          🏷️ Etiqueta 38x90 ↗
+                          🏷️ Vial Label 38x90 ↗
                         </a>
                       </div>
                     </div>
@@ -1138,10 +1138,10 @@ export default function AdminQuotationsTab() {
             <button
               onClick={() => setBiginModalData({ isOpen: true, quote: null })}
               className="gcp-btn-secondary"
-              title="Buscar o importar datos de cliente desde Zoho Bigin"
+              title="Search or import customer details from Zoho Bigin"
               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}
             >
-              <Building2 size={15} /> Cargar de Bigin
+              <Building2 size={15} /> Load from Bigin
             </button>
 
             <QuoteQuickActionDropdown size="md" variant="primary" buttonLabel="New Quotation" />

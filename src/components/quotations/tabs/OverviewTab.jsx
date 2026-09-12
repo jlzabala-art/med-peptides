@@ -148,7 +148,7 @@ export default function OverviewTab({ quotation, quotationId }) {
                   title="Open Client Profile"
                 >
                   <User size={12} />
-                  Ver Ficha ↗
+                  View Profile ↗
                 </button>
               )}
             </div>
@@ -186,10 +186,10 @@ export default function OverviewTab({ quotation, quotationId }) {
           </div>
           <div>
             <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#166534' }}>
-              Enlace de Cotización Pública para el Cliente
+              Public Quotation Link for Client
             </div>
             <div style={{ fontSize: '0.74rem', color: '#15803d', marginTop: 2 }}>
-              Incluye fichas técnicas, trazabilidad y etiquetas de vial 38x90
+              Includes technical monographs, lot traceability, and 38x90 vial labels
             </div>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function OverviewTab({ quotation, quotationId }) {
             }}
           >
             {copiedLink ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-            {copiedLink ? 'Copiado ✓' : 'Copiar Enlace'}
+            {copiedLink ? 'Copied ✓' : 'Copy Link'}
           </button>
 
           <a
@@ -233,7 +233,7 @@ export default function OverviewTab({ quotation, quotationId }) {
               textDecoration: 'none'
             }}
           >
-            Abrir Vista Cliente <ExternalLink size={13} />
+            Open Client View <ExternalLink size={13} />
           </a>
 
           <button
@@ -252,10 +252,10 @@ export default function OverviewTab({ quotation, quotationId }) {
               fontWeight: 700,
               cursor: 'pointer'
             }}
-            title="Buscar y cargar datos de contacto, dirección e instrucciones desde Zoho Bigin"
+            title="Search and load contact details, address, and delivery instructions from Zoho Bigin"
           >
             <Zap size={14} color="#0284c7" />
-            Cargar de Bigin
+            Load from Bigin
           </button>
 
           {!quotation.convertedOrderId && (
@@ -278,7 +278,7 @@ export default function OverviewTab({ quotation, quotationId }) {
               }}
             >
               <ShoppingCart size={14} />
-              {convertingOrder ? 'Convirtiendo...' : 'Convertir a Pedido'}
+              {convertingOrder ? 'Converting...' : 'Convert to Order'}
             </button>
           )}
 
@@ -301,7 +301,7 @@ export default function OverviewTab({ quotation, quotationId }) {
             }}
           >
             <Truck size={14} />
-            {generatingPo ? 'Generando PO...' : 'Generar PO Laboratorio'}
+            {generatingPo ? 'Generating PO...' : 'Generate Supplier PO'}
           </button>
         </div>
       </div>
@@ -371,7 +371,7 @@ export default function OverviewTab({ quotation, quotationId }) {
         quotation={quotation}
         onClose={() => setIsBiginModalOpen(false)}
         onSuccess={(updated) => {
-          notifier.success('Datos de Zoho Bigin aplicados a la cotización');
+          notifier.success('Zoho Bigin details applied to quotation');
           window.dispatchEvent(new CustomEvent('quotation-updated', { detail: updated }));
           window.dispatchEvent(new CustomEvent('refresh-quotations'));
         }}

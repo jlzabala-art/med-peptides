@@ -186,15 +186,15 @@ export default function ProtocolEditorWidget({
               >
                 <ClipboardPlus size={15} />
                 {isCreatingPrescription
-                  ? 'Creando…'
+                  ? 'Creating…'
                   : productCount > 0
-                    ? `Iniciar Prescripción (${productCount})`
-                    : 'Iniciar Prescripción'}
+                    ? `Start Prescription (${productCount})`
+                    : 'Start Prescription'}
               </button>
             )}
-            {showCancel && <button onClick={onCancel} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer' }}>Cancelar</button>}
+            {showCancel && <button onClick={onCancel} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer' }}>Cancel</button>}
             <button onClick={() => onSave(formData)} disabled={isSaving} style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Save size={16} /> {isSaving ? 'Guardando…' : 'Guardar Cambios'}
+              <Save size={16} /> {isSaving ? 'Saving…' : 'Save Changes'}
             </button>
           </div>
         </div>

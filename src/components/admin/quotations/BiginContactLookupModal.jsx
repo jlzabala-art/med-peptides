@@ -45,7 +45,7 @@ export default function BiginContactLookupModal({
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
     if (!name.trim() && !email.trim() && !phone.trim()) {
-      notifier.info("Introduce al menos un nombre, email o teléfono para buscar en Bigin.");
+      notifier.info("Please enter at least a name, email, or phone number to search in Bigin.");
       return;
     }
 
@@ -62,19 +62,19 @@ export default function BiginContactLookupModal({
       });
 
       if (!res.success) {
-        notifier.error(res.error || "Error al buscar en Bigin");
+        notifier.error(res.error || "Error searching Zoho Bigin");
         return;
       }
 
       if (res.found && res.contact) {
         setFoundContact(res.contact);
         setResultsList(res.contacts || [res.contact]);
-        notifier.success(`¡Contacto encontrado en Bigin: ${res.contact.name}!`);
+        notifier.success(`Contact found in Bigin: ${res.contact.name}!`);
       } else {
-        notifier.info(res.message || "No se encontraron contactos en Bigin.");
+        notifier.info(res.message || "No matching contacts found in Zoho Bigin.");
       }
     } catch (err) {
-      notifier.error(err.message || "Fallo en la conexión con Bigin");
+      notifier.error(err.message || "Connection failure with Zoho Bigin");
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export default function BiginContactLookupModal({
           biginContactId: target.id
         }
       }));
-      notifier.success(`Iniciando cotización para ${target.name} con datos de Bigin`);
+      notifier.success(`Starting new quotation for ${target.name} with Bigin data`);
       return;
     }
 
@@ -112,12 +112,12 @@ export default function BiginContactLookupModal({
     try {
       const res = await applyBiginDataToQuotationAction(quotation.id, target);
       if (res.success) {
-        notifier.success(`✅ Datos de Bigin sincronizados en la cotización #${quotation.quotationNumber || quotation.id}`);
+        notifier.success(`✅ Bigin data synced to quotation #${quotation.quotationNumber || quotation.id}`);
         if (onSuccess) onSuccess(target);
         onClose();
       }
     } catch (err) {
-      notifier.error(err.message || "Error al aplicar datos a la cotización");
+      notifier.error(err.message || "Failed to apply Bigin data to quotation");
     } finally {
       setApplying(false);
     }
@@ -178,10 +178,10 @@ export default function BiginContactLookupModal({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-                Cargar Datos desde Zoho Bigin
+                Load Data from Zoho Bigin
               </h3>
               <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b' }}>
-                {quotation ? `Sincronizar cliente para cotización #${quotation.quotationNumber || quotation.id}` : 'Buscar contactos en CRM por nombre, email o teléfono'}
+                {quotation ? `Sync client details for quotation #${quotation.quotationNumber || quotation.id}` : 'Search CRM contacts by name, email, or phone'}
               </p>
             </div>
           </div>
@@ -210,20 +210,20 @@ export default function BiginContactLookupModal({
         <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           
           <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569', lineHeight: 1.4 }}>
-            Introduce cualquiera de los datos que tengas disponibles. Buscaremos automáticamente coincidencias en <strong>Zoho Bigin</strong> para cargar la dirección de entrega, teléfono e instrucciones de mensajería.
+            Enter any customer details you have available. We will automatically search <strong>Zoho Bigin</strong> to load their verified delivery address, phone, and courier instructions.
           </p>
 
           <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* Input Name */}
             <div>
               <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>
-                Nombre / Apellido
+                Full Name / Surname
               </label>
               <div style={{ position: 'relative' }}>
                 <User size={15} color="#94a3b8" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
-                  placeholder="Ej. Rubén Ruano"
+                  placeholder="e.g. Ruben Ruano"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   style={{
@@ -242,13 +242,13 @@ export default function BiginContactLookupModal({
             {/* Input Email */}
             <div>
               <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>
-                Correo Electrónico
+                Email Address
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail size={15} color="#94a3b8" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="email"
-                  placeholder="Ej. ruben@rubenruano.com"
+                  placeholder="e.g. ruben@rubenruano.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
@@ -267,13 +267,13 @@ export default function BiginContactLookupModal({
             {/* Input Phone */}
             <div>
               <label style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>
-                Teléfono / Móvil
+                Phone / Mobile
               </label>
               <div style={{ position: 'relative' }}>
                 <Phone size={15} color="#94a3b8" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
-                  placeholder="Ej. +34 637316102"
+                  placeholder="e.g. +34 637316102"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   style={{
@@ -312,7 +312,7 @@ export default function BiginContactLookupModal({
               }}
             >
               {loading ? <RefreshCw size={16} className="animate-spin" /> : <Search size={16} />}
-              {loading ? 'Consultando Zoho Bigin...' : 'Buscar en Bigin'}
+              {loading ? 'Querying Zoho Bigin...' : 'Search in Bigin'}
             </button>
           </form>
 
@@ -406,7 +406,7 @@ export default function BiginContactLookupModal({
                     }}
                   >
                     {applying ? <RefreshCw size={15} className="animate-spin" /> : <CheckCircle size={15} />}
-                    {applying ? 'Aplicando a cotización...' : (quotation ? 'Aplicar Datos a esta Cotización' : 'Usar Datos para Nueva Cotización')}
+                    {applying ? 'Applying to quotation...' : (quotation ? 'Apply Details to this Quotation' : 'Use Details for New Quotation')}
                   </button>
                 </div>
               ) : (
@@ -419,7 +419,7 @@ export default function BiginContactLookupModal({
                   fontSize: '0.84rem',
                   color: '#991b1b'
                 }}>
-                  No se encontró ningún contacto con esos criterios en Zoho Bigin. Prueba con otro apellido, correo o teléfono.
+                  No contact was found matching these criteria in Zoho Bigin. Please try with another surname, email address, or phone number.
                 </div>
               )}
             </div>
@@ -448,7 +448,7 @@ export default function BiginContactLookupModal({
               cursor: 'pointer'
             }}
           >
-            Cerrar
+            Close
           </button>
         </div>
       </motion.div>

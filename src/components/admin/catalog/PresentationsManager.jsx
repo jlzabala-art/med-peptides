@@ -203,11 +203,11 @@ export default function PresentationsManager() {
                       fontSize: '0.9rem', background: '#fff', outline: 'none',
                     }}
                   />
-                  <button onClick={() => handleUpdate(p.id)} disabled={saving} title="Guardar"
+                  <button onClick={() => handleUpdate(p.id)} disabled={saving} title="Save"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-success, #16a34a)', display: 'flex', padding: '4px' }}>
                     <Check size={16} strokeWidth={2.5} />
                   </button>
-                  <button onClick={() => setEditingId(null)} title="Cancelar"
+                  <button onClick={() => setEditingId(null)} title="Cancel"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger, #dc2626)', display: 'flex', padding: '4px' }}>
                     <X size={16} strokeWidth={2.5} />
                   </button>
