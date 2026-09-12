@@ -14,6 +14,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { triggerHaptic } from '@/utils/haptics';
 
 export default function MobileActionSheet({ isOpen, onClose, title, items = [] }) {
   /* Lock body scroll while open */
@@ -70,9 +71,9 @@ export default function MobileActionSheet({ isOpen, onClose, title, items = [] }
           paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
         }}
       >
-        {/* Drag handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: '#d1d5db' }} />
+        {/* Tactile drag handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 6px', touchAction: 'none' }}>
+          <div style={{ width: 42, height: 4.5, borderRadius: 3, background: '#cbd5e1' }} />
         </div>
 
         {/* Header */}
@@ -85,7 +86,10 @@ export default function MobileActionSheet({ isOpen, onClose, title, items = [] }
             {title}
           </span>
           <button
-            onClick={onClose}
+            onClick={() => {
+              triggerHaptic('light');
+              onClose();
+            }}
             aria-label="Close"
             style={{
               width: 32, height: 32, borderRadius: 8,
@@ -107,7 +111,11 @@ export default function MobileActionSheet({ isOpen, onClose, title, items = [] }
             return (
               <button
                 key={i}
-                onClick={() => { item.onClick?.(); onClose(); }}
+                onClick={() => {
+                  triggerHaptic(isDanger ? 'warning' : 'medium');
+                  item.onClick?.();
+                  onClose();
+                }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '0.875rem',
                   width: '100%', minHeight: 52,

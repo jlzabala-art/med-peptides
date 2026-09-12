@@ -52,16 +52,25 @@ export function validatePayload(payload, schema) {
     }
 
     // 3. String Length Check
-    if (typeof val === 'string' && rules.minLength !== undefined) {
-      if (val.trim().length < rules.minLength) {
+    if (typeof val === 'string') {
+      if (rules.minLength !== undefined && val.trim().length < rules.minLength) {
         errors.push({ field, message: `Field '${field}' must have at least ${rules.minLength} characters.` });
+      }
+      if (rules.maxLength !== undefined && val.length > rules.maxLength) {
+        errors.push({ field, message: `Field '${field}' exceeds maximum length of ${rules.maxLength} characters.` });
+      }
+      if (rules.pattern && !rules.pattern.test(val)) {
+        errors.push({ field, message: `Field '${field}' format is invalid.` });
       }
     }
 
     // 4. Numeric Bounds
-    if (typeof val === 'number' && rules.min !== undefined) {
-      if (val < rules.min) {
+    if (typeof val === 'number') {
+      if (rules.min !== undefined && val < rules.min) {
         errors.push({ field, message: `Field '${field}' must be at least ${rules.min}.` });
+      }
+      if (rules.max !== undefined && val > rules.max) {
+        errors.push({ field, message: `Field '${field}' cannot exceed ${rules.max}.` });
       }
     }
 
@@ -91,3 +100,19 @@ export function badRequestResponse(errors) {
     { status: 400 }
   );
 }
+
+/**
+ * Strips dangerous control characters, null bytes, and script tags from text inputs
+ * @param {string} input 
+ * @param {number} [maxLen=4000]
+ * @returns {string}
+ */
+export function sanitizeText(input, maxLen = 4000) {
+  if (typeof input !== 'string') return '';
+  return input
+    .replace(/\0/g, '') // remove null bytes
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // strip scripts
+    .trim()
+    .slice(0, maxLen);
+}
+

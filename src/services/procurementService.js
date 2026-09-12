@@ -209,12 +209,13 @@ export const saveRFQ = async (rfqData, rfqId = null, collectionName = 'purchase_
 // ── Suppliers & Shipments ────────────────────────────────────────────────────
 
 /**
- * Fetches all active suppliers.
+ * Fetches active suppliers (bounded Rule #1).
+ * @param {number} maxCount
  * @returns {Promise<Array>}
  */
-export const fetchSuppliers = async () => {
+export const fetchSuppliers = async (maxCount = 100) => {
   try {
-    const snap = await getDocs(collection(db, 'suppliers'));
+    const snap = await getDocs(query(collection(db, 'suppliers'), limit(maxCount)));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     logger.error('[procurementService] fetchSuppliers failed', { error: err.message });

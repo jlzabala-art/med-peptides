@@ -8,6 +8,7 @@ import { useToast } from '../../../hooks/useToast';
 import ClinicPicker from './ClinicPicker';
 import PhysicianPicker from './PhysicianPicker';
 import InternationalPhoneInput from '../../ui/InternationalPhoneInput';
+import AIContextBadge from '../../ui/AIContextBadge';
 
 export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
   const { toast } = useToast();
@@ -302,6 +303,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
         }}>
           
           {/* ── CARD 0: AI Quick Intake (Gemini 2.5) ── */}
+          {/* ── CARD 0: AI Quick Intake (Gemini 2.5) ── */}
           <div style={{
             background: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
             border: '1px solid #bbf7d0',
@@ -313,42 +315,36 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', marginBottom: isAiOpen ? '0.75rem' : 0 }}
               onClick={() => setIsAiOpen(!isAiOpen)}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ width: 26, height: 26, borderRadius: 6, background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Sparkles size={15} color="#16a34a" />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    AI Intake Auto-Fill
-                    <span style={{ fontSize: '0.68rem', padding: '1px 6px', background: '#dcfce7', color: '#166534', borderRadius: 4, fontWeight: 700 }}>
-                      Gemini 2.5 Flash
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>
+              <AIContextBadge
+                title="AI Intake & Patient Referral Extractor"
+                subtitle="Instantly extracts full patient demographics, clinic and physician linkages"
+                contextPill="Target: Global Patient Registry"
+                accentColor="#16a34a"
+                model="Gemini 2.5 Flash"
+              />
+              <span style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 700, padding: '0.4rem 0.6rem', background: '#dcfce7', borderRadius: '6px', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
                 {isAiOpen ? 'Hide ▲' : 'Paste Referral ▼'}
               </span>
             </div>
 
             {isAiOpen && (
-              <div>
-                <p style={{ margin: '0 0 0.6rem 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.4 }}>
+              <div style={{ marginTop: '0.5rem' }}>
+                <p style={{ margin: '0 0 0.6rem 0', fontSize: '0.8rem', color: '#475569', lineHeight: 1.4 }}>
                   Paste unstructured clinical text, WhatsApp referrals, or intake emails to automatically populate the patient profile:
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={aiText}
                     onChange={(e) => setAiText(e.target.value)}
                     placeholder="e.g. Register Fatima Al Mansoori (fatima.m@example.ae, +971 50 889 1234, DOB 1988-04-12) at Roya Medical Center under Dr Valentina..."
                     style={{
                       width: '100%',
-                      padding: '0.65rem 0.85rem',
+                      padding: '0.75rem 0.85rem',
                       borderRadius: '8px',
                       border: '1px solid #86efac',
                       background: '#ffffff',
-                      fontSize: '0.82rem',
+                      fontSize: '0.84rem',
                       resize: 'vertical',
                       boxSizing: 'border-box',
                       outline: 'none',
@@ -357,11 +353,11 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                     }}
                     disabled={isExtracting}
                   />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <button
                       type="button"
                       onClick={() => setAiText("Please register Dr. Valentina's patient: Sarah Al Maktoum (sarah.maktoum@example.ae, +971 50 334 5678, Female, DOB 1991-06-15) at Roya Medical Center LLC for Longevity protocol.")}
-                      style={{ background: 'none', border: 'none', color: '#16a34a', fontSize: '0.74rem', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                      style={{ background: 'none', border: 'none', color: '#16a34a', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', padding: '0.25rem 0' }}
                     >
                       Fill sample intake
                     </button>
@@ -370,22 +366,23 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                       onClick={handleExtractAI}
                       disabled={isExtracting || !aiText.trim()}
                       style={{
-                        padding: '0.45rem 1rem',
+                        minHeight: '44px',
+                        padding: '0.5rem 1.25rem',
                         background: '#16a34a',
                         color: '#ffffff',
                         border: 'none',
-                        borderRadius: '7px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
+                        borderRadius: '8px',
+                        fontSize: '0.84rem',
+                        fontWeight: 700,
                         cursor: aiText.trim() && !isExtracting ? 'pointer' : 'not-allowed',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.4rem',
+                        gap: '0.5rem',
                         opacity: isExtracting || !aiText.trim() ? 0.6 : 1,
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
+                        boxShadow: '0 2px 4px rgba(22,163,74,0.2)'
                       }}
                     >
-                      {isExtracting ? <Loader2 size={13} className="spin" /> : <Sparkles size={13} />}
+                      {isExtracting ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}
                       {isExtracting ? 'Extracting with Gemini…' : 'Extract & Fill Form'}
                     </button>
                   </div>
@@ -393,7 +390,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
                 {aiExtractedBanner && (
                   <div style={{
-                    marginTop: '0.65rem', padding: '0.6rem 0.85rem', background: '#dcfce7',
+                    marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: '#dcfce7',
                     borderRadius: '8px', border: '1px solid #86efac', fontSize: '0.78rem', color: '#166534'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}>
@@ -430,7 +427,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
             {/* First & Last Name */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                   First Name <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
@@ -440,13 +437,14 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.85rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box', outline: 'none'
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                    border: '1px solid #cbd5e1', fontSize: '0.9rem', boxSizing: 'border-box', outline: 'none',
+                    color: '#0f172a', background: '#ffffff'
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                   Last Name <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
@@ -456,8 +454,9 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.85rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.875rem', boxSizing: 'border-box', outline: 'none'
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                    border: '1px solid #cbd5e1', fontSize: '0.9rem', boxSizing: 'border-box', outline: 'none',
+                    color: '#0f172a', background: '#ffffff'
                   }}
                 />
               </div>
@@ -465,7 +464,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
             {/* Email Address */}
             <div style={{ marginBottom: '0.85rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                 Email Address <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -480,13 +479,14 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                   }}
                   onBlur={handleEmailBlur}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.85rem', borderRadius: '8px',
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
                     border: emailError ? '1px solid #ef4444' : '1px solid #cbd5e1',
-                    fontSize: '0.875rem', boxSizing: 'border-box', outline: 'none'
+                    fontSize: '0.9rem', boxSizing: 'border-box', outline: 'none',
+                    color: '#0f172a', background: '#ffffff'
                   }}
                 />
                 {isCheckingEmail && (
-                  <Loader2 size={15} className="spin" color="#94a3b8" style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
+                  <Loader2 size={16} className="spin" color="#94a3b8" style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)' }} />
                 )}
               </div>
               {emailError && (
@@ -496,8 +496,8 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                 </div>
               )}
               {duplicateWarning && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.35rem', fontSize: '0.75rem', color: '#d97706', background: '#fffbeb', padding: '5px 10px', borderRadius: 6, border: '1px solid #fde68a' }}>
-                  <AlertCircle size={13} color="#d97706" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.35rem', fontSize: '0.75rem', color: '#d97706', background: '#fffbeb', padding: '6px 10px', borderRadius: 6, border: '1px solid #fde68a' }}>
+                  <AlertCircle size={14} color="#d97706" />
                   <span>{duplicateWarning}</span>
                 </div>
               )}
@@ -505,7 +505,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
             {/* International Phone */}
             <div style={{ marginBottom: '0.85rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                 Phone Number (International)
               </label>
               <InternationalPhoneInput
@@ -515,36 +515,39 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
               />
             </div>
 
-            {/* Country, DOB, Gender in 3-col Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '0.75rem' }}>
+            {/* Country of Residence - Full width for complete readability */}
+            <div style={{ marginBottom: '0.85rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
+                Country of Residence
+              </label>
+              <select
+                value={formData.country}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                style={{
+                  width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                  border: '1px solid #cbd5e1', fontSize: '0.9rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none',
+                  color: '#0f172a'
+                }}
+              >
+                <option value="AE">🇦🇪 United Arab Emirates</option>
+                <option value="ES">🇪🇸 Spain</option>
+                <option value="US">🇺🇸 United States</option>
+                <option value="GB">🇬🇧 United Kingdom</option>
+                <option value="SA">🇸🇦 Saudi Arabia</option>
+                <option value="QA">🇶🇦 Qatar</option>
+                <option value="KW">🇰🇼 Kuwait</option>
+                <option value="OM">🇴🇲 Oman</option>
+                <option value="BH">🇧🇭 Bahrain</option>
+                <option value="MX">🇲🇽 Mexico</option>
+                <option value="CO">🇨🇴 Colombia</option>
+                <option value="Other">🌐 Other Country</option>
+              </select>
+            </div>
+
+            {/* Date of Birth & Gender - 2 balanced columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                  Country
-                </label>
-                <select
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  style={{
-                    width: '100%', height: '40px', padding: '0 0.75rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.82rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none'
-                  }}
-                >
-                  <option value="AE">United Arab Emirates</option>
-                  <option value="ES">Spain</option>
-                  <option value="US">United States</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="SA">Saudi Arabia</option>
-                  <option value="QA">Qatar</option>
-                  <option value="KW">Kuwait</option>
-                  <option value="OM">Oman</option>
-                  <option value="BH">Bahrain</option>
-                  <option value="MX">Mexico</option>
-                  <option value="CO">Colombia</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                   Date of Birth
                 </label>
                 <input
@@ -552,24 +555,26 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.65rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.82rem', boxSizing: 'border-box', outline: 'none', background: '#ffffff'
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                    border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box', outline: 'none', background: '#ffffff',
+                    color: '#0f172a'
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                  Gender
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
+                  Biological Gender
                 </label>
                 <select
                   value={formData.gender}
                   onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.75rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.82rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none'
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                    border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none',
+                    color: '#0f172a'
                   }}
                 >
-                  <option value="">Select...</option>
+                  <option value="">Select gender...</option>
                   <option value="Female">Female</option>
                   <option value="Male">Male</option>
                   <option value="Other">Other</option>
@@ -595,7 +600,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
             {/* Clinic Picker */}
             <div style={{ marginBottom: '0.85rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                 Assigned Clinic
               </label>
               <ClinicPicker
@@ -607,7 +612,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
             {/* Physician Picker */}
             <div style={{ marginBottom: '0.85rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                 Assigned Physician / Supervising Doctor
               </label>
               <PhysicianPicker
@@ -620,24 +625,25 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
             {/* Program / Segment Tag */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
-                Clinical Program / Segment Focus
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
+                Clinical Program / Focus Area
               </label>
               <select
                 value={formData.program}
                 onChange={(e) => setFormData({ ...formData, program: e.target.value })}
                 style={{
-                  width: '100%', height: '40px', padding: '0 0.85rem', borderRadius: '8px',
-                  border: '1px solid #cbd5e1', fontSize: '0.85rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none'
+                  width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                  border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none',
+                  color: '#0f172a'
                 }}
               >
-                <option value="">None / Standard Intake</option>
+                <option value="">None / Standard Clinical Intake</option>
                 <option value="Longevity">Longevity & Biological Age Optimization</option>
                 <option value="Weight Loss">Metabolic & Weight Management (GLP-1 / GIP)</option>
                 <option value="Performance">Athletic Performance & Injury Recovery</option>
                 <option value="Cognitive">Cognitive & Neuro-enhancement</option>
                 <option value="Hormonal">Hormonal & GH-Axis Optimization</option>
-                <option value="VIP">VIP Executive Patient</option>
+                <option value="VIP">VIP Executive Concierge Patient</option>
               </select>
             </div>
           </div>
@@ -659,15 +665,16 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem', marginBottom: '0.85rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                   Initial Account Status
                 </label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.85rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.85rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none'
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                    border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none',
+                    color: '#0f172a'
                   }}
                 >
                   <option value="active">Active (Full Access)</option>
@@ -677,7 +684,7 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                   External Patient Ref / MRN
                 </label>
                 <input
@@ -686,15 +693,16 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                   value={formData.externalRef}
                   onChange={(e) => setFormData({ ...formData, externalRef: e.target.value })}
                   style={{
-                    width: '100%', height: '40px', padding: '0 0.85rem', borderRadius: '8px',
-                    border: '1px solid #cbd5e1', fontSize: '0.85rem', boxSizing: 'border-box', outline: 'none'
+                    width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                    border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box', outline: 'none',
+                    color: '#0f172a', background: '#ffffff'
                   }}
                 />
               </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', marginBottom: '0.35rem' }}>
                 Clinical Intake Notes & Medical History
               </label>
               <textarea
@@ -703,9 +711,9 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '8px',
-                  border: '1px solid #cbd5e1', fontSize: '0.85rem', boxSizing: 'border-box', outline: 'none',
-                  resize: 'vertical', fontFamily: 'inherit'
+                  width: '100%', padding: '0.75rem 0.85rem', borderRadius: '8px',
+                  border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box', outline: 'none',
+                  resize: 'vertical', fontFamily: 'inherit', color: '#0f172a', background: '#ffffff'
                 }}
               />
             </div>

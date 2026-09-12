@@ -16,6 +16,8 @@ import {
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 
+import AIContextBadge from '@/components/ui/AIContextBadge';
+
 /**
  * AIClinicalScribeModal
  * ─────────────────────────────────────────────────────────────────────────────
@@ -34,6 +36,11 @@ export default function AIClinicalScribeModal({
   const [parsedResult, setParsedResult] = useState(null);
 
   if (!isOpen) return null;
+
+  const patientName = patient?.name || patient?.displayName || null;
+  const contextPill = patientName 
+    ? `${patientName}${patient.age ? ` (${patient.age}yo${patient.gender ? `, ${patient.gender}` : ''})` : ''}${patient.allergies ? ` • Allergies: ${patient.allergies}` : ''}`
+    : 'General Doctor Dictation • Open Consultation';
 
   const handleGenerate = async () => {
     if (!notes.trim()) {
@@ -89,13 +96,13 @@ export default function AIClinicalScribeModal({
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999,
-      padding: '1.5rem'
+      padding: 'clamp(0.5rem, 3vw, 1.5rem)'
     }}>
       <div style={{
         backgroundColor: '#ffffff',
         width: '100%',
         maxWidth: '850px',
-        maxHeight: '90vh',
+        maxHeight: '92vh',
         borderRadius: '16px',
         display: 'flex',
         flexDirection: 'column',
@@ -105,35 +112,21 @@ export default function AIClinicalScribeModal({
       }}>
         {/* Header */}
         <div style={{
-          padding: '1.25rem 1.75rem',
+          padding: '1.25rem clamp(1rem, 2.5vw, 1.5rem)',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: '#f8fafc'
+          alignItems: 'flex-start',
+          backgroundColor: '#f8fafc',
+          gap: '1rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(13, 148, 136, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#0d9488'
-            }}>
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                AI Clinical Scribe & Prescription Copilot
-              </h3>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                {patient ? `Patient: ${patient.name || patient.displayName}` : 'Doctor consultation note-to-prescription transformer'}
-              </p>
-            </div>
-          </div>
+          <AIContextBadge
+            title="Clinical Scribe & Rx Copilot"
+            subtitle="Transform doctor dictation into an official structured prescription"
+            contextPill={contextPill}
+            accentColor="#0d9488"
+            model="Gemini 2.5 Flash"
+          />
           <button
             onClick={onClose}
             style={{
@@ -141,9 +134,16 @@ export default function AIClinicalScribeModal({
               border: 'none',
               cursor: 'pointer',
               color: '#64748b',
-              padding: '6px',
-              borderRadius: '50%'
+              padding: '8px',
+              borderRadius: '8px',
+              minWidth: '40px',
+              minHeight: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
             }}
+            aria-label="Close"
           >
             <X size={20} />
           </button>
@@ -172,10 +172,24 @@ export default function AIClinicalScribeModal({
                 resize: 'vertical'
               }}
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                Powered by Gemini 2.5 Flash · Clinical Peptide Pharmacokinetics
-              </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.65rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Quick presets:</span>
+                <button
+                  type="button"
+                  onClick={() => setNotes('Patient presenting with grade 2 knee ligament tear. Prescribe BPC-157 500mcg SubQ daily and TB-500 2mg twice weekly for 4 weeks. Instruct reconstitution with 2mL bacteriostatic water.')}
+                  style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '3px 8px', fontSize: '0.72rem', color: '#0d9488', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Injury & Repair
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotes('45yo female requesting cognitive optimization protocol. Prescribe Semax 600mcg intranasal daily morning and Selank 300mcg afternoon for 30 days.')}
+                  style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '3px 8px', fontSize: '0.72rem', color: '#0d9488', cursor: 'pointer', fontWeight: 600 }}
+                >
+                  Nootropic Stack
+                </button>
+              </div>
               <button
                 onClick={handleGenerate}
                 disabled={isLoading || !notes.trim()}
@@ -184,18 +198,20 @@ export default function AIClinicalScribeModal({
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '0.55rem 1.25rem',
-                  fontSize: '0.85rem',
+                  minHeight: '44px',
+                  padding: '0.65rem 1.25rem',
+                  fontSize: '0.86rem',
                   fontWeight: 700,
                   cursor: isLoading || !notes.trim() ? 'not-allowed' : 'pointer',
                   opacity: isLoading || !notes.trim() ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem'
+                  gap: '0.4rem',
+                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.2)'
                 }}
               >
                 <Sparkles size={16} />
-                {isLoading ? 'Structuring Rx...' : 'Structure Prescription'}
+                {isLoading ? 'Structuring Rx with Gemini...' : 'Structure Prescription'}
               </button>
             </div>
           </div>
@@ -329,23 +345,26 @@ export default function AIClinicalScribeModal({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer Actions */}
         <div style={{
-          padding: '1rem 1.75rem',
+          padding: '1rem clamp(1rem, 2.5vw, 1.5rem)',
           borderTop: '1px solid #e2e8f0',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
-          backgroundColor: '#f8fafc'
+          gap: '0.75rem',
+          backgroundColor: '#f8fafc',
+          flexWrap: 'wrap'
         }}>
           <button
             onClick={onClose}
             style={{
-              background: 'none',
+              background: '#ffffff',
               border: '1px solid #cbd5e1',
-              padding: '0.6rem 1.2rem',
+              minHeight: '44px',
+              padding: '0.6rem 1.25rem',
               borderRadius: '8px',
-              fontSize: '0.85rem',
+              fontSize: '0.86rem',
               fontWeight: 600,
               cursor: 'pointer',
               color: '#475569'
@@ -360,15 +379,17 @@ export default function AIClinicalScribeModal({
               backgroundColor: '#0d9488',
               color: '#ffffff',
               border: 'none',
-              padding: '0.6rem 1.4rem',
+              minHeight: '44px',
+              padding: '0.65rem 1.4rem',
               borderRadius: '8px',
-              fontSize: '0.85rem',
+              fontSize: '0.86rem',
               fontWeight: 700,
               cursor: parsedResult ? 'pointer' : 'not-allowed',
               opacity: parsedResult ? 1 : 0.5,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.4rem',
+              boxShadow: '0 2px 6px rgba(13, 148, 136, 0.2)'
             }}
           >
             <CheckCircle size={16} /> Transfer to Official Prescription

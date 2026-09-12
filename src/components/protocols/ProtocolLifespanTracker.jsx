@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Snowflake, Thermometer, Clock, ShoppingCart, CheckCircle2, AlertTriangle, ShieldCheck, Zap, RefreshCw } from '@/lib/icons';
+import notifier from '@/services/NotificationService';
 
 /**
  * ProtocolLifespanTracker
@@ -127,7 +128,7 @@ export default function ProtocolLifespanTracker({ protocol, onReorder = null }) 
             <span className="text-emerald-400 font-bold font-mono">5 Days Prior</span>
           </div>
           <button
-            onClick={() => onReorder ? onReorder() : alert('Replenishment batch added to cart!')}
+            onClick={() => onReorder ? onReorder() : notifier.success('Replenishment batch added to cart!')}
             className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-lg transition-all"
           >
             <RefreshCw size={14} />

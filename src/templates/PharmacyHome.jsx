@@ -1,4 +1,4 @@
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import LayoutDashboard from "lucide-react/dist/esm/icons/layout-dashboard";
 import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import Plus from "lucide-react/dist/esm/icons/plus";
@@ -10,12 +10,6 @@ import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import Brain from "lucide-react/dist/esm/icons/brain";
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-
-
-
-
-
-
 
 import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
@@ -103,6 +97,7 @@ export function PlaceholderTab() {
 export const PharmacyHomeContext = React.createContext({});
 
 export default function PharmacyHome({ children }) {
+  const router = useRouter();
   const { userProfile } = useAuth();
   const pathname = usePathname();
 
@@ -114,12 +109,14 @@ export default function PharmacyHome({ children }) {
       allowedRoles={['compounding_pharmacy', 'admin']}
       sidebarNavGroups={PHARMACY_NAV_GROUPS}
       activeNavId={activeTab}
-      onNavigate={(id) => { window.location.href = `/pharmacy/${id}`; }}
+      onNavigate={(id) => {
+        router.push(id === 'dashboard' ? '/pharmacy' : `/pharmacy/${id}`);
+      }}
       portalTitle="Pharmacy Portal"
       roleContext="compounding_pharmacy"
       pageContext={{ activeTab }}
     >
-      <div style={{ padding: '2rem' }}>
+      <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <PharmacyHomeContext.Provider value={{ userProfile }}>{children}</PharmacyHomeContext.Provider>
         </AdminTabErrorBoundary>

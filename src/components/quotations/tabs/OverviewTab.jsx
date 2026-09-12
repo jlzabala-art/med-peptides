@@ -1,11 +1,21 @@
 'use client';
 
-import React from 'react';
-import { User, Building2, Globe, Calendar, DollarSign, Clock, ShieldCheck, Stethoscope, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Building2, Globe, Calendar, DollarSign, Clock, ShieldCheck, Stethoscope, ArrowRight, ExternalLink, Share2, ShoppingCart, Truck, Copy, Check, Zap } from 'lucide-react';
 import StatusBadge from '../../ui/StatusBadge';
 import CopyableId from '../../ui/CopyableId';
+import { useDrawer } from '../../../context/DrawerContext';
+import { convertQuotationToOrderAction, convertQuotationToSupplierPoAction } from '../../../actions/quotationsActions';
+import notifier from '../../../services/NotificationService';
+import BiginContactLookupModal from '../../admin/quotations/BiginContactLookupModal';
 
 export default function OverviewTab({ quotation, quotationId }) {
+  const { openDrawer } = useDrawer();
+  const [convertingOrder, setConvertingOrder] = useState(false);
+  const [generatingPo, setGeneratingPo] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [isBiginModalOpen, setIsBiginModalOpen] = useState(false);
+
   if (!quotation) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
@@ -19,9 +29,12 @@ export default function OverviewTab({ quotation, quotationId }) {
   const CategoryIconComp = categoryIcon;
 
   const clientName = quotation.clientName || quotation.patientName || quotation.wholesalerName || quotation.clinicName || 'Direct Client';
+  const clientId = quotation.patientId || quotation.clientId || quotation.wholesalerId || quotation.clinicId || quotation.userId;
   const currency = quotation.currency || 'USD';
   const currencySymbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
   const grandTotal = Number(quotation.grandTotal || quotation.totalAmount || 0);
+  const publicToken = quotation.publicToken || quotation.token || quotation.id;
+  const publicUrl = typeof window !== 'undefined' ? `${window.location.origin}/quotation/${publicToken}` : `/quotation/${publicToken}`;
 
   const formattedDate = quotation.createdAt
     ? new Date(quotation.createdAt?.toDate ? quotation.createdAt.toDate() : quotation.createdAt).toLocaleDateString('es-ES', {
@@ -30,6 +43,60 @@ export default function OverviewTab({ quotation, quotationId }) {
         day: 'numeric'
       })
     : 'Recently';
+
+  const handleOpenClientProfile = () => {
+    if (clientId) {
+      openDrawer('patient', clientId, { clientName });
+    } else {
+      notifier.info(`Client profile ID not linked for ${clientName}`);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(publicUrl);
+      setCopiedLink(true);
+      notifier.success('Public quotation link copied to clipboard!');
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const handleConvertToOrder = async () => {
+    if (quotation.convertedOrderId) {
+      notifier.info(`Quotation already converted to Order ${quotation.convertedOrderNumber || quotation.convertedOrderId}`);
+      return;
+    }
+    setConvertingOrder(true);
+    try {
+      const qId = quotation.id || quotationId;
+      const res = await convertQuotationToOrderAction(qId);
+      if (res.success) {
+        notifier.success(`Sales Order ${res.orderNumber} created successfully!`);
+        if (res.orderId) {
+          openDrawer('order', res.orderId);
+        }
+      }
+    } catch (err) {
+      notifier.error(err.message || 'Failed to convert quotation to order');
+    } finally {
+      setConvertingOrder(false);
+    }
+  };
+
+  const handleConvertToPo = async () => {
+    setGeneratingPo(true);
+    try {
+      const qId = quotation.id || quotationId;
+      const res = await convertQuotationToSupplierPoAction(qId, quotation.supplierId, quotation.supplierName);
+      if (res.success) {
+        notifier.success(`Supplier PO ${res.poNumber} created successfully!`);
+      }
+    } catch (err) {
+      notifier.error(err.message || 'Failed to generate supplier PO');
+    } finally {
+      setGeneratingPo(false);
+    }
+  };
 
   return (
     <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -57,8 +124,33 @@ export default function OverviewTab({ quotation, quotationId }) {
             <CategoryIconComp size={22} />
           </div>
           <div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-              {clientName}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                {clientName}
+              </span>
+              {clientId && (
+                <button
+                  type="button"
+                  onClick={handleOpenClientProfile}
+                  style={{
+                    border: 'none',
+                    background: '#eff6ff',
+                    color: '#2563eb',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}
+                  title="Open Client Profile"
+                >
+                  <User size={12} />
+                  Ver Ficha ↗
+                </button>
+              )}
             </div>
             <div style={{ fontSize: '0.76rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <span>ID: <CopyableId value={quotation.quotationNumber || quotation.id} /></span>
@@ -73,6 +165,144 @@ export default function OverviewTab({ quotation, quotationId }) {
           <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--color-primary, #003666)', marginTop: 4 }}>
             {currencySymbol}{grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
+        </div>
+      </div>
+
+      {/* Interactive Actions & Public Link Card */}
+      <div style={{
+        background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+        border: '1px solid #bbf7d0',
+        borderRadius: 12,
+        padding: '14px 16px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Globe size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#166534' }}>
+              Enlace de Cotización Pública para el Cliente
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#15803d', marginTop: 2 }}>
+              Incluye fichas técnicas, trazabilidad y etiquetas de vial 38x90
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '6px 12px',
+              borderRadius: 6,
+              background: '#ffffff',
+              border: '1px solid #86efac',
+              color: '#166534',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            {copiedLink ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
+            {copiedLink ? 'Copiado ✓' : 'Copiar Enlace'}
+          </button>
+
+          <a
+            href={`/quotation/${publicToken}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '6px 12px',
+              borderRadius: 6,
+              background: '#16a34a',
+              color: '#ffffff',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              textDecoration: 'none'
+            }}
+          >
+            Abrir Vista Cliente <ExternalLink size={13} />
+          </a>
+
+          <button
+            type="button"
+            onClick={() => setIsBiginModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '6px 12px',
+              borderRadius: 6,
+              background: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              color: '#0369a1',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+            title="Buscar y cargar datos de contacto, dirección e instrucciones desde Zoho Bigin"
+          >
+            <Zap size={14} color="#0284c7" />
+            Cargar de Bigin
+          </button>
+
+          {!quotation.convertedOrderId && (
+            <button
+              type="button"
+              disabled={convertingOrder}
+              onClick={handleConvertToOrder}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '6px 12px',
+                borderRadius: 6,
+                background: 'var(--color-primary, #003666)',
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <ShoppingCart size={14} />
+              {convertingOrder ? 'Convirtiendo...' : 'Convertir a Pedido'}
+            </button>
+          )}
+
+          <button
+            type="button"
+            disabled={generatingPo}
+            onClick={handleConvertToPo}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '6px 12px',
+              borderRadius: 6,
+              background: '#0284c7',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            <Truck size={14} />
+            {generatingPo ? 'Generando PO...' : 'Generar PO Laboratorio'}
+          </button>
         </div>
       </div>
 
@@ -134,6 +364,18 @@ export default function OverviewTab({ quotation, quotationId }) {
           </div>
         </div>
       )}
+
+      {/* Zoho Bigin Quick Contact Lookup Modal */}
+      <BiginContactLookupModal
+        isOpen={isBiginModalOpen}
+        quotation={quotation}
+        onClose={() => setIsBiginModalOpen(false)}
+        onSuccess={(updated) => {
+          notifier.success('Datos de Zoho Bigin aplicados a la cotización');
+          window.dispatchEvent(new CustomEvent('quotation-updated', { detail: updated }));
+          window.dispatchEvent(new CustomEvent('refresh-quotations'));
+        }}
+      />
     </div>
   );
 }

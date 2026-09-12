@@ -109,20 +109,30 @@ export default function AppSidebar({
     }))
     .filter((group) => group.items.length > 0);
 
-  // Auto-expand the group that contains the current active route
+  // Mobile-specific expanded groups: always start 100% collapsed on mobile by default
+  const [mobileExpandedGroups, setMobileExpandedGroups] = React.useState([]);
+
+  React.useEffect(() => {
+    if (isMobile && isOpen) {
+      setMobileExpandedGroups([]);
+    }
+  }, [isMobile, isOpen]);
+
+  // Auto-expand the group that contains the current active route (desktop only, for deep routes)
   useEffect(() => {
-    if (!pathname) return;
-    // Extract the slug from /admin/<slug> or treat '' as Overview
+    if (!pathname || isMobile) return;
+    // Extract the slug from /admin/<slug>
     const parts = pathname.split('/').filter(Boolean);
     const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
+    if (!currentSlug) return;
     for (const group of filteredGroups) {
-      const hasActive = group.items?.some(item => item.id === currentSlug || item.id === '');
+      const hasActive = group.items?.some(item => item.id === currentSlug && item.id !== '');
       if (hasActive && !expandedGroups.includes(group.id)) {
         toggleGroup(group.id);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, isMobile]);
 
   // Local visual expand/collapse with persistence and compact-laptop intelligence
   const [expanded, setExpanded] = React.useState(() => {
@@ -176,7 +186,25 @@ export default function AppSidebar({
     const isActive = item.id === '' ? currentSlug === '' : currentSlug === item.id || currentSlug.startsWith(item.id + '/');
     const isFav = favorites.includes(item.id);
 
-    const targetHref = item.id === 'b2c-shop' ? '/' : `/${effectiveRole}/${item.id === 'dashboard' ? '' : item.id}`;
+    const getPortalBase = (role, path = '') => {
+      if (path.startsWith('/admin')) return '/admin';
+      if (path.startsWith('/doctor')) return '/doctor';
+      if (path.startsWith('/wholesaler')) return '/wholesaler';
+      if (path.startsWith('/patient')) return '/patient';
+      if (path.startsWith('/supplier')) return '/supplier';
+      if (path.startsWith('/pharmacy')) return '/pharmacy';
+      if (path.startsWith('/clinic')) return '/clinic';
+      if (role === 'doctor') return '/doctor';
+      if (role === 'wholesaler') return '/wholesaler';
+      if (role === 'patient') return '/patient';
+      if (role === 'supplier') return '/supplier';
+      if (role === 'pharmacy') return '/pharmacy';
+      if (role === 'clinic') return '/clinic';
+      return '/admin';
+    };
+
+    const portalBase = getPortalBase(effectiveRole, pathname);
+    const targetHref = item.id === 'b2c-shop' ? '/' : `${portalBase}/${item.id === 'dashboard' || item.id === 'overview' ? '' : item.id}`;
 
     return (
       <div 
@@ -369,21 +397,31 @@ export default function AppSidebar({
 
         {/* Dynamic Groups — filtered by effective role */}
         {filteredGroups.map((group) => {
-          const isGroupExpanded = expandedGroups.includes(group.id);
+          const isGroupExpanded = isMobile
+            ? mobileExpandedGroups.includes(group.id)
+            : expandedGroups.includes(group.id);
           const GroupIcon = group.icon;
           const theme = GROUP_THEMES[group.id] || {
             color: 'var(--color-primary, #2563eb)',
             bg: 'rgba(37, 99, 235, 0.12)',
           };
 
+          const handleGroupToggle = () => {
+            if (isMobile) {
+              setMobileExpandedGroups(prev =>
+                prev.includes(group.id) ? prev.filter(id => id !== group.id) : [...prev, group.id]
+              );
+            } else {
+              if (!expanded) setExpanded(true);
+              toggleGroup(group.id);
+            }
+          };
+
           return (
             <div key={group.id} className="sb-group hierarchical">
               <button 
                 className="sb-group-toggle"
-                onClick={() => {
-                  if (!expanded) setExpanded(true);
-                  toggleGroup(group.id);
-                }}
+                onClick={handleGroupToggle}
                 data-tooltip={!expanded ? group.label : undefined}
               >
                 {GroupIcon && (

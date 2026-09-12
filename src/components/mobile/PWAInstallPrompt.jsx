@@ -15,6 +15,14 @@ export default function PWAInstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch((err) => {
+        console.debug('[PWA] ServiceWorker registration skipped/failed:', err);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/shared/')) {
       return;
     }

@@ -29,14 +29,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useAdminRoleSimulation } from './admin/useAdminRoleSimulation';
 import { useMemo, useCallback } from 'react';
-
-// ── Role aliases — normalise legacy/typo role strings ─────────────────────────
-/** @type {Record<string, string>} */
-const ROLE_ALIASES = Object.freeze({
-  wholeseller: 'wholesaler', // canonical spelling is 'wholesaler'
-  pharmacy:    'compounding_pharmacy',
-  medical:     'medical_director',
-});
+import { ROLE_ALIASES, normalizeRole } from '../constants/roles';
 
 // ── Action-based permissions per canonical role ───────────────────────────────
 /**
@@ -172,7 +165,7 @@ export function useRoleAccess() {
     const raw = isSimulating
       ? simulatedRole
       : (isAdmin ? 'admin' : (activeRole || userProfile?.role || 'guest'));
-    return ROLE_ALIASES[raw] || raw;
+    return normalizeRole(raw);
   }, [isSimulating, simulatedRole, isAdmin, activeRole, userProfile?.role]);
 
   // Resolve action permissions for this role

@@ -1,26 +1,53 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/apiValidator';
+import { logger } from '@/utils/logger';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
+// Clinical scribe is the most sensitive endpoint: 10 requests per minute per IP
+const RATE_LIMIT_OPTIONS = { limit: 10, windowMs: 60 * 1000, tier: 'ai-clinical-scribe' };
+
 export async function POST(request) {
+  // Rate limiting — clinical scribe is high-cost endpoint
+  const rateInfo = checkRateLimit(request, RATE_LIMIT_OPTIONS);
+  if (!rateInfo.allowed) {
+    logger.warn('[AI Clinical Scribe] Rate limit exceeded', { tier: 'ai-clinical-scribe', retryAfter: rateInfo.retryAfter });
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     if (!apiKey) {
+      logger.error('[AI Clinical Scribe] Missing GEMINI_API_KEY');
       return NextResponse.json(
         { error: 'GEMINI_API_KEY is not configured on the server environment.' },
         { status: 500 }
       );
     }
 
-    const { clinicalNotes, patientProfile = {} } = await request.json();
+    const body = await request.json();
+    const rawNotes = body?.clinicalNotes;
+    const patientProfile = body?.patientProfile || {};
 
-    if (!clinicalNotes || typeof clinicalNotes !== 'string' || clinicalNotes.trim().length === 0) {
+    // Sanitize: strip null bytes, scripts, truncate to 8 000 chars
+    const clinicalNotes = sanitizeText(rawNotes, 8000);
+    const sanitizedProfile = {
+      name: sanitizeText(patientProfile.name, 200),
+      age: sanitizeText(String(patientProfile.age || ''), 20),
+      gender: sanitizeText(patientProfile.gender, 50),
+      medicalHistory: sanitizeText(patientProfile.medicalHistory, 2000),
+      allergies: sanitizeText(patientProfile.allergies, 1000),
+    };
+
+    if (!clinicalNotes || clinicalNotes.trim().length === 0) {
       return NextResponse.json(
         { error: 'Clinical notes or dictation text is required.' },
         { status: 400 }
       );
     }
 
+    logger.info('[AI Clinical Scribe] Processing request', { notesLength: clinicalNotes.length });
     const ai = new GoogleGenAI({ apiKey });
 
     // Structured Output Schema for Clinical Scribe
@@ -91,9 +118,9 @@ export async function POST(request) {
 Your task is to parse freeform clinical notes or doctor dictations into a standardized, institutional medical prescription.
 
 Patient Context:
-- Name: ${patientProfile.name || 'Not provided'}
-- Age/Gender: ${patientProfile.age || patientProfile.gender || 'Not specified'}
-- Medical History/Allergies: ${patientProfile.medicalHistory || patientProfile.allergies || 'None reported'}
+- Name: ${sanitizedProfile.name || 'Not provided'}
+- Age/Gender: ${sanitizedProfile.age || sanitizedProfile.gender || 'Not specified'}
+- Medical History/Allergies: ${sanitizedProfile.medicalHistory || sanitizedProfile.allergies || 'None reported'}
 
 Rules:
 1. Standardize peptide names into clean international nomenclature (e.g. "bpc" -> "BPC-157", "tb" -> "TB-500", "cjc" -> "CJC-1295 No DAC").
@@ -127,12 +154,10 @@ Rules:
     }
 
     const structuredPrescription = JSON.parse(text);
-    return NextResponse.json({
-      success: true,
-      data: structuredPrescription
-    });
+    const jsonResponse = NextResponse.json({ success: true, data: structuredPrescription });
+    return applyRateLimitHeaders(jsonResponse, rateInfo);
   } catch (error) {
-    console.error('[AI Clinical Scribe] Error:', error);
+    logger.error('[AI Clinical Scribe] Unhandled error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to process clinical notes.' },
       { status: 500 }

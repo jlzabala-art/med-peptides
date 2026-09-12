@@ -393,6 +393,13 @@
     height: 100vh;
     z-index: 1000;
     box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+
+  .sb-mobile-overlay {
+    touch-action: none;
+    overscroll-behavior: contain;
   }
 
   /* Show Bottom Navigation */

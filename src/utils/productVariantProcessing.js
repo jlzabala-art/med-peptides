@@ -1,4 +1,4 @@
-import { PRESENTATION_LABELS } from '../constants/presentationTypes';
+import { PRESENTATION_LABELS } from '../constants/presentationTypes.js';
 
 export function getHumanFormatName(formatId, rawFormat) {
   if (!formatId && !rawFormat) return 'Standard Formulation';
@@ -33,10 +33,11 @@ export function processProductVariants(variants) {
 
     // Pod Poland Specific fix - Data normalization (not fuzzy matching in the view layer)
     // We normalize the data at ingestion/processing time
-    if (supplierId === 'pod_poland') {
-      if (v.sku && v.sku.toLowerCase().includes('pen')) {
+    const sIdLower = String(supplierId).toLowerCase();
+    if (sIdLower.includes('pod') && sIdLower.includes('poland')) {
+      if ((v.sku && v.sku.toLowerCase().includes('pen')) || formatId === 'pen' || formatId.includes('pen')) {
         formatId = 'prefilled_pen';
-        rawFormat = 'Prefilled Pen';
+        rawFormat = 'Pre-filled Pen';
       }
       if (!v.dosage && v.sku) {
         // We shouldn't guess, but we need a valid ID. Ideally the DB would be updated.

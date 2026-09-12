@@ -1,5 +1,6 @@
 'use client';
 import orderRepository from '../../../repositories/orderRepository';
+import * as quotationRepository from '../../../repositories/quotationRepository';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
@@ -367,6 +368,52 @@ export default function UniversalOrderBuilder({
             toast.success(`Prescription submitted for ${selectedTarget.name}${poId ? ' · Supplier PO created' : ''}`);
           }
         }
+      } else if (mode === 'quotation') {
+        const year = new Date().getFullYear();
+        const randSeq = Math.floor(1000 + Math.random() * 9000);
+        const quotationNumber = `QUO-${year}-${randSeq}`;
+        const clientCleanName = (selectedTarget.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+        const publicToken = `quote_${clientCleanName}_${Date.now().toString(36)}`;
+
+        const quoteDoc = {
+          quotationNumber,
+          publicToken,
+          token: publicToken,
+          category: selectedTarget.type || (sourceModule === 'wholesaler' ? 'wholesaler' : 'patient'),
+          recipientType: selectedTarget.type || 'patient',
+          patientId: selectedTarget.id || null,
+          clientId: selectedTarget.id || null,
+          patientName: selectedTarget.name || '',
+          clientName: selectedTarget.name || '',
+          patientEmail: selectedTarget.email || '',
+          patientPhone: selectedTarget.phone || '',
+          doctorId: resolvedInitialDoctor?.id || null,
+          doctorName: resolvedInitialDoctor?.name || '',
+          items: draftItems.map(item => ({
+            productId: item.productId,
+            variantId: item.variantId || null,
+            name: item.productName || item.name || '',
+            dosage: item.dosage || '',
+            quantity: item.quantity || 1,
+            unitPrice: getItemResolvedPrice(item, pricingTier),
+            unitRate: getItemResolvedPrice(item, pricingTier),
+            supplierId: item.supplierId || null,
+            supplierName: item.supplierName || null,
+            supplierCost: item.supplierCost || null,
+            isKit: item.isKit || item.quantity >= 10,
+          })),
+          subtotal: totals.subtotal || 0,
+          grandTotal: totals.total || 0,
+          totalAmount: totals.total || 0,
+          status: status === 'draft' ? 'draft' : 'pending',
+          currency: 'USD',
+          validUntil: new Date(Date.now() + 30 * 86400000).toISOString(),
+          createdAt: new Date().toISOString(),
+          createdBy: currentUser?.uid || 'admin'
+        };
+
+        const qId = await quotationRepository.createQuotation(quoteDoc);
+        toast.success(`Cotización ${quotationNumber} creada para ${selectedTarget.name}!`);
       } else {
         const orderDoc = {
           userId:    selectedTarget.id,

@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import WorkflowDetailWorkspace from './components/WorkflowDetailWorkspace';
 import { Clock, CheckCircle2, AlertCircle, FileText, Pill, Truck, DollarSign, Search, Inbox, Inbox as ArchiveIcon, Trash2, UserPlus, FileUp, Filter, Zap } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
+import DataTable from '../../components/ui/DataTable';
 
 const sidebarViews = [
   { id: 'inbox', label: 'Inbox', icon: Inbox },
@@ -388,69 +389,64 @@ export default function OperationsInboxHub() {
               )}
             </div>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', background: '#fff' }}>
-              <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 10, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-                <tr>
-                  <th style={{ padding: '12px 16px', width: '40px' }}>
-                    <input type="checkbox" checked={selectedRows.length === filteredQueue.length && filteredQueue.length > 0} onChange={toggleAll} />
-                  </th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Status</th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Intent</th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Outcome</th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Linked Record</th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Sender</th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Owner</th>
-                  <th style={{ padding: '12px 16px', fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredQueue.map((item, index) => (
-                  <tr 
-                    key={item.id} 
-                    style={{ 
-                      borderBottom: '1px solid #e2e8f0', 
-                      background: selectedRows.includes(item.id) ? '#f0f9ff' : (index === focusedIndex ? '#f1f5f9' : '#fff'),
-                      cursor: 'pointer',
-                      transition: 'background 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      setFocusedIndex(index);
-                      if (!selectedRows.includes(item.id)) e.currentTarget.style.background = '#f8fafc';
-                    }}
-                    onMouseLeave={(e) => !selectedRows.includes(item.id) && index !== focusedIndex && (e.currentTarget.style.background = '#fff')}
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    <td style={{ padding: '16px 24px' }} onClick={(e) => e.stopPropagation()}>
-                      <input type="checkbox" checked={selectedRows.includes(item.id)} onChange={() => toggleRow(item.id)} />
-                    </td>
-                    <td style={{ padding: '16px' }}>{getStatusChip(item.status)}</td>
-                    <td style={{ padding: '16px', fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>{item.detectedIntent}</td>
-                    <td style={{ padding: '16px', fontSize: '13px', color: '#64748b' }}>{item.outcome}</td>
-                    <td style={{ padding: '16px', fontSize: '13px', fontWeight: 700, color: '#0ea5e9' }} onClick={(e) => {
-                      e.stopPropagation();
-                      if(item.linkedRecord) {
-                        console.log('Navigating to', item.linkedRecord);
-                      }
-                    }}>
-                      {item.linkedRecord ? <span style={{ textDecoration: 'underline' }}>{item.linkedRecord}</span> : '—'}
-                    </td>
-                    <td style={{ padding: '16px', fontSize: '13px', color: '#0f172a' }} onClick={() => setSelectedItem(item)}>
-                      <div style={{ fontWeight: 600 }}>{item.senderName}</div>
+            <DataTable
+              columns={[
+                {
+                  key: 'status',
+                  header: 'Status',
+                  width: '12%',
+                  render: (item) => getStatusChip(item.status),
+                },
+                {
+                  key: 'detectedIntent',
+                  header: 'Intent',
+                  width: '18%',
+                  render: (item) => <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.detectedIntent}</span>,
+                },
+                {
+                  key: 'outcome',
+                  header: 'Outcome',
+                  width: '20%',
+                  render: (item) => <span style={{ color: '#64748b' }}>{item.outcome}</span>,
+                },
+                {
+                  key: 'linkedRecord',
+                  header: 'Linked Record',
+                  width: '14%',
+                  render: (item) => item.linkedRecord ? <span style={{ fontWeight: 700, color: '#0ea5e9', textDecoration: 'underline' }}>{item.linkedRecord}</span> : '—',
+                },
+                {
+                  key: 'sender',
+                  header: 'Sender',
+                  width: '18%',
+                  render: (item) => (
+                    <div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.senderName}</div>
                       <div style={{ color: '#64748b', fontSize: '12px' }}>{item.senderEmail}</div>
-                    </td>
-                    <td style={{ padding: '16px', fontSize: '13px', color: '#64748b' }} onClick={() => setSelectedItem(item)}>{item.owner}</td>
-                    <td style={{ padding: '16px', fontSize: '13px', color: '#64748b' }} onClick={() => setSelectedItem(item)}>{item.date}</td>
-                  </tr>
-                ))}
-                {filteredQueue.length === 0 && (
-                  <tr>
-                    <td colSpan="8" style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
-                      No items in this view.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </div>
+                  ),
+                },
+                {
+                  key: 'owner',
+                  header: 'Owner',
+                  width: '10%',
+                  render: (item) => <span style={{ color: '#64748b' }}>{item.owner}</span>,
+                },
+                {
+                  key: 'date',
+                  header: 'Date',
+                  width: '8%',
+                  render: (item) => <span style={{ color: '#64748b' }}>{item.date}</span>,
+                },
+              ]}
+              data={filteredQueue}
+              selectedIds={selectedRows}
+              onSelectionChange={setSelectedRows}
+              onRowClick={(item) => setSelectedItem(item)}
+              emptyTitle="No items in this view"
+              emptyDescription="There are no items matching this operations filter."
+              showStatusFooter={false}
+            />
           )}
         </div>
       </div>

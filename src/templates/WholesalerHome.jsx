@@ -1032,35 +1032,6 @@ export function WholesalerRxInboxTab({ uid }) {
   );
 }
 
-// ── Mobile not supported ───────────────────────────────────────────────────────
-function MobileNotSupported() {
-  return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0f172a, #1e1b4b)',
-      padding: '2rem', textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💻</div>
-      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--color-bg-surface)', marginBottom: '0.75rem' }}>
-        B2B Wholesaler Portal
-      </div>
-      <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.65)', maxWidth: 320, lineHeight: 1.65, marginBottom: '2rem' }}>
-        The B2B portal is optimized for <strong style={{ color: 'var(--color-bg-surface)' }}>laptop or desktop</strong>.
-        Please access from a computer to manage prescriptions and bulk orders.
-      </div>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.6rem',
-        padding: '0.75rem 1.25rem', borderRadius: '12px',
-        background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
-        fontSize: '0.82rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)',
-      }}>
-        <Laptop size={16} /> Access from your computer
-      </div>
-    </div>
-  );
-}
-
 // ── Placeholder tab ────────────────────────────────────────────────────────────
 export function PlaceholderTab({ title, description }) {
   return (
@@ -1094,7 +1065,7 @@ export default function WholesalerHome({ children }) {
       roleContext="wholesaler"
       pageContext={{ activeTab }}
     >
-      <div style={{ padding: '1.25rem', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)', width: '100%', maxWidth: '1400px', margin: '0 auto' }}>
         {children}
       </div>
     </PanelShell>

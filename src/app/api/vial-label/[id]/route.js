@@ -3,8 +3,8 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import QRCode from 'qrcode';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://regenpept.com';
-const BRAND_NAME = 'RegenPept';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BRAND_NAME = 'Med-Peptides';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488
 const DARK_GRAY   = rgb(0.12, 0.15, 0.18);

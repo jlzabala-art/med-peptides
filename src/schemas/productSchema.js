@@ -44,6 +44,7 @@ export const PRODUCT_TYPE = Object.freeze({
 });
 
 export const PRODUCT_STATUS = Object.freeze({
+  PUBLISHED:     'published',
   ACTIVE:        'active',
   DRAFT:         'draft',
   OUT_OF_STOCK:  'out of stock',

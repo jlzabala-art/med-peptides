@@ -76,7 +76,7 @@ export async function fetchProductsMetricsAction() {
     const col = adminDb.collection('products');
     const [totalSnap, activeSnap, draftSnap, outOfStockSnap] = await Promise.all([
       col.count().get(),
-      col.where('status', '==', 'active').count().get(),
+      col.where('status', 'in', ['active', 'published']).count().get(),
       col.where('status', '==', 'draft').count().get(),
       col.where('stock', '<=', 0).count().get()
     ]);

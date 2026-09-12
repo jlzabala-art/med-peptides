@@ -19,6 +19,7 @@ import {
   Layers,
   ShoppingBag
 } from '@/lib/icons';
+import { triggerHaptic } from '@/utils/haptics';
 
 const ROLE_BOTTOM_ITEMS = {
   admin: [
@@ -29,18 +30,32 @@ const ROLE_BOTTOM_ITEMS = {
     { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   doctor: [
-    { id: 'home', label: 'Hub', path: '/admin', icon: Home },
+    { id: 'home', label: 'Home', path: '/doctor', icon: Home },
     { id: 'patients', label: 'Patients', path: '/doctor/patients', icon: Users },
     { id: 'prescriptions', label: 'Prescriptions', path: '/admin/prescriptions', icon: FileText },
     { id: 'orders', label: 'Orders', path: '/doctor/orders', icon: Package },
     { id: 'ai', label: 'Clinical AI', action: 'open_ai', icon: Sparkles, isAi: true },
   ],
   medical_director: [
-    { id: 'home', label: 'Hub', path: '/admin', icon: Home },
+    { id: 'home', label: 'Home', path: '/doctor', icon: Home },
     { id: 'patients', label: 'Patients', path: '/doctor/patients', icon: Users },
     { id: 'prescriptions', label: 'Prescriptions', path: '/admin/prescriptions', icon: FileText },
     { id: 'orders', label: 'Orders', path: '/doctor/orders', icon: Package },
     { id: 'ai', label: 'Clinical AI', action: 'open_ai', icon: Sparkles, isAi: true },
+  ],
+  clinic: [
+    { id: 'home', label: 'Clinic Hub', path: '/clinic', icon: Home },
+    { id: 'patients', label: 'Patients', path: '/clinic', icon: Users },
+    { id: 'orders', label: 'Orders', path: '/doctor/orders', icon: Package },
+    { id: 'ai', label: 'Clinic AI', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
+  ],
+  pharmacy: [
+    { id: 'home', label: 'Pharmacy', path: '/pharmacy', icon: Home },
+    { id: 'dispense', label: 'Dispense', path: '/pharmacy', icon: Pill },
+    { id: 'orders', label: 'Orders', path: '/pharmacy', icon: Package },
+    { id: 'ai', label: 'Rx Copilot', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   patient: [
     { id: 'home', label: 'Home', path: '/patient', icon: Home },
@@ -57,15 +72,15 @@ const ROLE_BOTTOM_ITEMS = {
     { id: 'menu', label: 'Account', action: 'open_sidebar', icon: Menu },
   ],
   supplier: [
-    { id: 'home', label: 'Supply Hub', path: '/wholesaler', icon: Home },
-    { id: 'catalog', label: 'API Catalog', path: '/admin/catalog', icon: Layers },
+    { id: 'home', label: 'Supply Hub', path: '/supplier', icon: Home },
+    { id: 'catalog', label: 'API Catalog', path: '/supplier/catalog', icon: Layers },
     { id: 'orders', label: 'Purchase Orders', path: '/supplier/orders', icon: Package },
     { id: 'ai', label: 'Supply AI', action: 'open_ai', icon: Sparkles, isAi: true },
     { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   guest: [
     { id: 'home', label: 'Home', path: '/', icon: Home },
-    { id: 'catalog', label: 'Catalog', path: '/admin/catalog', icon: BookOpen },
+    { id: 'catalog', label: 'Catalog', path: '/catalog', icon: BookOpen },
     { id: 'ai', label: 'Atlas AI', action: 'open_ai', icon: Sparkles, isAi: true },
     { id: 'login', label: 'Sign In', path: '/login', icon: User },
   ]
@@ -81,16 +96,21 @@ export default function MobileBottomNav({ onOpenSidebar, onOpenAi }) {
   const items = ROLE_BOTTOM_ITEMS[normalizedRole] || ROLE_BOTTOM_ITEMS[effectiveRole] || ROLE_BOTTOM_ITEMS.guest;
 
   const handleAction = (item, e) => {
+    triggerHaptic('selection');
     if (item.action === 'open_sidebar') {
       e.preventDefault();
       if (onOpenSidebar) onOpenSidebar();
     } else if (item.action === 'open_ai') {
       e.preventDefault();
-      if (onOpenAi) {
-        onOpenAi();
-      } else {
-        window.dispatchEvent(new CustomEvent('open-clinical-ai'));
-      }
+      const isDoc = normalizedRole === 'doctor' || effectiveRole === 'doctor' || effectiveRole === 'medical_director';
+      const eventDetail = isDoc ? {
+        mode: 'doctor',
+        role: effectiveRole,
+        contextLabel: 'Doctor Clinical Copilot',
+      } : undefined;
+
+      window.dispatchEvent(new CustomEvent('open-clinical-ai', { detail: eventDetail }));
+      if (onOpenAi) onOpenAi(eventDetail);
     }
   };
 
@@ -195,6 +215,7 @@ export default function MobileBottomNav({ onOpenSidebar, onOpenAi }) {
             <Link
               key={item.id}
               href={item.path}
+              onClick={() => triggerHaptic('tap')}
               className={`mobile-bottom-nav-item ${isActive ? 'active' : ''}`}
               aria-label={item.label}
             >

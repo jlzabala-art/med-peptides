@@ -7,7 +7,7 @@ import PublicProtocolPage from './PublicProtocolPage';
 export const revalidate = 3600; // ⚡ Multi-Tier ISR (1 hour Edge Cache)
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://regenpept.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
 async function getPublicProtocol(slug) {
   if (!adminDb || !slug) return null;

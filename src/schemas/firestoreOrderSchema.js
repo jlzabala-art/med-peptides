@@ -75,6 +75,9 @@ export const VALID_ORDER_ROLES = Object.freeze([
   'wholesaler',
   'supplier',
   'admin',
+  'medical_director',
+  'pharmacy',
+  'compounding_pharmacy',
 ]);
 
 // ── Order Line Item Contract ───────────────────────────────────────────────────

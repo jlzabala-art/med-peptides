@@ -1,9 +1,24 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
+const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp'
+]);
+
 export async function POST(request) {
+  const rateInfo = checkRateLimit(request, { limit: 15, windowMs: 60 * 1000, tier: 'extract-prescription' });
+  if (!rateInfo.allowed) {
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     if (!apiKey) {
       return NextResponse.json(
@@ -20,9 +35,23 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: 'File exceeds maximum allowed size of 15MB' },
+        { status: 413 }
+      );
+    }
+
+    const mimeType = file.type || (file.name?.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Supported formats: PDF, JPEG, PNG, WEBP.' },
+        { status: 415 }
+      );
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
 
     // JSON Schema for structured multimodal Gemini response
     const schema = {
@@ -219,7 +248,7 @@ CRITICAL PARSING RULES:
     parsedData._fileSize = file.size;
     parsedData._mimeType = mimeType;
 
-    return NextResponse.json(parsedData);
+    return applyRateLimitHeaders(NextResponse.json(parsedData), rateInfo);
   } catch (error) {
     console.error('[ai-extract-prescription] Extraction error:', error);
     return NextResponse.json(

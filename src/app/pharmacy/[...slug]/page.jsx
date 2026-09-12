@@ -11,6 +11,7 @@ export default function DynamicRoute({ params }) {
   
   
   const router = useRouter();
+  const defaultTab = slug[0] || 'prescriptions';
   
 
   return (

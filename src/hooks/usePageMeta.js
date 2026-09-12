@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 
 const BASE_TITLE = 'Atlas Health';
-const BASE_URL = 'https://regenpept.com';
-const DEFAULT_IMAGE = 'https://regenpept.com/og-premium.png';
+const BASE_URL = 'https://med-peptides.com';
+const DEFAULT_IMAGE = 'https://med-peptides.com/og-premium.png';
 
 export const useSEOStore = create((set) => ({
   meta: {

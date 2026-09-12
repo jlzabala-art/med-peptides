@@ -8,8 +8,10 @@ import MapPin from "lucide-react/dist/esm/icons/map-pin";
 import Mail from "lucide-react/dist/esm/icons/mail";
 import Plus from "lucide-react/dist/esm/icons/plus";
 import Archive from "lucide-react/dist/esm/icons/archive";
+import Download from "lucide-react/dist/esm/icons/download";
 import React, { useState, useEffect, useMemo } from 'react';
 import { StatusBadge, CopyableId, QuoteQuickActionDropdown, MetricCard, KpiScopeBar } from '../ui';
+import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
 import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
 import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 import ClinicProfileWorkspace from './clinics/ClinicProfileWorkspace';
@@ -217,7 +219,42 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
     }
   ];
 
+  const handleExportClinics = async (targetList) => {
+    const listToExport = targetList || filtered;
+    if (!listToExport || listToExport.length === 0) {
+      toast.success('Starting direct database export stream for clinics...');
+      try {
+        await triggerServerExport({ entity: 'clinics', format: 'csv' });
+        toast.success('Clinics export completed.');
+      } catch (err) {
+        toast.error('Failed to export clinics: ' + err.message);
+      }
+      return;
+    }
+    const columns = [
+      { key: 'id', header: 'ID' },
+      { key: 'name', header: 'Clinic Name' },
+      { key: 'territory', header: 'Territory' },
+      { key: 'tier', header: 'Tier' },
+      { key: 'status', header: 'Status' },
+      { key: 'manager', header: 'Account Manager' },
+      { key: 'phone', header: 'Phone' },
+      { key: 'email', header: 'Email' },
+      { key: 'address', header: 'Address' },
+    ];
+    exportToCSV(listToExport, columns, `clinics_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    toast.success(`Exported ${listToExport.length} clinics to CSV.`);
+  };
+
   const bulkActions = [
+    {
+      label: 'Export CSV',
+      icon: Download,
+      onClick: () => {
+        const selectedClinics = clinics.filter(c => selectedIds.includes(c.id));
+        handleExportClinics(selectedClinics);
+      }
+    },
     {
       label: 'Assign Territory',
       icon: MapPin,
@@ -279,6 +316,14 @@ export default function AdminClinicsTab({ isSubTab = false, initialData = null, 
           subtitle="Manage physical clinic locations, organizational structures, territories, and commercial insights."
           actions={
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button
+                className="btn btn-outline"
+                onClick={() => handleExportClinics()}
+                title="Export clinics database to CSV"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+              >
+                <Download size={15} /> Export
+              </button>
               <AIQuickActionButton
                 label="AI Forecast Demand"
                 onClick={() => {

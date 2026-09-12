@@ -248,7 +248,7 @@ export default function MobileProductCard({
               onClick={(e) => {
                 e.stopPropagation();
                 triggerHaptic('tap');
-                const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com'}/p/${row.slug || row.id}`;
+                const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com'}/p/${row.slug || row.id}`;
                 const text = `${name} — Clinical Information\n${publicUrl}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
               }}

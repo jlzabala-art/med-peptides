@@ -26,7 +26,7 @@ export const OrderSchema = z.object({
   productionStatus: z.enum(['pending', 'production', 'done', 'canceled']).default('pending'),
   supplierShippingCost: z.number().nonnegative().optional(),
   supplierItemsCost: z.number().nonnegative().optional(),
-  role: z.enum(['patient', 'doctor', 'clinic', 'wholesaler', 'supplier', 'admin']).default('patient'),
+  role: z.enum(['patient', 'doctor', 'clinic', 'wholesaler', 'supplier', 'admin', 'medical_director', 'pharmacy', 'compounding_pharmacy']).default('patient'),
   status: z.enum(['draft', 'awaiting payment', 'processing', 'en tránsito', 'delivered', 'disputed', 'cancelled']).default('awaiting payment'),
   currency: z.string().default('USD'),
   subtotal: z.number().nonnegative(),

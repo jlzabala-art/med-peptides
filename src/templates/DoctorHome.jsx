@@ -45,7 +45,7 @@ import PanelShell from '../components/shell/PanelShell';
 import AdminTabErrorBoundary from '../components/admin/AdminTabErrorBoundary';
 import dynamic from 'next/dynamic';
 
-const DoctorPatientsTab = dynamic(() => import('../components/admin/DoctorPatientsTab'), { ssr: false });
+const DoctorPatientsTab = dynamic(() => import('../components/doctor/DoctorPatientsTab'), { ssr: false });
 const UniversalProtocolsTable = dynamic(() => import('../components/shared/UniversalProtocolsTable'), { ssr: false });
 const MessagingWidget = dynamic(() => import('../components/messaging/MessagingWidget'), { ssr: false });
 const ClinicalAIWidget = dynamic(() => import('../components/admin/ClinicalAIWidget'), { ssr: false });
@@ -224,10 +224,12 @@ export default function DoctorHome() {
     async function fetchAll() {
       if (!doctorId) return;
       try {
+        const isMedDirector = userProfile?.role === 'medical_director' || userProfile?.role === 'admin';
         // Patients
-        const patSnap = await getDocs(
-          query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', doctorId), where('status', '==', 'active'))
-        );
+        const patQuery = isMedDirector
+          ? query(collection(db, 'doctor_patient_relationships'), where('status', '==', 'active'))
+          : query(collection(db, 'doctor_patient_relationships'), where('doctorId', '==', doctorId), where('status', '==', 'active'));
+        const patSnap = await getDocs(patQuery);
         // Protocols
         let protosSnap = null;
         try {
@@ -448,7 +450,7 @@ export default function DoctorHome() {
 
   return (
     <PanelShell 
-      allowedRoles={['doctor', 'admin']}
+      allowedRoles={['doctor', 'medical_director', 'admin']}
       sidebarNavGroups={DOCTOR_NAV_GROUPS}
       activeNavId={activeTab}
       onNavigate={(id) => setActiveTab(id)}
@@ -456,7 +458,7 @@ export default function DoctorHome() {
       roleContext="doctor"
       pageContext={{ activeTab }}
     >
-      <div style={{ padding: '2rem' }}>
+      <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           {renderTab()}
         </AdminTabErrorBoundary>

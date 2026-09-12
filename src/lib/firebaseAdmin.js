@@ -1,5 +1,6 @@
 import { getApps, initializeApp, cert, applicationDefault } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import * as admin from 'firebase-admin';
 
 function initializeFirebaseAdmin() {
@@ -41,6 +42,7 @@ function initializeFirebaseAdmin() {
 
 const adminApp = initializeFirebaseAdmin();
 const dbAdmin = adminApp ? getFirestore(adminApp) : null;
+const adminAuth = adminApp ? getAuth(adminApp) : null;
 
-export { admin, dbAdmin, dbAdmin as adminDb };
+export { admin, dbAdmin, dbAdmin as adminDb, adminAuth };
 

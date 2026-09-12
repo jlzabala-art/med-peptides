@@ -19,7 +19,7 @@
  *   configService.clearCache()           → void  (force re-fetch)
  */
 
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, query, limit } from 'firebase/firestore';
 import { db } from '../firebase.js';
 
 // ─── Cache helpers ────────────────────────────────────────────────────────────
@@ -69,12 +69,12 @@ async function cachedFetch(key, fetcher) {
 export const configService = {
 
   /**
-   * Returns all active blueprints from the `protocols` collection.
+   * Returns active blueprints from the `protocols` collection (bounded Rule #1).
    * Filters for `active: true` client-side to avoid requiring a composite index.
    */
-  async getBlueprints() {
-    return cachedFetch('protocols', async () => {
-      const snapshot = await getDocs(collection(db, 'protocols'));
+  async getBlueprints(maxCount = 100) {
+    return cachedFetch(`protocols_${maxCount}`, async () => {
+      const snapshot = await getDocs(query(collection(db, 'protocols'), limit(maxCount)));
       const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       return all.filter(b => b.active !== false);
     });

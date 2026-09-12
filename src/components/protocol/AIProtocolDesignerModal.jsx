@@ -15,6 +15,8 @@ import {
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 
+import AIContextBadge from '@/components/ui/AIContextBadge';
+
 /**
  * AIProtocolDesignerModal
  * ─────────────────────────────────────────────────────────────────────────────
@@ -24,7 +26,8 @@ import notifier from '@/services/NotificationService';
 export default function AIProtocolDesignerModal({
   isOpen,
   onClose,
-  onApplyProtocol
+  onApplyProtocol,
+  patient = null
 }) {
   const [goal, setGoal] = useState('');
   const [durationWeeks, setDurationWeeks] = useState(8);
@@ -33,6 +36,10 @@ export default function AIProtocolDesignerModal({
   const [designedProtocol, setDesignedProtocol] = useState(null);
 
   if (!isOpen) return null;
+
+  const contextLabel = patient?.name 
+    ? `Patient: ${patient.name} • ${durationWeeks}w Target (${experienceLevel})`
+    : `Protocol Scope: ${experienceLevel} • ${durationWeeks} Weeks Target Cycle`;
 
   const handleGenerate = async () => {
     if (!goal.trim()) {
@@ -48,7 +55,12 @@ export default function AIProtocolDesignerModal({
         body: JSON.stringify({
           targetGoal: goal,
           durationWeeks: Number(durationWeeks),
-          experienceLevel
+          experienceLevel,
+          patientContext: patient ? {
+            name: patient.name || patient.displayName,
+            age: patient.age || null,
+            allergies: patient.allergies || null
+          } : null
         })
       });
 
@@ -83,7 +95,7 @@ export default function AIProtocolDesignerModal({
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999,
-      padding: '1.5rem'
+      padding: 'clamp(0.5rem, 3vw, 1.5rem)'
     }}>
       <div style={{
         backgroundColor: '#ffffff',
@@ -99,35 +111,21 @@ export default function AIProtocolDesignerModal({
       }}>
         {/* Header */}
         <div style={{
-          padding: '1.25rem 1.75rem',
+          padding: '1.25rem clamp(1rem, 2.5vw, 1.5rem)',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: '#f8fafc'
+          alignItems: 'flex-start',
+          backgroundColor: '#f8fafc',
+          gap: '1rem'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(0, 163, 224, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--primary)'
-            }}>
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                AI Multi-Phase Protocol Architect
-              </h3>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                Evidence-based peptide stacking, phase titration & PK supply engine
-              </p>
-            </div>
-          </div>
+          <AIContextBadge
+            title="Multi-Phase Protocol Architect"
+            subtitle="Evidence-based peptide stacking, phase titration & PK supply engine"
+            contextPill={contextLabel}
+            accentColor="#003666"
+            model="Gemini 2.5 Flash"
+          />
           <button
             onClick={onClose}
             style={{
@@ -135,9 +133,16 @@ export default function AIProtocolDesignerModal({
               border: 'none',
               cursor: 'pointer',
               color: '#64748b',
-              padding: '6px',
-              borderRadius: '50%'
+              padding: '8px',
+              borderRadius: '8px',
+              minWidth: '40px',
+              minHeight: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
             }}
+            aria-label="Close"
           >
             <X size={20} />
           </button>
@@ -216,22 +221,24 @@ export default function AIProtocolDesignerModal({
                 onClick={handleGenerate}
                 disabled={isLoading || !goal.trim()}
                 style={{
-                  backgroundColor: 'var(--primary)',
+                  backgroundColor: 'var(--primary, #003666)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '0.6rem 1.4rem',
-                  fontSize: '0.85rem',
+                  minHeight: '44px',
+                  padding: '0.65rem 1.4rem',
+                  fontSize: '0.86rem',
                   fontWeight: 700,
                   cursor: isLoading || !goal.trim() ? 'not-allowed' : 'pointer',
                   opacity: isLoading || !goal.trim() ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem'
+                  gap: '0.4rem',
+                  boxShadow: '0 2px 6px rgba(0, 54, 102, 0.2)'
                 }}
               >
                 <Sparkles size={16} />
-                {isLoading ? 'Designing...' : 'Design Protocol'}
+                {isLoading ? 'Designing with Gemini...' : 'Design Protocol'}
               </button>
             </div>
           </div>
@@ -340,23 +347,26 @@ export default function AIProtocolDesignerModal({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer Actions */}
         <div style={{
-          padding: '1rem 1.75rem',
+          padding: '1rem clamp(1rem, 2.5vw, 1.5rem)',
           borderTop: '1px solid #e2e8f0',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
-          backgroundColor: '#f8fafc'
+          gap: '0.75rem',
+          backgroundColor: '#f8fafc',
+          flexWrap: 'wrap'
         }}>
           <button
             onClick={onClose}
             style={{
-              background: 'none',
+              background: '#ffffff',
               border: '1px solid #cbd5e1',
-              padding: '0.6rem 1.2rem',
+              minHeight: '44px',
+              padding: '0.6rem 1.25rem',
               borderRadius: '8px',
-              fontSize: '0.85rem',
+              fontSize: '0.86rem',
               fontWeight: 600,
               cursor: 'pointer',
               color: '#475569'
@@ -368,18 +378,20 @@ export default function AIProtocolDesignerModal({
             onClick={handleApply}
             disabled={!designedProtocol}
             style={{
-              backgroundColor: 'var(--primary)',
+              backgroundColor: 'var(--primary, #003666)',
               color: '#ffffff',
               border: 'none',
-              padding: '0.6rem 1.4rem',
+              minHeight: '44px',
+              padding: '0.65rem 1.4rem',
               borderRadius: '8px',
-              fontSize: '0.85rem',
+              fontSize: '0.86rem',
               fontWeight: 700,
               cursor: designedProtocol ? 'pointer' : 'not-allowed',
               opacity: designedProtocol ? 1 : 0.5,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem'
+              gap: '0.4rem',
+              boxShadow: '0 2px 6px rgba(0, 54, 102, 0.2)'
             }}
           >
             <CheckCircle size={16} /> Transfer to Workspace & Protocol Engine

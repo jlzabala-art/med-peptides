@@ -37,6 +37,19 @@ export default function UniversalShareDrawer({
 }) {
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [messageLang, setMessageLang] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('share_message_lang') || 'es';
+    }
+    return 'es';
+  });
+
+  const handleLanguageChange = (lang) => {
+    setMessageLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('share_message_lang', lang);
+    }
+  };
 
   // Recipient selection state
   const [targetType, setTargetType] = useState('doctor');
@@ -178,14 +191,30 @@ export default function UniversalShareDrawer({
 
   const composeMessageText = (effectiveUrl = shareUrl) => {
     if (customMessageTemplate) {
-      return customMessageTemplate({ targetName, targetType, shareUrl: effectiveUrl, itemName, itemCount, accountManagerEmail });
+      return customMessageTemplate({ targetName, targetType, shareUrl: effectiveUrl, itemName, itemCount, accountManagerEmail, lang: messageLang });
     }
 
-    const greeting = targetName ? `Dear ${targetName},\n\n` : '';
-    const desc = itemName ? `"${itemName}"` : `official ${docType.toUpperCase()}`;
-    const countInfo = itemCount ? ` (${itemCount} items)` : '';
+    const isEs = messageLang === 'es';
+    const greeting = targetName
+      ? (isEs ? `Estimado/a ${targetName},\n\n` : `Dear ${targetName},\n\n`)
+      : '';
+    const desc = itemName ? `"${itemName}"` : (isEs ? `documento oficial ${docType.toUpperCase()}` : `official ${docType.toUpperCase()}`);
+    const countInfo = itemCount ? (isEs ? ` (${itemCount} artículos)` : ` (${itemCount} items)`) : '';
 
     let roleIntro = '';
+    if (isEs) {
+      if (targetType === 'wholeseller') {
+        roleIntro = `Adjuntamos las condiciones comerciales mayoristas y documentación solicitada para ${desc}${countInfo}:`;
+      } else if (targetType === 'patient') {
+        roleIntro = `Aquí tiene su plan clínico y documentación para ${desc}:`;
+      } else if (targetType === 'account_manager') {
+        roleIntro = `Traspaso interno para seguimiento de cuenta sobre ${desc}${countInfo}:`;
+      } else {
+        roleIntro = `Adjuntamos el documento ${desc}${countInfo} de ATLAS SOLUTIONS en el siguiente enlace seguro:`;
+      }
+      return `${greeting}${roleIntro}\n\n🔗 ${effectiveUrl}\n\nPara cualquier consulta o pedido, responda directamente o contacte con: ${accountManagerEmail}`;
+    }
+
     if (targetType === 'wholeseller') {
       roleIntro = `Please find your requested wholesale commercial terms and documentation for ${desc}${countInfo}:`;
     } else if (targetType === 'patient') {
@@ -392,6 +421,58 @@ export default function UniversalShareDrawer({
                 }}
               />
             </div>
+          </div>
+        </div>
+
+        {/* Language Selector for Share Message */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: 8,
+          padding: '8px 12px',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+        }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
+            🌐 {messageLang === 'es' ? 'Idioma del Mensaje' : 'Message Language'}
+          </span>
+          <div style={{ display: 'flex', gap: 4, background: '#f1f5f9', padding: '3px', borderRadius: 6 }}>
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('es')}
+              style={{
+                padding: '3px 10px',
+                fontSize: '0.75rem',
+                fontWeight: messageLang === 'es' ? 700 : 500,
+                borderRadius: 4,
+                border: 'none',
+                background: messageLang === 'es' ? '#003666' : 'transparent',
+                color: messageLang === 'es' ? '#ffffff' : '#64748b',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🇪🇸 Español
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('en')}
+              style={{
+                padding: '3px 10px',
+                fontSize: '0.75rem',
+                fontWeight: messageLang === 'en' ? 700 : 500,
+                borderRadius: 4,
+                border: 'none',
+                background: messageLang === 'en' ? '#003666' : 'transparent',
+                color: messageLang === 'en' ? '#ffffff' : '#64748b',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🇬🇧 English
+            </button>
           </div>
         </div>
 

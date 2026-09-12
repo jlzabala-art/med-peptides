@@ -1,31 +1,42 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/apiValidator';
+import { logger } from '@/utils/logger';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+const RATE_LIMIT_OPTIONS = { limit: 15, windowMs: 60 * 1000, tier: 'ai-design-protocol' };
 
 export async function POST(request) {
+  const rateInfo = checkRateLimit(request, RATE_LIMIT_OPTIONS);
+  if (!rateInfo.allowed) {
+    logger.warn('[AI Design Protocol] Rate limit exceeded', { tier: 'ai-design-protocol', retryAfter: rateInfo.retryAfter });
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     if (!apiKey) {
+      logger.error('[AI Design Protocol] Missing GEMINI_API_KEY');
       return NextResponse.json(
         { error: 'GEMINI_API_KEY is not configured on the server environment.' },
         { status: 500 }
       );
     }
 
-    const { 
-      targetGoal, 
-      durationWeeks = 8, 
-      patientType = 'General Clinical', 
-      experienceLevel = 'Intermediate',
-      budgetTier = 'standard'
-    } = await request.json();
+    const body = await request.json();
+    const targetGoal = sanitizeText(body?.targetGoal, 500);
+    const durationWeeks = Math.min(Math.max(Number(body?.durationWeeks) || 8, 4), 52);
+    const patientType = sanitizeText(body?.patientType || 'General Clinical', 100);
+    const experienceLevel = sanitizeText(body?.experienceLevel || 'Intermediate', 50);
+    const budgetTier = sanitizeText(body?.budgetTier || 'standard', 50);
 
-    if (!targetGoal || typeof targetGoal !== 'string' || targetGoal.trim().length === 0) {
+    if (!targetGoal || targetGoal.trim().length === 0) {
       return NextResponse.json(
         { error: 'Target health goal or therapeutic outcome is required.' },
         { status: 400 }
       );
     }
+    logger.info('[AI Design Protocol] Processing request', { targetGoal: targetGoal.slice(0, 60), durationWeeks });
 
     const ai = new GoogleGenAI({ apiKey });
 
@@ -132,12 +143,10 @@ Architecture Rules:
     }
 
     const designedProtocol = JSON.parse(text);
-    return NextResponse.json({
-      success: true,
-      data: designedProtocol
-    });
+    const jsonResponse = NextResponse.json({ success: true, data: designedProtocol });
+    return applyRateLimitHeaders(jsonResponse, rateInfo);
   } catch (error) {
-    console.error('[AI Design Protocol] Error:', error);
+    logger.error('[AI Design Protocol] Unhandled error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to design protocol.' },
       { status: 500 }

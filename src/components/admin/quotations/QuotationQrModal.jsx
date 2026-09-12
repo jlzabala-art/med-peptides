@@ -9,7 +9,7 @@ export default function QuotationQrModal({ isOpen, onClose, quotation }) {
 
   if (!isOpen || !quotation) return null;
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
   const token = quotation.publicToken || quotation.id;
   const quoteUrl = `${origin}/quotation/${token}`;
   const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=10&data=${encodeURIComponent(quoteUrl)}`;

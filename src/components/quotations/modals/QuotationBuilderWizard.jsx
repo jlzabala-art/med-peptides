@@ -116,9 +116,10 @@ export default function QuotationBuilderWizard() {
       });
     }
 
-    // Open Global Rx / Order Builder Drawer
+    // Open Global Builder Drawer in quotation mode
     try {
       openDrawer('rx-builder', 'new', {
+        mode: 'quotation',
         sourceModule: wizardPayload?.source || 'quotations',
         initialPatient: wizardPayload?.patient || wizardPayload?.initialPatient || null,
         initialProtocol: wizardPayload?.protocol || wizardPayload?.initialProtocol || null,

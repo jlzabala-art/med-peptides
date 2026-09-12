@@ -107,12 +107,12 @@ export default function SupplierHome({ children }) {
       allowedRoles={['supplier', 'admin']}
       sidebarNavGroups={SUPPLIER_NAV_GROUPS}
       activeNavId={activeTab}
-      onNavigate={(id) => router.push(`/supplier/${id}`)}
+      onNavigate={(id) => router.push(id === 'dashboard' ? '/supplier' : `/supplier/${id}`)}
       portalTitle="Supplier Portal"
       roleContext="supplier"
       pageContext={{ activeTab }}
     >
-      <div style={{ padding: '2rem' }}>
+      <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <SupplierHomeContext.Provider value={{ userProfile }}>{children}</SupplierHomeContext.Provider>
         </AdminTabErrorBoundary>

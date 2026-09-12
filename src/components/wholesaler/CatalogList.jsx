@@ -19,7 +19,7 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { catalogRepository } from '../../repositories/catalogRepository';
 import notifier from '../../services/NotificationService';
 
@@ -41,13 +41,11 @@ import notifier from '../../services/NotificationService';
 
 
 
-import { getProtocolTemplates } from '../../repositories/protocolRepository';
-
-
-import ExpandableTableRow from '../common/ExpandableTableRow';
-import { FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock, ChevronDown, ChevronUp } from '@/lib/icons';
+import DataTable from '../ui/DataTable';
+import StatusBadge from '../ui/StatusBadge';
+import EmptyState from '../ui/EmptyState';
+import { FileText, Plus, Eye, Edit3, Copy, Trash2, ExternalLink, BarChart2, Users, FileDown, Search, ArrowLeft, Send, Check, X, Globe, Lock } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
-import StatusChip from '../ui/StatusChip';
 
 export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelectCatalogToEdit }) {
   const [catalogs, setCatalogs] = useState([]);
@@ -148,10 +146,175 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
     }
   };
 
-  const filteredCatalogs = catalogs.filter(c => 
-    c.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.slug?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCatalogs = useMemo(() => {
+    if (!searchQuery.trim()) return catalogs;
+    const q = searchQuery.toLowerCase();
+    return catalogs.filter(c => 
+      c.title?.toLowerCase().includes(q) || 
+      c.slug?.toLowerCase().includes(q)
+    );
+  }, [catalogs, searchQuery]);
+
+  const FORMAT_CONFIG = {
+    pdf:          { label: 'PDF',  bg: '#e0e7ff', color: '#4f46e5' },
+    excel:        { label: 'Excel', bg: '#fef3c7', color: '#d97706' },
+    landing_page: { label: 'Web',  bg: '#dcfce7', color: '#16a34a' },
+  };
+
+  // Columns for Leads Table
+  const leadColumns = useMemo(() => [
+    {
+      header: 'Name',
+      field: 'name',
+      width: '20%',
+      render: (row) => <span style={{ fontWeight: 600 }}>{row.name}</span>
+    },
+    {
+      header: 'Email',
+      field: 'email',
+      width: '20%',
+      render: (row) => <a href={`mailto:${row.email}`} style={linkStyle}>{row.email}</a>
+    },
+    {
+      header: 'Phone',
+      field: 'phone',
+      width: '15%',
+      render: (row) => row.phone || '—'
+    },
+    {
+      header: 'Notes / Request',
+      field: 'message',
+      width: '25%',
+      render: (row) => <span style={{ fontSize: '0.8rem', color: '#475569' }}>{row.message || '—'}</span>
+    },
+    {
+      header: 'Date',
+      field: 'createdAt',
+      width: '10%',
+      render: (row) => row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '—'
+    },
+    {
+      header: 'Status',
+      field: 'status',
+      width: '10%',
+      render: (row) => <StatusBadge status={row.status || 'active'} />
+    }
+  ], []);
+
+  // Columns for Catalogs Table
+  const catalogColumns = useMemo(() => [
+    {
+      header: 'Catalog / Route',
+      field: 'title',
+      width: '38%',
+      render: (catalog) => {
+        const publicUrl = `/catalog/${catalog.slug}`;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ fontWeight: 600, color: '#1a73e8', fontSize: '0.9rem' }}>{catalog.title}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: '0.8rem' }} title="Open in new tab">
+                {catalog.slug} <ExternalLink size={10} />
+              </a>
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleCopyLink(catalog); }} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: copiedId === catalog.id ? '#137333' : '#5f6368', padding: 0 }}
+                title="Copy Link"
+              >
+                {copiedId === catalog.id ? <Check size={12} /> : <Copy size={12} />}
+              </button>
+            </div>
+            {catalog.goal && <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 400 }}>{catalog.goal}</span>}
+          </div>
+        );
+      }
+    },
+    {
+      header: 'Status / Visibility',
+      field: 'status',
+      width: '22%',
+      render: (catalog) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+          <StatusBadge status={catalog.status || 'published'} />
+          {catalog.visibility === 'public' ? (
+            <span style={{ ...badgeStyle, backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'inline-flex', alignItems: 'center' }}>
+              <Globe size={12} style={{ marginRight: 4 }} /> Public
+            </span>
+          ) : (
+            <span style={{ ...badgeStyle, backgroundColor: '#f1f3f4', color: '#5f6368', display: 'inline-flex', alignItems: 'center' }}>
+              <Lock size={12} style={{ marginRight: 4 }} /> Private
+            </span>
+          )}
+        </div>
+      )
+    },
+    {
+      header: 'Formats & Date',
+      field: 'createdAt',
+      width: '22%',
+      render: (catalog) => {
+        const formats = catalog.formats || [];
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+              {formats.length === 0 ? (
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>—</span>
+              ) : (
+                formats.map((f, i) => {
+                  const cfg = FORMAT_CONFIG[f.type] || { label: f.type, bg: '#f1f5f9', color: '#475569' };
+                  return (
+                    <span key={i} title={`Generated: ${new Date(f.generatedAt).toLocaleString()}`} style={{
+                      fontSize: '0.72rem', background: cfg.bg, color: cfg.color,
+                      padding: '2px 7px', borderRadius: '4px', fontWeight: 700, cursor: 'default'
+                    }}>{cfg.label}</span>
+                  );
+                })
+              )}
+            </div>
+            {catalog.createdAt && (
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                Created: {new Date(catalog.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      header: 'Actions',
+      field: 'actions',
+      width: '18%',
+      align: 'right',
+      render: (catalog) => {
+        const isOwner = catalog.ownerId === ownerId || ownerType === 'admin';
+        return (
+          <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
+            <button onClick={(e) => { e.stopPropagation(); setPreviewCatalog(catalog); }} title="Preview Catalog" style={actionButtonStyle}>
+              <Eye size={14} />
+            </button>
+            {isOwner && (
+              <button onClick={(e) => { e.stopPropagation(); handleShareCRM(catalog); }} title="Share to CRM" style={{ ...actionButtonStyle, color: '#1a73e8' }}>
+                <Send size={14} />
+              </button>
+            )}
+            {isOwner && (
+              <button onClick={(e) => { e.stopPropagation(); onSelectCatalogToEdit(catalog); }} title="Edit Catalog" style={actionButtonStyle}>
+                <Edit3 size={14} />
+              </button>
+            )}
+            <button onClick={(e) => { e.stopPropagation(); handleDuplicate(catalog); }} title={isOwner ? "Duplicate" : "Clone for my clinic"} style={actionButtonStyle}>
+              <Copy size={14} />
+            </button>
+            {isOwner && (
+              <button onClick={(e) => { e.stopPropagation(); handleDelete(catalog.id); }} title="Delete" style={{ ...actionButtonStyle, color: '#d93025' }}>
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
+        );
+      }
+    }
+  ], [ownerId, ownerType, copiedId]);
 
   if (selectedCatalogLeads) {
     return (
@@ -166,53 +329,13 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
           </div>
         </div>
 
-        {leadsLoading ? (
-          <div style={loadingStyle}>Loading leads...</div>
-        ) : leadsList.length === 0 ? (
-          <div style={emptyStateStyle}>
-            <Users size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-            <h3>No leads captured yet</h3>
-            <p>Leads will appear here when doctors or clinics submit contact forms on your catalog.</p>
-          </div>
-        ) : (
-          <div style={tableContainerStyle}>
-            <table style={tableStyle}>
-              <thead>
-                <tr style={theadRowStyle}>
-                  <th style={thStyle}>Name</th>
-                  <th style={thStyle}>Email</th>
-                  <th style={thStyle}>Phone</th>
-                  <th style={thStyle}>Notes / Request</th>
-                  <th style={thStyle}>Date</th>
-                  <th style={thStyle}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leadsList.map(lead => (
-                  <tr key={lead.id} style={tbodyRowStyle}>
-                    <td style={{ ...tdStyle, fontWeight: 600 }}>{lead.name}</td>
-                    <td style={tdStyle}>{lead.email}</td>
-                    <td style={tdStyle}>{lead.phone}</td>
-                    <td style={tdStyle}>{lead.message || '—'}</td>
-                    <td style={tdStyle}>{new Date(lead.createdAt).toLocaleDateString()}</td>
-                    <td style={tdStyle}>
-                      <span style={{
-                        padding: '2px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        backgroundColor: lead.status === 'new' ? '#e8f0fe' : '#e6f4ea',
-                        color: lead.status === 'new' ? '#1a73e8' : '#137333'
-                      }}>
-                        {lead.status || 'new'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <DataTable
+          columns={leadColumns}
+          data={leadsList}
+          isLoading={leadsLoading}
+          emptyTitle="No leads captured yet"
+          emptyDescription="Leads will appear here when doctors or clinics submit contact forms on your catalog."
+        />
       </div>
     );
   }
@@ -235,49 +358,48 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
         </button>
       </div>
 
-      {loading ? (
-        <div style={loadingStyle}>Loading catalogs...</div>
-      ) : filteredCatalogs.length === 0 ? (
-        <div style={emptyStateStyle}>
-          <FileText size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-          <h3>No catalogs found</h3>
-          <p>Create your first dynamic catalog using AI merchandising context and customized pricing rules.</p>
-          <button onClick={onOpenBuilder} style={{ ...createButtonStyle, marginTop: '1rem' }}>
-            Get Started
-          </button>
-        </div>
-      ) : (
-        <div style={tableContainerStyle}>
-          <table style={tableStyle}>
-            <thead>
-              <tr style={theadRowStyle}>
-                <th style={thStyle}>Catalog / Route</th>
-                <th style={thStyle}>Status / Visibility</th>
-                <th style={thStyle}>Formats & Date</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCatalogs.map(catalog => (
-                <ExpandableCatalogRow 
-                  key={catalog.id}
-                  catalog={catalog}
-                  ownerId={ownerId}
-                  ownerType={ownerType}
-                  handleCopyLink={handleCopyLink}
-                  copiedId={copiedId}
-                  handleViewLeads={handleViewLeads}
-                  setPreviewCatalog={setPreviewCatalog}
-                  handleShareCRM={handleShareCRM}
-                  onSelectCatalogToEdit={onSelectCatalogToEdit}
-                  handleDuplicate={handleDuplicate}
-                  handleDelete={handleDelete}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable
+        columns={catalogColumns}
+        data={filteredCatalogs}
+        isLoading={loading}
+        emptyTitle="No catalogs found"
+        emptyDescription="Create your first dynamic catalog using AI merchandising context and customized pricing rules."
+        emptyActionLabel="Get Started"
+        onEmptyAction={onOpenBuilder}
+        expandableRender={(catalog) => {
+          const isOwner = catalog.ownerId === ownerId || ownerType === 'admin';
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', padding: '0.75rem 0' }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Audience</div>
+                <span style={badgeStyle}>{catalog.audience || catalog.targetAudience || '—'}</span>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Views</div>
+                <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>{catalog.views || 0}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Leads</div>
+                <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>
+                  {catalog.leadCaptureCount > 0 && isOwner ? (
+                    <button onClick={() => handleViewLeads(catalog)} style={leadsLinkButtonStyle}>
+                      <Users size={12} /> {catalog.leadCaptureCount} leads
+                    </button>
+                  ) : (
+                    catalog.leadCaptureCount || '0'
+                  )}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Last Updated</div>
+                <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>
+                  {catalog.updatedAt ? new Date(catalog.updatedAt).toLocaleDateString() : '—'}
+                </div>
+              </div>
+            </div>
+          );
+        }}
+      />
 
       {/* PREVIEW DRAWER */}
       {previewCatalog && (
@@ -305,151 +427,6 @@ export default function CatalogList({ ownerId, ownerType, onOpenBuilder, onSelec
         </div>
       )}
     </div>
-  );
-}
-
-// ── Internal Component for Expandable Row ────────────────────────────────────
-function ExpandableCatalogRow({ 
-  catalog, ownerId, ownerType, handleCopyLink, copiedId, handleViewLeads, 
-  setPreviewCatalog, handleShareCRM, onSelectCatalogToEdit, handleDuplicate, handleDelete 
-}) {
-  const publicUrl = `/catalog/${catalog.slug}`;
-  const isOwner = catalog.ownerId === ownerId || ownerType === 'admin';
-
-  const mainContent = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <span style={{ fontWeight: 600, color: '#1a73e8', fontSize: '0.9rem' }}>{catalog.title}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={{ ...linkStyle, fontSize: '0.8rem' }} title="Open in new tab">
-          {catalog.slug} <ExternalLink size={10} />
-        </a>
-        <button 
-          onClick={() => handleCopyLink(catalog)} 
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: copiedId === catalog.id ? '#137333' : '#5f6368', padding: 0 }}
-          title="Copy Link"
-        >
-          {copiedId === catalog.id ? <Check size={12} /> : <Copy size={12} />}
-        </button>
-      </div>
-      {catalog.goal && <span style={{ fontSize: '0.75rem', color: '#5f6368', fontWeight: 400 }}>{catalog.goal}</span>}
-    </div>
-  );
-
-  const subContent = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
-      <StatusChip status={catalog.status} />
-      {catalog.visibility === 'public' ? (
-        <span style={{...badgeStyle, backgroundColor: '#e8f0fe', color: '#1a73e8', display: 'inline-flex', alignItems: 'center'}}>
-          <Globe size={12} style={{marginRight: 4}}/> Public
-        </span>
-      ) : (
-        <span style={{...badgeStyle, backgroundColor: '#f1f3f4', color: '#5f6368', display: 'inline-flex', alignItems: 'center'}}>
-          <Lock size={12} style={{marginRight: 4}}/> Private
-        </span>
-      )}
-    </div>
-  );
-
-  const actions = (
-    <>
-      <button onClick={() => setPreviewCatalog(catalog)} title="Preview Catalog" style={actionButtonStyle}>
-        <Eye size={14} />
-      </button>
-      {isOwner && (
-        <button onClick={() => handleShareCRM(catalog)} title="Share to CRM" style={{ ...actionButtonStyle, color: '#1a73e8' }}>
-          <Send size={14} />
-        </button>
-      )}
-      {isOwner && (
-        <button onClick={() => onSelectCatalogToEdit(catalog)} title="Edit Catalog" style={actionButtonStyle}>
-          <Edit3 size={14} />
-        </button>
-      )}
-      <button onClick={() => handleDuplicate(catalog)} title={isOwner ? "Duplicate" : "Clone for my clinic"} style={actionButtonStyle}>
-        <Copy size={14} />
-      </button>
-      {isOwner && (
-        <button onClick={() => handleDelete(catalog.id)} title="Delete" style={{ ...actionButtonStyle, color: '#d93025' }}>
-          <Trash2 size={14} />
-        </button>
-      )}
-    </>
-  );
-
-
-  // Format label config
-  const FORMAT_CONFIG = {
-    pdf:          { label: 'PDF',  bg: '#e0e7ff', color: '#4f46e5' },
-    excel:        { label: 'Excel', bg: '#fef3c7', color: '#d97706' },
-    landing_page: { label: 'Web',  bg: '#dcfce7', color: '#16a34a' },
-  };
-
-  const formats = catalog.formats || [];
-
-  const formatsContent = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-        {formats.length === 0 ? (
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>—</span>
-        ) : (
-          formats.map((f, i) => {
-            const cfg = FORMAT_CONFIG[f.type] || { label: f.type, bg: '#f1f5f9', color: '#475569' };
-            return (
-              <span key={i} title={`Generated: ${new Date(f.generatedAt).toLocaleString()}`} style={{
-                fontSize: '0.72rem', background: cfg.bg, color: cfg.color,
-                padding: '2px 7px', borderRadius: '4px', fontWeight: 700, cursor: 'default'
-              }}>{cfg.label}</span>
-            );
-          })
-        )}
-      </div>
-      {catalog.createdAt && (
-        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-          Created: {new Date(catalog.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-        </span>
-      )}
-    </div>
-  );
-
-  const expandedContent = (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-      <div>
-        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Audience</div>
-        <span style={badgeStyle}>{catalog.audience || catalog.targetAudience || '—'}</span>
-      </div>
-      <div>
-        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Views</div>
-        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>{catalog.views || 0}</div>
-      </div>
-      <div>
-        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Leads</div>
-        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>
-          {catalog.leadCaptureCount > 0 && isOwner ? (
-            <button onClick={() => handleViewLeads(catalog)} style={leadsLinkButtonStyle}>
-              <Users size={12} /> {catalog.leadCaptureCount} leads
-            </button>
-          ) : (
-            catalog.leadCaptureCount || '0'
-          )}
-        </div>
-      </div>
-      <div>
-        <div style={{ fontSize: '0.7rem', color: '#5f6368', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', fontWeight: 600 }}>Last Updated</div>
-        <div style={{ fontSize: '0.85rem', color: '#202124', fontWeight: 500 }}>
-          {catalog.updatedAt ? new Date(catalog.updatedAt).toLocaleDateString() : '—'}
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <ExpandableTableRow 
-      mainContent={mainContent}
-      subContent={subContent}
-      extraContent={formatsContent}
-      actions={actions}
-      expandedContent={expandedContent}
-    />
   );
 }
 

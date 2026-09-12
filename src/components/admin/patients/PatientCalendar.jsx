@@ -179,8 +179,8 @@ export default function PatientCalendar({ patient, prescriptions = [], orders = 
           setAppointmentModalOpen(true);
         }}
         eventClick={(info) => {
-          const type = info.event.extendedProps.type;
-          alert(`Event type: ${type}\nTitle: ${info.event.title}`);
+          const type = info.event.extendedProps?.type || 'Appointment';
+          notifier.info(`${info.event.title} (${type})`);
         }}
       />
 

@@ -14,12 +14,38 @@
  * Slug rules: lowercase, spaces→"-", remove special chars.
  */
 
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { db } from '../firebase.js';
 
-// ── In-memory session cache ───────────────────────────────────────────────────
+// ── In-memory session cache (Layer 1) & LocalStorage (Layer 2) ────────────────
+const CACHE_KEY = 'rp_nav_metadata_v2';
+const TTL_MS = 60 * 60 * 1000; // 60 minutes
 let menuCache = null;
 let fetchPromise = null;
+
+function readStorageCache() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { timestamp, data } = JSON.parse(raw);
+    if (Date.now() - timestamp < TTL_MS && data?.categories?.length) {
+      return data;
+    }
+  } catch (e) {
+    // Ignore storage parse errors
+  }
+  return null;
+}
+
+function writeStorageCache(data) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+  } catch (e) {
+    // Ignore storage quota errors
+  }
+}
 
 // ── Slug helper ───────────────────────────────────────────────────────────────
 export function toSlug(value) {
@@ -39,15 +65,15 @@ function uniqueSorted(arr, max = 8) {
     .slice(0, max);
 }
 
-// ── Core fetch (runs once) ────────────────────────────────────────────────────
+// ── Core fetch (runs once, strictly limited Rule #1) ──────────────────────────
 async function fetchNavigationMetadata() {
   const categoriesRaw = [];
   const goalsRaw = [];
   const conditionsRaw = [];
 
   try {
-    // ── Blueprints (protocols) ────────────────────────────────────────────────
-    const blueprintSnap = await getDocs(collection(db, 'protocols'));
+    // ── Blueprints (protocols) with limit(40) ─────────────────────────────────
+    const blueprintSnap = await getDocs(query(collection(db, 'protocols'), limit(40)));
     blueprintSnap.forEach((doc) => {
       const data = doc.data();
       const meta = data.metadata || {};
@@ -60,8 +86,8 @@ async function fetchNavigationMetadata() {
   }
 
   try {
-    // ── Products ─────────────────────────────────────────────────────────────
-    const productSnap = await getDocs(collection(db, 'products'));
+    // ── Products with limit(50) ───────────────────────────────────────────────
+    const productSnap = await getDocs(query(collection(db, 'products'), limit(50)));
     productSnap.forEach((doc) => {
       const data = doc.data();
       if (data.category) categoriesRaw.push(data.category);
@@ -88,19 +114,27 @@ async function fetchNavigationMetadata() {
     path: `/collection/protocols?search=${encodeURIComponent(label)}`,
   }));
 
-  return { categories, goals, conditions };
+  const result = { categories, goals, conditions };
+  writeStorageCache(result);
+  return result;
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
  * Returns cached navigation metadata.
- * Fetches from Firestore on first call; subsequent calls return cache instantly.
+ * Checks RAM cache -> LocalStorage (TTL 60m) -> Firestore with limit(40/50).
  *
  * @returns {Promise<{ categories: Array, goals: Array, conditions: Array }>}
  */
 export async function getNavigationMetadata() {
   if (menuCache) return menuCache;
+
+  const storageData = readStorageCache();
+  if (storageData) {
+    menuCache = storageData;
+    return menuCache;
+  }
 
   // Prevent duplicate parallel fetches
   if (!fetchPromise) {
@@ -126,4 +160,11 @@ export async function getNavigationMetadata() {
 export function clearNavigationCache() {
   menuCache = null;
   fetchPromise = null;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch (e) {
+      // Ignore storage errors
+    }
+  }
 }

@@ -13,6 +13,7 @@ import PageHeader from '../ui/PageHeader';
 import GlobalSearchBar from '../ui/GlobalSearchBar';
 import EmptyState from '../ui/EmptyState';
 import GridSkeleton from '../ui/skeletons/GridSkeleton';
+import StatusBadge from '../ui/StatusBadge';
 
 export default function PhysicianPatientsTab({ doctorId }) {
   const [patients, setPatients] = useState([]);
@@ -158,18 +159,7 @@ export default function PhysicianPatientsTab({ doctorId }) {
                     {p.patientEmail}
                   </div>
                 </div>
-                <span
-                  style={{
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    color: 'var(--success)',
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  Active
-                </span>
+                <StatusBadge status="active" />
               </div>
 
               <div style={{ flex: 1 }}>
@@ -239,9 +229,6 @@ export default function PhysicianPatientsTab({ doctorId }) {
           ))}
         </div>
       )}
-      <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.8, background: 'var(--surface)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border)', pointerEvents: 'none', zIndex: 1000, boxShadow: 'var(--shadow-sm)' }}>
-        Widget: DoctorPatientsTab | Props: none
-      </div>
-</div>
+    </div>
   );
 }

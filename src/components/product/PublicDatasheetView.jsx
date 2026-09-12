@@ -22,11 +22,15 @@ import {
   Info,
   Box,
   QrCode,
-  ExternalLink
+  ExternalLink,
+  Building2
 } from '@/lib/icons';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
+import { triggerHaptic } from '@/utils/haptics';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
+import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
+import PublicDatasheetMobileBar from './PublicDatasheetMobileBar';
 
 function WaIcon() {
   return (
@@ -37,8 +41,22 @@ function WaIcon() {
   );
 }
 
-export default function PublicDatasheetView({ product, slug, baseUrl }) {
-  const [lang, setLang] = useState('en');
+export default function PublicDatasheetView({ 
+  product, 
+  slug, 
+  baseUrl,
+  initialSupplierFilter = null,
+  initialFormat = null,
+  initialStrength = null,
+  initialLang = null 
+}) {
+  const [lang, setLang] = useState(() => {
+    if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
+      return initialLang;
+    }
+    return 'en';
+  });
+  const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inlineSvg, setInlineSvg] = useState(null);
   const [svgError, setSvgError] = useState(false);
@@ -48,19 +66,20 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
   const requestedLangs = useRef(new Set());
 
   useEffect(() => {
+    if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) return;
     if (typeof navigator !== 'undefined') {
       const browserLang = navigator.language?.slice(0, 2)?.toLowerCase();
       if (browserLang && SUPPORTED_LANGUAGES.some(l => l.code === browserLang)) {
         setLang(browserLang);
       }
     }
-  }, []);
+  }, [initialLang]);
 
   const t = getTranslations(lang);
-  const publicUrl = `${baseUrl}/p/${slug}`;
   const targetId = product?.id || slug;
   const pdfUrl = `/api/product-sheet/${encodeURIComponent(targetId)}?format=vial`;
-  const barcodeImageUrl = `/api/barcode/${encodeURIComponent(slug)}?supplier=lotusland`;
+  const barcodeSupplier = product?.supplierId || product?.supplierName || product?.supplier || 'lotusland';
+  const barcodeImageUrl = `/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(barcodeSupplier)}`;
 
   // Fetch SVG inline — <img> cannot render nested <svg> (QR inside label)
   useEffect(() => {
@@ -75,7 +94,7 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
       .then(svg => setInlineSvg(svg))
       .catch(() => setSvgError(true));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
+  }, [slug, barcodeImageUrl]);
 
   // On-demand translation for non-English languages if missing from product document
   useEffect(() => {
@@ -143,88 +162,201 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
 
   // ─── Hierarchy, Formats & Strengths Matrix ─────────────────────────────────
   const hierarchy = product?.processedHierarchy || {};
+  const suppliersList = useMemo(() => Array.isArray(hierarchy.suppliers) ? hierarchy.suppliers : [], [hierarchy.suppliers]);
+  const isMultiSupplierMode = !product?.isSingleSupplierLocked && suppliersList.length > 1;
+
+  // Active supplier state (if multi-supplier mode)
+  const [activeSupplierId, setActiveSupplierId] = useState(() => {
+    if (initialSupplierFilter && initialSupplierFilter !== 'all') {
+      const cleanTarget = String(initialSupplierFilter).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
+      const matched = suppliersList.find(s => {
+        const sClean = String(s.id || s.name).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
+        return sClean === cleanTarget || sClean.includes(cleanTarget);
+      });
+      if (matched) return matched.id;
+    }
+    return 'all';
+  });
+
+  const activeSupplierObj = useMemo(() => {
+    if (activeSupplierId === 'all') return null;
+    return suppliersList.find(s => s.id === activeSupplierId) || null;
+  }, [suppliersList, activeSupplierId]);
+
+  const supplierName = useMemo(() => {
+    if (product?.isSingleSupplierLocked) {
+      return product?.supplierName || product?.supplier || 'Certified Clinical Synthesis Laboratory';
+    }
+    if (activeSupplierObj) {
+      return activeSupplierObj.name || activeSupplierObj.id;
+    }
+    return 'All Certified Laboratories (Multi-Source)';
+  }, [product, activeSupplierObj]);
+
   const rawFormats = Array.isArray(hierarchy.formats) ? hierarchy.formats : [];
   const rawStrengths = Array.isArray(hierarchy.strengths) ? hierarchy.strengths : [];
-  const supplierName = product?.supplierName || product?.supplier || 'Lotusland Clinical Synthesis';
 
+  // Filter formats by activeSupplier if not 'all'
+  const supplierFilteredFormats = useMemo(() => {
+    if (activeSupplierId === 'all' || !activeSupplierObj) {
+      return rawFormats;
+    }
+    const allowedFormatIds = Array.isArray(activeSupplierObj.formats) ? activeSupplierObj.formats : [];
+    return rawFormats.filter(f => allowedFormatIds.includes(f.id));
+  }, [activeSupplierId, activeSupplierObj, rawFormats]);
+
+  /**
+   * Parse total active content from a strength name.
+   * For single peptides: "10 mg" → 10
+   * For blends (pipe, plus, or slash separated):
+   * "6 mg + 6 mg + 30 mg + 6 mg" → 48 (sum of all)
+   * "10 mg | 10 mg | 75 mg | 10 mg" → 105 (sum of all)
+   */
   const parseNum = (str) => {
-    const m = String(str || '').match(/(\d+(\.\d+)?)/);
+    const s = String(str || '');
+    // Match all instances of e.g. "6 mg", "30mg"
+    const mgMatches = [...s.matchAll(/(\d+(?:\.\d+)?)\s*mg/gi)];
+    if (mgMatches.length > 0) {
+      const sum = mgMatches.reduce((acc, m) => acc + parseFloat(m[1]), 0);
+      if (sum > 0) return sum;
+    }
+    // Check for separators: |, +, or /
+    if (s.includes('|') || s.includes('+') || s.includes('/')) {
+      const parts = s.split(/[|+/]/);
+      let total = 0;
+      for (const part of parts) {
+        const m = part.match(/(\d+(?:\.\d+)?)/);
+        if (m) total += parseFloat(m[1]);
+      }
+      if (total > 0) return total;
+    }
+    const m = s.match(/(\d+(\.\d+)?)/);
     return m ? parseFloat(m[1]) : 999;
   };
 
   /**
    * Recommended BAC Water Reconstitution Volume by Vial Strength
-   * ────────────────────────────────────────────────────────────────
-   * Clinical best practice targets a concentration of ~2.5 mg/mL,
-   * which yields practical dose volumes (0.1–0.5 mL) measurable on
-   * a standard U-100 insulin syringe (1 mL / 100 units).
-   *
-   * Formula: Volume (mL) = ActiveContent (mg) / TargetConcentration (mg/mL)
-   * Rounded to nearest 0.5 mL for practical clinical use.
-   *
-   * Reference values:
-   *   5 mg  → 2.0 mL (2.5 mg/mL)   — standard for low-dose titration
-   *  10 mg  → 2.0 mL (5.0 mg/mL)   — most common research reconstitution
-   *  15 mg  → 3.0 mL (5.0 mg/mL)   — maintains consistent concentration
-   *  20 mg  → 4.0 mL (5.0 mg/mL)   — avoids high-viscosity solution
-   *  30 mg  → 6.0 mL (5.0 mg/mL)   — prevents peptide aggregation
-   *  40 mg  → 8.0 mL (5.0 mg/mL)   — clinical max for single vial
-   *  50 mg  → 10.0 mL (5.0 mg/mL)  — requires 10 mL BAC vial
    */
   const getReconstitutionVolume = (strengthName) => {
     const mg = parseNum(strengthName);
     if (mg <= 0 || isNaN(mg)) return { volume: '2.0', concentration: '5.0' };
 
-    // Target 5.0 mg/mL for all strengths ≥ 10 mg; 2.5 mg/mL for ≤ 5 mg (easier low-dose titration)
-    const targetConc = mg <= 5 ? 2.5 : 5.0;
+    let targetConc;
+    const strLower = String(strengthName || '').toLowerCase();
+    const isBlendStrength = strLower.includes('+') 
+      || strLower.includes('|') 
+      || strLower.includes('/')
+      || String(name || '').toLowerCase().includes('klow')
+      || String(name || '').toLowerCase().includes('glow');
+
+    if (isBlendStrength || mg > 50) {
+      targetConc = 15.0; // Multi-peptide blends (GLOW, KLOW, etc.)
+    } else if (mg <= 5) {
+      targetConc = 2.5;  // Easy low-dose titration
+    } else {
+      targetConc = 5.0;  // Standard single peptides
+    }
+
     const rawVol = mg / targetConc;
-    // Round to nearest 0.5 mL for practical syringe measurement
-    const volume = (Math.round(rawVol * 2) / 2).toFixed(1);
+    const volume = Math.min(10.0, Math.round(rawVol * 2) / 2).toFixed(1);
     const concentration = (mg / parseFloat(volume)).toFixed(1);
     return { volume, concentration };
   };
 
-  const sortedStrengths = [...rawStrengths].sort((a, b) => parseNum(a.name || a.id) - parseNum(b.name || b.id));
+  const sortedStrengths = useMemo(() => {
+    return [...rawStrengths].sort((a, b) => parseNum(a.name || a.id) - parseNum(b.name || b.id));
+  }, [rawStrengths]);
 
-  // Lotusland strictly manufactures Lyophilized Subcutaneous Vials (no cartridges or pens)
-  const variants = Array.isArray(product?.variants) ? product.variants : [];
-  const supplierIds = Array.isArray(product?.supplierIds) ? product.supplierIds : [];
-
-  // Strictly Lotusland check: true ONLY if all suppliers/variants are Lotusland (no mixed suppliers)
+  // Strictly Lotusland check: true ONLY if supplier is explicitly Lotusland
   const isStrictlyLotusland = useMemo(() => {
-    if (supplierIds.length > 0) {
-      return supplierIds.every(id => String(id).toLowerCase().includes('lotusland'));
-    }
-    if (variants.length > 0) {
-      return variants.every(v => {
-        const s = (v.supplier || v.supplierName || v.supplierId || '').toLowerCase();
-        return s.includes('lotusland');
-      });
-    }
-    const topSupplier = (product?.supplier || product?.supplierName || product?.supplierId || '').toLowerCase();
-    return topSupplier.includes('lotusland');
-  }, [product, supplierIds, variants]);
+    const s = (supplierName || '').toLowerCase();
+    const sid = (activeSupplierId || product?.supplierId || '').toLowerCase();
+    return s.includes('lotusland') || sid.includes('lotusland');
+  }, [supplierName, activeSupplierId, product]);
 
-  const isLotusland = (supplierName || '').toLowerCase().includes('lotusland') || (product?.supplierId || '').toLowerCase().includes('lotusland');
-  const sanitizedFormats = isLotusland 
-    ? rawFormats.filter(f => !f.id.includes('pen') && !f.id.includes('cartridge'))
-    : rawFormats;
+  const sanitizedFormats = useMemo(() => {
+    if (isStrictlyLotusland) {
+      return supplierFilteredFormats.filter(f => !f.id.includes('pen') && !f.id.includes('cartridge'));
+    }
+    return supplierFilteredFormats;
+  }, [isStrictlyLotusland, supplierFilteredFormats]);
 
   // Fallback if no hierarchy is present
   const availableFormats = sanitizedFormats.length > 0 ? sanitizedFormats : [
     { id: 'vial', name: 'Lyophilized Subcutaneous Vial', strengths: sortedStrengths.map(s => s.id) }
   ];
 
-  const [activeFormatId, setActiveFormatId] = useState(availableFormats[0]?.id || 'vial');
+  const [activeFormatId, setActiveFormatId] = useState(() => {
+    if (initialFormat) {
+      const cleanF = String(initialFormat).toLowerCase();
+      const found = availableFormats.find(f => f.id.toLowerCase() === cleanF || f.id.toLowerCase().includes(cleanF));
+      if (found) return found.id;
+    }
+    return availableFormats[0]?.id || 'vial';
+  });
+
+  // Keep activeFormatId valid when available formats change
+  useEffect(() => {
+    if (!availableFormats.some(f => f.id === activeFormatId)) {
+      setActiveFormatId(availableFormats[0]?.id || 'vial');
+    }
+  }, [availableFormats, activeFormatId]);
+
   const activeFormat = availableFormats.find(f => f.id === activeFormatId) || availableFormats[0];
-
   const activeFormatStrengthIds = Array.isArray(activeFormat?.strengths) ? activeFormat.strengths : [];
-  const filteredStrengths = sortedStrengths.filter(s => 
-    activeFormatStrengthIds.length === 0 || activeFormatStrengthIds.includes(s.id)
-  );
 
-  const [selectedStrengthId, setSelectedStrengthId] = useState(filteredStrengths[0]?.id || sortedStrengths[0]?.id || '10_mg');
-  const selectedStrength = sortedStrengths.find(s => s.id === selectedStrengthId) || filteredStrengths[0] || { name: '10 mg' };
+  const filteredStrengths = useMemo(() => {
+    return sortedStrengths.filter(s => 
+      activeFormatStrengthIds.length === 0 || activeFormatStrengthIds.includes(s.id)
+    );
+  }, [sortedStrengths, activeFormatStrengthIds]);
+
+  const [selectedStrengthId, setSelectedStrengthId] = useState(() => {
+    if (initialStrength) {
+      const cleanS = String(initialStrength).toLowerCase().replace(/[-_\s]+/g, '');
+      const found = filteredStrengths.find(s => {
+        const sc = String(s.name || s.id).toLowerCase().replace(/[-_\s]+/g, '');
+        return sc === cleanS || sc.includes(cleanS) || cleanS.includes(sc);
+      });
+      if (found) return found.id;
+    }
+    return filteredStrengths[0]?.id || sortedStrengths[0]?.id || '10_mg';
+  });
+
+  useEffect(() => {
+    if (!filteredStrengths.some(s => s.id === selectedStrengthId)) {
+      setSelectedStrengthId(filteredStrengths[0]?.id || sortedStrengths[0]?.id || '10_mg');
+    }
+  }, [filteredStrengths, selectedStrengthId, sortedStrengths]);
+
+  const selectedStrength = useMemo(() => {
+    return filteredStrengths.find(s => s.id === selectedStrengthId) 
+      || sortedStrengths.find(s => s.id === selectedStrengthId) 
+      || filteredStrengths[0] 
+      || sortedStrengths[0] 
+      || null;
+  }, [filteredStrengths, sortedStrengths, selectedStrengthId]);
+
+  // Reactive Dynamic Share URL respecting active state
+  const dynamicPublicUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (activeSupplierId && activeSupplierId !== 'all' && !product?.isSingleSupplierLocked) {
+      params.set('supplier', activeSupplierId);
+    } else if (product?.isSingleSupplierLocked && product?.supplierId) {
+      params.set('supplier', product.supplierId);
+    }
+    if (activeFormatId) {
+      params.set('format', activeFormatId);
+    }
+    if (selectedStrengthId) {
+      params.set('dose', selectedStrengthId);
+    }
+    if (lang && lang !== 'en') {
+      params.set('lang', lang);
+    }
+    const q = params.toString();
+    return `${baseUrl}/p/${slug}${q ? `?${q}` : ''}`;
+  }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product]);
 
   // ⚡ Non-blocking Access Telemetry Beacon for Tracked Client Links
   useEffect(() => {
@@ -264,7 +396,8 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
   const handlePrint = () => window.print();
 
   const handleCopyUrl = async () => {
-    await navigator.clipboard.writeText(publicUrl).catch(() => {});
+    triggerHaptic('copy');
+    await navigator.clipboard.writeText(dynamicPublicUrl).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -273,9 +406,9 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `${name} (SubQ Vial) — Official Monograph | RegenPept × Lotusland`,
-          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as a sterile lyophilized SubQ vial, synthesized under cGMP & ISO 9001:2015 by Lotusland for RegenPept. RP-HPLC Purity ≥ 99.0%.`,
-          url: publicUrl,
+          title: `${name} (${activeFormat?.name || 'Monograph'}) — Official Monograph | RegenPept × ${supplierName}`,
+          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, synthesized under verified cGMP quality standards by ${supplierName} for RegenPept. RP-HPLC Purity ≥ 99.0%.`,
+          url: dynamicPublicUrl,
         });
         return;
       } catch (err) {
@@ -286,18 +419,34 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
   };
 
   const handleWhatsApp = () => {
+    triggerHaptic('light');
+    const isPenOrCart = (activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge');
+    const isSpray = (activeFormatId || '').includes('spray');
+    const isOral = (activeFormatId || '').includes('capsule') || (activeFormatId || '').includes('tablet');
+    const formatLabel = activeFormat?.name || (isPenOrCart ? 'Pre-filled SubQ Pen' : isSpray ? 'Intranasal Spray Device' : isOral ? 'Oral Gastro-Resistant Capsule' : 'Sterile Lyophilized SubQ Vial');
     const recon = getReconstitutionVolume(selectedStrength?.name);
     const purityText = purity || '≥ 99.0% (RP-HPLC Verified)';
     const targetText = targetSystem || 'Clinical Incretin / Target Receptor Axis';
+    
+    let adminLine = `• *Reconstitution:* ${recon.volume} mL BAC Water → ${recon.concentration} mg/mL · Cold-Chain 2–8°C\n`;
+    if (isPenOrCart) {
+      adminLine = `• *Administration:* Pre-filled Multi-Dose SubQ Pen · Cold-Chain 2–8°C (Ready to Use, No Reconstitution)\n`;
+    } else if (isSpray) {
+      adminLine = `• *Administration:* Intranasal Spray · Metered Dose Pump · Cold-Chain 2–8°C\n`;
+    } else if (isOral) {
+      adminLine = `• *Administration:* Oral Gastro-Resistant Capsule · Ingest with water on empty stomach\n`;
+    }
+
     const pharmaMsg = 
       `🔬 *${name}* — Official Pharmaceutical Monograph & Clinical Specifications\n\n` +
-      `• *Formulation:* Sterile Lyophilized Subcutaneous Vial\n` +
-      `• *Synthesis Lab:* Lotusland (cGMP / ISO 9001:2015 Certified) for RegenPept\n` +
+      `• *Formulation:* ${formatLabel}\n` +
+      `• *Target Dose:* ${selectedStrength?.name || 'Standard'}\n` +
+      `• *Synthesis Lab:* ${supplierName} (Verified Quality Standards) for RegenPept\n` +
       `• *Analytical Release:* RP-HPLC Purity ${purityText} · ESI-MS Mass Verified\n` +
       `• *Receptor Target Axis:* ${targetText}\n` +
-      `• *Reconstitution:* ${recon.volume} mL BAC Water → ${recon.concentration} mg/mL · Cold-Chain 2–8°C\n` +
+      adminLine +
       `• *Regulatory Class:* Clinical Research & Analytical Standard (Zero Impurities)\n\n` +
-      `📑 *Access Official Monograph & Certificate of Analysis:*\n${publicUrl}`;
+      `📑 *Access Official Monograph & Certificate of Analysis:*\n${dynamicPublicUrl}`;
 
     window.open(`https://wa.me/?text=${encodeURIComponent(pharmaMsg)}`, '_blank', 'noopener,noreferrer');
   };
@@ -348,9 +497,14 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
               <QrCode size={14} /> Vial Barcode / QR
             </a>
 
-            <button onClick={handleShare} className="pds-btn pds-btn-ghost" title={t.copyLink}>
-              {copied ? <Check size={14} color="#4ade80" /> : <Share2 size={14} />}
-              {copied ? t.copied : t.shareColleague}
+            <button 
+              type="button"
+              onClick={() => setIsShareDrawerOpen(true)} 
+              className="pds-btn pds-btn-ghost" 
+              title={t.shareColleague}
+            >
+              <Share2 size={14} />
+              <span>{t.shareColleague}</span>
             </button>
 
             <button onClick={handlePrint} className="pds-btn pds-btn-ghost pds-print-hide-desktop">
@@ -372,7 +526,9 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
           <div className="pds-hero-header">
             <div className="pds-tag-group">
               <span className="pds-cat-tag">{category}</span>
-              <span className="pds-cgmp-tag">{t.lotuslandVerified}</span>
+              <span className="pds-cgmp-tag">
+                {isStrictlyLotusland ? t.lotuslandVerified : `${supplierName} Quality Verified`}
+              </span>
             </div>
             <h1 className="pds-title">{name}</h1>
             <p className="pds-target">
@@ -386,9 +542,13 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
                 <h2 className="pds-section-heading" style={{ margin: 0 }}>
                   {t.pharmacologicalOverview || 'Pharmacological Overview'}
                 </h2>
-                {isTranslating && (
-                  <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f0f9ff', padding: '2px 8px', borderRadius: '6px', border: '1px solid #bae6fd' }}>
-                    <Sparkles size={12} /> {t.translating || 'Translating...'}
+                {isTranslating ? (
+                  <span style={{ fontSize: '0.75rem', color: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 600, backgroundColor: '#f0f9ff', padding: '3px 10px', borderRadius: '8px', border: '1px solid #bae6fd' }}>
+                    <Sparkles size={13} className="spin" /> {t.translating || 'Translating with Gemini…'}
+                  </span>
+                ) : lang !== 'en' && (
+                  <span style={{ fontSize: '0.72rem', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: 500, backgroundColor: '#f8fafc', padding: '2px 8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    <Sparkles size={11} color="#0284c7" /> Gemini 2.5 Flash Translated
                   </span>
                 )}
               </div>
@@ -415,11 +575,95 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
             </div>
           </div>
 
+          {/* Multi-Supplier Laboratory Selector (Rendered ONLY if product has multiple verified suppliers) */}
+          {isMultiSupplierMode && (
+            <div className="pds-lab-filter-wrap" style={{ marginBottom: '18px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '12px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Building2 size={15} color="#003666" />
+                  Verified Manufacturing Laboratories:
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                  {suppliersList.length} verified sources available
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveSupplierId('all')}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.78rem',
+                    fontWeight: activeSupplierId === 'all' ? 700 : 500,
+                    background: activeSupplierId === 'all' ? '#003666' : '#ffffff',
+                    color: activeSupplierId === 'all' ? '#ffffff' : '#334155',
+                    border: activeSupplierId === 'all' ? '1px solid #003666' : '1px solid #cbd5e1',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  🌐 All Laboratories (Overview)
+                </button>
+
+                {suppliersList.map(s => {
+                  const isSelected = activeSupplierId === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveSupplierId(s.id);
+                        // Auto-select first compatible format for this supplier
+                        const suppFormatIds = Array.isArray(s.formats) ? s.formats : [];
+                        const compatFormats = rawFormats.filter(f => suppFormatIds.includes(f.id));
+                        if (compatFormats.length > 0 && !compatFormats.some(f => f.id === activeFormatId)) {
+                          setActiveFormatId(compatFormats[0].id);
+                        }
+                      }}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '8px',
+                        fontSize: '0.78rem',
+                        fontWeight: isSelected ? 700 : 500,
+                        background: isSelected ? '#003666' : '#ffffff',
+                        color: isSelected ? '#ffffff' : '#334155',
+                        border: isSelected ? '1px solid #003666' : '1px solid #cbd5e1',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {s.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Administration Format Tabs */}
           <div className="pds-format-tabs">
             {availableFormats.map(fmt => {
               const isActive = fmt.id === activeFormatId;
               const isPen = fmt.id.includes('pen');
+              const isCartridge = fmt.id.includes('cartridge');
+              let icon = '🧪';
+              let subtitle = 'Lyophilized SubQ Cake (Sterile Vial)';
+              if (isPen) {
+                icon = '🖊️';
+                subtitle = 'Prefilled Multi-Dose Dial Device';
+              } else if (isCartridge) {
+                icon = '💉';
+                subtitle = '3 mL Multi-Dose Refill Cartridge';
+              } else if (fmt.id.includes('spray')) {
+                icon = '💨';
+                subtitle = 'Intranasal Spray Device';
+              } else if (fmt.id.includes('capsule') || fmt.id.includes('tablet')) {
+                icon = '💊';
+                subtitle = 'Oral Gastro-Resistant Formulation';
+              }
+
               return (
                 <button
                   key={fmt.id}
@@ -432,12 +676,10 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
                   }}
                   className={`pds-format-tab-btn ${isActive ? 'active' : ''}`}
                 >
-                  <span className="pds-format-tab-icon">{isPen ? '🖊️' : '🧪'}</span>
+                  <span className="pds-format-tab-icon">{icon}</span>
                   <div className="pds-format-tab-text">
                     <span className="pds-format-tab-name">{fmt.name}</span>
-                    <span className="pds-format-tab-sub">
-                      {isPen ? 'Prefilled Multi-Dose Dial Device' : 'Lyophilized SubQ Cake (Single or 10-Pack Kit)'}
-                    </span>
+                    <span className="pds-format-tab-sub">{subtitle}</span>
                   </div>
                   {isActive && <span className="pds-format-active-dot" />}
                 </button>
@@ -481,21 +723,40 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
                 <span className="pds-dval">Subcutaneous (SubQ) Periumbilical</span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Recommended Reconstitution</span>
+                <span className="pds-dlabel">
+                  {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) 
+                    ? 'Device Delivery' 
+                    : 'Recommended Reconstitution'}
+                </span>
                 <span className="pds-dval">
-                  {getReconstitutionVolume(selectedStrength?.name).volume} mL Bacteriostatic Water (BAC)
-                  <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-                    → {getReconstitutionVolume(selectedStrength?.name).concentration} mg/mL final concentration
-                  </span>
+                  {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge')) ? (
+                    <>
+                      Pre-dissolved SubQ Liquid (Ready to Use)
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → Direct multi-dose dial injection (no BAC reconstitution required)
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {getReconstitutionVolume(selectedStrength?.name).volume} mL Bacteriostatic Water (BAC)
+                      <span style={{ display: 'block', fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
+                        → {getReconstitutionVolume(selectedStrength?.name).concentration} mg/mL final concentration
+                      </span>
+                    </>
+                  )}
                 </span>
               </div>
               <div className="pds-detail-col">
-                <span className="pds-dlabel">Lyophilization Cryoprotectant</span>
-                <span className="pds-dval">D-Mannitol (USP / EP Grade)</span>
+                <span className="pds-dlabel">Lyophilization / Excipient</span>
+                <span className="pds-dval">
+                  {((activeFormatId || '').includes('pen') || (activeFormatId || '').includes('cartridge'))
+                    ? 'Sterile Isotonic Solution (pH 6.8–7.4)'
+                    : 'D-Mannitol (USP / EP Grade)'}
+                </span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">Sourcing & Batch Release</span>
-                <span className="pds-dval">{supplierName} (cGMP Verified)</span>
+                <span className="pds-dval">{supplierName} (Verified Clinical Quality)</span>
               </div>
               <div className="pds-detail-col">
                 <span className="pds-dlabel">Analytical Purity</span>
@@ -607,11 +868,15 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
           </div>
         </section>
 
-        {/* Reconstitution Protocol & Interactive Syringe Simulator */}
-        <section className="pds-guide-section">
+        {/* Reconstitution Protocol & Interactive Clinical Guide */}
+        <section id="reconstitution-guide" className="pds-guide-section">
           <InteractiveReconstitutionGuide
             product={product}
             selectedStrength={selectedStrength}
+            availableStrengths={sortedStrengths}
+            activeFormatId={activeFormatId}
+            activeFormat={activeFormat}
+            supplierName={supplierName}
             lang={lang}
           />
         </section>
@@ -658,24 +923,26 @@ export default function PublicDatasheetView({ product, slug, baseUrl }) {
         </footer>
       </main>
 
-      {/* ── Floating Mobile Bar ── */}
-      <div className="pds-mobile-bar">
-        <a 
-          href={pdfUrl} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="pds-mbtn pds-mbtn-pdf"
-        >
-          <Download size={15} /> {t.downloadPdf}
-        </a>
-        <button onClick={handleCopyUrl} className="pds-mbtn pds-mbtn-copy">
-          {copied ? <Check size={15} color="#16a34a" /> : <Copy size={15} />}
-          {copied ? t.copied : t.copyLink}
-        </button>
-        <button onClick={handleWhatsApp} className="pds-mbtn pds-mbtn-wa">
-          <WaIcon /> WhatsApp
-        </button>
-      </div>
+      {/* ── High-Conversion Sticky Mobile Action Bar ── */}
+      <PublicDatasheetMobileBar
+        product={product}
+        name={name}
+        activeFormat={activeFormat}
+        selectedStrength={selectedStrength}
+        supplierName={supplierName}
+        dynamicPublicUrl={dynamicPublicUrl}
+        lang={lang}
+      />
+
+      {/* Dynamic Flexible Share Monograph Drawer */}
+      <ShareProductMonographDrawer
+        isOpen={isShareDrawerOpen}
+        onClose={() => setIsShareDrawerOpen(false)}
+        product={product}
+        initialSupplierKey={activeSupplierId !== 'all' ? activeSupplierId : (product?.supplierId || null)}
+        initialFormatId={activeFormatId}
+        initialStrengthId={selectedStrengthId}
+      />
     </div>
   );
 }

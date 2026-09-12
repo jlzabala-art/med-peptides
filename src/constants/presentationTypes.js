@@ -40,9 +40,10 @@ export const PRESENTATION_LABELS = {
   vial:                 'Vial',
   single_cartridge_pen: 'Single Cartridge Pen',
   double_cartridge_pen: 'Double Cartridge Pen',
-  refill_cartridge:     'Single Cartridge Pen', // Unified into Single Cartridge Pen
-  pen:                  'Single Cartridge Pen', // Backward-compatible canonical alias
-  cartridge:            'Single Cartridge Pen', // Backward-compatible canonical alias
+  refill_cartridge:     'Refill Cartridge (3 mL)',
+  pen:                  'Pre-filled Pen',
+  cartridge:            'Refill Cartridge (3 mL)',
+  prefilled_pen:        'Pre-filled Pen',
   capsule:              'Capsule',
   tablet:               'Tablet',
   nasal_spray:          'Nasal Spray',

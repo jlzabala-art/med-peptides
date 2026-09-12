@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/apiValidator';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -57,12 +59,18 @@ const PROGRAM_MAP = {
 };
 
 export async function POST(request) {
+  const rateInfo = checkRateLimit(request, { limit: 20, windowMs: 60 * 1000, tier: 'extract-patient' });
+  if (!rateInfo.allowed) {
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     const body = await request.json();
-    const { text } = body;
+    const rawText = body?.text;
 
-    if (!text || typeof text !== 'string' || !text.trim()) {
-      return NextResponse.json({ error: 'No text provided' }, { status: 400 });
+    const text = sanitizeText(rawText, 10000);
+    if (!text) {
+      return NextResponse.json({ error: 'No valid text provided (max 10000 chars)' }, { status: 400 });
     }
 
     const schema = {
@@ -190,12 +198,15 @@ Rules:
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      extracted,
-      matchedClinic,
-      matchedDoctor
-    });
+    return applyRateLimitHeaders(
+      NextResponse.json({
+        success: true,
+        extracted,
+        matchedClinic,
+        matchedDoctor
+      }),
+      rateInfo
+    );
   } catch (error) {
     console.error('Error in ai-extract-patient:', error);
     return NextResponse.json({ error: error.message || 'Failed to extract patient info' }, { status: 500 });

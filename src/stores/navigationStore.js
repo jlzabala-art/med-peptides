@@ -6,7 +6,7 @@ export const useNavigationStore = create(
     (set, get) => ({
       favorites: [],
       recents: [],
-      expandedGroups: ['dashboard'],
+      expandedGroups: [],
       mobileOpen: false,
 
       toggleFavorite: (itemId) => set((state) => {

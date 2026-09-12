@@ -10,6 +10,7 @@
 import { adminDb, admin } from '../lib/firebaseAdmin';
 import { serializeDoc, serializeFirestoreData } from '../lib/serializeFirestore';
 import logger from '../utils/logger';
+import { normalizeRole, isValidRole, CANONICAL_ROLES } from '../constants/roles';
 
 /**
  * Approves a user and assigns them a specific role via Firebase Custom Claims.
@@ -20,19 +21,22 @@ import logger from '../utils/logger';
  * @returns {Promise<{success: boolean, message: string}>}
  */
 export async function approveUserRoleAction(userId, role) {
-  const VALID_ROLES = ['admin', 'doctor', 'clinic', 'wholesaler', 'supplier', 'pharmacy', 'patient'];
-
   try {
     if (!userId || typeof userId !== 'string') throw new Error('userId is required');
-    if (!role || !VALID_ROLES.includes(role)) throw new Error(`Invalid role: "${role}"`);
+    if (!role || !isValidRole(role)) throw new Error(`Invalid role: "${role}"`);
+    const canonicalRole = normalizeRole(role);
     if (!adminDb) throw new Error('Firebase Admin SDK is not initialized');
 
     // ── Step 1: Set Firebase Auth Custom Claims ───────────────────────────
     // This is the authoritative gate for server-side role checks.
     const adminAuth = admin?.auth ? admin.auth() : null;
     if (adminAuth) {
-      await adminAuth.setCustomUserClaims(userId, { role, approved: true });
-      logger.info('approveUserRoleAction: Custom Claims set', { userId, role });
+      await adminAuth.setCustomUserClaims(userId, { 
+        role: canonicalRole, 
+        approved: true,
+        admin: canonicalRole === 'admin'
+      });
+      logger.info('approveUserRoleAction: Custom Claims set', { userId, role: canonicalRole });
     } else {
       logger.warn('approveUserRoleAction: admin.auth() unavailable — skipping Custom Claims', { userId });
     }
@@ -40,7 +44,13 @@ export async function approveUserRoleAction(userId, role) {
     // ── Step 2: Write role to Firestore user document ─────────────────────
     // Keeps the client-side useAuth() hook in sync without waiting for token refresh.
     await adminDb.collection('users').doc(userId).set(
-      { role, approved: true, updatedAt: new Date() },
+      { 
+        role: canonicalRole, 
+        roles: [canonicalRole],
+        approved: true, 
+        professionalStatus: 'approved',
+        updatedAt: new Date().toISOString() 
+      },
       { merge: true }
     );
 
@@ -48,15 +58,15 @@ export async function approveUserRoleAction(userId, role) {
     await adminDb.collection('audit_logs').add({
       action: 'USER_ROLE_APPROVED',
       targetId: userId,
-      metadata: { role },
-      timestamp: new Date(),
+      metadata: { role: canonicalRole, rawRequestedRole: role },
+      timestamp: new Date().toISOString(),
       operatorId: 'system',
       operatorRole: 'admin',
       fingerprint: { source: 'server' },
     });
 
-    logger.audit('USER_ROLE_APPROVED', 'system', userId, { role });
-    return { success: true, message: `User ${userId} approved as ${role}.` };
+    logger.audit('USER_ROLE_APPROVED', 'system', userId, { role: canonicalRole });
+    return { success: true, message: `User ${userId} approved as ${canonicalRole}.` };
 
   } catch (error) {
     logger.error('approveUserRoleAction failed', error);

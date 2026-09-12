@@ -47,4 +47,5 @@ export { default as QuoteQuickActionDropdown } from './QuoteQuickActionDropdown'
 export { default as UnifiedFiltersDrawer } from './UnifiedFiltersDrawer';
 export { default as ComponentErrorBoundary } from './ComponentErrorBoundary';
 export { default as UniversalShareDrawer } from './UniversalShareDrawer';
+export { default as AIContextBadge } from './AIContextBadge';
 

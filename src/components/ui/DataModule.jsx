@@ -173,21 +173,48 @@ export default function DataModule({
   return (
     <ErrorBoundary>
       <div className={`data-module-wrapper ${isSubModule ? 'is-sub-module' : ''}`}>
+      <style>{`
+        .data-module-wrapper {
+          display: flex;
+          flex-direction: column;
+        }
+        .dm-header-section { order: 1; }
+        .dm-kpi-strip { order: 2; }
+        .dm-search-filter-section { order: 3; }
+        .data-module-container { order: 4; }
+        @media (max-width: 768px) {
+          .dm-search-filter-section {
+            order: 2 !important;
+            margin-bottom: 0.35rem !important;
+          }
+          .dm-kpi-strip {
+            order: 3 !important;
+            margin-bottom: 0.35rem !important;
+          }
+          .data-module-container {
+            order: 4 !important;
+          }
+        }
+      `}</style>
       {(!hideHeader && (title || subtitle || actions || primaryAction || enableExport || breadcrumbs)) && (
-        <PageHeader
-          title={title}
-          subtitle={subtitle}
-          icon={Icon}
-          actions={finalActions}
-          breadcrumbs={breadcrumbs}
-        />
+        <div className="dm-header-section">
+          <PageHeader
+            title={title}
+            subtitle={subtitle}
+            icon={Icon}
+            actions={finalActions}
+            breadcrumbs={breadcrumbs}
+          />
+        </div>
       )}
       
-      {/* Mobile Page Actions (visible only on small screens via CSS) */}
-      <MobilePageActions 
-        primaryAction={primaryAction}
-        overflowActions={augmentedMobileOverflow}
-      />
+      {/* Mobile Page Actions (visible only when primaryAction is present) */}
+      {primaryAction && (
+        <MobilePageActions 
+          primaryAction={primaryAction}
+          overflowActions={augmentedMobileOverflow}
+        />
+      )}
 
       {/* KPI strip */}
       {kpis && (
@@ -197,7 +224,7 @@ export default function DataModule({
       )}
 
       {onSearchChange && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        <div className="dm-search-filter-section" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {/* Line 1 — Search input + result count */}
           <GlobalSearchBar
             value={searchTerm}

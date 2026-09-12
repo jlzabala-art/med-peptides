@@ -1,9 +1,9 @@
 "use server";
 
-import { adminDb } from '../lib/firebaseAdmin';
-import { validateOrderWrite } from '../repositories/orderWriteGuard';
-import { serializeDoc, serializeFirestoreData } from '../lib/serializeFirestore';
-import logger from '../utils/logger';
+import { adminDb } from '../lib/firebaseAdmin.js';
+import { validateOrderWrite } from '../repositories/orderWriteGuard.js';
+import { serializeDoc, serializeFirestoreData } from '../lib/serializeFirestore.js';
+import logger from '../utils/logger.js';
 
 // ── In-Memory TTL Cache for Quotations KPIs (60s) ───────────────────────────
 let cachedQuotationsKPIs = null;
@@ -330,11 +330,18 @@ export async function fetchPublicQuotationByTokenAction(token) {
       quoteDoc = tokenQuery.docs[0];
       quoteId = quoteDoc.id;
     } else {
-      // Fallback: try by direct doc ID
+      // Fallback: try by direct doc ID in 'quotations'
       const directDoc = await adminDb.collection('quotations').doc(token).get();
       if (directDoc.exists) {
         quoteDoc = directDoc;
         quoteId = directDoc.id;
+      } else {
+        // Fallback 2: check legacy 'b2b_quotations' collection
+        const b2bDoc = await adminDb.collection('b2b_quotations').doc(token).get();
+        if (b2bDoc.exists) {
+          quoteDoc = b2bDoc;
+          quoteId = b2bDoc.id;
+        }
       }
     }
 
@@ -374,6 +381,8 @@ export async function fetchPublicQuotationByTokenAction(token) {
       expiresAt: data.expiresAt ? (data.expiresAt.toDate ? data.expiresAt.toDate().toISOString() : data.expiresAt) : null,
       createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate().toISOString() : data.createdAt) : new Date().toISOString(),
       requiresColdChain: data.requiresColdChain !== false,
+      shippingAddress: data.shippingAddress || null,
+      deliveryInstructions: data.deliveryInstructions || null,
       salesOrderNumber: data.salesOrderNumber || null
     };
 
@@ -440,3 +449,189 @@ export async function approvePublicQuotationAction(token, approvalData = {}) {
     throw new Error(error.message || "Failed to approve quotation");
   }
 }
+
+/**
+ * 🔍 Search Bigin Contact by Name, Email, or Phone
+ */
+export async function searchBiginContactAction({ name = '', email = '', phone = '' } = {}) {
+  if (!name && !email && !phone) {
+    return { success: false, error: "Por favor, introduce al menos un nombre, email o teléfono para buscar." };
+  }
+
+  try {
+    // 1. Get cached access token from Firestore
+    let accessToken = null;
+    if (adminDb) {
+      const snapV2 = await adminDb.collection('zoho_token_cache').doc('access_token_v2').get();
+      if (snapV2.exists && snapV2.data().access_token) {
+        accessToken = snapV2.data().access_token;
+      } else {
+        const snapV1 = await adminDb.collection('zoho_token_cache').doc('access_token').get();
+        if (snapV1.exists) accessToken = snapV1.data().access_token;
+      }
+    }
+
+    if (!accessToken) {
+      return { success: false, error: "No se encontró token de acceso de Zoho Bigin en el sistema." };
+    }
+
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const cleanPhone = String(phone || '').replace(/[^\d+]/g, '');
+    const cleanName = String(name || '').trim();
+
+    let contacts = [];
+
+    // Helper fetcher
+    const searchEndpoint = async (paramKey, paramVal) => {
+      try {
+        const url = `https://www.zohoapis.com/bigin/v1/Contacts/search?${paramKey}=${encodeURIComponent(paramVal)}`;
+        const res = await fetch(url, {
+          headers: { Authorization: `Zoho-oauthtoken ${accessToken}` },
+          signal: AbortSignal.timeout(8000)
+        });
+        if (res.status === 204 || res.status === 404) return [];
+        if (!res.ok) return [];
+        const json = await res.json();
+        return Array.isArray(json?.data) ? json.data : [];
+      } catch (e) {
+        console.warn(`[searchBiginContactAction] search ${paramKey}=${paramVal} failed:`, e.message);
+        return [];
+      }
+    };
+
+    // Strategy 1: search by email
+    if (cleanEmail) {
+      contacts = await searchEndpoint('email', cleanEmail);
+    }
+
+    // Strategy 2: search by phone if nothing found yet
+    if (contacts.length === 0 && cleanPhone) {
+      contacts = await searchEndpoint('phone', cleanPhone);
+      if (contacts.length === 0 && cleanPhone.length >= 9) {
+        const localPhone = cleanPhone.slice(-9);
+        contacts = await searchEndpoint('phone', localPhone);
+      }
+    }
+
+    // Strategy 3: search by word / name if nothing found yet
+    if (contacts.length === 0 && cleanName) {
+      contacts = await searchEndpoint('word', cleanName);
+      if (contacts.length === 0) {
+        const parts = cleanName.split(' ').filter(Boolean);
+        if (parts.length > 1) {
+          const surname = parts[parts.length - 1];
+          if (surname.length >= 3) {
+            contacts = await searchEndpoint('word', surname);
+          }
+        }
+      }
+    }
+
+    if (contacts.length === 0) {
+      return {
+        success: true,
+        found: false,
+        message: "No se encontraron contactos coincidentes en Zoho Bigin."
+      };
+    }
+
+    // Normalize contacts
+    const normalized = contacts.map(c => {
+      const fullName = c.Full_Name || `${c.First_Name || ''} ${c.Last_Name || ''}`.trim() || 'Contacto sin nombre';
+      const street = c.Mailing_Street || '';
+      const city = c.Mailing_City || '';
+      const state = c.Mailing_State || '';
+      const zip = c.Mailing_Zip || '';
+      const country = c.Mailing_Country || 'España';
+      const formattedAddress = [street, city, zip, country].filter(Boolean).join(', ');
+
+      return {
+        id: String(c.id),
+        name: fullName,
+        email: c.Email || '',
+        phone: c.Mobile || c.Phone || '',
+        mobile: c.Mobile || '',
+        company: c.Account_Name?.name || c.Company || '',
+        shippingAddress: {
+          full: formattedAddress,
+          formatted: formattedAddress,
+          street,
+          city,
+          state,
+          postalCode: zip,
+          country
+        },
+        deliveryInstructions: c.Description || '',
+        source: 'Zoho Bigin',
+        raw: c
+      };
+    });
+
+    return {
+      success: true,
+      found: true,
+      count: normalized.length,
+      contact: normalized[0],
+      contacts: normalized
+    };
+  } catch (error) {
+    console.error("[searchBiginContactAction] Error:", error);
+    return { success: false, error: error.message || "Error al consultar Zoho Bigin" };
+  }
+}
+
+/**
+ * ⚡ Apply Bigin Contact Data Directly to a Quotation
+ */
+export async function applyBiginDataToQuotationAction(quotationId, biginContact) {
+  if (!quotationId || !biginContact || !adminDb) {
+    throw new Error("Quotation ID y datos de contacto de Bigin son requeridos");
+  }
+
+  try {
+    const quoteRef = adminDb.collection('quotations').doc(quotationId);
+    const snap = await quoteRef.get();
+    if (!snap.exists) throw new Error("Cotización no encontrada");
+
+    const now = new Date();
+    const updates = {
+      patientName: biginContact.name,
+      clientName: biginContact.name,
+      patientEmail: biginContact.email || '',
+      patientPhone: biginContact.phone || biginContact.mobile || '',
+      shippingAddress: biginContact.shippingAddress || null,
+      deliveryInstructions: biginContact.deliveryInstructions || '',
+      biginContactId: biginContact.id,
+      biginSyncedAt: now.toISOString(),
+      updatedAt: now
+    };
+
+    if (biginContact.company) {
+      updates.clinicName = biginContact.company;
+    }
+
+    await quoteRef.update(updates);
+
+    // Also upsert into Firestore clients collection for future reuse
+    const clientSlug = (biginContact.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    await adminDb.collection('clients').doc(clientSlug).set({
+      id: clientSlug,
+      name: biginContact.name,
+      email: biginContact.email || '',
+      phone: biginContact.phone || '',
+      shippingAddress: biginContact.shippingAddress || null,
+      deliveryInstructions: biginContact.deliveryInstructions || '',
+      biginId: biginContact.id,
+      updatedAt: now.toISOString()
+    }, { merge: true }).catch(() => {});
+
+    return {
+      success: true,
+      message: `Datos de ${biginContact.name} aplicados a la cotización con éxito`
+    };
+  } catch (error) {
+    console.error("[applyBiginDataToQuotationAction] Error:", error);
+    throw new Error(error.message || "Error al aplicar datos de Bigin a la cotización");
+  }
+}
+

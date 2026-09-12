@@ -27,6 +27,15 @@ const CLINICAL_QUICK_PROMPTS = [
   { label: 'Purity & Quality', text: 'How is peptide purity tested?' }
 ];
 
+const CLINICAL_DOCTOR_QUICK_PROMPTS = [
+  { label: '⚠️ Drug Interactions', text: 'Screen active protocols for contraindications and compound interactions.' },
+  { label: '📊 Biomarker Analysis', text: 'Evaluate recent blood lab panels (HbA1c, IGF-1) and flag abnormalities.' },
+  { label: '📝 Draft Prescription', text: 'Draft an evidence-based peptide prescription for a patient.' },
+  { label: '📈 Dosage & Titration', text: 'Provide recommended titration schedules for Semaglutide/Tirzepatide.' },
+  { label: '👥 Patient Adherence', text: 'Identify patients with adherence below 70% needing clinical follow-up.' },
+  { label: '🔬 Compound Mechanism', text: 'Explain receptor affinity and clinical rationale for BPC-157 + TB-500.' }
+];
+
 const ADMIN_QUICK_PROMPTS = [
   { label: 'Inactive Users', text: 'Show me users who have been inactive for more than 30 days.' },
   { label: 'Today\'s Orders', text: 'Summarize today\'s order volume and revenue.' },
@@ -1034,7 +1043,7 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                     { label: 'Zoho Permissions', text: 'Explain the Zoho Books permissions required for synchronization.' }
                   ] :
                   contextMode === 'admin' ? ADMIN_QUICK_PROMPTS : 
-                  contextMode === 'doctor' ? CLINICAL_QUICK_PROMPTS : 
+                  (contextMode === 'doctor' || contextMode === 'medical_director') ? CLINICAL_DOCTOR_QUICK_PROMPTS : 
                   RESEARCH_QUICK_PROMPTS);
 
 

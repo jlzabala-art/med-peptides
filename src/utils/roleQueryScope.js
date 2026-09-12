@@ -17,7 +17,8 @@ import { where } from 'firebase/firestore';
  */
 export function getRoleQueryConstraints(collectionName, user, effectiveRole) {
   if (!user || !user.uid) return [];
-  if (effectiveRole === 'admin') return []; // Admin has global view access
+  // Admin and Medical Director have global/institutional clinical view access
+  if (effectiveRole === 'admin' || effectiveRole === 'medical_director') return [];
 
   const constraints = [];
 

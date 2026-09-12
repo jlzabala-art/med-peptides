@@ -39,7 +39,7 @@ export const KNOWN_CANONICAL_PEPTIDES = {
   'bpc-157-tb-500-ghk-cu': {
     canonicalKey: 'bpc-157-tb-500-ghk-cu',
     canonicalName: 'BPC-157 + TB-500 + GHK-Cu Stack',
-    aliases: ['bpc-157 + tb-500 + ghk-cu', 'bpc-157 + tb-500 + ghk-cu + kpv'],
+    aliases: ['bpc-157 + tb-500 + ghk-cu', 'bpc-157/tb-500/ghk-cu'],
     category: 'Peptide Blend'
   },
   'cagrilintide-semaglutide': {
@@ -307,7 +307,26 @@ export function deriveCanonicalIdentity(product = {}) {
     };
   }
 
-  // 5. Check single peptide word boundaries
+  // 5. If the product name contains '+', it represents a multi-compound combo/blend.
+  // Do NOT collapse it into an individual single peptide!
+  if (lower.includes('+')) {
+    const cleanedCombo = rawName
+      .replace(/\s*\([^)]*\)/g, '')
+      .replace(/\b\d+(\.\d+)?\s*(mg|mcg|iu|ml|g|pfs|vial|capsule|pen|cartridge|kit)\b/gi, '')
+      .trim();
+    const comboKey = cleanedCombo
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return {
+      canonicalKey: comboKey || 'blend-' + (product.id || 'item'),
+      canonicalName: product.canonicalName || cleanedCombo || rawName,
+      isRecognized: true,
+      category: 'Peptide Blend'
+    };
+  }
+
+  // 6. Check single peptide word boundaries
   for (const [key, def] of Object.entries(KNOWN_CANONICAL_PEPTIDES)) {
     for (const alias of def.aliases) {
       // Regex word-boundary check

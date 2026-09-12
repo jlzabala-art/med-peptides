@@ -34,6 +34,7 @@ import {
   getDocs,
   query,
   where,
+  limit,
 } from 'firebase/firestore';
 import * as fb from '../firebase';
 const db = fb?.db;
@@ -168,16 +169,17 @@ export async function rejectRecommendation(recId, patientResponse = '') {
   }
 }
 
-// ── Queries ───────────────────────────────────────────────────────────────────
+// ── Queries (Rule #1 strictly bounded) ───────────────────────────────────────
 
 /**
- * Get all recommendations for a patient.
- * Optionally filter by status.
+ * Get recommendations for a patient.
+ * Optionally filter by status, default max 50.
  */
-export async function getRecommendationsForPatient(patientId, statusFilter = null) {
+export async function getRecommendationsForPatient(patientId, statusFilter = null, max = 50) {
   let q = query(
     collection(db, RECS_COL),
     where('patientId', '==', patientId),
+    limit(max),
   );
   const snap = await getDocs(q);
   let results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -186,19 +188,21 @@ export async function getRecommendationsForPatient(patientId, statusFilter = nul
 }
 
 /**
- * Get all recommendations created by a doctor.
+ * Get recommendations created by a doctor, default max 50.
  * Optionally filter by patientId.
  */
-export async function getRecommendationsByDoctor(doctorId, patientId = null) {
+export async function getRecommendationsByDoctor(doctorId, patientId = null, max = 50) {
   let q = query(
     collection(db, RECS_COL),
     where('doctorId', '==', doctorId),
+    limit(max),
   );
   if (patientId) {
     q = query(
       collection(db, RECS_COL),
       where('doctorId', '==', doctorId),
       where('patientId', '==', patientId),
+      limit(max),
     );
   }
   const snap = await getDocs(q);
@@ -217,10 +221,10 @@ export async function getRecommendation(recId) {
 }
 
 /**
- * Get all recommendations (admin view).
+ * Get all recommendations (admin view, bounded Rule #1).
  */
-export async function getAllRecommendations() {
-  const snap = await getDocs(collection(db, RECS_COL));
+export async function getAllRecommendations(max = 100) {
+  const snap = await getDocs(query(collection(db, RECS_COL), limit(max)));
   return snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));

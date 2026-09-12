@@ -26,7 +26,7 @@ export function invalidatePublicProductCache(slug) {
   }
 }
 
-async function getPublicProduct(slug, supplierFilter = 'lotusland') {
+async function getPublicProduct(slug, supplierFilter = null) {
   if (!adminDb || !slug) return null;
   const target = decodeURIComponent(slug).toLowerCase().trim();
   const cacheKey = `${target}::${supplierFilter || 'all'}`;
@@ -60,6 +60,7 @@ async function getPublicProduct(slug, supplierFilter = 'lotusland') {
   if (!doc) return null;
 
   const raw = { id: doc.id, ...doc.data() };
+  raw.slug = raw.slug || doc.id || slug;
   if (raw.status === 'hidden' || raw.status === 'archived') return null;
 
   // 🛡️ Clinical Guardrail: Public Monograph & Reconstitution is strictly for Peptides
@@ -75,25 +76,52 @@ async function getPublicProduct(slug, supplierFilter = 'lotusland') {
     rawVariants = (varSnap?.docs || []).map(v => ({ id: v.id, ...v.data() }));
   }
 
-  // Filter variants strictly for target supplier (e.g. Lotusland) to prevent cross-supplier contamination
-  const activeSupplier = (supplierFilter || raw.supplierName || raw.supplier || raw.supplierId || '').toLowerCase().trim();
-  if (activeSupplier.includes('lotusland')) {
-    const lotusVariants = (rawVariants || []).filter(v => {
-      const vSupp = (v.supplierName || v.supplier || v.supplierId || '').toLowerCase();
-      return vSupp.includes('lotusland');
-    });
-    if (lotusVariants.length > 0) {
-      rawVariants = lotusVariants;
+  function matchSupplier(v, targetFilter) {
+    if (!targetFilter) return false;
+    const normalize = (s) => String(s || '').toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
+    const cleanTarget = normalize(targetFilter);
+    if (!cleanTarget) return false;
+
+    const suppId = normalize(v.supplierId);
+    const suppName = normalize(v.supplierName);
+    const supp = normalize(v.supplier);
+
+    return (
+      suppId === cleanTarget ||
+      suppName === cleanTarget ||
+      supp === cleanTarget ||
+      (suppId && cleanTarget && (suppId.includes(cleanTarget) || cleanTarget.includes(suppId))) ||
+      (suppName && cleanTarget && (suppName.includes(cleanTarget) || cleanTarget.includes(suppName))) ||
+      (supp && cleanTarget && (supp.includes(cleanTarget) || cleanTarget.includes(supp)))
+    );
+  }
+
+  // Filter variants strictly for target supplier to prevent cross-supplier contamination
+  const isSpecificSupplierRequested = Boolean(supplierFilter && supplierFilter.toLowerCase() !== 'all');
+
+  if (isSpecificSupplierRequested) {
+    const filtered = (rawVariants || []).filter(v => matchSupplier(v, supplierFilter));
+    if (filtered.length > 0) {
+      rawVariants = filtered;
+      const matchedSupp = filtered[0].supplierName || filtered[0].supplier || supplierFilter;
+      const matchedSuppId = filtered[0].supplierId || (supplierFilter.startsWith('supplier-') ? supplierFilter : `supplier-${supplierFilter}`);
+      raw.supplierName = matchedSupp;
+      raw.supplier = matchedSupp;
+      raw.supplierId = matchedSuppId;
+      raw.suppliers = [matchedSuppId];
+      raw.supplierIds = [matchedSuppId];
+      raw.isSingleSupplierLocked = true;
+    } else {
+      // 🛡️ Zero-Leakage: If a specific supplier was requested that does NOT offer this product,
+      // return null so it renders 404/notFound instead of leaking all other suppliers!
+      return null;
     }
-    raw.supplierName = 'Lotusland';
-    raw.supplier = 'Lotusland Limited';
-    raw.supplierId = 'supplier-lotusland';
-  } else if (supplierFilter) {
-    const filtered = (rawVariants || []).filter(v => {
-      const vSupp = (v.supplierName || v.supplier || v.supplierId || '').toLowerCase();
-      return vSupp.includes(supplierFilter.toLowerCase());
-    });
-    if (filtered.length > 0) rawVariants = filtered;
+  } else {
+    // 🌐 Institutional Multi-Supplier View:
+    // Retain all legitimate variants across all authorized suppliers
+    raw.isSingleSupplierLocked = false;
+    raw.supplierName = 'Certified Clinical Laboratories';
+    raw.supplier = 'Multi-Source';
   }
 
   // 🛡️ Zero-Trust Sanitization
@@ -104,6 +132,7 @@ async function getPublicProduct(slug, supplierFilter = 'lotusland') {
 
   const result = {
     ...sanitized,
+    isSingleSupplierLocked: Boolean(raw.isSingleSupplierLocked),
     processedHierarchy,
   };
 
@@ -138,7 +167,9 @@ export async function generateMetadata({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const slug = resolvedParams?.slug;
-  const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || 'lotusland';
+  const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
+  const formatParam = resolvedSearchParams?.format || null;
+  const doseParam = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
   const product = await getPublicProduct(slug, supplierFilter);
 
   if (!product) {
@@ -148,23 +179,28 @@ export async function generateMetadata({ params, searchParams }) {
     };
   }
 
-  const name = product.name || product.displayName || 'Clinical Peptide';
-  const targetSystem = product.targetSystem || product.target || 'Physiological Incretin / Glucagon Receptor Axis';
-  const supplierName = 'Lotusland (cGMP / ISO 9001:2015)';
+  const name = product.canonicalName || product.name || product.title || slug;
+  const isLotus = (product.supplierName || product.supplier || '').toLowerCase().includes('lotusland');
+  const supplierName = product.isSingleSupplierLocked
+    ? (isLotus ? 'Lotusland (cGMP / ISO 9001:2015)' : (product.supplierName || product.supplier || supplierFilter || 'Official Laboratory'))
+    : 'Certified Clinical Laboratories';
   const purity = product.purity || '≥ 99.0% (RP-HPLC & ESI-MS)';
 
-  const pharmaTitle = `${name} (Lyophilized SubQ Vial) — Official Monograph & Clinical Specs | RegenPept × Lotusland`;
-  const pharmaDesc = `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as a sterile lyophilized subcutaneous vial. Synthesized under certified cGMP & ISO 9001:2015 standards by Lotusland for RegenPept. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
+  const formatSuffix = formatParam ? ` [${formatParam.toUpperCase()}]` : '';
+  const doseSuffix = doseParam ? ` (${doseParam.replace(/_/g, ' ')})` : '';
+
+  const pharmaTitle = `${name}${doseSuffix}${formatSuffix} — Official Clinical Monograph & Specs | RegenPept`;
+  const pharmaDesc = `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated and synthesized under certified cGMP standards by ${supplierName} for RegenPept. Features dual-stage RP-HPLC purity ${purity}, ESI-MS molecular validation, peptide reconstitution protocols, cold-chain storage parameters, and clinical administration guidelines.`;
 
   // Universal dynamic scannable barcode/QR image directing to this page for WhatsApp & social platforms
-  const barcodeImageUrl = `${BASE_URL}/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(supplierFilter || 'lotusland')}`;
+  const barcodeImageUrl = `${BASE_URL}/api/barcode/${encodeURIComponent(slug)}?supplier=${encodeURIComponent(supplierFilter || product.supplierId || 'lotusland')}`;
   const canonicalUrl = `${BASE_URL}/p/${slug}${supplierFilter ? `?supplier=${encodeURIComponent(supplierFilter)}` : ''}`;
 
   return {
     title: pharmaTitle,
     description: pharmaDesc,
     openGraph: {
-      title: `${name} (Lyophilized SubQ Vial) — Official Monograph | RegenPept × Lotusland`,
+      title: pharmaTitle,
       description: pharmaDesc,
       url: canonicalUrl,
       siteName: 'RegenPept Clinical Monographs',
@@ -181,7 +217,7 @@ export async function generateMetadata({ params, searchParams }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${name} (SubQ Vial) — Official Monograph & Specs`,
+      title: `${name} — Official Monograph & Specs`,
       description: pharmaDesc,
       images: [barcodeImageUrl],
     },
@@ -192,7 +228,7 @@ export async function generateMetadata({ params, searchParams }) {
       'og:image:height': '630',
       'og:image:alt': `Barcode & QR Direct Link for ${name} — Official Clinical Monograph`,
       'article:section': 'Pharmaceutical & Clinical Peptides',
-      'article:tag': `${name}, Lotusland, cGMP, SubQ Vial, Peptide Monograph, RegenPept`,
+      'article:tag': `${name}, ${supplierName}, cGMP, Peptide Monograph, RegenPept`,
     },
     robots: { index: true, follow: true },
   };
@@ -205,7 +241,10 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const slug = resolvedParams?.slug;
-  const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || 'lotusland';
+  const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
+  const initialFormat = resolvedSearchParams?.format || null;
+  const initialStrength = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;
+  const initialLang = resolvedSearchParams?.lang || null;
   const product = await getPublicProduct(slug, supplierFilter);
 
   if (!product) {
@@ -223,7 +262,15 @@ export default async function PublicProductRoute({ params, searchParams }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <PublicDatasheetView product={safeProduct} slug={slug} baseUrl={BASE_URL} />
+      <PublicDatasheetView 
+        product={safeProduct} 
+        slug={slug} 
+        baseUrl={BASE_URL}
+        initialSupplierFilter={supplierFilter}
+        initialFormat={initialFormat}
+        initialStrength={initialStrength}
+        initialLang={initialLang}
+      />
     </>
   );
 }

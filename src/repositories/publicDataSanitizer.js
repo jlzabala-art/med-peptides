@@ -16,6 +16,7 @@ export const VARIANT_PUBLIC_WHITELIST = [
   'batchNumber', 'lotNumber', 'expirationDate', 'expiryDate', 'mfgDate',
   'coaUrl', 'isActive', 'status',
   'reconstitutionGuide', 'warnings',
+  'supplierId', 'supplierName', 'supplier',
 ];
 
 // ─── Whitelist of Allowed Public Product Fields ──────────────────────────────

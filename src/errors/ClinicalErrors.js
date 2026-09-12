@@ -1,15 +1,19 @@
 /**
  * src/errors/ClinicalErrors.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Typed error classes for clinical and repository operations.
+ * Typed error classes for clinical, repository, and API operations.
  *
  * Using typed errors allows catch blocks in components to differentiate
- * between validation errors, business rule violations, and network failures,
- * producing precise UX feedback per error class.
+ * between validation errors, business rule violations, network failures,
+ * and configuration issues — producing precise UX feedback per error class.
  *
  * Standards: ISO 14971 (risk management), FDA 21 CFR Part 11, OWASP.
  * ─────────────────────────────────────────────────────────────────────────────
  */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Repository & Domain Errors
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Thrown when a repository write receives data that fails Zod schema validation.
@@ -69,5 +73,83 @@ export class PHIAccessDeniedError extends Error {
     this.code = 'PHI_ACCESS_DENIED';
     this.resource = resource;
     this.actorId = actorId;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// API & Infrastructure Errors
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Thrown when a required external resource (document, entity) is not found.
+ * Maps to HTTP 404. Use in repositories and API routes for explicit not-found states.
+ */
+export class NotFoundError extends Error {
+  /**
+   * @param {string} resourceType - e.g. 'Patient', 'Product', 'Protocol'
+   * @param {string} id - The identifier that was not found
+   */
+  constructor(resourceType, id) {
+    super(`[${resourceType}] No se encontró el recurso con identificador "${id}"`);
+    this.name = 'NotFoundError';
+    this.code = 'RESOURCE_NOT_FOUND';
+    this.resourceType = resourceType;
+    this.resourceId = id;
+  }
+}
+
+/**
+ * Thrown when a network or external service call fails (Firestore, Gemini, external APIs).
+ * Provides structured context for retry logic and circuit breakers.
+ */
+export class NetworkError extends Error {
+  /**
+   * @param {string} service - Name of the service that failed (e.g. 'Firestore', 'Gemini', 'Stripe')
+   * @param {string} operation - The operation being performed (e.g. 'read', 'write', 'generateContent')
+   * @param {Error} [cause] - Original underlying error
+   */
+  constructor(service, operation, cause) {
+    super(`[${service}] Fallo en operación "${operation}"${cause ? `: ${cause.message}` : ''}`);
+    this.name = 'NetworkError';
+    this.code = 'NETWORK_ERROR';
+    this.service = service;
+    this.operation = operation;
+    this.cause = cause || null;
+  }
+}
+
+/**
+ * Thrown when an IP or user has exceeded the configured request rate limit.
+ * Maps to HTTP 429. Provides retryAfter hint for exponential backoff on the client.
+ */
+export class RateLimitError extends Error {
+  /**
+   * @param {string} tier - The rate limit tier/endpoint name
+   * @param {number} retryAfterSeconds - Seconds until the window resets
+   */
+  constructor(tier, retryAfterSeconds) {
+    super(`[RateLimit] Límite de solicitudes excedido en "${tier}". Reintentar en ${retryAfterSeconds}s.`);
+    this.name = 'RateLimitError';
+    this.code = 'RATE_LIMIT_EXCEEDED';
+    this.tier = tier;
+    this.retryAfter = retryAfterSeconds;
+  }
+}
+
+/**
+ * Thrown when a required environment variable or configuration value is missing.
+ * Prevents silent failures during server startup or API initialization.
+ * Standards: Twelve-Factor App (Config factor).
+ */
+export class ConfigurationError extends Error {
+  /**
+   * @param {string} variableName - The name of the missing env var or config key
+   * @param {string} [context] - Context where the variable is needed
+   */
+  constructor(variableName, context = '') {
+    super(`[Config] Variable requerida faltante: "${variableName}"${context ? ` (necesaria en ${context})` : ''}`);
+    this.name = 'ConfigurationError';
+    this.code = 'CONFIGURATION_ERROR';
+    this.variableName = variableName;
   }
 }

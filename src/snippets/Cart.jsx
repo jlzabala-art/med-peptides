@@ -653,7 +653,7 @@ export default function Cart() {
   const onCheckout = async () => {
     if (userProfile?.role === 'doctor') {
       if (!activePatient) {
-        alert("Please select a patient first.");
+        notifier.warning("Please select a patient first.");
         return;
       }
       try {
@@ -669,10 +669,10 @@ export default function Cart() {
         // We will assume clearCart exists, if not we will fix it
         if (typeof clearCart === 'function') clearCart(); 
         setActiveModal(null);
-        alert("Prescription created successfully!");
+        notifier.success("Prescription created successfully!");
       } catch (err) {
         console.error("Error creating prescription", err);
-        alert("Failed to create prescription.");
+        notifier.error("Failed to create prescription.");
       }
     } else {
       setActiveModal(null);

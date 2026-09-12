@@ -44,6 +44,7 @@ export { default as CloudRain } from 'lucide-react/dist/esm/icons/cloud-rain';
 export { default as CloudSnow } from 'lucide-react/dist/esm/icons/cloud-snow';
 export { default as CloudLightning } from 'lucide-react/dist/esm/icons/cloud-lightning';
 export { default as Command } from 'lucide-react/dist/esm/icons/command';
+export { default as Compass } from 'lucide-react/dist/esm/icons/compass';
 export { default as Copy } from 'lucide-react/dist/esm/icons/copy';
 export { default as Cpu } from 'lucide-react/dist/esm/icons/cpu';
 export { default as CreditCard } from 'lucide-react/dist/esm/icons/credit-card';

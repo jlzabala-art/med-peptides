@@ -340,7 +340,7 @@ export const buildPeptideColumns = ({
     {
       key: 'presentation',
       header: 'Format',
-      width: '140px',
+      width: '160px',
       align: 'left',
       nowrap: true,
       render: (v) => {
@@ -380,7 +380,6 @@ export const buildPeptideColumns = ({
     activePriceCol,
     ...(marginCol ? [marginCol] : []),
     ...(commercialChannel === 'cost' && priceGapCol ? [priceGapCol] : []),
-    ...(activeMgCol ? [activeMgCol] : []),
     actionCol
   ].filter(Boolean);
 };

@@ -47,6 +47,16 @@ export default function SupplierAgreementCard({ variant, selectedProduct, onUpda
   const discountPercent = variant.discountPercent ?? suppPricing.discountPercent ?? 25;
   const listPrice = variant.listPrice || suppPricing.listPrice || Math.round((netCost / (1 - (discountPercent / 100))) * 100) / 100;
   const quotationDate = variant.lastQuotationDate || suppPricing.lastQuotationDate || variant.updatedAt || '2026-08-20';
+  const formattedQuotationDate = (() => {
+    if (!quotationDate) return 'N/A';
+    try {
+      const d = new Date(quotationDate);
+      if (isNaN(d.getTime())) return String(quotationDate);
+      return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+      return String(quotationDate);
+    }
+  })();
   const agreementNotes = suppPricing.agreementNotes || `${supplierName} Commercial Agreement (-${discountPercent}% Discount on ${isRaw ? 'Bulk APIs' : 'Finished Formulations'})`;
 
   // Calculate quotation age & validity status
@@ -191,7 +201,7 @@ export default function SupplierAgreementCard({ variant, selectedProduct, onUpda
               <Calendar size={13} style={{ color: '#64748b' }} />
               <span style={{ color: '#64748b' }}>Quoted:</span>
               <span style={{ fontWeight: 650, color: '#0f172a' }}>
-                {quotationDate}
+                {formattedQuotationDate}
               </span>
               <span style={{
                 fontSize: '0.68rem',
@@ -265,7 +275,7 @@ export default function SupplierAgreementCard({ variant, selectedProduct, onUpda
           <div>
             <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>Batch MOQ & Total</div>
             <div style={{ fontSize: '0.90rem', fontWeight: 700, color: '#0f172a' }}>
-              {moq}{uom} = ${formatNumberAdaptive(netCost * moq)}
+              {moq} {uom} · ${formatNumberAdaptive(netCost * moq)}
             </div>
           </div>
 

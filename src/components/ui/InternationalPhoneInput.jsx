@@ -4,25 +4,25 @@ import React, { useState, useEffect } from 'react';
 import { Phone } from 'lucide-react';
 
 const COUNTRY_CODES = [
-  { code: '+971', country: 'AE', label: '🇦🇪 UAE (+971)', digits: 9 },
-  { code: '+34', country: 'ES', label: '🇪🇸 Spain (+34)', digits: 9 },
-  { code: '+1', country: 'US', label: '🇺🇸 US/CA (+1)', digits: 10 },
-  { code: '+44', country: 'GB', label: '🇬🇧 UK (+44)', digits: 10 },
-  { code: '+966', country: 'SA', label: '🇸🇦 Saudi Arabia (+966)', digits: 9 },
-  { code: '+974', country: 'QA', label: '🇶🇦 Qatar (+974)', digits: 8 },
-  { code: '+965', country: 'KW', label: '🇰🇼 Kuwait (+965)', digits: 8 },
-  { code: '+968', country: 'OM', label: '🇴🇲 Oman (+968)', digits: 8 },
-  { code: '+973', country: 'BH', label: '🇧🇭 Bahrain (+973)', digits: 8 },
-  { code: '+49', country: 'DE', label: '🇩🇪 Germany (+49)', digits: 10 },
-  { code: '+33', country: 'FR', label: '🇫🇷 France (+33)', digits: 9 },
-  { code: '+39', country: 'IT', label: '🇮🇹 Italy (+39)', digits: 10 },
-  { code: '+52', country: 'MX', label: '🇲🇽 Mexico (+52)', digits: 10 },
-  { code: '+57', country: 'CO', label: '🇨🇴 Colombia (+57)', digits: 10 },
-  { code: '+54', country: 'AR', label: '🇦🇷 Argentina (+54)', digits: 10 },
-  { code: '+56', country: 'CL', label: '🇨🇱 Chile (+56)', digits: 9 },
-  { code: '+61', country: 'AU', label: '🇦🇺 Australia (+61)', digits: 9 },
-  { code: '+91', country: 'IN', label: '🇮🇳 India (+91)', digits: 10 },
-  { code: '+41', country: 'CH', label: '🇨🇭 Switzerland (+41)', digits: 9 },
+  { code: '+971', country: 'AE', label: '🇦🇪 +971', fullLabel: '🇦🇪 UAE (+971)', digits: 9 },
+  { code: '+34', country: 'ES', label: '🇪🇸 +34', fullLabel: '🇪🇸 Spain (+34)', digits: 9 },
+  { code: '+1', country: 'US', label: '🇺🇸 +1', fullLabel: '🇺🇸 US/CA (+1)', digits: 10 },
+  { code: '+44', country: 'GB', label: '🇬🇧 +44', fullLabel: '🇬🇧 UK (+44)', digits: 10 },
+  { code: '+966', country: 'SA', label: '🇸🇦 +966', fullLabel: '🇸🇦 Saudi Arabia (+966)', digits: 9 },
+  { code: '+974', country: 'QA', label: '🇶🇦 +974', fullLabel: '🇶🇦 Qatar (+974)', digits: 8 },
+  { code: '+965', country: 'KW', label: '🇰🇼 +965', fullLabel: '🇰🇼 Kuwait (+965)', digits: 8 },
+  { code: '+968', country: 'OM', label: '🇴🇲 +968', fullLabel: '🇴🇲 Oman (+968)', digits: 8 },
+  { code: '+973', country: 'BH', label: '🇧🇭 +973', fullLabel: '🇧🇭 Bahrain (+973)', digits: 8 },
+  { code: '+49', country: 'DE', label: '🇩🇪 +49', fullLabel: '🇩🇪 Germany (+49)', digits: 10 },
+  { code: '+33', country: 'FR', label: '🇫🇷 +33', fullLabel: '🇫🇷 France (+33)', digits: 9 },
+  { code: '+39', country: 'IT', label: '🇮🇹 +39', fullLabel: '🇮🇹 Italy (+39)', digits: 10 },
+  { code: '+52', country: 'MX', label: '🇲🇽 +52', fullLabel: '🇲🇽 Mexico (+52)', digits: 10 },
+  { code: '+57', country: 'CO', label: '🇨🇴 +57', fullLabel: '🇨🇴 Colombia (+57)', digits: 10 },
+  { code: '+54', country: 'AR', label: '🇦🇷 +54', fullLabel: '🇦🇷 Argentina (+54)', digits: 10 },
+  { code: '+56', country: 'CL', label: '🇨🇱 +56', fullLabel: '🇨🇱 Chile (+56)', digits: 9 },
+  { code: '+61', country: 'AU', label: '🇦🇺 +61', fullLabel: '🇦🇺 Australia (+61)', digits: 9 },
+  { code: '+91', country: 'IN', label: '🇮🇳 +91', fullLabel: '🇮🇳 India (+91)', digits: 10 },
+  { code: '+41', country: 'CH', label: '🇨🇭 +41', fullLabel: '🇨🇭 Switzerland (+41)', digits: 9 },
 ];
 
 export default function InternationalPhoneInput({
@@ -100,21 +100,24 @@ export default function InternationalPhoneInput({
         disabled={disabled}
         onChange={(e) => handlePrefixChange(e.target.value)}
         style={{
-          padding: '0.6rem 0.5rem',
+          height: '42px',
+          padding: '0 0.5rem',
           border: 'none',
-          borderRight: '1px solid var(--border, #e2e8f0)',
-          background: 'var(--surface-50, #f8fafc)',
-          fontSize: '0.82rem',
+          borderRight: '1px solid #cbd5e1',
+          background: '#f8fafc',
+          fontSize: '0.85rem',
           fontWeight: 600,
-          color: 'var(--text-primary, #0f172a)',
+          color: '#0f172a',
           cursor: 'pointer',
           outline: 'none',
-          maxWidth: '135px'
+          minWidth: '92px',
+          maxWidth: '110px',
+          flexShrink: 0
         }}
       >
         {COUNTRY_CODES.map((c) => (
           <option key={c.code} value={c.code}>
-            {c.label}
+            {c.fullLabel || c.label}
           </option>
         ))}
       </select>
@@ -128,13 +131,14 @@ export default function InternationalPhoneInput({
           placeholder={placeholder}
           style={{
             width: '100%',
-            padding: '0.6rem 0.75rem',
+            height: '42px',
+            padding: '0 0.85rem',
             border: 'none',
             background: 'transparent',
-            fontSize: '0.875rem',
+            fontSize: '0.9rem',
             outline: 'none',
             boxSizing: 'border-box',
-            color: 'var(--text-primary, #0f172a)'
+            color: '#0f172a'
           }}
         />
       </div>

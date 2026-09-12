@@ -12,11 +12,17 @@ import {
   MessageSquare
 } from '@/lib/icons';
 import { useUIStore } from '@/stores/uiStore';
+import { useAuth } from '@/context/AuthContext';
+import { useSimulationStore } from '@/stores/useSimulationStore';
 
 export default function MobileSpeedDialFAB() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { setActiveModal } = useUIStore();
+  const { activeRole } = useAuth();
+  const { simulatedRole } = useSimulationStore();
+  const effectiveRole = simulatedRole || activeRole || 'patient';
+  const isDoctorRole = effectiveRole === 'doctor' || effectiveRole === 'medical_director';
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -64,12 +70,18 @@ export default function MobileSpeedDialFAB() {
     },
     {
       id: 'atlas-ai',
-      label: 'Ask Atlas AI Copilot',
+      label: isDoctorRole ? 'Clinical AI Copilot' : 'Ask Atlas AI Copilot',
       icon: Sparkles,
-      color: '#9333ea',
-      bgColor: '#f3e8ff',
+      color: isDoctorRole ? '#0d9488' : '#9333ea',
+      bgColor: isDoctorRole ? '#ccfbf1' : '#f3e8ff',
       onClick: () => {
-        window.dispatchEvent(new CustomEvent('open-clinical-ai'));
+        window.dispatchEvent(new CustomEvent('open-clinical-ai', {
+          detail: isDoctorRole ? {
+            mode: 'doctor',
+            role: effectiveRole,
+            contextLabel: 'Clinical Decision Support',
+          } : undefined
+        }));
         setIsOpen(false);
       }
     }

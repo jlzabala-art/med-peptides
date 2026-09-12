@@ -38,6 +38,7 @@ import {
   getDocs,
   query,
   where,
+  limit,
   serverTimestamp,
   arrayUnion,
 } from 'firebase/firestore';
@@ -243,11 +244,12 @@ export async function getActiveDoctorIds(patientId) {
 }
 
 /**
- * Get all relationships (admin view).
+ * Get relationships (admin view, bounded Rule #1).
+ * @param {number} [maxCount=200]
  * @returns {Promise<Array>}
  */
-export async function getAllRelationships() {
-  const snap = await getDocs(collection(db, RELATIONSHIPS_COL));
+export async function getAllRelationships(maxCount = 200) {
+  const snap = await getDocs(query(collection(db, RELATIONSHIPS_COL), limit(maxCount)));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 

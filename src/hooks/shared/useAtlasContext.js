@@ -1,10 +1,13 @@
 import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useSimulationStore } from '@/stores/useSimulationStore';
 import { FileText, TrendingUp, AlertCircle, ShoppingCart, UserCheck, MessageSquare, Calendar, ShieldAlert, RefreshCw, Sparkles, BookOpen, Terminal, Database, Activity } from '@/lib/icons';
 
 export function useAtlasContext() {
   const { activeRole } = useAuth();
+  const { simulatedRole } = useSimulationStore();
+  const effectiveRole = simulatedRole || activeRole || 'patient';
   const pathname = usePathname() || '';
 
   const contextData = useMemo(() => {
@@ -16,30 +19,44 @@ export function useAtlasContext() {
     let contextActions = [];
 
     // Role and Path based logic
-    switch (activeRole) {
+    switch (effectiveRole) {
       case 'doctor':
-        themeAccent = '#0f9d58';
-        themeBgActive = 'rgba(15, 157, 88, 0.08)';
+      case 'medical_director':
+        themeAccent = '#0d9488';
+        themeBgActive = 'rgba(13, 148, 136, 0.08)';
         agentType = 'clinical_decision';
+        assistantName = 'Clinical AI Copilot';
         
         if (pathname.includes('/prescriptions')) {
           suggestedPrompts = [
             { label: '📋 Review pending prescriptions' },
-            { label: '💊 Recommended BPC-157 dosage' }
+            { label: '💊 Recommended BPC-157 dosage' },
+            { label: '⚠️ Screen drug interactions' }
           ];
           contextActions = [
             { id: 'doc_sugerir_protocolo', icon: Sparkles, label: 'Suggest Protocols', desc: 'Based on patient biomarkers', color: 'purple', prompt: 'Suggest evidence-based medical protocols tailored to the patient metrics.' },
             { id: 'doc_interacciones', icon: ShieldAlert, label: 'Interaction Check', desc: 'Cross-reference compounds', color: 'red', prompt: 'Check for potential contraindications or drug-peptide interactions.' }
           ];
-        } else {
+        } else if (pathname.includes('/patients')) {
           suggestedPrompts = [
-            { label: '💉 GLP-1 Weight Management Protocol' },
-            { label: '🔬 Peptide Clinical Trial Evidence' },
-            { label: '📋 Draft Clinical Consultation Note' }
+            { label: '📊 Patient biomarker trends' },
+            { label: '⚠️ Screen contraindications' },
+            { label: '📝 Draft prescription protocol' }
           ];
           contextActions = [
-            { id: 'doc_citas_hoy', icon: Calendar, label: "Today's Schedule", desc: 'Consultations & intakes', color: 'blue', prompt: 'Show my scheduled patient consultations for today.' },
-            { id: 'doc_seguimiento', icon: AlertCircle, label: 'Follow-up Alerts', desc: 'Check-ins required', color: 'orange', prompt: 'List active patients who are due for biomarker follow-up.' }
+            { id: 'doc_interacciones', icon: ShieldAlert, label: 'Drug Safety Check', desc: 'Contraindications & interactions', color: 'red', prompt: 'Screen active patient protocols for contraindications and drug interactions.' },
+            { id: 'doc_biomarkers', icon: Activity, label: 'Biomarker Review', desc: 'HbA1c, IGF-1 & blood panels', color: 'teal', prompt: 'Evaluate recent blood lab panels and identify out-of-range biomarkers.' }
+          ];
+        } else {
+          suggestedPrompts = [
+            { label: '💉 GLP-1 Protocol Titration' },
+            { label: '🔬 Peptide Clinical Evidence' },
+            { label: '📋 Draft Clinical Consultation Note' },
+            { label: '⚠️ Drug Interaction Check' }
+          ];
+          contextActions = [
+            { id: 'doc_safety', icon: ShieldAlert, label: 'Drug Safety & Warnings', desc: 'Contraindications & interactions', color: 'red', prompt: 'Screen active patient protocols for contraindications and compound interactions.' },
+            { id: 'doc_biomarkers', icon: Activity, label: 'Biomarker Lab Review', desc: 'Evaluate blood panels & trends', color: 'teal', prompt: 'Evaluate recent blood lab panels and identify out-of-range biomarkers.' }
           ];
         }
         break;
@@ -139,9 +156,9 @@ export function useAtlasContext() {
       assistantName,
       suggestedPrompts,
       contextActions,
-      contextMode: activeRole || 'default'
+      contextMode: (effectiveRole === 'medical_director' ? 'doctor' : effectiveRole) || 'default'
     };
-  }, [activeRole, pathname]);
+  }, [effectiveRole, pathname]);
 
   return contextData;
 }

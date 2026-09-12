@@ -34,6 +34,7 @@ export const CURRENT_SCHEMA_VER = 2;
  */
 export const VALID_STATUSES = Object.freeze([
   'draft',
+  'published',
   'active',
   'out of stock',
   'hidden',

@@ -2,13 +2,13 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, ADMIN_EMAILS } from '../../context/AuthContext';
 import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
 import TabSkeleton from '../ui/TabSkeleton';
 import { Loader2 } from '@/lib/icons';
 
 export default function ProtectedRoute({ children, allowedRoles, requiredRole }) {
-  const { user, activeRole, loading } = useAuth();
+  const { user, userProfile, activeRole, loading, isAdmin: authIsAdmin } = useAuth();
   const [mounted, setMounted] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -17,25 +17,31 @@ export default function ProtectedRoute({ children, allowedRoles, requiredRole })
     setMounted(true);
   }, []);
 
-  // In development/test only: allow testing with dev_admin flag. Strictly blocked in production.
-  const isDevAdmin = mounted && process.env.NODE_ENV !== 'production' && (
-    localStorage.getItem('dev_admin') === 'true' || 
-    window.__DEV_ADMIN__ === true ||
-    (user && (user.email === 'admin@regenpept.test' || activeRole === 'admin'))
-  );
+  // Admins always have super-user clearance to inspect and navigate all portals
+  const isAdmin = authIsAdmin || activeRole === 'admin' || userProfile?.role === 'admin' || userProfile?.isAdmin === true || (user && ADMIN_EMAILS.includes(user.email?.toLowerCase()));
 
   const effectiveRoles = allowedRoles || (requiredRole ? [requiredRole] : null);
-  const isUnauthorized = mounted && !isDevAdmin && !loading && (
+  const isUnauthorized = mounted && !loading && !isAdmin && (
     !user || (effectiveRoles && !effectiveRoles.includes(activeRole))
   );
 
   React.useEffect(() => {
     if (isUnauthorized) {
-      router.push('/login');
+      if (!user) {
+        router.push('/login');
+      } else {
+        // Authenticated user lacks clearance for this area — redirect to their authorized portal
+        const roleHome = activeRole === 'doctor' ? '/doctor'
+          : activeRole === 'patient' ? '/patient'
+          : activeRole === 'wholesaler' ? '/wholesaler'
+          : activeRole === 'supplier' ? '/wholesaler'
+          : '/';
+        router.push(roleHome);
+      }
     }
-  }, [isUnauthorized, router]);
+  }, [isUnauthorized, user, activeRole, router]);
 
-  if (!mounted || (loading && !isDevAdmin)) {
+  if (!mounted || (loading && !isAdmin)) {
     return (
       <div style={{ width: '100%', minHeight: '100vh', background: 'var(--color-bg-base, #f8fafc)', padding: '1.5rem', boxSizing: 'border-box' }}>
         <TabSkeleton />

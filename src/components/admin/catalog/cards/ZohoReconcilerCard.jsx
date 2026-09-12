@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Zap, RefreshCw, CheckCircle2, AlertCircle, Link2, ExternalLink } from 'lucide-react';
+import { Zap, RefreshCw, CheckCircle2, AlertCircle, Link2, ExternalLink, Copy, Check } from 'lucide-react';
 import { formatNumberAdaptive } from '../../../../utils/formatters';
 import notifier from '../../../../services/NotificationService';
 
@@ -16,6 +16,7 @@ import notifier from '../../../../services/NotificationService';
  */
 export default function ZohoReconcilerCard({ variant, product, onUpdateVariantField }) {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [copiedSku, setCopiedSku] = useState(false);
 
   if (!variant && !product) return null;
 
@@ -115,8 +116,55 @@ export default function ZohoReconcilerCard({ variant, product, onUpdateVariantFi
           <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
             Portal SKU
           </div>
-          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>
-            {sku}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            marginTop: '3px',
+            padding: '2px 8px',
+            backgroundColor: '#f1f5f9',
+            border: '1px solid #e2e8f0',
+            borderRadius: '5px',
+            maxWidth: '100%'
+          }}>
+            <span 
+              title={sku}
+              style={{ 
+                fontSize: '0.74rem', 
+                fontWeight: 700, 
+                color: '#0f172a', 
+                fontFamily: 'monospace',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {sku}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                if (navigator?.clipboard?.writeText) {
+                  navigator.clipboard.writeText(sku);
+                  setCopiedSku(true);
+                  setTimeout(() => setCopiedSku(false), 2000);
+                  notifier.info('SKU copied to clipboard');
+                }
+              }}
+              title="Copy SKU"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color: copiedSku ? '#16a34a' : '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+                flexShrink: 0
+              }}
+            >
+              {copiedSku ? <Check size={12} /> : <Copy size={12} />}
+            </button>
           </div>
         </div>
 
@@ -124,8 +172,16 @@ export default function ZohoReconcilerCard({ variant, product, onUpdateVariantFi
           <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
             Zoho Item ID / Code
           </div>
-          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: isLinked ? '#4f46e5' : '#94a3b8', fontFamily: 'monospace' }}>
-            {zohoItemId || 'None (Click create above)'}
+          <div style={{ marginTop: '4px' }}>
+            {isLinked ? (
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#4f46e5', fontFamily: 'monospace' }}>
+                {zohoItemId}
+              </span>
+            ) : (
+              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                Not connected
+              </span>
+            )}
           </div>
         </div>
 

@@ -221,7 +221,7 @@ export const ProductSchema = z.object({
   
   description: z.string().optional(),
   isActive: z.boolean().default(true),
-  status: z.enum(['draft', 'active', 'out of stock', 'hidden', 'archived']).default('active'),
+  status: z.enum(['draft', 'published', 'active', 'out of stock', 'hidden', 'archived']).default('published'),
   featured: z.boolean().default(false),
   requiresColdChain: z.boolean().default(true),
   requiresPrescription: z.boolean().default(true),
@@ -270,7 +270,7 @@ export const ApiRawMaterialVariantSchema = z.object({
   supplier: z.string().optional(),
   supplierId: z.string().optional(),
   supplierName: z.string().optional(),
-  status: z.enum(['draft', 'active', 'out of stock', 'hidden', 'archived']).default('active'),
+  status: z.enum(['draft', 'published', 'active', 'out of stock', 'hidden', 'archived']).default('published'),
   isActive: z.boolean().default(true),
 });
 

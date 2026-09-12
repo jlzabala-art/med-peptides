@@ -1,15 +1,31 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSimulationStore } from '../../stores/useSimulationStore';
+import { CANONICAL_ROLES, normalizeRole } from '../../constants/roles';
 
 export const ADMIN_ROLES = {
-  admin: {
-    id: 'admin',
-    label: 'Admin / Superuser',
+  [CANONICAL_ROLES.ADMIN]: {
+    id: CANONICAL_ROLES.ADMIN,
+    label: 'Super Admin',
     allowedTabs: ['*'], // Admin bypasses filtering
   },
-  medical_director: {
-    id: 'medical_director',
+  [CANONICAL_ROLES.MEDICAL_DIRECTOR]: {
+    id: CANONICAL_ROLES.MEDICAL_DIRECTOR,
     label: 'Medical Director',
+    allowedTabs: [
+      'dashboard',
+      'prescriptions',
+      'prescription-agent',
+      'patients',
+      'protocols',
+      'products',
+      'clinical-ai',
+      'lab-tests',
+      'doctors',
+    ],
+  },
+  [CANONICAL_ROLES.DOCTOR]: {
+    id: CANONICAL_ROLES.DOCTOR,
+    label: 'Physician / Prescriber',
     allowedTabs: [
       'dashboard',
       'prescriptions',
@@ -21,8 +37,59 @@ export const ADMIN_ROLES = {
       'lab-tests',
     ],
   },
-  account_manager: {
-    id: 'account_manager',
+  [CANONICAL_ROLES.CLINIC]: {
+    id: CANONICAL_ROLES.CLINIC,
+    label: 'Clinic / Practice',
+    allowedTabs: [
+      'dashboard',
+      'doctors',
+      'patients',
+      'prescriptions',
+      'protocols',
+      'products',
+      'orders',
+    ],
+  },
+  [CANONICAL_ROLES.COMPOUNDING_PHARMACY]: {
+    id: CANONICAL_ROLES.COMPOUNDING_PHARMACY,
+    label: 'Compounding Pharmacy',
+    allowedTabs: [
+      'dashboard',
+      'prescriptions',
+      'products',
+      'purchase-orders',
+      'logistics',
+    ],
+  },
+  [CANONICAL_ROLES.WHOLESALER]: {
+    id: CANONICAL_ROLES.WHOLESALER,
+    label: 'Wholesaler / Distributor',
+    allowedTabs: [
+      'dashboard',
+      'orders',
+      'products',
+      'purchase-orders',
+      'wholesellers',
+      'logistics',
+      'quotations',
+    ],
+  },
+  [CANONICAL_ROLES.SUPPLIER]: {
+    id: CANONICAL_ROLES.SUPPLIER,
+    label: 'Supplier / Manufacturer',
+    allowedTabs: [
+      'dashboard',
+      'purchase-orders',
+      'wholesellers',
+      'purchase-rfqs',
+      'purchase-bills',
+      'products',
+      'logistics',
+      'import-catalogs',
+    ],
+  },
+  [CANONICAL_ROLES.ACCOUNT_MANAGER]: {
+    id: CANONICAL_ROLES.ACCOUNT_MANAGER,
     label: 'Account Manager',
     allowedTabs: [
       'dashboard',
@@ -36,22 +103,8 @@ export const ADMIN_ROLES = {
       'relationships',
     ],
   },
-  supplier: {
-    id: 'supplier',
-    label: 'Supplier / Wholesaler',
-    allowedTabs: [
-      'dashboard',
-      'purchase-orders',
-      'wholesellers',
-      'purchase-rfqs',
-      'purchase-bills',
-      'products',
-      'logistics',
-      'import-catalogs',
-    ],
-  },
-  patient_coordinator: {
-    id: 'patient_coordinator',
+  [CANONICAL_ROLES.PATIENT_COORDINATOR]: {
+    id: CANONICAL_ROLES.PATIENT_COORDINATOR,
     label: 'Patient Coordinator',
     allowedTabs: [
       'dashboard',
@@ -60,6 +113,35 @@ export const ADMIN_ROLES = {
       'protocols',
       'orders',
       'communications',
+    ],
+  },
+  [CANONICAL_ROLES.PATIENT]: {
+    id: CANONICAL_ROLES.PATIENT,
+    label: 'Patient Personal Health',
+    allowedTabs: [
+      'dashboard',
+      'prescriptions',
+      'protocols',
+      'orders',
+      'lab-tests',
+    ],
+  },
+  [CANONICAL_ROLES.GUEST]: {
+    id: CANONICAL_ROLES.GUEST,
+    label: 'Public / Guest',
+    allowedTabs: ['dashboard'],
+  },
+  wholeseller: {
+    id: 'wholesaler',
+    label: 'Wholesaler / Distributor',
+    allowedTabs: [
+      'dashboard',
+      'orders',
+      'products',
+      'purchase-orders',
+      'wholesellers',
+      'logistics',
+      'quotations',
     ],
   },
   fagron_clinic: {
@@ -114,10 +196,11 @@ export function useAdminRoleSimulation() {
     listeners.forEach((listener) => listener());
   }, [exitStoreSimulation]);
 
-  const currentRoleConfig = ADMIN_ROLES[role] || ADMIN_ROLES.admin;
+  const normalizedRole = normalizeRole(role);
+  const currentRoleConfig = ADMIN_ROLES[normalizedRole] || ADMIN_ROLES[role] || ADMIN_ROLES.admin;
 
   return {
-    simulatedRole: role,
+    simulatedRole: normalizedRole,
     setSimulatedRole,
     impersonatedUser,
     impersonateUser,

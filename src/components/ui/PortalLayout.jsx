@@ -29,6 +29,7 @@ import UserProfileMenu from './UserProfileMenu';
 import AdminPortalSwitcher from '../shared/AppHeader/AdminPortalSwitcher';
 import GlobalPreferencesDropdown from '../shared/AppHeader/GlobalPreferencesDropdown';
 import RoleImpersonatorSelector from '../shell/RoleImpersonatorSelector';
+import ImpersonationBanner from '../shared/ImpersonationBanner';
 import useAdminNotifications from '../../hooks/useAdminNotifications';
 import { useCopilot } from '../../context/CopilotContext';
 import CopilotWorkspacePanel from '../ai-copilot/CopilotWorkspacePanel';
@@ -38,6 +39,7 @@ import PullToRefreshContainer from '../mobile/PullToRefreshContainer';
 import { Menu, Search, Bell, HelpCircle, User, Bot, X, Sparkles, Maximize2, List, Briefcase } from '@/lib/icons';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { useCart } from '../../context/CartProvider';
+import { useSimulationStore } from '../../stores/useSimulationStore';
 import MobileBottomNav from '../mobile/MobileBottomNav';
 
 // ── Atlas AI — Suggested Prompts per Role (100% English) ──────────────────────
@@ -90,6 +92,7 @@ const ROLE_SUGGESTED_PROMPTS = {
 const ROLE_AGENT_TYPE = {
   admin: 'admin_operations',
   doctor: 'clinical_decision',
+  medical_director: 'clinical_decision',
   patient: 'wellness_companion',
   wholesaler: 'b2b_optimizer',
   compounding_pharmacy: 'formulation_expert',
@@ -193,8 +196,17 @@ export default function PortalLayout({
     typeof window !== 'undefined' ? window.innerWidth <= 768 : false
   );
 
+  const { simulatedRole } = useSimulationStore();
+  const effectiveAiRole = simulatedRole || roleContext;
+  const normalizedAiRole = effectiveAiRole === 'medical_director' ? 'doctor' : effectiveAiRole;
+
   useEffect(() => {
-    const handleOpenAi = () => setAiOpen(true);
+    const handleOpenAi = (e) => {
+      if (e?.detail) {
+        setEnrichedContext(prev => ({ ...prev, ...e.detail }));
+      }
+      setAiOpen(true);
+    };
     window.addEventListener('open-clinical-ai', handleOpenAi);
     return () => window.removeEventListener('open-clinical-ai', handleOpenAi);
   }, []);
@@ -522,6 +534,7 @@ export default function PortalLayout({
     >
       <style>{siriAnimation}</style>
       <style>{headerCSS}</style>
+      <ImpersonationBanner />
       {/* TOPBAR */}
       <header className="portal-header">
         {/* LEFT: hamburger + logo + title + portal switcher */}
@@ -1111,9 +1124,9 @@ export default function PortalLayout({
                 isOpen={true}
                 setIsOpen={() => setAiOpen(false)}
                 pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext}
-                contextMode={roleContext}
-                agentType={ROLE_AGENT_TYPE[roleContext] || 'default'}
-                suggestedPrompts={ROLE_SUGGESTED_PROMPTS[roleContext] || []}
+                contextMode={normalizedAiRole}
+                agentType={ROLE_AGENT_TYPE[effectiveAiRole] || ROLE_AGENT_TYPE[normalizedAiRole] || 'default'}
+                suggestedPrompts={ROLE_SUGGESTED_PROMPTS[effectiveAiRole] || ROLE_SUGGESTED_PROMPTS[normalizedAiRole] || []}
               />
             </div>
           </aside>
@@ -1146,9 +1159,9 @@ export default function PortalLayout({
         isOpen={isAiOpen}
         setIsOpen={setAiOpen}
         pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext}
-        contextMode={roleContext}
-        agentType={ROLE_AGENT_TYPE[roleContext] || 'default'}
-        suggestedPrompts={ROLE_SUGGESTED_PROMPTS[roleContext] || []}
+        contextMode={normalizedAiRole}
+        agentType={ROLE_AGENT_TYPE[effectiveAiRole] || ROLE_AGENT_TYPE[normalizedAiRole] || 'default'}
+        suggestedPrompts={ROLE_SUGGESTED_PROMPTS[effectiveAiRole] || ROLE_SUGGESTED_PROMPTS[normalizedAiRole] || []}
       />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
       <MobileBottomNav 

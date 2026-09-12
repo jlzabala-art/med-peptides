@@ -6,13 +6,7 @@ import { getTokens } from 'next-firebase-auth-edge';
 import { serverConfig } from '../authConfig';
 import GlobalClientWrapper from './GlobalClientWrapper';
 import { Suspense } from 'react';
-import { Inter } from 'next/font/google';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-sans',
-});
 
 export const metadata = {
   title: 'Atlas Health — Precision Peptide & Protocol Intelligence',
@@ -20,11 +14,13 @@ export const metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    shortcut: '/favicon.svg',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 };
 
@@ -59,14 +55,20 @@ async function AuthWrapper({ children }) {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-        <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="apple-touch-icon" href="/icon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
         <style>{`
+          :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          }
+          body {
+            font-family: var(--font-sans);
+          }
           .global-spinner {
             width: 48px;
             height: 48px;
@@ -91,7 +93,7 @@ export default function RootLayout({ children }) {
           }
         `}</style>
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <div id="root">
           <Suspense fallback={<div className="spinner-container"><span className="global-spinner"></span></div>}>
             <AuthWrapper>

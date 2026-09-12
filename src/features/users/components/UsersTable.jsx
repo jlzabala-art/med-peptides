@@ -13,6 +13,7 @@ import { logAction } from '../../../services/auditLogger';
 import { useToast } from '../../../hooks/useToast';
 import notifier from '../../../services/NotificationService';
 import { useRoleAccess } from '../../../hooks/useRoleAccess';
+import { useAdminRoleSimulation } from '../../../hooks/admin/useAdminRoleSimulation';
 
 import PageHeader from '../../../components/ui/PageHeader';
 import GlobalSearchBar from '../../../components/ui/GlobalSearchBar';
@@ -39,8 +40,9 @@ import FinancialWholesalerModal from '../../../components/admin/FinancialWholesa
 import User360Drawer from '../../../components/admin/users/User360Drawer';
 import InviteUserModal from '../../../components/admin/users/InviteUserModal';
 import AIUserIntelligenceModal from '../../../components/admin/users/AIUserIntelligenceModal';
-import { useAdminRoleSimulation } from '../../../hooks/admin/useAdminRoleSimulation';
 import { EMAILJS_CONFIG } from '@/config/emailjs';
+import { approveUserRoleAction } from '../../../actions/adminActions';
+import { normalizeRole, CANONICAL_ROLES, ROLE_METADATA } from '../../../constants/roles';
 
 const EMAILJS_TEMPLATE_ID = EMAILJS_CONFIG.TEMPLATES.USER_WELCOME; 
 
@@ -237,15 +239,57 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     }
   }, [deepLinkPreselect, filteredUsers, selectAll]);
 
-  async function handleToggleApproval(userId, currentStatus) {
+  async function handleToggleApproval(targetUser, currentStatus) {
     if (readOnly || !canApprove) return;
-    const confirmMessage = currentStatus ? "Are you sure you want to REVOKE this user's professional access?" : 'Approve this user for professional access?';
+    const userId = typeof targetUser === 'object' ? targetUser.id : targetUser;
+    const fullUser = typeof targetUser === 'object' ? targetUser : filteredUsers.find(u => u.id === userId);
+    const userName = fullUser ? getUserFullName(fullUser) : 'this user';
+    
+    const confirmMessage = currentStatus 
+      ? `Are you sure you want to REVOKE professional access for ${userName}?` 
+      : `Approve ${userName} for professional access and synchronize RBAC claims?`;
+
     notifier.confirmCritical(confirmMessage, async () => {
       try {
-        await updateDoc(doc(db, 'users', userId), { approved: !currentStatus });
-        await logAction(user?.uid || 'admin', 'admin', currentStatus ? 'USER_REVOKE' : 'USER_APPROVE', userId);
+        if (!currentStatus) {
+          // Approving: resolve canonical role
+          const rawRole = fullUser?.role || fullUser?.roles?.[0] || fullUser?.requestedRole || defaultRole || CANONICAL_ROLES.DOCTOR;
+          const canonicalRole = normalizeRole(rawRole);
+          
+          const result = await approveUserRoleAction(userId, canonicalRole);
+          if (result && !result.success) {
+            // Fallback direct Firestore update if server action encountered an issue
+            await updateDoc(doc(db, 'users', userId), { 
+              approved: true, 
+              role: canonicalRole, 
+              roles: [canonicalRole],
+              professionalStatus: 'approved' 
+            });
+          }
+
+          // Trigger automatic welcome email notification
+          if (fullUser?.email) {
+            try {
+              await handleSendEmail(fullUser);
+            } catch (e) {
+              console.warn("Automatic welcome email skipped:", e);
+            }
+          }
+
+          await logAction(user?.uid || 'admin', 'admin', 'USER_APPROVE', userId);
+          toast.success(`User ${userName} approved as ${ROLE_METADATA[canonicalRole]?.label || canonicalRole}. Permissions synchronized.`);
+        } else {
+          // Revoking access
+          await updateDoc(doc(db, 'users', userId), { 
+            approved: false,
+            professionalStatus: 'revoked'
+          });
+          await logAction(user?.uid || 'admin', 'admin', 'USER_REVOKE', userId);
+          toast.warning(`Professional access revoked for ${userName}.`);
+        }
         refetch();
       } catch (err) {
+        console.error("handleToggleApproval error:", err);
         toast.error('Failed to update user status.');
       }
     });
@@ -530,6 +574,14 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
       render: (u) => {
         const actions = [];
         
+        if (!u.isArchived && canApprove && !u.approved) {
+          actions.push({
+            type: 'approve',
+            label: 'Approve Access',
+            onClick: (e) => { e.stopPropagation(); handleToggleApproval(u, false); }
+          });
+        }
+
         // AI User Intelligence Action
         actions.push({
           label: 'AI Outreach',
@@ -540,10 +592,11 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           }
         });
 
-        if (!u.isArchived && canApprove) {
+        if (!u.isArchived && canApprove && u.approved) {
           actions.push({
-            type: u.approved ? 'revoke' : 'approve',
-            onClick: (e) => { e.stopPropagation(); handleToggleApproval(u.id, u.approved); }
+            type: 'revoke',
+            label: 'Revoke Access',
+            onClick: (e) => { e.stopPropagation(); handleToggleApproval(u, true); }
           });
         }
         

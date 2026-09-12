@@ -8,6 +8,8 @@ import MobileVariantCard from './MobileVariantCard';
 import VariantTimelinePanel from './VariantTimelinePanel';
 import { COMMERCIAL_CHANNELS } from '../../../utils/commercialPricingHelper';
 import { ChevronDown, ChevronRight, Building2, Layers, ListFilter, ShieldCheck, FileText, Share2, Download, DollarSign, TrendingUp, Clock, Zap } from 'lucide-react';
+import toast from 'react-hot-toast';
+import ShareProductMonographDrawer from './drawers/ShareProductMonographDrawer';
 
 // Lead times by supplier geography & fulfillment SLA
 const SUPPLIER_LEAD_TIMES = {
@@ -105,6 +107,20 @@ export default function VariantAccordion({
       ...prev,
       [suppKey]: !prev[suppKey]
     }));
+  };
+
+  const [shareDrawerConfig, setShareDrawerConfig] = useState({ isOpen: false, supplierKey: null });
+
+  const handleSharePublicDatasheet = (group) => {
+    const slug = selectedProduct?.slug || selectedProduct?.id;
+    if (!slug) {
+      toast.error('Product identifier not found');
+      return;
+    }
+    setShareDrawerConfig({
+      isOpen: true,
+      supplierKey: group?.key || group?.name || null
+    });
   };
 
   // Helper: extract numeric mg value from a variant for sorting
@@ -513,6 +529,44 @@ export default function VariantAccordion({
                       <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
                         {group.name}
                       </span>
+
+                      {/* 🌐 1-Click Public Datasheet Export & Share */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSharePublicDatasheet(group);
+                        }}
+                        title="Export & Share Public Datasheet"
+                        aria-label="Export public datasheet"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '2px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          color: '#0284c7',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+                          transition: 'all 0.15s ease',
+                          lineHeight: 1.4
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#0284c7';
+                          e.currentTarget.style.backgroundColor = '#f0f9ff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#cbd5e1';
+                          e.currentTarget.style.backgroundColor = '#ffffff';
+                        }}
+                      >
+                        <Share2 size={12} style={{ color: '#0284c7' }} />
+                        <span>Public Datasheet</span>
+                      </button>
                       {group.hasCOA && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.68rem', fontWeight: 600, color: '#059669', backgroundColor: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>
                           <ShieldCheck size={11} /> COA Verified
@@ -610,6 +664,14 @@ export default function VariantAccordion({
           emptySubtitle="Try resetting filters or adding a new variant for this product."
         />
       )}
+
+      {/* 🌐 Flexible Multi-Supplier & Format Share Drawer */}
+      <ShareProductMonographDrawer
+        isOpen={shareDrawerConfig.isOpen}
+        onClose={() => setShareDrawerConfig({ isOpen: false, supplierKey: null })}
+        product={selectedProduct}
+        initialSupplierKey={shareDrawerConfig.supplierKey}
+      />
     </div>
   );
 }

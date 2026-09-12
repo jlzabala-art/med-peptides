@@ -122,16 +122,41 @@ export const deletePrescription = async (id) => {
 };
 
 /**
- * Fetches all registered users for care team selection.
+let careTeamCache = { data: null, expiresAt: 0 };
+
+/**
+ * Fetches care team eligible users (doctors, clinics, medical directors, staff) with TTL caching.
  * @returns {Promise<Array>}
  */
 export const fetchCareTeamUsers = async () => {
+  const now = Date.now();
+  if (careTeamCache.data && careTeamCache.expiresAt > now) {
+    return careTeamCache.data;
+  }
+
   try {
-    const usersSnap = await getDocs(collection(db, 'users'));
-    return usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const q = query(
+      collection(db, 'users'),
+      where('role', 'in', ['doctor', 'clinic', 'medical_director', 'staff', 'admin']),
+      limit(100)
+    );
+    const usersSnap = await getDocs(q);
+    const users = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    careTeamCache = { data: users, expiresAt: now + 5 * 60 * 1000 };
+    return users;
   } catch (err) {
     logger.error('[prescriptionsService] fetchCareTeamUsers failed', { error: err.message });
-    throw err;
+    // Fallback if index missing: query with limit 100
+    try {
+      const fallbackSnap = await getDocs(query(collection(db, 'users'), limit(100)));
+      const fallbackUsers = fallbackSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(u => ['doctor', 'clinic', 'medical_director', 'staff', 'admin'].includes(u.role));
+      careTeamCache = { data: fallbackUsers, expiresAt: now + 2 * 60 * 1000 };
+      return fallbackUsers;
+    } catch (fallbackErr) {
+      throw err;
+    }
   }
 };
 

@@ -188,16 +188,18 @@ function PhysicianDrawerContent({ id, onClose }) {
 // ── Rx Builder Drawer ─────────────────────────────────────────────────────────
 // Triggered by any module via: openDrawer('rx-builder', 'new', { initialPatient, initialProtocol, initialDoctor, initialItems })
 function RxBuilderDrawerContent({ data, onClose }) {
+  const mode = data?.mode || (data?.sourceModule === 'quotations' ? 'quotation' : 'prescription');
+  const title = mode === 'quotation' ? 'New Commercial Quotation' : 'New Prescription';
   return (
     <StandardDrawer
-      title="New Prescription"
+      title={title}
       isOpen={true}
       onClose={onClose}
       width="min(92vw, 960px)"
     >
       <div style={{ padding: '1.5rem' }}>
         <UniversalOrderBuilder
-          mode="prescription"
+          mode={mode}
           sourceModule={data?.sourceModule || 'unknown'}
           initialPatient={data?.initialPatient || null}
           initialProtocol={data?.initialProtocol || null}
@@ -371,7 +373,7 @@ export default function GlobalDrawerManager() {
           );
         }
 
-        if (drawer.type === 'quotation') {
+        if (drawer.type === 'quotation' || drawer.type === 'quote') {
           return (
             <div key={drawer.id} style={{ zIndex, position: 'relative' }}>
               <QuotationDrawerContent id={drawer.resourceId} data={drawer.data} onClose={() => handleClose(drawer)} />

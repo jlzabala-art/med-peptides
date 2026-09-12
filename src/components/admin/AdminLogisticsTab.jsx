@@ -6,11 +6,13 @@ import Truck from "lucide-react/dist/esm/icons/truck";
 import Clock from "lucide-react/dist/esm/icons/clock";
 import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import Package from "lucide-react/dist/esm/icons/package";
+import Download from "lucide-react/dist/esm/icons/download";
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, getDocs, doc, updateDoc, limit, startAfter, getCountFromServer, orderBy, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Card, CardContent } from '../ui/Card';
 import MetricCard from '../ui/MetricCard';
+import KpiScopeBar from '../ui/KpiScopeBar';
 
 import DataTable from '../ui/DataTable';
 import KittingRiskAnalysis from './KittingRiskAnalysis';
@@ -20,9 +22,11 @@ import GlobalSearchBar from '../ui/GlobalSearchBar';
 import StatusChip from '../ui/StatusChip';
 import CopyableId from '../ui/CopyableId';
 import AppActionGroup from '../ui/AppActionGroup';
+import { exportToCSV } from '../../utils/universalExporter';
 
 export default function AdminLogisticsTab() {
   const [activeTab, setActiveTab] = useState('supplier_shipments'); // 'supplier_shipments' or 'agency_rfqs'
+  const [kpiScope, setKpiScope] = useState('filtered');
   const [dataList, setDataList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -159,13 +163,88 @@ export default function AdminLogisticsTab() {
     }
   ];
 
+  const activeDataForKpis = dataList;
+  const kpis = {
+    total: kpiScope === 'global' ? kpiStats.total : activeDataForKpis.length,
+    inTransit: activeDataForKpis.filter(d => ['shipped', 'in_transit', 'dispatched', 'en tránsito'].includes(String(d.status || '').toLowerCase())).length,
+    delivered: activeDataForKpis.filter(d => String(d.status || '').toLowerCase() === 'delivered').length,
+    pending: activeDataForKpis.filter(d => ['pending', 'draft', 'delayed', 'action_required'].includes(String(d.status || '').toLowerCase())).length,
+  };
+
+  const handleExportLogistics = () => {
+    if (dataList.length === 0) {
+      notifier.info("No logistics records to export");
+      return;
+    }
+    const cols = [
+      { key: 'id', header: 'ID', accessor: d => d.id },
+      { key: 'partner', header: activeTab === 'agency_rfqs' ? 'Client' : 'Supplier', accessor: d => d.clientName || d.supplierName || d.supplierId || '' },
+      { key: 'status', header: 'Status', accessor: d => d.status || '' },
+      { key: 'carrier', header: 'Carrier', accessor: d => d.carrier || '' },
+      { key: 'trackingNumber', header: 'Tracking', accessor: d => d.trackingNumber || '' },
+      { key: 'createdAt', header: 'Created', accessor: d => (d.createdAt?.seconds ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : '') }
+    ];
+    exportToCSV(dataList, cols, `${activeTab}_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    notifier.success(`Exported ${dataList.length} logistics records to CSV.`);
+  };
+
   return (
-    <div style={{ padding: '0 2rem 2rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '3rem' }}>
       <PageHeader
-        title="Logistics & Shipping"
+        title="Logistics & Cold-Chain Tracking"
         subtitle="Global control center for tracking and managing operations."
         icon={Truck}
+        actions={
+          <button
+            className="btn btn-outline"
+            onClick={handleExportLogistics}
+            title="Export logistics records to CSV"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <Download size={15} /> Export
+          </button>
+        }
       />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <KpiScopeBar
+          scope={kpiScope}
+          onScopeChange={setKpiScope}
+          isFiltered={dataList.length !== kpiStats.total}
+          filteredCount={dataList.length}
+          globalCount={kpiStats.total}
+        />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          <MetricCard
+            title="Total Records"
+            value={kpis.total}
+            icon={Package}
+            trend="Active operations volume"
+            trendDirection="neutral"
+          />
+          <MetricCard
+            title="In Transit"
+            value={kpis.inTransit}
+            icon={Truck}
+            trend="Cold-chain courier network"
+            trendDirection="up"
+          />
+          <MetricCard
+            title="Delivered"
+            value={kpis.delivered}
+            icon={CheckCircle}
+            trend="Successful clinical handoffs"
+            trendDirection="up"
+          />
+          <MetricCard
+            title="Pending Dispatch"
+            value={kpis.pending}
+            icon={Clock}
+            trend="Awaiting warehouse pickup"
+            trendDirection="neutral"
+          />
+        </div>
+      </div>
 
       <div style={{ marginBottom: '0.5rem' }}>
         <GlobalSearchBar
@@ -181,15 +260,6 @@ export default function AdminLogisticsTab() {
       </div>
 
       <KittingRiskAnalysis />
-
-      <div className="kpi-scroll-row" style={{ paddingBottom: '0.5rem' }}>
-        <MetricCard
-          title="Total Records"
-          value={kpiStats.total}
-          icon={Package}
-          accentColor="var(--color-primary, #4f46e5)"
-        />
-      </div>
 
       <div className="gcp-table-container">
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--surface)' }}>

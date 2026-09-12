@@ -15,9 +15,9 @@ service cloud.firestore {
     // ── B2B Portal Role Helpers ──────────────────────────────────────────────
     function isDoctor() {
       return isAuthenticated() && (
-        request.auth.token.role == 'doctor' ||
+        request.auth.token.role in ['doctor', 'medical_director'] ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor')
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['doctor', 'medical_director'])
       );
     }
 
@@ -57,6 +57,7 @@ service cloud.firestore {
 
     function isValidProductType(type) {
       return type in [
+        'finished_product', 'raw_material',
         'peptide', 'supplement', 'test_kit', 'equipment', 'consumable',
         'api_raw_material', 'bundle', 'subscription', 'hormone',
         'small_molecule', 'injectable_nutrient', 'iv_protocol',
@@ -554,14 +555,14 @@ service cloud.firestore {
     match /purchaseBills/{id} { allow read, write: if isAdmin(); }
 
     // ── SALES (O2C) ──
-    match /b2b_quotations/{id} { allow read, write: if true; }
+    match /b2b_quotations/{id} { allow read, write: if isAuthenticated() && (isAdmin() || isWholesaler() || isDoctor()); }
     match /sales_orders/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
     match /b2b_invoices/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
     match /b2b_payments/{id} { allow read, write: if isAdmin() || isWholesaler() || isDoctor(); }
 
-    match /inbound_emails/{id} { allow read, write: if true; }
-    match /command_center/{id} { allow read, write: if true; }
-    match /operations_queue/{id} { allow read, write: if true; }
+    match /inbound_emails/{id} { allow read, write: if isAdmin(); }
+    match /command_center/{id} { allow read, write: if isAdmin(); }
+    match /operations_queue/{id} { allow read, write: if isAdmin(); }
 
     // ── settings ────────────────────────────────────────────────────────────
     match /settings/{docId} {

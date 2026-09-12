@@ -1,10 +1,11 @@
 "use client";
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Search, X, Command, Loader, Clock, ChevronDown, Filter } from '@/lib/icons';
+import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode } from '@/lib/icons';
 import '../../styles/search.css';
 import MultiSelectFilter from './MultiSelectFilter';
 import SingleSelectFilter from './SingleSelectFilter';
 import MobileFiltersSheet from '../mobile/MobileFiltersSheet';
+import QrScannerModal from '../shared/QrScannerModal';
 import { searchAlgolia } from '@/services/algoliaSearch';
 import { trackSearchClick } from '@/services/algoliaInsights';
 
@@ -94,6 +95,7 @@ export default function GlobalSearchBar({
   const [suggestions, setSuggestions] = useState([]);
   const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -383,6 +385,32 @@ export default function GlobalSearchBar({
             </button>
           )}
 
+          {/* QR / Barcode Scanner trigger button */}
+          <button
+            type="button"
+            className="atlas-search__qr-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsQrModalOpen(true);
+            }}
+            title="Escanear QR de vial o producto"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '0.3rem',
+              color: '#64748b',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '6px',
+              transition: 'all 0.15s ease',
+              flexShrink: 0
+            }}
+          >
+            <QrCode size={15} />
+          </button>
+
           {/* ── Quick-filter inline pills (separated by a divider) ── */}
           {hasFilterOptions && (
             <>
@@ -604,6 +632,15 @@ export default function GlobalSearchBar({
           }}
         />
       )}
+
+      {/* Camera QR & Barcode Scanner Modal */}
+      <QrScannerModal
+        isOpen={isQrModalOpen}
+        onClose={() => setIsQrModalOpen(false)}
+        onDetected={(code) => {
+          onChange?.(code);
+        }}
+      />
     </>
   );
 }

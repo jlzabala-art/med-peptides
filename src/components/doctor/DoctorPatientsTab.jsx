@@ -13,10 +13,15 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Pill from 'lucide-react/dist/esm/icons/pill';
 import Dna from 'lucide-react/dist/esm/icons/dna';
 
+import { useRoleAccess } from '../../hooks/useRoleAccess';
+
 export default function DoctorPatientsTab({ doctorId }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeCohort, setActiveCohort] = useState('all');
+  const { is, role } = useRoleAccess();
+  const isMedicalDirector = is('medical_director') || is('admin') || role === 'medical_director';
+  const effectiveDocId = isMedicalDirector ? null : doctorId;
 
   useEffect(() => {
     const urlCohort = searchParams.get('cohort');
@@ -33,9 +38,9 @@ export default function DoctorPatientsTab({ doctorId }) {
   ];
 
   return (
-    <div style={{ padding: '0', minHeight: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {/* Quick Return to Overview Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: '#ffffff', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+    <div style={{ padding: '0', minHeight: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Quick Return to Overview Bar (Desktop only, PageHeader provides back button on mobile) */}
+      <div className="doctor-overview-return-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: '#ffffff', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
         <Breadcrumb items={[
           { label: '🏠 Doctor Overview', href: '/doctor' },
           { label: '👥 Patient Management' }
@@ -62,6 +67,11 @@ export default function DoctorPatientsTab({ doctorId }) {
         </button>
       </div>
       <style>{`
+        @media (max-width: 768px) {
+          .doctor-overview-return-bar {
+            display: none !important;
+          }
+        }
         .cohort-switcher-bar {
           display: flex;
           align-items: center;
@@ -73,6 +83,10 @@ export default function DoctorPatientsTab({ doctorId }) {
           border: 1px solid #e2e8f0;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
           -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .cohort-switcher-bar::-webkit-scrollbar {
+          display: none;
         }
         .cohort-tab-btn {
           padding: 0.55rem 0.9rem;
@@ -90,23 +104,26 @@ export default function DoctorPatientsTab({ doctorId }) {
         .cohort-label-full { display: inline; white-space: nowrap; }
         .cohort-label-short { display: none; white-space: nowrap; }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
           .cohort-switcher-bar {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.4rem;
-            padding: 0.5rem;
-            overflow-x: visible;
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            gap: 0.35rem !important;
+            padding: 0.35rem 0.5rem !important;
+            border-radius: 10px !important;
           }
           .cohort-tab-btn {
-            width: 100%;
-            justify-content: center;
-            padding: 0.55rem 0.35rem;
-            font-size: 0.75rem;
+            flex: 0 0 auto !important;
+            width: auto !important;
+            padding: 0.4rem 0.75rem !important;
+            font-size: 0.78rem !important;
+            border-radius: 20px !important;
+            height: 34px !important;
             box-sizing: border-box;
           }
-          .cohort-label-full { display: none !important; }
-          .cohort-label-short { display: inline !important; }
+          .cohort-label-full { display: inline !important; }
+          .cohort-label-short { display: none !important; }
         }
       `}</style>
 
@@ -154,17 +171,17 @@ export default function DoctorPatientsTab({ doctorId }) {
       {/* Cohort Specific Content */}
       {activeCohort === 'all' && (
         <UniversalPatientsTable
-          doctorId={doctorId}
+          doctorId={effectiveDocId}
           viewMode="doctor"
-          title="All Assigned Patients"
-          subtitle="Centralized directory for managing all patient accounts."
+          title={isMedicalDirector ? "All Clinic Patients" : "All Assigned Patients"}
+          subtitle={isMedicalDirector ? "Full clinical oversight of all clinic patient records." : "Centralized directory for managing all patient accounts."}
           readOnly={false}
         />
       )}
 
-      {activeCohort === 'peptides' && <PeptideCohortTable doctorId={doctorId} />}
-      {activeCohort === 'supplements' && <SupplementsCohortTable doctorId={doctorId} />}
-      {activeCohort === 'genomics' && <GenomicsCohortTable doctorId={doctorId} />}
+      {activeCohort === 'peptides' && <PeptideCohortTable doctorId={effectiveDocId} />}
+      {activeCohort === 'supplements' && <SupplementsCohortTable doctorId={effectiveDocId} />}
+      {activeCohort === 'genomics' && <GenomicsCohortTable doctorId={effectiveDocId} />}
     </div>
   );
 }

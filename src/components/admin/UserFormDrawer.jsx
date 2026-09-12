@@ -10,6 +10,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
 import ClinicFormDrawer from './clinics/ClinicFormDrawer';
 
+import { approveUserRoleAction } from '../../actions/adminActions';
+import { CANONICAL_ROLES, normalizeRole } from '../../constants/roles';
+
 export default function UserFormDrawer({
   isOpen,
   onClose,
@@ -24,7 +27,7 @@ export default function UserFormDrawer({
   const { toast } = useToast();
 
   const isCreating = !user;
-  const initialRoles = isCreating ? [defaultRole || 'guest'] : (user?.roles || (user?.role ? [user.role] : [defaultRole || 'guest']));
+  const initialRoles = isCreating ? [normalizeRole(defaultRole || 'guest')] : (user?.roles || (user?.role ? [normalizeRole(user.role)] : [normalizeRole(defaultRole || 'guest')]));
   
   const [currentRoles, setCurrentRoles] = useState(initialRoles);
   const [isClinicDrawerOpen, setIsClinicDrawerOpen] = useState(false);
@@ -48,11 +51,18 @@ export default function UserFormDrawer({
         type: 'checkbox-group', 
         required: true,
         options: [
-          { value: 'patient', label: 'Patient' },
-          { value: 'doctor', label: 'Physician' },
-          { value: 'wholesaler', label: 'Wholesaler' },
-          { value: 'guest', label: 'Guest (B2C)' },
-          { value: 'admin', label: 'Admin' }
+          { value: CANONICAL_ROLES.PATIENT, label: 'Patient' },
+          { value: CANONICAL_ROLES.DOCTOR, label: 'Physician / Prescriber' },
+          { value: CANONICAL_ROLES.MEDICAL_DIRECTOR, label: 'Medical Director' },
+          { value: CANONICAL_ROLES.CLINIC, label: 'Clinic / Institution' },
+          { value: CANONICAL_ROLES.COMPOUNDING_PHARMACY, label: 'Compounding Pharmacy' },
+          { value: CANONICAL_ROLES.WHOLESALER, label: 'Wholesaler / Distributor' },
+          { value: CANONICAL_ROLES.SUPPLIER, label: 'Supplier / Manufacturer' },
+          { value: CANONICAL_ROLES.ACCOUNT_MANAGER, label: 'Account Manager' },
+          { value: CANONICAL_ROLES.SALES_AGENT, label: 'Sales Agent' },
+          { value: CANONICAL_ROLES.STAFF, label: 'Clinical Staff' },
+          { value: CANONICAL_ROLES.GUEST, label: 'Guest (B2C)' },
+          { value: CANONICAL_ROLES.ADMIN, label: 'Super Admin' }
         ]
       },
       { 
@@ -162,6 +172,14 @@ export default function UserFormDrawer({
         };
 
         await updateDoc(userRef, updates);
+
+        // Sync Firebase Auth Custom Claims via Server Action
+        try {
+          await approveUserRoleAction(user.id, selectedRoles[0]);
+        } catch (claimErr) {
+          console.warn('[UserFormDrawer] Custom claims sync notice:', claimErr.message);
+        }
+
         await logAction(authUser?.uid || 'admin', 'admin', 'ADMIN_UPDATE_USER', user.id, { updates });
         toast.success(`User updated successfully.`);
       }

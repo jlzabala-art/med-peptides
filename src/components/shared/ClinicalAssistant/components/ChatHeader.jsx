@@ -33,10 +33,11 @@ export default function ChatHeader({
     (!pageContext && messages?.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)))
   );
 
-  const themeAccent = isPatientContext ? '#0d9488' : isProductContext ? '#7c3aed' : contextMode === 'admin' ? '#1a73e8' : contextMode === 'doctor' ? '#0f9d58' : '#4285f4';
-  const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : isProductContext ? 'rgba(124, 58, 237, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : contextMode === 'doctor' ? '#e6f4ea' : '#e8f0fe';
-  const headerTitle = isPatientContext ? '🩺 Patient Clinical Copilot' : isProductContext ? '🔬 ClinicalAI — Product Intelligence' : contextMode === 'admin' ? 'Atlas AI (Admin)' : contextMode === 'doctor' ? 'Clinical Advisor' : 'Atlas AI';
-  const statusLabel = isPatientContext ? `Patient Link Active · ${pageContext?.name || 'Chart'}` : isProductContext ? 'Product Research Link Active' : contextMode === 'admin' ? 'System Link Active' : contextMode === 'doctor' ? 'Clinical Link Active' : 'Neural Link Active';
+  const isDoctorRole = contextMode === 'doctor' || contextMode === 'medical_director' || role === 'doctor' || role === 'medical_director';
+  const themeAccent = isPatientContext ? '#0d9488' : isProductContext ? '#7c3aed' : isDoctorRole ? '#0d9488' : contextMode === 'admin' ? '#1a73e8' : '#4285f4';
+  const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : isProductContext ? 'rgba(124, 58, 237, 0.08)' : isDoctorRole ? 'rgba(13, 148, 136, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : '#e8f0fe';
+  const headerTitle = isPatientContext ? '🩺 Patient Clinical Copilot' : isProductContext ? '🔬 ClinicalAI — Product Intelligence' : isDoctorRole ? '🩺 Clinical AI Copilot (Doctor)' : contextMode === 'admin' ? 'Atlas AI (Admin)' : 'Atlas AI';
+  const statusLabel = isPatientContext ? `Patient Link Active · ${pageContext?.name || 'Chart'}` : isProductContext ? 'Product Research Link Active' : isDoctorRole ? 'Clinical Link Active · Doctor Decision Support' : contextMode === 'admin' ? 'System Link Active' : 'Neural Link Active';
 
   return (
     <div className="clinical-chat-header" style={{

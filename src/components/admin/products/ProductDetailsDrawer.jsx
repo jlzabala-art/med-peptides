@@ -44,7 +44,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 
-import { Button, StatusChip, Card } from '../../ui';
+import { Button, StatusChip, Card, AIContextBadge } from '../../ui';
 import { doc, updateDoc, deleteDoc, addDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import * as fb from '../../../firebase';
 const db = fb?.db;
@@ -1109,31 +1109,32 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
               </div>
             </div>
 
-            {/* 14. Right Sidebar: Atlas AI Product Advisor Panel (collapsible) */}
-            {!isMobile && showAiAdvisor && (
+            {/* 14. Right Sidebar: Atlas AI Product Advisor Panel (collapsible, mobile-friendly) */}
+            {showAiAdvisor && (
               <div style={{
-                width: '320px',
-                borderLeft: '1px solid #e2e8f0',
+                width: isMobile ? '100%' : '340px',
+                borderLeft: isMobile ? 'none' : '1px solid #e2e8f0',
+                borderTop: isMobile ? '1px solid #e2e8f0' : 'none',
                 backgroundColor: '#f8fafc',
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100%',
+                height: isMobile ? 'auto' : '100%',
+                maxHeight: isMobile ? '50vh' : '100%',
                 overflow: 'hidden'
               }}>
-                {/* Advisor Header */}
+                {/* Advisor Header with AIContextBadge */}
                 <div style={{
-                  padding: '1.25rem 1.5rem',
+                  padding: '1rem 1.25rem',
                   borderBottom: '1px solid #e2e8f0',
-                  backgroundColor: '#f1f5f9',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  backgroundColor: '#ffffff',
                 }}>
-                  <Brain size={20} color="var(--color-primary)" />
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#0f172a', fontWeight: 700 }}>Atlas AI Product Advisor</h3>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-primary)', fontWeight: 600 }}>Active Agent Copilot</span>
-                  </div>
+                  <AIContextBadge
+                    title="Product Intelligence Copilot"
+                    subtitle="Pharmacological Monograph & SEO Generation"
+                    contextPill={`SKU: ${form.sku || 'Draft'} • ${form.name || 'Unsaved'}`}
+                    accentColor="#003666"
+                    model="Gemini 2.5 Flash"
+                  />
                 </div>
 
                 {/* Advisor Insights Panel Body */}
@@ -1185,22 +1186,27 @@ export default function ProductDetailsDrawer({ isOpen, onClose, product, onSave 
                     <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Automations</span>
                     <button
                       onClick={() => triggerAiAction('description')}
+                      disabled={isImproving}
                       style={{
-                        padding: '0.6rem 0.85rem',
-                        borderRadius: '6px',
-                        border: '1px solid #334155',
-                        backgroundColor: '#e2e8f0',
-                        color: '#475569',
-                        fontSize: '0.8rem',
-                        fontWeight: 500,
-                        cursor: 'pointer',
+                        minHeight: '44px',
+                        padding: '0.65rem 1rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border, #cbd5e1)',
+                        backgroundColor: '#ffffff',
+                        color: 'var(--primary, #003666)',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: isImproving ? 'not-allowed' : 'pointer',
                         textAlign: 'left',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px'
+                        gap: '8px',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        opacity: isImproving ? 0.7 : 1
                       }}
                     >
-                      <FileText size={13} color="#a78bfa" /> Generate Description
+                      <Sparkles size={16} color="var(--primary, #003666)" />
+                      {isImproving ? 'Generating Clinical Monograph…' : 'Generate Full Clinical Monograph'}
                     </button>
                   </div>
 

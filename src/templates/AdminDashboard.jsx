@@ -362,8 +362,9 @@ export default function AdminDashboard({ children }) {
       }
     >
       <div 
+        className="admin-content-inner"
         style={{ 
-          padding: '1.5rem', 
+          padding: 'clamp(0.5rem, 2vw, 1.5rem)', 
           width: '100%', 
           display: 'flex', 
           flexDirection: 'column', 

@@ -317,14 +317,15 @@ export function TodayPrioritiesQueue({ priorities = [], onAction }) {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flex: 1, minWidth: 0, paddingRight: '0.5rem' }}>
                     <span
                       style={{
                         fontSize: '0.65rem',
                         fontWeight: 700,
                         textTransform: 'uppercase',
-                        padding: '0.15rem 0.4rem',
+                        padding: '0.2rem 0.45rem',
                         borderRadius: '4px',
+                        flexShrink: 0,
                         backgroundColor:
                           item.priority === 'critical'
                             ? '#fef2f2'
@@ -341,14 +342,15 @@ export function TodayPrioritiesQueue({ priorities = [], onAction }) {
                     >
                       {item.priority}
                     </span>
-                    <span style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.82rem', color: '#1e293b', fontWeight: 600, lineHeight: 1.4 }}>
                       {item.text}
                     </span>
                   </div>
                   <ArrowRight
-                    size={14}
-                    color="#94a3b8"
+                    size={16}
+                    color="#64748b"
                     style={{
+                      flexShrink: 0,
                       transform: isSelected ? 'rotate(90deg)' : 'rotate(0deg)',
                       transition: 'transform 0.2s',
                     }}
@@ -360,34 +362,41 @@ export function TodayPrioritiesQueue({ priorities = [], onAction }) {
                   <div
                     className="cc-pq-accordion-detail"
                     style={{
-                      padding: '0.75rem',
+                      padding: '0.85rem',
                       backgroundColor: '#f8fafc',
                       borderRadius: '0 0 8px 8px',
                       marginTop: '-4px',
-                      border: '1px solid #e2e8f0',
+                      border: '1px solid #cbd5e1',
                       borderTop: 'none',
-                      fontSize: '0.8rem',
-                      color: '#475569',
+                      fontSize: '0.82rem',
+                      color: '#334155',
+                      lineHeight: 1.5,
                     }}
                   >
-                    {item.detail}
-                    <div style={{ marginTop: '0.5rem' }}>
+                    <div>{item.detail}</div>
+                    <div style={{ marginTop: '0.65rem' }}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onAction && onAction(item);
                         }}
                         style={{
-                          padding: '0.3rem 0.6rem',
-                          fontSize: '0.75rem',
+                          padding: '0.45rem 1rem',
+                          minHeight: '38px',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
                           background: '#0284c7',
-                          color: '#fff',
+                          color: '#ffffff',
                           border: 'none',
-                          borderRadius: '4px',
+                          borderRadius: '6px',
                           cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          boxShadow: '0 2px 4px rgba(2, 132, 199, 0.2)',
                         }}
                       >
-                        Resolve Action
+                        Resolve Action <ArrowRight size={13} />
                       </button>
                     </div>
                   </div>

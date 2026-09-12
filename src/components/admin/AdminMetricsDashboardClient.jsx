@@ -364,7 +364,22 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
       {/* Dynamic Embedded CSS Styles */}
 
       {/* ── COMMAND CENTER HEADER & PRESET CUSTOMIZER ────────────────── */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 30, background: 'rgba(255, 255, 255, 0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(226, 232, 240, 0.8)', padding: '1.25rem 1.5rem', marginBottom: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(148, 163, 184, 0.12)' }}>
+      <div 
+        className="admin-command-center-banner"
+        style={{ 
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 30, 
+          background: 'rgba(255, 255, 255, 0.92)', 
+          backdropFilter: 'blur(16px)', 
+          WebkitBackdropFilter: 'blur(16px)', 
+          border: '1px solid rgba(226, 232, 240, 0.8)', 
+          padding: '1.25rem 1.5rem', 
+          marginBottom: '1.5rem', 
+          borderRadius: '16px', 
+          boxShadow: '0 4px 20px -2px rgba(148, 163, 184, 0.12)' 
+        }}
+      >
         <div
           style={{
             display: 'flex',
@@ -406,6 +421,7 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
               </span>
             </div>
             <h1
+              className="admin-hero-title"
               style={{
                 margin: 0,
                 fontSize: '1.75rem',
@@ -416,39 +432,52 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
             >
               Atlas Command Center
             </h1>
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+            <p 
+              className="admin-hero-subtitle"
+              style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: '#64748b' }}
+            >
               Strategic oversight & operational real-time control room.
             </p>
           </div>
 
           {/* Controls Bar */}
           {isAdmin && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div 
+              className="admin-hero-controls"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
+            >
               {/* Preset Selector */}
               {isMedicalDirectorRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f0fdf4', color: '#0d9488', border: '1px solid #99f6e4', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span>🩺 Pure Clinical Oversight Mode</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f0fdf4', color: '#0d9488', border: '1px solid #99f6e4', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span className="admin-hero-role-full">🩺 Pure Clinical Oversight Mode</span>
+                  <span className="admin-hero-role-short">🩺 Clinical Oversight</span>
                 </div>
               ) : isDoctorRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span>🩺 Physician Practice Mode (Assigned Patients Only)</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span className="admin-hero-role-full">🩺 Physician Practice Mode (Assigned Patients Only)</span>
+                  <span className="admin-hero-role-short">🩺 Physician Practice</span>
                 </div>
               ) : isPatientRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span>👤 Patient Personal Health Mode</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span className="admin-hero-role-full">👤 Patient Personal Health Mode</span>
+                  <span className="admin-hero-role-short">👤 Patient Mode</span>
                 </div>
               ) : isSupplierRole ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', border: '1px solid #fed7aa', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span>📦 Supplier Control Room Mode (Scoped RFQs & Orders)</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', border: '1px solid #fed7aa', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span className="admin-hero-role-full">📦 Supplier Control Room Mode (Scoped RFQs & Orders)</span>
+                  <span className="admin-hero-role-short">📦 Supplier Mode</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#003666', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
-                  <span>🛡️ Executive Role View: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
+                <div className="admin-hero-role-pill" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 0.95rem', minHeight: '44px', borderRadius: '10px', backgroundColor: '#e0f2fe', color: '#003666', border: '1px solid #bae6fd', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span className="admin-hero-role-full">🛡️ Executive Role View: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
+                  <span className="admin-hero-role-short">🛡️ Role: {effectiveRole?.toUpperCase() || 'ADMIN'}</span>
                 </div>
               )}
 
               {/* Customize Mode Toggle */}
               <button
+                type="button"
+                className="admin-hero-customize-btn"
                 onClick={() => setIsCustomizing(!isCustomizing)}
                 style={{
                   display: 'flex',
@@ -464,10 +493,12 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                   fontWeight: 700,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               >
                 <Sliders size={15} />
-                {isCustomizing ? 'Done Customizing' : 'Customize Layout'}
+                <span className="admin-hero-customize-full">{isCustomizing ? 'Done Customizing' : 'Customize Layout'}</span>
+                <span className="admin-hero-customize-short">{isCustomizing ? 'Done' : 'Customize'}</span>
               </button>
             </div>
           )}
@@ -689,13 +720,20 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
                             <Sparkles size={16} color="#0ea5e9" /> {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Atlas Clinical AI Assistant' : 'Atlas AI Sourcing Hub'}
                           </h3>
                           {/* Tabs */}
-                          <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', maxWidth: '100%', paddingBottom: '2px' }}>
+                          <div style={{ display: 'flex', gap: '0.35rem', overflowX: 'auto', maxWidth: '100%', paddingBottom: '3px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
                             {['insights', 'predictions', 'recommendations', 'agents'].map((tab) => (
                               <button
                                 key={tab}
                                 onClick={() => setAiWorkspaceTab(tab)}
                                 className={`cc-tab-btn ${aiWorkspaceTab === tab ? 'active' : ''}`}
-                                style={{ whiteSpace: 'nowrap' }}
+                                style={{
+                                  whiteSpace: 'nowrap',
+                                  padding: '0.4rem 0.8rem',
+                                  borderRadius: '20px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  flexShrink: 0,
+                                }}
                               >
                                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
                               </button>
@@ -705,79 +743,65 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
 
                         {/* Workspace Content */}
                         <div>
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              flexWrap: 'wrap',
-                              gap: '0.5rem',
-                              padding: '0.5rem 0.75rem',
-                              backgroundColor: '#f8fafc',
-                              borderRadius: '6px',
-                              marginBottom: '0.75rem',
-                              fontSize: '0.75rem',
-                            }}
-                          >
-                            <span>
-                              Last analysis: <strong>Today 14:02</strong>
-                            </span>
-                            <span>
-                              Confidence score: <strong style={{ color: '#10b981' }}>98.4%</strong>
-                            </span>
-                            <span>
-                              {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
-                                <>Safety Index: <strong style={{ color: '#10b981' }}>99.8% Optimal</strong></>
-                              ) : (
-                                <>Estimated impact: <strong style={{ color: '#0284c7' }}>{formatAEDtoDual(24000, '+')} / mo</strong></>
-                              )}
-                            </span>
+                          <div className={styles.aiWorkspaceMetricsStrip}>
+                            <div className={styles.aiWorkspaceMetricChip}>
+                              <span className={styles.aiMetricLabel}>Last Analysis</span>
+                              <strong className={styles.aiMetricVal}>Today 14:02</strong>
+                            </div>
+                            <div className={styles.aiWorkspaceMetricChip}>
+                              <span className={styles.aiMetricLabel}>Confidence</span>
+                              <strong className={styles.aiMetricVal} style={{ color: '#10b981' }}>98.4%</strong>
+                            </div>
+                            <div className={styles.aiWorkspaceMetricChip}>
+                              <span className={styles.aiMetricLabel}>{(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Safety Index' : 'Est. Impact'}</span>
+                              <strong className={styles.aiMetricVal} style={{ color: (isMedicalDirectorRole || currentRolePreset === 'Clinical') ? '#10b981' : '#0284c7' }}>
+                                {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? '99.8% Optimal' : `${formatAEDtoDual(24000, '+')} / mo`}
+                              </strong>
+                            </div>
                           </div>
 
                           {aiWorkspaceTab === 'insights' && (
-                            <ul
-                              style={{
-                                margin: 0,
-                                paddingLeft: '1.2rem',
-                                fontSize: '0.82rem',
-                                color: '#334155',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.4rem',
-                              }}
-                            >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                               {(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? (
                                 <>
-                                  <li>
-                                    <strong>{metrics.activePatients || 162} active enrolled patients</strong> currently undergoing supervised peptide therapy.
-                                  </li>
-                                  <li>
-                                    <strong>{metrics.activeProtocols || 77} clinical protocols</strong> actively prescribed and monitored network-wide.
-                                  </li>
-                                  <li>
-                                    <strong>{metrics.pendingPrescriptions || 13} pending prescriptions</strong> awaiting final clinical review and sign-off.
-                                  </li>
-                                  <li>
-                                    <strong>0 contraindication alerts</strong> or dosage safety flags recorded across active regimens today.
-                                  </li>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#0284c7', marginTop: '6px', flexShrink: 0 }} />
+                                    <div><strong>{metrics.activePatients || 162} active enrolled patients</strong> currently undergoing supervised peptide therapy.</div>
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#0ea5e9', marginTop: '6px', flexShrink: 0 }} />
+                                    <div><strong>{metrics.activeProtocols || 77} clinical protocols</strong> actively prescribed and monitored network-wide.</div>
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b', marginTop: '6px', flexShrink: 0 }} />
+                                    <div><strong>{metrics.pendingPrescriptions || 13} pending prescriptions</strong> awaiting final clinical review and sign-off.</div>
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', marginTop: '6px', flexShrink: 0 }} />
+                                    <div><strong>0 contraindication alerts</strong> or dosage safety flags recorded across active regimens today.</div>
+                                  </div>
                                 </>
                               ) : (
                                 <>
-                                  <li>
-                                    Revenue increased <strong>18%</strong> this month across strategic wholesaler
-                                    segments.
-                                  </li>
-                                  <li>No overdue supplier bills in the queue. AP matches are healthy.</li>
-                                  <li>
-                                    <strong>3 opportunities</strong> in Dubai clinic network need strategic
-                                    discount review.
-                                  </li>
-                                  <li>
-                                    Average RFQ response time improved by <strong>22%</strong> over the last 14
-                                    days.
-                                  </li>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981', marginTop: '6px', flexShrink: 0 }} />
+                                    <div>Revenue increased <strong>18%</strong> this month across strategic wholesaler segments.</div>
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#0ea5e9', marginTop: '6px', flexShrink: 0 }} />
+                                    <div>No overdue supplier bills in the queue. AP matches are healthy.</div>
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b', marginTop: '6px', flexShrink: 0 }} />
+                                    <div><strong>3 opportunities</strong> in Dubai clinic network need strategic discount review.</div>
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', padding: '0.65rem 0.85rem', borderRadius: '8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.45 }}>
+                                    <div style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#6366f1', marginTop: '6px', flexShrink: 0 }} />
+                                    <div>Average RFQ response time improved by <strong>22%</strong> over the last 14 days.</div>
+                                  </div>
                                 </>
                               )}
-                            </ul>
+                            </div>
                           )}
                           {aiWorkspaceTab === 'predictions' && (
                             <p style={{ margin: 0, fontSize: '0.82rem', color: '#475569' }}>

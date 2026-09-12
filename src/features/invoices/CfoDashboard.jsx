@@ -1,4 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import DataTable from '@/components/ui/DataTable';
+import StatusBadge from '@/components/ui/StatusBadge';
+import PageHeader from '@/components/ui/PageHeader';
+import MetricCard from '@/components/ui/MetricCard';
+import { DollarSign, TrendingUp, AlertCircle, CheckCircle } from '@/lib/icons';
 
 function fmtCurrency(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount || 0);
@@ -27,11 +32,42 @@ export default function CfoDashboard({ invoices }) {
   const maxTrend = Math.max(...trendData.map(d => d.revenue));
 
   return (
-    <div style={{ padding: '3rem', maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       
-      <div style={{ marginBottom: '3rem' }}>
-        <h1 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>Financial Dashboard</h1>
-        <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Select an invoice from the left to view details, or review overall financial health below.</p>
+      <PageHeader
+        title="Financial Health & CFO Dashboard"
+        subtitle="Institutional cash flows, invoice aging analysis, and revenue collection trends."
+      />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        <MetricCard
+          title="Invoiced YTD"
+          value="€945,000"
+          icon={DollarSign}
+          trend="+18% vs last year"
+          trendDirection="up"
+        />
+        <MetricCard
+          title="Cash Collected"
+          value="€860,000"
+          icon={CheckCircle}
+          trend="91% collection efficiency"
+          trendDirection="up"
+        />
+        <MetricCard
+          title="Total Exposure"
+          value="€64,800"
+          icon={TrendingUp}
+          trend="Across 5 customer accounts"
+          trendDirection="neutral"
+        />
+        <MetricCard
+          title="Critical Overdue"
+          value="€2,800"
+          icon={AlertCircle}
+          trend="> 60 days bucket"
+          trendDirection="down"
+        />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
@@ -80,41 +116,53 @@ export default function CfoDashboard({ invoices }) {
         {/* Customer Payment Performance */}
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem', gridColumn: '1 / -1' }}>
           <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Customer Payment Performance (Top Debtors)</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', textAlign: 'left' }}>
-                <th style={{ padding: '0.5rem', fontWeight: 600 }}>Customer</th>
-                <th style={{ padding: '0.5rem', fontWeight: 600, textAlign: 'right' }}>Total Exposure</th>
-                <th style={{ padding: '0.5rem', fontWeight: 600, textAlign: 'right' }}>Overdue</th>
-                <th style={{ padding: '0.5rem', fontWeight: 600, textAlign: 'center' }}>Avg Delay</th>
-                <th style={{ padding: '0.5rem', fontWeight: 600, textAlign: 'center' }}>Risk Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Mock Data */}
-              <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700, color: '#0f172a' }}>Global Pharma Solutions</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 600 }}>€125,000</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', color: '#ef4444', fontWeight: 700 }}>€45,000</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: '#f59e0b' }}>+12 days</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}><span style={{ padding: '0.2rem 0.5rem', background: '#fee2e2', color: '#991b1b', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>HIGH</span></td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700, color: '#0f172a' }}>MediLife Clinics</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 600 }}>€80,000</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', color: '#64748b' }}>€0</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: '#10b981' }}>-2 days</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}><span style={{ padding: '0.2rem 0.5rem', background: '#d1fae5', color: '#065f46', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>LOW</span></td>
-              </tr>
-              <tr>
-                <td style={{ padding: '0.75rem 0.5rem', fontWeight: 700, color: '#0f172a' }}>Longevity Hub EU</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 600 }}>€42,500</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', color: '#ef4444', fontWeight: 700 }}>€12,000</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: '#f59e0b' }}>+5 days</td>
-                <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}><span style={{ padding: '0.2rem 0.5rem', background: '#fef3c7', color: '#92400e', borderRadius: '4px', fontWeight: 700, fontSize: '0.7rem' }}>MEDIUM</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <DataTable
+            columns={[
+              {
+                key: 'customer',
+                header: 'Customer',
+                width: '32%',
+                render: (row) => <span style={{ fontWeight: 700, color: '#0f172a' }}>{row.customer}</span>,
+              },
+              {
+                key: 'exposure',
+                header: 'Total Exposure',
+                width: '20%',
+                render: (row) => <span style={{ fontWeight: 600 }}>€{row.exposure.toLocaleString()}</span>,
+              },
+              {
+                key: 'overdue',
+                header: 'Overdue',
+                width: '18%',
+                render: (row) => <span style={{ color: row.overdue > 0 ? '#ef4444' : '#64748b', fontWeight: 700 }}>€{row.overdue.toLocaleString()}</span>,
+              },
+              {
+                key: 'delay',
+                header: 'Avg Delay',
+                width: '15%',
+                render: (row) => <span style={{ color: row.delayDays > 0 ? '#f59e0b' : '#10b981', fontWeight: 600 }}>{row.delay}</span>,
+              },
+              {
+                key: 'risk',
+                header: 'Risk Score',
+                width: '15%',
+                render: (row) => {
+                  const statusMap = {
+                    HIGH: 'rejected',
+                    MEDIUM: 'pending',
+                    LOW: 'active',
+                  };
+                  return <StatusBadge status={statusMap[row.risk] || 'inactive'} label={row.risk} />;
+                },
+              },
+            ]}
+            data={[
+              { id: '1', customer: 'Global Pharma Solutions', exposure: 125000, overdue: 45000, delay: '+12 days', delayDays: 12, risk: 'HIGH' },
+              { id: '2', customer: 'MediLife Clinics', exposure: 80000, overdue: 0, delay: '-2 days', delayDays: -2, risk: 'LOW' },
+              { id: '3', customer: 'Longevity Hub EU', exposure: 42500, overdue: 12000, delay: '+5 days', delayDays: 5, risk: 'MEDIUM' },
+            ]}
+            showStatusFooter={false}
+          />
         </div>
 
       </div>

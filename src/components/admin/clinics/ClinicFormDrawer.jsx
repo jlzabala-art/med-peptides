@@ -74,7 +74,7 @@ export default function ClinicFormDrawer({ isOpen, onClose, onComplete }) {
     try {
       const docData = {
         ...data,
-        status: 'Active',
+        status: 'active',
         createdAt: serverTimestamp(),
         revenue: 0,
         patientCount: 0,

@@ -26,7 +26,6 @@ import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActio
 import { fetchKPIsAction } from '../../actions/kpiActions';
 import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import UniversalOrderBuilder from '../shared/order-builder/UniversalOrderBuilder';
-import ClinicalCopilotWidget from './ClinicalCopilotWidget';
 import PatientAdherenceWidget from './PatientAdherenceWidget';
 import ClinicalCommandHub from '../admin/widgets/ClinicalCommandHub';
 import { Card, MetricCard } from '../ui';
@@ -386,9 +385,7 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
         <MetricCard title={t('doctor.overview.stats_patients')} value={isLoading ? '…' : (totalPatients || '—')} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#7c3aed" onClick={() => onNavigate?.('patients')} />
       </div>
 
-      {/* 🧬 AI CLINICAL COPILOT & ADHERENCE WIDGETS */}
-      <ClinicalCopilotWidget onDraftGenerated={(draft) => { setShowBuilder(true); window.dispatchEvent(new CustomEvent('nav:ai-draft', { detail: draft })); }} />
-
+      {/* 🧬 PATIENT ADHERENCE WIDGET */}
       <PatientAdherenceWidget doctorId={doctorId} />
 
       {/* 📦 QUICK WORKFLOW CARDS (Rx Builder & Catalog Generator) */}

@@ -351,11 +351,23 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
                 paddingTop: '0.25rem',
               }}>
                 <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 800,
+                  backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                  color: screenAI.accentColor || '#2563eb',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(37, 99, 235, 0.2)',
+                  letterSpacing: '0.02em',
+                }}>
+                  Gemini 2.5 Flash
+                </span>
+                <span style={{
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   color: 'var(--text-muted, #64748b)',
                 }}>
-                  Context:
+                  Scope:
                 </span>
                 {goalMeta && (
                   <span style={{
@@ -388,6 +400,7 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
                   fontSize: '0.72rem',
                   color: 'var(--text-muted, #94a3b8)',
                   marginLeft: 'auto',
+                  fontWeight: 600
                 }}>
                   {pathname === '/' ? 'Home' : pathname.replace('/', '')}
                 </span>

@@ -104,7 +104,7 @@ export async function GET(request, { params }) {
     const { searchParams } = new URL(request.url);
     const supplier = searchParams.get('supplier') || 'lotusland';
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides-app-27a3a.web.app';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
     const targetUrl = `${baseUrl}/p/${slug}${supplier ? `?supplier=${encodeURIComponent(supplier)}` : ''}`;
 
     // 1. Fetch Product Metadata
@@ -224,7 +224,7 @@ export async function GET(request, { params }) {
       SCAN WITH CAMERA TO OPEN SPECS
     </text>
     <text x="198" y="408" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#64748B">
-      regenpept.com/p/${escapeXml(slug)}
+      med-peptides.com/p/${escapeXml(slug)}
     </text>
   </g>
 

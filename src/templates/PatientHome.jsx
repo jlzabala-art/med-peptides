@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import ChevronRight from "lucide-react/dist/esm/icons/chevron-right";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Bot from "lucide-react/dist/esm/icons/bot";
@@ -26,29 +26,9 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usePatientAIProfile } from '../hooks/usePatientAIProfile';
 import RefillReminderBanner from '../components/shared/RefillReminderBanner';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import PageHeader from '../components/ui/PageHeader';
 import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
-
-
 
 // ── Goal → peptide metadata ───────────────────────────────────────────────────
 export const GOAL_PEPTIDE_MAP = {
@@ -110,6 +90,7 @@ export function openAI(q = '') {
 export const PatientContext = React.createContext({});
 
 export default function PatientHome({ children }) {
+  const router = useRouter();
   const { user, userProfile } = useAuth();
   const pathname = usePathname();
   const uid = user?.uid;
@@ -125,20 +106,18 @@ export default function PatientHome({ children }) {
       sidebarNavGroups={PATIENT_NAV_GROUPS}
       activeNavId={activeTab}
       onNavigate={(id) => {
-        // Assume routing logic handled at higher level or fallback
-        window.location.href = `/patient/${id}`;
+        router.push(id === 'dashboard' ? '/patient' : `/patient/${id}`);
       }}
       portalTitle="Patient Portal"
       roleContext="patient"
       pageContext={{ activeTab }}
     >
-      <div style={{ padding: '1.5rem', backgroundColor: '#f8f9fa', minHeight: '100%' }}>
-        <h1 style={{ margin: '0 0 0.25rem 0', fontSize: '1.4rem', fontWeight: 600, color: '#0f172a' }}>
-          {activeTab === 'prescriptions' ? 'My Prescriptions' : `Welcome back, ${name}`}
-        </h1>
-        <p style={{ margin: '0 0 2rem 0', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-          {activeTab === 'prescriptions' ? 'Manage your active recommendations and protocols.' : 'Overview of your active treatments and insights.'}
-        </p>
+      <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)', minHeight: '100%' }}>
+        <PageHeader 
+          title={activeTab === 'prescriptions' ? 'My Prescriptions' : `Welcome back, ${name}`}
+          subtitle={activeTab === 'prescriptions' ? 'Manage your active recommendations and protocols.' : 'Overview of your active treatments and insights.'}
+          panel="patient"
+        />
         <PatientContext.Provider value={{ userProfile, uid, name }}>
           {children}
         </PatientContext.Provider>

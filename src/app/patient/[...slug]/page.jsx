@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { PatientContext } from '../../../templates/PatientHome';
 import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
+import EmptyState from '../../../components/ui/EmptyState';
+import { Compass } from '@/lib/icons';
 
 // ── Dynamic imports ──────────────────────────────────────────────────────────
 const PatientPrescriptionsTab = dynamic(() => import('../../../components/patient/PatientPrescriptionsTab'), { ssr: false });
@@ -13,6 +15,7 @@ const PatientAppointments = dynamic(() => import('../../../templates/PatientAppo
 const PatientOrdersTab = dynamic(() => import('../../../components/patient/PatientOrdersTab'), { ssr: false });
 const UserSettings = dynamic(() => import('../../../templates/UserSettings'), { ssr: false });
 const UserProfileTab = dynamic(() => import('../../../components/shared/UserProfileTab'), { ssr: false });
+const CatalogPage = dynamic(() => import('../../../templates/CatalogPage'), { ssr: false });
 
 // ── Bridge wrappers ──────────────────────────────────────────────────────────
 function PrescriptionsWrapper() {
@@ -115,6 +118,23 @@ export default function PatientDynamicRoute({ params }) {
         <ProfileWrapper />
       </AdminTabErrorBoundary>
     );
-    default: return <div>Tab Not Found: {path}</div>;
+    case 'catalog': return (
+      <AdminTabErrorBoundary tabId="catalog" tabLabel="Catalog">
+        <CatalogPage />
+      </AdminTabErrorBoundary>
+    );
+    default: return (
+      <div style={{ padding: '3rem 1.5rem' }}>
+        <EmptyState
+          icon={Compass}
+          title="Section Not Found"
+          subtitle={`The requested section "${path}" does not exist or has been relocated.`}
+          action={{
+            label: 'Return to Patient Dashboard',
+            onClick: () => window.location.assign('/patient')
+          }}
+        />
+      </div>
+    );
   }
 }

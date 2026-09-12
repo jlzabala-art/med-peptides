@@ -6,7 +6,7 @@ import VerifyBatchClient from './VerifyBatchClient';
 export const revalidate = 86400; // ⚡ 24h Edge Cache for Batch Certificates
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://regenpept.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 
 // ⚡ Layer 1 In-Memory Server RAM Cache for Batch Verification Records
 const VERIFY_RAM_CACHE = new Map();

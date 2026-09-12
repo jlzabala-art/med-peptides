@@ -114,7 +114,7 @@ export default function KpiScopeBar({
                 {filteredLabel} {isFiltered && filteredCount != null && `(${filteredCount})`}
               </span>
               <span className="kpi-scope-btn-text-mobile">
-                {String(filteredLabel).split('·')[0].split('Prods')[0].trim()}
+                Filtered {isFiltered && filteredCount != null ? `(${filteredCount})` : ''}
               </span>
             </button>
             <button
@@ -137,7 +137,7 @@ export default function KpiScopeBar({
                 {globalLabel} {globalCount != null && `(${globalCount})`}
               </span>
               <span className="kpi-scope-btn-text-mobile">
-                {String(globalLabel).split('·')[0].split('Prods')[0].trim()}
+                All {globalCount != null ? `(${globalCount})` : ''}
               </span>
             </button>
           </div>

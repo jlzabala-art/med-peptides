@@ -130,13 +130,13 @@ export default function AuthPage({ onBack }) {
   useEffect(() => {
     if (!loading && user && userProfile) {
       const role = (userProfile.role || 'guest').toLowerCase();
-      
-      // Do not redirect if role is pending (needs onboarding)
-      if (role === 'pending') {
+      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(user.email?.toLowerCase());
+
+      // Do not redirect if role is pending (needs onboarding), unless user is an admin by email
+      if (role === 'pending' && !isAdminUser) {
         return;
       }
 
-      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(user.email?.toLowerCase());
       const isPhysicianUser = role === 'doctor';
 
       const redirectable = isAdminUser || isPhysicianUser || role === 'wholesaler' || role === 'patient';
@@ -161,28 +161,29 @@ export default function AuthPage({ onBack }) {
     setError('');
     setSubmitting(true);
     try {
-      const { cred, profile } = await login(email, password);
+      const cleanEmail = email ? email.trim().toLowerCase() : '';
+      const { cred, profile } = await login(cleanEmail, password);
       setSuccess('Logged in successfully!');
 
       const role = (profile?.role || 'guest').toLowerCase();
-      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(cred.user.email?.toLowerCase());
+      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(cred.user.email?.toLowerCase()) || ADMIN_EMAILS.includes(cleanEmail);
       const isPhysicianUser = role === 'doctor';
 
       setTimeout(() => {
         if (redirectTo) {
-          router.push(redirectTo, { replace: true });
+          router.replace(redirectTo);
         } else if (isAdminUser) {
-          router.push('/admin');
+          router.replace('/admin');
         } else if (isPhysicianUser) {
-          router.push('/doctor', { replace: true });
+          router.replace('/doctor');
         } else if (role === 'wholesaler') {
-          router.push('/wholesaler', { replace: true });
+          router.replace('/wholesaler');
         } else if (role === 'patient') {
-          router.push('/patient', { replace: true });
+          router.replace('/patient');
         } else {
-          handleBack();
+          router.replace('/');
         }
-      }, 1200);
+      }, 300);
     } catch (err) {
       if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
         setError('Invalid email or password. If this account was originally created with Google, use "Sign in with Google" below or click "Forgot Password?" to set a password.');
@@ -384,27 +385,39 @@ export default function AuthPage({ onBack }) {
     try {
       const { cred, profile } = await loginWithGoogle();
       setSuccess('Logged in with Google successfully!');
+      const emailToCheck = (cred?.user?.email || '').toLowerCase().trim();
       const role = (profile?.role || 'guest').toLowerCase();
-      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(cred.user.email?.toLowerCase());
+      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(emailToCheck);
       const isPhysicianUser = role === 'doctor';
 
       setTimeout(() => {
         if (redirectTo) {
-          router.push(redirectTo, { replace: true });
+          router.replace(redirectTo);
         } else if (isAdminUser) {
-          router.push('/admin');
+          router.replace('/admin');
         } else if (isPhysicianUser) {
-          router.push('/doctor', { replace: true });
+          router.replace('/doctor');
         } else if (role === 'wholesaler') {
-          router.push('/wholesaler', { replace: true });
+          router.replace('/wholesaler');
         } else if (role === 'patient') {
-          router.push('/patient', { replace: true });
+          router.replace('/patient');
         } else {
-          handleBack();
+          router.replace('/');
         }
-      }, 1500);
+      }, 300);
     } catch (err) {
-      setError(err.message);
+      if (err.code === 'auth/popup-closed-by-user') {
+        // User intentionally cancelled the popup, do not show an intrusive error
+        setError('');
+      } else if (err.code === 'auth/popup-blocked') {
+        setError('Tu navegador ha bloqueado la ventana emergente de Google. Por favor, permite ventanas emergentes (popups) para este sitio.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('Este dominio aún no está autorizado en Firebase Authentication. Contacta al administrador.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Error de conexión con el servicio de autenticación de Google. Revisa tu red.');
+      } else {
+        setError(err.message || 'Error al autenticar con Google.');
+      }
     }
     setSubmitting(false);
   };
@@ -415,7 +428,7 @@ export default function AuthPage({ onBack }) {
       const isAdminNow = isAdmin || isAdminByEmail || userProfile?.role === 'admin';
       if (isAdminNow) {
         const target = redirectTo || '/admin';
-        router.push(target);
+        router.replace(target);
       }
     }
   }, [user, loading, isAdmin, isAdminByEmail, userProfile, redirectTo, router]);
@@ -538,7 +551,8 @@ export default function AuthPage({ onBack }) {
     padding: '0.85rem 1rem 0.85rem 2.8rem',
     borderRadius: '8px',
     border: '1px solid #cbd5e1',
-    fontSize: '0.95rem',
+    // 16px minimum prevents iOS Safari from auto-zooming on input focus
+    fontSize: '16px',
     outline: 'none',
     fontFamily: 'var(--font-sans)',
     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
@@ -829,7 +843,33 @@ export default function AuthPage({ onBack }) {
                 fontSize: '0.9rem', 
                 fontWeight: 500 
               }}>
-                {error}
+                <div>{error}</div>
+                {error.includes('Google') && (
+                  <div style={{ marginTop: '0.65rem' }}>
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={submitting}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: 'var(--color-danger, #ef4444)',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(239, 68, 68, 0.35)',
+                        borderRadius: '6px',
+                        padding: '0.4rem 0.75rem',
+                        cursor: submitting ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      🔑 {submitting ? 'Enviando enlace...' : 'Establecer contraseña con 1 clic (vía email)'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

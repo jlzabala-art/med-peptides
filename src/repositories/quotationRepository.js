@@ -189,10 +189,21 @@ export const submitSupplierBillForPO = async (poId, billInfo) => {
 
 export const fetchB2BClientQuoteById = async (quoteId) => {
   try {
-    const docRef = doc(db, 'b2b_quotations', quoteId);
-    const snap = await getDoc(docRef);
-    if (!snap.exists()) return null;
-    return { id: snap.id, ...snap.data() };
+    // 1. Check primary authoritative collection 'quotations'
+    const primaryRef = doc(db, 'quotations', quoteId);
+    const primarySnap = await getDoc(primaryRef);
+    if (primarySnap.exists()) {
+      return { id: primarySnap.id, ...primarySnap.data() };
+    }
+
+    // 2. Fallback to legacy 'b2b_quotations'
+    const legacyRef = doc(db, 'b2b_quotations', quoteId);
+    const legacySnap = await getDoc(legacyRef);
+    if (legacySnap.exists()) {
+      return { id: legacySnap.id, ...legacySnap.data() };
+    }
+
+    return null;
   } catch (err) {
     logger.error('[quotationRepository] fetchB2BClientQuoteById failed', { quoteId, error: err.message });
     throw err;
@@ -201,8 +212,16 @@ export const fetchB2BClientQuoteById = async (quoteId) => {
 
 export const updateB2BClientQuoteStatus = async (quoteId, status) => {
   try {
+    const primaryRef = doc(db, 'quotations', quoteId);
+    const primarySnap = await getDoc(primaryRef);
+    if (primarySnap.exists()) {
+      await updateDoc(primaryRef, { status, updatedAt: serverTimestamp() });
+      logger.info('[quotationRepository] Quote status updated in quotations', { quoteId, status });
+      return;
+    }
+
     await updateDoc(doc(db, 'b2b_quotations', quoteId), { status, updatedAt: serverTimestamp() });
-    logger.info('[quotationRepository] B2B Quote status updated', { quoteId, status });
+    logger.info('[quotationRepository] B2B Quote status updated in b2b_quotations', { quoteId, status });
   } catch (err) {
     logger.error('[quotationRepository] updateB2BClientQuoteStatus failed', { quoteId, error: err.message });
     throw err;

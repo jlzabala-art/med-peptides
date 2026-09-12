@@ -10,7 +10,9 @@ import {
   updatePassword,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  EmailAuthProvider,
+  linkWithCredential
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
@@ -46,7 +48,15 @@ export function useAuth() {
   return ctx;
 }
 
-export const ADMIN_EMAILS = ['jose@mediluxem.com', 'kasia@mediluxem.com', 'jose@mediluxeme.com', 'kasia@mediluxeme.com', 'business@mediluxeme.com', 'admin@regenpept.test'];
+export const ADMIN_EMAILS = [
+  'jose@mediluxem.com',
+  'kasia@mediluxem.com',
+  'jose@mediluxeme.com',
+  'kasia@mediluxeme.com',
+  'business@mediluxeme.com',
+  'admin@regenpept.test',
+  'jlzabala@gmail.com'
+];
 
 export const DEFAULT_ROLE_PERMISSIONS = {
   admin: {
@@ -180,8 +190,16 @@ export function AuthProvider({ children, serverUser = null }) {
           const docRef = doc(db, 'users', firebaseUser.uid);
 
           const docSnap = await getDoc(docRef);
+          const userEmail = (firebaseUser.email || '').toLowerCase().trim();
+          const isKnownAdmin = ADMIN_EMAILS.includes(userEmail);
+
           if (docSnap.exists()) {
             const data = docSnap.data();
+            if (isKnownAdmin && (data.role !== 'admin' || !data.approved)) {
+              data.role = 'admin';
+              data.approved = true;
+              data.professionalStatus = 'approved';
+            }
             setUserProfile(data);
             if (typeof window !== 'undefined') {
               localStorage.setItem('regenpept_userProfile', JSON.stringify(data));
@@ -198,15 +216,23 @@ export function AuthProvider({ children, serverUser = null }) {
             // Segment by role in GA4 user properties
             setAnalyticsUserRole(gaRole, firebaseUser.uid);
           } else {
-            // Auth user exists but no Firestore doc yet — treat as pending
-            setUserProfile({ approved: false, role: 'pending' });
-            setUserProperties({ user_type: 'pending', is_verified: 'false' });
-            setAnalyticsUserRole('guest', firebaseUser.uid);
+            // Auth user exists but no Firestore doc yet
+            const fallbackProfile = isKnownAdmin
+              ? { approved: true, role: 'admin', professionalStatus: 'approved', email: userEmail, userType: 'admin' }
+              : { approved: false, role: 'pending' };
+            setUserProfile(fallbackProfile);
+            setUserProperties({ user_type: fallbackProfile.role, is_verified: fallbackProfile.approved ? 'true' : 'false' });
+            setAnalyticsUserRole(isKnownAdmin ? 'admin' : 'guest', firebaseUser.uid);
           }
         } catch (err) {
           console.warn('Could not fetch user profile:', err);
-          setUserProfile({ approved: false, role: 'pending' });
-          setAnalyticsUserRole('guest', firebaseUser.uid);
+          const userEmail = (firebaseUser.email || '').toLowerCase().trim();
+          const isKnownAdmin = ADMIN_EMAILS.includes(userEmail);
+          const fallbackProfile = isKnownAdmin
+            ? { approved: true, role: 'admin', professionalStatus: 'approved', email: userEmail, userType: 'admin' }
+            : { approved: false, role: 'pending' };
+          setUserProfile(fallbackProfile);
+          setAnalyticsUserRole(isKnownAdmin ? 'admin' : 'guest', firebaseUser.uid);
         }
       } else {
         // Sincronizar logout con el servidor
@@ -286,15 +312,15 @@ export function AuthProvider({ children, serverUser = null }) {
   }, [activeRole, rolePermissions, userProfile?.permissionsOverride]);
 
   const isVerified = userProfile?.approved === true || userProfile?.isVerified === true;
-  const allowedRoles = ['verified_medical', 'clinic', 'staff', 'pharmacy', 'distributor', 'researcher', 'professional', 'doctor', 'wholesaler', 'compounding_pharmacy', 'supplier'];
+  const allowedRoles = ['verified_medical', 'clinic', 'staff', 'pharmacy', 'distributor', 'researcher', 'professional', 'doctor', 'medical_director', 'wholesaler', 'compounding_pharmacy', 'supplier'];
   const userRole = activeRole;
   
   // ── B2B Portal Role Helpers ───────────────────────────────────────────────
   // isPatient: user registered as a patient in the supervised purchasing portal
   const isPatient = user !== null && activeRole === 'patient';
 
-  // isPhysician: user registered as a doctor/supervising professional
-  const isPhysician = user !== null && activeRole === 'doctor';
+  // isPhysician: user registered as a doctor or medical director
+  const isPhysician = user !== null && (activeRole === 'doctor' || activeRole === 'medical_director');
 
   // isStaff: user registered as assistant/nurse/staff
   const isStaff = user !== null && activeRole === 'staff';
@@ -336,13 +362,43 @@ export function AuthProvider({ children, serverUser = null }) {
   }, [user, userProfile, isProfessional, isVerified, loading, userRole, baseRole, activePermissions]);
 
   const login = async (email, password) => {
-    const safeEmail = email ? email.trim() : email;
+    const safeEmail = email ? email.trim().toLowerCase() : email;
     const cred = await signInWithEmailAndPassword(auth, safeEmail, password);
     const docRef = doc(db, 'users', cred.user.uid);
     const docSnap = await getDoc(docRef);
     let profile = null;
+    const isAdmin = ADMIN_EMAILS.includes(safeEmail);
+
     if (docSnap.exists()) {
       profile = docSnap.data();
+      if (isAdmin && (profile.role !== 'admin' || !profile.approved)) {
+        profile = {
+          ...profile,
+          role: 'admin',
+          approved: true,
+          professionalStatus: 'approved'
+        };
+        try {
+          await updateDoc(docRef, { role: 'admin', approved: true, professionalStatus: 'approved' });
+        } catch (e) {
+          console.warn('[AuthContext] Could not update profile to admin:', e);
+        }
+      }
+      setUserProfile(profile);
+    } else if (isAdmin) {
+      profile = {
+        email: safeEmail,
+        role: 'admin',
+        approved: true,
+        professionalStatus: 'approved',
+        userType: 'admin',
+        createdAt: new Date().toISOString()
+      };
+      try {
+        await setDoc(docRef, profile);
+      } catch (e) {
+        console.warn('[AuthContext] Could not create admin profile:', e);
+      }
       setUserProfile(profile);
     }
     setManualActiveRole(null);
@@ -367,21 +423,25 @@ export function AuthProvider({ children, serverUser = null }) {
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     const cred = await signInWithPopup(auth, provider);
     
     // Check if profile exists, if not create a basic one
+    const userEmail = (cred.user.email || '').toLowerCase().trim();
+    const isAdmin = ADMIN_EMAILS.includes(userEmail);
     const docRef = doc(db, 'users', cred.user.uid);
     const docSnap = await getDoc(docRef);
     let profile = null;
+
     if (!docSnap.exists()) {
       const nameParts = (cred.user.displayName || '').trim().split(' ');
       profile = {
         firstName: nameParts[0] || '',
         lastName: nameParts.slice(1).join(' ') || '',
-        email: cred.user.email,
+        email: userEmail,
         institution: '',
-        userType: '',
-        role: 'pending',
+        userType: isAdmin ? 'admin' : '',
+        role: isAdmin ? 'admin' : 'pending',
         phone: '',
         shippingStreet: '',
         shippingCity: '',
@@ -392,13 +452,31 @@ export function AuthProvider({ children, serverUser = null }) {
         billingZip: '',
         billingCountry: '',
         taxId: '',
-        approved: false,
+        approved: isAdmin ? true : false,
+        professionalStatus: isAdmin ? 'approved' : 'pending_review',
         createdAt: new Date().toISOString()
       };
-      await setDoc(docRef, profile);
+      try {
+        await setDoc(docRef, profile);
+      } catch (e) {
+        console.warn('[AuthContext] Could not set profile doc:', e);
+      }
       setUserProfile(profile);
     } else {
       profile = docSnap.data();
+      if (isAdmin && (profile.role !== 'admin' || !profile.approved)) {
+        profile = {
+          ...profile,
+          role: 'admin',
+          approved: true,
+          professionalStatus: 'approved'
+        };
+        try {
+          await updateDoc(docRef, { role: 'admin', approved: true, professionalStatus: 'approved' });
+        } catch (e) {
+          console.warn('[AuthContext] Could not update profile doc to admin:', e);
+        }
+      }
       setUserProfile(profile);
     }
     
@@ -407,7 +485,58 @@ export function AuthProvider({ children, serverUser = null }) {
 
   const linkPassword = async (newPassword) => {
     if (!auth.currentUser) throw new Error('No user is currently authenticated.');
-    await updatePassword(auth.currentUser, newPassword);
+    const currentUser = auth.currentUser;
+    const userEmail = currentUser.email;
+    if (!userEmail) throw new Error('User does not have an associated email address.');
+
+    let linked = false;
+
+    // Check if the user already has a password provider linked
+    const hasPasswordProvider = currentUser.providerData?.some(
+      (p) => p.providerId === 'password'
+    );
+
+    if (hasPasswordProvider) {
+      try {
+        await updatePassword(currentUser, newPassword);
+        linked = true;
+      } catch (err) {
+        console.warn('[linkPassword] updatePassword failed, trying server API fallback:', err);
+      }
+    } else {
+      try {
+        const credential = EmailAuthProvider.credential(userEmail, newPassword);
+        await linkWithCredential(currentUser, credential);
+        linked = true;
+      } catch (err) {
+        console.warn('[linkPassword] linkWithCredential failed, trying server API fallback:', err);
+      }
+    }
+
+    // If client-side linking/update failed or needed fresh credentials, use our server API
+    if (!linked) {
+      try {
+        const token = await currentUser.getIdToken(true);
+        const res = await fetch('/api/auth/set-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ password: newPassword })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to link password via server');
+        }
+        linked = true;
+      } catch (apiErr) {
+        console.error('[linkPassword] Server API fallback also failed:', apiErr);
+        throw apiErr;
+      }
+    }
+
+    return true;
   };
 
   const updateProfileData = async (data) => {

@@ -1,0 +1,1865 @@
+{
+  "totalProducts": 459,
+  "duplicateProductGroups": [
+    [
+      "bacteriostaticwater",
+      [
+        {
+          "id": "bac-water",
+          "name": "Bacteriostatic Water (BAC)",
+          "slug": "bac-water",
+          "status": "active",
+          "variantsCount": 6
+        },
+        {
+          "id": "bacteriostatic-water",
+          "name": "Bacteriostatic Water (BAC)",
+          "slug": "bacteriostatic-water",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "bacteriostatic-water-09-benzyl-alcohol-10ml",
+          "name": "Bacteriostatic Water (BAC)",
+          "slug": "bacteriostatic-water-09-benzyl-alcohol-10ml",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "starter-kit-bundle",
+          "name": "Bacteriostatic Water (BAC)",
+          "slug": "starter-kit-bundle",
+          "status": "published",
+          "variantsCount": 2
+        },
+        {
+          "id": "starter-kit-syringe-bac-water",
+          "name": "Bacteriostatic Water (BAC)",
+          "slug": "starter-kit-syringe-bac-water",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "syringe-bac-water-bundle",
+          "name": "Bacteriostatic Water (BAC)",
+          "slug": "syringe-bac-water-bundle",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "bpc157",
+      [
+        {
+          "id": "bioniq_bpc_157_kpv_capsule",
+          "name": "BPC-157 (Body Protection Compound)",
+          "slug": "bpc-157-kpv",
+          "status": "active",
+          "variantsCount": 3
+        },
+        {
+          "id": "bpc-157",
+          "name": "BPC-157 (Body Protection Compound)",
+          "slug": "bpc-157",
+          "status": "active",
+          "variantsCount": 26
+        },
+        {
+          "id": "bpc-157-semaglutide",
+          "name": "BPC-157 (Body Protection Compound)",
+          "slug": "bpc-157-semaglutide",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "glow",
+      [
+        {
+          "id": "bioniq_glow_stack_bundle",
+          "name": "GLOW (BPC-157 / TB-500 / GHK-Cu)",
+          "slug": "glow-stack",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "glow",
+          "name": "GLOW (BPC-157 / TB-500 / GHK-Cu)",
+          "slug": "glow",
+          "status": "active",
+          "variantsCount": 4
+        },
+        {
+          "id": "glow-bpc-157-tb-500-ghk",
+          "name": "GLOW (BPC-157 / TB-500 / GHK-Cu)",
+          "slug": "glow-bpc-157-tb-500-ghk",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "glow-ghk-cu-bpc-157-tb-500",
+          "name": "GLOW (BPC-157 / TB-500 / GHK-Cu)",
+          "slug": "glow-ghk-cu-bpc-157-tb-500",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "glow-triple-peptide",
+          "name": "GLOW (BPC-157 / TB-500 / GHK-Cu)",
+          "slug": "glow-triple-peptide",
+          "status": "active",
+          "variantsCount": 4
+        }
+      ]
+    ],
+    [
+      "pt141",
+      [
+        {
+          "id": "bioniq_pt_141_oxytocin_nasal_spray",
+          "name": "PT-141 (Bremelanotide)",
+          "slug": "pt-141-oxytocin",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "pt-141",
+          "name": "PT-141 (Bremelanotide)",
+          "slug": "pt-141",
+          "status": "active",
+          "variantsCount": 11
+        },
+        {
+          "id": "pt-141-bremelanotide-10mg",
+          "name": "PT-141 (Bremelanotide)",
+          "slug": "pt-141-bremelanotide-10mg",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "tb500",
+      [
+        {
+          "id": "bioniq_tb_500_thymosin_beta_4_single_use_pen_15_mg",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "tb-500-thymosin-beta-4",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "tb-500",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "tb-500",
+          "status": "active",
+          "variantsCount": 12
+        },
+        {
+          "id": "tb-500-thymosin-4",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "tb-500-thymosin-4",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "tb-500-thymosin-b4-acetate-5mg",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "tb-500-thymosin-b4-acetate-5mg",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "thymosin-4-tb-500",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "thymosin-4-tb-500",
+          "status": "active",
+          "variantsCount": 3
+        },
+        {
+          "id": "thymosin-beta-4",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "thymosin-beta-4",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "thymosin-beta-tb-500",
+          "name": "TB-500 (Thymosin Beta-4)",
+          "slug": "thymosin-beta-tb-500",
+          "status": "active",
+          "variantsCount": 3
+        }
+      ]
+    ],
+    [
+      "bloodonadleveltest",
+      [
+        {
+          "id": "bloodo-nad-level-test",
+          "name": "Bloodo NAD Level Test",
+          "slug": "bloodo-nad-level-test",
+          "status": "active",
+          "variantsCount": 4
+        },
+        {
+          "id": "nad-level-test",
+          "name": "Bloodo NAD Level Test",
+          "slug": "nad-level-test",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "bpc157tb500blend",
+      [
+        {
+          "id": "bpc-10mg-tb-10mg",
+          "name": "BPC-157 + TB-500 Blend",
+          "slug": "bpc-10mg-tb-10mg",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "bpc-157-tb-500",
+          "name": "BPC-157 + TB-500 Blend",
+          "slug": "bpc-157-tb-500",
+          "status": "active",
+          "variantsCount": 19
+        },
+        {
+          "id": "bpc-157-tb-500-blend",
+          "name": "BPC-157 + TB-500 Blend",
+          "slug": "bpc-157-tb-500-blend",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "bpc-5-mgtb-5-mg",
+          "name": "BPC-157 + TB-500 Blend",
+          "slug": "bpc-5-mgtb-5-mg",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "bpc157tb500ghkcustack",
+      [
+        {
+          "id": "bpc-157-tb-500-ghk-cu",
+          "name": "BPC-157 + TB-500 + GHK-Cu Stack",
+          "slug": "bpc-157-tb-500-ghk-cu",
+          "status": "active",
+          "variantsCount": 5
+        },
+        {
+          "id": "bpc-157-tb-500-ghk-cu-kpv",
+          "name": "BPC-157 + TB-500 + GHK-Cu Stack",
+          "slug": "bpc-157-tb-500-ghk-cu-kpv",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "cjc1295",
+      [
+        {
+          "id": "cjc-1295",
+          "name": "CJC-1295 (No DAC)",
+          "slug": "cjc-1295",
+          "status": "active",
+          "variantsCount": 4
+        },
+        {
+          "id": "cjc-1295-dac",
+          "name": "CJC-1295 (No DAC)",
+          "slug": "cjc-1295-dac",
+          "status": "active",
+          "variantsCount": 5
+        },
+        {
+          "id": "cjc-1295-no-dac",
+          "name": "CJC-1295 (No DAC)",
+          "slug": "cjc-1295-no-dac",
+          "status": "active",
+          "variantsCount": 12
+        },
+        {
+          "id": "cjc-1295-without-dac",
+          "name": "CJC-1295 (No DAC)",
+          "slug": "cjc-1295-without-dac",
+          "status": "active",
+          "variantsCount": 6
+        },
+        {
+          "id": "cjc-1295-without-dac-2mg",
+          "name": "CJC-1295 (No DAC)",
+          "slug": "cjc-1295-without-dac-2mg",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "cjc1295ipamorelinblend",
+      [
+        {
+          "id": "cjc-1295-ipamorelin",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-ipamorelin",
+          "status": "active",
+          "variantsCount": 10
+        },
+        {
+          "id": "cjc-1295-ipamorelin-blend",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-ipamorelin-blend",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "cjc-1295-ipamorelin-dsip",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-ipamorelin-dsip",
+          "status": "active",
+          "variantsCount": 4
+        },
+        {
+          "id": "cjc-1295-no-dac-ipamorelin",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-no-dac-ipamorelin",
+          "status": "active",
+          "variantsCount": 5
+        },
+        {
+          "id": "cjc-1295-no-dac-ipamorelin-bpc-157",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-no-dac-ipamorelin-bpc-157",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "cjc-1295-no-dac-ipamorelin-sermorelin",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-no-dac-ipamorelin-sermorelin",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "cjc-1295-without-dac-5mg-ipa-5mg",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-without-dac-5mg-ipa-5mg",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "cjc-1295-without-dac-ipamorelin",
+          "name": "CJC-1295 + Ipamorelin Blend",
+          "slug": "cjc-1295-without-dac-ipamorelin",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "epithalon",
+      [
+        {
+          "id": "epitalon",
+          "name": "Epithalon (Epitalon)",
+          "slug": "epitalon",
+          "status": "active",
+          "variantsCount": 5
+        },
+        {
+          "id": "epithalon",
+          "name": "Epithalon (Epitalon)",
+          "slug": "epithalon",
+          "status": "active",
+          "variantsCount": 10
+        }
+      ]
+    ],
+    [
+      "fst344",
+      [
+        {
+          "id": "fst-344-follistatin",
+          "name": "FST-344 (Follistatin)",
+          "slug": "fst-344-follistatin",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "fst344",
+          "name": "FST344",
+          "slug": "fst344",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "ghkcu",
+      [
+        {
+          "id": "ghk-cu",
+          "name": "GHK-Cu (Copper Peptide)",
+          "slug": "ghk-cu",
+          "status": "active",
+          "variantsCount": 13
+        },
+        {
+          "id": "ghk-cu-copper-peptide",
+          "name": "GHK-Cu (Copper Peptide)",
+          "slug": "ghk-cu-copper-peptide",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "ghk-cu-human-copper",
+          "name": "GHK-Cu (Copper Peptide)",
+          "slug": "ghk-cu-human-copper",
+          "status": "active",
+          "variantsCount": 4
+        }
+      ]
+    ],
+    [
+      "ginseng",
+      [
+        {
+          "id": "ginseng",
+          "name": "Ginseng",
+          "slug": "ginseng",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "ginseng-extract",
+          "name": "Ginseng",
+          "slug": "ginseng-extract",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "ipamorelin",
+      [
+        {
+          "id": "ipamorelin",
+          "name": "Ipamorelin",
+          "slug": "ipamorelin",
+          "status": "active",
+          "variantsCount": 13
+        },
+        {
+          "id": "tesamorelin-ipamorelin",
+          "name": "Ipamorelin",
+          "slug": "tesamorelin-ipamorelin",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "klow",
+      [
+        {
+          "id": "klow-bpc-157-tb-500-ghkcu-kpv",
+          "name": "KLOW (BPC-157 / TB-500 / GHK-Cu / KPV)",
+          "slug": "klow-bpc-157-tb-500-ghkcu-kpv",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "klow-peptide",
+          "name": "KLOW (BPC-157 / TB-500 / GHK-Cu / KPV)",
+          "slug": "klow-peptide",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "ldn",
+      [
+        {
+          "id": "ldn",
+          "name": "LDN",
+          "slug": "ldn",
+          "status": "active",
+          "variantsCount": 8
+        },
+        {
+          "id": "ldn-low-dose-naltrexone",
+          "name": "LDN (Low Dose Naltrexone)",
+          "slug": "ldn-low-dose-naltrexone",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "ll37",
+      [
+        {
+          "id": "ll-37",
+          "name": "LL-37",
+          "slug": "ll-37",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "ll37-5mg",
+          "name": "LL37",
+          "slug": "ll37-5mg",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "mk677",
+      [
+        {
+          "id": "mk-677",
+          "name": "MK-677",
+          "slug": "mk-677",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "mk-677-ibutamoren",
+          "name": "MK-677 (Ibutamoren)",
+          "slug": "mk-677-ibutamoren",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "mt2",
+      [
+        {
+          "id": "mt2",
+          "name": "MT2",
+          "slug": "mt2",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "mt2-melanotan-ii",
+          "name": "MT2 (Melanotan II)",
+          "slug": "mt2-melanotan-ii",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "prostaquinontm",
+      [
+        {
+          "id": "prostaquinon",
+          "name": "Prostaquinon TM",
+          "slug": "prostaquinon",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "prostaquinon-tm",
+          "name": "Prostaquinon TM",
+          "slug": "prostaquinon-tm",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "pycnogenol",
+      [
+        {
+          "id": "pycnogenol",
+          "name": "Pycnogenol",
+          "slug": "pycnogenol",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "pycnogenol-pinus-pinaster",
+          "name": "Pycnogenol (Pinus pinaster)",
+          "slug": "pycnogenol-pinus-pinaster",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ],
+    [
+      "selank",
+      [
+        {
+          "id": "selank",
+          "name": "Selank",
+          "slug": "selank",
+          "status": "active",
+          "variantsCount": 10
+        },
+        {
+          "id": "semax-selank",
+          "name": "Selank",
+          "slug": "semax-selank",
+          "status": "active",
+          "variantsCount": 4
+        }
+      ]
+    ],
+    [
+      "slupp332",
+      [
+        {
+          "id": "slu-pp-332",
+          "name": "SLU PP-332",
+          "slug": "slu-pp-332",
+          "status": "active",
+          "variantsCount": 3
+        },
+        {
+          "id": "slu-pp-332-100mg-caps-x30",
+          "name": "SLU-PP-332",
+          "slug": "slu-pp-332-100mg-caps-x30",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "ss31",
+      [
+        {
+          "id": "ss-31",
+          "name": "SS-31 (Elamipretide)",
+          "slug": "ss-31",
+          "status": "active",
+          "variantsCount": 9
+        },
+        {
+          "id": "ss-31-elamipretide",
+          "name": "SS-31 (Elamipretide)",
+          "slug": "ss-31-elamipretide",
+          "status": "active",
+          "variantsCount": 3
+        },
+        {
+          "id": "ss31",
+          "name": "SS-31 (Elamipretide)",
+          "slug": "ss31",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "thymosinalpha1",
+      [
+        {
+          "id": "thymosin-alpha-1",
+          "name": "Thymosin Alpha 1",
+          "slug": "thymosin-alpha-1",
+          "status": "active",
+          "variantsCount": 15
+        },
+        {
+          "id": "thymosin-alpha-1-5-mg",
+          "name": "Thymosin Alpha - 1",
+          "slug": "thymosin-alpha-1-5-mg",
+          "status": "active",
+          "variantsCount": 3
+        }
+      ]
+    ],
+    [
+      "turmericdryextract",
+      [
+        {
+          "id": "turmeric-dry-extract",
+          "name": "Turmeric dry extract",
+          "slug": "turmeric-dry-extract",
+          "status": "active",
+          "variantsCount": 2
+        },
+        {
+          "id": "turmeric-extract",
+          "name": "Turmeric Dry Extract",
+          "slug": "turmeric-extract",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "vip",
+      [
+        {
+          "id": "vip-10-mg",
+          "name": "VIP",
+          "slug": "vip-10-mg",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "vip-vasoactive-intestinal-peptide",
+          "name": "VIP (Vasoactive Intestinal Peptide)",
+          "slug": "vip-vasoactive-intestinal-peptide",
+          "status": "active",
+          "variantsCount": 1
+        }
+      ]
+    ],
+    [
+      "vitamine",
+      [
+        {
+          "id": "vitamin-e",
+          "name": "Vitamin E",
+          "slug": "vitamin-e",
+          "status": "active",
+          "variantsCount": 1
+        },
+        {
+          "id": "vitamin-e-tocoferol",
+          "name": "Vitamin E (Tocoferol)",
+          "slug": "vitamin-e-tocoferol",
+          "status": "active",
+          "variantsCount": 2
+        }
+      ]
+    ]
+  ],
+  "duplicateSlugGroups": [],
+  "internalVariantDuplicatesCount": 52,
+  "internalVariantDuplicates": [
+    {
+      "id": "ara-290",
+      "name": "ARA-290",
+      "totalVariants": 4,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::10mg:::34.10"
+        },
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::10 mg:::60.00"
+        }
+      ]
+    },
+    {
+      "id": "bac-water",
+      "name": "Bacteriostatic Water (BAC)",
+      "totalVariants": 6,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 2,
+          "key": "supplier-lotusland:::vial:::30 ml:::20.00"
+        },
+        {
+          "duplicateIdx": 5,
+          "originalIdx": 3,
+          "key": "supplier-lotusland:::bottle:::30 ml:::20.00"
+        }
+      ]
+    },
+    {
+      "id": "benzocaine-usp",
+      "name": "Benzocaine USP",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::20000g:::0.17"
+        }
+      ]
+    },
+    {
+      "id": "bpc-157-tb-500",
+      "name": "BPC-157 + TB-500 Blend",
+      "totalVariants": 19,
+      "duplicateCount": 7,
+      "dups": [
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::single_cartridge_pen:::15 mg:::238.00"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 1,
+          "key": "supplier-pod-poland:::single_cartridge_pen:::15 mg + 15 mg:::415.21"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 2,
+          "key": "supplier-vallida:::single_cartridge_pen:::6 mg + 9 mg:::182.56"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 3,
+          "key": "supplier-magenta:::single_cartridge_pen:::6 mg + 9 mg:::155.31"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 4,
+          "key": "supplier-nplabs:::vial:::10 mg + 10 mg:::162.00"
+        },
+        {
+          "duplicateIdx": 17,
+          "originalIdx": 7,
+          "key": "supplier-lotusland:::vial:::10 mg + 10 mg:::130.00"
+        },
+        {
+          "duplicateIdx": 18,
+          "originalIdx": 8,
+          "key": "supplier-lotusland:::vial:::5 mg + 5 mg:::70.00"
+        }
+      ]
+    },
+    {
+      "id": "cagrilintide",
+      "name": "Cagrilintide",
+      "totalVariants": 5,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-nplabs:::vial:::5 mg:::129.60"
+        },
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::10 mg:::80.00"
+        }
+      ]
+    },
+    {
+      "id": "cjc-1295-without-dac",
+      "name": "CJC-1295 (No DAC)",
+      "totalVariants": 6,
+      "duplicateCount": 3,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::10 mg:::50.00"
+        },
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::2 mg:::20.00"
+        },
+        {
+          "duplicateIdx": 5,
+          "originalIdx": 2,
+          "key": "supplier-lotusland:::vial:::5 mg:::30.00"
+        }
+      ]
+    },
+    {
+      "id": "cjc-1295-without-dac-ipamorelin",
+      "name": "CJC-1295 + Ipamorelin Blend",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::5 mg + 5 mg:::30.00"
+        }
+      ]
+    },
+    {
+      "id": "cortisol-test",
+      "name": "Cortisol Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-bloodo:::blood_test:::1 test / kit:::199.00"
+        }
+      ]
+    },
+    {
+      "id": "dihexa",
+      "name": "Dihexa",
+      "totalVariants": 15,
+      "duplicateCount": 6,
+      "dups": [
+        {
+          "duplicateIdx": 9,
+          "originalIdx": 1,
+          "key": "supplier-magenta:::capsule:::10 mg:::490.46"
+        },
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 2,
+          "key": "supplier-magenta:::capsule:::2.5 mg:::136.24"
+        },
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 3,
+          "key": "supplier-magenta:::capsule:::20 mg:::735.69"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 4,
+          "key": "supplier-magenta:::capsule:::5 mg:::250.68"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 5,
+          "key": "supplier-nplabs:::capsule:::10 mg:::129.60"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 6,
+          "key": "supplier-nplabs:::capsule:::30 mg:::194.40"
+        }
+      ]
+    },
+    {
+      "id": "dsip",
+      "name": "DSIP",
+      "totalVariants": 18,
+      "duplicateCount": 8,
+      "dups": [
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::nasal_spray:::10 mg:::174.00"
+        },
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 1,
+          "key": "supplier-pod-poland:::single_cartridge_pen:::5 mg:::233.55"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 2,
+          "key": "supplier-magenta:::single_cartridge_pen:::2 mg:::108.99"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 3,
+          "key": "supplier-magenta:::nasal_spray:::15 mg:::171.66"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 4,
+          "key": "supplier-nplabs:::sublingual_drops:::1000 mcg/ml:::71.28"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 7,
+          "key": "supplier-europeptides:::single_cartridge_pen:::5mg:::50.60"
+        },
+        {
+          "duplicateIdx": 16,
+          "originalIdx": 8,
+          "key": "supplier-lotusland:::vial:::10 mg:::70.00"
+        },
+        {
+          "duplicateIdx": 17,
+          "originalIdx": 9,
+          "key": "supplier-lotusland:::vial:::5 mg:::40.00"
+        }
+      ]
+    },
+    {
+      "id": "eternadx-genetic-test",
+      "name": "Eterna DX Genetic Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-eternadx:::kit:::1 test / kit:::169.00"
+        }
+      ]
+    },
+    {
+      "id": "ghk-cu-human-copper",
+      "name": "GHK-Cu (Copper Peptide)",
+      "totalVariants": 4,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::100 mg:::40.00"
+        },
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::50 mg:::25.00"
+        }
+      ]
+    },
+    {
+      "id": "ghrp-2",
+      "name": "GHRP-2",
+      "totalVariants": 4,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::5mg:::27.50"
+        },
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::5 mg:::18.00"
+        }
+      ]
+    },
+    {
+      "id": "glutathione",
+      "name": "Glutathione",
+      "totalVariants": 4,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-fagron-iberia:::powder:::5%:::54.00"
+        }
+      ]
+    },
+    {
+      "id": "hcg",
+      "name": "hCG",
+      "totalVariants": 16,
+      "duplicateCount": 7,
+      "dups": [
+        {
+          "duplicateIdx": 9,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::5000iu:::33.00"
+        },
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 1,
+          "key": "supplier-magenta:::single_cartridge_pen:::000 iu:::122.62"
+        },
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 3,
+          "key": "supplier-nplabs:::vial:::5000 iu:::43.20"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 5,
+          "key": "supplier-lotusland:::vial:::10,000 iu:::70.00"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 6,
+          "key": "supplier-lotusland:::vial:::5,000 iu:::40.00"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 7,
+          "key": "supplier-lotusland:::vial:::10000 iu:::70.00"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 8,
+          "key": "supplier-lotusland:::vial:::5000 iu:::40.00"
+        }
+      ]
+    },
+    {
+      "id": "hemoglobin-a1c-hba1c-test",
+      "name": "Hemoglobin A1c (HbA1c) Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-bloodo:::blood_test:::1 test / kit:::199.00"
+        }
+      ]
+    },
+    {
+      "id": "hexarelin",
+      "name": "Hexarelin",
+      "totalVariants": 8,
+      "duplicateCount": 4,
+      "dups": [
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::2mg:::30.80"
+        },
+        {
+          "duplicateIdx": 5,
+          "originalIdx": 1,
+          "key": "supplier-europeptides:::single_cartridge_pen:::5mg:::44.00"
+        },
+        {
+          "duplicateIdx": 6,
+          "originalIdx": 2,
+          "key": "supplier-lotusland:::vial:::2 mg:::20.00"
+        },
+        {
+          "duplicateIdx": 7,
+          "originalIdx": 3,
+          "key": "supplier-lotusland:::vial:::5 mg:::40.00"
+        }
+      ]
+    },
+    {
+      "id": "hgh",
+      "name": "HGH",
+      "totalVariants": 7,
+      "duplicateCount": 3,
+      "dups": [
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 0,
+          "key": "supplier-nplabs:::vial:::36 iu:::108.00"
+        },
+        {
+          "duplicateIdx": 5,
+          "originalIdx": 2,
+          "key": "supplier-lotusland:::vial:::20 iu:::50.00"
+        },
+        {
+          "duplicateIdx": 6,
+          "originalIdx": 3,
+          "key": "supplier-lotusland:::vial:::36 iu:::90.00"
+        }
+      ]
+    },
+    {
+      "id": "hmg",
+      "name": "HMG",
+      "totalVariants": 5,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::75iu:::27.50"
+        },
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 2,
+          "key": "supplier-lotusland:::vial:::75 iu:::30.00"
+        }
+      ]
+    },
+    {
+      "id": "igf-1-lr3",
+      "name": "IGF-1 LR3",
+      "totalVariants": 12,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 9,
+          "originalIdx": 3,
+          "key": "supplier-nplabs:::vial:::1 mg:::129.60"
+        },
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 5,
+          "key": "supplier-fusion:::vial:::100 mcg/ml:::138.96"
+        }
+      ]
+    },
+    {
+      "id": "igf-lr3",
+      "name": "IGF LR3",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::1 mg:::150.00"
+        }
+      ]
+    },
+    {
+      "id": "insulin-syringes",
+      "name": "Insulin Syringes 1/2 ml - 31G x 8 mm",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::100 count box:::15.00"
+        }
+      ]
+    },
+    {
+      "id": "insulin-syringes-1-2-ml-31g-x-8-mm-100-counts",
+      "name": "Insulin Syringes 1/2 ml - 31g x 8 mm 100 Counts",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::box:::n/a:::15.00"
+        }
+      ]
+    },
+    {
+      "id": "kisspeptin",
+      "name": "Kisspeptin",
+      "totalVariants": 16,
+      "duplicateCount": 3,
+      "dups": [
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 3,
+          "key": "supplier-fusion:::vial:::100 mcg/ml:::144.41"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 5,
+          "key": "supplier-magenta:::nasal_spray:::10 mg:::258.86"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 7,
+          "key": "supplier-fusion:::vial:::1 mg/ml:::211.17"
+        }
+      ]
+    },
+    {
+      "id": "kisspeptin-10",
+      "name": "Kisspeptin-10",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-nplabs:::vial:::5 mg:::54.00"
+        }
+      ]
+    },
+    {
+      "id": "kpv",
+      "name": "KPV Peptide",
+      "totalVariants": 16,
+      "duplicateCount": 7,
+      "dups": [
+        {
+          "duplicateIdx": 9,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::single_cartridge_pen:::15 mg:::145.00"
+        },
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 1,
+          "key": "supplier-pod-poland:::single_cartridge_pen:::10 mg:::311.41"
+        },
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 2,
+          "key": "supplier-magenta:::capsule:::500 mcg:::177.11"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 3,
+          "key": "supplier-magenta:::single_cartridge_pen:::10 mg:::149.86"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 4,
+          "key": "supplier-nplabs:::vial:::10 mg:::54.00"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 5,
+          "key": "supplier-nplabs:::nasal_spray:::250 mcg/ml:::64.80"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 6,
+          "key": "supplier-nplabs:::vial:::5 mg:::32.40"
+        }
+      ]
+    },
+    {
+      "id": "latanoprost-fagron",
+      "name": "Latanoprost Fagron",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-fagron-genomics:::powder:::custom / magistral:::179.00"
+        }
+      ]
+    },
+    {
+      "id": "ldn",
+      "name": "LDN",
+      "totalVariants": 8,
+      "duplicateCount": 4,
+      "dups": [
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 0,
+          "key": "supplier-nplabs:::capsule:::0.5mg:::99.00"
+        },
+        {
+          "duplicateIdx": 5,
+          "originalIdx": 1,
+          "key": "supplier-nplabs:::capsule:::1.5mg:::99.00"
+        },
+        {
+          "duplicateIdx": 6,
+          "originalIdx": 2,
+          "key": "supplier-nplabs:::capsule:::2.5mg:::99.00"
+        },
+        {
+          "duplicateIdx": 7,
+          "originalIdx": 3,
+          "key": "supplier-nplabs:::capsule:::4.5mg:::99.00"
+        }
+      ]
+    },
+    {
+      "id": "lidocaine-usp",
+      "name": "Lidocaine USP",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::30000g:::0.23"
+        }
+      ]
+    },
+    {
+      "id": "methylene-blue",
+      "name": "Methylene Blue",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::3000g:::21.00"
+        }
+      ]
+    },
+    {
+      "id": "mgf",
+      "name": "MGF",
+      "totalVariants": 6,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::2 mg:::34.10"
+        },
+        {
+          "duplicateIdx": 5,
+          "originalIdx": 1,
+          "key": "supplier-magenta:::single_cartridge_pen:::4mg:::215.11"
+        }
+      ]
+    },
+    {
+      "id": "mots-c",
+      "name": "MOTS-c",
+      "totalVariants": 31,
+      "duplicateCount": 13,
+      "dups": [
+        {
+          "duplicateIdx": 17,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::single_cartridge_pen:::15 mg:::160.00"
+        },
+        {
+          "duplicateIdx": 19,
+          "originalIdx": 2,
+          "key": "supplier-europeptides:::single_cartridge_pen:::10mg:::48.40"
+        },
+        {
+          "duplicateIdx": 20,
+          "originalIdx": 3,
+          "key": "supplier-lotusland:::vial:::10 mg:::70.00"
+        },
+        {
+          "duplicateIdx": 21,
+          "originalIdx": 4,
+          "key": "supplier-lotusland:::vial:::40 mg:::180.00"
+        },
+        {
+          "duplicateIdx": 22,
+          "originalIdx": 5,
+          "key": "supplier-lotusland:::vial:::60 mg:::260.00"
+        },
+        {
+          "duplicateIdx": 23,
+          "originalIdx": 6,
+          "key": "supplier-vallida:::single_cartridge_pen:::15 mg:::340.60"
+        },
+        {
+          "duplicateIdx": 24,
+          "originalIdx": 7,
+          "key": "supplier-vallida:::vial:::25 mg:::395.10"
+        },
+        {
+          "duplicateIdx": 25,
+          "originalIdx": 8,
+          "key": "supplier-vallida:::single_cartridge_pen:::30 mg:::422.34"
+        },
+        {
+          "duplicateIdx": 26,
+          "originalIdx": 9,
+          "key": "supplier-magenta:::single_cartridge_pen:::30 mg:::397.82"
+        },
+        {
+          "duplicateIdx": 27,
+          "originalIdx": 10,
+          "key": "supplier-magenta:::single_cartridge_pen:::60 mg:::558.58"
+        },
+        {
+          "duplicateIdx": 28,
+          "originalIdx": 11,
+          "key": "supplier-nplabs:::vial:::10 mg:::86.40"
+        },
+        {
+          "duplicateIdx": 29,
+          "originalIdx": 12,
+          "key": "supplier-nplabs:::vial:::20 mg:::129.60"
+        },
+        {
+          "duplicateIdx": 30,
+          "originalIdx": 14,
+          "key": "supplier-nplabs:::vial:::50 mg:::162.00"
+        }
+      ]
+    },
+    {
+      "id": "nad",
+      "name": "NAD+ (Nicotinamide Adenine Dinucleotide)",
+      "totalVariants": 21,
+      "duplicateCount": 9,
+      "dups": [
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 1,
+          "key": "supplier-europeptides:::single_cartridge_pen:::100mg:::121.00"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 2,
+          "key": "supplier-lotusland:::vial:::1,000 mg:::50.00"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 3,
+          "key": "supplier-lotusland:::vial:::500 mg:::30.00"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 4,
+          "key": "supplier-lotusland:::vial:::750 mg:::40.00"
+        },
+        {
+          "duplicateIdx": 16,
+          "originalIdx": 5,
+          "key": "supplier-lotusland:::vial:::1000 mg:::50.00"
+        },
+        {
+          "duplicateIdx": 17,
+          "originalIdx": 6,
+          "key": "supplier-magenta:::single_cartridge_pen:::750 mg:::204.36"
+        },
+        {
+          "duplicateIdx": 18,
+          "originalIdx": 7,
+          "key": "supplier-magenta:::nasal_spray:::1000 mg:::204.36"
+        },
+        {
+          "duplicateIdx": 19,
+          "originalIdx": 8,
+          "key": "supplier-magenta:::nasal_spray:::1500 mg:::271.12"
+        },
+        {
+          "duplicateIdx": 20,
+          "originalIdx": 10,
+          "key": "supplier-pod-poland:::single_cartridge_pen:::500 mg:::259.50"
+        }
+      ]
+    },
+    {
+      "id": "nad-level-test",
+      "name": "Bloodo NAD Level Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-bloodo:::blood_test:::1 test / kit:::199.00"
+        }
+      ]
+    },
+    {
+      "id": "omega-ratio-test",
+      "name": "Omega Ratio Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-bloodo:::blood_test:::1 test / kit:::199.00"
+        }
+      ]
+    },
+    {
+      "id": "oxytocin",
+      "name": "Oxytocin",
+      "totalVariants": 11,
+      "duplicateCount": 5,
+      "dups": [
+        {
+          "duplicateIdx": 6,
+          "originalIdx": 0,
+          "key": "supplier-magenta:::nasal_spray:::35 iu:::98.09"
+        },
+        {
+          "duplicateIdx": 7,
+          "originalIdx": 1,
+          "key": "supplier-magenta:::nasal_spray:::40 iu:::122.62"
+        },
+        {
+          "duplicateIdx": 8,
+          "originalIdx": 2,
+          "key": "supplier-magenta:::nasal_spray:::15 iu:::66.76"
+        },
+        {
+          "duplicateIdx": 9,
+          "originalIdx": 3,
+          "key": "supplier-magenta:::nasal_spray:::50 iu:::147.14"
+        },
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 5,
+          "key": "supplier-nplabs:::nasal_spray:::50 iu/ml:::43.20"
+        }
+      ]
+    },
+    {
+      "id": "oxytocin-acetate",
+      "name": "Oxytocin Acetate",
+      "totalVariants": 5,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::10mg:::46.20"
+        },
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::10 mg:::90.00"
+        }
+      ]
+    },
+    {
+      "id": "pinealon",
+      "name": "Pinealon",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::25 mg:::80.00"
+        }
+      ]
+    },
+    {
+      "id": "progesterone",
+      "name": "Progesterone",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-fusion:::capsule:::200 mg:::253.41"
+        }
+      ]
+    },
+    {
+      "id": "slu-pp-332",
+      "name": "SLU PP-332",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::250 mcg / tablet:::80.00"
+        }
+      ]
+    },
+    {
+      "id": "snap-8",
+      "name": "Snap-8",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-europeptides:::single_cartridge_pen:::10 mg:::34.10"
+        }
+      ]
+    },
+    {
+      "id": "syringe-bac-water-bundle",
+      "name": "Bacteriostatic Water (BAC)",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::kit:::30 ml:::99.00"
+        }
+      ]
+    },
+    {
+      "id": "tesamorelin",
+      "name": "Tesamorelin",
+      "totalVariants": 18,
+      "duplicateCount": 7,
+      "dups": [
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::single_cartridge_pen:::30 mg:::325.00"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 2,
+          "key": "supplier-europeptides:::single_cartridge_pen:::2mg:::36.30"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 3,
+          "key": "supplier-lotusland:::vial:::10 mg:::80.00"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 4,
+          "key": "supplier-pod-poland:::single_cartridge_pen:::60 mg:::726.61"
+        },
+        {
+          "duplicateIdx": 15,
+          "originalIdx": 5,
+          "key": "supplier-magenta:::single_cartridge_pen:::30 mg:::476.84"
+        },
+        {
+          "duplicateIdx": 16,
+          "originalIdx": 7,
+          "key": "supplier-nplabs:::sublingual_drops:::30 mg:::97.20"
+        },
+        {
+          "duplicateIdx": 17,
+          "originalIdx": 8,
+          "key": "supplier-nplabs:::vial:::5 mg:::86.40"
+        }
+      ]
+    },
+    {
+      "id": "testosterone-test",
+      "name": "Testosterone+ Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-bloodo:::blood_test:::1 test / kit:::199.00"
+        }
+      ]
+    },
+    {
+      "id": "thymalin",
+      "name": "Thymalin",
+      "totalVariants": 5,
+      "duplicateCount": 2,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::single_cartridge_pen:::5mg:::184.00"
+        },
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 1,
+          "key": "supplier-europeptides:::single_cartridge_pen:::10 mg:::34.10"
+        }
+      ]
+    },
+    {
+      "id": "thymogen",
+      "name": "Thymogen",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 0,
+          "key": "supplier-lotusland:::vial:::25 mg:::70.00"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-alpha",
+      "name": "Thymosin Alpha",
+      "totalVariants": 4,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 3,
+          "originalIdx": 0,
+          "key": "supplier-pod-poland:::single_cartridge_pen:::12.8 mg:::233.55"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-alpha-1",
+      "name": "Thymosin Alpha 1",
+      "totalVariants": 15,
+      "duplicateCount": 7,
+      "dups": [
+        {
+          "duplicateIdx": 8,
+          "originalIdx": 0,
+          "key": "supplier-bioniq:::single_cartridge_pen:::30 mg:::236.00"
+        },
+        {
+          "duplicateIdx": 9,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::10 mg:::80.00"
+        },
+        {
+          "duplicateIdx": 10,
+          "originalIdx": 2,
+          "key": "supplier-nplabs:::sublingual_drops:::1.5 mg/ml:::142.56"
+        },
+        {
+          "duplicateIdx": 11,
+          "originalIdx": 3,
+          "key": "supplier-nplabs:::vial:::10 mg:::129.60"
+        },
+        {
+          "duplicateIdx": 12,
+          "originalIdx": 5,
+          "key": "supplier-nplabs:::vial:::5 mg:::86.40"
+        },
+        {
+          "duplicateIdx": 13,
+          "originalIdx": 6,
+          "key": "supplier-nplabs:::sublingual_drops:::600 mcg/ml:::95.04"
+        },
+        {
+          "duplicateIdx": 14,
+          "originalIdx": 7,
+          "key": "supplier-fusion:::vial:::3000 mcg/ml:::190.74"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-alpha-1-5-mg",
+      "name": "Thymosin Alpha - 1",
+      "totalVariants": 3,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 2,
+          "originalIdx": 1,
+          "key": "supplier-lotusland:::vial:::10 mg:::80.00"
+        }
+      ]
+    },
+    {
+      "id": "thymosin-beta",
+      "name": "Thymosin Beta",
+      "totalVariants": 5,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 4,
+          "originalIdx": 0,
+          "key": "supplier-magenta:::single_cartridge_pen:::45 mg:::435.97"
+        }
+      ]
+    },
+    {
+      "id": "vit-d3",
+      "name": "Vit. D3",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-nplabs:::capsule:::000 iu:::99.00"
+        }
+      ]
+    },
+    {
+      "id": "vitamin-d-test",
+      "name": "Vitamin D Test",
+      "totalVariants": 2,
+      "duplicateCount": 1,
+      "dups": [
+        {
+          "duplicateIdx": 1,
+          "originalIdx": 0,
+          "key": "supplier-bloodo:::blood_test:::1 test / kit:::199.00"
+        }
+      ]
+    }
+  ]
+}

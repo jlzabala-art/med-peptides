@@ -40,12 +40,22 @@ function capitalizeName(name) {
   return name.split(' ').map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()).join(' ');
 }
 
-import PatientsKPIs from '../admin/patients/PatientsKPIs';
+import { useRoleAccess } from '../../hooks/useRoleAccess';
+
+
+
+function cleanStr(s) {
+  return (s || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
 
 export default function UniversalPatientsTable({ doctorId, accountManagerId, readOnly = false, viewMode = 'admin', hideHeader = false, title = 'Patient Registry', subtitle = 'Centralized database for managing all patients across the platform.', initialData = null, serverKPIs = null }) {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [mobileActionPatient, setMobileActionPatient] = useState(null);
+
+  const { is, role } = useRoleAccess();
+  const isMedicalDirector = is('medical_director') || is('admin') || role === 'medical_director';
+  const effectiveDoctorId = isMedicalDirector ? null : doctorId;
 
   const handleMobileQuickAction = useCallback((action, patient) => {
     if (action === 'menu') { setMobileActionPatient(patient); }
@@ -72,6 +82,11 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
   // Fetch doctors for the filter dropdown
   const { data: doctors } = useFirestoreCollection('users', {
     whereConditions: [['roles', 'array-contains', 'doctor']]
+  });
+
+  // Live Firestore patients query (fallback when Algolia is empty or inactive)
+  const { data: firestorePatients = [], isLoading: firestoreLoading } = useFirestoreCollection('patients', {
+    limitCount: 100,
   });
 
   // Algolia Facets
@@ -119,8 +134,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     if (filters.status) facetFilters.push(`status:${filters.status.toLowerCase()}`);
     if (filters.physicianId) {
       facetFilters.push(`physicianId:${filters.physicianId}`);
-    } else if (doctorId) {
-      facetFilters.push(`doctorIds:${doctorId}`);
+    } else if (effectiveDoctorId) {
+      facetFilters.push(`doctorIds:${effectiveDoctorId}`);
     }
     
     // Numeric filters for timeRange
@@ -140,7 +155,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       page,
       hitsPerPage: 50 
     };
-  }, [filters, page, doctorId]);
+  }, [filters, page, effectiveDoctorId]);
 
   const { hits: algoliaHits, isAlgoliaActive, loading: algoliaLoading, totalHits } = useAlgoliaSearch(
     'atlas_patients',
@@ -152,30 +167,30 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
   // Map objectID to id for compatibility & multi-query matching fallback
   const finalFiltered = useMemo(() => {
     let list = [];
-    if (algoliaHits.length > 0) {
+    if (algoliaHits && algoliaHits.length > 0) {
       list = algoliaHits.map(h => ({ ...h, id: h.objectID || h.id }));
     } else if (initialData && initialData.length > 0) {
       list = initialData.map(p => ({ ...p, id: p.id || p.objectID }));
-    } else {
-      list = [];
+    } else if (firestorePatients && firestorePatients.length > 0) {
+      list = firestorePatients.map(p => ({ ...p, id: p.id || p.objectID }));
     }
 
-    // Filter by doctorId if specified
-    if (doctorId) {
-      const docMatches = list.filter(p => p.physicianId === doctorId || p.assignedDoctorId === doctorId || (Array.isArray(p.doctorIds) && p.doctorIds.includes(doctorId)));
-      if (docMatches.length > 0) list = docMatches;
+    // Filter by effectiveDoctorId if specified (Medical Director has null effectiveDoctorId)
+    if (effectiveDoctorId) {
+      list = list.filter(p => p.physicianId === effectiveDoctorId || p.assignedDoctorId === effectiveDoctorId || (Array.isArray(p.doctorIds) && p.doctorIds.includes(effectiveDoctorId)));
     }
 
-    // Multi-patient query support (comma-separated search: e.g. "Carlos, Elena, Marcus" or "pat-1, pat-2")
+    // Multi-patient query support (comma-separated search) with diacritic-insensitivity
     if (searchTerm && searchTerm.trim()) {
-      const queries = searchTerm.split(',').map(q => q.trim().toLowerCase()).filter(Boolean);
+      const queries = searchTerm.split(',').map(q => cleanStr(q)).filter(Boolean);
       if (queries.length > 0) {
         list = list.filter(p => {
-          const id = (p.id || '').toLowerCase();
-          const name = (p.name || `${p.firstName || ''} ${p.lastName || ''}`).toLowerCase();
-          const email = (p.email || '').toLowerCase();
-          const physician = (p.physician || '').toLowerCase();
-          return queries.some(q => id.includes(q) || name.includes(q) || email.includes(q) || physician.includes(q));
+          const id = cleanStr(p.id || p.objectID);
+          const name = cleanStr(p.name || `${p.firstName || ''} ${p.lastName || ''}`);
+          const email = cleanStr(p.email);
+          const physician = cleanStr(p.physician);
+          const clinic = cleanStr(p.clinic);
+          return queries.some(q => id.includes(q) || name.includes(q) || email.includes(q) || physician.includes(q) || clinic.includes(q));
         });
       }
     }
@@ -186,7 +201,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     }
 
     return list;
-  }, [algoliaHits, isAlgoliaActive, searchTerm, initialData, doctorId, filters.status]);
+  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status]);
 
   // Smart Auto-open Patient Detail Drawer if 1 match or openDetail=true
   const autoOpenedRef = React.useRef(false);
@@ -198,6 +213,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     const openDetailParam = searchParams.get('openDetail') === 'true';
     const patientIdParam = searchParams.get('patientId') || searchParams.get('drawerId');
     const searchParam = searchParams.get('search');
+    const viewParam = searchParams.get('view') || 'overview';
 
     let targetPatient = null;
 
@@ -206,10 +222,10 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
     } else if (openDetailParam && finalFiltered.length > 0) {
       targetPatient = finalFiltered[0];
     } else if (searchParam && finalFiltered.length === 1) {
-      const query = searchParam.trim().toLowerCase();
+      const query = cleanStr(searchParam);
       const p = finalFiltered[0];
-      const name = (p.name || `${p.firstName || ''} ${p.lastName || ''}`).toLowerCase();
-      const id = (p.id || '').toLowerCase();
+      const name = cleanStr(p.name || `${p.firstName || ''} ${p.lastName || ''}`);
+      const id = cleanStr(p.id);
       if (name.includes(query) || id.includes(query) || query.includes(name)) {
         targetPatient = p;
       }
@@ -217,7 +233,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
 
     if (targetPatient) {
       autoOpenedRef.current = true;
-      openDrawer('patient', targetPatient.id, { initialTab: 'overview', patient: targetPatient });
+      openDrawer('patient', targetPatient.id, { initialTab: viewParam, patient: targetPatient });
     }
   }, [finalFiltered, searchParams, openDrawer]);
 

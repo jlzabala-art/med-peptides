@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchPublicQuotationByTokenAction, approvePublicQuotationAction } from '../../../actions/quotationsActions';
-import { FileText, CheckCircle2, Clock, ShieldCheck, Download, AlertTriangle, Snowflake, Building2, User, Sparkles, Phone, Mail } from 'lucide-react';
+import { FileText, CheckCircle2, Clock, ShieldCheck, Download, AlertTriangle, Snowflake, Building2, User, Sparkles, Phone, Mail, Share2, Tag, ExternalLink } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
+import { triggerHaptic } from '@/utils/haptics';
 
 export default function PublicQuotationPage() {
   const params = useParams();
@@ -19,6 +20,7 @@ export default function PublicQuotationPage() {
   const [clientNotes, setClientNotes] = useState('');
   const [isApproving, setIsApproving] = useState(false);
   const [approvalResult, setApprovalResult] = useState(null);
+  const [approvalError, setApprovalError] = useState(null);
 
   useEffect(() => {
     async function loadQuote() {
@@ -43,8 +45,9 @@ export default function PublicQuotationPage() {
 
   const handleApprove = async (e) => {
     e.preventDefault();
+    setApprovalError(null);
     if (!approverName.trim()) {
-      alert("Please enter your name or facility signature to confirm approval.");
+      setApprovalError("Please enter your name or facility signature to confirm approval.");
       return;
     }
 
@@ -57,23 +60,40 @@ export default function PublicQuotationPage() {
       });
 
       if (res.success) {
+        triggerHaptic('success');
         setApprovalResult(res);
         setQuotation(prev => ({
           ...prev,
           status: 'approved',
           salesOrderNumber: res.orderNumber
         }));
+      } else {
+        setApprovalError(res.error || "Failed to submit approval");
       }
     } catch (err) {
-      alert(err.message || "Failed to submit approval");
+      setApprovalError(err.message || "Failed to submit approval");
     } finally {
       setIsApproving(false);
     }
   };
 
   const handleDownloadPdf = () => {
+    triggerHaptic('light');
     if (!quotation) return;
     window.open(`/api/generate-pdf?type=quotation&id=${quotation.id}`, '_blank');
+  };
+
+  const handleShareWhatsApp = () => {
+    triggerHaptic('light');
+    if (!quotation) return;
+    const quoteUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const text = `📋 *Cotización Oficial — RegenPept*\n` +
+      `• *Nº Cotización:* ${quotation.quotationNumber}\n` +
+      `• *Cliente:* ${quotation.clientName}\n` +
+      `• *Importe Total:* $${quotation.grandTotal?.toFixed(2)} ${quotation.currency || 'USD'}\n` +
+      `• *Estado:* ${isApproved ? 'Aprobada ✓' : 'Pendiente de Aprobación'}\n\n` +
+      `🔗 *Ver y Aprobar en línea:* ${quoteUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
   if (loading) {
@@ -132,13 +152,22 @@ export default function PublicQuotationPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleDownloadPdf}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 16px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s ease' }}
-          >
-            <Download size={15} style={{ color: '#0284c7' }} />
-            Download PDF
-          </button>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleShareWhatsApp}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 16px', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s ease' }}
+            >
+              <Share2 size={15} style={{ color: '#16a34a' }} />
+              WhatsApp
+            </button>
+            <button
+              onClick={handleDownloadPdf}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 16px', backgroundColor: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s ease' }}
+            >
+              <Download size={15} style={{ color: '#0284c7' }} />
+              PDF
+            </button>
+          </div>
         </div>
 
         {/* 2. Commercial & Logistics Banner */}
@@ -146,9 +175,20 @@ export default function PublicQuotationPage() {
           <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
             <span style={{ fontSize: '0.70rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Recipient Details</span>
             <div style={{ fontSize: '0.94rem', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>{quotation.clientName}</div>
-            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-              Category: <strong>{quotation.category.toUpperCase()}</strong> • Terms: {quotation.paymentTerms || 'Due on Receipt'}
-            </div>
+            {quotation.shippingAddress ? (
+              <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '3px', lineHeight: 1.35 }}>
+                📍 {quotation.shippingAddress.street}, {quotation.shippingAddress.city} ({quotation.shippingAddress.postalCode})
+                {quotation.deliveryInstructions && (
+                  <div style={{ fontSize: '0.72rem', color: '#0284c7', marginTop: '2px', fontWeight: 600 }}>
+                    🕒 {quotation.deliveryInstructions}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                Category: <strong>{quotation.category.toUpperCase()}</strong> • Terms: {quotation.paymentTerms || 'Due on Receipt'}
+              </div>
+            )}
           </div>
 
           <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
@@ -181,7 +221,8 @@ export default function PublicQuotationPage() {
             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Currency: <strong>{quotation.currency}</strong></span>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
+          {/* Desktop Table View */}
+          <div className="quote-desktop-table" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <thead>
                 <tr style={{ textAlign: 'left', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.74rem' }}>
@@ -196,13 +237,38 @@ export default function PublicQuotationPage() {
                   const qty = Number(item.quantity || 1);
                   const rate = Number(item.unitRate || item.unitPrice || item.price || 0);
                   const lineTotal = Number(item.totalPrice || item.subtotal || qty * rate);
+                  const prodSlug = item.productId || 'tirzepatide';
+                  const supplierParam = item.supplierId ? `?supplier=${item.supplierId}` : '';
 
                   return (
                     <tr key={idx} style={{ borderBottom: idx < items.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
                       <td style={{ padding: '14px 20px' }}>
                         <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.name}</div>
                         <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
-                          {item.dosage || 'Standard clinical vial'} • Compounded Lyophilized Solution
+                          {item.dosage || 'Standard clinical vial'} • {item.presentation || 'Compounded Lyophilized Solution'}
+                        </div>
+                        {item.notes && (
+                          <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600, marginTop: '2px' }}>
+                            🏷️ {item.notes}
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                          <a
+                            href={`/p/${prodSlug}${supplierParam}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.74rem', color: '#003666', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <ExternalLink size={12} /> Ficha Técnica
+                          </a>
+                          <a
+                            href={`/api/vial-label/${prodSlug}?format=38x90`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                          >
+                            <Tag size={12} /> Etiqueta Vial (38x90)
+                          </a>
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'center', fontWeight: 700 }}>{qty}</td>
@@ -213,6 +279,58 @@ export default function PublicQuotationPage() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards View */}
+          <div className="quote-mobile-cards" style={{ padding: '12px', display: 'none', flexDirection: 'column', gap: '10px' }}>
+            {items.map((item, idx) => {
+              const qty = Number(item.quantity || 1);
+              const rate = Number(item.unitRate || item.unitPrice || item.price || 0);
+              const lineTotal = Number(item.totalPrice || item.subtotal || qty * rate);
+              const prodSlug = item.productId || 'tirzepatide';
+              const supplierParam = item.supplierId ? `?supplier=${item.supplierId}` : '';
+
+              return (
+                <div key={idx} style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.92rem' }}>{item.name}</div>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0284c7', backgroundColor: '#e0f2fe', padding: '2px 8px', borderRadius: '6px', flexShrink: 0 }}>
+                      × {qty}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>
+                    {item.dosage || 'Standard clinical vial'} • {item.presentation || ''}
+                  </div>
+                  {item.notes && (
+                    <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600, marginTop: '2px' }}>
+                      🏷️ {item.notes}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', paddingTop: '6px', borderTop: '1px dashed #cbd5e1', fontSize: '0.84rem' }}>
+                    <span style={{ color: '#64748b' }}>Rate: ${rate.toFixed(2)}</span>
+                    <strong style={{ color: '#0f172a', fontSize: '0.95rem' }}>${lineTotal.toFixed(2)}</strong>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                    <a
+                      href={`/p/${prodSlug}${supplierParam}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.75rem', color: '#003666', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <ExternalLink size={13} /> Ficha Técnica
+                    </a>
+                    <a
+                      href={`/api/vial-label/${prodSlug}?format=38x90`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Tag size={13} /> Etiqueta Vial
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Totals Summary */}
@@ -291,6 +409,13 @@ export default function PublicQuotationPage() {
                 </div>
               </div>
 
+              {approvalError && (
+                <div style={{ padding: '10px 14px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: '0.84rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertTriangle size={16} />
+                  <span>{approvalError}</span>
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
                 <button
                   type="submit"
@@ -310,6 +435,20 @@ export default function PublicQuotationPage() {
           Atlas Health • Atlas Medical Compounding Systems • USP 797 & 800 Sterile Compounding
         </div>
 
+        <style>{`
+          @media (max-width: 640px) {
+            .quote-desktop-table {
+              display: none !important;
+            }
+            .quote-mobile-cards {
+              display: flex !important;
+            }
+            button[type="submit"] {
+              width: 100% !important;
+              justify-content: center !important;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );

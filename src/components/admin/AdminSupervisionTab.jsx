@@ -15,7 +15,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { getAllRelationships, updateRelationshipStatus } from '../../services/assignmentService';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import notifier from '../../services/NotificationService';
 import { db } from '../../firebase';
 import { RefreshCw, Activity } from '@/lib/icons';
@@ -48,31 +48,47 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
   const [statusFilter, setStatusFilter] = useState([]); // string[]
   const [searchQuery, setSearchQuery] = useState('');
 
-  // ── Load users for name resolution ─────────────────────────────────────────
-  const loadUsers = useCallback(async () => {
+  // ── Load users for name resolution (targeted on needed IDs only) ───────────
+  const loadUsersForRels = useCallback(async (relsList) => {
     try {
-      const snap = await getDocs(collection(db, 'users'));
-      const map = {};
-      snap.forEach((d) => {
-        const u = d.data();
-        map[d.id] = {
-          displayName: u.displayName || u.name || u.email || d.id,
-          email: u.email || '',
-          role: u.role || 'unknown',
-        };
+      const neededIds = new Set();
+      relsList.forEach(r => {
+        if (r.patientId) neededIds.add(r.patientId);
+        if (r.doctorId) neededIds.add(r.doctorId);
       });
+
+      const map = { ...userMap };
+      const missingIds = Array.from(neededIds).filter(id => !map[id]).slice(0, 60);
+
+      if (missingIds.length === 0) return;
+
+      const fetchPromises = missingIds.map(async (id) => {
+        try {
+          const snap = await getDoc(doc(db, 'users', id));
+          if (snap.exists()) {
+            const u = snap.data();
+            map[id] = {
+              displayName: u.displayName || u.name || u.email || id,
+              email: u.email || '',
+              role: u.role || 'unknown',
+            };
+          }
+        } catch (_) {}
+      });
+
+      await Promise.all(fetchPromises);
       setUserMap(map);
     } catch (_) {
       // non-blocking
     }
-  }, []);
+  }, [userMap]);
 
   // ── Load all relationships ──────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [rels] = await Promise.all([getAllRelationships(), loadUsers()]);
+      const rels = await getAllRelationships();
       const sorted = [...rels].sort((a, b) => {
         const order = { pending: 0, active: 1, paused: 2, revoked: 3 };
         const byStatus = (order[a.status] ?? 9) - (order[b.status] ?? 9);
@@ -80,6 +96,7 @@ export default function AdminSupervisionTab({ isSubTab = false, onNavigateToClin
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
       setRelationships(sorted);
+      loadUsersForRels(sorted);
     } catch (e) {
       setError(e.message);
     } finally {

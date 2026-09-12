@@ -1,11 +1,6 @@
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-
-
-
-
-
 
 import PanelShell from '../components/shell/PanelShell';
 import DashboardEngine from '../engine/DashboardEngine';
@@ -86,6 +81,7 @@ export function PlaceholderTab() {
 export const ClinicHomeContext = React.createContext({});
 
 export default function ClinicHome({ children }) {
+  const router = useRouter();
   const { userProfile } = useAuth();
   const pathname = usePathname();
 
@@ -97,12 +93,14 @@ export default function ClinicHome({ children }) {
       allowedRoles={['clinic', 'admin']}
       sidebarNavGroups={CLINIC_NAV_GROUPS}
       activeNavId={activeTab}
-      onNavigate={(id) => { window.location.href = `/clinic/${id}`; }}
+      onNavigate={(id) => {
+        router.push(id === 'dashboard' ? '/clinic' : `/clinic/${id}`);
+      }}
       portalTitle="Clinic Portal"
       roleContext="clinic"
       pageContext={{ activeTab }}
     >
-      <div style={{ padding: '2rem' }}>
+      <div style={{ padding: 'clamp(0.75rem, 2.5vw, 1.5rem)' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={activeTab}>
           <ClinicHomeContext.Provider value={{ userProfile }}>{children}</ClinicHomeContext.Provider>
         </AdminTabErrorBoundary>

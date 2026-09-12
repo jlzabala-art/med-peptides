@@ -155,7 +155,18 @@ function CareTeamLookupInput({ label, value, onChange, placeholder, defaultItems
   );
 }
 
-export default function OverviewTab({ rx, refreshPrescription }) {
+export default function OverviewTab({ rx = {}, onProtocolClick, refreshPrescription }) {
+  const patient = rx?.patient?.name || rx?.patientName || rx?.patient || 'Unknown Patient';
+  const patEmail = rx?.patient?.email || rx?.patientEmail || rx?.email || null;
+  const patPhone = rx?.patient?.phone || rx?.patientPhone || rx?.phone || null;
+  const doctor = rx?.doctor?.name || rx?.doctorName || rx?.physicianName || '';
+  const docEmail = rx?.doctor?.email || rx?.doctorEmail || '';
+  const manager = rx?.accountManager || rx?.manager || '';
+  const wholeseller = rx?.wholesellerName || rx?.wholeseller || rx?.pharmacy || rx?.clinic || '';
+  const diagnosis = rx?.diagnosis || rx?.clinicalIndication || rx?.condition || '';
+  const protocol = rx?.protocol || rx?.protocolName || '';
+  const notes = rx?.notes || rx?.clinicalNotes || rx?.instructions || '';
+
   const [isEditingTeam, setIsEditingTeam] = useState(false);
   const [isSavingTeam, setIsSavingTeam] = useState(false);
   const [doctorName, setDoctorName] = useState(rx?.doctorName || rx?.doctor?.name || '');
@@ -331,7 +342,7 @@ export default function OverviewTab({ rx, refreshPrescription }) {
     ) : null;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
       {/* Left: Patient & Team */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div

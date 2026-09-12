@@ -9,6 +9,8 @@
   background-color: var(--background);
   position: relative;
   scroll-margin-top: 72px; /* Offset for sticky nav */
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
 }
 
 @media (max-width: 768px) {

@@ -234,10 +234,11 @@ export function useClinicalAI({
         return parsed;
       }
     }
-      const initialGreeting = contextMode === 'admin' 
+      const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
+      const initialGreeting = isDoctor
+        ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
+        : contextMode === 'admin' 
         ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
-        : contextMode === 'doctor'
-        ? "Hey! 👋 I'm your Clinical Advisor. How can I help you evaluate protocols or analyze patient cases today?"
         : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
       return [{
         role: 'assistant',
@@ -306,10 +307,11 @@ export function useClinicalAI({
     const newId = uuidv4();
     setSessionId(newId);
     setSuggestions([]);
-    const initialGreeting = contextMode === 'admin' 
+    const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
+    const initialGreeting = isDoctor
+      ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
+      : contextMode === 'admin' 
       ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
-      : contextMode === 'doctor'
-      ? "Hey! 👋 I'm your Clinical Advisor. How can I help you evaluate protocols or analyze patient cases today?"
       : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
     setMessages([{
       role: 'assistant',
@@ -399,10 +401,11 @@ export function useClinicalAI({
   }, [messages, sessionId]);
 
   const clearSession = useCallback(() => {
-    const initialGreeting = contextMode === 'admin' 
+    const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
+    const initialGreeting = isDoctor
+      ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
+      : contextMode === 'admin' 
       ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
-      : contextMode === 'doctor'
-      ? "Hey! 👋 I'm your Clinical Advisor. How can I help you evaluate protocols or analyze patient cases today?"
       : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
     const defaultGreeting = [{
       role: 'assistant',

@@ -54,7 +54,7 @@ import useOrders from '../../../hooks/data/useOrders';
 
 
 
-import { exportToCSV } from '../../../utils/exportUtils';
+import { exportToCSV } from '../../../utils/universalExporter';
 
 
 import { httpsCallable } from 'firebase/functions';
@@ -67,133 +67,92 @@ import DataTableSkeleton from '../../../components/ui/skeletons/DataTableSkeleto
 import CopyableId from '../../../components/ui/CopyableId';
 import StatusChip from '../../../components/ui/StatusChip';
 import InlineEditableCell from '../../../components/ui/InlineEditableCell';
+import { MetricCard, KpiScopeBar } from '../../../components/ui';
 
-// ── Uniform KPI Summary Bar ───────────────────────────────────────────────────
-function UniformKPIs({ data, globalMetrics }) {
-  const total = globalMetrics?.total ?? data.length;
-  const pending = globalMetrics?.pending ?? data.filter(d => ['Pending', 'Processing'].includes(d.status)).length;
-  const shipped = globalMetrics?.shipped ?? data.filter(d => ['Shipped'].includes(d.status)).length;
-  const completed = globalMetrics?.completed ?? data.filter(d => ['Completed', 'Delivered'].includes(d.status)).length;
-  
-  const totalRevenue = globalMetrics?.totalRevenue ?? data.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
+// ── Canonical Status Helper ───────────────────────────────────────────────────
+function normalizeOrderStatus(status) {
+  return String(status || '').toLowerCase().trim();
+}
+
+// ── Uniform KPI Summary Bar (Rule #22) ────────────────────────────────────────
+function OrdersKPIs({ data = [], globalData = [], globalMetrics = null, isFiltered = false, onFilterStatusChange }) {
+  const [scope, setScope] = useState('filtered');
+
+  const pool = (scope === 'filtered' && isFiltered) ? data : (globalData.length > 0 ? globalData : data);
+
+  const total = globalMetrics?.total ?? pool.length;
+  const pending = pool.filter(d => ['awaiting payment', 'processing', 'pending', 'draft'].includes(normalizeOrderStatus(d.status))).length;
+  const inTransit = pool.filter(d => ['en tránsito', 'en transito', 'shipped', 'in transit'].includes(normalizeOrderStatus(d.status))).length;
+  const delivered = pool.filter(d => ['delivered', 'completed'].includes(normalizeOrderStatus(d.status))).length;
 
   const stats = [
-    { label: 'Total Orders', value: total, color: '#3b82f6', icon: <ShoppingCart size={16} /> },
-    { label: 'Pending Processing', value: pending, color: '#f59e0b', icon: <Clock size={16} /> },
-    { label: 'Shipped', value: shipped, color: '#8b5cf6', icon: <Truck size={16} /> },
-    { label: 'Revenue (Loaded)', value: `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}`, color: '#059669', icon: <Activity size={16} /> },
+    { label: 'Total Orders', value: total, subtitle: scope === 'global' ? 'All database orders' : (isFiltered ? 'Matching active filters' : 'Active orders'), color: 'var(--color-primary, #003666)', icon: ShoppingCart, filter: 'all' },
+    { label: 'Pending Processing', value: pending, subtitle: 'Awaiting fulfillment', color: '#d97706', alert: pending > 0, icon: Clock, filter: 'processing' },
+    { label: 'In Transit', value: inTransit, subtitle: 'Dispatched / Cold Chain', color: '#2563eb', icon: Truck, filter: 'en tránsito' },
+    { label: 'Delivered', value: delivered, subtitle: 'Successfully fulfilled', color: '#16a34a', icon: CheckCircle2, filter: 'delivered' },
   ];
 
   return (
-    <div className="orders-kpi-grid">
-      {stats.map((s, i) => (
-        <div key={i} className="orders-kpi-card">
-          <div className="orders-kpi-header">
-            <div className="orders-kpi-icon-wrap" style={{ color: s.color, background: s.color + '18' }}>
-              {s.icon}
-            </div>
-            <span className="orders-kpi-label">{s.label}</span>
-          </div>
-          <div className="orders-kpi-value">
-            {s.value}
-          </div>
-        </div>
-      ))}
-      <style jsx>{`
-        .orders-kpi-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1rem;
-          margin-bottom: 1.25rem;
-        }
-        .orders-kpi-card {
-          background: #ffffff;
-          padding: 1rem 1.15rem;
-          border-radius: 12px;
-          border: 1px solid var(--border, #e2e8f0);
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-          min-width: 0;
-          box-sizing: border-box;
-        }
-        .orders-kpi-header {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .orders-kpi-icon-wrap {
-          padding: 6px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-        .orders-kpi-label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          color: var(--text-muted, #64748b);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .orders-kpi-value {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: var(--text-main, #0f172a);
-          line-height: 1.1;
-        }
-        @media (max-width: 768px) {
-          .orders-kpi-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.65rem;
-          }
-          .orders-kpi-card {
-            padding: 0.85rem;
-          }
-          .orders-kpi-value {
-            font-size: 1.25rem;
-          }
-          .orders-kpi-label {
-            font-size: 0.68rem;
-          }
-        }
-      `}</style>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem' }}>
+      <KpiScopeBar
+        scope={scope}
+        onScopeChange={setScope}
+        isFiltered={isFiltered}
+        filteredCount={data.length}
+        globalCount={globalData.length || total}
+        scopeLabel={scope === 'global' ? 'Entire Database (Unfiltered)' : (isFiltered ? 'Matching Active Filters' : 'Active Orders Registry')}
+      />
+      <div className="dashboard-kpi-grid">
+        {stats.map((s, i) => (
+          <MetricCard
+            key={i}
+            title={s.label}
+            value={s.value}
+            subtitle={s.subtitle}
+            color={s.color}
+            icon={s.icon}
+            alert={s.alert}
+            onClick={() => onFilterStatusChange && onFilterStatusChange(s.filter)}
+            className="clickable-card"
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-// ── Smart Chips ───────────────────────────────────────────────────────────────
+// ── Smart Chips (Rule #28 Canonical Statuses) ─────────────────────────────────
 function SmartChips({ activeChip, setActiveChip }) {
   const chips = [
-    { id: 'All', label: 'All Orders', icon: <Package size={14} /> },
-    { id: 'Processing', label: 'Processing', icon: <Clock size={14} /> },
-    { id: 'Shipped', label: 'Shipped', icon: <Truck size={14} /> },
-    { id: 'Completed', label: 'Completed', icon: <CheckCheck size={14} /> },
+    { id: 'all', label: 'All Orders', icon: <Package size={14} /> },
+    { id: 'awaiting payment', label: 'Awaiting Payment', icon: <Clock size={14} /> },
+    { id: 'processing', label: 'Processing', icon: <Activity size={14} /> },
+    { id: 'en tránsito', label: 'In Transit', icon: <Truck size={14} /> },
+    { id: 'delivered', label: 'Delivered', icon: <CheckCircle2 size={14} /> },
+    { id: 'cancelled', label: 'Cancelled', icon: <X size={14} /> },
   ];
+
+  const current = normalizeOrderStatus(activeChip);
 
   return (
     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingBottom: '0.25rem' }}>
-      {chips.map(chip => (
-        <button
-          key={chip.id}
-          onClick={() => setActiveChip(chip.id)}
-          style={{
-            padding: '0.45rem 0.9rem', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap',
-            background: activeChip === chip.id ? '#003666' : 'white',
-            color: activeChip === chip.id ? 'white' : '#64748b',
-            border: activeChip === chip.id ? '1px solid #003666' : '1px solid #e2e8f0',
-          }}
-          onMouseEnter={e => { if (activeChip !== chip.id) e.currentTarget.style.borderColor = '#94a3b8' }}
-          onMouseLeave={e => { if (activeChip !== chip.id) e.currentTarget.style.borderColor = '#e2e8f0' }}
-        >
-          {chip.icon} {chip.label}
-        </button>
-      ))}
+      {chips.map(chip => {
+        const isSelected = current === chip.id;
+        return (
+          <button
+            key={chip.id}
+            onClick={() => setActiveChip(chip.id)}
+            style={{
+              padding: '0.45rem 0.9rem', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap',
+              background: isSelected ? 'var(--color-primary, #003666)' : 'white',
+              color: isSelected ? 'white' : '#64748b',
+              border: isSelected ? '1px solid var(--color-primary, #003666)' : '1px solid #e2e8f0',
+            }}
+          >
+            {chip.icon} {chip.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -212,7 +171,7 @@ export default function OrdersTable({
   viewMode = 'admin' 
 }) {
   const router = useRouter();
-  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterStatus, setFilterStatus] = useState('all');
   const [filterSource, setFilterSource] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
@@ -304,9 +263,9 @@ export default function OrdersTable({
     setSending(true);
     setSendResult('');
     try {
-      // 1. Update Firestore status → 'Confirmed'
+      // 1. Update Firestore status → 'processing' (Canonical taxonomy AGENTS.md #28)
       await orderRepository.updateOrder(confirmModal.id, {
-        status: 'Confirmed',
+        status: 'processing',
         confirmedAt: new Date(),
         confirmedBy: 'admin',
       });
@@ -315,7 +274,7 @@ export default function OrdersTable({
         'admin',
         'ORDER_CONFIRM',
         confirmModal.id,
-        { previousStatus: confirmModal.status, newStatus: 'Confirmed' }
+        { previousStatus: confirmModal.status, newStatus: 'processing' }
       );
 
       // 2. Send emails via Cloud Function
@@ -399,8 +358,22 @@ export default function OrdersTable({
 
   /* ── Filtered orders ─────────────────────────────────────────────────── */
   const filtered = orders.filter((o) => {
-    const matchesStatus =
-      filterStatus === 'All' || o.status?.toLowerCase() === filterStatus.toLowerCase();
+    const normStatus = normalizeOrderStatus(o.status);
+    const targetStatus = normalizeOrderStatus(filterStatus);
+    let matchesStatus = targetStatus === 'all' || !targetStatus;
+    if (!matchesStatus) {
+      if (targetStatus === 'processing') {
+        matchesStatus = ['processing', 'confirmed', 'pending'].includes(normStatus);
+      } else if (targetStatus === 'en tránsito' || targetStatus === 'en transito') {
+        matchesStatus = ['en tránsito', 'en transito', 'shipped', 'in transit'].includes(normStatus);
+      } else if (targetStatus === 'delivered') {
+        matchesStatus = ['delivered', 'completed'].includes(normStatus);
+      } else if (targetStatus === 'awaiting payment') {
+        matchesStatus = ['awaiting payment', 'awaiting_payment', 'draft'].includes(normStatus);
+      } else {
+        matchesStatus = normStatus === targetStatus;
+      }
+    }
     const matchesSource = filterSource === 'All' || (o.source && o.source.toLowerCase() === filterSource.toLowerCase());
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
@@ -635,12 +608,14 @@ export default function OrdersTable({
   ];
 
   const activeFilters = [];
-  if (filterStatus !== 'All') {
-    activeFilters.push({ key: 'status', label: 'Status', value: filterStatus, onRemove: () => setFilterStatus('All') });
+  if (filterStatus && filterStatus !== 'all') {
+    activeFilters.push({ key: 'status', label: 'Status', value: filterStatus, onRemove: () => setFilterStatus('all') });
   }
 
+  const isFiltered = Boolean(searchTerm || (filterStatus && filterStatus !== 'all') || filterSource !== 'All' || dateRange.start || dateRange.end);
+
   return (
-    <div style={{ padding: '0 2rem 2rem 2rem' }}>
+    <div style={{ padding: '0 clamp(0.5rem, 2vw, 1.5rem) 2rem clamp(0.5rem, 2vw, 1.5rem)' }}>
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <PageHeader
         title="Orders"
@@ -656,8 +631,14 @@ export default function OrdersTable({
         }
       />
 
-      {/* ── KPI Summary Bar ───────────────────────────────────────────────── */}
-      <UniformKPIs data={orders} globalMetrics={globalMetrics} />
+      {/* ── KPI Summary Bar (Rule #22) ────────────────────────────────────── */}
+      <OrdersKPIs
+        data={filtered}
+        globalData={orders}
+        globalMetrics={globalMetrics}
+        isFiltered={isFiltered}
+        onFilterStatusChange={setFilterStatus}
+      />
 
       {/* ── Search & Filters ──────────────────────────────────────────────── */}
       <div style={{ marginBottom: '1rem' }}>
@@ -699,7 +680,7 @@ export default function OrdersTable({
                 ? 'Try adjusting your search or clearing the filters.'
                 : 'Orders will appear here once customers place them.',
               action: (activeFilters.length > 0 || searchTerm)
-                ? { label: 'Clear filters', onClick: () => { setSearchTerm(''); setFilterStatus('All'); } }
+                ? { label: 'Clear filters', onClick: () => { setSearchTerm(''); setFilterStatus('all'); } }
                 : null,
             }}
           />

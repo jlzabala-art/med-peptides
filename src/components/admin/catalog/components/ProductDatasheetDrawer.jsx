@@ -25,6 +25,7 @@ import {
 import { getPeptideScientificData } from '../../../../utils/knownPeptideData';
 import { getProductAvailableTypes } from '../../../../utils/productNormalizer';
 import notifier from '../../../../services/NotificationService';
+import ShareProductMonographDrawer from '../drawers/ShareProductMonographDrawer';
 
 export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
   const [downloading, setDownloading] = useState(false);
@@ -220,8 +221,10 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
         ? 'Small Molecule API'
         : 'Peptide Active Ingredient';
 
-  return createPortal(
-    <div
+  return (
+    <>
+      {createPortal(
+        <div
       style={{
         position: 'fixed',
         inset: 0,
@@ -986,319 +989,18 @@ export default function ProductDatasheetDrawer({ product, isOpen, onClose }) {
           </button>
         </div>
       </div>
-
-      {/* ── Share Clinical Monograph (Lateral Drawer on Desktop / Bottom Sheet on Mobile) ── */}
-      {isShareOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 100065,
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            justifyContent: isMobile ? 'flex-end' : 'flex-end',
-            alignItems: isMobile ? 'center' : 'stretch',
-            background: isMobile ? 'rgba(15, 23, 42, 0.65)' : 'rgba(15, 23, 42, 0.45)',
-            backdropFilter: isMobile ? 'blur(6px)' : 'blur(4px)',
-            WebkitBackdropFilter: isMobile ? 'blur(6px)' : 'blur(4px)',
-            animation: 'fadeIn 0.15s ease'
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsShareOpen(false);
-          }}
-        >
-          <div
-            style={isMobile ? {
-              width: '100%',
-              maxWidth: '520px',
-              background: '#ffffff',
-              borderTopLeftRadius: '24px',
-              borderTopRightRadius: '24px',
-              boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.25)',
-              border: '1px solid #e2e8f0',
-              borderBottom: 'none',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              maxHeight: '85vh',
-              animation: 'slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-            } : {
-              width: '100%',
-              maxWidth: '460px',
-              height: '100%',
-              background: '#ffffff',
-              boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.25)',
-              borderLeft: '1px solid #e2e8f0',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              animation: 'slideInRight 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Tactile Bottom Sheet Drag Handle (Mobile Only) */}
-            {isMobile && (
-              <div
-                style={{
-                  width: '44px',
-                  height: '5px',
-                  borderRadius: '3px',
-                  background: '#cbd5e1',
-                  alignSelf: 'center',
-                  marginTop: '12px',
-                  marginBottom: '4px'
-                }}
-              />
-            )}
-
-            {/* Header: Title & Close */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: isMobile ? '12px 20px 14px 20px' : '18px 20px',
-                borderBottom: '1px solid #f1f5f9',
-                flexShrink: 0
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '10px',
-                    background: '#e0f2fe',
-                    color: '#0369a1',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <Share2 size={18} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.02rem', fontWeight: 800, color: '#0f172a' }}>
-                    Share Clinical Monograph
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.76rem', color: '#64748b' }}>
-                    Atlas Solutions • {name}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsShareOpen(false)}
-                style={{
-                  background: '#f1f5f9',
-                  border: 'none',
-                  padding: '6px',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  color: '#64748b',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                aria-label="Close share sheet"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Scrollable Body */}
-            <div style={{ padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Direct Monograph Link Box */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Direct Monograph URL:
-                </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    readOnly
-                    value={shareUrl}
-                    style={{
-                      flex: 1,
-                      padding: '10px 12px',
-                      fontSize: '0.82rem',
-                      borderRadius: '10px',
-                      border: '1px solid #cbd5e1',
-                      background: '#f8fafc',
-                      color: '#0f172a',
-                      outline: 'none',
-                      fontFamily: 'monospace'
-                    }}
-                    onClick={(e) => e.target.select()}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(shareUrl, 'link')}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '10px 16px',
-                      background: copiedLink ? '#16a34a' : '#003666',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '10px',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      transition: 'background 0.2s ease',
-                      flexShrink: 0
-                    }}
-                  >
-                    {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-                    <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
-                  </button>
-                </div>
-                {copiedLink && (
-                  <p style={{ margin: '6px 0 0', fontSize: '0.76rem', color: '#16a34a', fontWeight: 700 }}>
-                    ✓ Link copied to clipboard. Ready to share with clinicians or patients.
-                  </p>
-                )}
-              </div>
-
-              {/* Quick Communication Channels */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
-                  Instant Sharing Channels:
-                </span>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  {/* WhatsApp */}
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`Atlas Solutions — Official Clinical Monograph:\n*${name}*\n${shareUrl}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      padding: '12px 14px',
-                      background: '#25D366',
-                      color: '#ffffff',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
-                    }}
-                  >
-                    <MessageCircle size={18} />
-                    <span>WhatsApp</span>
-                  </a>
-
-                  {/* Email */}
-                  <a
-                    href={`mailto:?subject=${encodeURIComponent(`Atlas Solutions Clinical Monograph — ${name}`)}&body=${encodeURIComponent(`Hello,\n\nPlease find attached the official clinical monograph from Atlas Solutions for ${name}:\n\n${shareUrl}\n\nBest regards,\nAtlas Solutions`)}`}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      padding: '12px 14px',
-                      background: '#0284c7',
-                      color: '#ffffff',
-                      borderRadius: '10px',
-                      textDecoration: 'none',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      boxShadow: '0 2px 6px rgba(2, 132, 199, 0.25)'
-                    }}
-                  >
-                    <Mail size={18} />
-                    <span>Email</span>
-                  </a>
-                </div>
-
-                {/* Native mobile share if supported */}
-                {typeof navigator !== 'undefined' && navigator.share && (
-                  <button
-                    type="button"
-                    onClick={handleNativeShare}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      padding: '12px',
-                      background: '#eff6ff',
-                      color: '#1d4ed8',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: '10px',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Share2 size={16} />
-                    <span>More Options (Device Native Share)</span>
-                  </button>
-                )}
-
-                {/* Copy PDF URL */}
-                <button
-                  type="button"
-                  onClick={() => handleCopy(pdfUrl, 'pdf')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '11px',
-                    background: '#f8fafc',
-                    color: '#334155',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '10px',
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <FileText size={15} color="#dc2626" />
-                  <span>{copiedPdf ? '✓ PDF Link Copied' : 'Copy Direct Official PDF Link'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Sheet Footer */}
-            <div
-              style={{
-                padding: '12px 20px 24px 20px',
-                borderTop: '1px solid #f1f5f9',
-                background: '#f8fafc',
-                display: 'flex',
-                justifyContent: 'flex-end'
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setIsShareOpen(false)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  background: '#f1f5f9',
-                  color: '#334155',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '10px',
-                  fontSize: '0.86rem',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>,
     document.body
+  )}
+
+      {/* ── Flexible Multi-Supplier & Presentation Share Monograph Drawer ── */}
+      <ShareProductMonographDrawer
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        product={product}
+        initialSupplierKey={product?.supplierId || product?.supplierName || null}
+        initialFormatId={selectedFormat}
+      />
+    </>
   );
 }

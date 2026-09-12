@@ -83,21 +83,29 @@ async function rebuildIndex() {
       .map(g => String(g).toLowerCase().replace(/_/g, '-'));
 
     const variantsList = Array.isArray(data.variants) ? data.variants : [];
+    const allSuppliers = [
+      data.supplierName,
+      data.supplier,
+      ...(data.suppliers || []),
+      ...(variantsList.map(v => v.supplierName || v.supplier).filter(Boolean))
+    ].filter(Boolean);
+    const uniqueSuppliers = [...new Set(allSuppliers)];
 
     records.push({
       objectID: docId,
       id: docId,
       name: data.name || data.title || '',
-      canonicalKey: data.canonicalKey || canonical.canonicalKey,
-      canonicalName: data.canonicalName || canonical.canonicalName,
+      canonicalKey: canonical.canonicalKey || data.canonicalKey || docId,
+      canonicalName: canonical.canonicalName || data.canonicalName || data.name || docId,
       category: data.category || '',
       description: data.description ? String(data.description).substring(0, 500) : '',
       goals: data.goals || [],
       canonicalGoals: data.canonicalGoals || [],
       tags: data.tags || [],
       searchableGoals: [...new Set(allGoals)],
-      supplier: data.supplier || data.supplierName || '',
-      supplierName: data.supplierName || data.supplier || '',
+      supplier: uniqueSuppliers[0] || data.supplier || data.supplierName || '',
+      supplierName: uniqueSuppliers[0] || data.supplierName || data.supplier || '',
+      suppliers: uniqueSuppliers,
       stock: Number(data.stock ?? data.inventory ?? 0),
       price: Number(data.price || 0),
       variantsCount: Number(data.variantsCount ?? variantsList.length ?? 1),
@@ -134,6 +142,10 @@ async function rebuildIndex() {
     indexSettings: {
       attributeForDistinct: 'canonicalKey',
       distinct: 1,
+      minWordSizefor1Typo: 5,
+      disableTypoToleranceOnWords: [
+        'glow', 'klow', 'bpc', 'ghk', 'kpv', 'mots', 'dsip', 'cjc', 'nad', 'telo', 'tymo', 'pt', 'ss'
+      ],
       searchableAttributes: [
         'unordered(canonicalName)',
         'unordered(name)',

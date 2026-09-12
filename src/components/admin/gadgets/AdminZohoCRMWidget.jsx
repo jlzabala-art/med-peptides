@@ -24,6 +24,7 @@ import {
   deleteDoc,
   query,
   where,
+  limit,
   serverTimestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../../../firebase';

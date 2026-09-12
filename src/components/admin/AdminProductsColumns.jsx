@@ -3,14 +3,13 @@ import { UploadCloud, Plus, Share2, Copy, Check, ExternalLink, User } from '@/li
 import UniversalShareDrawer from '../ui/UniversalShareDrawer';
 import TooltipWrapper from '../ui/TooltipWrapper';
 import AppEntityCell from '../ui/AppEntityCell';
-import InlineEditField from '../ui/InlineEditField';
 import AppStatusToggle from '../ui/AppStatusToggle';
 import AppActionGroup from '../ui/AppActionGroup';
 import CopyableId from '../ui/CopyableId';
 import notifier from '../../services/NotificationService';
 import { getProductAvailableTypes, isPeptideProduct } from '../../utils/productNormalizer';
 
-const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
 
 /**
  * QrShareButton — inline share button for admin table rows.

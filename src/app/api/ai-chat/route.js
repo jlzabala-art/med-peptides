@@ -1,14 +1,22 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/apiValidator';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 export async function POST(req) {
+  const rateInfo = checkRateLimit(req, { limit: 25, windowMs: 60 * 1000, tier: 'ai-chat' });
+  if (!rateInfo.allowed) {
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     const body = await req.json();
-    const { message, context = {}, history = [] } = body;
+    const { message: rawMessage, context = {}, history = [] } = body;
 
-    if (!message || typeof message !== 'string') {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    const message = sanitizeText(rawMessage, 2000);
+    if (!message) {
+      return NextResponse.json({ error: 'Valid message text is required (max 2000 chars)' }, { status: 400 });
     }
 
     const {
@@ -50,44 +58,75 @@ GUIDELINES:
 
     if (GEMINI_API_KEY) {
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: systemPrompt }]
-              },
-              ...history.slice(-4).map(h => ({
-                role: h.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: h.text }]
-              })),
-              {
-                role: 'user',
-                parts: [{ text: message }]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.4,
-              maxOutputTokens: 800,
-            }
-          })
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        
+        const contents = [
+          { role: 'user', parts: [{ text: systemPrompt }] },
+          ...history.slice(-4).map(h => ({
+            role: h.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: h.text }]
+          })),
+          { role: 'user', parts: [{ text: message }] }
+        ];
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents,
+          config: {
+            temperature: 0.3,
+            maxOutputTokens: 900,
+          }
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (replyText) {
-            return NextResponse.json({
-              reply: replyText,
-              goal,
-              timestamp: new Date().toISOString()
-            });
-          }
+        const replyText = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (replyText) {
+          const res = NextResponse.json({
+            reply: replyText,
+            goal,
+            model: 'gemini-2.5-flash',
+            timestamp: new Date().toISOString()
+          });
+          return applyRateLimitHeaders(res, rateInfo);
         }
-      } catch (geminiErr) {
-        console.warn('[Atlas AI API] Gemini call error, falling back:', geminiErr);
+      } catch (sdkErr) {
+        console.warn('[Atlas AI API] GoogleGenAI SDK error, attempting REST fallback:', sdkErr.message);
+        try {
+          const restRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                { role: 'user', parts: [{ text: systemPrompt }] },
+                ...history.slice(-4).map(h => ({
+                  role: h.sender === 'user' ? 'user' : 'model',
+                  parts: [{ text: h.text }]
+                })),
+                { role: 'user', parts: [{ text: message }] }
+              ],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 900,
+              }
+            })
+          });
+
+          if (restRes.ok) {
+            const data = await restRes.json();
+            const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (replyText) {
+              const res = NextResponse.json({
+                reply: replyText,
+                goal,
+                model: 'gemini-2.5-flash',
+                timestamp: new Date().toISOString()
+              });
+              return applyRateLimitHeaders(res, rateInfo);
+            }
+          }
+        } catch (restErr) {
+          console.warn('[Atlas AI API] Gemini REST fallback error:', restErr);
+        }
       }
     }
 
@@ -98,11 +137,12 @@ GUIDELINES:
       `• **Reconstitution Guide**: Vials typically reconstitute with 1.0mL – 2.0mL of bacteriostatic water. You can check the [Dose Calculator](/calculator) for exact units.\n\n` +
       `How else can I assist your protocol today?`;
 
-    return NextResponse.json({
+    const fallbackRes = NextResponse.json({
       reply: fallbackReply,
       goal,
       timestamp: new Date().toISOString()
     });
+    return applyRateLimitHeaders(fallbackRes, rateInfo);
 
   } catch (error) {
     console.error('[Atlas AI API] Error:', error);

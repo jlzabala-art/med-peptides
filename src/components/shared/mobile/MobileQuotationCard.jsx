@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useCallback } from 'react';
-import { Eye, Sparkles, MoreVertical, FileText, CheckCircle, Package, ArrowRight, Share2 } from 'lucide-react';
+import { Eye, Sparkles, MoreVertical, FileText, CheckCircle, Package, ArrowRight, Share2, Zap } from 'lucide-react';
 import StatusBadge from '../../ui/StatusBadge';
 import CopyableId from '../../ui/CopyableId';
 import { WarehouseOriginBadge, ColdChainBadge } from '../../ui/WarehouseOriginBadge';
@@ -90,26 +90,58 @@ export default function MobileQuotationCard({
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
+              const lang = (typeof window !== 'undefined' ? localStorage.getItem('share_message_lang') : 'es') || 'es';
+              const isEs = lang === 'es';
               const total = Number(quote.grandTotal || 0).toFixed(2);
               const itemsCount = (quote.items || []).length;
               const client = quote.clientName || 'Valued Client';
               const quoteNum = quote.quotationNumber || quote.id;
-              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+              const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
               const secureLink = `${origin}/quotation/${quote.id}`;
-              const msg = `Dear ${client},\n\nPlease find your official Atlas Health Quotation (${quoteNum}):\n• Products: ${itemsCount} compounded formulation(s)\n• Total: $${total}\n• View & Accept Online: ${secureLink}`;
+              const msg = isEs
+                ? `Estimado/a ${client},\n\nLe adjuntamos su Cotización oficial de Atlas Health (${quoteNum}):\n• Productos: ${itemsCount} formulación(es) compuesta(s)\n• Total: $${total}\n• Ver y Aceptar Online: ${secureLink}`
+                : `Dear ${client},\n\nPlease find your official Atlas Health Quotation (${quoteNum}):\n• Products: ${itemsCount} compounded formulation(s)\n• Total: $${total}\n• View & Accept Online: ${secureLink}`;
               const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
               window.open(waUrl, '_blank');
             }}
             className="gcp-btn-secondary"
-            title="Share via WhatsApp"
-            style={{ minHeight: '44px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#16a34a', borderColor: '#bbf7d0', backgroundColor: '#f0fdf4', borderRadius: '8px' }}
+            title="Compartir vía WhatsApp (ES/EN)"
+            style={{ minHeight: '44px', padding: '0 10px', fontSize: '0.78rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#16a34a', borderColor: '#bbf7d0', backgroundColor: '#f0fdf4', borderRadius: '8px' }}
           >
-            <Share2 size={15} />
+            <Share2 size={14} />
             Share
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onQuickAction) {
+                onQuickAction('sync_bigin', quote);
+              } else {
+                window.dispatchEvent(new CustomEvent('open-bigin-lookup', { detail: quote }));
+              }
+            }}
+            className="gcp-btn-secondary"
+            title="Cargar datos de Zoho Bigin"
+            style={{
+              minHeight: '44px',
+              padding: '0 10px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              color: '#0284c7',
+              borderColor: '#bae6fd',
+              backgroundColor: '#f0f9ff',
+              borderRadius: '8px'
+            }}
+          >
+            <Zap size={14} />
+            Bigin
           </button>
           <button
             onClick={(e) => {
@@ -117,9 +149,9 @@ export default function MobileQuotationCard({
               window.dispatchEvent(new CustomEvent('open-quotation-drawer', { detail: quote }));
             }}
             className="gcp-btn-secondary"
-            style={{ minHeight: '44px', padding: '0 12px', fontSize: '0.78rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '8px' }}
+            style={{ minHeight: '44px', padding: '0 10px', fontSize: '0.78rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px', borderRadius: '8px' }}
           >
-            <Eye size={15} />
+            <Eye size={14} />
             Details
           </button>
         </div>

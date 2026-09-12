@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { triggerHaptic } from '@/utils/hapticFeedback';
+import { triggerHaptic } from '@/utils/haptics';
 
 /**
  * MobileFloatingDock

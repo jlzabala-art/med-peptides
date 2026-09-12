@@ -88,6 +88,7 @@ export default function PanelShell({
             height: 100vh;
             width: 100%;
             overflow: hidden;
+            overscroll-behavior: none;
           }
         `}</style>
         <IOSPushBanner />

@@ -1,21 +1,27 @@
 {
-  "name": "Atlas App",
+  "name": "Atlas Services",
   "short_name": "Atlas",
-  "description": "Atlas Health — Precision Peptide & Protocol Intelligence Platform",
+  "description": "Atlas Services — Precision Peptide & Protocol Intelligence Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020e1c",
-  "theme_color": "#0284c7",
+  "background_color": "#0f172a",
+  "theme_color": "#003666",
   "icons": [
     {
-      "src": "/regenpept_logo_favicon.svg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/regenpept_logo_favicon.svg",
+      "src": "/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
       "type": "image/svg+xml"
     }
   ]

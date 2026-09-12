@@ -19,6 +19,7 @@ import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
 import { formatAEDtoDual } from '../../utils/currencies';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { fetchExecutiveBriefAction } from '../../actions/adminActions';
+import { triggerHaptic } from '../../utils/haptics';
 
 const TIME_RANGES = [
   { id: 'today', label: 'Today' },
@@ -116,7 +117,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
       title: 'Active Enrolled Patients',
       value: `${metrics.activePatients || '0'} Patients`,
       icon: Users,
-      route: '/doctor/patients',
+      route: '/admin/patients?status=active',
       styleClass: styles.revenueIcon,
     },
     pendingPrescriptions: {
@@ -137,7 +138,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
       title: 'Patient Follow-Ups Due',
       value: `${metrics.dueFollowUps || '0'} Due`,
       icon: AlertTriangle,
-      route: '/doctor/patients',
+      route: '/admin/patients?filter=followup_due',
       styleClass: styles.inventoryIcon,
     },
   };
@@ -165,36 +166,56 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         </div>
 
         {/* Date Range Filter Selector (Server Calculated with Touch-Friendly Buttons) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#f1f5f9', padding: '4px', borderRadius: '10px', flexWrap: 'wrap' }}>
-          <Calendar size={14} style={{ color: '#64748b', marginLeft: '6px', marginRight: '2px' }} />
-          {TIME_RANGES.map((tr) => (
-            <button
-              key={tr.id}
-              onClick={() => setTimeRange(tr.id)}
-              style={{
-                padding: '6px 12px',
-                minHeight: '34px',
-                borderRadius: '8px',
-                border: 'none',
-                fontSize: '0.78rem',
-                fontWeight: timeRange === tr.id ? 800 : 600,
-                backgroundColor: timeRange === tr.id ? '#ffffff' : 'transparent',
-                color: timeRange === tr.id ? '#003666' : '#64748b',
-                boxShadow: timeRange === tr.id ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {tr.label}
-            </button>
-          ))}
+        <div 
+          className="admin-time-range-bar"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '4px', 
+            backgroundColor: '#f1f5f9', 
+            padding: '4px', 
+            borderRadius: '10px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <Calendar size={14} className="admin-time-range-calendar-icon" style={{ color: '#64748b', marginLeft: '6px', marginRight: '2px', flexShrink: 0 }} />
+          <div className="admin-time-range-segmented" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px', flex: 1 }}>
+            {TIME_RANGES.map((tr) => (
+              <button
+                key={tr.id}
+                type="button"
+                onClick={() => {
+                  triggerHaptic('select');
+                  setTimeRange(tr.id);
+                }}
+                className={`admin-time-range-btn ${timeRange === tr.id ? 'active' : ''}`}
+                style={{
+                  padding: '6px 8px',
+                  minHeight: '34px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  fontSize: '0.76rem',
+                  fontWeight: timeRange === tr.id ? 800 : 600,
+                  backgroundColor: timeRange === tr.id ? '#ffffff' : 'transparent',
+                  color: timeRange === tr.id ? '#003666' : '#64748b',
+                  boxShadow: timeRange === tr.id ? '0 2px 4px rgba(0,0,0,0.08)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                {tr.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="dashboard-kpi-grid">
+      <div className="dashboard-kpi-grid admin-overview-kpi-grid">
         {currentRoleKpis.map((key) => {
           const config = CARD_CONFIG[key];
           if (!config) return null;

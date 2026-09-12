@@ -50,7 +50,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const mfgDate = product.mfgDate || '2026-02-18';
   const expDate = product.expirationDate || product.expiryDate || '2028-02-18 (24 Mo Stability)';
 
-  const origin = baseUrl || 'https://regenpept.com';
+  const origin = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com');
   const verifyUrl = `${origin}/verify/${encodeURIComponent(batchCode)}`;
   const pdfUrl = `/api/product-sheet/${product.id || slug}?format=vial`;
 

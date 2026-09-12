@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronRight, ChevronLeft, Check, SlidersHorizontal } from '@/lib/icons';
+import { triggerHaptic } from '@/utils/haptics';
 
 /**
  * MobileFiltersSheet — Two-level mobile filter bottom sheet
@@ -87,6 +88,7 @@ export default function MobileFiltersSheet({
 
   /* ── Handlers ── */
   const toggleOption = (groupKey, value) => {
+    triggerHaptic('selection');
     setPendingValues(prev => {
       const current = prev[groupKey] || [];
       const strVal = String(value);
@@ -101,6 +103,7 @@ export default function MobileFiltersSheet({
   };
 
   const handleApply = () => {
+    triggerHaptic('medium');
     filterOptions.forEach(fo => {
       fo.onChange?.(pendingValues[fo.key] || []);
     });
@@ -108,6 +111,7 @@ export default function MobileFiltersSheet({
   };
 
   const handleClearAll = () => {
+    triggerHaptic('warning');
     const cleared = {};
     filterOptions.forEach(fo => { cleared[fo.key] = []; });
     setPendingValues(cleared);
@@ -135,7 +139,11 @@ export default function MobileFiltersSheet({
           {view === 'detail' ? (
             <button
               className="mfs-back-btn"
-              onClick={() => { setView('groups'); setActiveGroupKey(null); }}
+              onClick={() => {
+                triggerHaptic('light');
+                setView('groups');
+                setActiveGroupKey(null);
+              }}
               aria-label="Back to all filters"
             >
               <ChevronLeft size={18} />
@@ -172,7 +180,11 @@ export default function MobileFiltersSheet({
                   <button
                     key={fo.key}
                     className={`mfs-group-row${hasActive ? ' mfs-group-row--active' : ''}`}
-                    onClick={() => { setActiveGroupKey(fo.key); setView('detail'); }}
+                    onClick={() => {
+                      triggerHaptic('light');
+                      setActiveGroupKey(fo.key);
+                      setView('detail');
+                    }}
                     aria-label={`${fo.pluralLabel || fo.label}: ${summary}`}
                   >
                     <span className="mfs-group-name">{fo.pluralLabel || fo.label}</span>

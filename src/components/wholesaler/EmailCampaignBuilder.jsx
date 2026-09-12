@@ -25,7 +25,8 @@ import { renderCatalogEmailHtml } from '../../utils/emailHtmlRenderer';
 import EmailPreviewPanel from './EmailPreviewPanel';
 import { ArrowLeft, ArrowRight, Save, Bot, Sparkles, Check, Trash2, Plus, Mail, Users, ExternalLink, BarChart2, Eye, Copy, Send, MessageSquare } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
-import StatusChip from '../ui/StatusChip';
+import DataTable from '../ui/DataTable';
+import StatusBadge from '../ui/StatusBadge';
 
 
 
@@ -624,54 +625,63 @@ Do NOT wrap in markdown code blocks. Output raw JSON.`;
         </>
       )}
 
-      {campaigns.length === 0 ? (
-        <div style={emptyStateStyle}>
-          <Mail size={48} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-          <h3>No campaigns found</h3>
-          <p>Launch your first B2B email campaign Curating catalogs for clinical leads.</p>
-        </div>
-      ) : filteredCampaigns.length === 0 ? (
-        <div style={{ ...emptyStateStyle, padding: '2rem' }}>
-          <Mail size={32} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-          <h3>No matching campaigns</h3>
-          <p>Try refining your search queries or filter selections.</p>
-        </div>
-      ) : (
-        <div style={tableContainerStyle}>
-          <table style={tableStyle}>
-            <thead>
-              <tr style={theadRowStyle}>
-                <th style={thStyle}>Recipient</th>
-                <th style={thStyle}>Subject Line</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Opens</th>
-                <th style={thStyle}>Clicks</th>
-                <th style={thStyle}>Date</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCampaigns.map(c => (
-                <tr key={c.campaignId} style={tbodyRowStyle}>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{c.recipient?.name}</td>
-                  <td style={tdStyle}>{c.subject}</td>
-                  <td style={tdStyle}>
-                    <StatusChip status={c.status} />
-                  </td>
-                  <td style={tdStyle}>{c.tracking?.openCount || 0}</td>
-                  <td style={tdStyle}>{c.tracking?.clickCount || 0}</td>
-                  <td style={tdStyle}>{new Date(c.createdAt).toLocaleDateString()}</td>
-                  <td style={{ ...tdStyle, textAlign: 'right' }}>
-                    <button onClick={() => handleClone(c)} style={actionButtonStyle}>
-                      Clone Setup
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable
+        columns={[
+          {
+            header: 'Recipient',
+            field: 'recipient',
+            width: '20%',
+            render: (c) => <span style={{ fontWeight: 600 }}>{c.recipient?.name || 'All Clients'}</span>
+          },
+          {
+            header: 'Subject Line',
+            field: 'subject',
+            width: '30%',
+            render: (c) => c.subject || '—'
+          },
+          {
+            header: 'Status',
+            field: 'status',
+            width: '14%',
+            render: (c) => <StatusBadge status={c.status || 'draft'} />
+          },
+          {
+            header: 'Opens',
+            field: 'opens',
+            width: '10%',
+            align: 'center',
+            render: (c) => c.tracking?.openCount || 0
+          },
+          {
+            header: 'Clicks',
+            field: 'clicks',
+            width: '10%',
+            align: 'center',
+            render: (c) => c.tracking?.clickCount || 0
+          },
+          {
+            header: 'Date',
+            field: 'createdAt',
+            width: '10%',
+            render: (c) => c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '—'
+          },
+          {
+            header: 'Actions',
+            field: 'actions',
+            width: '6%',
+            align: 'right',
+            render: (c) => (
+              <button onClick={() => handleClone(c)} style={actionButtonStyle}>
+                Clone Setup
+              </button>
+            )
+          }
+        ]}
+        data={filteredCampaigns}
+        keyField="campaignId"
+        emptyTitle={campaigns.length === 0 ? "No campaigns found" : "No matching campaigns"}
+        emptyDescription={campaigns.length === 0 ? "Launch your first B2B email campaign curating catalogs for clinical leads." : "Try refining your search queries or filter selections."}
+      />
     </div>
   );
 }

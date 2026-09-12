@@ -5,6 +5,7 @@ import DataTable from '@/components/ui/DataTable';
 import StatusBadge from '@/components/ui/StatusBadge';
 import CopyableId from '@/components/ui/CopyableId';
 import EmptyState from '@/components/ui/EmptyState';
+import notifier from '@/services/NotificationService';
 import { 
   FileText, 
   ExternalLink, 
@@ -100,10 +101,11 @@ export default function CatalogTrackingTable({ isMobile = false }) {
         const data = await res.json();
         setLogs(prev => prev.map(l => l.id === logId ? { ...l, status: 'converted_to_order', poNumber: data.poNumber } : l));
         setKpis(prev => ({ ...prev, convertedCount: prev.convertedCount + 1 }));
-        alert(`🎉 Sales Order ${data.poNumber} created successfully in the system!`);
+        notifier.success(`Sales Order ${data.poNumber} created successfully!`);
       }
     } catch (err) {
       console.error('Error converting to order:', err);
+      notifier.error('Failed to convert to order');
     } finally {
       setIsUpdating(null);
     }
@@ -122,10 +124,11 @@ export default function CatalogTrackingTable({ isMobile = false }) {
       });
       if (res.ok) {
         setLogs(prev => prev.map(l => l.id === logId ? { ...l, followUpDate: targetDate, status: 'followed_up' } : l));
-        alert(`⏰ Follow-up reminder set for ${targetDate}`);
+        notifier.info(`Follow-up reminder set for ${targetDate}`);
       }
     } catch (err) {
       console.error('Error setting reminder:', err);
+      notifier.error('Failed to set reminder');
     } finally {
       setIsUpdating(null);
     }

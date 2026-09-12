@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
-import { Bot, Mail, CheckCircle, XCircle, ArrowRight, Activity, AlertTriangle, FileText } from '@/lib/icons';
+import { Bot, Mail, CheckCircle, XCircle, ArrowRight, ArrowLeft, Activity, AlertTriangle, FileText } from '@/lib/icons';
 import toast from 'react-hot-toast';
+import AIContextBadge from '@/components/ui/AIContextBadge';
 
 export default function AIInboxTab() {
   const [emails, setEmails] = useState([]);
@@ -15,7 +16,7 @@ export default function AIInboxTab() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setEmails(docs);
-      if (docs.length > 0 && !selectedEmail) {
+      if (docs.length > 0 && !selectedEmail && typeof window !== 'undefined' && window.innerWidth > 768) {
         setSelectedEmail(docs[0]);
       }
       setLoading(false);
@@ -91,11 +92,11 @@ export default function AIInboxTab() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', backgroundColor: 'var(--background)' }}>
+    <div className="ai-inbox-container">
       {/* LEFT LIST */}
-      <div style={{ width: '35%', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--surface)' }}>
+      <div className={`ai-inbox-list ${selectedEmail ? 'ai-inbox-list--hidden-mobile' : ''}`}>
         <div style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h2 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Bot size={18} color="var(--primary)" /> AI Ingestion Queue
           </h2>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>{emails.filter(e => e.needsHumanReview).length} pending human review</p>
@@ -109,8 +110,8 @@ export default function AIInboxTab() {
                 padding: '16px',
                 borderBottom: '1px solid var(--border)',
                 cursor: 'pointer',
-                backgroundColor: selectedEmail?.id === email.id ? 'var(--primary-light)' : 'transparent',
-                borderLeft: selectedEmail?.id === email.id ? '3px solid var(--primary)' : '3px solid transparent',
+                backgroundColor: selectedEmail?.id === email.id ? 'var(--primary-light, #eff6ff)' : 'transparent',
+                borderLeft: selectedEmail?.id === email.id ? '3px solid var(--primary, #2563eb)' : '3px solid transparent',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -144,29 +145,90 @@ export default function AIInboxTab() {
       </div>
 
       {/* RIGHT PREVIEW & VALIDATION */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'var(--surface-alt)', overflowY: 'auto' }}>
+      <div className={`ai-inbox-detail ${!selectedEmail ? 'ai-inbox-detail--hidden-mobile' : ''}`}>
         {selectedEmail ? (
-          <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+          <div style={{ padding: 'clamp(1rem, 2.5vw, 2rem)', maxWidth: '850px', margin: '0 auto', width: '100%' }}>
             
-            {/* Header Action Bar */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', backgroundColor: 'var(--surface)', padding: '1rem 1.5rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Bot size={18} color="var(--primary)" /> AI Analysis Complete
-                </h3>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Awaiting human validation before workflow creation</span>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button onClick={() => handleReject(selectedEmail.id)} className="gcp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}>
-                  <XCircle size={16} /> Discard
-                </button>
-                <button onClick={() => handleApprove(selectedEmail.id)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle size={16} /> Approve Workflow
-                </button>
-              </div>
+            {/* Mobile Back Button */}
+            <div className="ai-inbox-mobile-back">
+              <button
+                type="button"
+                onClick={() => setSelectedEmail(null)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.5rem 0.85rem',
+                  borderRadius: '8px',
+                  background: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
+                  color: '#334155',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  minHeight: '40px',
+                  marginBottom: '1rem'
+                }}
+              >
+                <ArrowLeft size={16} /> Volver a la Bandeja (Queue)
+              </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            {/* Header Action Bar with AIContextBadge */}
+            <div style={{ marginBottom: '1.5rem', backgroundColor: 'var(--surface)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+              <AIContextBadge
+                title="Inbound Email Intelligence"
+                subtitle="Intent Detection & Automated Workflow Formulation"
+                contextPill={`From: ${selectedEmail.from} • Subject: ${selectedEmail.subject?.slice(0, 35)}...`}
+                accentColor="var(--primary, #003666)"
+                model="Gemini 2.5 Flash"
+                actions={
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => handleReject(selectedEmail.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        color: '#ef4444',
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        padding: '0.5rem 0.85rem',
+                        borderRadius: '8px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        minHeight: '40px'
+                      }}
+                    >
+                      <XCircle size={16} /> Discard
+                    </button>
+                    <button
+                      onClick={() => handleApprove(selectedEmail.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        background: 'var(--primary, #003666)',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '8px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        minHeight: '40px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <CheckCircle size={16} /> Approve Workflow
+                    </button>
+                  </div>
+                }
+              />
+            </div>
+
+            <div className="ai-inbox-grid">
               
               {/* Original Email */}
               <div style={{ backgroundColor: 'var(--surface)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -290,6 +352,61 @@ export default function AIInboxTab() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .ai-inbox-container {
+          display: flex;
+          height: 100%;
+          width: 100%;
+          overflow: hidden;
+        }
+        .ai-inbox-list {
+          width: 350px;
+          flex-shrink: 0;
+          border-right: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+          background: var(--surface);
+          overflow-y: auto;
+        }
+        .ai-inbox-detail {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          background: var(--surface-alt);
+          overflow-y: auto;
+        }
+        .ai-inbox-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+        }
+        .ai-inbox-mobile-back {
+          display: none;
+        }
+        @media (max-width: 768px) {
+          .ai-inbox-container {
+            flex-direction: column;
+          }
+          .ai-inbox-list {
+            width: 100%;
+            border-right: none;
+          }
+          .ai-inbox-list--hidden-mobile {
+            display: none !important;
+          }
+          .ai-inbox-detail--hidden-mobile {
+            display: none !important;
+          }
+          .ai-inbox-mobile-back {
+            display: block;
+          }
+          .ai-inbox-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem;
+          }
+        }
+      `}</style>
     </div>
   );
 }

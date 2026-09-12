@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { prescriptionSchema } from '../../../schemas/prescriptionSchema';
 import { resolveIngredients } from '../../../services/apiIngredientMatcher';
+import AIContextBadge from '../../../components/ui/AIContextBadge';
 
 export default function ImportPrescriptionModal({ 
   isOpen, 
@@ -201,26 +202,30 @@ export default function ImportPrescriptionModal({
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           padding: '1.25rem 1.5rem',
           borderBottom: '1px solid #e2e8f0',
-          backgroundColor: '#f8fafc'
+          backgroundColor: '#f8fafc',
+          gap: '1rem'
         }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#0f172a' }}>{title}</h2>
-            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Upload a document to automatically parse and extract details instantly.
-            </p>
-          </div>
+          <AIContextBadge
+            title={title}
+            subtitle="Multimodal AI parses clinical scripts, PDFs, and doctor signatures into official prescriptions"
+            contextPill={context?.patientName ? `Patient: ${context.patientName}` : "Target: Official Rx Engine"}
+            accentColor="#0d9488"
+            model="Gemini 2.5 Flash • Multimodal"
+          />
           <button 
             onClick={onClose}
             style={{
               background: 'none', border: 'none', padding: '0.5rem',
               cursor: 'pointer', color: '#64748b', borderRadius: '8px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              minWidth: '44px', minHeight: '44px'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            aria-label="Close"
           >
             <X size={20} />
           </button>

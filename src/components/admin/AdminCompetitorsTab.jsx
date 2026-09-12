@@ -51,6 +51,7 @@ export default function AdminCompetitorsTab({ isSubTab = false, initialSearch = 
   // Settings State
   const [showSettings, setShowSettings] = useState(false);
   const [competitorUrls, setCompetitorUrls] = useState([
+    { name: "RegenPept", url: "https://regenpept.com/" },
     { name: "Peptide Sciences", url: "https://www.peptidesciences.com/" },
     { name: "Limitless Life", url: "https://limitlesslifenootropics.com/" },
     { name: "Core Peptides", url: "https://corepeptides.com/" }

@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { DoctorContext } from '../../../templates/DoctorDashboard';
 import AdminTabErrorBoundary from '../../../components/admin/AdminTabErrorBoundary';
+import EmptyState from '../../../components/ui/EmptyState';
+import { Compass } from '@/lib/icons';
 
 // ── Eager imports (high traffic, primary navigation) ──────────────────────────
 import DoctorOverviewTab from '../../../components/doctor/DoctorOverviewTab';
@@ -26,6 +28,7 @@ const DoctorLabResults = dynamic(() => import('../../../templates/DoctorLabResul
 const DoctorResearch = dynamic(() => import('../../../templates/DoctorResearch'), { ssr: false });
 const CatalogCreatorFlow = dynamic(() => import('../../../components/wholesaler/CatalogCreatorFlow'), { ssr: false });
 const UserProfileTab = dynamic(() => import('../../../components/shared/UserProfileTab'), { ssr: false });
+const AdminCatalogTabClient = dynamic(() => import('../../../components/admin/AdminCatalogTabClient'), { ssr: false });
 
 // ── Bridge wrappers ──────────────────────────────────────────────────────────
 function OverviewWrapper() {
@@ -146,6 +149,14 @@ function LeadsWrapper() {
   return <DoctorLeadsTab doctorId={doctorId} />;
 }
 
+function DoctorCatalogWrapper() {
+  return (
+    <div style={{ padding: '1rem' }}>
+      <AdminCatalogTabClient readOnly={true} />
+    </div>
+  );
+}
+
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
 export default function DynamicRoute({ params }) {
   const resolvedParams = React.use(params);
@@ -153,6 +164,8 @@ export default function DynamicRoute({ params }) {
   const path = slug.join('/');
 
   switch (path) {
+    case 'catalog':
+    case 'products': return <DoctorCatalogWrapper />;
     case 'new-prescription': return <NewPrescriptionWrapper />;
     case 'prescriptions-history': return <PrescriptionsHistoryWrapper />;
     case 'patients': return <PatientsWrapper />;
@@ -168,6 +181,18 @@ export default function DynamicRoute({ params }) {
     case 'assistants': return <AssistantsWrapper />;
     case 'settings': return <SettingsWrapper />;
     case 'my-profile': return <UserProfileTab />;
-    default: return <div>Tab Not Found: {path}</div>;
+    default: return (
+      <div style={{ padding: '3rem 1.5rem' }}>
+        <EmptyState
+          icon={Compass}
+          title="Section Not Found"
+          subtitle={`The requested doctor module "${path}" does not exist or has been moved.`}
+          action={{
+            label: 'Return to Doctor Overview',
+            onClick: () => window.location.assign('/doctor')
+          }}
+        />
+      </div>
+    );
   }
 }

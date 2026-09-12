@@ -33,6 +33,67 @@ const DEFAULT_ACTIVE_KPIS = [];
 const _catalogCache = { products: null, variants: null, ts: 0 };
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+export function buildFlatVariants(products = []) {
+  const flatVars = [];
+  products.forEach((p) => {
+    if (p.variants && p.variants.length > 0) {
+      p.variants.forEach((v, idx) => {
+        const details = [
+          v.format || p.format || '',
+          v.dosage || p.dosage || '',
+          v.size || p.size || '',
+        ].filter(Boolean).join(' ');
+        const computedPrice = Number(v.pricing?.retail?.perUnit) || 0;
+        const computedCost = Number(v.pricing?.master?.perUnit) || 0;
+
+        flatVars.push({
+          ...v,
+          id: v.id || `${p.id}-var-${idx}`,
+          productId: p.id,
+          productName: p.name || 'Unknown Product',
+          name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
+          supplierId: v.supplierId || null,
+          stock: Number(v.stock?.available || v.stock) || 0,
+          reorderPoint: Number(v.reorderPoint) || 20,
+          price: computedPrice,
+          cost: computedCost,
+          coa: v.hasCoa ? 'Valid' : 'Missing',
+          gmp: v.hasGmp ? 'Valid' : 'Missing',
+          registration: 'Active',
+          isMissingSupplier: !v.supplierId,
+          isMissingPricing: !(computedPrice || computedCost),
+          rawVariant: v,
+          rawProduct: p,
+        });
+      });
+    } else {
+      const computedPrice = Number(p.pricing?.retail?.perUnit) || 0;
+      const computedCost = Number(p.pricing?.master?.perUnit) || 0;
+
+      flatVars.push({
+        ...p,
+        id: p.id,
+        productId: p.id,
+        productName: p.name || 'Unknown Product',
+        name: p.name || 'Unknown Product',
+        supplierId: p.supplierIds?.[0] || null,
+        stock: Number(p.stock?.available || p.stock) || 0,
+        reorderPoint: Number(p.reorderPoint) || 20,
+        price: computedPrice,
+        cost: computedCost,
+        coa: p.hasCoa ? 'Valid' : 'Missing',
+        gmp: p.hasGmp ? 'Valid' : 'Missing',
+        registration: 'Active',
+        isMissingSupplier: !(p.supplierIds?.length > 0),
+        isMissingPricing: !(computedPrice || computedCost),
+        rawVariant: null,
+        rawProduct: p,
+      });
+    }
+  });
+  return flatVars;
+}
+
 export function useCatalogData(options = {}) {
   const {
     pageSize = 20,
@@ -180,65 +241,7 @@ export function useCatalogData(options = {}) {
         });
 
         setProducts(finalProducts);
-        
-        // Build flatVars
-        const flatVars = [];
-        finalProducts.forEach((p) => {
-          if (p.variants && p.variants.length > 0) {
-            p.variants.forEach((v, idx) => {
-              const details = [
-                v.format || p.format || '',
-                v.dosage || p.dosage || '',
-                v.size || p.size || '',
-              ].filter(Boolean).join(' ');
-              const computedPrice = Number(v.pricing?.retail?.perUnit) || 0;
-              const computedCost = Number(v.pricing?.master?.perUnit) || 0;
-  
-              flatVars.push({
-                ...v,
-                id: v.id || `${p.id}-var-${idx}`,
-                productId: p.id,
-                productName: p.name || 'Unknown Product',
-                name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
-                supplierId: v.supplierId || null,
-                stock: Number(v.stock?.available || v.stock) || 0,
-                reorderPoint: Number(v.reorderPoint) || 20,
-                price: computedPrice,
-                cost: computedCost,
-                coa: v.hasCoa ? 'Valid' : 'Missing',
-                gmp: v.hasGmp ? 'Valid' : 'Missing',
-                registration: 'Active',
-                isMissingSupplier: !v.supplierId,
-                isMissingPricing: !(computedPrice || computedCost),
-                rawVariant: v,
-                rawProduct: p,
-              });
-            });
-          } else {
-            const computedPrice = Number(p.pricing?.retail?.perUnit) || 0;
-            const computedCost = Number(p.pricing?.master?.perUnit) || 0;
-  
-            flatVars.push({
-              ...p,
-              id: p.id,
-              productId: p.id,
-              productName: p.name || 'Unknown Product',
-              name: p.name || 'Unknown Product',
-              supplierId: p.supplierIds?.[0] || null,
-              stock: Number(p.stock?.available || p.stock) || 0,
-              reorderPoint: Number(p.reorderPoint) || 20,
-              price: computedPrice,
-              cost: computedCost,
-              coa: p.hasCoa ? 'Valid' : 'Missing',
-              gmp: p.hasGmp ? 'Valid' : 'Missing',
-              registration: 'Active',
-              isMissingSupplier: !(p.supplierIds?.length > 0),
-              isMissingPricing: !(computedPrice || computedCost),
-              rawVariant: null,
-              rawProduct: p,
-            });
-          }
-        });
+        const flatVars = buildFlatVariants(finalProducts);
         setVariants(flatVars);
         setHasMore(false);
         setLoading(false);
@@ -313,48 +316,10 @@ export function useCatalogData(options = {}) {
 
           if (searchRes.hits.length === 0) {
             // Algolia returned 0 hits — the index is authoritative.
-            // Show empty results instead of falling through to Firestore,
-            // which would incorrectly show ALL products (e.g. KLOW showing 12 unrelated products).
             console.warn("Algolia returned 0 hits for query:", searchQuery);
             setProducts([]);
             setVariants([]);
             setHasMore(false);
-            setLoading(false);
-            return;
-          } else {
-            setHasMore(searchRes.page < searchRes.nbPages - 1);
-
-            // Fetch the actual documents from Firestore based on Algolia's objectID
-            const promises = searchRes.hits.map((hit) => getDoc(doc(db, 'products', hit.objectID)));
-            const docsSnap = await Promise.all(promises);
-            
-            // Filter out missing docs and construct the snapshot-like array
-            const validDocs = docsSnap.filter(d => d.exists());
-            const rawProducts = validDocs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-
-            // Now fetch variants for these products using individual subcollection queries
-            // This avoids the need for a global collectionGroup index
-            const variantPromises = validDocs.map(d => getDocs(collection(db, 'products', d.id, 'variants')));
-            const variantSnaps = await Promise.all(variantPromises);
-            
-            let allVariants = [];
-            variantSnaps.forEach(snap => {
-              allVariants = allVariants.concat(snap.docs.map(vDoc => ({ id: vDoc.id, ...vDoc.data() })));
-            });
-
-            const variantsByProduct = {};
-            allVariants.forEach((v) => {
-              if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
-              variantsByProduct[v.productId].push(v);
-            });
-
-            const finalProducts = rawProducts.map((p) => {
-              p.variants = variantsByProduct[p.id] || [];
-              return p;
-            });
-
-            setProducts(finalProducts);
-            setVariants(allVariants);
             setLoading(false);
             return;
           }
@@ -369,32 +334,46 @@ export function useCatalogData(options = {}) {
           const validDocs = docsSnap.filter(d => d.exists());
           const rawProducts = validDocs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
 
-          // Now fetch variants for these products
-          const idChunks = [];
-          for (let i = 0; i < validDocs.length; i += 10) {
-            idChunks.push(validDocs.map(d => d.id).slice(i, i + 10));
-          }
-
-          let allVariants = [];
-          for (const chunk of idChunks) {
-            const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
-            const vSnap = await getDocs(vQ);
-            allVariants = allVariants.concat(vSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+          // Check which products need variants fetched (i.e. those where p.variants is missing or empty)
+          const productsNeedingVariants = rawProducts.filter(p => !p.variants || !Array.isArray(p.variants) || p.variants.length === 0);
+          
+          let allFetchedVariants = [];
+          if (productsNeedingVariants.length > 0) {
+            const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+            const idChunks = chunkArray(productsNeedingVariants.map(p => p.id), 10);
+            try {
+              for (const chunk of idChunks) {
+                const vQ = query(collectionGroup(db, 'variants'), where('productId', 'in', chunk));
+                const vSnap = await getDocs(vQ);
+                allFetchedVariants = allFetchedVariants.concat(vSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+              }
+            } catch (err) {
+              const vPromises = productsNeedingVariants.map(p => getDocs(collection(db, 'products', p.id, 'variants')));
+              const vSnaps = await Promise.all(vPromises);
+              vSnaps.forEach(vSnap => {
+                allFetchedVariants = allFetchedVariants.concat(vSnap.docs.map(vDoc => ({ id: vDoc.id, ...vDoc.data() })));
+              });
+            }
           }
 
           const variantsByProduct = {};
-          allVariants.forEach((v) => {
-            if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
-            variantsByProduct[v.productId].push(v);
+          allFetchedVariants.forEach((v) => {
+            if (v.productId) {
+              if (!variantsByProduct[v.productId]) variantsByProduct[v.productId] = [];
+              variantsByProduct[v.productId].push(v);
+            }
           });
 
           const finalProducts = rawProducts.map((p) => {
-            p.variants = variantsByProduct[p.id] || [];
+            if (!p.variants || p.variants.length === 0) {
+              p.variants = variantsByProduct[p.id] || [];
+            }
             return p;
           });
 
+          const flatVars = buildFlatVariants(finalProducts);
           setProducts(finalProducts);
-          setVariants(allVariants);
+          setVariants(flatVars);
           setLoading(false);
           return;
 
@@ -547,63 +526,7 @@ export function useCatalogData(options = {}) {
 
       setProducts(rawProducts);
 
-      const flatVars = [];
-      rawProducts.forEach((p) => {
-        if (p.variants && p.variants.length > 0) {
-          p.variants.forEach((v, idx) => {
-            const details = [
-              v.format || p.format || '',
-              v.dosage || p.dosage || '',
-              v.size || p.size || '',
-            ].filter(Boolean).join(' ');
-            const computedPrice = Number(v.pricing?.retail?.perUnit) || 0;
-            const computedCost = Number(v.pricing?.master?.perUnit) || 0;
-
-            flatVars.push({
-              ...v,
-              id: v.id || `${p.id}-var-${idx}`,
-              productId: p.id,
-              productName: p.name || 'Unknown Product',
-              name: `${p.name || ''}${details ? ` - ${details}` : ''}`.trim(),
-              supplierId: v.supplierId || null,
-              stock: Number(v.stock?.available || v.stock) || 0,
-              reorderPoint: Number(v.reorderPoint) || 20,
-              price: computedPrice,
-              cost: computedCost,
-              coa: v.hasCoa ? 'Valid' : 'Missing',
-              gmp: v.hasGmp ? 'Valid' : 'Missing',
-              registration: 'Active',
-              isMissingSupplier: !v.supplierId,
-              isMissingPricing: !(computedPrice || computedCost),
-              rawVariant: v,
-              rawProduct: p,
-            });
-          });
-        } else {
-          const computedPrice = Number(p.pricing?.retail?.perUnit) || 0;
-          const computedCost = Number(p.pricing?.master?.perUnit) || 0;
-
-          flatVars.push({
-            ...p,
-            id: p.id,
-            productId: p.id,
-            productName: p.name || 'Unknown Product',
-            name: p.name || 'Unknown Product',
-            supplierId: p.supplierIds?.[0] || null,
-            stock: Number(p.stock?.available || p.stock) || 0,
-            reorderPoint: Number(p.reorderPoint) || 20,
-            price: computedPrice,
-            cost: computedCost,
-            coa: p.hasCoa ? 'Valid' : 'Missing',
-            gmp: p.hasGmp ? 'Valid' : 'Missing',
-            registration: 'Active',
-            isMissingSupplier: !(p.supplierIds?.length > 0),
-            isMissingPricing: !(computedPrice || computedCost),
-            rawVariant: null,
-            rawProduct: p,
-          });
-        }
-      });
+      const flatVars = buildFlatVariants(rawProducts);
       setVariants(flatVars);
 
       // Fetch real global metrics from the Cloud Function updated document

@@ -29,9 +29,9 @@ import { useToast } from '../hooks/useToast';
 const LS_STATUS_KEY   = 'ph_filter_status';
 const LS_FAVORITE_KEY = 'ph_filter_favorite';
 
-// ── Lazy initializers: run only on first render
-const initStatus   = () => localStorage.getItem(LS_STATUS_KEY)   ?? 'all';
-const initFavorite = () => localStorage.getItem(LS_FAVORITE_KEY) === 'true';
+// ── Lazy initializers: run safely on client
+const initStatus   = () => (typeof window !== 'undefined' ? localStorage.getItem(LS_STATUS_KEY) ?? 'all' : 'all');
+const initFavorite = () => (typeof window !== 'undefined' ? localStorage.getItem(LS_FAVORITE_KEY) === 'true' : false);
 
 const parseDate = (d) => {
   if (!d) return 0;

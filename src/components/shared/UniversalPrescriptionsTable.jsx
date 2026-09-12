@@ -27,9 +27,9 @@ import { useDrawer } from '../../context/DrawerContext';
 import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 import BuilderProtocolSearch from './order-builder/BuilderProtocolSearch';
 import MobilePrescriptionCard from './mobile/MobilePrescriptionCard';
-import MobileActionSheet from '../ui/MobileActionSheet';
 import { Eye, Edit3, XCircle } from '@/lib/icons';
 import notifier from '../../services/NotificationService';
+import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
 
 export default function UniversalPrescriptionsTable({ doctorId, patientId, readOnly = false, hideHeader = false, title = 'Prescriptions', subtitle = 'System of record for all patient prescriptions and recommendations.', serverKPIs, enableAskAtlas = false, initialData }) {
   const { openDrawer } = useDrawer();
@@ -405,30 +405,39 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     return chips;
   }, [statusFilter, rangeFilter, urlDoctorId, urlDoctorName, updateUrlParam]);
 
-  const handleExportCsv = useCallback(() => {
+  const handleExportCsv = useCallback(async () => {
     const list = (isAlgoliaActive ? algoliaHits : displayPrescriptions) || [];
     if (list.length === 0) {
-      notifier.info('No prescriptions to export');
+      notifier.info('Downloading complete prescriptions database via server stream...');
+      try {
+        await triggerServerExport({
+          entity: 'prescriptions',
+          format: 'csv',
+          doctorId: doctorId || undefined
+        });
+        notifier.success('Prescriptions export completed.');
+      } catch (err) {
+        notifier.error('Failed to export prescriptions: ' + err.message);
+      }
       return;
     }
-    const headers = ['ID', 'Patient', 'Doctor', 'Status', 'Date', 'Total'];
-    const rows = list.map(rx => [
-      rx.id,
-      `"${rx.patientName || ''}"`,
-      `"${rx.doctorName || rx.physicianName || ''}"`,
-      rx.status || '',
-      rx.createdAt?.seconds ? new Date(rx.createdAt.seconds * 1000).toISOString() : '',
-      rx.total || 0
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `prescriptions_export_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, [displayPrescriptions, isAlgoliaActive, algoliaHits]);
+
+    const columns = [
+      { key: 'id', header: 'ID', accessor: rx => rx.id || '' },
+      { key: 'patientName', header: 'Patient', accessor: rx => rx.patientName || '' },
+      { key: 'doctorName', header: 'Doctor', accessor: rx => rx.doctorName || rx.physicianName || '' },
+      { key: 'status', header: 'Status', accessor: rx => rx.status || 'draft' },
+      {
+        key: 'createdAt',
+        header: 'Date',
+        accessor: rx => (rx.createdAt?.seconds ? new Date(rx.createdAt.seconds * 1000).toISOString() : (rx.createdAt || ''))
+      },
+      { key: 'total', header: 'Total ($)', accessor: rx => Number(rx.total || 0).toFixed(2) }
+    ];
+
+    exportToCSV(list, columns, `prescriptions_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    notifier.success(`Exported ${list.length} prescriptions to CSV.`);
+  }, [displayPrescriptions, isAlgoliaActive, algoliaHits, doctorId]);
 
   return (
     <>

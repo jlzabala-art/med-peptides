@@ -1,11 +1,27 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/apiValidator';
+import { logger } from '@/utils/logger';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+const RATE_LIMIT_OPTIONS = { limit: 20, windowMs: 60 * 1000, tier: 'ai-parse-supplier-pricelist' };
+// Max 20 MB for supplier pricelists (PDF with many pages)
+const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+]);
 
 export async function POST(request) {
+  const rateInfo = checkRateLimit(request, RATE_LIMIT_OPTIONS);
+  if (!rateInfo.allowed) {
+    logger.warn('[AI Supplier Pricelist] Rate limit exceeded', { tier: 'ai-parse-supplier-pricelist', retryAfter: rateInfo.retryAfter });
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     if (!apiKey) {
+      logger.error('[AI Supplier Pricelist] Missing GEMINI_API_KEY');
       return NextResponse.json(
         { error: 'GEMINI_API_KEY is not configured on the server environment.' },
         { status: 500 }
@@ -14,15 +30,30 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const file = formData.get('file');
-    const supplierName = formData.get('supplierName') || 'Unknown Supplier';
+    const supplierName = sanitizeText(formData.get('supplierName') || 'Unknown Supplier', 200);
 
     if (!file) {
       return NextResponse.json({ error: 'No supplier pricelist file provided' }, { status: 400 });
     }
 
     const arrayBuffer = await file.arrayBuffer();
+    if (arrayBuffer.byteLength > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: `File too large. Maximum allowed size is ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB.` },
+        { status: 413 }
+      );
+    }
+
+    const mimeType = file.type || (file.name?.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+      return NextResponse.json(
+        { error: `File type '${mimeType}' is not supported. Allowed: PDF, JPEG, PNG, WebP.` },
+        { status: 415 }
+      );
+    }
+
+    logger.info('[AI Supplier Pricelist] Processing upload', { supplierName, mimeType, sizeBytes: arrayBuffer.byteLength });
     const buffer = Buffer.from(arrayBuffer);
-    const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
 
     const ai = new GoogleGenAI({ apiKey });
 
@@ -105,12 +136,10 @@ Extraction Guidelines:
     }
 
     const parsedData = JSON.parse(text);
-    return NextResponse.json({
-      success: true,
-      data: parsedData,
-    });
+    const jsonResponse = NextResponse.json({ success: true, data: parsedData });
+    return applyRateLimitHeaders(jsonResponse, rateInfo);
   } catch (error) {
-    console.error('[AI Parse Supplier Pricelist] Error:', error);
+    logger.error('[AI Supplier Pricelist] Unhandled error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to parse supplier pricelist.' },
       { status: 500 }

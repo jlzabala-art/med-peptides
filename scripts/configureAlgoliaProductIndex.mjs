@@ -39,6 +39,12 @@ async function configureProductIndex() {
     attributeForDistinct: 'canonicalKey',
     distinct: 1,
 
+    // ── Strict Typo Tolerance for Peptide Acronyms & Short Names ──────────────
+    minWordSizefor1Typo: 5,
+    disableTypoToleranceOnWords: [
+      'glow', 'klow', 'bpc', 'ghk', 'kpv', 'mots', 'dsip', 'cjc', 'nad', 'telo', 'tymo', 'pt', 'ss'
+    ],
+
     // ── Search Relevance & Prioritization ─────────────────────────────────────
     searchableAttributes: [
       'unordered(canonicalName)',

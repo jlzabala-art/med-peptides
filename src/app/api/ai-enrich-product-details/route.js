@@ -1,25 +1,41 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/apiValidator';
+import { logger } from '@/utils/logger';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+const RATE_LIMIT_OPTIONS = { limit: 30, windowMs: 60 * 1000, tier: 'ai-enrich-product' };
 
 export async function POST(request) {
+  const rateInfo = checkRateLimit(request, RATE_LIMIT_OPTIONS);
+  if (!rateInfo.allowed) {
+    logger.warn('[AI Enrich Product] Rate limit exceeded', { tier: 'ai-enrich-product', retryAfter: rateInfo.retryAfter });
+    return rateLimitExceededResponse(rateInfo);
+  }
+
   try {
     if (!apiKey) {
+      logger.error('[AI Enrich Product] Missing GEMINI_API_KEY');
       return NextResponse.json(
         { error: 'GEMINI_API_KEY is not configured on the server environment.' },
         { status: 500 }
       );
     }
 
-    const { productName, category = '', strength = '', presentation = 'vial' } = await request.json();
+    const body = await request.json();
+    const productName = sanitizeText(body?.productName, 200);
+    const category = sanitizeText(body?.category || '', 100);
+    const strength = sanitizeText(body?.strength || '', 50);
+    const presentation = sanitizeText(body?.presentation || 'vial', 50);
 
-    if (!productName || typeof productName !== 'string' || productName.trim().length === 0) {
+    if (!productName || productName.trim().length === 0) {
       return NextResponse.json(
         { error: 'Product name is required.' },
         { status: 400 }
       );
     }
+    logger.info('[AI Enrich Product] Processing request', { productName });
 
     const ai = new GoogleGenAI({ apiKey });
 
@@ -105,12 +121,10 @@ Rules:
     }
 
     const productEnrichment = JSON.parse(text);
-    return NextResponse.json({
-      success: true,
-      data: productEnrichment
-    });
+    const jsonResponse = NextResponse.json({ success: true, data: productEnrichment });
+    return applyRateLimitHeaders(jsonResponse, rateInfo);
   } catch (error) {
-    console.error('[AI Product Enrichment] Error:', error);
+    logger.error('[AI Enrich Product] Unhandled error', error);
     return NextResponse.json(
       { error: error.message || 'Failed to enrich product data.' },
       { status: 500 }

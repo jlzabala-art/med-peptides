@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuotationsUIStore } from '../../stores/quotationsUIStore';
 import StandardDrawer from '../ui/StandardDrawer';
 import StandardDrawerTabs from '../common/StandardDrawerTabs';
@@ -24,10 +24,38 @@ const QUOTATION_TABS = [
   { id: 'internal', label: 'Internal Notes' },
 ];
 
-export default function QuotationDetailDrawer() {
-  const { activeQuotation, closeQuotationDrawer, openBuilderWizard } = useQuotationsUIStore();
+export default function QuotationDetailDrawer({ quotation: propQuotation, onClose: propOnClose }) {
+  const { activeQuotation: storeQuotation, closeQuotationDrawer, openBuilderWizard } = useQuotationsUIStore();
+  const [localQuotation, setLocalQuotation] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const { createQuotation } = useTransactionManager();
+
+  useEffect(() => {
+    const handleOpen = (e) => {
+      if (e.detail) {
+        setLocalQuotation(e.detail);
+      }
+    };
+    const handleUpdated = (e) => {
+      if (e.detail) {
+        setLocalQuotation(prev => prev ? { ...prev, ...e.detail } : e.detail);
+      }
+    };
+    window.addEventListener('open-quotation-drawer', handleOpen);
+    window.addEventListener('quotation-updated', handleUpdated);
+    return () => {
+      window.removeEventListener('open-quotation-drawer', handleOpen);
+      window.removeEventListener('quotation-updated', handleUpdated);
+    };
+  }, []);
+
+  const activeQuotation = propQuotation || localQuotation || storeQuotation;
+
+  const handleClose = () => {
+    if (propOnClose) propOnClose();
+    setLocalQuotation(null);
+    closeQuotationDrawer();
+  };
 
   if (!activeQuotation) return null;
 
@@ -45,19 +73,18 @@ export default function QuotationDetailDrawer() {
   };
 
   const handleCreateQuotationFromRfq = () => {
-    // Open the builder wizard prefilled with RFQ items, or directly call createQuotation
     openBuilderWizard({
       type: 'rfq',
       id: activeQuotation.id,
       data: activeQuotation
     });
-    closeQuotationDrawer();
+    handleClose();
   };
 
   return (
     <StandardDrawer
       isOpen={!!activeQuotation}
-      onClose={closeQuotationDrawer}
+      onClose={handleClose}
       title={activeQuotation.type === 'rfq' ? `RFQ #${activeQuotation.rfqId}` : `Quotation #${activeQuotation.quotationNumber || activeQuotation.id}`}
       subtitle={activeQuotation.type === 'rfq' ? 'Pending Commercial Review' : 'Pending Client Approval'}
     >

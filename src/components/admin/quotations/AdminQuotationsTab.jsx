@@ -15,7 +15,8 @@ import KpiScopeBar from '../../ui/KpiScopeBar';
 import DocumentShareModal from '../catalog/document-generator/DocumentShareModal';
 import QuotationQrModal from './QuotationQrModal';
 import DataQualitySentinelModal from '../data-quality/DataQualitySentinelModal';
-import { FileText, Clock, CheckCircle, TrendingUp, Download, RefreshCw, ShieldCheck, MapPin, User, Calendar, DollarSign, Sparkles, Mail, ArrowRight, Edit3, Eye, Share2, MessageSquare, Link as LinkIcon, Check, QrCode } from 'lucide-react';
+import BiginContactLookupModal from './BiginContactLookupModal';
+import { FileText, Clock, CheckCircle, TrendingUp, Download, RefreshCw, ShieldCheck, MapPin, User, Calendar, DollarSign, Sparkles, Mail, ArrowRight, Edit3, Eye, Share2, MessageSquare, Link as LinkIcon, Check, QrCode, Building2 } from 'lucide-react';
 import { useDrawer } from '../../../context/DrawerContext';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
 import { fetchQuotationsKPIsAction, convertQuotationToOrderAction, convertQuotationToSupplierPoAction } from '../../../actions/quotationsActions';
@@ -23,6 +24,7 @@ import { useAccountManagers } from '../../../hooks/admin/useAccountManagers';
 import { extendQuotationValidity } from '../../../services/quotationRepository';
 import notifier from '../../../services/NotificationService';
 import MobileQuotationCard from '../../shared/mobile/MobileQuotationCard';
+import { exportToCSV } from '../../../utils/universalExporter';
 
 
 
@@ -45,6 +47,7 @@ export default function AdminQuotationsTab() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [shareModalData, setShareModalData] = useState({ isOpen: false, quote: null, pdfUrl: '' });
   const [qrModalData, setQrModalData] = useState({ isOpen: false, quote: null });
+  const [biginModalData, setBiginModalData] = useState({ isOpen: false, quote: null });
   const [isSentinelOpen, setIsSentinelOpen] = useState(false);
 
   // Account Managers directory
@@ -300,28 +303,34 @@ export default function AdminQuotationsTab() {
 
   const activeKPIs = kpiScope === 'filtered' ? filteredKPIs : realKPIs;
 
-  const handleShareWhatsApp = (quote) => {
+  const handleShareWhatsApp = (quote, lang = null) => {
+    const activeLang = lang || (typeof window !== 'undefined' ? (localStorage.getItem('share_message_lang') || 'es') : 'es');
     const total = Number(quote.grandTotal || 0).toFixed(2);
     const itemsCount = (quote.items || []).length;
     const client = quote.clientName || 'Valued Client';
     const quoteNum = quote.quotationNumber || quote.id;
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
     const secureLink = `${origin}/quotation/${quote.id}`;
-    const msg = `Dear ${client},\n\nPlease find your official Atlas Health Quotation (${quoteNum}):\n• Products: ${itemsCount} compounded formulation(s)\n• Total: $${total} (incl. refrigerated express delivery)\n• View & Accept Online: ${secureLink}\n\nBest regards,\nAtlas Health Medical Commercial Desk`;
+
+    const isEs = activeLang === 'es';
+    const msg = isEs
+      ? `Estimado/a ${client},\n\nLe adjuntamos su Cotización oficial de Atlas Health (${quoteNum}):\n• Productos: ${itemsCount} formulación(es) compuesta(s)\n• Total: $${total} (incl. envío urgente refrigerado)\n• Ver y Aceptar Online: ${secureLink}\n\nAtentamente,\nAtlas Health Medical Commercial Desk`
+      : `Dear ${client},\n\nPlease find your official Atlas Health Quotation (${quoteNum}):\n• Products: ${itemsCount} compounded formulation(s)\n• Total: $${total} (incl. refrigerated express delivery)\n• View & Accept Online: ${secureLink}\n\nBest regards,\nAtlas Health Medical Commercial Desk`;
+
     const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(waUrl, '_blank');
-    notifier.success(`📲 WhatsApp proposal opened for ${client}`);
+    notifier.success(`📲 WhatsApp proposal opened for ${client} (${isEs ? 'Español' : 'English'})`);
   };
 
   const handleCopyClientLink = (quote) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
     const link = `${origin}/quotation/${quote.id}`;
     navigator.clipboard?.writeText(link);
     notifier.success(`🔗 Client link copied for ${quote.quotationNumber || quote.id}`);
   };
 
   const handleOpenShareModal = (quote) => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://regenpept.com';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
     setShareModalData({
       isOpen: true,
       quote,
@@ -372,24 +381,18 @@ export default function AdminQuotationsTab() {
       notifier.info("No quotations to export");
       return;
     }
-    const headers = ['Quotation Number', 'Category', 'Client / Recipient', 'Supervisor', 'Status', 'Date', 'Margin %', 'Grand Total'];
-    const rows = filteredQuotations.map(q => [
-      `"${q.quotationNumber || q.id}"`,
-      q.category || 'patient',
-      `"${q.clientName || ''}"`,
-      `"${q.doctorName || q.accountManagerId || ''}"`,
-      q.status || 'draft',
-      q.createdDate ? q.createdDate.toLocaleDateString() : '',
-      `${q.marginPercent || 0}%`,
-      q.grandTotal || 0
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const link = document.createElement('a');
-    link.setAttribute('href', encodeURI(csvContent));
-    link.setAttribute('download', `quotations_export_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const columns = [
+      { key: 'quotationNumber', header: 'Quotation Number', accessor: q => q.quotationNumber || q.id },
+      { key: 'category', header: 'Category', accessor: q => q.category || 'patient' },
+      { key: 'clientName', header: 'Client / Recipient', accessor: q => q.clientName || '' },
+      { key: 'doctorName', header: 'Supervisor', accessor: q => q.doctorName || q.accountManagerId || '' },
+      { key: 'status', header: 'Status', accessor: q => q.status || 'draft' },
+      { key: 'createdDate', header: 'Date', accessor: q => (q.createdDate ? q.createdDate.toLocaleDateString() : '') },
+      { key: 'marginPercent', header: 'Margin %', accessor: q => `${q.marginPercent || 0}%` },
+      { key: 'grandTotal', header: 'Grand Total ($)', accessor: q => Number(q.grandTotal || 0).toFixed(2) }
+    ];
+    exportToCSV(filteredQuotations, columns, `quotations_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    notifier.success(`Exported ${filteredQuotations.length} quotations to CSV.`);
   };
 
   // AI Margin Advisor Handler
@@ -577,6 +580,14 @@ export default function AdminQuotationsTab() {
       render: (row) => {
         const isWholesaler = row.category === 'wholesaler';
         const isClinic = row.category === 'clinic';
+        const clientId = row.patientId || row.clientId || row.wholesalerId || row.clinicId;
+
+        const handleClientClick = (e) => {
+          if (clientId) {
+            e.stopPropagation();
+            openDrawer('patient', clientId, { clientName: row.clientName });
+          }
+        };
 
         if (isWholesaler) {
           return (
@@ -585,8 +596,20 @@ export default function AdminQuotationsTab() {
                 🏢 WHOLESALER
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {row.clientName}
+                <span 
+                  onClick={handleClientClick}
+                  style={{ 
+                    fontWeight: 700, 
+                    color: clientId ? '#ea580c' : 'var(--text-main)', 
+                    fontSize: '0.88rem', 
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis',
+                    cursor: clientId ? 'pointer' : 'default'
+                  }}
+                  title={clientId ? "Click to view Wholesaler Profile" : undefined}
+                >
+                  {row.clientName} {clientId && '↗'}
                 </span>
                 <span style={{ fontSize: '0.70rem', color: 'var(--text-muted)' }}>Bonded Warehouse Dispatch</span>
               </div>
@@ -601,8 +624,20 @@ export default function AdminQuotationsTab() {
                 🏥 CLINIC
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {row.clientName}
+                <span 
+                  onClick={handleClientClick}
+                  style={{ 
+                    fontWeight: 700, 
+                    color: clientId ? '#2563eb' : 'var(--text-main)', 
+                    fontSize: '0.88rem', 
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis',
+                    cursor: clientId ? 'pointer' : 'default'
+                  }}
+                  title={clientId ? "Click to view Clinic Profile" : undefined}
+                >
+                  {row.clientName} {clientId && '↗'}
                 </span>
                 <span style={{ fontSize: '0.70rem', color: 'var(--text-muted)' }}>Clinic Facility Reception</span>
               </div>
@@ -617,8 +652,20 @@ export default function AdminQuotationsTab() {
               👤 PATIENT
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {row.clientName}
+              <span 
+                onClick={handleClientClick}
+                style={{ 
+                  fontWeight: 700, 
+                  color: clientId ? '#0d9488' : 'var(--text-main)', 
+                  fontSize: '0.88rem', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis',
+                  cursor: clientId ? 'pointer' : 'default'
+                }}
+                title={clientId ? "Click to view Patient Profile" : undefined}
+              >
+                {row.clientName} {clientId && '↗'}
               </span>
               <span style={{ fontSize: '0.70rem', color: 'var(--text-muted)' }}>Direct Home Delivery</span>
             </div>
@@ -702,6 +749,12 @@ export default function AdminQuotationsTab() {
                   label: 'Share Multi-Channel (WhatsApp, Email, QR, Link)',
                   tooltip: 'Share via WhatsApp, Email, Link, QR',
                   onClick: () => handleOpenShareModal(row)
+                },
+                {
+                  type: 'sync_bigin',
+                  label: 'Cargar datos desde Zoho Bigin',
+                  tooltip: 'Buscar o sincronizar dirección y contacto desde Bigin CRM',
+                  onClick: () => setBiginModalData({ isOpen: true, quote: row })
                 },
                 {
                   type: 'whatsapp',
@@ -859,49 +912,124 @@ export default function AdminQuotationsTab() {
             </div>
           </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-            <thead>
-              <tr style={{ textAlign: 'left', color: 'var(--text-muted)', fontSize: '0.72rem', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ padding: '8px 12px' }}>Product & Formulation</th>
-                <th style={{ padding: '8px 12px' }}>Supplier / Lab</th>
-                <th style={{ padding: '8px 12px', textAlign: 'center' }}>Qty</th>
-                <th style={{ padding: '8px 12px', textAlign: 'right' }}>Unit Rate</th>
-                <th style={{ padding: '8px 12px', textAlign: 'right' }}>Supplier Cost</th>
-                <th style={{ padding: '8px 12px', textAlign: 'right' }}>Margin %</th>
-                <th style={{ padding: '8px 12px', textAlign: 'right' }}>Line Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, idx) => {
-                const qty = Number(item.quantity || 1);
-                const rate = Number(item.unitRate || item.rate || item.unitPrice || 0);
-                const cost = Number(item.supplierCost || rate * 0.55);
-                const lineTotal = Number(item.subtotal || qty * rate);
-                const margin = rate > 0 ? (((rate - cost) / rate) * 100) : 45;
+          <DataTable
+            columns={[
+              {
+                header: 'Product & Formulation & Docs',
+                field: 'name',
+                width: '30%',
+                render: (item) => {
+                  const slug = item.slug || (item.productId ? String(item.productId).toLowerCase().replace(/[^a-z0-9]+/g, '-') : (item.name ? String(item.name).toLowerCase().split(' ')[0] : 'peptide'));
+                  const sParam = item.supplierId ? `?supplier=${item.supplierId}` : (row.supplierId ? `?supplier=${row.supplierId}` : '');
+                  const isKit = item.isKit || (item.quantity >= 10 && (item.supplierId?.includes('lotusland') || row.supplierId?.includes('lotusland'))) || (item.name && item.name.toLowerCase().includes('kit'));
 
-                return (
-                  <tr key={idx} style={{ borderBottom: idx < items.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                    <td style={{ padding: '8px 12px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{item.name}</div>
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{item.name}</span>
+                        {isKit && (
+                          <span style={{ fontSize: '0.64rem', fontWeight: 800, backgroundColor: '#ecfdf5', color: '#047857', padding: '1px 5px', borderRadius: 4, border: '1px solid #a7f3d0' }}>
+                            Kit 10
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: '0.70rem', color: 'var(--text-muted)' }}>{item.dosage || 'Standard vial'}</div>
-                    </td>
-                    <td style={{ padding: '8px 12px', color: '#475569', fontSize: '0.78rem' }}>
-                      {item.supplierName || 'Fagron Compounding'}
-                    </td>
-                    <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700 }}>{qty}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>${rate.toFixed(2)}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right', color: '#64748b' }}>${cost.toFixed(2)}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: margin >= 40 ? '#16a34a' : '#d97706' }}>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '3px' }}>
+                        <a
+                          href={`/p/${slug}${sParam}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ fontSize: '0.68rem', fontWeight: 700, color: '#0d9488', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                        >
+                          📄 Ficha Técnica ↗
+                        </a>
+                        <a
+                          href={`/api/vial-label/${slug}?format=38x90`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4338ca', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
+                        >
+                          🏷️ Etiqueta 38x90 ↗
+                        </a>
+                      </div>
+                    </div>
+                  );
+                }
+              },
+              {
+                header: 'Supplier / Lab',
+                field: 'supplierName',
+                width: '18%',
+                render: (item) => (
+                  <span style={{ color: '#475569', fontSize: '0.78rem' }}>
+                    {item.supplierName || 'Fagron Compounding'}
+                  </span>
+                )
+              },
+              {
+                header: 'Qty',
+                field: 'quantity',
+                width: '8%',
+                align: 'center',
+                render: (item) => <span style={{ fontWeight: 700 }}>{item.quantity || 1}</span>
+              },
+              {
+                header: 'Unit Rate',
+                field: 'unitRate',
+                width: '12%',
+                align: 'right',
+                render: (item) => `$${Number(item.unitRate || item.rate || item.unitPrice || 0).toFixed(2)}`
+              },
+              {
+                header: 'Supplier Cost',
+                field: 'supplierCost',
+                width: '12%',
+                align: 'right',
+                render: (item) => {
+                  const rate = Number(item.unitRate || item.rate || item.unitPrice || 0);
+                  const cost = Number(item.supplierCost || rate * 0.55);
+                  return <span style={{ color: '#64748b' }}>${cost.toFixed(2)}</span>;
+                }
+              },
+              {
+                header: 'Margin %',
+                field: 'margin',
+                width: '12%',
+                align: 'right',
+                render: (item) => {
+                  const rate = Number(item.unitRate || item.rate || item.unitPrice || 0);
+                  const cost = Number(item.supplierCost || rate * 0.55);
+                  const margin = rate > 0 ? (((rate - cost) / rate) * 100) : 45;
+                  return (
+                    <span style={{ fontWeight: 700, color: margin >= 40 ? '#16a34a' : '#d97706' }}>
                       {margin.toFixed(1)}%
-                    </td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: 'var(--text-main)' }}>
+                    </span>
+                  );
+                }
+              },
+              {
+                header: 'Line Total',
+                field: 'lineTotal',
+                width: '12%',
+                align: 'right',
+                render: (item) => {
+                  const qty = Number(item.quantity || 1);
+                  const rate = Number(item.unitRate || item.rate || item.unitPrice || 0);
+                  const lineTotal = Number(item.subtotal || qty * rate);
+                  return (
+                    <strong style={{ color: 'var(--text-main)' }}>
                       ${lineTotal.toFixed(2)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </strong>
+                  );
+                }
+              }
+            ]}
+            data={items.map((it, i) => ({ ...it, _id: it.id || `item_${i}` }))}
+            keyField="_id"
+            showStatusFooter={false}
+          />
         </div>
       </div>
     );
@@ -1005,6 +1133,15 @@ export default function AdminQuotationsTab() {
               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
             >
               <Download size={15} /> Export CSV
+            </button>
+
+            <button
+              onClick={() => setBiginModalData({ isOpen: true, quote: null })}
+              className="gcp-btn-secondary"
+              title="Buscar o importar datos de cliente desde Zoho Bigin"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}
+            >
+              <Building2 size={15} /> Cargar de Bigin
             </button>
 
             <QuoteQuickActionDropdown size="md" variant="primary" buttonLabel="New Quotation" />
@@ -1192,6 +1329,17 @@ export default function AdminQuotationsTab() {
       <DataQualitySentinelModal
         isOpen={isSentinelOpen}
         onClose={() => setIsSentinelOpen(false)}
+      />
+
+      {/* 8. Zoho Bigin Quick Lookup & Auto-fill Modal */}
+      <BiginContactLookupModal
+        isOpen={biginModalData.isOpen}
+        quotation={biginModalData.quote}
+        onClose={() => setBiginModalData({ isOpen: false, quote: null })}
+        onSuccess={() => {
+          refreshQuotes();
+          loadKpis(true);
+        }}
       />
     </div>
   );

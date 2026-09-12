@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Package, ShieldCheck, Snowflake, FileCheck } from 'lucide-react';
+import { Package, ShieldCheck, Snowflake, FileCheck, FileText, Tag, ExternalLink } from 'lucide-react';
 import CopyableId from '../../ui/CopyableId';
 import DataTable from '../../ui/DataTable';
 
@@ -32,29 +32,107 @@ export default function ItemsTab({ quotation, quotationId }) {
           columns={[
             {
               key: 'name',
-              header: 'Product / Presentation',
-              width: '40%',
-              render: (it) => (
-                <div>
-                  <div style={{ fontWeight: 600, color: '#0f172a' }}>{it.name || it.productName || 'Catalog Product'}</div>
-                  <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                    {it.dosage && <span>{it.dosage}</span>}
-                    {it.productId && (
-                      <>
-                        <span>·</span>
-                        <span>SKU: <CopyableId value={it.productId} /></span>
-                      </>
-                    )}
+              header: 'Product / Presentation & Docs',
+              width: '45%',
+              render: (it) => {
+                const isKit = it.isKit || (it.quantity >= 10 && it.supplierId?.includes('lotusland')) || (it.name && it.name.toLowerCase().includes('kit'));
+                const slug = it.slug || (it.productId ? String(it.productId).toLowerCase().replace(/[^a-z0-9]+/g, '-') : (it.name ? String(it.name).toLowerCase().split(' ')[0] : 'peptide'));
+                const supplierParam = it.supplierId ? `?supplier=${it.supplierId}` : (quotation.supplierId ? `?supplier=${quotation.supplierId}` : '');
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>
+                        {it.name || it.productName || 'Catalog Product'}
+                      </span>
+                      {isKit && (
+                        <span style={{
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          backgroundColor: '#ecfdf5',
+                          color: '#047857',
+                          border: '1px solid #a7f3d0',
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3
+                        }}>
+                          <Tag size={10} /> Kit 10 Viales
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      {it.dosage && <span>{it.dosage}</span>}
+                      {it.supplierName && (
+                        <>
+                          <span>·</span>
+                          <span style={{ color: '#0284c7', fontWeight: 600 }}>{it.supplierName}</span>
+                        </>
+                      )}
+                      {it.productId && (
+                        <>
+                          <span>·</span>
+                          <span>SKU: <CopyableId value={it.productId} /></span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Ficha Técnica & Etiqueta Vial Links */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                      <a
+                        href={`/p/${slug}${supplierParam}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: '#0d9488',
+                          background: '#f0fdfa',
+                          border: '1px solid #ccfbf1',
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3
+                        }}
+                      >
+                        <FileText size={11} /> Ficha Técnica ↗
+                      </a>
+
+                      <a
+                        href={`/api/vial-label/${slug}?format=38x90`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: '#4338ca',
+                          background: '#e0e7ff',
+                          border: '1px solid #c7d2fe',
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3
+                        }}
+                      >
+                        <Tag size={11} /> Etiqueta 38x90 ↗
+                      </a>
+                    </div>
                   </div>
-                </div>
-              )
+                );
+              }
             },
             {
               key: 'quantity',
               header: 'Quantity',
-              width: '15%',
+              width: '12%',
               render: (it) => (
-                <div style={{ textAlign: 'center', fontWeight: 600, color: '#0f172a' }}>
+                <div style={{ textAlign: 'center', fontWeight: 700, color: '#0f172a', fontSize: '0.92rem' }}>
                   {Number(it.quantity || 1)}
                 </div>
               )
@@ -62,7 +140,7 @@ export default function ItemsTab({ quotation, quotationId }) {
             {
               key: 'unitPrice',
               header: 'Unit Rate',
-              width: '15%',
+              width: '14%',
               render: (it) => {
                 const rate = Number(it.unitPrice || it.unitRate || it.price || 0);
                 return (
@@ -75,7 +153,7 @@ export default function ItemsTab({ quotation, quotationId }) {
             {
               key: 'total',
               header: 'Total',
-              width: '15%',
+              width: '14%',
               render: (it) => {
                 const qty = Number(it.quantity || 1);
                 const rate = Number(it.unitPrice || it.unitRate || it.price || 0);

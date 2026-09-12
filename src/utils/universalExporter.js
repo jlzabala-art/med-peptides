@@ -2,9 +2,11 @@
  * universalExporter.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Institutional Data Exporter with CSV Injection Protection & Dynamic Filtering.
- * Supports CSV and JSON streaming download for any DataTable dataset.
+ * Supports:
+ *   - Fast client-side CSV/JSON download with UTF-8 BOM.
+ *   - Direct Server-Side Streaming Export (/api/export/[entity]) for massive datasets.
  *
- * Implements AGENTS.md Rule #10 (Anti-Risk & Data Sanitization).
+ * Implements AGENTS.md Rule #1 (Paging/Limits) and Rule #10 (Anti-Risk & Data Sanitization).
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -12,11 +14,11 @@
  * Sanitizes a cell value to prevent CSV Injection / Formula Execution in Excel/Sheets.
  * If text starts with =, +, -, @, \t, \r, it prepends a single quote.
  */
-function sanitizeCSVCell(value) {
+export function sanitizeCSVCell(value) {
   if (value === null || value === undefined) return '';
-  const str = String(value);
+  let str = String(value);
   if (/^[=+\-@\t\r]/.test(str)) {
-    return `'${str}`;
+    str = `'${str}`;
   }
   // Escape double quotes
   return str.replace(/"/g, '""');
@@ -25,13 +27,27 @@ function sanitizeCSVCell(value) {
 /**
  * Exports an array of objects to sanitized CSV and triggers browser download.
  * @param {Array<Object>} data - Raw data objects
- * @param {Array<Object>} columns - Column definitions [{ key, header }]
+ * @param {Array<Object>} columns - Column definitions [{ key, header, accessor }]
  * @param {string} [filename='export.csv']
  */
-export function exportToCSV(data = [], columns = [], filename = 'export.csv') {
+export function exportToCSV(data = [], arg2 = [], arg3 = 'export.csv') {
   if (!Array.isArray(data) || data.length === 0) {
     console.warn('[universalExporter] No data to export.');
     return;
+  }
+
+  // Polymorphic argument handling:
+  // Signature A: (data, columns, filename)
+  // Signature B: (data, filename, columns)
+  let columns = [];
+  let filename = 'export.csv';
+
+  if (typeof arg2 === 'string') {
+    filename = arg2;
+    columns = Array.isArray(arg3) ? arg3 : [];
+  } else if (Array.isArray(arg2)) {
+    columns = arg2;
+    filename = typeof arg3 === 'string' ? arg3 : 'export.csv';
   }
 
   const exportCols = columns.length > 0
@@ -42,8 +58,10 @@ export function exportToCSV(data = [], columns = [], filename = 'export.csv') {
 
   const rows = data.map(row => {
     return exportCols.map(c => {
-      const val = row[c.key];
-      const cellContent = typeof val === 'object' ? JSON.stringify(val) : val;
+      const val = typeof c.accessor === 'function' ? c.accessor(row) : row[c.key];
+      const cellContent = (val && typeof val === 'object' && !Array.isArray(val)) 
+        ? JSON.stringify(val) 
+        : val;
       return `"${sanitizeCSVCell(cellContent)}"`;
     }).join(',');
   });
@@ -62,7 +80,58 @@ export function exportToJSON(data = [], filename = 'export.json') {
   downloadBlob(blob, filename.endsWith('.json') ? filename : `${filename}.json`);
 }
 
-function downloadBlob(blob, filename) {
+/**
+ * Triggers a direct server-side stream download from /api/export/[entity]
+ * Best for massive datasets (entire database archive up to 5,000 records).
+ *
+ * @param {{
+ *   entity: 'clinics' | 'prescriptions' | 'products' | 'patients' | 'orders',
+ *   format?: 'csv' | 'json',
+ *   status?: string,
+ *   doctorId?: string,
+ *   clinicId?: string,
+ *   limit?: number,
+ *   filename?: string
+ * }} options
+ */
+export async function triggerServerExport({
+  entity,
+  format = 'csv',
+  status,
+  doctorId,
+  clinicId,
+  limit = 2000,
+  filename
+}) {
+  if (typeof window === 'undefined') return;
+
+  const params = new URLSearchParams();
+  params.set('format', format);
+  if (status && status !== 'all') params.set('status', status);
+  if (doctorId) params.set('doctorId', doctorId);
+  if (clinicId) params.set('clinicId', clinicId);
+  if (limit) params.set('limit', String(limit));
+
+  const url = `/api/export/${encodeURIComponent(entity)}?${params.toString()}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || `Server export failed with HTTP ${res.status}`);
+    }
+
+    const blob = await res.blob();
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const resolvedName = filename || `${entity}_export_${dateStr}.${format}`;
+    downloadBlob(blob, resolvedName);
+  } catch (err) {
+    console.error('[universalExporter] server export error:', err);
+    throw err;
+  }
+}
+
+export function downloadBlob(blob, filename) {
   if (typeof window === 'undefined') return;
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);

@@ -141,7 +141,7 @@ export async function normalizeExtractedPrescriptions(rawData, options = {}) {
         treatmentDays: Number(block.treatmentDays) || 30,
         instructions: orig.instructions || block.posology || '',
         patientInstructions: block.posology || '',
-        status: 'Pending',
+        status: 'pending',
         // UI & Audit flags
         _isPlaceholder: !!r.isPlaceholder,
         _isNewPlaceholder: !!r.isNew,
