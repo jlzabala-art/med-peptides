@@ -84,10 +84,63 @@ function draw1DBarcode(page, originX, originY, maxW, height, text) {
   page.drawRectangle({ x, y: originY, width: 1, height, color: barColor });
 }
 
+const DISCREET_PREFIXES = {
+  retatrutide: 'RT',
+  tirzepatide: 'TZ',
+  semaglutide: 'SM',
+  cagrilintide: 'CG',
+  mazdutide: 'MZ',
+  survodutide: 'SV',
+  bpc157: 'BP',
+  'bpc-157': 'BP',
+  tb500: 'TB',
+  'tb-500': 'TB',
+  epithalon: 'EP',
+  ghkcu: 'GH',
+  'ghk-cu': 'GH',
+  ipamorelin: 'IP',
+  cjc1295: 'CJ',
+  'cjc-1295': 'CJ',
+  nad: 'ND',
+  nadplus: 'ND',
+  motsc: 'MC',
+  'mots-c': 'MC',
+  ss31: 'SS',
+  'ss-31': 'SS',
+  selank: 'SL',
+  semax: 'SX',
+  aod9604: 'AD',
+  'aod-9604': 'AD',
+  tesofensine: 'TS',
+  sermorelin: 'SR',
+  melanotan: 'MT',
+  'melanotan-2': 'MT',
+  pt141: 'PT',
+  'pt-141': 'PT',
+};
+
+function getDiscreetProductCode(product, customCode, uniqueSeq) {
+  if (customCode) return String(customCode).toUpperCase();
+  const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
+  
+  let prefix = DISCREET_PREFIXES[cleanSlug];
+  if (!prefix) {
+    const consonants = cleanSlug.replace(/[^bcdfghjklmnpqrstvwxyz]/g, '').toUpperCase();
+    if (consonants.length >= 2) {
+      prefix = consonants.slice(0, 2);
+    } else {
+      prefix = cleanSlug.slice(0, 2).toUpperCase();
+    }
+  }
+
+  const num = uniqueSeq ? uniqueSeq.slice(0, 3) : '982';
+  return `${prefix}-${num}`;
+}
+
 /**
- * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR)
+ * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR, Batch & Discreet Code)
  */
-async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl) {
+async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl, batchNumber, discreetCode) {
   const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
   const category = toSafePdfText(product.category || product.therapeutic_category || 'Research');
   const casNumber = toSafePdfText(product.casNumber || product.cas || '');
@@ -124,9 +177,9 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   // Top header color band
   page.drawRectangle({
     x: originX,
-    y: originY + heightPt - 16,
+    y: originY + heightPt - 14,
     width: widthPt,
-    height: 16,
+    height: 14,
     color: BRAND_COLOR,
   });
 
@@ -136,15 +189,15 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
 
   page.drawText(leftLabelTitle, {
     x: originX + 8,
-    y: originY + heightPt - 11.5,
-    size: 6.8,
+    y: originY + heightPt - 10,
+    size: 6.5,
     font: fontB,
     color: rgb(1, 1, 1),
   });
 
   page.drawText(rightLabelTag, {
     x: originX + widthPt - rightLabelTagW - 8,
-    y: originY + heightPt - 11.5,
+    y: originY + heightPt - 10,
     size: 5.2,
     font: fontB,
     color: rgb(0.85, 0.92, 1),
@@ -152,62 +205,53 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
 
   // Main Content Left Column
   const contentLeft = originX + 8;
-  let currentY = originY + heightPt - 32;
+  let currentY = originY + heightPt - 27;
 
   // Product Name
   page.drawText(trunc(name, 26), {
     x: contentLeft,
     y: currentY,
-    size: 13,
+    size: 12.5,
     font: fontB,
     color: DARK_GRAY,
   });
 
-  currentY -= 12;
+  currentY -= 11;
 
   // Dosage & Purity Highlight
   const dosePurityText = `${dosage}  -  Purity: ${purity}`;
   page.drawText(trunc(dosePurityText, 34), {
     x: contentLeft,
     y: currentY,
-    size: 7.5,
+    size: 7.2,
     font: fontB,
     color: TEAL_COLOR,
   });
 
-  currentY -= 11;
+  currentY -= 10;
 
   // CAS / Format
   const metaText = `${formatType}${casNumber ? `  -  CAS: ${casNumber}` : ''}`;
   page.drawText(trunc(metaText, 38), {
     x: contentLeft,
     y: currentY,
-    size: 6.5,
+    size: 6.2,
     font,
     color: MUTED,
   });
 
-  currentY -= 13;
+  currentY -= 8;
 
   // Reconstitution Fill-in Fields (Handwriteable)
   page.drawLine({
     start: { x: contentLeft, y: currentY },
-    end: { x: originX + widthPt - 80, y: currentY },
+    end: { x: originX + widthPt - 86, y: currentY },
     thickness: 0.4,
     color: rgb(0.88, 0.9, 0.93),
   });
 
-  currentY -= 10;
-  page.drawText('Reconst. Date: _______________   Exp: ___________', {
-    x: contentLeft,
-    y: currentY,
-    size: 6,
-    font,
-    color: DARK_GRAY,
-  });
-
   currentY -= 9;
-  page.drawText('Diluent Volume: _____________ mL BAC / Sterile Water', {
+  page.drawText('Reconst. Date: _______________   Exp: ___________', {
     x: contentLeft,
     y: currentY,
     size: 5.8,
@@ -215,20 +259,39 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: DARK_GRAY,
   });
 
-  // Warning & Storage footer inside label
-  currentY -= 10;
-  page.drawText(`Storage: ${trunc(storage, 35)}`, {
+  currentY -= 8.5;
+  page.drawText('Diluent Volume: _____________ mL BAC / Sterile Water', {
     x: contentLeft,
     y: currentY,
     size: 5.5,
     font,
+    color: DARK_GRAY,
+  });
+
+  // Warning & Storage footer inside label
+  currentY -= 8.5;
+  page.drawText(`Storage: ${trunc(storage, 35)}`, {
+    x: contentLeft,
+    y: currentY,
+    size: 5.2,
+    font,
     color: MUTED,
   });
 
+  // Discreet batch number and product coding reference
+  currentY -= 8.5;
+  page.drawText(`Batch: ${batchNumber}   •   Cod: ${discreetCode}`, {
+    x: contentLeft,
+    y: currentY,
+    size: 5.6,
+    font: fontB,
+    color: DARK_GRAY,
+  });
+
   // QR Code on the Right
-  const qrSize = heightPt - 30; // 70-80 pt
-  const qrX = originX + widthPt - qrSize - 8;
-  const qrY = originY + 8;
+  const qrSize = 68; // ~68 pt square
+  const qrX = originX + widthPt - qrSize - 10;
+  const qrY = originY + 16;
 
   page.drawImage(qrImage, {
     x: qrX,
@@ -238,22 +301,37 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   });
 
   page.drawText('SCAN FOR GUIDE', {
-    x: qrX + 4,
-    y: qrY - 5,
+    x: qrX + (qrSize - fontB.widthOfTextAtSize('SCAN FOR GUIDE', 4.8)) / 2,
+    y: qrY - 6,
     size: 4.8,
     font: fontB,
     color: BRAND_COLOR,
+  });
+
+  page.drawText(`COD: ${discreetCode}`, {
+    x: qrX + (qrSize - fontB.widthOfTextAtSize(`COD: ${discreetCode}`, 5)) / 2,
+    y: qrY - 12,
+    size: 5,
+    font: fontB,
+    color: DARK_GRAY,
   });
 }
 
 /**
  * Draws the ANONYMOUS SHIPPING & TRACEABILITY label
- * Contains STRICTLY the square QR code + 1D scan barcode with an anonymous tracking number.
+ * Contains STRICTLY the square QR code + 1D scan barcode with an anonymous batch number and discreet product code.
  * Absolutely zero product/drug name to ensure 100% discrete logistics.
  */
-async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customBatch, targetShareUrl) {
+async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customBatch, targetShareUrl, customDiscreetCode) {
   const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
   
+  let hash = 0;
+  for (let i = 0; i < cleanSlug.length; i++) {
+    hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
+    hash |= 0;
+  }
+  const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
+
   // Generate an anonymous batch / lot number that does NOT disclose the compound/product name
   let batchNumber = customBatch;
   if (!batchNumber) {
@@ -262,15 +340,11 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     } else if (product.lotNumber && !product.lotNumber.toLowerCase().includes(cleanSlug)) {
       batchNumber = product.lotNumber;
     } else {
-      let hash = 0;
-      for (let i = 0; i < cleanSlug.length; i++) {
-        hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
-        hash |= 0;
-      }
-      const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
       batchNumber = `LOT-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
     }
   }
+
+  const discreetCode = customDiscreetCode || getDiscreetProductCode(product, null, uniqueSeq);
 
   // The square QR code opens the official shared product monograph page
   const destinationUrl = targetShareUrl || `${BASE_URL}/p/${cleanSlug}`;
@@ -309,15 +383,15 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    page.drawText('SCAN QR', {
-      x: qrX + (qrSize - fontB.widthOfTextAtSize('SCAN QR', 5.5)) / 2,
+    page.drawText('SCAN QR FOR GUIDE', {
+      x: qrX + (qrSize - fontB.widthOfTextAtSize('SCAN QR FOR GUIDE', 5)) / 2,
       y: qrY - 7,
-      size: 5.5,
+      size: 5,
       font: fontB,
       color: BRAND_COLOR,
     });
 
-    // 2. Right side: STRICTLY the 1D Scan Barcode & Anonymous BATCH NUMBER
+    // 2. Right side: BATCH NUMBER, DISCREET CODING, 1D Scan Barcode
     const rightX = qrX + qrSize + 16;
     const rightWidth = originX + widthPt - rightX - 14;
 
@@ -329,6 +403,16 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       size: 7,
       font: fontB,
       color: MUTED,
+    });
+
+    const codeTag = `COD: ${discreetCode}`;
+    const codeTagW = fontB.widthOfTextAtSize(codeTag, 7);
+    page.drawText(codeTag, {
+      x: rightX + rightWidth - codeTagW,
+      y: curY,
+      size: 7,
+      font: fontB,
+      color: DARK_GRAY,
     });
 
     curY -= 17;
@@ -353,6 +437,16 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       font,
       color: DARK_GRAY,
     });
+
+    const refTag = `REF: ${discreetCode}`;
+    const refTagW = font.widthOfTextAtSize(refTag, 6.8);
+    page.drawText(refTag, {
+      x: rightX + rightWidth - refTagW,
+      y: curY,
+      size: 6.8,
+      font,
+      color: MUTED,
+    });
   } else {
     // 50x50mm Square Layout
     const qrSize = heightPt - 42;
@@ -366,18 +460,18 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    page.drawText('SCAN QR', {
-      x: originX + (widthPt - fontB.widthOfTextAtSize('SCAN QR', 5.5)) / 2,
+    page.drawText('SCAN QR FOR GUIDE', {
+      x: originX + (widthPt - fontB.widthOfTextAtSize('SCAN QR FOR GUIDE', 5.2)) / 2,
       y: qrY - 7,
-      size: 5.5,
+      size: 5.2,
       font: fontB,
       color: BRAND_COLOR,
     });
 
-    page.drawText(batchNumber, {
-      x: originX + (widthPt - fontB.widthOfTextAtSize(batchNumber, 8)) / 2,
+    page.drawText(`BATCH: ${batchNumber}   •   COD: ${discreetCode}`, {
+      x: originX + (widthPt - fontB.widthOfTextAtSize(`BATCH: ${batchNumber}   •   COD: ${discreetCode}`, 6.5)) / 2,
       y: originY + 12,
-      size: 8,
+      size: 6.5,
       font: fontB,
       color: DARK_GRAY,
     });
@@ -394,6 +488,7 @@ export async function GET(request, { params }) {
     const isBarcodeOnly = type === 'barcode' || type === 'minimal' || type === 'barcode_only' || type === 'shipping';
 
     const customBatch = searchParams.get('batch') || searchParams.get('lot') || searchParams.get('tracking') || searchParams.get('trk');
+    const customCode = searchParams.get('code') || searchParams.get('ref') || searchParams.get('coding');
 
     if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
 
@@ -423,6 +518,13 @@ export async function GET(request, { params }) {
       targetShareUrl = `${BASE_URL}/p/${cleanSlug}${qs ? `?${qs}` : ''}`;
     }
 
+    let hash = 0;
+    for (let i = 0; i < cleanSlug.length; i++) {
+      hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
+      hash |= 0;
+    }
+    const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
+
     // Deterministic anonymous batch number (Lot)
     let batchNumber = customBatch;
     if (!batchNumber) {
@@ -431,19 +533,16 @@ export async function GET(request, { params }) {
       } else if (product.lotNumber && !product.lotNumber.toLowerCase().includes(cleanSlug)) {
         batchNumber = product.lotNumber;
       } else {
-        let hash = 0;
-        for (let i = 0; i < cleanSlug.length; i++) {
-          hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
-          hash |= 0;
-        }
-        const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
         batchNumber = `LOT-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
       }
     }
 
+    // Discreet coding number invented to identify the product internally
+    const discreetCode = getDiscreetProductCode(product, customCode, uniqueSeq);
+
     const renderLabel = isBarcodeOnly
-      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, batchNumber, targetShareUrl)
-      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl);
+      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, batchNumber, targetShareUrl, discreetCode)
+      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl, batchNumber, discreetCode);
 
     if (format === 'sheet_a4') {
       // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)
