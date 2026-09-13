@@ -3,6 +3,8 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import QRCode from 'qrcode';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 
+export const dynamic = 'force-dynamic';
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488
@@ -244,17 +246,24 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
 }
 
 /**
- * Draws the BARCODE-ONLY label that directs instantly to the Monograph
- * Features a large prominent QR Code for camera scanning + 1D barcode for laser scanning
+ * Draws the ANONYMOUS SHIPPING & TRACEABILITY label
+ * Contains STRICTLY the square QR code + 1D scan barcode with an anonymous tracking number.
+ * Absolutely zero product/drug name to ensure 100% discrete logistics.
  */
-async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB) {
-  const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
-  const variant = product.variants?.[0] || {};
-  const dosage = toSafePdfText(variant.dosage || variant.dose || product.dosage || '');
-  const cleanSlug = toSafePdfText(product.slug || product.id || 'peptide').toLowerCase();
+async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customTracking) {
+  const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
   
-  // Public Monograph URL
-  const publicUrl = `${BASE_URL}/p/${cleanSlug}`;
+  // Generate an anonymous tracking number that does NOT disclose the compound/product name
+  let trackingNumber = customTracking;
+  if (!trackingNumber) {
+    let hash = 0;
+    for (let i = 0; i < cleanSlug.length; i++) {
+      hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
+      hash |= 0;
+    }
+    const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
+    trackingNumber = `TRK-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
+  }
 
   // Outer border & background
   page.drawRectangle({
@@ -262,57 +271,75 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     y: originY,
     width: widthPt,
     height: heightPt,
-    borderColor: rgb(0.82, 0.86, 0.9),
-    borderWidth: 0.6,
+    borderColor: rgb(0.80, 0.84, 0.88),
+    borderWidth: 0.8,
     color: rgb(1, 1, 1),
   });
 
-  const trackingCode = toSafePdfText(product.sku || product.lotNumber || `RP-LOT-${cleanSlug.toUpperCase()}-2026`);
+  // The QR code encodes strictly the tracking number — zero product/compound identification
+  const qrPngBuffer = await QRCode.toBuffer(trackingNumber, {
+    margin: 1,
+    width: 320,
+    errorCorrectionLevel: 'M',
+    color: { dark: '#002244', light: '#ffffff' }
+  });
+  const qrImage = await pdfDoc.embedPng(qrPngBuffer);
 
   if (widthPt >= 200) {
-    // Landscape 38x90 layout
-    // Top banner
-    page.drawRectangle({
-      x: originX,
-      y: originY + heightPt - 15,
-      width: widthPt,
-      height: 15,
-      color: BRAND_COLOR,
+    // 38x90mm Landscape Layout: ONLY the square QR code, 1D scan barcode and tracking number
+    const qrSize = heightPt - 24; // ~83 pt square
+    const qrX = originX + 14;
+    const qrY = originY + (heightPt - qrSize) / 2;
+
+    // 1. Square QR Code on the Left
+    page.drawImage(qrImage, {
+      x: qrX,
+      y: qrY,
+      width: qrSize,
+      height: qrSize,
     });
 
-    const leftShipTitle = 'DISPATCH & TRACEABILITY';
-    const rightShipTag = 'PARCEL STANDARD';
-    const rightShipTagW = fontB.widthOfTextAtSize(rightShipTag, 5.2);
+    // 2. Right side: STRICTLY the 1D Scan Barcode & Anonymous Tracking Number
+    const rightX = qrX + qrSize + 16;
+    const rightWidth = originX + widthPt - rightX - 14;
 
-    page.drawText(leftShipTitle, {
-      x: originX + 8,
-      y: originY + heightPt - 11,
-      size: 6.8,
+    let curY = originY + heightPt - 20;
+
+    page.drawText('TRACKING NUMBER', {
+      x: rightX,
+      y: curY,
+      size: 7,
       font: fontB,
-      color: rgb(1, 1, 1),
+      color: MUTED,
     });
 
-    page.drawText(rightShipTag, {
-      x: originX + widthPt - rightShipTagW - 8,
-      y: originY + heightPt - 11,
-      size: 5.2,
+    curY -= 17;
+    page.drawText(trackingNumber, {
+      x: rightX,
+      y: curY,
+      size: 15,
       font: fontB,
-      color: rgb(0.85, 0.92, 1),
+      color: DARK_GRAY,
     });
 
-    // Generate high-resolution QR code pointing directly to verification URL
-    const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
-      margin: 1,
-      width: 320,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#002244', light: '#ffffff' }
-    });
-    const qrImage = await pdfDoc.embedPng(qrPngBuffer);
+    curY -= 12;
+    // 1D Barcode
+    const barcodeHeight = 28;
+    draw1DBarcode(page, rightX, curY - barcodeHeight, rightWidth, barcodeHeight, trackingNumber);
 
-    // Large QR Code on the Left: scans instantly from camera
-    const qrSize = heightPt - 28; // ~80 pt
-    const qrX = originX + 8;
-    const qrY = originY + 8;
+    curY -= (barcodeHeight + 9);
+    page.drawText(`* ${trackingNumber} *`, {
+      x: rightX + 4,
+      y: curY,
+      size: 7.2,
+      font,
+      color: DARK_GRAY,
+    });
+  } else {
+    // 50x50mm Square Layout
+    const qrSize = heightPt - 42;
+    const qrX = originX + (widthPt - qrSize) / 2;
+    const qrY = originY + 30;
 
     page.drawImage(qrImage, {
       x: qrX,
@@ -321,100 +348,12 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    // Right side: STRICTLY Code, 1D Barcode and Logistics Specs (No drug description)
-    const rightX = qrX + qrSize + 12;
-    const rightWidth = originX + widthPt - rightX - 8;
-
-    let curY = originY + heightPt - 30;
-
-    // 1. Primary Tracking / SKU Code
-    page.drawText(trackingCode, {
-      x: rightX,
-      y: curY,
-      size: 10,
+    page.drawText(trackingNumber, {
+      x: originX + (widthPt - fontB.widthOfTextAtSize(trackingNumber, 8)) / 2,
+      y: originY + 12,
+      size: 8,
       font: fontB,
       color: DARK_GRAY,
-    });
-
-    curY -= 11;
-    page.drawText('DISCREET LOGISTICS PARCEL - COLD CHAIN VERIFIED', {
-      x: rightX,
-      y: curY,
-      size: 6.0,
-      font: fontB,
-      color: MUTED,
-    });
-
-    curY -= 12;
-    // 2. 1D Barcode
-    const barcodeHeight = 16;
-    draw1DBarcode(page, rightX, curY - barcodeHeight, rightWidth, barcodeHeight, trackingCode);
-
-    curY -= (barcodeHeight + 7);
-    page.drawText(`* ${trackingCode} *`, {
-      x: rightX + 8,
-      y: curY,
-      size: 5.8,
-      font,
-      color: DARK_GRAY,
-    });
-
-    curY -= 9;
-    page.drawText('OUTBOUND FREIGHT SPECIFICATION - DIRECT TRANSIT', {
-      x: rightX,
-      y: curY,
-      size: 5.2,
-      font,
-      color: MUTED,
-    });
-  } else {
-    // Square 50x50 layout
-    page.drawRectangle({
-      x: originX,
-      y: originY + heightPt - 14,
-      width: widthPt,
-      height: 14,
-      color: BRAND_COLOR,
-    });
-
-    page.drawText('PARCEL TRACEABILITY', {
-      x: originX + 6,
-      y: originY + heightPt - 10,
-      size: 6.5,
-      font: fontB,
-      color: rgb(1, 1, 1),
-    });
-
-    page.drawText(trunc(trackingCode, 20), {
-      x: originX + 6,
-      y: originY + heightPt - 24,
-      size: 7.5,
-      font: fontB,
-      color: DARK_GRAY,
-    });
-
-    const qrSize = heightPt - 46;
-    const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
-      margin: 1,
-      width: 256,
-      errorCorrectionLevel: 'M',
-      color: { dark: '#002244', light: '#ffffff' }
-    });
-    const qrImage = await pdfDoc.embedPng(qrPngBuffer);
-
-    page.drawImage(qrImage, {
-      x: originX + (widthPt - qrSize) / 2,
-      y: originY + 16,
-      width: qrSize,
-      height: qrSize,
-    });
-
-    page.drawText('SCAN FOR VERIFICATION', {
-      x: originX + (widthPt - 86) / 2,
-      y: originY + 6,
-      size: 5.5,
-      font: fontB,
-      color: BRAND_COLOR,
     });
   }
 }
@@ -428,6 +367,8 @@ export async function GET(request, { params }) {
     const type = (searchParams.get('type') || searchParams.get('style') || 'full').toLowerCase();
     const isBarcodeOnly = type === 'barcode' || type === 'minimal' || type === 'barcode_only' || type === 'shipping';
 
+    const customTracking = searchParams.get('tracking') || searchParams.get('trk');
+
     if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
 
     const product = await getProductData(id);
@@ -437,7 +378,22 @@ export async function GET(request, { params }) {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const renderLabel = isBarcodeOnly ? renderBarcodeOnlyLabel : renderFullInfoLabel;
+    // Deterministic anonymous tracking number
+    let trackingNumber = customTracking;
+    if (!trackingNumber) {
+      const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
+      let hash = 0;
+      for (let i = 0; i < cleanSlug.length; i++) {
+        hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
+        hash |= 0;
+      }
+      const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
+      trackingNumber = `TRK-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
+    }
+
+    const renderLabel = isBarcodeOnly
+      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, trackingNumber)
+      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB);
 
     if (format === 'sheet_a4') {
       // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)
@@ -451,7 +407,7 @@ export async function GET(request, { params }) {
 
       // Title banner on A4
       const sheetTitle = isBarcodeOnly
-        ? `Atlas Services Barcode & Monograph Label Sheet - ${product.name || id}`
+        ? `Atlas Logistics Discreet Parcel Traceability Labels`
         : `Atlas Services Complete Clinical Vial Label Sheet - ${product.name || id}`;
 
       page.drawText(toSafePdfText(sheetTitle), {
@@ -466,32 +422,38 @@ export async function GET(request, { params }) {
         for (let col = 0; col < 2; col++) {
           const x = marginX + col * (labelW + gapX);
           const y = 841.89 - marginY - (row + 1) * labelH - row * gapY;
-          await renderLabel(pdfDoc, page, x, y, labelW, labelH, product, font, fontB);
+          await renderLabel(pdfDoc, page, x, y, labelW, labelH);
         }
       }
     } else if (format === '50x50') {
       // Square 50x50mm
       const sizePt = mmToPt(50);
       const page = pdfDoc.addPage([sizePt, sizePt]);
-      await renderLabel(pdfDoc, page, 0, 0, sizePt, sizePt, product, font, fontB);
+      await renderLabel(pdfDoc, page, 0, 0, sizePt, sizePt);
     } else {
       // Default 38x90mm thermal label
       const labelW = mmToPt(90); // ~255 pt
       const labelH = mmToPt(38); // ~108 pt
       const page = pdfDoc.addPage([labelW, labelH]);
-      await renderLabel(pdfDoc, page, 0, 0, labelW, labelH, product, font, fontB);
+      await renderLabel(pdfDoc, page, 0, 0, labelW, labelH);
     }
 
     const pdfBytes = await pdfDoc.save();
     const safeName = toSafePdfText(product.name || id).replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-    const filename = `vial_label_${safeName}_${isBarcodeOnly ? 'barcode' : 'full'}_${format}.pdf`;
+    const filename = isBarcodeOnly
+      ? `shipping_label_${trackingNumber.toLowerCase()}_${format}.pdf`
+      : `vial_label_${safeName}_full_${format}.pdf`;
 
     return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="${filename}"`,
-        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'Cache-Control': isBarcodeOnly
+          ? 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0'
+          : 'public, max-age=3600, stale-while-revalidate=86400',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
   } catch (err) {
