@@ -800,14 +800,27 @@ button:focus-visible, a:focus-visible {
   }
 }
 
-/* ── Print styles: render only the modal scroll body ─────────────────────── */
+/* ── Print styles: render only the modal scroll body when a print modal is open ── */
 @media print {
-  /* Hide everything on the page */
-  body > * { display: none !important; }
+  /* Only hide non-modal siblings if a modal marked with data-print-modal exists on the page */
+  body:has([data-print-modal="true"]) > *:not(:has([data-print-modal="true"])) {
+    display: none !important;
+  }
 
   /* Reveal the modal overlay so it is the print root */
-  body > * [data-print-modal="true"],
-  [data-print-modal="true"] { display: block !important; }
+  body:has([data-print-modal="true"]) [data-print-modal="true"],
+  [data-print-modal="true"] {
+    display: block !important;
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
 
   /* The scrollable modal body gets full height */
   [data-print-body="true"] {
@@ -819,19 +832,9 @@ button:focus-visible, a:focus-visible {
   }
 
   /* Hide chrome that has no value on paper */
-  [data-print-hide="true"] { display: none !important; }
-
-  /* Ensure content fills the page */
-  [data-print-modal="true"] {
-    position: static !important;
-    box-shadow: none !important;
-    border: none !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
-    background: #fff !important;
+  [data-print-hide="true"],
+  .no-print {
+    display: none !important;
   }
 
   /* Page margins */

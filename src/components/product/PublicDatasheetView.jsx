@@ -24,7 +24,8 @@ import {
   QrCode,
   ExternalLink,
   Building2,
-  Tag
+  Tag,
+  Eye
 } from '@/lib/icons';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
@@ -33,6 +34,7 @@ import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
 import PublicDatasheetMobileBar from './PublicDatasheetMobileBar';
+import MonographPreviewModal from './MonographPreviewModal';
 
 function WaIcon() {
   return (
@@ -59,6 +61,7 @@ export default function PublicDatasheetView({
     return 'en';
   });
   const [isShareDrawerOpen, setIsShareDrawerOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [inlineSvg, setInlineSvg] = useState(null);
   const [svgError, setSvgError] = useState(false);
@@ -500,20 +503,23 @@ export default function PublicDatasheetView({
               ))}
             </select>
 
-            <a 
-              href={pdfUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <button 
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsPreviewModalOpen(true);
+              }}
               className="pds-btn pds-btn-pdf"
-              title="Download Comprehensive Clinical Monograph (PDF)"
+              title="Preview Monograph & Download PDF"
             >
-              <Download size={14} /> {t.downloadPdf}
-            </a>
+              <Eye size={14} /> Preview PDF
+            </button>
 
             <a 
-              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=full`}
+              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=full${labelQueryString}`}
               target="_blank" 
               rel="noopener noreferrer" 
+              download={`vial_label_${slug}_full_38x90.pdf`}
               className="pds-btn pds-btn-barcode"
               title="Download Complete Specification Vial Label 38x90mm (PDF)"
             >
@@ -521,9 +527,10 @@ export default function PublicDatasheetView({
             </a>
 
             <a 
-              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=barcode`}
+              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=barcode${labelQueryString}`}
               target="_blank" 
               rel="noopener noreferrer" 
+              download={`batch_label_${slug}_barcode_38x90.pdf`}
               className="pds-btn pds-btn-barcode"
               title="Download Direct Monograph Barcode & QR Label (PDF)"
             >
@@ -540,7 +547,15 @@ export default function PublicDatasheetView({
               <span>{t.shareColleague}</span>
             </button>
 
-            <button onClick={handlePrint} className="pds-btn pds-btn-ghost" title="Print Complete Monograph (All Formulations)">
+            <button 
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setIsPreviewModalOpen(true);
+              }} 
+              className="pds-btn pds-btn-ghost" 
+              title="Preview & Print Complete Monograph (All Formulations)"
+            >
               <Printer size={14} /> {t.printPdf}
             </button>
 
@@ -935,22 +950,24 @@ export default function PublicDatasheetView({
                 </p>
                 <div className="pds-label-type-buttons">
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${labelQueryString}`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
+                    download={`shipping_label_${slug}_38x90.pdf`}
                     className="pds-btn pds-btn-barcode"
-                    title="Download 38x90mm Shipping Label (PDF)"
+                    title="Download 38x90mm Shipping Label (PDF File)"
                   >
-                    <QrCode size={14} /> Download 38×90mm
+                    <Download size={14} /> Download 38×90mm PDF
                   </a>
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping${labelQueryString}`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
+                    download={`shipping_labels_sheet_${slug}_a4.pdf`}
                     className="pds-btn pds-btn-ghost"
-                    title="Download A4 Sheet with 8 Shipping Labels"
+                    title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
                   >
-                    <FileText size={14} /> Sheet (A4 ×8)
+                    <FileText size={14} /> Sheet (A4 ×8 PDF)
                   </a>
                   <button
                     type="button"
@@ -981,22 +998,24 @@ export default function PublicDatasheetView({
                 </p>
                 <div className="pds-label-type-buttons">
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client${labelQueryString}`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
+                    download={`client_vial_label_${slug}_38x90.pdf`}
                     className="pds-btn pds-btn-pdf"
-                    title="Download 38x90mm Client Vial Label (PDF)"
+                    title="Download 38x90mm Client Vial Label (PDF File)"
                   >
-                    <Tag size={14} /> Download 38×90mm
+                    <Download size={14} /> Download 38×90mm PDF
                   </a>
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client${labelQueryString}`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
+                    download={`client_vial_labels_sheet_${slug}_a4.pdf`}
                     className="pds-btn pds-btn-ghost"
-                    title="Download A4 Sheet with 8 Client Vial Labels"
+                    title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
                   >
-                    <FileText size={14} /> Sheet (A4 ×8)
+                    <FileText size={14} /> Sheet (A4 ×8 PDF)
                   </a>
                   <button
                     type="button"
@@ -1054,6 +1073,11 @@ export default function PublicDatasheetView({
         selectedStrength={selectedStrength}
         supplierName={supplierName}
         dynamicPublicUrl={dynamicPublicUrl}
+        pdfUrl={pdfUrl}
+        onOpenPreview={() => {
+          triggerHaptic('light');
+          setIsPreviewModalOpen(true);
+        }}
         lang={lang}
       />
 
@@ -1065,6 +1089,21 @@ export default function PublicDatasheetView({
         initialSupplierKey={activeSupplierId !== 'all' ? activeSupplierId : (product?.supplierId || null)}
         initialFormatId={activeFormatId}
         initialStrengthId={selectedStrengthId}
+      />
+
+      {/* Visual Clinical Monograph & PDF Preview Modal */}
+      <MonographPreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        product={product}
+        slug={slug}
+        supplierName={supplierName}
+        activeFormat={activeFormat}
+        selectedStrength={selectedStrength}
+        availableFormats={availableFormats}
+        sortedStrengths={sortedStrengths}
+        dynamicPublicUrl={dynamicPublicUrl}
+        labelQueryString={labelQueryString}
       />
     </div>
   );

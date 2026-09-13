@@ -20,12 +20,12 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto" data-print-modal="true">
       {/* Container */}
       <div className="relative w-full max-w-4xl bg-white text-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 my-auto flex flex-col max-h-[92vh]">
         
         {/* Modal Action Bar (Hidden on print) */}
-        <div className="flex items-center justify-between px-6 py-3.5 bg-slate-900 text-white border-b border-slate-800 print:hidden flex-shrink-0">
+        <div data-print-hide="true" className="flex items-center justify-between px-6 py-3.5 bg-slate-900 text-white border-b border-slate-800 print:hidden flex-shrink-0">
           <div className="flex items-center gap-2">
             <FileText size={18} className="text-teal-400" />
             <span className="font-bold text-sm tracking-wide">Certificate of Analysis (COA) Preview</span>
@@ -48,7 +48,7 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
         </div>
 
         {/* Printable Document Body */}
-        <div id="printable-coa-document" className="p-6 sm:p-10 overflow-y-auto space-y-6 text-xs font-sans">
+        <div id="printable-coa-document" data-print-body="true" className="p-6 sm:p-10 overflow-y-auto space-y-6 text-xs font-sans">
           
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b-2 border-slate-900 pb-4 gap-4">

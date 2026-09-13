@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import './PublicDatasheetMobileBar.css';
-import { Share2, Check, FlaskConical } from '@/lib/icons';
+import { Share2, Check, FlaskConical, Eye } from '@/lib/icons';
 import { triggerHaptic } from '@/utils/haptics';
 
 function WaIconMini() {
@@ -21,6 +21,7 @@ export default function PublicDatasheetMobileBar({
   supplierName,
   dynamicPublicUrl,
   pdfUrl,
+  onOpenPreview,
   lang = 'en'
 }) {
   const [copied, setCopied] = useState(false);
@@ -102,6 +103,22 @@ export default function PublicDatasheetMobileBar({
               aria-label="Ir a Calculadora de Reconstitución"
             >
               <FlaskConical size={18} />
+            </button>
+          )}
+
+          {/* Preview Monograph & PDF Button */}
+          {onOpenPreview && (
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                onOpenPreview();
+              }}
+              className="pds-mb-btn pds-mb-btn-calc"
+              title="Preview Monograph & Print PDF"
+              aria-label="Preview Monograph & Print PDF"
+            >
+              <Eye size={18} />
             </button>
           )}
 

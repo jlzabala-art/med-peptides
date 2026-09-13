@@ -677,11 +677,14 @@ export async function GET(request, { params }) {
       ? `batch_label_${batchNumber.toLowerCase()}_${format}.pdf`
       : `vial_label_${safeName}_full_${format}.pdf`;
 
+    const isDownload = searchParams.get('download') === '1' || searchParams.get('download') === 'true';
+    const dispositionType = isDownload ? 'attachment' : (searchParams.get('disposition') || 'inline');
+
     return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="${filename}"`,
+        'Content-Disposition': `${dispositionType}; filename="${filename}"`,
         'Cache-Control': isBarcodeOnly
           ? 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0'
           : 'public, max-age=3600, stale-while-revalidate=86400',
