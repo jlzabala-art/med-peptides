@@ -30,7 +30,7 @@ export default function DataTable({
   // Pagination
   currentPage = 1,
   totalPages = 1,
-  totalItems = 0,
+  totalItems = null,
   onPageChange,
   // GCP Style Pagination
   rowsPerPage,
@@ -40,7 +40,7 @@ export default function DataTable({
   onNextPage,
   onPrevPage,
   statusText = 'Data up to date',
-  showStatusFooter = true,
+  showStatusFooter = false,
   paginationText,
   // Batch Actions
   renderBatchActions,
@@ -78,9 +78,9 @@ export default function DataTable({
   onColumnToggle, // (columnKey, isVisible) => void
   tableId,
   getRowProps, // (row) => ({ style?: {}, className?: string })
-  minHeight, // custom minHeight override
   pagination = true,
   hidePagination = false,
+  alwaysShowPagination = false,
 
   // Ask Atlas Action
   enableAskAtlas = true,
@@ -1340,12 +1340,18 @@ export default function DataTable({
         </table>
       </div>
 
-      {/* Pagination Footer (Google Cloud Style) */}
-      {!hidePagination && pagination !== false && (
-        <>
-          <div
-            style={{
-              display: 'flex',
+      {/* Pagination Footer (Google Cloud Style) — automatically hidden when all items fit on 1 page */}
+      {(() => {
+        const totalCount = (totalItems != null && totalItems > 0) ? totalItems : sortedData.length;
+        const isSinglePage = totalCount <= activeRowsPerPage && !hasNextPage && !onNextPage && activePage === 1;
+        if (hidePagination || pagination === false || (isSinglePage && !alwaysShowPagination)) {
+          return null;
+        }
+        return (
+          <>
+            <div
+              style={{
+                display: 'flex',
               justifyContent: 'flex-end',
               alignItems: 'center',
               padding: '10px 24px',
@@ -1520,7 +1526,8 @@ export default function DataTable({
             </div>
           )}
         </>
-      )}
+      );
+    })()}
       {/* Mobile Contextual Action Bar — reserved for mobile touch layout */}
       
       {/* Desktop Sticky Floating Bulk Action Bar */}

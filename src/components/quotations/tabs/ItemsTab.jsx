@@ -1,11 +1,19 @@
 'use client';
 
-import React from 'react';
-import { Package, ShieldCheck, Snowflake, FileCheck, FileText, Tag, ExternalLink, QrCode } from 'lucide-react';
+import React, { useState } from 'react';
+import { Package, ShieldCheck, Snowflake, FileCheck, FileText, Tag, ExternalLink, QrCode, RefreshCw } from 'lucide-react';
 import CopyableId from '../../ui/CopyableId';
 import DataTable from '../../ui/DataTable';
+import AlgoliaProductSwitcherModal from '../modals/AlgoliaProductSwitcherModal';
+import { updateQuotation } from '../../../repositories/quotationRepository';
+import notifier from '../../../services/NotificationService';
+import { triggerHaptic } from '../../../utils/haptics';
 
 export default function ItemsTab({ quotation, quotationId }) {
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [saving, setSaving] = useState(false);
+
   if (!quotation) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
@@ -17,6 +25,68 @@ export default function ItemsTab({ quotation, quotationId }) {
   const items = Array.isArray(quotation.items) ? quotation.items : [];
   const currency = quotation.currency || 'USD';
   const currencySymbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+
+  const handleOpenSwitcher = (index) => {
+    setEditingIndex(index);
+    setSwitcherOpen(true);
+    triggerHaptic('light');
+  };
+
+  const handleSelectProduct = async (newProduct) => {
+    if (editingIndex === null || !items[editingIndex]) return;
+    try {
+      setSaving(true);
+      const currentId = quotationId || quotation.id;
+      const updatedItems = [...items];
+      const prev = updatedItems[editingIndex];
+
+      const newCost = Number(newProduct.costPrice || newProduct.supplierPrice || newProduct.price || prev.supplierCost || 25);
+      const itemMargin = prev.margin !== undefined ? Number(prev.margin) : 45;
+      const marginDecimal = itemMargin / 100;
+      const newUnitPrice = marginDecimal < 1
+        ? Math.round((newCost / (1 - marginDecimal)) * 100) / 100
+        : Math.round(newCost * 1.45 * 100) / 100;
+
+      updatedItems[editingIndex] = {
+        ...prev,
+        productId: newProduct.id || prev.productId,
+        name: newProduct.name || newProduct.productName || prev.name,
+        productName: newProduct.name || newProduct.productName || prev.productName,
+        dosage: newProduct.dosage || newProduct.strength || prev.dosage || '',
+        supplierName: newProduct.supplierName || newProduct.vendor || prev.supplierName,
+        supplierId: newProduct.supplierId || prev.supplierId,
+        supplierCost: newCost,
+        unitPrice: newUnitPrice,
+        unitRate: newUnitPrice,
+        slug: newProduct.slug || prev.slug,
+      };
+
+      let newSubtotal = 0;
+      updatedItems.forEach(it => {
+        newSubtotal += Number(it.unitPrice || it.price || 0) * Number(it.quantity || 1);
+      });
+      const newTax = Math.round(newSubtotal * 0.05 * 100) / 100;
+      const newGrandTotal = Math.round((newSubtotal + newTax) * 100) / 100;
+
+      const payload = {
+        items: updatedItems,
+        subtotal: newSubtotal,
+        taxTotal: newTax,
+        grandTotal: newGrandTotal,
+        totalAmount: newGrandTotal,
+      };
+
+      await updateQuotation(currentId, payload);
+      window.dispatchEvent(new CustomEvent('quotation-updated', { detail: payload }));
+      notifier.success(`Producto sustituido con éxito por ${newProduct.name || 'nuevo compuesto'}`);
+      setSwitcherOpen(false);
+      setEditingIndex(null);
+    } catch (err) {
+      notifier.error(`Error al sustituir producto: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -34,7 +104,7 @@ export default function ItemsTab({ quotation, quotationId }) {
               key: 'name',
               header: 'Product / Presentation & Docs',
               width: '45%',
-              render: (it) => {
+              render: (it, index) => {
                 const isKit = it.isKit || (it.quantity >= 10 && it.supplierId?.includes('lotusland')) || (it.name && it.name.toLowerCase().includes('kit'));
                 const slug = it.slug || (it.productId ? String(it.productId).toLowerCase().replace(/[^a-z0-9]+/g, '-') : (it.name ? String(it.name).toLowerCase().split(' ')[0] : 'peptide'));
                 const supplierParam = it.supplierId ? `?supplier=${it.supplierId}` : (quotation.supplierId ? `?supplier=${quotation.supplierId}` : '');
@@ -45,6 +115,30 @@ export default function ItemsTab({ quotation, quotationId }) {
                       <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.88rem' }}>
                         {it.name || it.productName || 'Catalog Product'}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenSwitcher(index)}
+                        style={{
+                          border: '1px solid #cbd5e1',
+                          background: '#f8fafc',
+                          color: '#003666',
+                          borderRadius: 5,
+                          padding: '2px 7px',
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3,
+                          transition: 'all 0.15s ease',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#003666'; e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                        title="Cambiar este producto por otro del catálogo con Algolia"
+                      >
+                        <RefreshCw size={10} />
+                        <span>Sustituir</span>
+                      </button>
                       {isKit && (
                         <span style={{
                           fontSize: '0.68rem',
@@ -213,10 +307,20 @@ export default function ItemsTab({ quotation, quotationId }) {
           ]}
           data={items}
           keyField="id"
+          pagination={false}
+          showStatusFooter={false}
           hideExpandColumn={true}
           emptyTitle="No line items attached to this quotation"
         />
       </div>
+
+      {/* Algolia Instant Product Switcher Modal */}
+      <AlgoliaProductSwitcherModal
+        isOpen={switcherOpen}
+        onClose={() => { setSwitcherOpen(false); setEditingIndex(null); }}
+        currentItem={editingIndex != null ? items[editingIndex] : null}
+        onSelectProduct={handleSelectProduct}
+      />
     </div>
   );
 }
