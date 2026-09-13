@@ -38,7 +38,7 @@ export default function GlobalPreferencesDropdown() {
   const handleLanguageSelect = (lang) => {
     if (lang === 'es') {
       notifier.toast(
-        '🌐 La localización en español se encuentra en fase de validación técnica y clínica. Estará disponible en una próxima actualización. La plataforma opera actualmente en inglés estándar.',
+        '🌐 Spanish language localization is undergoing technical and clinical validation. It will be available in an upcoming release. The platform currently operates in standard clinical English.',
         'info'
       );
       return;
@@ -166,7 +166,7 @@ export default function GlobalPreferencesDropdown() {
                   fontSize: '0.85rem',
                   transition: 'all 0.15s ease',
                 }}
-                title="Español (En fase de validación técnica — Próximamente)"
+                title="Spanish (Under technical and clinical validation — Coming soon)"
               >
                 <span>Español</span>
                 <span style={{ 
@@ -178,7 +178,7 @@ export default function GlobalPreferencesDropdown() {
                   borderRadius: '4px',
                   border: '1px solid #e2e8f0'
                 }}>
-                  Pronto
+                  Soon
                 </span>
               </button>
             </div>
@@ -324,7 +324,7 @@ export default function GlobalPreferencesDropdown() {
                 type="button"
                 onClick={() => {
                   notifier.toast(
-                    '📐 El modo Compacto se encuentra en fase de implantación técnica y estará disponible en una próxima actualización.',
+                    '📐 Compact high-density mode is undergoing technical adaptation across all clinical tables and will be available in an upcoming update.',
                     'info'
                   );
                 }}
@@ -343,7 +343,7 @@ export default function GlobalPreferencesDropdown() {
                   fontSize: '0.82rem',
                   transition: 'all 0.15s ease',
                 }}
-                title="Compact (En fase de implantación — Próximamente)"
+                title="Compact (Under implementation — Coming soon)"
               >
                 <List size={15} />
                 <span>Compact</span>
@@ -356,7 +356,7 @@ export default function GlobalPreferencesDropdown() {
                   borderRadius: '4px',
                   border: '1px solid #e2e8f0'
                 }}>
-                  Pronto
+                  Soon
                 </span>
               </button>
             </div>

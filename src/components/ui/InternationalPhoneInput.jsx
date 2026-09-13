@@ -58,8 +58,12 @@ export default function InternationalPhoneInput({
       }
     } else {
       setLocalNumber(trimmed);
+      if (countryHint) {
+        const match = COUNTRY_CODES.find(c => c.country.toLowerCase() === countryHint.toLowerCase());
+        if (match) setSelectedPrefix(match.code);
+      }
     }
-  }, [value]);
+  }, [value, countryHint]);
 
   // If countryHint changes and no prefix is set, adapt
   useEffect(() => {

@@ -140,13 +140,13 @@ function getDiscreetProductCode(product, customCode, uniqueSeq) {
 /**
  * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR, Batch & Discreet Code)
  */
-async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl, batchNumber, discreetCode) {
+async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl, batchNumber, discreetCode, targetVariant) {
   const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
   const category = toSafePdfText(product.category || product.therapeutic_category || 'Research');
   const casNumber = toSafePdfText(product.casNumber || product.cas || '');
   
-  // Pick primary variant info if available
-  const variant = product.variants?.[0] || {};
+  // Pick active variant info (defaulting to Lotusland)
+  const variant = targetVariant || product.variants?.[0] || {};
   const dosage = toSafePdfText(variant.dosage || variant.dose || product.dosage || '10 mg');
   const purity = toSafePdfText(variant.purity || variant.grade || '>= 98.5% (HPLC)');
   const formatType = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
@@ -501,18 +501,43 @@ export async function GET(request, { params }) {
 
     const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
 
+    // 1. Identify primary supplier & variant (Defaulting strictly to Lotusland for clinical vials)
+    const suppParam = searchParams.get('supplier');
+    const targetSupplier = (suppParam && suppParam !== 'all') ? suppParam : 'supplier-lotusland';
+
+    // Find matching variant (prioritize Lotusland)
+    const targetVariant = product.variants?.find(v => {
+      const s = String(v.supplier || v.supplierId || v.supplierName || '').toLowerCase();
+      const matchesSupp = s.includes('lotus') || (targetSupplier && s.includes(targetSupplier.replace(/^supplier-/, '')));
+      const reqDose = searchParams.get('dose');
+      if (reqDose && reqDose !== 'all') {
+        const vDose = String(v.dosage || v.dose || '').toLowerCase().replace(/\s+/g, '');
+        const rDose = String(reqDose).toLowerCase().replace(/\s+/g, '');
+        return matchesSupp && (vDose === rDose || vDose.includes(rDose));
+      }
+      return matchesSupp;
+    }) || product.variants?.find(v => {
+      const reqDose = searchParams.get('dose');
+      if (reqDose && reqDose !== 'all') {
+        const vDose = String(v.dosage || v.dose || '').toLowerCase().replace(/\s+/g, '');
+        const rDose = String(reqDose).toLowerCase().replace(/\s+/g, '');
+        return vDose === rDose || vDose.includes(rDose);
+      }
+      return true;
+    }) || product.variants?.[0] || {};
+
+    const targetDose = searchParams.get('dose') || targetVariant.dosage || targetVariant.dose || product.dosage || '10 mg';
+    const targetFormat = searchParams.get('presentation') || searchParams.get('formatId') || targetVariant.presentation || targetVariant.presentationName || 'vial';
+
     // Resolve target shared URL for the QR code
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetShareUrl = explicitUrl;
     if (!targetShareUrl) {
       const qParams = new URLSearchParams();
-      const supp = searchParams.get('supplier');
-      const dose = searchParams.get('dose');
+      if (targetSupplier && targetSupplier !== 'all') qParams.set('supplier', targetSupplier);
+      if (targetDose && targetDose !== 'all') qParams.set('dose', targetDose);
+      if (targetFormat && targetFormat !== 'all') qParams.set('format', targetFormat);
       const lang = searchParams.get('lang');
-      const presFormat = searchParams.get('presentation') || searchParams.get('formatId');
-      if (supp && supp !== 'all') qParams.set('supplier', supp);
-      if (dose && dose !== 'all') qParams.set('dose', dose);
-      if (presFormat && presFormat !== 'all') qParams.set('format', presFormat);
       if (lang && lang !== 'en') qParams.set('lang', lang);
       const qs = qParams.toString();
       targetShareUrl = `${BASE_URL}/p/${cleanSlug}${qs ? `?${qs}` : ''}`;
@@ -542,7 +567,7 @@ export async function GET(request, { params }) {
 
     const renderLabel = isBarcodeOnly
       ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, batchNumber, targetShareUrl, discreetCode)
-      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl, batchNumber, discreetCode);
+      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl, batchNumber, discreetCode, targetVariant);
 
     if (format === 'sheet_a4') {
       // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)

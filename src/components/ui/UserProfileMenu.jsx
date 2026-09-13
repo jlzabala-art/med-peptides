@@ -18,9 +18,11 @@ import {
   X,
   Sparkles
 } from '@/lib/icons';
+import UserProfileDrawer from '../shared/UserProfileDrawer';
 
 export default function UserProfileMenu({ roleContext = 'patient', isMobile = false, portalTitle = '' }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const menuRef = useRef(null);
 
@@ -242,7 +244,10 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <button
                 type="button"
-                onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/profile' : `/${roleContext}/my-profile`)}
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsProfileDrawerOpen(true);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -389,7 +394,10 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
           <div style={{ padding: '8px' }}>
             <button
               type="button"
-              onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/profile' : `/${roleContext}/my-profile`)}
+              onClick={() => {
+                setIsOpen(false);
+                setIsProfileDrawerOpen(true);
+              }}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -494,6 +502,12 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
           </div>
         </div>
       )}
+
+      {/* Normalized User Profile Drawer */}
+      <UserProfileDrawer
+        isOpen={isProfileDrawerOpen}
+        onClose={() => setIsProfileDrawerOpen(false)}
+      />
     </div>
   );
 }
