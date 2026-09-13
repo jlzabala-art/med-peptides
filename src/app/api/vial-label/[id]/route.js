@@ -87,7 +87,7 @@ function draw1DBarcode(page, originX, originY, maxW, height, text) {
 /**
  * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR)
  */
-async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB) {
+async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl) {
   const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
   const category = toSafePdfText(product.category || product.therapeutic_category || 'Research');
   const casNumber = toSafePdfText(product.casNumber || product.cas || '');
@@ -100,7 +100,8 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   const storage = toSafePdfText(variant.storageInstructions || 'Store at 2C - 8C');
 
   // Generate QR Code PNG Buffer pointing to public page
-  const publicUrl = `${BASE_URL}/p/${product.slug || product.id}`;
+  const cleanSlug = toSafePdfText(product.slug || product.id || 'product').toLowerCase();
+  const publicUrl = targetShareUrl || `${BASE_URL}/p/${cleanSlug}`;
   const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
     margin: 1,
     width: 256,
@@ -250,7 +251,7 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
  * Contains STRICTLY the square QR code + 1D scan barcode with an anonymous tracking number.
  * Absolutely zero product/drug name to ensure 100% discrete logistics.
  */
-async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customTracking) {
+async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customTracking, targetShareUrl) {
   const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
   
   // Generate an anonymous tracking number that does NOT disclose the compound/product name
@@ -265,6 +266,9 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     trackingNumber = `TRK-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
   }
 
+  // The square QR code opens the official shared product monograph page
+  const destinationUrl = targetShareUrl || `${BASE_URL}/p/${cleanSlug}`;
+
   // Outer border & background
   page.drawRectangle({
     x: originX,
@@ -276,8 +280,8 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     color: rgb(1, 1, 1),
   });
 
-  // The QR code encodes strictly the tracking number — zero product/compound identification
-  const qrPngBuffer = await QRCode.toBuffer(trackingNumber, {
+  // The QR code encodes the shared page URL
+  const qrPngBuffer = await QRCode.toBuffer(destinationUrl, {
     margin: 1,
     width: 320,
     errorCorrectionLevel: 'M',
@@ -286,7 +290,7 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
   const qrImage = await pdfDoc.embedPng(qrPngBuffer);
 
   if (widthPt >= 200) {
-    // 38x90mm Landscape Layout: ONLY the square QR code, 1D scan barcode and tracking number
+    // 38x90mm Landscape Layout: square QR code opening shared page + 1D scan barcode and anonymous tracking number
     const qrSize = heightPt - 24; // ~83 pt square
     const qrX = originX + 14;
     const qrY = originY + (heightPt - qrSize) / 2;
@@ -297,6 +301,14 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       y: qrY,
       width: qrSize,
       height: qrSize,
+    });
+
+    page.drawText('SCAN QR', {
+      x: qrX + (qrSize - fontB.widthOfTextAtSize('SCAN QR', 5.5)) / 2,
+      y: qrY - 7,
+      size: 5.5,
+      font: fontB,
+      color: BRAND_COLOR,
     });
 
     // 2. Right side: STRICTLY the 1D Scan Barcode & Anonymous Tracking Number
@@ -348,6 +360,14 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
+    page.drawText('SCAN QR', {
+      x: originX + (widthPt - fontB.widthOfTextAtSize('SCAN QR', 5.5)) / 2,
+      y: qrY - 7,
+      size: 5.5,
+      font: fontB,
+      color: BRAND_COLOR,
+    });
+
     page.drawText(trackingNumber, {
       x: originX + (widthPt - fontB.widthOfTextAtSize(trackingNumber, 8)) / 2,
       y: originY + 12,
@@ -378,10 +398,28 @@ export async function GET(request, { params }) {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+    const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
+
+    // Resolve target shared URL for the QR code
+    const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
+    let targetShareUrl = explicitUrl;
+    if (!targetShareUrl) {
+      const qParams = new URLSearchParams();
+      const supp = searchParams.get('supplier');
+      const dose = searchParams.get('dose');
+      const lang = searchParams.get('lang');
+      const presFormat = searchParams.get('presentation') || searchParams.get('formatId');
+      if (supp && supp !== 'all') qParams.set('supplier', supp);
+      if (dose && dose !== 'all') qParams.set('dose', dose);
+      if (presFormat && presFormat !== 'all') qParams.set('format', presFormat);
+      if (lang && lang !== 'en') qParams.set('lang', lang);
+      const qs = qParams.toString();
+      targetShareUrl = `${BASE_URL}/p/${cleanSlug}${qs ? `?${qs}` : ''}`;
+    }
+
     // Deterministic anonymous tracking number
     let trackingNumber = customTracking;
     if (!trackingNumber) {
-      const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
       let hash = 0;
       for (let i = 0; i < cleanSlug.length; i++) {
         hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
@@ -392,8 +430,8 @@ export async function GET(request, { params }) {
     }
 
     const renderLabel = isBarcodeOnly
-      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, trackingNumber)
-      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB);
+      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, trackingNumber, targetShareUrl)
+      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl);
 
     if (format === 'sheet_a4') {
       // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)

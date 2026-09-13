@@ -16,7 +16,9 @@ import {
   Sparkles,
   CheckCircle2,
   ShieldCheck,
-  Send
+  Send,
+  FileText,
+  FileDown
 } from '@/lib/icons';
 import { processProductVariants } from '@/utils/productVariantProcessing';
 import { SUPPORTED_LANGUAGES } from '@/utils/productTranslations';
@@ -619,6 +621,74 @@ export default function ShareProductMonographDrawer({
             >
               <Send size={15} />
               <span>Email Monograph</span>
+            </a>
+          </div>
+        </div>
+
+        {/* ── 7. Physical Thermal Vial Labels (38x90 mm) ── */}
+        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <FileDown size={15} color="#003666" />
+              <span>Physical Thermal Labels (38x90 mm):</span>
+            </span>
+            <span style={{ fontSize: '0.68rem', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+              QR opens this shared link
+            </span>
+          </div>
+          <p style={{ margin: '0 0 10px', fontSize: '0.73rem', color: '#64748b', lineHeight: 1.4 }}>
+            Direct PDF generation for thermal label printers. The square QR code opens this exact shared monograph view upon scan.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            {/* Shipping Label (Discreet) */}
+            <a
+              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${queryString ? `&${queryString}` : ''}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '9px 12px',
+                background: '#f8fafc',
+                color: '#003666',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <QrCode size={14} />
+              <span>Shipping Label (Discreet)</span>
+            </a>
+
+            {/* Client Label (Full Specs) */}
+            <a
+              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client${queryString ? `&${queryString}` : ''}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '9px 12px',
+                background: '#f0fdfa',
+                color: '#0d9488',
+                border: '1px solid #99f6e4',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <FileText size={14} />
+              <span>Client Label (Full Specs)</span>
             </a>
           </div>
         </div>
