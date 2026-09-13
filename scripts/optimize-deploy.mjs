@@ -13,15 +13,24 @@
  */
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 console.log('🚀 [Optimize Deploy] Preparing fast deployment environment...');
 
 // Step 1: Find and patch firebase-tools if available
 function patchFirebaseTools() {
+  let globalNpmRoot = '';
+  try {
+    globalNpmRoot = execSync('npm root -g', { encoding: 'utf8', timeout: 5000 }).trim();
+  } catch (_) {}
+
   const nextUtilsPaths = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/frameworks/next/utils.js') : '',
+    '/usr/local/lib/node_modules/firebase-tools/lib/frameworks/next/utils.js',
+    '/opt/hostedtoolcache/node/*/x64/lib/node_modules/firebase-tools/lib/frameworks/next/utils.js',
     '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/frameworks/next/utils.js',
     path.resolve('node_modules/firebase-tools/lib/frameworks/next/utils.js'),
-  ];
+  ].filter(Boolean);
 
   for (const filePath of nextUtilsPaths) {
     if (fs.existsSync(filePath)) {
@@ -45,9 +54,11 @@ function patchFirebaseTools() {
 
   // Patch next/index.js to avoid copying heavy public/ directory to Cloud Functions (served by Firebase Hosting CDN)
   const nextIndexPaths = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/frameworks/next/index.js') : '',
+    '/usr/local/lib/node_modules/firebase-tools/lib/frameworks/next/index.js',
     '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/frameworks/next/index.js',
     path.resolve('node_modules/firebase-tools/lib/frameworks/next/index.js'),
-  ];
+  ].filter(Boolean);
 
   for (const filePath of nextIndexPaths) {
     if (fs.existsSync(filePath)) {
@@ -75,9 +86,11 @@ function patchFirebaseTools() {
 
   // Patch prepareFunctionsUpload to ensure packageSource ignores .next/cache, public, and static assets
   const prepareUploadPaths = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js') : '',
+    '/usr/local/lib/node_modules/firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js',
     '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js',
     path.resolve('node_modules/firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js'),
-  ];
+  ].filter(Boolean);
 
   for (const filePath of prepareUploadPaths) {
     if (fs.existsSync(filePath)) {
@@ -173,8 +186,22 @@ function ensureRootGcloudIgnore() {
   fs.writeFileSync(rootIgnorePath, content, 'utf8');
 }
 
+// Step 4: Purge root .next/cache before staging so firebase-tools does not copy 2+ GB into Cloud Functions
+function purgeNextCache() {
+  const rootCachePath = path.resolve('.next/cache');
+  if (fs.existsSync(rootCachePath)) {
+    try {
+      fs.rmSync(rootCachePath, { recursive: true, force: true });
+      console.log('🧹 [Optimize Deploy] Purged root .next/cache (compiler cache removed from deployment package)');
+    } catch (err) {
+      console.warn(`⚠️ [Optimize Deploy] Could not delete root .next/cache: ${err.message}`);
+    }
+  }
+}
+
 patchFirebaseTools();
 ensureRootGcloudIgnore();
+purgeNextCache();
 if (fs.existsSync(path.resolve('.firebase'))) {
   pruneDir(path.resolve('.firebase'));
 }
