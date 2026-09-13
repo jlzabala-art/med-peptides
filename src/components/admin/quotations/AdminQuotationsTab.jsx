@@ -36,9 +36,23 @@ export default function AdminQuotationsTab() {
   // Search and Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const statusFilter = searchParams.get('status') || '';
-  const rangeFilter = searchParams.get('range') || 'all';
+  const urlRange = searchParams.get('range') || searchParams.get('timeframe');
+  const savedKpiRange = typeof window !== 'undefined' 
+    ? (sessionStorage.getItem('admin_kpi_time_range') || localStorage.getItem('admin_kpi_time_range'))
+    : null;
+  const rangeFilter = urlRange !== null && urlRange !== undefined ? urlRange : (savedKpiRange || 'week');
   const categoryFilter = searchParams.get('category') || searchParams.get('recipient') || '';
   const managerFilter = searchParams.get('manager') || searchParams.get('accountManager') || '';
+
+  // Synchronize URL query parameter with the active range on initial load if missing (Golden Rule #24)
+  useEffect(() => {
+    if (!searchParams.get('range') && !searchParams.get('timeframe')) {
+      const defaultRange = savedKpiRange || 'week';
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('range', defaultRange);
+      router.replace(`${pathname}?${params.toString()}`);
+    }
+  }, [pathname, searchParams, savedKpiRange, router]);
 
   // Context Bridge Focus for Atlas AI
   const [focusedQuote, setFocusedQuote] = useState(null);
@@ -241,11 +255,34 @@ export default function AdminQuotationsTab() {
     if (rangeFilter && rangeFilter !== 'all') {
       const now = new Date();
       const cutoff = new Date();
-      if (rangeFilter === '7d') cutoff.setDate(now.getDate() - 7);
-      else if (rangeFilter === '30d') cutoff.setDate(now.getDate() - 30);
-      else if (rangeFilter === '90d') cutoff.setDate(now.getDate() - 90);
 
-      list = list.filter(q => q.createdDate >= cutoff);
+      switch (rangeFilter) {
+        case 'today':
+          cutoff.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+        case 'this_week':
+        case '7d':
+          cutoff.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+        case 'this_month':
+        case '30d':
+          cutoff.setDate(now.getDate() - 30);
+          break;
+        case '90d':
+          cutoff.setDate(now.getDate() - 90);
+          break;
+        case 'year':
+        case 'this_year':
+          cutoff.setDate(now.getDate() - 365);
+          break;
+        default:
+          cutoff.setDate(now.getDate() - 7);
+          break;
+      }
+
+      list = list.filter(q => q.createdDate instanceof Date && !isNaN(q.createdDate.getTime()) && q.createdDate >= cutoff);
     }
 
     if (searchQuery.trim()) {
@@ -356,6 +393,10 @@ export default function AdminQuotationsTab() {
   };
 
   const handleFilterChange = (key, value) => {
+    if (key === 'range' && typeof window !== 'undefined') {
+      sessionStorage.setItem('admin_kpi_time_range', value);
+      localStorage.setItem('admin_kpi_time_range', value);
+    }
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set(key, value);
     else params.delete(key);
@@ -1096,7 +1137,12 @@ export default function AdminQuotationsTab() {
     rangeFilter && rangeFilter !== 'all' ? {
       key: 'range',
       label: 'Date Range',
-      value: rangeFilter === '7d' ? 'Last 7 Days' : rangeFilter === '30d' ? 'Last 30 Days' : 'Last 90 Days',
+      value: rangeFilter === 'today' ? 'Today' 
+        : (rangeFilter === 'week' || rangeFilter === '7d' || rangeFilter === 'this_week') ? 'This Week (7 Days)' 
+        : (rangeFilter === 'month' || rangeFilter === '30d' || rangeFilter === 'this_month') ? 'This Month (30 Days)' 
+        : rangeFilter === '90d' ? 'Last 90 Days' 
+        : (rangeFilter === 'year' || rangeFilter === 'this_year') ? 'This Year' 
+        : rangeFilter,
       onRemove: () => handleFilterChange('range', 'all')
     } : null,
   ].filter(Boolean);
@@ -1254,11 +1300,15 @@ export default function AdminQuotationsTab() {
             label: 'Date Range',
             options: [
               { label: 'All Time', value: 'all' },
-              { label: 'Last 7 Days', value: '7d' },
-              { label: 'Last 30 Days', value: '30d' },
-              { label: 'Last 90 Days', value: '90d' }
+              { label: 'Today', value: 'today' },
+              { label: 'This Week (7 Days)', value: 'week' },
+              { label: 'This Month (30 Days)', value: 'month' },
+              { label: 'Last 90 Days', value: '90d' },
+              { label: 'This Year', value: 'year' }
             ],
-            value: rangeFilter,
+            value: (rangeFilter === '7d' || rangeFilter === 'this_week') ? 'week' 
+              : (rangeFilter === '30d' || rangeFilter === 'this_month') ? 'month' 
+              : (rangeFilter === 'this_year' ? 'year' : rangeFilter),
             onChange: (val) => handleFilterChange('range', val)
           }
         ]}

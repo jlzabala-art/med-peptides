@@ -46,7 +46,12 @@ const DOMAIN_FILTERS = [
 export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = {} }) {
   const router = useRouter();
   const { effectiveRole } = useRoleAccess();
-  const [timeRange, setTimeRange] = useState('today');
+  const [timeRange, setTimeRange] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('admin_kpi_time_range') || localStorage.getItem('admin_kpi_time_range') || 'week';
+    }
+    return 'week';
+  });
   const [selectedDomain, setSelectedDomain] = useState('all');
   const [serverMetrics, setServerMetrics] = useState(initialMetrics);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
@@ -141,7 +146,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         title: 'Quotations Issued',
         value: `${metrics.quotationsCount || 0} Quotes`,
         icon: FileText,
-        route: '/admin/quotations',
+        route: `/admin/quotations?range=${timeRange}`,
         styleClass: styles.iconFinance,
       },
       {
@@ -165,7 +170,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         title: 'Average Quotation Value',
         value: formatAEDtoDual(metrics.avgQuotationValue || 0),
         icon: DollarSign,
-        route: '/admin/quotations',
+        route: `/admin/quotations?range=${timeRange}`,
         styleClass: styles.iconFinance,
       },
     ],
@@ -370,6 +375,10 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
                 onClick={() => {
                   triggerHaptic('select');
                   setTimeRange(tr.id);
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('admin_kpi_time_range', tr.id);
+                    localStorage.setItem('admin_kpi_time_range', tr.id);
+                  }
                 }}
                 className={`admin-time-range-btn ${timeRange === tr.id ? 'active' : ''}`}
                 style={{
@@ -445,7 +454,15 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
                   <div 
                     key={kpi.id} 
                     className={`${styles.card} ${kpi.isAlert ? styles.cardAlert : ''}`} 
-                    onClick={() => router.push(kpi.route)}
+                    onClick={() => {
+                      let target = kpi.route;
+                      if (target) {
+                        if (target.startsWith('/admin/quotations') && !target.includes('range=')) {
+                          target += (target.includes('?') ? '&' : '?') + `range=${timeRange}`;
+                        }
+                        router.push(target);
+                      }
+                    }}
                   >
                     <div className={`${styles.iconContainer} ${kpi.styleClass}`}>
                       <IconComponent size={18} />
