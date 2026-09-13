@@ -1,59 +1,39 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-
-
-
-
-
-
+import React, { useState, useEffect } from 'react';
 import { usePreferences } from '../../../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
 import notifier from '@/services/NotificationService';
-import { Globe, DollarSign, List, Maximize2, Check, Settings2, Cloud, Eye, EyeOff } from '@/lib/icons';
+import StandardDrawer from '@/components/ui/StandardDrawer';
+import { 
+  Globe, 
+  DollarSign, 
+  List, 
+  Maximize2, 
+  Check, 
+  Settings2, 
+  Cloud, 
+  Eye, 
+  EyeOff,
+  Sparkles,
+  Info
+} from '@/lib/icons';
 
 export default function GlobalPreferencesDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const buttonRef = useRef(null);
-  const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
   const { currency, updateCurrency, density, updateDensity, weatherDisplay, updateWeatherDisplay } = usePreferences();
   const { i18n } = useTranslation();
 
   // Ensure interface remains on English standard while Spanish and Compact mode are in implementation
   useEffect(() => {
-    if (i18n.language === 'es' || (typeof window !== 'undefined' && localStorage.getItem('language') === 'es')) {
-      i18n.changeLanguage('en');
+    if (i18n?.language === 'es' || (typeof window !== 'undefined' && localStorage.getItem('language') === 'es')) {
+      i18n?.changeLanguage?.('en');
       localStorage.setItem('language', 'en');
     }
     if (density === 'compact' || (typeof window !== 'undefined' && localStorage.getItem('atlas_density') === 'compact')) {
       updateDensity('comfortable');
     }
   }, [i18n, density, updateDensity]);
-
-  // Close on outside click
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-          buttonRef.current && !buttonRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Recalculate position on open so the panel uses fixed coords
-  const handleToggle = () => {
-    if (!isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropPos({
-        top: rect.bottom + 8,
-        right: window.innerWidth - rect.right,
-      });
-    }
-    setIsOpen(prev => !prev);
-  };
 
   const handleLanguageSelect = (lang) => {
     if (lang === 'es') {
@@ -63,7 +43,7 @@ export default function GlobalPreferencesDropdown() {
       );
       return;
     }
-    i18n.changeLanguage('en');
+    i18n?.changeLanguage?.('en');
     localStorage.setItem('language', 'en');
   };
 
@@ -73,10 +53,10 @@ export default function GlobalPreferencesDropdown() {
     <div style={{ position: 'relative', display: 'inline-block' }}>
       {/* Trigger button */}
       <button
-        ref={buttonRef}
-        onClick={handleToggle}
+        type="button"
+        onClick={() => setIsOpen(true)}
         aria-label="Global Preferences"
-        aria-haspopup="true"
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
         style={{
           display: 'flex',
@@ -88,7 +68,7 @@ export default function GlobalPreferencesDropdown() {
           padding: '0.4rem 0.6rem',
           borderRadius: '20px',
           cursor: 'pointer',
-          color: 'var(--color-text-secondary)',
+          color: 'var(--color-text-secondary, #475569)',
           fontWeight: 600,
           fontSize: '0.75rem',
           transition: 'all 0.2s ease',
@@ -103,224 +83,369 @@ export default function GlobalPreferencesDropdown() {
         <Settings2 size={14} style={{ marginLeft: '2px' }} />
       </button>
 
-      {/* Fixed-position dropdown — breaks out of any stacking context */}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          style={{
-            position: 'fixed',
-            top: dropPos.top,
-            right: dropPos.right,
-            background: 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderRadius: '12px',
-            boxShadow: '0 10px 40px -5px rgba(0,0,0,0.15), 0 4px 12px -2px rgba(0,0,0,0.08)',
-            border: '1px solid rgba(0,0,0,0.06)',
-            width: '270px',
-            zIndex: 99999,
-            overflow: 'hidden',
-            animation: 'gpd-fadeIn 0.18s ease-out',
-          }}
-        >
-          {/* Header */}
-          <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.75rem', color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Preferences
-            </span>
-          </div>
+      {/* Adaptive Drawer: Side-Over on Laptop / Desktop, Bottom Sheet on Mobile */}
+      <StandardDrawer
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Preferences"
+        subtitle="Platform localization, currency & layout density"
+        width="clamp(340px, 28vw, 420px)"
+        bodyPadding="1.25rem"
+        expandable={false}
+        zIndex={99999}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          <div style={{ padding: '0.5rem' }}>
-            {/* Language */}
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem 0.4rem' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
+          {/* Section: Language */}
+          <div style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '1rem',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Globe size={16} color="var(--color-primary, #003666)" />
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Language
                 </span>
-                <span style={{ fontSize: '0.62rem', color: '#0369a1', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bae6fd', fontWeight: 600 }}>
-                  Standard
-                </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
-                {/* English - Active Standard */}
-                <button
-                  type="button"
-                  onClick={() => handleLanguageSelect('en')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0.5rem 0.6rem', border: '1px solid rgba(0, 113, 189, 0.25)', borderRadius: '6px',
-                    background: 'rgba(0, 113, 189, 0.08)',
-                    color: 'var(--color-primary)',
-                    cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-                  }}
-                  title="English (Clinical Operating Standard)"
-                >
-                  <span>English</span>
-                  <Check size={14} color="var(--color-primary)" />
-                </button>
-
-                {/* Spanish - Elegantly marked as Coming Soon */}
-                <button
-                  type="button"
-                  onClick={() => handleLanguageSelect('es')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0.5rem 0.6rem', border: '1px dashed #cbd5e1', borderRadius: '6px',
-                    background: '#f8fafc',
-                    color: '#64748b',
-                    cursor: 'pointer', fontWeight: 500, fontSize: '0.82rem',
-                    transition: 'all 0.15s ease',
-                  }}
-                  title="Español (En fase de validación técnica — Próximamente)"
-                >
-                  <span>Español</span>
-                  <span style={{ 
-                    fontSize: '0.58rem', 
-                    fontWeight: 700, 
-                    color: '#475569', 
-                    background: '#e2e8f0', 
-                    padding: '1px 5px', 
-                    borderRadius: '4px',
-                    letterSpacing: '0.02em',
-                  }}>
-                    Pronto
-                  </span>
-                </button>
-              </div>
-              <div style={{ fontSize: '0.66rem', color: '#64748b', padding: '0.4rem 0.5rem 0', lineHeight: 1.35 }}>
-                La versión en español está en fase de validación clínica. La plataforma opera actualmente en inglés estándar.
-              </div>
+              <span style={{ 
+                fontSize: '0.65rem', 
+                color: '#0369a1', 
+                background: '#f0f9ff', 
+                padding: '2px 8px', 
+                borderRadius: '6px', 
+                border: '1px solid #bae6fd', 
+                fontWeight: 700 
+              }}>
+                Clinical Standard
+              </span>
             </div>
 
-            {/* Currency */}
-            <div style={{ marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Currency</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.25rem' }}>
-                {['USD', 'AED', 'DUAL'].map(curr => {
-                  const active = currency === curr;
-                  return (
-                    <button
-                      key={curr}
-                      onClick={() => updateCurrency(curr)}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: '0.5rem 0', border: 'none', borderRadius: '6px',
-                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.75rem',
-                      }}
-                    >
-                      {curr}
-                    </button>
-                  );
-                })}
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              {/* English - Active Standard */}
+              <button
+                type="button"
+                onClick={() => handleLanguageSelect('en')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  border: '1.5px solid var(--color-primary, #003666)',
+                  borderRadius: '8px',
+                  background: 'rgba(0, 54, 102, 0.06)',
+                  color: 'var(--color-primary, #003666)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  transition: 'all 0.15s ease',
+                }}
+                title="English (Clinical Operating Standard)"
+              >
+                <span>English</span>
+                <Check size={16} color="var(--color-primary, #003666)" />
+              </button>
+
+              {/* Spanish - In Technical Validation */}
+              <button
+                type="button"
+                onClick={() => handleLanguageSelect('es')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.65rem 0.75rem',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  transition: 'all 0.15s ease',
+                }}
+                title="Español (En fase de validación técnica — Próximamente)"
+              >
+                <span>Español</span>
+                <span style={{ 
+                  fontSize: '0.6rem', 
+                  fontWeight: 700, 
+                  color: '#475569', 
+                  background: '#f1f5f9', 
+                  padding: '2px 6px', 
+                  borderRadius: '4px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  Pronto
+                </span>
+              </button>
             </div>
 
-            {/* Density */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem 0.4rem' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
-                  Layout Density
-                </span>
-                <span style={{ fontSize: '0.62rem', color: '#0369a1', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bae6fd', fontWeight: 600 }}>
-                  Standard
-                </span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
-                {/* Comfortable - Active Standard */}
-                <button
-                  type="button"
-                  onClick={() => updateDensity('comfortable')}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
-                    padding: '0.5rem', border: '1px solid rgba(0, 113, 189, 0.25)', borderRadius: '6px',
-                    background: 'rgba(0, 113, 189, 0.08)',
-                    color: 'var(--color-primary)',
-                    cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem',
-                  }}
-                  title="Comfortable (Active operating layout)"
-                >
-                  <Maximize2 size={14} /> Comfortable
-                </button>
-
-                {/* Compact - Elegantly marked as in implementation */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    notifier.toast(
-                      '📐 El modo Compacto se encuentra en fase de implantación técnica y estará disponible en una próxima actualización.',
-                      'info'
-                    );
-                  }}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
-                    padding: '0.5rem', border: '1px dashed #cbd5e1', borderRadius: '6px',
-                    background: '#f8fafc',
-                    color: '#64748b',
-                    cursor: 'pointer', fontWeight: 500, fontSize: '0.75rem',
-                    transition: 'all 0.15s ease',
-                  }}
-                  title="Compact (En fase de implantación — Próximamente)"
-                >
-                  <List size={14} />
-                  <span>Compact</span>
-                  <span style={{ 
-                    fontSize: '0.58rem', 
-                    fontWeight: 700, 
-                    color: '#475569', 
-                    background: '#e2e8f0', 
-                    padding: '1px 4px', 
-                    borderRadius: '4px',
-                    letterSpacing: '0.02em',
-                  }}>
-                    Pronto
-                  </span>
-                </button>
-              </div>
-              <div style={{ fontSize: '0.66rem', color: '#64748b', padding: '0.4rem 0.5rem 0', lineHeight: 1.35 }}>
-                El modo compacto de alta densidad está en fase de adaptación responsiva por módulo.
-              </div>
-            </div>
-
-            {/* Weather Display */}
-            <div style={{ marginTop: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Weather Widget</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.25rem' }}>
-                {[
-                  { id: 'automatic', label: 'Auto', Icon: Cloud },
-                  { id: 'visible',   label: 'Show', Icon: Eye },
-                  { id: 'hidden',    label: 'Hide', Icon: EyeOff },
-                ].map(({ id, label, Icon }) => {
-                  const active = weatherDisplay === id;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => updateWeatherDisplay(id)}
-                      style={{
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
-                        padding: '0.5rem', border: 'none', borderRadius: '6px',
-                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.7rem',
-                      }}
-                    >
-                      <Icon size={14} /> {label}
-                    </button>
-                  );
-                })}
-              </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '6px', 
+              fontSize: '0.72rem', 
+              color: '#64748b', 
+              marginTop: '0.75rem', 
+              lineHeight: 1.4 
+            }}>
+              <Info size={13} style={{ flexShrink: 0, marginTop: '2px', color: '#94a3b8' }} />
+              <span>Atlas Health operates under medical English standard. Spanish localized terms are undergoing technical validation.</span>
             </div>
           </div>
-        </div>
-      )}
 
-      <style>{`
-        @keyframes gpd-fadeIn {
-          from { opacity: 0; transform: translateY(-6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+          {/* Section: Currency */}
+          <div style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '1rem',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <DollarSign size={16} color="var(--color-primary, #003666)" />
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Currency
+                </span>
+              </div>
+              <span style={{ 
+                fontSize: '0.65rem', 
+                color: '#475569', 
+                background: '#f1f5f9', 
+                padding: '2px 8px', 
+                borderRadius: '6px', 
+                fontWeight: 600 
+              }}>
+                Active: {currency}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+              {['USD', 'AED', 'EUR', 'DUAL'].map(curr => {
+                const active = currency === curr;
+                return (
+                  <button
+                    key={curr}
+                    type="button"
+                    onClick={() => updateCurrency(curr)}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0.6rem 0.25rem',
+                      border: active ? '1.5px solid var(--color-primary, #003666)' : '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      background: active ? 'rgba(0, 54, 102, 0.08)' : '#ffffff',
+                      color: active ? 'var(--color-primary, #003666)' : '#334155',
+                      cursor: 'pointer',
+                      fontWeight: active ? 700 : 500,
+                      fontSize: '0.82rem',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <span>{curr}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '6px', 
+              fontSize: '0.72rem', 
+              color: '#64748b', 
+              marginTop: '0.75rem', 
+              lineHeight: 1.4 
+            }}>
+              <Info size={13} style={{ flexShrink: 0, marginTop: '2px', color: '#94a3b8' }} />
+              <span>Select pricing display currency for catalog products, prescriptions, and invoices.</span>
+            </div>
+          </div>
+
+          {/* Section: Density */}
+          <div style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '1rem',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Maximize2 size={16} color="var(--color-primary, #003666)" />
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Layout Density
+                </span>
+              </div>
+              <span style={{ 
+                fontSize: '0.65rem', 
+                color: '#0369a1', 
+                background: '#f0f9ff', 
+                padding: '2px 8px', 
+                borderRadius: '6px', 
+                border: '1px solid #bae6fd', 
+                fontWeight: 700 
+              }}>
+                Comfortable
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              {/* Comfortable - Active Standard */}
+              <button
+                type="button"
+                onClick={() => updateDensity('comfortable')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  padding: '0.65rem 0.75rem',
+                  border: '1.5px solid var(--color-primary, #003666)',
+                  borderRadius: '8px',
+                  background: 'rgba(0, 54, 102, 0.06)',
+                  color: 'var(--color-primary, #003666)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                }}
+                title="Comfortable (Active operating layout)"
+              >
+                <Maximize2 size={15} />
+                <span>Comfortable</span>
+              </button>
+
+              {/* Compact - In Technical Implementation */}
+              <button
+                type="button"
+                onClick={() => {
+                  notifier.toast(
+                    '📐 El modo Compacto se encuentra en fase de implantación técnica y estará disponible en una próxima actualización.',
+                    'info'
+                  );
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  padding: '0.65rem 0.75rem',
+                  border: '1px dashed #cbd5e1',
+                  borderRadius: '8px',
+                  background: '#ffffff',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.82rem',
+                  transition: 'all 0.15s ease',
+                }}
+                title="Compact (En fase de implantación — Próximamente)"
+              >
+                <List size={15} />
+                <span>Compact</span>
+                <span style={{ 
+                  fontSize: '0.6rem', 
+                  fontWeight: 700, 
+                  color: '#475569', 
+                  background: '#f1f5f9', 
+                  padding: '2px 5px', 
+                  borderRadius: '4px',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  Pronto
+                </span>
+              </button>
+            </div>
+
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '6px', 
+              fontSize: '0.72rem', 
+              color: '#64748b', 
+              marginTop: '0.75rem', 
+              lineHeight: 1.4 
+            }}>
+              <Info size={13} style={{ flexShrink: 0, marginTop: '2px', color: '#94a3b8' }} />
+              <span>High-density table mode is being adapted across all tabular screens for optimal data packing.</span>
+            </div>
+          </div>
+
+          {/* Section: Weather Widget */}
+          <div style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            padding: '1rem',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Cloud size={16} color="var(--color-primary, #003666)" />
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Weather Widget
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
+              {[
+                { id: 'automatic', label: 'Auto', Icon: Cloud },
+                { id: 'visible',   label: 'Show', Icon: Eye },
+                { id: 'hidden',    label: 'Hide', Icon: EyeOff },
+              ].map(({ id, label, Icon }) => {
+                const active = weatherDisplay === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => updateWeatherDisplay(id)}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.3rem',
+                      padding: '0.65rem 0.5rem',
+                      border: active ? '1.5px solid var(--color-primary, #003666)' : '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      background: active ? 'rgba(0, 54, 102, 0.08)' : '#ffffff',
+                      color: active ? 'var(--color-primary, #003666)' : '#334155',
+                      cursor: 'pointer',
+                      fontWeight: active ? 700 : 500,
+                      fontSize: '0.78rem',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Icon size={16} />
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Footer note */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '0.75rem 1rem',
+            background: 'rgba(0, 54, 102, 0.03)',
+            borderRadius: '10px',
+            border: '1px solid rgba(0, 54, 102, 0.08)',
+            fontSize: '0.72rem',
+            color: '#64748b'
+          }}>
+            <Sparkles size={16} color="var(--color-primary, #003666)" style={{ flexShrink: 0 }} />
+            <span>Preferences are automatically stored locally and applied across all workspace modules.</span>
+          </div>
+
+        </div>
+      </StandardDrawer>
     </div>
   );
 }
