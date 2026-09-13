@@ -460,4 +460,9 @@ El footer sticky del bottom sheet SIEMPRE debe tener:
   - `src/components/admin/catalog/components/MobileGenomicsCard.jsx` (Matriz Genómica)
   - `src/components/ui/MobileRecordCard.jsx` (Renderizador universal de `DataTable`)
 
-
+## 39. Auto-Commit y Auto-Push Obligatorio (Zero-Manual-Deploy Rule)
+- **Siempre que el asistente concluya un bloque de trabajo, corrección o funcionalidad aprobada por el usuario**, DEBE realizar de forma proactiva y automática el ciclo de sincronización en Git:
+  1. `git add -A`
+  2. `git commit -m "feat/fix(...): descripción precisa"`
+  3. `git push origin main`
+- **Propósito**: Dispara instantáneamente el pipeline optimizado de GitHub Actions en segundo plano sin que el usuario tenga que solicitarlo o recordarlo. Nunca dejes cambios aprobados pendientes de push en local.
