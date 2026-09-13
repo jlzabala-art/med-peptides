@@ -65,7 +65,8 @@ export default class AdminTabErrorBoundary extends Component {
       );
     }
 
-    const { tabLabel = 'This section', error, errorInfo, showDetail } = this.state;
+    const { error, errorInfo, showDetail } = this.state;
+    const tabLabel = this.props.tabLabel || 'This section';
     const isDev = process.env.NODE_ENV === 'development';
 
     return (

@@ -77,6 +77,7 @@ export default function DataTable({
   visibleColumns, // array of keys
   onColumnToggle, // (columnKey, isVisible) => void
   tableId,
+  minHeight,
   getRowProps, // (row) => ({ style?: {}, className?: string })
   pagination = true,
   hidePagination = false,
