@@ -19,12 +19,12 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 
 // ── Shipping destinations ─────────────────────────────────────────────────────
 export const SHIPPING_DESTINATIONS = [
-  { id: 'exw',    label: 'Ex-Works (EU Hub Pickup / No Freight)', costUSD: 0,  costEUR: 0,  flag: '🏭', code: 'EXW',    leadTime: 'Immediate' },
-  { id: 'eu',     label: 'European Union (Express Hub 2–4 Days)', costUSD: 40, costEUR: 36, flag: '🇪🇺', code: 'EU',     leadTime: '2–4 Days' },
-  { id: 'uk_ch',  label: 'UK & Switzerland (Priority Express)',   costUSD: 50, costEUR: 45, flag: '🇬🇧', code: 'UK/CH',  leadTime: '3–5 Days' },
-  { id: 'us_ca',  label: 'USA & Canada (Air Courier Express)',    costUSD: 60, costEUR: 55, flag: '🇺🇸', code: 'USA/CA', leadTime: '4–6 Days' },
-  { id: 'latam',  label: 'Latin America (DHL Express Courier)',   costUSD: 75, costEUR: 68, flag: '🌎', code: 'LATAM',  leadTime: '5–8 Days' },
-  { id: 'intl',   label: 'Rest of World / International Express', costUSD: 85, costEUR: 78, flag: '🌐', code: 'INTL',   leadTime: '5–9 Days' },
+  { id: 'eu',     label: 'European Union (Cold-Chain Express 2–4 Days)', costUSD: 78,  costEUR: 70,  flag: '🇪🇺', code: 'EU',     leadTime: '2–4 Days' },
+  { id: 'uk_ch',  label: 'UK & Switzerland (Priority Medical Courier)',   costUSD: 95,  costEUR: 85,  flag: '🇬🇧', code: 'UK/CH',  leadTime: '3–5 Days' },
+  { id: 'us_ca',  label: 'USA & Canada (Direct Cold-Chain Courier)',     costUSD: 115, costEUR: 105, flag: '🇺🇸', code: 'USA/CA', leadTime: '4–6 Days' },
+  { id: 'gcc',    label: 'GCC & Middle East (Express Courier UAE/KSA)',   costUSD: 110, costEUR: 100, flag: '🇦🇪', code: 'GCC',    leadTime: '3–5 Days' },
+  { id: 'latam',  label: 'Latin America (DHL Medical Express)',           costUSD: 145, costEUR: 130, flag: '🌎', code: 'LATAM',  leadTime: '5–8 Days' },
+  { id: 'intl',   label: 'Rest of World (Global Priority Express)',       costUSD: 165, costEUR: 150, flag: '🌐', code: 'INTL',   leadTime: '5–9 Days' },
 ];
 
 // ── Administration route keyword map ─────────────────────────────────────────
@@ -72,7 +72,7 @@ export function useSharedCatalogState({
 
   // ── Currency & Shipping ───────────────────────────────────────────────────
   const [currentCurrency,    setCurrentCurrency]    = useState(currency || 'USD');
-  const [selectedShipping,   setSelectedShipping]   = useState('exw');
+  const [selectedShipping,   setSelectedShipping]   = useState('eu');
 
   // ── UI toggles ────────────────────────────────────────────────────────────
   const [expandedProducts,      setExpandedProducts]      = useState(new Set());
@@ -109,6 +109,8 @@ export function useSharedCatalogState({
   const [checkoutForm, setCheckoutForm] = useState({
     clinicName:      catalogMeta?.recipientName || '',
     contactPerson:   '',
+    email:           '',
+    phone:           '',
     vatTaxId:        '',
     deliveryAddress: '',
     cityCountry:     '',
@@ -242,13 +244,13 @@ export function useSharedCatalogState({
   const handleCopyOrderSummary = useCallback(() => {
     if (cartItems.length === 0) return;
     let text = `Official Order Inquiry (${catalogMeta?.catalogId || 'Atlas Catalog'})\n`;
-    text += `Terms: ${selectedShipping === 'exw' ? 'Ex-Works (EXW)' : `DAP / Delivered (${activeShipping.flag} ${activeShipping.label})`} • Currency: ${currentCurrency}\n\n`;
+    text += `Terms: DAP / Delivered (${activeShipping.flag} ${activeShipping.label}) • Currency: ${currentCurrency}\n\n`;
     cartItems.forEach((item, idx) => {
       const itemPrice = item.price * fxMultiplier;
       text += `${idx + 1}. ${item.productName} (${item.dosage}) × ${item.quantity} units = ${currencySymbol}${(item.quantity * itemPrice).toFixed(2)}\n`;
     });
     text += `\n📦 Total Estimated Units: ${cartTotalUnits} units\n`;
-    text += `🏷️ Products Subtotal (EXW): ${currencySymbol}${cartTotalPrice.toFixed(2)} ${currentCurrency}\n`;
+    text += `🏷️ Products Subtotal: ${currencySymbol}${cartTotalPrice.toFixed(2)} ${currentCurrency}\n`;
     if (shippingCost > 0) {
       text += `✈️ Freight (${activeShipping.flag} ${activeShipping.label}): +${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}\n`;
     }
@@ -326,16 +328,16 @@ export function useSharedCatalogState({
     });
   }, []);
 
-  // ── Price tier label ──────────────────────────────────────────────────────
+  // ── Subtle institutional price tier label (no cost or internal margin exposure) ──
   const priceTierLabel = includePrices
     ? ({
-        cost:        'Supplier Master Cost Tier',
-        wholesaler:  'Wholesale / B2B Distribution Tier',
-        wholeseller: 'Wholesale / B2B Distribution Tier', // legacy alias
-        clinic:      'Clinical / Healthcare Provider Tier',
-        retail:      'Retail / MSRP Recommended Tier',
-      }[priceSource] || 'Official Commercial Tier')
-    : 'Clinical Vademecum (Unpriced Portfolio)';
+        cost:        'Institutional Terms (B2B-DIR)',
+        wholesaler:  'B2B Wholesale Portfolio',
+        wholeseller: 'B2B Wholesale Portfolio', // legacy alias
+        clinic:      'Clinical Healthcare Provider Terms',
+        retail:      'Clinical Reference Portfolio (MSRP)',
+      }[priceSource] || 'Verified Institutional Terms')
+    : 'Clinical Vademecum (Reference Portfolio)';
 
   // ── WhatsApp checkout handler ─────────────────────────────────────────────
   const handleConfirmWhatsApp = useCallback(() => {
@@ -365,16 +367,14 @@ export function useSharedCatalogState({
         msg += `${idx + 1}. ${item.productName} (${item.dosage}) × ${item.quantity} units = ${currencySymbol}${(item.quantity * itemUnitPrice).toFixed(2)} ${currentCurrency}${isBulk ? ' (10+ Volume Rate)' : ''}\n`;
       });
       msg += `\n📦 *Total Estimated Units*: ${cartTotalUnits} units\n`;
-      msg += `🏷️ *Products Subtotal (EXW)*: ${currencySymbol}${cartTotalPrice.toFixed(2)} ${currentCurrency}\n`;
+      msg += `🏷️ *Products Subtotal*: ${currencySymbol}${cartTotalPrice.toFixed(2)} ${currentCurrency}\n`;
       if (shippingCost > 0) {
         msg += `✈️ *Freight Destination*: ${activeShipping.flag} ${activeShipping.label} (+${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency})\n`;
-      } else {
-        msg += `🏭 *Dispatch*: Ex-Works Pickup (EXW $0)\n`;
       }
       msg += `💵 *Grand Total Estimate*: ${currencySymbol}${grandTotal.toFixed(2)} ${currentCurrency}\n\n`;
       msg += `Please confirm batch release, pro-forma confirmation, and payment details.\n`;
     } else {
-      msg += `I would like to request availability and discuss an order under ${selectedShipping === 'exw' ? 'Ex-Works (EXW)' : `DAP (${activeShipping.flag} ${activeShipping.label})`} terms.\n`;
+      msg += `I would like to request availability and discuss an order under DAP (${activeShipping.flag} ${activeShipping.label}) terms.\n`;
     }
 
     if (currentUrl) msg += `\n🔗 *Catalog Access Link*:\n${currentUrl}\n`;

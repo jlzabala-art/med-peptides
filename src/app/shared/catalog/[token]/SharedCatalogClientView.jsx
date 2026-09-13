@@ -18,7 +18,8 @@ import {
   Snowflake,
   ClipboardList,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from 'lucide-react';
 import { resolveVariantClinicalImage, resolveProtocolClinicalImage } from '@/utils/clinicalImageResolver';
 import {
@@ -75,7 +76,54 @@ export default function SharedCatalogClientView({
     includePrices,
   });
 
+  // ── Clinic Portal Registration Modal State ───────────────────────────────
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
+  const [registerForm, setRegisterForm] = React.useState({
+    clinicName: catalogMeta?.recipientName || '',
+    contactName: '',
+    email: '',
+    phone: '',
+    country: '',
+    specialty: 'Anti-Aging & Longevity Medicine',
+    licenseNumber: '',
+    estimatedMonthlyVolume: '25 - 100 vials / month',
+    notes: ''
+  });
+  const [isSubmittingRegister, setIsSubmittingRegister] = React.useState(false);
+  const [registerSubmitted, setRegisterSubmitted] = React.useState(false);
+  const [registerApplicationId, setRegisterApplicationId] = React.useState('');
+  const [registerError, setRegisterError] = React.useState('');
 
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    if (!registerForm.clinicName || !registerForm.contactName || !registerForm.email) {
+      setRegisterError('Please complete all required fields (Clinic Name, Lead Practitioner, Professional Email).');
+      return;
+    }
+    setIsSubmittingRegister(true);
+    setRegisterError('');
+    try {
+      const res = await fetch('/api/portal/access-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...registerForm,
+          referralSource: `shared_catalog_${catalogMeta?.catalogId || 'direct'}`
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit application');
+      }
+      setRegisterApplicationId(data.id || '');
+      setRegisterSubmitted(true);
+    } catch (err) {
+      console.error('Registration submission error:', err);
+      setRegisterError(err.message || 'Error submitting application. Please try again.');
+    } finally {
+      setIsSubmittingRegister(false);
+    }
+  };
 
   // ── Catalog PDF download — uses fetch+NDJSON streaming ──
   const handleDownloadPdf = async () => {
@@ -92,8 +140,8 @@ export default function SharedCatalogClientView({
           currency: currentCurrency,
           recipientName: catalogMeta?.recipientName,
           recipientType: catalogMeta?.recipientType,
-          isExWorks: true,
-          incoterm: 'EXW',
+          isExWorks: false,
+          incoterm: 'DAP',
           showKitPrice: true,
           kitSize: 10,
           showDescription: true,
@@ -101,9 +149,7 @@ export default function SharedCatalogClientView({
           showDosage: true,
           showPresentation: true,
           showPurity: true,
-          shippingNote: shippingCost > 0
-            ? `Estimated Freight to ${activeShipping.label}: ${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}`
-            : 'Terms: Ex-Works (EXW) from European Hub — Standard dispatch',
+          shippingNote: `Delivered Priority Cold-Chain Freight (${activeShipping.flag} ${activeShipping.label}): +${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}`,
           supplierFilter: catalogMeta?.supplierId || null,
           category: catalogMeta?.category || null,
           accountManagerName: catalogMeta?.accountManagerName || 'Atlas Commercial Desk',
@@ -273,11 +319,11 @@ export default function SharedCatalogClientView({
       doc.setFontSize(8.5);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(71, 85, 105);
-      doc.text('Subtotal (EXW):', 125, finalY + 8);
+      doc.text('Products Subtotal:', 125, finalY + 8);
       doc.text(`${currencySymbol}${cartTotalPrice.toFixed(2)}`, 190, finalY + 8, { align: 'right' });
 
       doc.text(`Freight (${activeShipping.code}):`, 125, finalY + 16);
-      doc.text(`${shippingCost > 0 ? `+${currencySymbol}${shippingCost.toFixed(2)}` : 'EXW $0.00'}`, 190, finalY + 16, { align: 'right' });
+      doc.text(`+${currencySymbol}${shippingCost.toFixed(2)}`, 190, finalY + 16, { align: 'right' });
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
@@ -300,6 +346,61 @@ export default function SharedCatalogClientView({
     }
   };
 
+  const [isSubmittingOrder, setIsSubmittingOrder] = React.useState(false);
+  const [placedOrderCode, setPlacedOrderCode] = React.useState('');
+  const [orderSubmitError, setOrderSubmitError] = React.useState('');
+
+  const handlePlaceOrderDraft = async () => {
+    if (cartItems.length === 0) return;
+    setIsSubmittingOrder(true);
+    setOrderSubmitError('');
+
+    try {
+      const res = await fetch('/api/orders/create-draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartItems,
+          customerName: checkoutForm.clinicName || catalogMeta?.recipientName || 'Clinical Client',
+          customerEmail: checkoutForm.email || '',
+          customerPhone: checkoutForm.phone || '',
+          customerAddress: checkoutForm.deliveryAddress || '',
+          customerVat: checkoutForm.vatTaxId || '',
+          customerNotes: checkoutForm.deliveryNotes || '',
+          shippingDestination: activeShipping.label,
+          shippingCode: activeShipping.code,
+          shippingCost,
+          subtotal: cartTotalPrice,
+          grandTotal,
+          currency: currentCurrency,
+          currencySymbol,
+          totalUnits: cartTotalUnits,
+          catalogId: catalogMeta?.catalogId,
+          accountManagerName: catalogMeta?.accountManagerName || 'Atlas Commercial Desk',
+          accountManagerEmail: catalogMeta?.accountManagerEmail || '',
+          accountManagerId: catalogMeta?.accountManagerId || '',
+          source: 'shared_catalog'
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to record draft order');
+      }
+
+      setPlacedOrderCode(data.orderCode);
+      // Trigger WhatsApp
+      handleConfirmWhatsApp();
+    } catch (err) {
+      console.error('Error placing draft order:', err);
+      setOrderSubmitError(err.message || 'Error processing order inquiry.');
+      // Fallback: still open WhatsApp
+      handleConfirmWhatsApp();
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+
   const handleOpenWhatsAppCheckout = () => {
     setIsCheckoutModalOpen(true);
   };
@@ -314,17 +415,159 @@ export default function SharedCatalogClientView({
     }}>
       <style>{`
         .catalog-container {
-          max-width: 1120px;
+          max-width: 1160px;
           margin: 0 auto;
           padding: 24px 16px;
         }
-        .header-card {
+        /* Sandboxed Institutional Topbar */
+        .institutional-topbar {
+          background-color: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .topbar-inner {
+          max-width: 1160px;
+          margin: 0 auto;
+          padding: 10px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+        .topbar-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .topbar-brand-title {
+          font-size: 0.95rem;
+          font-weight: 800;
+          color: #003666;
+          letter-spacing: -0.01em;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .portal-verified-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background-color: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          color: #166534;
+          font-size: 0.72rem;
+          font-weight: 700;
+          padding: 2px 8px;
+          borderRadius: 6px;
+        }
+        .topbar-actions {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .topbar-currency-toggle {
+          display: inline-flex;
+          background-color: #f1f5f9;
+          padding: 2px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+        }
+        .currency-btn {
+          padding: 4px 10px;
+          border-radius: 6px;
+          border: none;
+          font-size: 0.76rem;
+          font-weight: 800;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .currency-btn.active {
+          background-color: #003666;
+          color: #ffffff;
+          box-shadow: 0 1px 3px rgba(0, 54, 102, 0.2);
+        }
+        .currency-btn.inactive {
+          background: transparent;
+          color: #64748b;
+        }
+        .topbar-destination {
+          display: inline-flex;
+          align-items: center;
+          background-color: #f8fafc;
+          padding: 3px 10px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          font-size: 0.8rem;
+          color: #334155;
+        }
+        .topbar-cart-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background-color: #eff6ff;
+          border: 1px solid #bfdbfe;
+          color: #1e40af;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 800;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .topbar-cart-pill:hover {
+          background-color: #dbeafe;
+        }
+        .topbar-signin-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background-color: #ffffff;
+          border: 1px solid #cbd5e1;
+          color: #334155;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .topbar-signin-btn:hover {
+          background-color: #f8fafc;
+          border-color: #94a3b8;
+        }
+        .topbar-apply-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
           background: linear-gradient(135deg, #003666 0%, #0284c7 100%);
+          border: none;
+          color: #ffffff;
+          padding: 7px 14px;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 800;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0, 54, 102, 0.25);
+          transition: all 0.15s ease;
+        }
+        .topbar-apply-btn:hover {
+          opacity: 0.95;
+          box-shadow: 0 3px 10px rgba(0, 54, 102, 0.35);
+        }
+        /* Executive Header Card */
+        .header-card {
+          background: linear-gradient(135deg, #00284d 0%, #003666 55%, #0284c7 100%);
           color: #ffffff;
           border-radius: 16px;
           padding: 28px 32px;
           margin-bottom: 24px;
-          box-shadow: 0 8px 24px -4px rgba(0, 54, 102, 0.2);
+          box-shadow: 0 10px 30px -5px rgba(0, 54, 102, 0.25);
         }
         .tab-button {
           padding: 8px 16px;
@@ -357,7 +600,7 @@ export default function SharedCatalogClientView({
           flex-direction: column;
           gap: 10px;
           background: #ffffff;
-          padding: 12px 16px;
+          padding: 14px 18px;
           border-radius: 12px;
           border: 1px solid #e2e8f0;
           margin-bottom: 16px;
@@ -398,8 +641,8 @@ export default function SharedCatalogClientView({
           background: #ffffff;
           border: 1px solid #e2e8f0;
           border-radius: 12px;
-          padding: 16px 18px;
-          margin-bottom: 12px;
+          padding: 18px 20px;
+          margin-bottom: 14px;
           transition: all 0.15s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
@@ -408,16 +651,15 @@ export default function SharedCatalogClientView({
           box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
         .category-chip {
-          padding: 5px 12px;
+          padding: 6px 14px;
           border-radius: 16px;
-          font-size: 0.76rem;
-          font-weight: 600;
+          font-size: 0.78rem;
+          font-weight: 700;
           cursor: pointer;
           border: 1px solid transparent;
           white-space: nowrap;
           flex-shrink: 0;
           transition: all 0.15s ease;
-          text-transform: capitalize;
         }
         .category-chip.active {
           background: #003666;
@@ -435,13 +677,44 @@ export default function SharedCatalogClientView({
           line-height: 1.4;
           max-width: 780px;
         }
+        .add-kit-btn {
+          background-color: #16a34a;
+          color: #ffffff;
+          border: none;
+          border-radius: 6px;
+          padding: 4px 10px;
+          font-size: 0.74rem;
+          font-weight: 800;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          box-shadow: 0 1px 3px rgba(22, 163, 74, 0.25);
+          transition: all 0.15s ease;
+        }
+        .add-kit-btn:hover {
+          background-color: #15803d;
+        }
+        .remove-kit-btn {
+          background-color: #fef2f2;
+          color: #dc2626;
+          border: 1px solid #fecaca;
+          border-radius: 6px;
+          padding: 4px 8px;
+          font-size: 0.72rem;
+          font-weight: 700;
+          cursor: pointer;
+        }
         @media (max-width: 768px) {
           .catalog-container {
-            padding: 12px 10px 96px 10px;
+            padding: 10px 8px 105px 8px;
           }
           .header-card {
             padding: 16px 14px;
             border-radius: 12px;
+          }
+          .header-card h1 {
+            font-size: 1.35rem !important;
           }
           .product-card {
             padding: 12px 10px;
@@ -459,146 +732,282 @@ export default function SharedCatalogClientView({
             display: none !important;
           }
         }
+        @media (max-width: 640px) {
+          .topbar-inner {
+            padding: 8px 10px;
+            gap: 8px;
+          }
+          .topbar-brand {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .topbar-brand-title {
+            font-size: 0.85rem;
+          }
+          .portal-verified-badge {
+            display: none !important;
+          }
+          .topbar-actions {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+          .topbar-destination {
+            padding: 3px 6px;
+            flex-shrink: 0;
+          }
+          .topbar-destination select {
+            max-width: 86px !important;
+            font-size: 0.72rem !important;
+          }
+          .currency-btn {
+            padding: 3px 6px;
+            font-size: 0.72rem;
+          }
+          .topbar-cart-pill {
+            padding: 4px 8px;
+            font-size: 0.74rem;
+            flex-shrink: 0;
+          }
+          .topbar-signin-btn {
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+          }
+          .topbar-apply-btn {
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            flex-shrink: 0;
+            white-space: nowrap;
+          }
+          .variant-card {
+            padding: 10px 8px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+          }
+          .variant-pricing-actions {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          }
+          .single-unit-box {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 8px 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .kit-pack-box {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 8px 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .dock-wrapper {
+            padding: 8px 10px max(12px, env(safe-area-inset-bottom, 12px)) 10px !important;
+          }
+          .dock-content {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .dock-actions {
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: 1fr 2fr !important;
+            gap: 6px !important;
+          }
+          .dock-actions button {
+            justify-content: center !important;
+            min-height: 44px !important;
+          }
+          .cart-drawer-card {
+            max-width: calc(100vw - 20px) !important;
+            margin: 0 10px !important;
+            padding: 14px !important;
+            max-height: 55vh !important;
+          }
+          .checkout-form-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
 
+      {/* Sandboxed Institutional Navigation Topbar */}
+      <header className="institutional-topbar">
+        <div className="topbar-inner">
+          <div className="topbar-brand">
+            <img 
+              src="/atlas-health-logo.png" 
+              alt="Atlas Health" 
+              style={{ height: '24px', width: 'auto', objectFit: 'contain' }}
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+            <div className="topbar-brand-title">
+              <span>ATLAS HEALTH</span>
+              <span style={{ fontWeight: 400, color: '#94a3b8' }}>•</span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#475569' }} className="mobile-hide">Clinical Formulations</span>
+            </div>
+            <span className="portal-verified-badge">
+              <ShieldCheck size={12} />
+              <span>Verified Portal</span>
+            </span>
+          </div>
+
+          <div className="topbar-actions">
+            {/* Destination Selector */}
+            <div className="topbar-destination">
+              <span style={{ marginRight: '5px' }}>✈️</span>
+              <select
+                value={selectedShipping}
+                onChange={(e) => setSelectedShipping(e.target.value)}
+                style={{
+                  background: 'transparent',
+                  color: '#0f172a',
+                  border: 'none',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  outline: 'none',
+                  maxWidth: '170px'
+                }}
+              >
+                {SHIPPING_DESTINATIONS.map(d => (
+                  <option key={d.id} value={d.id}>
+                    {d.flag} {d.code} (+{currencySymbol}{currentCurrency === 'EUR' ? d.costEUR : d.costUSD})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Currency Toggle */}
+            <div className="topbar-currency-toggle">
+              <button
+                type="button"
+                onClick={() => setCurrentCurrency('USD')}
+                className={`currency-btn ${currentCurrency === 'USD' ? 'active' : 'inactive'}`}
+              >
+                $ USD
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentCurrency('EUR')}
+                className={`currency-btn ${currentCurrency === 'EUR' ? 'active' : 'inactive'}`}
+              >
+                € EUR
+              </button>
+            </div>
+
+            {/* Top Cart Pill (if active) */}
+            {cartTotalUnits > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(!isCartOpen)}
+                className="topbar-cart-pill"
+                title="Review Order"
+              >
+                <Package size={14} />
+                <span>{cartTotalUnits} Vials</span>
+                <span>•</span>
+                <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
+              </button>
+            )}
+
+            {/* Provider Sign In & Registration Actions */}
+            <a
+              href="/auth/login"
+              className="topbar-signin-btn"
+              title="Provider Authentication"
+            >
+              <Lock size={13} color="#003666" />
+              <span>Sign In</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
+              className="topbar-apply-btn"
+            >
+              <Building2 size={13} />
+              <span>Apply for Portal Access</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
       <div className="catalog-container">
-        {/* Header Hero */}
+        {/* Executive Header Card */}
         <div className="header-card">
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                <img 
-                  src="/atlas-health-logo.png" 
-                  alt="Atlas Health" 
-                  style={{ 
-                    height: '28px', 
-                    width: 'auto', 
-                    objectFit: 'contain',
-                    filter: 'brightness(0) invert(1)' 
-                  }}
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-                <span style={{ fontSize: '0.825rem', fontWeight: 700, letterSpacing: '0.05em', color: '#e0f2fe', textTransform: 'uppercase' }}>
-                  Atlas Health • Clinical Portfolio
-                </span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
+            <div style={{ flex: '1 1 560px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#93c5fd', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                <Sparkles size={14} />
+                <span>Clinical Portfolio & Therapeutic Vademecum</span>
               </div>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
-                Official Formulations & Product Portfolio
+              <h1 style={{ fontSize: '1.85rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
+                Official Clinical Formulations & Product Portfolio
               </h1>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px', fontSize: '0.825rem', color: '#ffffff' }}>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
-                  📅 Issue Date: {catalogMeta.issuedAt || catalogMeta.iat 
+              <p style={{ margin: '8px 0 0 0', fontSize: '0.875rem', color: '#e0f2fe', lineHeight: 1.45, maxWidth: '640px' }}>
+                Analytical-grade lyophilized peptide vials, multi-dose presentations, and standardized therapeutic protocols. Verified direct delivery terms for authorized healthcare institutions.
+              </p>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px', fontSize: '0.8rem', color: '#ffffff' }}>
+                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
+                  📅 Effective: {catalogMeta.issuedAt || catalogMeta.iat 
                     ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                     : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
+                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
                   🏷️ {priceTierLabel}
                 </span>
-
-                {/* Destination & Freight Selector */}
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(0,0,0,0.25)',
-                  backdropFilter: 'blur(4px)',
-                  padding: '3px 8px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  fontSize: '0.8rem',
-                  color: '#ffffff',
-                  maxWidth: '100%',
-                  boxSizing: 'border-box'
-                }}>
-                  <span style={{ marginRight: '6px', fontWeight: 600, opacity: 0.9, flexShrink: 0 }}>✈️ Destination:</span>
-                  <select
-                    value={selectedShipping}
-                    onChange={(e) => setSelectedShipping(e.target.value)}
-                    style={{
-                      background: 'transparent',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      outline: 'none',
-                      maxWidth: '200px',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {SHIPPING_DESTINATIONS.map(d => (
-                      <option key={d.id} value={d.id} style={{ color: '#0f172a', backgroundColor: '#ffffff' }}>
-                        {d.flag} {d.code}: {d.label} {d.costUSD > 0 ? `(+${currencySymbol}${currentCurrency === 'EUR' ? d.costEUR : d.costUSD})` : '(EXW $0)'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={{ display: 'inline-flex', backgroundColor: 'rgba(0,0,0,0.25)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)' }}>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentCurrency('USD')}
-                    style={{
-                      padding: '3px 10px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      backgroundColor: currentCurrency === 'USD' ? '#ffffff' : 'transparent',
-                      color: currentCurrency === 'USD' ? '#003666' : '#ffffff',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    $ USD
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentCurrency('EUR')}
-                    style={{
-                      padding: '3px 10px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      backgroundColor: currentCurrency === 'EUR' ? '#ffffff' : 'transparent',
-                      color: currentCurrency === 'EUR' ? '#003666' : '#ffffff',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    € EUR
-                  </button>
-                </div>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
+                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
                   {isProtocolCatalog 
                     ? `📋 ${protocols.length} Clinical Protocols`
                     : `📦 ${products.length} Formulations • ${totalVariants} Presentations`}
                 </span>
+                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
+                  ❄️ 2–8°C GDP Cold-Chain Certified
+                </span>
               </div>
             </div>
 
-            <button
-              onClick={handleDownloadPdf}
-              disabled={isGeneratingPdf}
-              style={{
-                backgroundColor: '#ffffff',
-                color: '#003666',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '12px 20px',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                cursor: isGeneratingPdf ? 'wait' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }}
-            >
-              <Download size={16} />
-              <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+              <button
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#003666',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '13px 22px',
+                  fontWeight: 800,
+                  fontSize: '0.9rem',
+                  cursor: isGeneratingPdf ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Download size={17} />
+                <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
+              </button>
+              <span style={{ fontSize: '0.72rem', color: '#bae6fd', paddingLeft: '4px' }}>
+                Complete Vademecum (PDF with COA References)
+              </span>
+            </div>
           </div>
         </div>
 
@@ -619,14 +1028,14 @@ export default function SharedCatalogClientView({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ backgroundColor: '#2563eb', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '0.72rem' }}>
-              EXW
+              DAP
             </span>
             <span style={{ fontWeight: 700, color: '#1e3a8a' }}>
-              Commercial Terms: Ex-Works (EXW)
+              Commercial Terms: Direct Delivery (DAP)
             </span>
             <span style={{ color: '#93c5fd' }}>•</span>
             <span style={{ color: '#3b82f6' }}>
-              All unit and kit prices are quoted Ex-Works in {currentCurrency}. Shipping, customs duties, cold-chain logistics, and local taxes are calculated upon dispatch.
+              All unit and kit prices are quoted in {currentCurrency}. Certified cold-chain courier freight is calculated based on destination at checkout.
             </span>
           </div>
           <div style={{ fontWeight: 700, color: '#1d4ed8', fontSize: '0.78rem' }}>
@@ -689,9 +1098,9 @@ export default function SharedCatalogClientView({
             <button
               onClick={() => setDosageFilter(dosageFilter === 'kits' ? 'all' : 'kits')}
               style={{
-                padding: '5px 12px',
+                padding: '6px 14px',
                 borderRadius: '16px',
-                fontSize: '0.76rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 border: '1px solid',
@@ -709,9 +1118,9 @@ export default function SharedCatalogClientView({
             <button
               onClick={() => setDosageFilter(dosageFilter === 'high_dose' ? 'all' : 'high_dose')}
               style={{
-                padding: '5px 12px',
+                padding: '6px 14px',
                 borderRadius: '16px',
-                fontSize: '0.76rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 border: '1px solid',
@@ -726,15 +1135,27 @@ export default function SharedCatalogClientView({
               💪 High Dose (≥10mg)
             </button>
 
-            {categories.filter(c => c !== 'all').map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`category-chip ${selectedCategory === cat ? 'active' : 'inactive'}`}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.filter(c => c !== 'all').map(cat => {
+              const label = {
+                peptide: 'Peptides',
+                weight_loss: 'Metabolic & GLP-1',
+                longevity: 'Longevity & Bioregulators',
+                supplement: 'Bioregulators & Supplements',
+                nutricosmetics: 'Aesthetic & Skin',
+                clinical_supplies: 'Clinical Supplies',
+                raw_material: 'Raw Materials'
+              }[cat] || cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`category-chip ${selectedCategory === cat ? 'active' : 'inactive'}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -836,10 +1257,10 @@ export default function SharedCatalogClientView({
                           minWidth: '130px'
                         }}>
                           <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Starting From (EXW)
+                            Starting From
                           </div>
                           <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#003666' }}>
-                            {currencySymbol}{startingPrice.toFixed(2)} <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b' }}>{currentCurrency} (EXW)</span>
+                            {currencySymbol}{startingPrice.toFixed(2)} <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#64748b' }}>{currentCurrency}</span>
                           </div>
                         </div>
                       )}
@@ -889,6 +1310,7 @@ export default function SharedCatalogClientView({
                           return (
                             <div
                               key={v.id || vIdx}
+                              className="variant-card"
                               style={{
                                 display: 'flex',
                                 flexWrap: 'wrap',
@@ -930,100 +1352,163 @@ export default function SharedCatalogClientView({
                               </div>
 
                               {includePrices && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-                                  {/* Single Unit Price */}
-                                  <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
-                                      Single Unit (1–9)
+                                <div className="variant-pricing-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                  {/* Single Unit (1-9) Box & Counter */}
+                                  <div className="single-unit-box" style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    backgroundColor: '#f8fafc',
+                                    border: '1px solid #e2e8f0',
+                                    borderRadius: '8px',
+                                    padding: '4px 8px',
+                                  }}>
+                                    <div style={{ textAlign: 'right' }}>
+                                      <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                                        Single (1–9)
+                                      </div>
+                                      <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666' }}>
+                                        {currencySymbol}{displayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{currentCurrency}</span>
+                                      </div>
                                     </div>
-                                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#003666' }}>
-                                      {currencySymbol}{displayPrice.toFixed(2)} <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{currentCurrency}</span>
+                                    <div style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      backgroundColor: '#ffffff',
+                                      borderRadius: '6px',
+                                      border: '1px solid #cbd5e1',
+                                      padding: '1px',
+                                      marginLeft: '2px'
+                                    }}>
+                                      <button
+                                        type="button"
+                                        onClick={() => updateQuantity(v, prod, -1)}
+                                        disabled={!cart[v.id]?.quantity}
+                                        style={{
+                                          width: '26px',
+                                          height: '26px',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          background: 'transparent',
+                                          border: 'none',
+                                          cursor: cart[v.id]?.quantity ? 'pointer' : 'default',
+                                          fontWeight: 800,
+                                          color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1'
+                                        }}
+                                        title="Decrease 1 Unit"
+                                      >
+                                        -
+                                      </button>
+                                      <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 800, fontSize: '0.82rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
+                                        {cart[v.id]?.quantity || 0}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => updateQuantity(v, prod, 1)}
+                                        style={{
+                                          width: '26px',
+                                          height: '26px',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          background: '#003666',
+                                          color: '#ffffff',
+                                          border: 'none',
+                                          borderRadius: '4px',
+                                          cursor: 'pointer',
+                                          fontWeight: 800
+                                        }}
+                                        title="Add 1 Single Unit"
+                                      >
+                                        +
+                                      </button>
                                     </div>
                                   </div>
 
-                                  {/* 10-Unit Pack Volume Price */}
+                                  {/* 10-Unit Pack Volume Price & Direct Kit Action Button */}
                                   {kitDisplayPrice > 0 && (
-                                    <div style={{
-                                      textAlign: 'right',
-                                      borderLeft: '1px solid #e2e8f0',
-                                      paddingLeft: '12px',
+                                    <div className="kit-pack-box" style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '10px',
                                       backgroundColor: '#f0fdf4',
                                       borderRadius: '8px',
-                                      padding: '5px 10px',
+                                      padding: '4px 10px',
                                       border: '1px solid #bbf7d0',
                                     }}>
-                                      <div style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-                                        <span>📦 Pack ×10 {unitPlural}</span>
-                                        {savingsPct > 0 && (
-                                          <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.6rem', padding: '1px 4px', borderRadius: '4px', fontWeight: 800 }}>
-                                            -{savingsPct}%
-                                          </span>
+                                      <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                                          <span>📦 Pack ×10 {unitPlural}</span>
+                                          {savingsPct > 0 && (
+                                            <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.6rem', padding: '1px 4px', borderRadius: '4px', fontWeight: 800 }}>
+                                              -{savingsPct}%
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#15803d', marginTop: '1px' }}>
+                                          {currencySymbol}{kitDisplayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#166534' }}>/ pack</span>
+                                        </div>
+                                        <div style={{ fontSize: '0.68rem', color: '#166534', fontWeight: 600 }}>
+                                          ({currencySymbol}{tier10Rate.toFixed(2)} / unit)
+                                        </div>
+                                      </div>
+
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => updateQuantity(v, prod, 10)}
+                                          className="add-kit-btn"
+                                          title="Add 1 Full Pack of 10 Vials at Discount"
+                                        >
+                                          + Add Kit (10)
+                                        </button>
+
+                                        {(cart[v.id]?.quantity || 0) >= 10 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => updateQuantity(v, prod, -10)}
+                                            className="remove-kit-btn"
+                                            title="Remove 1 Kit (10 Vials)"
+                                          >
+                                            -1 Kit
+                                          </button>
                                         )}
-                                      </div>
-                                      <div style={{ fontSize: '0.96rem', fontWeight: 800, color: '#15803d', marginTop: '1px' }}>
-                                        {currencySymbol}{kitDisplayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#166534' }}>/ pack</span>
-                                      </div>
-                                      <div style={{ fontSize: '0.68rem', color: '#166534', fontWeight: 600 }}>
-                                        ({currencySymbol}{tier10Rate.toFixed(2)} / unit)
                                       </div>
                                     </div>
                                   )}
+                                </div>
+                              )}
 
-                                  {/* Live Quantity / Price Calculator Controls */}
-                                  <div style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    backgroundColor: '#f1f5f9',
-                                    borderRadius: '8px',
-                                    padding: '2px',
-                                    border: '1px solid #cbd5e1',
-                                    marginLeft: '4px'
-                                  }}>
-                                    <button
-                                      type="button"
-                                      onClick={() => updateQuantity(v, prod, -1)}
-                                      disabled={!cart[v.id]?.quantity}
-                                      style={{
-                                        width: '28px',
-                                        height: '28px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        background: cart[v.id]?.quantity ? '#ffffff' : 'transparent',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        cursor: cart[v.id]?.quantity ? 'pointer' : 'default',
-                                        fontWeight: 800,
-                                        color: cart[v.id]?.quantity ? '#0f172a' : '#94a3b8',
-                                        boxShadow: cart[v.id]?.quantity ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
-                                      }}
-                                    >
-                                      -
-                                    </button>
-                                    <span style={{ minWidth: '30px', textAlign: 'center', fontWeight: 800, fontSize: '0.88rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
-                                      {cart[v.id]?.quantity || 0}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => updateQuantity(v, prod, 1)}
-                                      style={{
-                                        width: '28px',
-                                        height: '28px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        background: '#003666',
-                                        color: '#ffffff',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        fontWeight: 800,
-                                        boxShadow: '0 1px 2px rgba(0, 54, 102, 0.2)'
-                                      }}
-                                    >
-                                      +
-                                    </button>
+                              {/* Live Order Status Indicator for this specific presentation */}
+                              {(cart[v.id]?.quantity || 0) > 0 && (
+                                <div style={{
+                                  width: '100%',
+                                  marginTop: '6px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  flexWrap: 'wrap',
+                                  gap: '6px',
+                                  backgroundColor: '#f0fdf4',
+                                  border: '1px solid #bbf7d0',
+                                  borderRadius: '6px',
+                                  padding: '5px 10px',
+                                  fontSize: '0.78rem'
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#166534', fontWeight: 700 }}>
+                                    <CheckCircle2 size={13} color="#16a34a" />
+                                    <span>In Order: <strong>{cart[v.id].quantity} {unitPlural}</strong></span>
+                                    {Math.floor(cart[v.id].quantity / 10) > 0 && (
+                                      <span style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '1px 6px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>
+                                        {Math.floor(cart[v.id].quantity / 10)} Kit{Math.floor(cart[v.id].quantity / 10) > 1 ? 's' : ''} (10 pk)
+                                        {cart[v.id].quantity % 10 > 0 ? ` + ${cart[v.id].quantity % 10} Single Vial(s)` : ''}
+                                      </span>
+                                    )}
                                   </div>
+                                  <span style={{ color: '#15803d', fontWeight: 800 }}>
+                                    Item Subtotal: {currencySymbol}{(cart[v.id].quantity * (cart[v.id].quantity >= 10 && v.tier10UnitPrice ? v.tier10UnitPrice : v.price) * fxMultiplier).toFixed(2)} {currentCurrency}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -1118,7 +1603,7 @@ export default function SharedCatalogClientView({
       </div>
 
       {/* Floating Bottom Action Bar & Order Calculator */}
-      <div style={{
+      <div className="dock-wrapper" style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
@@ -1129,7 +1614,7 @@ export default function SharedCatalogClientView({
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
         zIndex: 50
       }}>
-        <div style={{
+        <div className="dock-content" style={{
           maxWidth: '1120px',
           margin: '0 auto',
           padding: '0 16px',
@@ -1157,7 +1642,7 @@ export default function SharedCatalogClientView({
                 borderRadius: '8px',
               }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#15803d' }}>
-                  🛒 Order Estimate: {cartTotalUnits} units • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency} {selectedShipping === 'exw' ? '(EXW)' : `(Incl. ${activeShipping.flag} Freight)`}
+                  🛒 Order Estimate: {cartTotalUnits} units • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency} (Incl. {activeShipping.flag} Freight)
                 </span>
                 <button
                   type="button"
@@ -1193,7 +1678,7 @@ export default function SharedCatalogClientView({
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="dock-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {cartTotalUnits > 0 && (
               <button
                 onClick={handleCopyOrderSummary}
@@ -1264,7 +1749,7 @@ export default function SharedCatalogClientView({
             width: '100%',
             boxSizing: 'border-box'
           }}>
-            <div style={{
+            <div className="cart-drawer-card" style={{
               pointerEvents: 'auto',
               maxWidth: '440px',
               width: '100%',
@@ -1292,23 +1777,91 @@ export default function SharedCatalogClientView({
                 {cartItems.map(item => {
                   const isBulk = item.quantity >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0;
                   const itemUnitPrice = (isBulk ? item.tier10UnitPrice : item.price) * fxMultiplier;
+                  const kits = Math.floor(item.quantity / 10);
+                  const singles = item.quantity % 10;
                   return (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.825rem' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.productName}</div>
-                        <div style={{ color: '#64748b', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '1px' }}>
-                          <span>{item.dosage} • {currencySymbol}{itemUnitPrice.toFixed(2)}/unit</span>
+                    <div
+                      key={item.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontSize: '0.825rem',
+                        backgroundColor: '#f8fafc',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0'
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>
+                        <div style={{ fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.productName}
+                        </div>
+                        <div style={{ color: '#64748b', fontSize: '0.74rem', display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px', flexWrap: 'wrap' }}>
+                          <span>{item.dosage}</span>
+                          <span style={{ color: '#cbd5e1' }}>•</span>
+                          <span>{currencySymbol}{itemUnitPrice.toFixed(2)}/unit</span>
                           {isBulk && (
                             <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '0.65rem', fontWeight: 800, padding: '1px 5px', borderRadius: '4px' }}>
-                              10+ Rate Applied
+                              10+ Rate
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: 600, marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                          {kits > 0 && (
+                            <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+                              📦 {kits} Kit{kits > 1 ? 's' : ''} (10 pk)
+                            </span>
+                          )}
+                          {kits > 0 && singles > 0 && <span style={{ color: '#94a3b8' }}>+</span>}
+                          {singles > 0 && (
+                            <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+                              🧪 {singles} Single Vial{singles > 1 ? 's' : ''}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontWeight: 800, color: '#003666' }}>
-                          ×{item.quantity} = {currencySymbol}${(item.quantity * itemUnitPrice).toFixed(2)}
-                        </span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {/* Inline qty controls in drawer */}
+                        <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #cbd5e1', padding: '1px' }}>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item, { canonicalName: item.productName }, -1)}
+                            style={{ width: '22px', height: '22px', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', color: '#64748b' }}
+                            title="Decrease 1"
+                          >
+                            -
+                          </button>
+                          <span style={{ minWidth: '22px', textAlign: 'center', fontWeight: 800, fontSize: '0.78rem', color: '#0f172a' }}>
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(item, { canonicalName: item.productName }, 1)}
+                            style={{ width: '22px', height: '22px', border: 'none', background: '#003666', color: '#fff', borderRadius: '4px', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem' }}
+                            title="Add 1"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <div style={{ textAlign: 'right', minWidth: '70px' }}>
+                          <div style={{ fontWeight: 800, color: '#003666', fontSize: '0.85rem' }}>
+                            {currencySymbol}{(item.quantity * itemUnitPrice).toFixed(2)}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item, { canonicalName: item.productName }, -item.quantity)}
+                          style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8', padding: '2px', display: 'flex', alignItems: 'center' }}
+                          title="Remove from Order"
+                          onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
                   );
@@ -1336,7 +1889,7 @@ export default function SharedCatalogClientView({
                 >
                   {SHIPPING_DESTINATIONS.map(d => (
                     <option key={d.id} value={d.id}>
-                      {d.flag} {d.label} {d.costUSD > 0 ? `(+${currencySymbol}${currentCurrency === 'EUR' ? d.costEUR : d.costUSD} ${currentCurrency})` : '(EXW $0)'}
+                      {d.flag} {d.label} (+{currencySymbol}{currentCurrency === 'EUR' ? d.costEUR : d.costUSD} {currentCurrency})
                     </option>
                   ))}
                 </select>
@@ -1344,13 +1897,13 @@ export default function SharedCatalogClientView({
 
               <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b' }}>
-                  <span>Formulations Subtotal (EXW):</span>
+                  <span>Formulations Subtotal:</span>
                   <span style={{ fontWeight: 700, color: '#0f172a' }}>{currencySymbol}{cartTotalPrice.toFixed(2)} {currentCurrency}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#64748b' }}>
                   <span>Freight ({activeShipping.flag} {activeShipping.code}):</span>
-                  <span style={{ fontWeight: 700, color: shippingCost > 0 ? '#0284c7' : '#16a34a' }}>
-                    {shippingCost > 0 ? `+${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}` : 'Self-Pickup ($0)'}
+                  <span style={{ fontWeight: 700, color: '#0284c7' }}>
+                    +{currencySymbol}{shippingCost.toFixed(2)} {currentCurrency}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #cbd5e1' }}>
@@ -1510,7 +2063,7 @@ export default function SharedCatalogClientView({
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
                     Contact Person
@@ -1540,6 +2093,49 @@ export default function SharedCatalogClientView({
                     value={checkoutForm.vatTaxId}
                     onChange={(e) => setCheckoutForm({ ...checkoutForm, vatTaxId: e.target.value })}
                     placeholder="e.g. EU123456789"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem',
+                      color: '#0f172a',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                    Professional Email
+                  </label>
+                  <input
+                    type="email"
+                    value={checkoutForm.email}
+                    onChange={(e) => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
+                    placeholder="practitioner@clinic.com"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem',
+                      color: '#0f172a',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                    Phone / WhatsApp *
+                  </label>
+                  <input
+                    type="tel"
+                    value={checkoutForm.phone}
+                    onChange={(e) => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
+                    placeholder="+1 (555) 000-0000"
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -1597,11 +2193,47 @@ export default function SharedCatalogClientView({
               </div>
             </div>
 
+            {/* Placed Order Notification Banner */}
+            {placedOrderCode && (
+              <div style={{
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                fontSize: '0.825rem',
+                color: '#15803d',
+                marginTop: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <CheckCircle2 size={18} color="#16a34a" />
+                <div>
+                  <strong>Order Draft #{placedOrderCode} registered in portal.</strong> Our operations team and your account manager have been dispatched an immediate alert.
+                </div>
+              </div>
+            )}
+
+            {orderSubmitError && (
+              <div style={{
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                fontSize: '0.825rem',
+                color: '#b91c1c',
+                marginTop: '14px'
+              }}>
+                ⚠️ {orderSubmitError}
+              </div>
+            )}
+
             {/* Modal Actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
               <button
                 type="button"
-                onClick={handleConfirmWhatsApp}
+                onClick={handlePlaceOrderDraft}
+                disabled={isSubmittingOrder}
                 style={{
                   width: '100%',
                   backgroundColor: '#16a34a',
@@ -1611,17 +2243,18 @@ export default function SharedCatalogClientView({
                   padding: '12px 20px',
                   fontWeight: 800,
                   fontSize: '0.95rem',
-                  cursor: 'pointer',
+                  cursor: isSubmittingOrder ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   boxShadow: '0 4px 14px rgba(22, 163, 74, 0.3)',
+                  opacity: isSubmittingOrder ? 0.75 : 1,
                   transition: 'all 0.15s ease'
                 }}
               >
                 <MessageSquare size={18} />
-                <span>Send Order via WhatsApp 🚀</span>
+                <span>{isSubmittingOrder ? 'Registering Draft & Opening WhatsApp...' : 'Submit Order & Send via WhatsApp 🚀'}</span>
               </button>
 
               <button
@@ -1648,6 +2281,440 @@ export default function SharedCatalogClientView({
                 <span>{isGeneratingProForma ? 'Generating PDF...' : '📄 Download Official Pro-Forma (PDF)'}</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Clinic Portal Access Registration Modal ──────────────────────── */}
+      {isRegisterModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isSubmittingRegister) {
+              setIsRegisterModalOpen(false);
+            }
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '540px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #e2e8f0',
+              padding: '28px',
+              position: 'relative'
+            }}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setIsRegisterModalOpen(false)}
+              disabled={isSubmittingRegister}
+              style={{
+                position: 'absolute',
+                top: '18px',
+                right: '18px',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                color: '#64748b',
+                fontSize: '1.2rem',
+                fontWeight: 700,
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+
+            {registerSubmitted ? (
+              <div style={{ textAlign: 'center', padding: '20px 8px' }}>
+                <div
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    backgroundColor: '#dcfce7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    color: '#16a34a'
+                  }}
+                >
+                  <CheckCircle2 size={36} />
+                </div>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
+                  Institutional Application Received
+                </h3>
+                <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  Thank you for submitting your practice details. Your application has been logged under reference:
+                </p>
+                {registerApplicationId && (
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      backgroundColor: '#f1f5f9',
+                      border: '1px dashed #cbd5e1',
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      fontFamily: 'monospace',
+                      fontWeight: 700,
+                      color: '#003666',
+                      fontSize: '0.95rem',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    REF: {registerApplicationId}
+                  </div>
+                )}
+                <p style={{ color: '#64748b', fontSize: '0.825rem', lineHeight: 1.5, margin: '0 0 24px' }}>
+                  Our medical compliance team will review your professional license and practice credentials within 24 business hours. You will receive your dedicated portal sign-in credentials via email.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegisterModalOpen(false);
+                    setRegisterSubmitted(false);
+                  }}
+                  style={{
+                    backgroundColor: '#003666',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '10px 24px',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Return to Shared Catalog
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      backgroundColor: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#0284c7'
+                    }}
+                  >
+                    <ShieldCheck size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                      Institutional Portal Access Application
+                    </h3>
+                    <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                      Certified medical clinics, practitioners & healthcare organizations only.
+                    </span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.45, margin: '8px 0 16px' }}>
+                  Apply for institutional tier pricing, clinical dosing documentation, cold-chain logistics, and automated prescription processing.
+                </p>
+
+                {registerError && (
+                  <div
+                    style={{
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      color: '#b91c1c',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      fontSize: '0.825rem',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    ⚠️ {registerError}
+                  </div>
+                )}
+
+                <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Clinic / Practice Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Longevity Institute"
+                        value={registerForm.clinicName}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, clinicName: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Lead Practitioner / Contact *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Dr. / Director Full Name"
+                        value={registerForm.contactName}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, contactName: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Professional Email *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="practitioner@clinic.com"
+                        value={registerForm.email}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Phone / WhatsApp
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="+1 (555) 000-0000"
+                        value={registerForm.phone}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, phone: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Country of Practice
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. United States, Spain, Mexico"
+                        value={registerForm.country}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, country: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Clinical Specialty
+                      </label>
+                      <select
+                        value={registerForm.specialty}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, specialty: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem',
+                          backgroundColor: '#ffffff'
+                        }}
+                      >
+                        <option value="Anti-Aging & Longevity Medicine">Anti-Aging & Longevity Medicine</option>
+                        <option value="Endocrinology & Metabolic Health">Endocrinology & Metabolic Health</option>
+                        <option value="Sports Medicine & Orthopedics">Sports Medicine & Orthopedics</option>
+                        <option value="Functional & Integrative Medicine">Functional & Integrative Medicine</option>
+                        <option value="Medical Aesthetic & Dermatology">Medical Aesthetic & Dermatology</option>
+                        <option value="Clinical Compounding & Pharmacy">Clinical Compounding & Pharmacy</option>
+                        <option value="Biomedical Research Institute">Biomedical Research Institute</option>
+                        <option value="Other Clinical Specialty">Other Clinical Specialty</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Medical License / NPI / Reg. ID
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. MD-12345678 (Optional)"
+                        value={registerForm.licenseNumber}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, licenseNumber: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Est. Monthly Peptide Volume
+                      </label>
+                      <select
+                        value={registerForm.estimatedMonthlyVolume}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, estimatedMonthlyVolume: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '8px',
+                          fontSize: '0.85rem',
+                          backgroundColor: '#ffffff'
+                        }}
+                      >
+                        <option value="10 - 25 vials / month">10 - 25 vials / month</option>
+                        <option value="25 - 100 vials / month">25 - 100 vials / month (Standard Practice)</option>
+                        <option value="100 - 500 vials / month">100 - 500 vials / month (Multi-Doctor Clinic)</option>
+                        <option value="500+ vials / month">500+ vials / month (Institutional Supply)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      Additional Clinical Requirements or Specific Formulations
+                    </label>
+                    <textarea
+                      rows={2}
+                      placeholder="Specify any target formulations, recurring protocol requirements or compound purity needs..."
+                      value={registerForm.notes}
+                      onChange={(e) => setRegisterForm(prev => ({ ...prev, notes: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setIsRegisterModalOpen(false)}
+                      disabled={isSubmittingRegister}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        color: '#475569',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        padding: '9px 18px',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingRegister}
+                      style={{
+                        backgroundColor: '#003666',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px 22px',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: isSubmittingRegister ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        opacity: isSubmittingRegister ? 0.7 : 1
+                      }}
+                    >
+                      <ShieldCheck size={16} />
+                      <span>{isSubmittingRegister ? 'Submitting Application...' : 'Submit Portal Application'}</span>
+                    </button>
+                  </div>
+                </form>
+
+                <div
+                  style={{
+                    marginTop: '16px',
+                    paddingTop: '12px',
+                    borderTop: '1px solid #f1f5f9',
+                    fontSize: '0.72rem',
+                    color: '#94a3b8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <Lock size={12} color="#94a3b8" />
+                  <span>
+                    Strictly confidential. Medical credentials and license data are reviewed exclusively by our compliance division.
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

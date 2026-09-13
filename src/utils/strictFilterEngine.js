@@ -121,6 +121,20 @@ export function isVariantMatchingFilter(variant = {}, product = {}, filters = {}
     if (!vCat.includes(normTargetCat) && !normTargetCat.includes(vCat)) {
       return false;
     }
+
+    // When explicitly filtering for peptides, strictly exclude Bulk APIs, raw materials, and clinical supplies
+    if (normTargetCat === 'peptide' && !filters.includeSupplies) {
+      const pNameLower = String(p.canonicalName || p.name || '').toLowerCase();
+      const vNameLower = String(v.name || '').toLowerCase();
+      const isRaw = v.type === 'raw_material' || v.type === 'api_raw_material' ||
+                    p.primaryType === 'raw_material' || p.category === 'raw_material' ||
+                    pNameLower.includes('(bulk api)') || vNameLower.includes('bulk api');
+      const isSupply = pNameLower.includes('bacteriostatic') || pNameLower.includes('syringe') ||
+                       vNameLower.includes('bacteriostatic') || vNameLower.includes('syringe');
+      if (isRaw || isSupply) {
+        return false;
+      }
+    }
   }
 
   // 4. ── PRESENTATION / FORMAT FILTER ───────────────────────────────────────

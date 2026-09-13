@@ -340,6 +340,8 @@ export async function POST(request) {
     productTypeFilter = 'all',
     // catalogueFilter: scope document to a specific source catalogue / brand (e.g. 'RegenPept')
     catalogueFilter = null,
+    // categoryFilter: scope document to a specific category (e.g. 'peptide')
+    categoryFilter = body.categoryFilter || body.category || null,
   } = body;
 
   const anonymousSupplierMap = new Map();
@@ -457,7 +459,7 @@ export async function POST(request) {
             if (filtered.length > 0) rows = filtered;
           }
           rows.forEach(v => {
-            if (!isVariantMatchingFilter(v, product, { supplierFilter, productTypeFilter, onlyInStock, catalogueFilter })) {
+            if (!isVariantMatchingFilter(v, product, { supplierFilter, productTypeFilter, onlyInStock, catalogueFilter, categoryFilter })) {
               return;
             }
             const resolved = resolveVariantPrice(v, { tier: canonicalTier });

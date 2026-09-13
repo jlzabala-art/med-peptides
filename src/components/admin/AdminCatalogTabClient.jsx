@@ -470,7 +470,9 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     const timeoutId = setTimeout(() => controller.abort(), 35_000);
 
     try {
-      const productIds = (initialProducts || []).map(p => p.id).filter(Boolean);
+      const productIds = extraParams.productIds !== undefined
+        ? extraParams.productIds
+        : (initialProducts || []).map(p => p.id).filter(Boolean);
 
       const res = await fetch('/api/generate-pdf', {
         method: 'POST',
@@ -604,8 +606,18 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     onExportCSV:         handleExportCSV,
     onImportPriceList:   handleImportPriceList,
     onNewProduct:        handleNewProduct,
-    onLotuslandPDF:      () => handleSupplierPDF('lotusland', 'Lotusland / RegenPept', 'lotusland-pdf', { catalogueFilter: 'RegenPept' }),
-    onLotuslandWeb:      () => handleSupplierWebShare('supplier-lotusland', 'Lotusland / RegenPept', 'lotusland-web', { catalogueFilter: 'RegenPept' }),
+    onLotuslandPDF:      () => handleSupplierPDF('lotusland', 'Lotusland / RegenPept', 'lotusland-pdf', {
+      catalogueFilter: 'RegenPept',
+      categoryFilter: 'peptide',
+      productTypeFilter: 'finished_product',
+      productIds: []
+    }),
+    onLotuslandWeb:      () => handleSupplierWebShare('supplier-lotusland', 'Lotusland / RegenPept', 'lotusland-web', {
+      catalogueFilter: 'RegenPept',
+      category: 'peptide',
+      categoryFilter: 'peptide',
+      productTypeFilter: 'finished_product'
+    }),
     onLarimedicalPDF:    () => handleSupplierPDF('supplier-larimedical', 'LARIMEDICAL (Sterilia)', 'larimedical-pdf', { currency: 'EUR' }),
     onLarimedicalWeb:    () => handleSupplierWebShare('supplier-larimedical', 'LARIMEDICAL (Sterilia)', 'larimedical-web', { currency: 'EUR' }),
     onEuropeptidesPDF:   () => handleSupplierPDF('europeptides', 'EuroPeptides', 'europeptides-pdf'),

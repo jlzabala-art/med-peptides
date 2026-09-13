@@ -16,6 +16,7 @@ import ProfessionalWelcomeOverlay from '../ui/ProfessionalWelcomeOverlay';
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
 const GlobalDrawerManager = dynamic(() => import('../shared/GlobalDrawerManager'), { ssr: false });
 const PushNotificationPrompt = dynamic(() => import('../ui/PushNotificationPrompt'), { ssr: false });
+const IncomingOrderAcknowledgmentModal = dynamic(() => import('../shared/IncomingOrderAcknowledgmentModal'), { ssr: false });
 
 /**
  * PanelShell
@@ -97,6 +98,7 @@ export default function PanelShell({
         <IOSPushBanner />
         <PushNotificationPrompt />
         <ProfessionalWelcomeOverlay />
+        <IncomingOrderAcknowledgmentModal />
         <PortalLayout
           sidebarNavGroups={sidebarNavGroups}
           sidebarPinnedItems={sidebarPinnedItems}
