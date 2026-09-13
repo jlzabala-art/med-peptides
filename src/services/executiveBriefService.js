@@ -1,6 +1,4 @@
-import { dbAdmin } from '../lib/firebaseAdmin';
-import { db } from '../firebase';
-import { collection, query, where, getDocs, limit, Timestamp } from 'firebase/firestore';
+import { dbAdmin } from '../lib/firebaseAdmin.js';
 
 /**
  * Safely parse date from various Firestore formats (Timestamp, ISO string, epoch ms)
@@ -95,11 +93,14 @@ export async function getExecutiveBriefMetrics({ role = 'admin', timeRange = 'to
         if (seenQuoteIds.has(doc.id)) return;
         seenQuoteIds.add(doc.id);
         const data = doc.data();
-        const createdAt = parseDocDate(data.createdAt || data.date || data.timestamp);
+        const createdAt = parseDocDate(data.createdAt || data.date || data.timestamp || data.generatedAt);
         if (createdAt && createdAt >= startDate) {
           metrics.quotationsCount += 1;
-          const val = Number(data.totalAmount || data.total || data.estimatedTotal || data.amount || 0);
-          totalQuotationAmount += val;
+          const rawVal = data.grandTotal ?? data.totalAmount ?? data.total ?? data.estimatedTotal ?? data.subtotal ?? data.amount ?? 0;
+          const val = typeof rawVal === 'number' ? rawVal : parseFloat(String(rawVal).replace(/[^0-9.-]/g, '')) || 0;
+          if (!isNaN(val) && val > 0) {
+            totalQuotationAmount += val;
+          }
         }
       });
       metrics.avgQuotationValue = metrics.quotationsCount > 0 
@@ -113,10 +114,17 @@ export async function getExecutiveBriefMetrics({ role = 'admin', timeRange = 'to
         const createdAt = parseDocDate(data.createdAt || data.date || data.timestamp);
 
         if (createdAt && createdAt >= startDate) {
-          const val = Number(data.total || data.amount || data.totalValue || 0);
-          metrics.revenue += val;
+          const rawVal = data.total ?? data.price ?? data.totalAmount ?? data.amount ?? data.totalValue ?? data.subtotal ?? 0;
+          const val = typeof rawVal === 'number' ? rawVal : parseFloat(String(rawVal).replace(/[^0-9.-]/g, '')) || 0;
+          if (!isNaN(val) && val > 0) {
+            metrics.revenue += val;
+          }
           metrics.periodOrders += 1;
-          if (data.type === 'wholesale' || data.isWholesale) {
+          const isWholesale = data.type === 'wholesale' || 
+            data.isWholesale || 
+            data.pricingRole === 'wholesale' || 
+            data.pricingTier === 'wholesale';
+          if (isWholesale && !isNaN(val) && val > 0) {
             metrics.wholesaleSales += val;
           }
         }
@@ -188,7 +196,11 @@ export async function getExecutiveBriefMetrics({ role = 'admin', timeRange = 'to
         }
         const createdAt = parseDocDate(data.createdAt || data.date || data.orderDate);
         if (createdAt && createdAt >= startDate) {
-          metrics.procurementSpend += Number(data.totalAmount || data.total || data.amount || 0);
+          const rawSpend = data.totalAmount ?? data.total ?? data.amount ?? 0;
+          const spendVal = typeof rawSpend === 'number' ? rawSpend : parseFloat(String(rawSpend).replace(/[^0-9.-]/g, '')) || 0;
+          if (!isNaN(spendVal) && spendVal > 0) {
+            metrics.procurementSpend += spendVal;
+          }
         }
       });
 

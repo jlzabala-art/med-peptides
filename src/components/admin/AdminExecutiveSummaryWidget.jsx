@@ -34,17 +34,27 @@ const TIME_RANGES = [
   { id: 'year', label: 'This Year' },
 ];
 
+const DOMAIN_FILTERS = [
+  { id: 'all', label: 'All Domains (5 Tiers)' },
+  { id: 'products', label: '🏷️ Products (Pharmacy)' },
+  { id: 'sales', label: '💼 Sales (Finance)' },
+  { id: 'procurement', label: '📦 Procurement (Supplier)' },
+  { id: 'clinical', label: '🩺 Clinical (Doctor)' },
+  { id: 'wholesale', label: '🌐 Wholesaler (Admin)' },
+];
+
 export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = {} }) {
   const router = useRouter();
   const { effectiveRole } = useRoleAccess();
   const [timeRange, setTimeRange] = useState('today');
+  const [selectedDomain, setSelectedDomain] = useState('all');
   const [serverMetrics, setServerMetrics] = useState(initialMetrics);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
 
   const activeRole = effectiveRole || 'admin';
   const isAdmin = activeRole === 'admin';
 
-  // Fetch server-calculated metrics when role or timeRange changes
+  // Fetch server-calculated metrics whenever activeRole or timeRange changes (100% server execution)
   useEffect(() => {
     let isMounted = true;
     async function loadMetrics() {
@@ -66,12 +76,18 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
 
   const metrics = { ...initialMetrics, ...serverMetrics };
 
-  // ── Master Definitions of all 4-KPI Rows ────────────────────────────────────
+  // ── Master Definitions of all 5 Domains (Strictly 4 KPIs each, Canonical Role Colors) ──
 
   const PRODUCTS_ROW = {
     id: 'products',
-    title: '🏷️ Products & Catalog',
-    tag: 'Inventory & Compounds',
+    title: 'Products & Catalog',
+    roleBadge: 'Role: Pharmacist / Catalog',
+    roleBadgeClass: styles.badgeProducts,
+    accentClass: styles.bayProducts,
+    icon: Box,
+    iconClass: styles.iconPharmacist,
+    summaryText: `${metrics.publishedProducts || 0} Compounds`,
+    tag: 'Inventory & Formulas',
     kpis: [
       {
         id: 'publishedProducts',
@@ -79,7 +95,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.publishedProducts || 0} Compounds`,
         icon: Box,
         route: '/admin/products?status=published',
-        styleClass: styles.inventoryIcon,
+        styleClass: styles.iconPharmacist,
       },
       {
         id: 'totalVariants',
@@ -87,7 +103,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.totalVariants || 0} Formats`,
         icon: Layers,
         route: '/admin/products',
-        styleClass: styles.rfqIcon,
+        styleClass: styles.iconPharmacist,
       },
       {
         id: 'lowStockAlerts',
@@ -95,7 +111,8 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.lowStockAlerts || 0} Alerts`,
         icon: AlertTriangle,
         route: '/admin/products?filter=low_stock',
-        styleClass: styles.shipmentIcon,
+        styleClass: styles.alertIcon,
+        isAlert: Number(metrics.lowStockAlerts) > 0,
       },
       {
         id: 'verifiedMonographs',
@@ -103,14 +120,20 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.verifiedMonographs || 0} Verified`,
         icon: FileCheck,
         route: '/admin/knowledge-base',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconPharmacist,
       },
     ],
   };
 
   const SALES_ROW = {
     id: 'sales',
-    title: '💼 Sales & Commercial Performance',
+    title: 'Sales & Commercial Performance',
+    roleBadge: 'Role: Finance & Sales',
+    roleBadgeClass: styles.badgeSales,
+    accentClass: styles.baySales,
+    icon: TrendingUp,
+    iconClass: styles.iconFinance,
+    summaryText: `${metrics.quotationsCount || 0} Quotes Issued`,
     tag: `Period: ${TIME_RANGES.find(t => t.id === timeRange)?.label}`,
     kpis: [
       {
@@ -119,7 +142,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.quotationsCount || 0} Quotes`,
         icon: FileText,
         route: '/admin/quotations',
-        styleClass: styles.rfqIcon,
+        styleClass: styles.iconFinance,
       },
       {
         id: 'revenue',
@@ -127,7 +150,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: formatAEDtoDual(metrics.revenue || 0),
         icon: TrendingUp,
         route: '/admin/revenue?filter=real',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconFinance,
       },
       {
         id: 'periodOrders',
@@ -135,7 +158,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.periodOrders || 0} Orders`,
         icon: ShoppingCart,
         route: '/admin/orders',
-        styleClass: styles.inventoryIcon,
+        styleClass: styles.iconFinance,
       },
       {
         id: 'avgQuotationValue',
@@ -143,14 +166,20 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: formatAEDtoDual(metrics.avgQuotationValue || 0),
         icon: DollarSign,
         route: '/admin/quotations',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconFinance,
       },
     ],
   };
 
   const PROCUREMENT_ROW = {
     id: 'procurement',
-    title: '📦 Procurement & Sourcing',
+    title: 'Procurement & Sourcing',
+    roleBadge: 'Role: Supplier / Commercial',
+    roleBadgeClass: styles.badgeProcurement,
+    accentClass: styles.bayProcurement,
+    icon: Briefcase,
+    iconClass: styles.iconSupplier,
+    summaryText: `${metrics.openRFQs || 0} Active RFQs`,
     tag: 'Supply Chain & Manufacturing',
     kpis: [
       {
@@ -159,7 +188,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.openRFQs || 0} RFQs`,
         icon: FileText,
         route: '/admin/procurement',
-        styleClass: styles.rfqIcon,
+        styleClass: styles.iconSupplier,
       },
       {
         id: 'pendingPOs',
@@ -167,7 +196,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.pendingPOs || 0} POs`,
         icon: Briefcase,
         route: '/admin/purchase-orders',
-        styleClass: styles.shipmentIcon,
+        styleClass: styles.iconSupplier,
       },
       {
         id: 'procurementSpend',
@@ -175,7 +204,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: formatAEDtoDual(metrics.procurementSpend || 0),
         icon: DollarSign,
         route: '/admin/procurement',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconSupplier,
       },
       {
         id: 'activeSuppliers',
@@ -183,14 +212,20 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.activeSuppliers || 0} Suppliers`,
         icon: Building2,
         route: '/admin/suppliers',
-        styleClass: styles.inventoryIcon,
+        styleClass: styles.iconSupplier,
       },
     ],
   };
 
   const CLINICAL_ROW = {
     id: 'clinical',
-    title: '🩺 Clinical Operations & Medical Direction',
+    title: 'Clinical Operations & Medical Direction',
+    roleBadge: 'Role: Doctor / Clinical',
+    roleBadgeClass: styles.badgeClinical,
+    accentClass: styles.bayClinical,
+    icon: Activity,
+    iconClass: styles.iconDoctor,
+    summaryText: `${metrics.activePatients || 0} Enrolled Patients`,
     tag: 'Doctor & Patient Supervision',
     kpis: [
       {
@@ -199,7 +234,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.activePatients || 0} Patients`,
         icon: Users,
         route: '/admin/patients?status=active',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconDoctor,
       },
       {
         id: 'pendingPrescriptions',
@@ -207,7 +242,8 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.pendingPrescriptions || 0} Pending`,
         icon: FileText,
         route: '/admin/prescriptions?status=pending',
-        styleClass: styles.rfqIcon,
+        styleClass: styles.alertIcon,
+        isAlert: Number(metrics.pendingPrescriptions) > 0,
       },
       {
         id: 'activeProtocols',
@@ -215,22 +251,28 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.activeProtocols || 0} Protocols`,
         icon: Activity,
         route: '/admin/protocols?status=active',
-        styleClass: styles.shipmentIcon,
+        styleClass: styles.iconDoctor,
       },
       {
         id: 'dueFollowUps',
         title: 'Patient Follow-Ups Due',
         value: `${metrics.dueFollowUps || 0} Due`,
         icon: AlertTriangle,
-        route: '/admin/patients?filter=followup_due',
-        styleClass: styles.inventoryIcon,
+        route: '/admin/follow-up',
+        styleClass: styles.iconDoctor,
       },
     ],
   };
 
   const WHOLESALE_ROW = {
     id: 'wholesale',
-    title: '🌐 Wholesaler & B2B Distribution',
+    title: 'Wholesaler & B2B Distribution',
+    roleBadge: 'Role: Admin & Wholesale',
+    roleBadgeClass: styles.badgeWholesale,
+    accentClass: styles.bayWholesale,
+    icon: Truck,
+    iconClass: styles.iconAdmin,
+    summaryText: `${metrics.activeClinics || 0} Partner Clinics`,
     tag: 'Institutional Network',
     kpis: [
       {
@@ -239,7 +281,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: formatAEDtoDual(metrics.wholesaleSales || 0),
         icon: DollarSign,
         route: '/admin/orders?type=wholesale',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconAdmin,
       },
       {
         id: 'openOrders',
@@ -247,7 +289,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.openOrders || 0} Orders`,
         icon: Truck,
         route: '/admin/orders?status=processing',
-        styleClass: styles.shipmentIcon,
+        styleClass: styles.iconAdmin,
       },
       {
         id: 'pendingApprovals',
@@ -255,7 +297,8 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.pendingApprovals || 0} Approvals`,
         icon: AlertTriangle,
         route: '/admin/approvals?status=pending',
-        styleClass: styles.inventoryIcon,
+        styleClass: styles.alertIcon,
+        isAlert: Number(metrics.pendingApprovals) > 0,
       },
       {
         id: 'activeClinics',
@@ -263,22 +306,28 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         value: `${metrics.activeClinics || 0} Clinics`,
         icon: Building2,
         route: '/admin/clinics',
-        styleClass: styles.revenueIcon,
+        styleClass: styles.iconAdmin,
       },
     ],
   };
 
-  // ── Determine which rows to display according to user role ──────────────────
-  const activeSections = isAdmin
-    ? [PRODUCTS_ROW, SALES_ROW, PROCUREMENT_ROW, CLINICAL_ROW, WHOLESALE_ROW]
+  const allSections = [PRODUCTS_ROW, SALES_ROW, PROCUREMENT_ROW, CLINICAL_ROW, WHOLESALE_ROW];
+
+  // Filter sections by role and by domain tab
+  const roleSections = isAdmin
+    ? allSections
     : ['doctor', 'medical_director'].includes(activeRole)
     ? [CLINICAL_ROW]
     : ['wholesaler', 'supplier'].includes(activeRole)
     ? [WHOLESALE_ROW, PROCUREMENT_ROW]
     : [CLINICAL_ROW];
 
+  const visibleSections = selectedDomain === 'all'
+    ? roleSections
+    : roleSections.filter(s => s.id === selectedDomain);
+
   const getBriefTitle = () => {
-    if (['doctor', 'medical_director'].includes(activeRole)) return 'Clinical AI Brief';
+    if (['doctor', 'medical_director'].includes(activeRole)) return 'Clinical AI Command Brief';
     if (activeRole === 'patient') return 'Personal Health AI Brief';
     if (['wholesaler', 'supplier'].includes(activeRole)) return 'Wholesale Sourcing AI Brief';
     return 'Executive AI Command Brief';
@@ -349,40 +398,74 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         </div>
       </div>
 
-      {/* Render 4-KPI Rows with Section Headings */}
-      {activeSections.map((section) => (
-        <div key={section.id} className={styles.rowSection}>
-          <div className={styles.rowHeader}>
-            <span className={styles.rowTitle}>{section.title}</span>
-            <span className={styles.rowTag}>{section.tag}</span>
-          </div>
-          <div className={styles.kpiRowGrid}>
-            {section.kpis.map((kpi) => {
-              const IconComponent = kpi.icon;
-              return (
-                <div 
-                  key={kpi.id} 
-                  className={styles.card} 
-                  onClick={() => router.push(kpi.route)}
-                >
-                  <div className={`${styles.iconContainer} ${kpi.styleClass}`}>
-                    <IconComponent size={18} />
-                  </div>
-                  <div className={styles.cardContent}>
-                    <div className={styles.cardHeader}>
-                      <span className={styles.cardValue}>{kpi.value}</span>
-                      <ArrowUpRight size={14} className={styles.arrowIcon} />
-                    </div>
-                    <span className={styles.cardLabel}>{kpi.title}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      {/* Domain Quick Filter Bar (Laptop & Mobile Touch-Friendly) */}
+      {isAdmin && (
+        <div className={styles.domainFilterBar}>
+          {DOMAIN_FILTERS.map((df) => (
+            <button
+              key={df.id}
+              type="button"
+              onClick={() => {
+                triggerHaptic('select');
+                setSelectedDomain(df.id);
+              }}
+              className={`${styles.domainFilterBtn} ${selectedDomain === df.id ? styles.domainFilterBtnActive : ''}`}
+            >
+              {df.label}
+            </button>
+          ))}
         </div>
-      ))}
+      )}
 
-      <div className={styles.footer} style={{ marginTop: '0.5rem' }}>
+      {/* Render Domain Bays (Each domain has distinct canonical role accent color and 4-card grid) */}
+      {visibleSections.map((section) => {
+        const BayIcon = section.icon;
+        return (
+          <div key={section.id} className={`${styles.domainBay} ${section.accentClass}`}>
+            <div className={styles.bayHeader}>
+              <div className={styles.bayTitleGroup}>
+                <div className={`${styles.bayIconBadge} ${section.iconClass}`}>
+                  <BayIcon size={16} />
+                </div>
+                <h4 className={styles.bayTitle}>{section.title}</h4>
+                <span className={`${styles.bayRoleBadge} ${section.roleBadgeClass}`}>
+                  {section.roleBadge}
+                </span>
+                <span className={styles.baySummaryPill} style={{ backgroundColor: 'rgba(0,0,0,0.04)', color: 'var(--text-secondary)' }}>
+                  {section.summaryText}
+                </span>
+              </div>
+              <span className={styles.bayMetaTag}>{section.tag}</span>
+            </div>
+
+            <div className={styles.kpiRowGrid}>
+              {section.kpis.map((kpi) => {
+                const IconComponent = kpi.icon;
+                return (
+                  <div 
+                    key={kpi.id} 
+                    className={`${styles.card} ${kpi.isAlert ? styles.cardAlert : ''}`} 
+                    onClick={() => router.push(kpi.route)}
+                  >
+                    <div className={`${styles.iconContainer} ${kpi.styleClass}`}>
+                      <IconComponent size={18} />
+                    </div>
+                    <div className={styles.cardContent}>
+                      <div className={styles.cardHeader}>
+                        <span className={styles.cardValue}>{kpi.value}</span>
+                        <ArrowUpRight size={14} className={styles.arrowIcon} />
+                      </div>
+                      <span className={styles.cardLabel}>{kpi.title}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className={styles.footer} style={{ marginTop: '0.25rem' }}>
         <div className={styles.actions}>
           <button
             className={`${styles.actionBtn} ${styles.askAtlasBtn}`}
