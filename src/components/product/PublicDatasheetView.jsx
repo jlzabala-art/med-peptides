@@ -28,6 +28,7 @@ import {
 } from '@/lib/icons';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
+import toast from 'react-hot-toast';
 import ProductTraceabilityCard from './ProductTraceabilityCard';
 import InteractiveReconstitutionGuide from './InteractiveReconstitutionGuide';
 import ShareProductMonographDrawer from '../admin/catalog/drawers/ShareProductMonographDrawer';
@@ -63,8 +64,20 @@ export default function PublicDatasheetView({
   const [svgError, setSvgError] = useState(false);
   const [dynamicTranslations, setDynamicTranslations] = useState({});
   const [isTranslating, setIsTranslating] = useState(false);
-  const [, startTransition] = useTransition();
+  const [copiedLabelType, setCopiedLabelType] = useState(null);
   const requestedLangs = useRef(new Set());
+
+  const handleCopyLabelUrl = (type) => {
+    if (typeof window === 'undefined') return;
+    const url = `${window.location.origin}/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=${type}`;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(url);
+      setCopiedLabelType(type);
+      triggerHaptic('success');
+      toast.success(type === 'shipping' ? 'Enlace de etiqueta de envío copiado ✓' : 'Enlace de etiqueta clínica copiado ✓');
+      setTimeout(() => setCopiedLabelType(null), 2500);
+    }
+  };
 
   // Strictly default to English unless explicitly requested via initialLang param
   useEffect(() => {
@@ -887,6 +900,18 @@ export default function PublicDatasheetView({
                   >
                     <FileText size={14} /> Sheet (A4 ×8)
                   </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyLabelUrl('shipping')}
+                    className="pds-btn pds-btn-copy-label"
+                    title="Copy direct shareable link to this shipping label"
+                  >
+                    {copiedLabelType === 'shipping' ? (
+                      <><Check size={13} style={{ color: '#16a34a' }} /> <span>Copied Link</span></>
+                    ) : (
+                      <><Copy size={13} /> <span>Copy Link</span></>
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -921,6 +946,18 @@ export default function PublicDatasheetView({
                   >
                     <FileText size={14} /> Sheet (A4 ×8)
                   </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyLabelUrl('client')}
+                    className="pds-btn pds-btn-copy-label"
+                    title="Copy direct shareable link to this client vial label"
+                  >
+                    {copiedLabelType === 'client' ? (
+                      <><Check size={13} style={{ color: '#16a34a' }} /> <span>Copied Link</span></>
+                    ) : (
+                      <><Copy size={13} /> <span>Copy Link</span></>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

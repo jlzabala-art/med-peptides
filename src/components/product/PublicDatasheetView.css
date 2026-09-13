@@ -856,14 +856,88 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .pds-label-type-buttons .pds-btn {
   flex: 1;
-  min-width: 130px;
+  min-width: 120px;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.76rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 7px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  min-height: 34px;
+}
+
+/* Shipping Primary Button (Deep Blue) */
+.pds-label-type-buttons .pds-btn-barcode {
+  background: #003666 !important;
+  color: #ffffff !important;
+  border: 1px solid #002244 !important;
+  box-shadow: 0 1px 2px rgba(0, 34, 68, 0.12);
+}
+
+.pds-label-type-buttons .pds-btn-barcode:hover {
+  background: #002244 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 34, 68, 0.22);
+}
+
+/* Client Vial Primary Button (Teal Medical) */
+.pds-label-type-buttons .pds-btn-pdf {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+  border: 1px solid #0f766e !important;
+  box-shadow: 0 1px 2px rgba(13, 148, 136, 0.15);
+}
+
+.pds-label-type-buttons .pds-btn-pdf:hover {
+  background: #0f766e !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+}
+
+/* Sheet A4 Button (Neutral White with Crisp Border) */
+.pds-label-type-buttons .pds-btn-ghost {
+  background: #ffffff !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 600;
+}
+
+.pds-label-type-buttons .pds-btn-ghost:hover {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+/* Non-Intrusive Copy Link Button */
+.pds-label-type-buttons .pds-btn-copy-label {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px dashed #cbd5e1;
+  font-weight: 650;
+  font-size: 0.74rem;
   padding: 0.45rem 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+  min-height: 34px;
+}
+
+.pds-label-type-buttons .pds-btn-copy-label:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #003666;
 }
 
 .pds-vial-label-preview-wrap {

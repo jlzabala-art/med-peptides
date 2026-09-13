@@ -127,18 +127,22 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: BRAND_COLOR,
   });
 
-  page.drawText('CLINICAL VIAL APPLICATION LABEL', {
+  const leftLabelTitle = 'CLINICAL VIAL APPLICATION';
+  const rightLabelTag = 'RESEARCH STANDARD';
+  const rightLabelTagW = fontB.widthOfTextAtSize(rightLabelTag, 5.2);
+
+  page.drawText(leftLabelTitle, {
     x: originX + 8,
-    y: originY + heightPt - 12,
-    size: 7.2,
+    y: originY + heightPt - 11.5,
+    size: 6.8,
     font: fontB,
     color: rgb(1, 1, 1),
   });
 
-  page.drawText('PHARMACEUTICAL RESEARCH STANDARD', {
-    x: originX + widthPt - 150,
-    y: originY + heightPt - 12,
-    size: 5.5,
+  page.drawText(rightLabelTag, {
+    x: originX + widthPt - rightLabelTagW - 8,
+    y: originY + heightPt - 11.5,
+    size: 5.2,
     font: fontB,
     color: rgb(0.85, 0.92, 1),
   });
@@ -263,6 +267,8 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     color: rgb(1, 1, 1),
   });
 
+  const trackingCode = toSafePdfText(product.sku || product.lotNumber || `RP-LOT-${cleanSlug.toUpperCase()}-2026`);
+
   if (widthPt >= 200) {
     // Landscape 38x90 layout
     // Top banner
@@ -274,23 +280,27 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       color: BRAND_COLOR,
     });
 
-    page.drawText('TRACEABILITY & BATCH VERIFICATION', {
+    const leftShipTitle = 'DISPATCH & TRACEABILITY';
+    const rightShipTag = 'PARCEL STANDARD';
+    const rightShipTagW = fontB.widthOfTextAtSize(rightShipTag, 5.2);
+
+    page.drawText(leftShipTitle, {
       x: originX + 8,
       y: originY + heightPt - 11,
-      size: 7.2,
+      size: 6.8,
       font: fontB,
       color: rgb(1, 1, 1),
     });
 
-    page.drawText('DISPATCH & SHIPPING STANDARD', {
-      x: originX + widthPt - 135,
+    page.drawText(rightShipTag, {
+      x: originX + widthPt - rightShipTagW - 8,
       y: originY + heightPt - 11,
-      size: 5.5,
+      size: 5.2,
       font: fontB,
       color: rgb(0.85, 0.92, 1),
     });
 
-    // Generate high-resolution QR code pointing directly to monograph
+    // Generate high-resolution QR code pointing directly to verification URL
     const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
       margin: 1,
       width: 320,
@@ -300,9 +310,9 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     const qrImage = await pdfDoc.embedPng(qrPngBuffer);
 
     // Large QR Code on the Left: scans instantly from camera
-    const qrSize = heightPt - 25; // ~83 pt
+    const qrSize = heightPt - 28; // ~80 pt
     const qrX = originX + 8;
-    const qrY = originY + 6;
+    const qrY = originY + 8;
 
     page.drawImage(qrImage, {
       x: qrX,
@@ -311,60 +321,51 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    // Right side: Product Name, Direct URL & 1D Barcode
+    // Right side: STRICTLY Code, 1D Barcode and Logistics Specs (No drug description)
     const rightX = qrX + qrSize + 12;
     const rightWidth = originX + widthPt - rightX - 8;
 
-    let curY = originY + heightPt - 31;
-    page.drawText(trunc(name, 22), {
+    let curY = originY + heightPt - 30;
+
+    // 1. Primary Tracking / SKU Code
+    page.drawText(trackingCode, {
       x: rightX,
       y: curY,
-      size: 13,
+      size: 10,
       font: fontB,
       color: DARK_GRAY,
     });
 
-    curY -= 12;
-    if (dosage) {
-      page.drawText(trunc(`${dosage} - Clinical Monograph Standard`, 30), {
-        x: rightX,
-        y: curY,
-        size: 7.5,
-        font: fontB,
-        color: TEAL_COLOR,
-      });
-      curY -= 10;
-    }
-
-    page.drawText('Scan QR with phone camera for official monograph:', {
+    curY -= 11;
+    page.drawText('DISCREET LOGISTICS PARCEL - COLD CHAIN VERIFIED', {
       x: rightX,
       y: curY,
-      size: 5.8,
-      font,
+      size: 6.0,
+      font: fontB,
       color: MUTED,
     });
 
-    curY -= 9;
-    page.drawText('ANALYTICAL RELEASE & COA PASSPORT', {
-      x: rightX,
-      y: curY,
-      size: 6.2,
-      font: fontB,
-      color: BRAND_COLOR,
-    });
+    curY -= 12;
+    // 2. 1D Barcode
+    const barcodeHeight = 16;
+    draw1DBarcode(page, rightX, curY - barcodeHeight, rightWidth, barcodeHeight, trackingCode);
 
-    curY -= 14;
-    // 1D Barcode
-    const barcodeHeight = 13;
-    draw1DBarcode(page, rightX, curY, rightWidth, barcodeHeight, `LOT-${cleanSlug}`);
-
-    curY -= 8;
-    page.drawText(`* LOT-${toSafePdfText(cleanSlug).toUpperCase()}-2026 *`, {
+    curY -= (barcodeHeight + 7);
+    page.drawText(`* ${trackingCode} *`, {
       x: rightX + 8,
       y: curY,
-      size: 5.5,
+      size: 5.8,
       font,
       color: DARK_GRAY,
+    });
+
+    curY -= 9;
+    page.drawText('OUTBOUND FREIGHT SPECIFICATION - DIRECT TRANSIT', {
+      x: rightX,
+      y: curY,
+      size: 5.2,
+      font,
+      color: MUTED,
     });
   } else {
     // Square 50x50 layout
@@ -376,7 +377,7 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       color: BRAND_COLOR,
     });
 
-    page.drawText('BATCH TRACEABILITY', {
+    page.drawText('PARCEL TRACEABILITY', {
       x: originX + 6,
       y: originY + heightPt - 10,
       size: 6.5,
@@ -384,10 +385,10 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       color: rgb(1, 1, 1),
     });
 
-    page.drawText(trunc(name, 16), {
+    page.drawText(trunc(trackingCode, 20), {
       x: originX + 6,
-      y: originY + heightPt - 25,
-      size: 8.5,
+      y: originY + heightPt - 24,
+      size: 7.5,
       font: fontB,
       color: DARK_GRAY,
     });
@@ -408,8 +409,8 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    page.drawText('SCAN FOR MONOGRAPH', {
-      x: originX + (widthPt - 80) / 2,
+    page.drawText('SCAN FOR VERIFICATION', {
+      x: originX + (widthPt - 86) / 2,
       y: originY + 6,
       size: 5.5,
       font: fontB,

@@ -129,78 +129,244 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
     }
   };
 
+  const [activeTab, setActiveTab] = useState('pricing'); // 'pricing' | 'zoho' | 'audit' | 'yield'
+  const isZohoLinked = Boolean(variant.zohoItemId);
+
   return (
     <div style={{
-      padding: '1rem 1.25rem',
-      backgroundColor: '#f8fafc',
-      borderTop: '1px solid #e2e8f0',
+      padding: '0.875rem 1rem',
+      backgroundColor: '#f1f5f9',
+      borderTop: '2px solid #e2e8f0',
       borderRadius: '0 0 8px 8px',
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.875rem'
+      gap: '0.75rem'
     }}>
-      {/* 1. Supplier Pricing & Commercial Agreement Card */}
-      <SupplierAgreementCard
-        variant={variant}
-        selectedProduct={selectedProduct}
-        onUpdateVariantField={onUpdateVariantField}
-      />
-
-      {/* 2. Bulk API Yield & Dilution Calculator (For Raw Materials / Bulk APIs) */}
-      {isRawMaterial && (
-        <BulkApiYieldCalculator
-          variant={variant}
-          selectedProduct={selectedProduct}
-        />
-      )}
-
-      {/* 3. Zoho Books & Inventory Reconciler Card */}
-      <ZohoReconcilerCard
-        variant={variant}
-        product={selectedProduct}
-        onUpdateVariantField={onUpdateVariantField}
-      />
-
-      {/* 2. Audit Trail Header bar */}
+      {/* Sleek Sub-Navigation Tab Bar */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: '0.5rem',
-        paddingBottom: '0.625rem',
-        borderBottom: '1px solid #e2e8f0'
+        paddingBottom: '0.5rem',
+        borderBottom: '1px solid #cbd5e1'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px',
-            borderRadius: '6px',
-            backgroundColor: '#eff6ff',
-            color: '#003666'
+        {/* Variant summary pill */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#0f172a' }}>
+            {variant.dosage || variant.dose || 'Variant'} • {variant.format || variant.presentation || 'Standard'}
+          </span>
+          <code style={{
+            fontSize: '0.70rem',
+            backgroundColor: '#ffffff',
+            padding: '1px 6px',
+            borderRadius: '4px',
+            border: '1px solid #cbd5e1',
+            color: '#475569',
+            fontFamily: 'monospace'
           }}>
-            <History size={14} />
-          </div>
-          <div>
-            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-              Variant Modification Timeline & Audit Trail
-            </span>
-            <span style={{ fontSize: '0.72rem', color: '#64748b', marginLeft: '0.5rem' }}>
-              ({timeline.length} {timeline.length === 1 ? 'event' : 'events'} recorded)
-            </span>
-          </div>
-        </div>
-
-        <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontWeight: 600, color: '#334155' }}>SKU / Ref:</span>
-          <code style={{ backgroundColor: '#ffffff', padding: '1px 5px', borderRadius: '4px', border: '1px solid #e2e8f0', color: '#475569' }}>
             {variant.id || 'variant-ref'}
           </code>
         </div>
+
+        {/* Tab Controls */}
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          backgroundColor: '#e2e8f0',
+          padding: '3px',
+          borderRadius: '8px',
+          gap: '2px',
+          maxWidth: '100%',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch'
+        }}>
+          {/* Commercial Tab */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('pricing')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 10px',
+              fontSize: '0.74rem',
+              fontWeight: activeTab === 'pricing' ? 750 : 550,
+              color: activeTab === 'pricing' ? '#0f172a' : '#475569',
+              backgroundColor: activeTab === 'pricing' ? '#ffffff' : 'transparent',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'pricing' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap',
+              minHeight: '28px'
+            }}
+          >
+            <DollarSign size={13} style={{ color: activeTab === 'pricing' ? '#059669' : '#64748b' }} />
+            <span>Commercial Rates</span>
+          </button>
+
+          {/* Zoho ERP Tab */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('zoho')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 10px',
+              fontSize: '0.74rem',
+              fontWeight: activeTab === 'zoho' ? 750 : 550,
+              color: activeTab === 'zoho' ? '#0f172a' : '#475569',
+              backgroundColor: activeTab === 'zoho' ? '#ffffff' : 'transparent',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'zoho' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap',
+              minHeight: '28px'
+            }}
+          >
+            <Zap size={13} style={{ color: activeTab === 'zoho' ? '#6366f1' : '#64748b' }} />
+            <span>Zoho ERP</span>
+            <span style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: isZohoLinked ? '#16a34a' : '#d97706',
+              display: 'inline-block'
+            }} />
+          </button>
+
+          {/* History Tab */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('audit')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 10px',
+              fontSize: '0.74rem',
+              fontWeight: activeTab === 'audit' ? 750 : 550,
+              color: activeTab === 'audit' ? '#0f172a' : '#475569',
+              backgroundColor: activeTab === 'audit' ? '#ffffff' : 'transparent',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              boxShadow: activeTab === 'audit' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap',
+              minHeight: '28px'
+            }}
+          >
+            <History size={13} style={{ color: activeTab === 'audit' ? '#0284c7' : '#64748b' }} />
+            <span>Audit Trail</span>
+            {timeline.length > 0 && (
+              <span style={{
+                fontSize: '0.65rem',
+                backgroundColor: activeTab === 'audit' ? '#eff6ff' : '#cbd5e1',
+                color: activeTab === 'audit' ? '#0369a1' : '#475569',
+                padding: '0 5px',
+                borderRadius: '9999px',
+                fontWeight: 700
+              }}>
+                {timeline.length}
+              </span>
+            )}
+          </button>
+
+          {/* Yield Tab (Raw Material only) */}
+          {isRawMaterial && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('yield')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 10px',
+                fontSize: '0.74rem',
+                fontWeight: activeTab === 'yield' ? 750 : 550,
+                color: activeTab === 'yield' ? '#0f172a' : '#475569',
+                backgroundColor: activeTab === 'yield' ? '#ffffff' : 'transparent',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                boxShadow: activeTab === 'yield' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+                minHeight: '28px'
+              }}
+            >
+              <FlaskConical size={13} style={{ color: activeTab === 'yield' ? '#7c3aed' : '#64748b' }} />
+              <span>Bulk API Yield</span>
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Tab Content Area */}
+      {activeTab === 'pricing' && (
+        <SupplierAgreementCard
+          variant={variant}
+          selectedProduct={selectedProduct}
+          onUpdateVariantField={onUpdateVariantField}
+          onNavigateTab={setActiveTab}
+        />
+      )}
+
+      {activeTab === 'zoho' && (
+        <ZohoReconcilerCard
+          variant={variant}
+          product={selectedProduct}
+          onUpdateVariantField={onUpdateVariantField}
+        />
+      )}
+
+      {activeTab === 'yield' && isRawMaterial && (
+        <BulkApiYieldCalculator
+          variant={variant}
+          selectedProduct={selectedProduct}
+        />
+      )}
+
+      {activeTab === 'audit' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Audit Trail Header */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+            paddingBottom: '0.4rem',
+            borderBottom: '1px solid #cbd5e1'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '24px',
+                height: '24px',
+                borderRadius: '6px',
+                backgroundColor: '#eff6ff',
+                color: '#003666'
+              }}>
+                <History size={14} />
+              </div>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                Variant Modification Timeline & Audit Trail
+              </span>
+              <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                ({timeline.length} {timeline.length === 1 ? 'event' : 'events'} recorded)
+              </span>
+            </div>
+          </div>
 
       {/* Timeline Stream */}
       {timeline.length === 0 ? (
@@ -440,6 +606,8 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               </div>
             );
           })}
+        </div>
+      )}
         </div>
       )}
 

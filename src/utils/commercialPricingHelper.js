@@ -36,40 +36,61 @@ export function resolveChannelPrice(variant, channel = 'cost', priceView = 'unit
   const suppPricing = variant.supplierPricing || {};
   const pricingObj = variant.pricing || {};
 
-  if (priceView === 'kit') {
-    rawCost = variant.cost_10 ?? 
+  // Default Unit / Base Gram
+  const unitPrice = variant.unit_price ?? 
+    variant.cost_tiers?.cost_1 ?? 
+    variant.cost_1 ?? 
+    pricingObj.master?.perUnit ?? 
+    pricingObj.masterPrice?.base ?? 
+    pricingObj.supplierCost ?? 
+    suppPricing.netCost ?? 
+    variant.supplierCost ?? 
+    variant.supplierUnitCostUSD ?? 
+    variant.priceUSD ?? 
+    variant.price ?? 
+    variant.perVialPriceUSD ?? 
+    null;
+
+  if (priceView === 'kit' || priceView === 'tier_10') {
+    const rawCost10 = variant.cost_10 ?? 
       variant.cost_tiers?.cost_10 ?? 
       pricingObj.master?.kit ?? 
       pricingObj.cost_tiers?.cost_10 ?? 
       variant.kitCost ?? 
       variant.perKitPriceUSD ?? 
-      (suppPricing.netCost ? Number(suppPricing.netCost) * (variant.moq || 5) : null) ?? 
       null;
+
+    // Check if rawCost10 is an explicit wholesale kit price (and greater than single unit price)
+    if (rawCost10 != null && !isNaN(rawCost10) && Number(rawCost10) > Number(unitPrice || 0)) {
+      rawCost = Number(rawCost10);
+    } else if (unitPrice != null && !isNaN(unitPrice) && Number(unitPrice) > 0) {
+      // For all single-unit suppliers (Europeptides, Magenta, POD Poland, NP Labs, etc.), 10-pack = unit_price * 10
+      rawCost = Number((Number(unitPrice) * 10).toFixed(2));
+    } else {
+      rawCost = rawCost10 != null ? Number(rawCost10) : null;
+    }
   } else if (priceView === 'tier_50') {
-    rawCost = variant.cost_50 ?? 
+    const rawCost50 = variant.cost_50 ?? 
       variant.cost_tiers?.cost_50 ?? 
       pricingObj.cost_tiers?.cost_50 ?? 
-      (variant.cost_10 ? Number((variant.cost_10 * 0.95).toFixed(2)) : null);
+      null;
+    if (rawCost50 != null && !isNaN(rawCost50) && Number(rawCost50) > 0) {
+      rawCost = Number(rawCost50);
+    } else if (unitPrice != null && !isNaN(unitPrice) && Number(unitPrice) > 0) {
+      rawCost = Number((Number(unitPrice) * 50 * 0.95).toFixed(2));
+    }
   } else if (priceView === 'tier_100') {
-    rawCost = variant.cost_100 ?? 
+    const rawCost100 = variant.cost_100 ?? 
       variant.cost_tiers?.cost_100 ?? 
       pricingObj.cost_tiers?.cost_100 ?? 
-      (variant.cost_10 ? Number((variant.cost_10 * 0.90).toFixed(2)) : null);
-  } else {
-    // Default Unit / Base Gram
-    rawCost = variant.unit_price ?? 
-      variant.cost_tiers?.cost_1 ?? 
-      variant.cost_1 ?? 
-      pricingObj.master?.perUnit ?? 
-      pricingObj.masterPrice?.base ?? 
-      pricingObj.supplierCost ?? 
-      suppPricing.netCost ?? 
-      variant.supplierCost ?? 
-      variant.supplierUnitCostUSD ?? 
-      variant.priceUSD ?? 
-      variant.price ?? 
-      variant.perVialPriceUSD ?? 
       null;
+    if (rawCost100 != null && !isNaN(rawCost100) && Number(rawCost100) > 0) {
+      rawCost = Number(rawCost100);
+    } else if (unitPrice != null && !isNaN(unitPrice) && Number(unitPrice) > 0) {
+      rawCost = Number((Number(unitPrice) * 100 * 0.90).toFixed(2));
+    }
+  } else {
+    rawCost = unitPrice;
   }
 
   if (channel === 'cost') {

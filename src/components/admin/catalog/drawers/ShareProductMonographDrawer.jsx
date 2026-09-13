@@ -85,27 +85,50 @@ export default function ShareProductMonographDrawer({
     }
   }, [isOpen, initialSupplierKey, initialFormatId, initialStrengthId, suppliersList]);
 
+  // Helper to normalize supplier strings for robust matching
+  const cleanSupplierKey = (val) => String(val || '').toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
+
+  // Filter product variants strictly matching selectedSupplierId
+  const supplierVariants = useMemo(() => {
+    if (!product?.variants || !Array.isArray(product.variants)) return [];
+    if (selectedSupplierId === 'all') return product.variants;
+    
+    const targetClean = cleanSupplierKey(selectedSupplierId);
+    return product.variants.filter(v => {
+      const vSupp = cleanSupplierKey(v.supplierId || v.supplier || v.supplierName || '');
+      return vSupp === targetClean || vSupp.includes(targetClean) || targetClean.includes(vSupp);
+    });
+  }, [product?.variants, selectedSupplierId]);
+
   // Available formats based on selected supplier
   const availableFormats = useMemo(() => {
     if (selectedSupplierId === 'all') {
       return hierarchy.formats || [];
     }
-    const supp = suppliersList.find(s => s.id === selectedSupplierId);
-    if (!supp) return hierarchy.formats || [];
-    const suppFormatIds = Array.isArray(supp.formats) ? supp.formats : [];
-    return (hierarchy.formats || []).filter(f => suppFormatIds.includes(f.id));
-  }, [selectedSupplierId, suppliersList, hierarchy.formats]);
+    const suppFormatIds = new Set();
+    supplierVariants.forEach(v => {
+      const rawFormat = v.formatId || v.format || v.presentation || 'vial';
+      suppFormatIds.add(rawFormat.toLowerCase().replace(/\s+/g, '_'));
+    });
+    return (hierarchy.formats || []).filter(f => suppFormatIds.has(f.id));
+  }, [selectedSupplierId, supplierVariants, hierarchy.formats]);
 
-  // Available strengths based on selected format
+  // Available strengths based on BOTH selected supplier AND selected format
   const availableStrengths = useMemo(() => {
-    if (selectedFormatId === 'all') {
-      return hierarchy.strengths || [];
-    }
-    const fmt = (hierarchy.formats || []).find(f => f.id === selectedFormatId);
-    if (!fmt) return hierarchy.strengths || [];
-    const fmtStrengthIds = Array.isArray(fmt.strengths) ? fmt.strengths : [];
-    return (hierarchy.strengths || []).filter(s => fmtStrengthIds.length === 0 || fmtStrengthIds.includes(s.id));
-  }, [selectedFormatId, hierarchy.formats, hierarchy.strengths]);
+    const validStrengthIds = new Set();
+    supplierVariants.forEach(v => {
+      const rawFormat = v.formatId || v.format || v.presentation || 'vial';
+      const formatId = rawFormat.toLowerCase().replace(/\s+/g, '_');
+      if (selectedFormatId !== 'all' && formatId !== selectedFormatId) {
+        return;
+      }
+      const rawStrength = v.strengthId || v.dosage || v.dose || v.strength || v.name || 'unknown_strength';
+      const strengthId = rawStrength.toString().toLowerCase().replace(/\s+/g, '_');
+      validStrengthIds.add(strengthId);
+    });
+
+    return (hierarchy.strengths || []).filter(s => validStrengthIds.has(s.id));
+  }, [supplierVariants, selectedFormatId, hierarchy.strengths]);
 
   // If format is no longer available under the selected supplier, reset it to 'all'
   useEffect(() => {

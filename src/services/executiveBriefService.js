@@ -39,10 +39,24 @@ function getStartDateForTimeRange(timeRange = 'today') {
   return start;
 }
 
+// In-memory cache for fast multi-tenant executive brief retrieval (60s TTL)
+const briefCache = new Map();
+const CACHE_TTL_MS = 60 * 1000;
+
+export function invalidateExecutiveBriefCache() {
+  briefCache.clear();
+}
+
 /**
  * Server-calculated Executive Brief Metrics aggregated by role and timeRange
  */
 export async function getExecutiveBriefMetrics({ role = 'admin', timeRange = 'today', userId = null }) {
+  const cacheKey = `${role}_${timeRange}_${userId || 'all'}`;
+  const cached = briefCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+    return cached.data;
+  }
+
   const startDate = getStartDateForTimeRange(timeRange);
 
   const metrics = {
@@ -295,10 +309,13 @@ export async function getExecutiveBriefMetrics({ role = 'admin', timeRange = 'to
     console.warn('[ExecutiveBriefService] Server calculation warning:', error?.message || error);
   }
 
-  return {
+  const result = {
     timeRange,
     role,
     metrics,
     calculatedAt: new Date().toISOString(),
   };
+
+  briefCache.set(cacheKey, { timestamp: Date.now(), data: result });
+  return result;
 }

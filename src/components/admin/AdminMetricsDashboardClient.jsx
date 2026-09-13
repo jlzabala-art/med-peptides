@@ -206,7 +206,13 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
     const interval = setInterval(() => {
       setDbLatency(`${Math.floor(Math.random() * 20) + 12}ms`);
     }, 15000);
-    return () => clearInterval(interval);
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   // Fetch metrics dynamically from real Firestore collections
@@ -625,20 +631,12 @@ export default function AdminMetricsDashboardClient({ wholesalerId = null, initi
         <DashboardEngine role="wholesaler" dataContext={{ userProfile, uid: userProfile?.uid }} />
       ) : (
         <>
-          {/* ── 0. AI EXECUTIVE SUMMARY WIDGET ────────────────────────────── */}
-          {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-              {[...Array(4)].map((_, i) => (
-                <div key={i} style={{ height: '110px', borderRadius: '16px', background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-              ))}
-            </div>
-          ) : (
-            <AdminExecutiveSummaryWidget 
-              metrics={metrics} 
-              visibleKPIs={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? ROLE_PRESETS.Clinical.visibleKPIs : visibleKPIs}
-              currentRolePreset={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Clinical' : currentRolePreset}
-            />
-          )}
+          {/* ── 0. AI EXECUTIVE SUMMARY WIDGET (Instant Render + Server Calculated) ── */}
+          <AdminExecutiveSummaryWidget 
+            metrics={metrics} 
+            visibleKPIs={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? ROLE_PRESETS.Clinical.visibleKPIs : visibleKPIs}
+            currentRolePreset={(isMedicalDirectorRole || currentRolePreset === 'Clinical') ? 'Clinical' : currentRolePreset}
+          />
 
           {/* ── MAIN WORKSPACE CONTENT GRID (2 COLUMNS) ────────────────────── */}
           <div className={styles.workspaceGrid}>

@@ -174,6 +174,7 @@ export default function OrdersTable({
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterSource, setFilterSource] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [targetId, setTargetId] = useState(null);
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [confirmModal, setConfirmModal] = useState(null); // order object
@@ -193,9 +194,12 @@ export default function OrdersTable({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const p = new URLSearchParams(window.location.search);
-      const targetId = p.get('orderId');
-      if (targetId && !searchTerm) {
-        setSearchTerm(targetId);
+      const tid = p.get('orderId');
+      if (tid) {
+        setTargetId(tid);
+        if (!searchTerm) {
+          setSearchTerm(tid);
+        }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -670,7 +674,7 @@ export default function OrdersTable({
           <DataTable
             columns={columns}
             data={paginatedOrders}
-            keyField={(o) => o.id}
+            keyField="id"
             expandableRender={renderOrderDetails}
             selectable={!readOnly}
             selectedIds={selectedOrderIds}
