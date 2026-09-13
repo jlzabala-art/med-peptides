@@ -376,13 +376,16 @@ export default function PublicDatasheetView({
     const p = new URLSearchParams();
     const supp = (activeSupplierId && activeSupplierId !== 'all') ? activeSupplierId : (product?.isSingleSupplierLocked ? product?.supplierId : null);
     if (supp) p.set('supplier', supp);
+    if (supplierName && !supplierName.includes('All Certified Laboratories')) {
+      p.set('supplierName', supplierName);
+    }
     const targetDose = selectedStrength?.name || selectedStrengthId;
     if (targetDose && targetDose !== 'all') p.set('dose', targetDose);
     if (activeFormatId && activeFormatId !== 'all') p.set('presentation', activeFormatId);
     if (lang && lang !== 'en') p.set('lang', lang);
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [activeSupplierId, product, selectedStrength, selectedStrengthId, activeFormatId, lang]);
+  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang]);
 
   // ⚡ Non-blocking Access Telemetry Beacon for Tracked Client Links
   useEffect(() => {

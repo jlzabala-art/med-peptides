@@ -121,6 +121,13 @@ export function useVariantMutations({ selectedProduct, setSelectedProduct, displ
         [`pricing.${channelName}.marginPct`]: newMarginPct,
         [`pricing.${channelName}.currency`]: 'USD'
       };
+    } else if (field === 'vialCode' || field === 'batchCode') {
+      const cleanVal = String(value || '').trim().toUpperCase();
+      dbPayload = {
+        vialCode: cleanVal,
+        batchCode: cleanVal,
+        batchNumber: cleanVal
+      };
     } else {
       dbPayload[field] = value;
     }
@@ -184,8 +191,10 @@ export function useVariantMutations({ selectedProduct, setSelectedProduct, displ
 
       // Parent document denormalized fields are automatically synced by updateVariant -> syncVariantDenorm
       
-      const labelUpdated = field === 'supplierId' ? 'Supplier' : (field.includes('cost') || field.includes('price') ? 'Price' : field);
-      notifier.success(`${labelUpdated} auto-calculated & saved across all currencies`);
+      const labelUpdated = (field === 'vialCode' || field === 'batchCode')
+        ? 'Vial / Batch Code'
+        : (field === 'supplierId' ? 'Supplier' : (field.includes('cost') || field.includes('price') ? 'Price' : field));
+      notifier.success(`${labelUpdated} updated & saved`);
       
       // 4. Auto-refresh caches
       queryClient.invalidateQueries({ queryKey: ['catalog-summary'], exact: false });

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import QRCode from 'qrcode';
 import { adminDb } from '../../../../lib/firebaseAdmin';
+import { getCanonicalSupplierName } from '../../../../data/productConstants';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,19 +174,32 @@ function getDiscreetProductCode(product, customCode, uniqueSeq) {
 /**
  * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR, Batch & Discreet Code)
  */
-async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl, batchNumber, discreetCode, targetVariant) {
+/**
+ * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR, Batch & Discreet Code)
+ */
+async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, targetShareUrl, batchNumber, discreetCode, targetVariant, targetSupplierName, targetDose) {
   const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
   const category = toSafePdfText(product.category || product.therapeutic_category || 'Research');
   const casNumber = toSafePdfText(product.casNumber || product.cas || '');
   
-  // Pick active variant info (defaulting to Lotusland)
+  // Pick active variant info or requested overrides
   const variant = targetVariant || product.variants?.[0] || {};
-  const dosage = toSafePdfText(variant.dosage || variant.dose || product.dosage || '10 mg');
-  const purity = toSafePdfText(variant.purity || variant.grade || '>= 98.5% (HPLC)');
+  const dosage = toSafePdfText(targetDose || variant.dosage || variant.dose || product.dosage || '10 mg');
+  const supplierDisplay = toSafePdfText(targetSupplierName || variant.supplierName || variant.supplier || product.supplierName || 'Lotusland Limited');
+  const purity = toSafePdfText(variant.purity || variant.grade || '>= 99.0% (HPLC)');
   const formatType = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
-  const storage = toSafePdfText(variant.storageInstructions || 'Store at 2C - 8C');
+  const storage = toSafePdfText(variant.storageInstructions || 'Store Desiccated at -20C');
 
-  // Generate QR Code PNG Buffer pointing to public page
+  // Dynamic reconstitution concentration calculation based on selected dosage
+  const mgMatch = String(dosage).match(/(\d+(?:\.\d+)?)\s*mg/i);
+  let concText = '2.0 mL BAC / Sterile Water';
+  if (mgMatch) {
+    const mg = parseFloat(mgMatch[1]);
+    const conc = (mg / 2.0).toFixed(1);
+    concText = `2.0 mL BAC Water (Resulting Conc: ${conc} mg/mL)`;
+  }
+
+  // Generate QR Code PNG Buffer pointing to specific variant/dose/supplier public page
   const cleanSlug = toSafePdfText(product.slug || product.id || 'product').toLowerCase();
   const publicUrl = targetShareUrl || `${BASE_URL}/p/${cleanSlug}`;
   const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
@@ -217,8 +231,9 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   });
 
   const leftLabelTitle = 'CLINICAL VIAL APPLICATION';
-  const rightLabelTag = 'RESEARCH STANDARD';
-  const rightLabelTagW = fontB.widthOfTextAtSize(rightLabelTag, 5.2);
+  const rightLabelTag = `${supplierDisplay.toUpperCase()} QUALIFIED`;
+  const cleanTag = trunc(rightLabelTag, 28);
+  const rightLabelTagW = fontB.widthOfTextAtSize(cleanTag, 5.2);
 
   page.drawText(leftLabelTitle, {
     x: originX + 8,
@@ -228,7 +243,7 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: rgb(1, 1, 1),
   });
 
-  page.drawText(rightLabelTag, {
+  page.drawText(cleanTag, {
     x: originX + widthPt - rightLabelTagW - 8,
     y: originY + heightPt - 10,
     size: 5.2,
@@ -251,8 +266,8 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
 
   currentY -= 11;
 
-  // Dosage & Purity Highlight
-  const dosePurityText = `${dosage}  -  Purity: ${purity}`;
+  // Dosage & Purity Highlight - explicitly shows selected dosage
+  const dosePurityText = `Dose: ${dosage}   -   Purity: ${purity}`;
   page.drawText(trunc(dosePurityText, 34), {
     x: contentLeft,
     y: currentY,
@@ -293,10 +308,10 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   });
 
   currentY -= 8.5;
-  page.drawText('Diluent Volume: _____________ mL BAC / Sterile Water', {
+  page.drawText(`Diluent: ${trunc(concText, 44)}`, {
     x: contentLeft,
     y: currentY,
-    size: 5.5,
+    size: 5.4,
     font,
     color: DARK_GRAY,
   });
@@ -311,12 +326,12 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: MUTED,
   });
 
-  // Discreet batch number and product coding reference
+  // Batch number and supplier reference line
   currentY -= 8.5;
-  page.drawText(`Batch: ${batchNumber}   •   Cod: ${discreetCode}`, {
+  page.drawText(`Batch: ${batchNumber}   •   Lab: ${trunc(supplierDisplay, 20)}`, {
     x: contentLeft,
     y: currentY,
-    size: 5.6,
+    size: 5.5,
     font: fontB,
     color: DARK_GRAY,
   });
@@ -341,12 +356,13 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: BRAND_COLOR,
   });
 
-  page.drawText(`COD: ${discreetCode}`, {
-    x: qrX + (qrSize - fontB.widthOfTextAtSize(`COD: ${discreetCode}`, 5)) / 2,
+  const suppUnderQr = trunc(supplierDisplay, 16);
+  page.drawText(suppUnderQr, {
+    x: qrX + (qrSize - font.widthOfTextAtSize(suppUnderQr, 4.4)) / 2,
     y: qrY - 12,
-    size: 5,
-    font: fontB,
-    color: DARK_GRAY,
+    size: 4.4,
+    font,
+    color: MUTED,
   });
 }
 
@@ -520,7 +536,7 @@ export async function GET(request, { params }) {
     const type = (searchParams.get('type') || searchParams.get('style') || 'full').toLowerCase();
     const isBarcodeOnly = type === 'barcode' || type === 'minimal' || type === 'barcode_only' || type === 'shipping';
 
-    const customBatch = searchParams.get('batch') || searchParams.get('lot') || searchParams.get('tracking') || searchParams.get('trk');
+    const customBatch = searchParams.get('batch') || searchParams.get('vialCode') || searchParams.get('lot') || searchParams.get('tracking') || searchParams.get('trk');
     const customCode = searchParams.get('code') || searchParams.get('ref') || searchParams.get('coding');
 
     if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
@@ -575,15 +591,35 @@ export async function GET(request, { params }) {
       targetVariant = product.variants?.find(v => v.isPreferred) || product.variants?.[0] || {};
     }
 
-    // Derive supplier, dose, and format strictly from the resolved targetVariant
+    // Derive human-readable supplier display name and canonical ID
+    const customSupplierName = searchParams.get('supplierName');
     const rawSupplier = suppParam || targetVariant.supplierId || targetVariant.supplierName || targetVariant.supplier || product.supplierId || product.supplier || '';
     let targetSupplier = null;
     if (rawSupplier && rawSupplier !== 'all') {
       targetSupplier = rawSupplier.startsWith('supplier-') ? rawSupplier : `supplier-${String(rawSupplier).toLowerCase().replace(/[\s_]+/g, '-')}`;
     }
 
+    let resolvedSupplierName = customSupplierName;
+    if (!resolvedSupplierName) {
+      resolvedSupplierName = getCanonicalSupplierName(rawSupplier || targetSupplier);
+    }
+
     const targetDose = doseParam || targetVariant.dosage || targetVariant.dose || product.dosage || '10 mg';
     const targetFormat = formatParam || targetVariant.presentation || targetVariant.presentationName || targetVariant.format || 'vial';
+
+    // Deterministic batch number customized for supplier + dose + variant vialCode
+    let batchNumber = customBatch;
+    if (!batchNumber) {
+      const varBatch = targetVariant.vialCode || targetVariant.batchCode || targetVariant.batchNumber || targetVariant.lotNumber;
+      if (varBatch && !varBatch.toLowerCase().includes(cleanSlug)) {
+        batchNumber = varBatch;
+      } else {
+        const suppClean = (resolvedSupplierName || 'LOTUS').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
+        const doseClean = String(targetDose || '10MG').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        const yearMonth = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+        batchNumber = `RP-${suppClean}-${doseClean}-${yearMonth}`;
+      }
+    }
 
     // Resolve target shared URL for the QR code
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
@@ -593,6 +629,7 @@ export async function GET(request, { params }) {
       if (targetSupplier && targetSupplier !== 'all') qParams.set('supplier', targetSupplier);
       if (targetDose && targetDose !== 'all') qParams.set('dose', targetDose);
       if (targetFormat && targetFormat !== 'all') qParams.set('format', targetFormat);
+      if (batchNumber) qParams.set('batch', batchNumber);
       const lang = searchParams.get('lang');
       if (lang && lang !== 'en') qParams.set('lang', lang);
       const qs = qParams.toString();
@@ -606,27 +643,12 @@ export async function GET(request, { params }) {
     }
     const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
 
-    // Deterministic anonymous batch number (Lot)
-    let batchNumber = customBatch;
-    if (!batchNumber) {
-      const varBatch = targetVariant.batchNumber || targetVariant.batchCode || targetVariant.lotNumber;
-      if (varBatch && !varBatch.toLowerCase().includes(cleanSlug)) {
-        batchNumber = varBatch;
-      } else if (product.batchCode && !product.batchCode.toLowerCase().includes(cleanSlug)) {
-        batchNumber = product.batchCode;
-      } else if (product.lotNumber && !product.lotNumber.toLowerCase().includes(cleanSlug)) {
-        batchNumber = product.lotNumber;
-      } else {
-        batchNumber = `LOT-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
-      }
-    }
-
     // Discreet coding number invented to identify the product internally
     const discreetCode = getDiscreetProductCode(product, customCode, uniqueSeq);
 
     const renderLabel = isBarcodeOnly
       ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, batchNumber, targetShareUrl, discreetCode)
-      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl, batchNumber, discreetCode, targetVariant);
+      : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl, batchNumber, discreetCode, targetVariant, resolvedSupplierName, targetDose);
 
     if (format === 'sheet_a4') {
       // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)

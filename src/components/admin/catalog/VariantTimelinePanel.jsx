@@ -20,8 +20,12 @@ import {
   CheckCircle2,
   AlertCircle,
   ExternalLink,
-  FileCheck
+  FileCheck,
+  Barcode,
+  Copy,
+  Check
 } from 'lucide-react';
+import notifier from '@/services/NotificationService';
 import { formatTimelineValue } from '../../../utils/variantTimelineHelper';
 import { formatNumberAdaptive } from '../../../utils/formatters';
 import InlineEditableCell from '../../ui/InlineEditableCell';
@@ -41,6 +45,37 @@ import SupplierQuotationDetailDrawer from '../quotations/SupplierQuotationDetail
  */
 export default function VariantTimelinePanel({ variant, selectedProduct, onUpdateVariantField }) {
   const [activeQuotationId, setActiveQuotationId] = useState(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  // Deterministic fallback unique code if not explicitly saved on the variant
+  const defaultSuppCode = (variant?.supplierId || variant?.supplier || 'RP').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
+  const defaultDoseCode = String(variant?.dosage || variant?.dose || '10MG').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const idSuffix = String(variant?.id || 'V1').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || 'V01';
+  const defaultVialCode = `RP-${defaultSuppCode}-${defaultDoseCode}-${idSuffix}`;
+  const currentVialCode = variant?.vialCode || variant?.batchCode || variant?.batchNumber || defaultVialCode;
+
+  const handleCopyVialCode = (code) => {
+    if (!code) return;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(code);
+      setCopiedCode(true);
+      notifier.success(`Vial Code copied: ${code}`);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  const productSlug = encodeURIComponent(selectedProduct?.slug || selectedProduct?.id || '');
+  const variantIdParam = encodeURIComponent(variant?.id || '');
+  const suppParam = encodeURIComponent(variant?.supplierId || variant?.supplier || '');
+  const doseParam = encodeURIComponent(variant?.dosage || variant?.dose || '');
+  const formatParam = encodeURIComponent(variant?.presentation || variant?.format || '');
+  const batchParam = encodeURIComponent(currentVialCode);
+
+  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}&vialCode=${batchParam}`;
+
+  const shippingLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=shipping&${baseLabelQuery}&download=1`;
+  const clientLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=client&${baseLabelQuery}&download=1`;
+  const sheetLabelUrl = `/api/vial-label/${productSlug}?format=sheet_a4&type=full&${baseLabelQuery}&download=1`;
 
   if (!variant) return null;
 
@@ -168,30 +203,6 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           }}>
             {variant.id || 'variant-ref'}
           </code>
-          <a
-            href={`/api/vial-label/${encodeURIComponent(selectedProduct?.slug || selectedProduct?.id || '')}?format=38x90&type=shipping&variantId=${encodeURIComponent(variant.id || '')}&supplier=${encodeURIComponent(variant.supplierId || variant.supplier || '')}&dose=${encodeURIComponent(variant.dosage || variant.dose || '')}&presentation=${encodeURIComponent(variant.presentation || variant.format || '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '2px 8px',
-              fontSize: '0.70rem',
-              fontWeight: 600,
-              color: '#0369a1',
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              borderRadius: '6px',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease'
-            }}
-            title="Download 38x90mm label for this variant"
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e0f2fe'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
-          >
-            🏷️ Print Label
-          </a>
         </div>
 
         {/* Tab Controls */}
@@ -330,6 +341,196 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
               <span>Bulk API Yield</span>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Unique Vial / Batch Code & Label Dispatch Bar */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.625rem',
+        padding: '0.5rem 0.75rem',
+        backgroundColor: '#ffffff',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+      }}>
+        {/* Left: Unique Editable Vial Code */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0369a1' }}>
+            <Barcode size={15} />
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              Vial Code / Batch:
+            </span>
+          </div>
+
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #cbd5e1',
+            borderRadius: '6px',
+            padding: '2px 6px',
+            fontFamily: 'monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            color: '#0f172a'
+          }}>
+            {onUpdateVariantField ? (
+              <InlineEditableCell
+                value={currentVialCode}
+                type="text"
+                width="165px"
+                placeholder="Unique Vial Code"
+                onSave={async (newVal) => {
+                  const clean = String(newVal || '').trim().toUpperCase();
+                  if (!clean) return;
+                  await onUpdateVariantField(variant.id, 'vialCode', clean);
+                }}
+              />
+            ) : (
+              <span>{currentVialCode}</span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleCopyVialCode(currentVialCode)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 7px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              color: copiedCode ? '#15803d' : '#475569',
+              backgroundColor: copiedCode ? '#dcfce7' : '#f1f5f9',
+              border: `1px solid ${copiedCode ? '#86efac' : '#cbd5e1'}`,
+              borderRadius: '5px',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title="Copy unique vial code to clipboard"
+          >
+            {copiedCode ? <Check size={12} /> : <Copy size={12} />}
+            <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+          </button>
+
+          {variant?.vialCode ? (
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 600,
+              padding: '1px 5px',
+              borderRadius: '4px',
+              backgroundColor: '#ecfdf5',
+              color: '#059669',
+              border: '1px solid #a7f3d0'
+            }}>
+              Custom Code
+            </span>
+          ) : (
+            <span style={{
+              fontSize: '0.66rem',
+              fontWeight: 600,
+              padding: '1px 5px',
+              borderRadius: '4px',
+              backgroundColor: '#f8fafc',
+              color: '#64748b',
+              border: '1px solid #e2e8f0'
+            }}>
+              Auto-Assigned
+            </span>
+          )}
+        </div>
+
+        {/* Right: Quick Label Download Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#64748b', marginRight: '2px' }}>
+            Print Labels:
+          </span>
+
+          {/* 1. Shipping Label */}
+          <a
+            href={shippingLabelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download={`shipping_label_${currentVialCode}_38x90.pdf`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              color: '#1e293b',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '5px',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease'
+            }}
+            title={`Download 38x90mm Shipping Barcode Label for batch ${currentVialCode}`}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+          >
+            <span>📦</span> Shipping (38×90)
+          </a>
+
+          {/* 2. Client Vial Label */}
+          <a
+            href={clientLabelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download={`client_label_${currentVialCode}_38x90.pdf`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              color: '#0369a1',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderRadius: '5px',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease'
+            }}
+            title={`Download 38x90mm Client Vial Label with active supplier, dosage & batch ${currentVialCode}`}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
+          >
+            <span>🏷️</span> Client Vial (38×90)
+          </a>
+
+          {/* 3. A4 Sheet */}
+          <a
+            href={sheetLabelUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download={`vial_labels_sheet_${currentVialCode}_a4.pdf`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              color: '#475569',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '5px',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease'
+            }}
+            title={`Download A4 Sheet (8 labels) for batch ${currentVialCode}`}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+          >
+            <span>📄</span> Sheet (×8)
+          </a>
         </div>
       </div>
 

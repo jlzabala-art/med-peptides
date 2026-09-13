@@ -52,11 +52,11 @@ export default function MonographPreviewModal({
   const cas = product.cas || product.casNumber || product.molecular?.casNumber || 'N/A';
   const formula = product.molecular?.formula || product.formula || 'C225H348N48O68';
   const mw = product.molecular?.molecularWeight || product.molecularWeight || '4731.3';
-  const purity = product.purity || '99.4';
-  const lot = `RP-${(slug || 'LOT').slice(0, 4).toUpperCase()}-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-
   const formatName = activeFormat?.name || 'Vial (Lyophilized)';
   const doseName = selectedStrength?.name || '10 mg';
+  const suppCode = (supplierName || 'LOTUS').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
+  const doseCode = (doseName || '10MG').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  const lot = `RP-${suppCode}-${doseCode}-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
   // Direct PDF Download Endpoints
   const monographPdfUrl = `/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`;
@@ -431,7 +431,12 @@ export default function MonographPreviewModal({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', padding: '0.25rem 0' }}>
                   <div style={{ flex: 1, fontSize: '0.65rem', fontFamily: 'monospace', color: '#334155', lineHeight: 1.35 }}>
                     <div>Reconstitute: 2.0 mL BAC Water</div>
-                    <div>Conc: {doseName.includes('20') ? '10.0 mg/mL' : '5.0 mg/mL'} · SubQ</div>
+                    <div>
+                      Conc: {(() => {
+                        const m = doseName.match(/(\d+(?:\.\d+)?)\s*mg/i);
+                        return m ? (parseFloat(m[1]) / 2.0).toFixed(1) : '5.0';
+                      })()} mg/mL · SubQ
+                    </div>
                     <div>Recon Date: [ ___ / ___ / 2026 ]</div>
                     <div>Discard: 28 Days post-recon (2-8°C)</div>
                   </div>

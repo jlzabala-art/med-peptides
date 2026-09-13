@@ -22,7 +22,8 @@ export default function InlineEditableCell({
   prefix = null,
   suffix = null,
   align = 'left',
-  stacked = false
+  stacked = false,
+  width = null
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(value ?? '');
@@ -287,7 +288,7 @@ export default function InlineEditableCell({
                 outline: 'none',
                 fontSize: '0.88rem',
                 fontWeight: 600,
-                width: type === 'number' ? '70px' : '110px',
+                width: width || (type === 'number' ? '70px' : '110px'),
                 textAlign: align,
                 background: 'transparent',
                 height: '100%',
