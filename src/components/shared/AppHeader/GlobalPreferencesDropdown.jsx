@@ -9,6 +9,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { usePreferences } from '../../../context/PreferencesContext';
 import { useTranslation } from 'react-i18next';
+import notifier from '@/services/NotificationService';
 import { Globe, DollarSign, List, Maximize2, Check, Settings2, Cloud, Eye, EyeOff } from '@/lib/icons';
 
 export default function GlobalPreferencesDropdown() {
@@ -18,6 +19,17 @@ export default function GlobalPreferencesDropdown() {
   const [dropPos, setDropPos] = useState({ top: 0, right: 0 });
   const { currency, updateCurrency, density, updateDensity, weatherDisplay, updateWeatherDisplay } = usePreferences();
   const { i18n } = useTranslation();
+
+  // Ensure interface remains on English standard while Spanish and Compact mode are in implementation
+  useEffect(() => {
+    if (i18n.language === 'es' || (typeof window !== 'undefined' && localStorage.getItem('language') === 'es')) {
+      i18n.changeLanguage('en');
+      localStorage.setItem('language', 'en');
+    }
+    if (density === 'compact' || (typeof window !== 'undefined' && localStorage.getItem('atlas_density') === 'compact')) {
+      updateDensity('comfortable');
+    }
+  }, [i18n, density, updateDensity]);
 
   // Close on outside click
   useEffect(() => {
@@ -43,12 +55,19 @@ export default function GlobalPreferencesDropdown() {
     setIsOpen(prev => !prev);
   };
 
-  const toggleLanguage = (lang) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem('language', lang);
+  const handleLanguageSelect = (lang) => {
+    if (lang === 'es') {
+      notifier.toast(
+        '🌐 La localización en español se encuentra en fase de validación técnica y clínica. Estará disponible en una próxima actualización. La plataforma opera actualmente en inglés estándar.',
+        'info'
+      );
+      return;
+    }
+    i18n.changeLanguage('en');
+    localStorage.setItem('language', 'en');
   };
 
-  const currentLang = i18n.language === 'es' ? 'ES' : 'EN';
+  const currentLang = 'EN';
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -98,7 +117,7 @@ export default function GlobalPreferencesDropdown() {
             borderRadius: '12px',
             boxShadow: '0 10px 40px -5px rgba(0,0,0,0.15), 0 4px 12px -2px rgba(0,0,0,0.08)',
             border: '1px solid rgba(0,0,0,0.06)',
-            width: '240px',
+            width: '270px',
             zIndex: 99999,
             overflow: 'hidden',
             animation: 'gpd-fadeIn 0.18s ease-out',
@@ -114,26 +133,62 @@ export default function GlobalPreferencesDropdown() {
           <div style={{ padding: '0.5rem' }}>
             {/* Language */}
             <div style={{ marginBottom: '1rem' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Language</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
-                {[{ id: 'en', label: 'English' }, { id: 'es', label: 'Español' }].map(({ id, label }) => {
-                  const active = currentLang === id.toUpperCase();
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => toggleLanguage(id)}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '0.5rem', border: 'none', borderRadius: '6px',
-                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.82rem',
-                      }}
-                    >
-                      {label} {active && <Check size={14} />}
-                    </button>
-                  );
-                })}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem 0.4rem' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Language
+                </span>
+                <span style={{ fontSize: '0.62rem', color: '#0369a1', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bae6fd', fontWeight: 600 }}>
+                  Standard
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+                {/* English - Active Standard */}
+                <button
+                  type="button"
+                  onClick={() => handleLanguageSelect('en')}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.5rem 0.6rem', border: '1px solid rgba(0, 113, 189, 0.25)', borderRadius: '6px',
+                    background: 'rgba(0, 113, 189, 0.08)',
+                    color: 'var(--color-primary)',
+                    cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
+                  }}
+                  title="English (Clinical Operating Standard)"
+                >
+                  <span>English</span>
+                  <Check size={14} color="var(--color-primary)" />
+                </button>
+
+                {/* Spanish - Elegantly marked as Coming Soon */}
+                <button
+                  type="button"
+                  onClick={() => handleLanguageSelect('es')}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0.5rem 0.6rem', border: '1px dashed #cbd5e1', borderRadius: '6px',
+                    background: '#f8fafc',
+                    color: '#64748b',
+                    cursor: 'pointer', fontWeight: 500, fontSize: '0.82rem',
+                    transition: 'all 0.15s ease',
+                  }}
+                  title="Español (En fase de validación técnica — Próximamente)"
+                >
+                  <span>Español</span>
+                  <span style={{ 
+                    fontSize: '0.58rem', 
+                    fontWeight: 700, 
+                    color: '#475569', 
+                    background: '#e2e8f0', 
+                    padding: '1px 5px', 
+                    borderRadius: '4px',
+                    letterSpacing: '0.02em',
+                  }}>
+                    Pronto
+                  </span>
+                </button>
+              </div>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', padding: '0.4rem 0.5rem 0', lineHeight: 1.35 }}>
+                La versión en español está en fase de validación clínica. La plataforma opera actualmente en inglés estándar.
               </div>
             </div>
 
@@ -164,29 +219,67 @@ export default function GlobalPreferencesDropdown() {
 
             {/* Density */}
             <div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, padding: '0 0.5rem 0.5rem', textTransform: 'uppercase' }}>Layout Density</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
-                {[
-                  { id: 'comfortable', label: 'Comfortable', Icon: Maximize2 },
-                  { id: 'compact',     label: 'Compact',     Icon: List },
-                ].map(({ id, label, Icon }) => {
-                  const active = density === id;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => updateDensity(id)}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
-                        padding: '0.5rem', border: 'none', borderRadius: '6px',
-                        background: active ? 'rgba(0, 113, 189, 0.1)' : 'transparent',
-                        color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-                        cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: '0.75rem',
-                      }}
-                    >
-                      <Icon size={14} /> {label}
-                    </button>
-                  );
-                })}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem 0.4rem' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--color-text-tertiary)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  Layout Density
+                </span>
+                <span style={{ fontSize: '0.62rem', color: '#0369a1', background: '#f0f9ff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bae6fd', fontWeight: 600 }}>
+                  Standard
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
+                {/* Comfortable - Active Standard */}
+                <button
+                  type="button"
+                  onClick={() => updateDensity('comfortable')}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                    padding: '0.5rem', border: '1px solid rgba(0, 113, 189, 0.25)', borderRadius: '6px',
+                    background: 'rgba(0, 113, 189, 0.08)',
+                    color: 'var(--color-primary)',
+                    cursor: 'pointer', fontWeight: 600, fontSize: '0.75rem',
+                  }}
+                  title="Comfortable (Active operating layout)"
+                >
+                  <Maximize2 size={14} /> Comfortable
+                </button>
+
+                {/* Compact - Elegantly marked as in implementation */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    notifier.toast(
+                      '📐 El modo Compacto se encuentra en fase de implantación técnica y estará disponible en una próxima actualización.',
+                      'info'
+                    );
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem',
+                    padding: '0.5rem', border: '1px dashed #cbd5e1', borderRadius: '6px',
+                    background: '#f8fafc',
+                    color: '#64748b',
+                    cursor: 'pointer', fontWeight: 500, fontSize: '0.75rem',
+                    transition: 'all 0.15s ease',
+                  }}
+                  title="Compact (En fase de implantación — Próximamente)"
+                >
+                  <List size={14} />
+                  <span>Compact</span>
+                  <span style={{ 
+                    fontSize: '0.58rem', 
+                    fontWeight: 700, 
+                    color: '#475569', 
+                    background: '#e2e8f0', 
+                    padding: '1px 4px', 
+                    borderRadius: '4px',
+                    letterSpacing: '0.02em',
+                  }}>
+                    Pronto
+                  </span>
+                </button>
+              </div>
+              <div style={{ fontSize: '0.66rem', color: '#64748b', padding: '0.4rem 0.5rem 0', lineHeight: 1.35 }}>
+                El modo compacto de alta densidad está en fase de adaptación responsiva por módulo.
               </div>
             </div>
 

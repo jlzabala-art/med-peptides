@@ -28,7 +28,7 @@ export default function PresentationsManager() {
     if (!trimmed) return;
     // Prevent duplicates (case-insensitive)
     if (presentations.some(p => (p.name || '').toLowerCase() === trimmed.toLowerCase())) {
-      notifier.warn(`"${trimmed}" ya existe.`);
+      notifier.warn(`"${trimmed}" already exists.`);
       return;
     }
     setSaving(true);
@@ -40,9 +40,9 @@ export default function PresentationsManager() {
       });
       setNewName('');
       setIsAdding(false);
-      notifier.success(`Presentación "${trimmed}" añadida.`);
+      notifier.success(`Presentation "${trimmed}" added.`);
     } catch (e) {
-      notifier.error('Error al añadir presentación.');
+      notifier.error('Failed to add presentation.');
       console.error(e);
     } finally {
       setSaving(false);
@@ -59,9 +59,9 @@ export default function PresentationsManager() {
         updatedAt: serverTimestamp(),
       });
       setEditingId(null);
-      notifier.success(`Presentación actualizada.`);
+      notifier.success(`Presentation updated.`);
     } catch (e) {
-      notifier.error('Error al actualizar.');
+      notifier.error('Failed to update presentation.');
       console.error(e);
     } finally {
       setSaving(false);
@@ -70,13 +70,13 @@ export default function PresentationsManager() {
 
   const handleDelete = useCallback((id, name) => {
     notifier.confirmCritical(
-      `¿Eliminar la presentación "${name}"? Esta acción no se puede deshacer.`,
+      `Delete presentation "${name}"? This action cannot be undone.`,
       async () => {
         try {
           await deleteDoc(doc(db, 'presentations', id));
-          notifier.success(`"${name}" eliminada.`);
+          notifier.success(`"${name}" deleted.`);
         } catch (e) {
-          notifier.error('Error al eliminar.');
+          notifier.error('Failed to delete presentation.');
           console.error(e);
         }
       }
@@ -94,7 +94,7 @@ export default function PresentationsManager() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '2px solid var(--primary-light)', paddingBottom: '0.75rem' }}>
         <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.25rem', margin: 0 }}>
           <Package size={24} color="var(--primary)" />
-          Presentaciones de Producto
+          Product Presentations
         </h2>
         {!isAdding && (
           <button
@@ -106,14 +106,14 @@ export default function PresentationsManager() {
               border: 'none', borderRadius: '8px', cursor: 'pointer',
             }}
           >
-            <Plus size={15} /> Nueva presentación
+            <Plus size={15} /> New Presentation
           </button>
         )}
       </div>
 
       <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
-        Lista maestra de formatos/presentaciones disponibles para asignar a variantes de producto en el catálogo.
-        Todas las entradas son únicas y no pueden duplicarse.
+        Master registry of formats and presentations available for assignment to product variants in the catalog.
+        All entries must be unique.
       </p>
 
       {/* Add new row */}
@@ -146,7 +146,7 @@ export default function PresentationsManager() {
               fontSize: '0.85rem', fontWeight: 600, opacity: (!newName.trim() || saving) ? 0.5 : 1
             }}
           >
-            <Check size={14} /> Guardar
+            <Check size={14} /> Save
           </button>
           <button
             onClick={() => { setIsAdding(false); setNewName(''); }}
@@ -156,7 +156,7 @@ export default function PresentationsManager() {
               display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem',
             }}
           >
-            <X size={14} /> Cancelar
+            <X size={14} /> Cancel
           </button>
         </div>
       )}
@@ -164,12 +164,12 @@ export default function PresentationsManager() {
       {/* List */}
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          Cargando presentaciones...
+          Loading presentations...
         </div>
       ) : presentations.length === 0 ? (
         <div style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--color-bg-subtle, #f8fafc)', borderRadius: '8px' }}>
           <Package size={32} style={{ opacity: 0.3, marginBottom: '0.75rem' }} />
-          <p style={{ margin: 0, fontSize: '0.9rem' }}>No hay presentaciones. Añade la primera.</p>
+          <p style={{ margin: 0, fontSize: '0.9rem' }}>No presentations found. Add the first one.</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -219,14 +219,14 @@ export default function PresentationsManager() {
                   </span>
                   <button
                     onClick={() => { setEditingId(p.id); setEditingValue(p.name || ''); }}
-                    title="Editar"
+                    title="Edit"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: '4px', opacity: 0.6 }}
                   >
                     <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(p.id, p.name)}
-                    title="Eliminar"
+                    title="Delete"
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger, #dc2626)', display: 'flex', padding: '4px', opacity: 0.6 }}
                   >
                     <Trash2 size={14} />
