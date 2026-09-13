@@ -1123,6 +1123,186 @@
   font-weight: 600;
 }
 
+.pds-mobile-card-title {
+  font-weight: 800;
+  color: #003666;
+}
+
+.pds-mobile-card-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pds-format-mini-badge {
+  display: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Mobile Formulations Matrix Cards Transformation (max-width: 768px) ── */
+@media (max-width: 768px) {
+  .pds-all-strengths-matrix {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .pds-matrix-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .pds-matrix-table-title {
+    font-size: 0.92rem;
+  }
+
+  .pds-matrix-table-sub {
+    font-size: 0.72rem;
+  }
+
+  .pds-matrix-print-pill {
+    align-self: flex-start;
+  }
+
+  .pds-table-responsive {
+    overflow-x: visible;
+  }
+
+  .pds-strengths-table thead {
+    display: none;
+  }
+
+  .pds-strengths-table,
+  .pds-strengths-table tbody,
+  .pds-strengths-table tr,
+  .pds-strengths-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pds-strengths-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .pds-strengths-table tr {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+  }
+
+  .pds-strengths-table tr:hover {
+    border-color: #cbd5e1;
+    background: #fbfcfe;
+  }
+
+  .pds-strengths-table tr.pds-row-selected {
+    background: #f0fdf4 !important;
+    border: 1.5px solid #16a34a !important;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12) !important;
+  }
+
+  .pds-format-mini-badge {
+    display: inline-block;
+  }
+
+  .pds-strengths-table td {
+    padding: 0 !important;
+    border: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.80rem;
+    color: #334155;
+    line-height: 1.4;
+  }
+
+  /* Card Header: Strength/Dose */
+  .pds-strengths-table td:nth-child(1) {
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding-bottom: 0.45rem !important;
+    margin-bottom: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pds-strengths-table td:nth-child(1) .pds-mobile-card-title {
+    font-size: 1.05rem;
+  }
+
+  /* Hide redundant full format row on mobile since it is displayed in the header pill */
+  .pds-strengths-table td:nth-child(2) {
+    display: none;
+  }
+
+  .pds-strengths-table td:nth-child(3)::before {
+    content: "Diluent:";
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .pds-strengths-table td:nth-child(4)::before {
+    content: "Concentration:";
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .pds-strengths-table td:nth-child(5)::before {
+    content: "Route:";
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .pds-strengths-table td:nth-child(6)::before {
+    content: "Purity:";
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .pds-strengths-table td:nth-child(7)::before {
+    content: "Laboratory:";
+    font-size: 0.70rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+}
+
 /* ── Print Stylesheet ── */
 @media print {
   .pds-top-bar,

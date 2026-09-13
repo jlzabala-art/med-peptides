@@ -96,7 +96,30 @@ export default function CoaModal({ product, variant, isOpen, onClose }) {
               <ShieldCheck size={16} className="text-teal-600" />
               <span>Release Test Results & Specifications</span>
             </h2>
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+            {/* Mobile Cards View (< sm) */}
+            <div className="sm:hidden print:hidden space-y-2.5">
+              {coa.tests.map((t, idx) => (
+                <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-[11px]">
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-200/80 pb-1.5">
+                    <span className="font-bold text-slate-900">{t.parameter}</span>
+                    <span className="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      {t.status}
+                    </span>
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-slate-500 font-semibold text-[10px]">Specification:</span>
+                    <span className="font-mono text-slate-700 text-[10px] text-right">{t.specification}</span>
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-slate-500 font-semibold text-[10px]">Result:</span>
+                    <span className="font-mono font-bold text-slate-900 text-[11px] text-right">{t.result}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop / Print Table View (>= sm) */}
+            <div className="hidden sm:block print:block overflow-x-auto border border-slate-200 rounded-xl">
               <table className="w-full text-left border-collapse text-[11px]">
                 <thead>
                   <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold uppercase">

@@ -831,22 +831,62 @@ export default function PublicDatasheetView({
                   {availableFormats.flatMap(fmt => {
                     const compatStrengths = sortedStrengths.filter(s => !fmt.strengths || fmt.strengths.includes(s.id));
                     const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: 'Standard Clinical Dose' }];
+                    const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
+                    const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet') || fmt.id.includes('oral');
+                    const isSpray = fmt.id.includes('spray') || fmt.id.includes('nasal');
+
                     return list.map(st => {
                       const recon = getReconstitutionVolume(st.name);
-                      const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
                       const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
+
+                      const diluentText = isPenOrCart 
+                        ? 'Pre-filled Solution (Zero mixing)' 
+                        : isOral 
+                          ? 'Solid Oral Dose (No diluent)'
+                          : isSpray
+                            ? 'Pre-metered Intranasal Solution'
+                            : `${recon.volume} mL BAC Water`;
+
+                      const concText = isPenOrCart 
+                        ? 'Pre-formulated Liquid' 
+                        : isOral 
+                          ? 'Unit Dosage'
+                          : isSpray
+                            ? 'Metered Spray Solution'
+                            : `${recon.concentration} mg/mL`;
+
+                      const adminText = isOral 
+                        ? 'Oral (Gastro-resistant)' 
+                        : isSpray 
+                          ? 'Intranasal (Nasal Mucosa)'
+                          : isPenOrCart
+                            ? 'SubQ Pen Injection'
+                            : 'Subcutaneous (SubQ)';
+
                       return (
-                        <tr key={`${fmt.id}-${st.id}`} className={isCurrentlyActive ? 'pds-row-selected' : ''}>
-                          <td>
-                            <strong>{st.name}</strong>
-                            {isCurrentlyActive && <span className="pds-active-badge">Active Selection</span>}
+                        <tr 
+                          key={`${fmt.id}-${st.id}`} 
+                          className={isCurrentlyActive ? 'pds-row-selected' : ''}
+                          onClick={() => {
+                            setActiveFormatId(fmt.id);
+                            setSelectedStrengthId(st.id);
+                          }}
+                          style={{ cursor: 'pointer' }}
+                          title={`Click to select ${st.name} ${fmt.name}`}
+                        >
+                          <td data-label="Strength / Dose">
+                            <span className="pds-mobile-card-title">{st.name}</span>
+                            <span className="pds-mobile-card-badges">
+                              <span className="pds-format-mini-badge">{fmt.name}</span>
+                              {isCurrentlyActive && <span className="pds-active-badge">Active Selection</span>}
+                            </span>
                           </td>
-                          <td>{fmt.name}</td>
-                          <td>{isPenOrCart ? 'Pre-filled (Zero mixing required)' : `${recon.volume} mL BAC Water`}</td>
-                          <td className="pds-conc-cell">{isPenOrCart ? 'Pre-formulated Solution' : `${recon.concentration} mg/mL`}</td>
-                          <td>Subcutaneous (SubQ)</td>
-                          <td className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
-                          <td>{supplierName}</td>
+                          <td data-label="Presentation Format">{fmt.name}</td>
+                          <td data-label="Reconstitution Diluent">{diluentText}</td>
+                          <td data-label="Resulting Concentration" className="pds-conc-cell">{concText}</td>
+                          <td data-label="Administration">{adminText}</td>
+                          <td data-label="Analytical Grade" className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
+                          <td data-label="Laboratory Verification">{supplierName}</td>
                         </tr>
                       );
                     });
