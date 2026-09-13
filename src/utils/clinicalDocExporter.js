@@ -51,7 +51,7 @@ export async function generateCompoundingSheetPDF(prescription, meta = {}) {
   let y = height - 50;
 
   // 1. Header
-  page.drawText('REGENPEPT CLINICAL NETWORK', {
+  page.drawText('ATLAS SERVICES CLINICAL NETWORK', {
     x: 40,
     y,
     size: 16,
@@ -206,7 +206,7 @@ export async function generateCompoundingSheetPDF(prescription, meta = {}) {
   });
   page.drawText('Recepción y Validación de Farmacia', { x: width - 220, y: footerY + 30, size: 8, font: fontRegular, color: mutedColor });
 
-  page.drawText('Documento generado mediante RegenPept Clinical Platform. Uso médico exclusivo.', {
+  page.drawText('Documento generado mediante Atlas Services Clinical Platform. Uso médico exclusivo.', {
     x: 40,
     y: 25,
     size: 7,

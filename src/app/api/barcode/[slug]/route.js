@@ -153,7 +153,7 @@ export async function GET(request, { params }) {
   
   <!-- Brand & Alliance -->
   <text x="60" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="24" font-weight="900" fill="#FFFFFF" letter-spacing="-0.02em">
-    REGENPEPT <tspan fill="#38BDF8">×</tspan> LOTUSLAND
+    ATLAS SERVICES <tspan fill="#38BDF8">×</tspan> LOTUSLAND
   </text>
   <text x="60" y="88" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#94A3B8" letter-spacing="0.08em">
     OFFICIAL CLINICAL MONOGRAPH &amp; ANALYTICAL RELEASE STANDARD

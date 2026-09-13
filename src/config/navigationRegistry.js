@@ -92,8 +92,7 @@ export const NAVIGATION_REGISTRY = [
 
   // ── SALES (9 → 4) ──────────────────────────────────────────────────────────
   // Leads + Clinics + Agency Deals → CRM & Accounts
-  // Sales Orders + Patient Orders + My Orders → Orders Hub
-  // Quotations + Discounts → Quotes & Pricing
+  // ── SALES (Zoho Books Standard) ────────────────────────────────────────────
   {
     id: 'sales',
     label: 'Sales',
@@ -101,32 +100,31 @@ export const NAVIGATION_REGISTRY = [
     roles: ['admin', 'ceo', 'sales', 'operations', 'finance', 'patient'],
     items: [
       {
-        id: 'orders',
-        label: 'Orders',
-        icon: ShoppingBag,
-        roles: ['admin', 'sales', 'operations', 'finance', 'patient'],
-        // Absorbed: sales-orders (B2B), patient-orders (B2C), my-orders (patient)
-        // Filter by type in the view
-      },
-      {
-        id: 'crm',
-        label: 'CRM & Accounts',
+        id: 'customers',
+        label: 'Customers',
         icon: Users2,
         roles: ['admin', 'sales'],
-        // Absorbed: leads, clinics, agency-deals (unified with segment tabs)
+        // Unified: Clinics/Doctors, Wholesalers (B2B), Individual Patients, CRM
+      },
+      {
+        id: 'quotations',
+        label: 'Estimates',
+        icon: FileText,
+        roles: ['admin', 'sales', 'finance'],
+        // Quotes & pricing
+      },
+      {
+        id: 'orders',
+        label: 'Sales Orders',
+        icon: ShoppingBag,
+        roles: ['admin', 'sales', 'operations', 'finance', 'patient'],
+        // Customer orders (B2B and B2C)
       },
       {
         id: 'account-managers',
         label: 'Account Managers',
         icon: HandshakeIcon,
         roles: ['admin', 'sales'],
-      },
-      {
-        id: 'quotations',
-        label: 'Quotes & Pricing',
-        icon: FileText,
-        roles: ['admin', 'sales', 'finance'],
-        // Absorbed: quotations + discounts (tabs within the view)
       },
       {
         id: 'revenue',
@@ -137,9 +135,7 @@ export const NAVIGATION_REGISTRY = [
     ]
   },
 
-  // ── PURCHASING (5 → 3) ─────────────────────────────────────────────────────
-  // RFQs + Purchase Orders → Procurement (differentiated by status/type column)
-  // Supplier Bills → moved to Finance > Transactions
+  // ── PURCHASING (Zoho Books Standard) ───────────────────────────────────────
   {
     id: 'purchasing',
     label: 'Purchasing',
@@ -148,22 +144,17 @@ export const NAVIGATION_REGISTRY = [
     items: [
       {
         id: 'suppliers',
-        label: 'Suppliers',
+        label: 'Suppliers & Vendors',
         icon: Building,
         roles: ['admin', 'operations', 'pharmacist'],
-      },
-      {
-        id: 'wholesellers',
-        label: 'Wholesellers',
-        icon: Building,
-        roles: ['admin', 'operations', 'finance'],
+        // Laboratories & synthesis partners, plus cross-supply vendors
       },
       {
         id: 'procurement',
-        label: 'Procurement',
+        label: 'Purchase Orders',
         icon: FileText,
         roles: ['admin', 'operations', 'pharmacist', 'supplier'],
-        // Absorbed: rfqs + purchase-orders (type column differentiates; status drives workflow)
+        // Sourcing RFQs and confirmed POs
       },
       {
         id: 'production-queue',
@@ -304,9 +295,11 @@ export const ROUTE_ALIASES = {
   'sales-orders':        'orders',
   'patient-orders':      'orders',
   'my-orders':           'orders',
-  'leads':               'crm',
-  'clinics':             'crm',
-  'agency-deals':        'crm',
+  'leads':               'customers',
+  'clinics':             'customers',
+  'crm':                 'customers',
+  'wholesellers':        'customers',
+  'agency-deals':        'customers',
   'discounts':           'quotations',
   // Purchasing
   'rfqs':                'procurement',

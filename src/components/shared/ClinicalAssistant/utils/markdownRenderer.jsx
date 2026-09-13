@@ -278,6 +278,70 @@ export function processMarkdown(content) {
     processed = processed.replace(/\[STACK_SYNERGY:.*?\]/g, '');
   }
 
+  // Extract Datasheet Download Action
+  const datasheetMatch = processed.match(/\[ACTION:DOWNLOAD_DATASHEET:([^\]]+)\]/i);
+  if (datasheetMatch) {
+    const rawVal = datasheetMatch[1].trim();
+    try {
+      if (rawVal.startsWith('{')) {
+        metadata.datasheetAction = JSON.parse(rawVal);
+      } else {
+        metadata.datasheetAction = { slug: rawVal, productName: rawVal };
+      }
+    } catch {
+      metadata.datasheetAction = { slug: rawVal, productName: rawVal };
+    }
+    processed = processed.replace(/\[ACTION:DOWNLOAD_DATASHEET:.*?\]/gi, '');
+  }
+
+  // Extract Price List Download Action
+  const priceListMatch = processed.match(/\[ACTION:DOWNLOAD_PRICELIST:([^\]]+)\]/i);
+  if (priceListMatch) {
+    const rawVal = priceListMatch[1].trim();
+    try {
+      if (rawVal.startsWith('{')) {
+        metadata.priceListAction = JSON.parse(rawVal);
+      } else {
+        metadata.priceListAction = { category: rawVal };
+      }
+    } catch {
+      metadata.priceListAction = { category: rawVal };
+    }
+    processed = processed.replace(/\[ACTION:DOWNLOAD_PRICELIST:.*?\]/gi, '');
+  }
+
+  // Extract Clinical Protocol Sheet Download Action
+  const protocolSheetMatch = processed.match(/\[ACTION:DOWNLOAD_PROTOCOL_SHEET:([^\]]+)\]/i);
+  if (protocolSheetMatch) {
+    const rawVal = protocolSheetMatch[1].trim();
+    try {
+      if (rawVal.startsWith('{')) {
+        metadata.protocolSheetAction = JSON.parse(rawVal);
+      } else {
+        metadata.protocolSheetAction = { protocolId: rawVal, protocolName: rawVal };
+      }
+    } catch {
+      metadata.protocolSheetAction = { protocolId: rawVal, protocolName: rawVal };
+    }
+    processed = processed.replace(/\[ACTION:DOWNLOAD_PROTOCOL_SHEET:.*?\]/gi, '');
+  }
+
+  // Extract Protocol Compendium Export Action
+  const protocolCompendiumMatch = processed.match(/\[ACTION:EXPORT_PROTOCOL_GUIDE(?::([^\]]+))?\]/i);
+  if (protocolCompendiumMatch) {
+    const rawVal = protocolCompendiumMatch[1]?.trim() || 'all';
+    try {
+      if (rawVal.startsWith('{')) {
+        metadata.protocolCompendiumAction = JSON.parse(rawVal);
+      } else {
+        metadata.protocolCompendiumAction = { category: rawVal };
+      }
+    } catch {
+      metadata.protocolCompendiumAction = { category: rawVal };
+    }
+    processed = processed.replace(/\[ACTION:EXPORT_PROTOCOL_GUIDE(?::.*?)?\]/gi, '');
+  }
+
   return { html: renderAIMarkdown(processed), metadata };
 }
 

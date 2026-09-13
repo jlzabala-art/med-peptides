@@ -160,7 +160,7 @@ export default function ShareProductMonographDrawer({
   // Generate tailored WhatsApp text
   const isEs = selectedLang === 'es';
   const isPt = selectedLang === 'pt';
-  const waIntro = isEs ? 'Ficha Técnica Clínica Oficial — RegenPept' : isPt ? 'Ficha Técnica Clínica Oficial — RegenPept' : 'Official Clinical Monograph — RegenPept';
+  const waIntro = isEs ? 'Ficha Técnica Clínica Oficial — Atlas Services' : isPt ? 'Ficha Técnica Clínica Oficial — Atlas Services' : 'Official Clinical Monograph — Atlas Services';
   const waCompound = isEs ? 'Compuesto' : isPt ? 'Composto' : 'Compound';
   const waSource = isEs ? 'Laboratorio' : isPt ? 'Laboratório' : 'Laboratory';
   const waPres = isEs ? 'Presentación' : isPt ? 'Apresentação' : 'Presentation';

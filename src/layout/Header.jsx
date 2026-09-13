@@ -921,13 +921,32 @@ function Header(props) {
                         <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--success)' }}>{t('header.activeSession', 'Active Session')}</span>
                       </div>
                     </div>
-                    {activeRole === 'admin' ? (
-                      <Link href="/admin" className="drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--error, #ef4444)' }}>
-                        <LayoutDashboard size={18} /> {t('header.adminBoard', 'Admin Board')}
-                      </Link>
-                    ) : (
-                      <Link href="/patient" className="drawer-link" onClick={() => setMobileMenuOpen(false)}><LayoutDashboard size={18} /> {t('header.dashboard', 'Dashboard')}</Link>
-                    )}                    <button 
+                    {(() => {
+                      const isUserAdmin = isAdmin || activeRole === 'admin';
+                      const portalHref = isUserAdmin ? '/admin'
+                        : (activeRole === 'doctor' || activeRole === 'medical_director') ? '/doctor'
+                        : (activeRole === 'wholesaler' || activeRole === 'wholeseller') ? '/wholesaler'
+                        : activeRole === 'supplier' ? '/supplier'
+                        : activeRole === 'clinic' ? '/clinic'
+                        : '/patient';
+                      const portalLabel = isUserAdmin ? t('header.adminBoard', 'Admin Board')
+                        : activeRole === 'doctor' || activeRole === 'medical_director' ? 'Doctor Portal'
+                        : activeRole === 'wholesaler' || activeRole === 'wholeseller' ? 'Wholesale Portal'
+                        : activeRole === 'supplier' ? 'Supplier Hub'
+                        : activeRole === 'clinic' ? 'Clinic Portal'
+                        : t('header.dashboard', 'Dashboard');
+                      return (
+                        <Link 
+                          href={portalHref} 
+                          className="drawer-link" 
+                          onClick={() => setMobileMenuOpen(false)} 
+                          style={isUserAdmin ? { color: 'var(--error, #ef4444)' } : undefined}
+                        >
+                          <LayoutDashboard size={18} /> {portalLabel}
+                        </Link>
+                      );
+                    })()}
+                    <button 
                       onClick={() => { logout(); setMobileMenuOpen(false); }}
                       style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', textAlign: 'left' }}
                       className="drawer-link"

@@ -100,8 +100,8 @@ export async function GET(request) {
   <text x="508" y="424" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#6ee7b7">✓  Dual ESI-MS Confirmed</text>
 
   <!-- Brand Footer -->
-  <text x="100" y="505" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="white">RegenPept</text>
-  <text x="100" y="528" font-family="system-ui, sans-serif" font-size="14" fill="#64748b">regenpept.com · Precision Clinical Peptide & Protocol Intelligence</text>
+  <text x="100" y="505" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="white">Atlas Services</text>
+  <text x="100" y="528" font-family="system-ui, sans-serif" font-size="14" fill="#64748b">med-peptides.com · Precision Clinical Peptide &amp; Protocol Intelligence</text>
 
   <!-- Watermark Icon -->
   <text x="1050" y="515" font-family="system-ui, sans-serif" font-size="44" text-anchor="middle" opacity="0.6">${typeIcon}</text>

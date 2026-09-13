@@ -114,7 +114,7 @@ export async function POST(request) {
       required: ['clinicalSummary', 'patientTargetGoal', 'medications', 'accessories', 'safetyAlerts']
     };
 
-    const systemPrompt = `You are the Lead Clinical Peptide Pharmacologist and AI Scribe for RegenPept.
+    const systemPrompt = `You are the Lead Clinical Peptide Pharmacologist and AI Scribe for Atlas Services.
 Your task is to parse freeform clinical notes or doctor dictations into a standardized, institutional medical prescription.
 
 Patient Context:

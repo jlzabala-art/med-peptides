@@ -125,6 +125,31 @@ export async function buildCatalogSummary(searchParams) {
       productsList.push({ id: doc.id, ref: doc.ref, data: doc.data() });
     });
 
+    // Hydrate any products matched by Algolia that might have been missing from the initial batch
+    if (algoliaMatchedIds && algoliaMatchedIds.size > 0) {
+      const existingIds = new Set(productsList.map(p => p.id.toLowerCase()));
+      const missingIds = Array.from(algoliaMatchedIds).filter(id => !existingIds.has(id));
+      if (missingIds.length > 0) {
+        const fetchedMissing = await Promise.all(
+          missingIds.slice(0, 30).map(async (mid) => {
+            try {
+              const dSnap = await adminDb.collection('products').doc(mid).get();
+              if (dSnap.exists) return { id: dSnap.id, ref: dSnap.ref, data: dSnap.data() };
+              const sSnap = await adminDb.collection('products').where('slug', '==', mid).limit(1).get();
+              if (!sSnap.empty) return { id: sSnap.docs[0].id, ref: sSnap.docs[0].ref, data: sSnap.docs[0].data() };
+            } catch {}
+            return null;
+          })
+        );
+        fetchedMissing.filter(Boolean).forEach(p => {
+          if (!existingIds.has(p.id.toLowerCase())) {
+            existingIds.add(p.id.toLowerCase());
+            productsList.push(p);
+          }
+        });
+      }
+    }
+
     // Helper to format variant metrics
     const formatVariant = (v = {}, fallbackId) => {
       let doseValue = parseFloat(v.dosage || v.dose || 0);
@@ -159,7 +184,10 @@ export async function buildCatalogSummary(searchParams) {
         missingVariantsProducts.map(async (p) => {
           try {
             const snap = await p.ref.collection('variants').get();
-            return { id: p.id, docs: snap.docs };
+            if (!snap.empty) return { id: p.id, docs: snap.docs };
+            // Fallback: check root collection product_variants where parentProductId == p.id
+            const pvSnap = await adminDb.collection('product_variants').where('parentProductId', '==', p.id).get();
+            return { id: p.id, docs: pvSnap.docs };
           } catch {
             return { id: p.id, docs: [] };
           }
@@ -188,8 +216,9 @@ export async function buildCatalogSummary(searchParams) {
       const docId = item.id;
       const cName = data.canonicalName || data.name || docId;
 
-      const isInactive = (data.status && ['inactive', 'archived', 'draft'].includes(data.status)) || data.isActive === false;
-      const computedStatus = data.status || (isInactive ? 'archived' : 'active');
+      const rawStatus = (data.status || '').toLowerCase();
+      const isInactive = (['inactive', 'archived', 'draft'].includes(rawStatus)) || data.isActive === false;
+      const computedStatus = (rawStatus === 'published' ? 'active' : rawStatus) || (isInactive ? 'archived' : 'active');
 
       // Search term filter (case-insensitive substring match with tags/aliases/programs)
       if (qParam.length > 0) {
@@ -230,7 +259,11 @@ export async function buildCatalogSummary(searchParams) {
 
       // Status Filter
       if (statusParams.length > 0) {
-        if (!statusParams.includes(computedStatus)) return;
+        const matchesStatus = statusParams.some(sp => {
+          const normSp = sp === 'published' ? 'active' : sp;
+          return normSp === computedStatus || normSp === rawStatus || (normSp === 'active' && (rawStatus === 'active' || rawStatus === 'published' || !rawStatus));
+        });
+        if (!matchesStatus) return;
       } else {
         if (!includeInactive && isInactive) return;
       }
@@ -361,8 +394,8 @@ export async function buildCatalogSummary(searchParams) {
 
       // Allow products with subcollection variants (variantsCount > 0) even when
       // the embedded array is empty — they will show the correct count from variantsCount.
-      const effectiveVariantCount = productVariants.length || (data.variantsCount || 0);
-      if (effectiveVariantCount === 0 && !includeInactive) return;
+      const effectiveVariantCount = productVariants.length || (data.variantsCount || 0) || (Array.isArray(data.variants) ? data.variants.length : 0);
+      if (effectiveVariantCount === 0 && !includeInactive && !qParam) return;
 
       let minPrice = Infinity, maxPrice = 0, totalStock = null;
       const suppliers = new Map();

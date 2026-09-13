@@ -19,7 +19,7 @@ import {
   Sparkles
 } from '@/lib/icons';
 
-export default function UserProfileMenu({ roleContext = 'patient', isMobile = false }) {
+export default function UserProfileMenu({ roleContext = 'patient', isMobile = false, portalTitle = '' }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const menuRef = useRef(null);
@@ -116,8 +116,8 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
             <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.2 }}>
               {displayName}
             </span>
-            <span style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600 }}>
-              {currentRole}
+            <span style={{ fontSize: '0.66rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>
+              {portalTitle || currentRole}
             </span>
           </div>
         )}

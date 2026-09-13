@@ -18,7 +18,7 @@ const protocolsToSeed = [
     goals: ['Hair Growth', 'Aesthetics', 'Anti-Aging'],
     complexity_level: 'Beginner',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Improved hair follicle health and thickness',
@@ -72,7 +72,7 @@ const protocolsToSeed = [
     goals: ['Hair Growth', 'Recovery', 'Anti-Aging'],
     complexity_level: 'Intermediate',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Maximized hair density and follicle structural integrity',
@@ -126,7 +126,7 @@ const protocolsToSeed = [
     goals: ['Recovery', 'Anti-Inflammatory', 'Anti-Aging'],
     complexity_level: 'Advanced',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Profound reduction in chronic inflammatory markers',
@@ -180,7 +180,7 @@ const protocolsToSeed = [
     goals: ['Energy', 'Longevity', 'Metabolic Health'],
     complexity_level: 'Advanced',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Enhanced cellular energy and reduced fatigue',

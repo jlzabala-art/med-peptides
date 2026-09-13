@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import DataModule from '../ui/DataModule';
 import DataTable from '../ui/DataTable';
 import MobileActionSheet from '../ui/MobileActionSheet';
@@ -28,6 +28,7 @@ import { useGenomicsMatrixColumns } from './catalog/columns/useGenomicsMatrixCol
 import CatalogVariantExpander from './catalog/components/CatalogVariantExpander';
 import MobileGenomicsCard from './catalog/components/MobileGenomicsCard';
 import CatalogMobileCard from './catalog/components/CatalogMobileCard';
+import { useProductsContextBridge } from '../../hooks/admin/useProductsContextBridge';
 import dynamic from 'next/dynamic';
 
 const CatalogModalsContainer = dynamic(() => import('./catalog/drawers/CatalogModalsContainer'), { ssr: false });
@@ -55,6 +56,8 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedParam = searchParams?.get('selected') || searchParams?.get('productId') || searchParams?.get('id');
   const { user } = useAuth();
   const { openDrawer } = useDrawer();
   const { updateCart } = useCart();
@@ -145,6 +148,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
 
   // Drawers & Modals States
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [activeDrawer, setActiveDrawer] = useState(null); // 'offers', 'pricing', 'competitors', 'edit', 'quick-view'
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
@@ -221,6 +225,22 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       window.removeEventListener('catalog-new-product', handleNewProduct);
     };
   }, []);
+
+  // Direct product auto-opening when navigating from other modules (Rule #4 & cross-navigation)
+  useEffect(() => {
+    if (!selectedParam || !data || data.length === 0) return;
+    const cleanId = selectedParam.toLowerCase();
+    const matched = data.find(p => 
+      (p.id && String(p.id).toLowerCase() === cleanId) ||
+      (p.slug && String(p.slug).toLowerCase() === cleanId) ||
+      (p.canonicalName && String(p.canonicalName).toLowerCase() === cleanId) ||
+      (p.name && String(p.name).toLowerCase() === cleanId)
+    );
+    if (matched) {
+      setSelectedProduct(matched);
+      setActiveDrawer('offers');
+    }
+  }, [selectedParam, data]);
 
   const handleNavigation = useCallback((url) => {
     setActiveDrawer(null);
@@ -453,6 +473,21 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       scopeLabel: hasAnyFilter ? 'Matching Active Filters' : 'Active Catalog'
     };
   }, [kpiScope, facetTotals, globalMetrics, facetProductTypes, facetCategories, dataWithMeta, kpis, categoryFacets, hasAnyFilter, filterSupplier, facetSuppliers, filterCategory]);
+
+  // ── 3-Level Context Hierarchy Bridge for ClinicalAI ───────────────────────
+  useProductsContextBridge({
+    products: dataWithMeta,
+    globalMetrics: displayedMetrics,
+    activeFilters: {
+      category: filterCategory.length > 0 ? filterCategory.join(', ') : 'All',
+      supplier: filterSupplier.length > 0 ? filterSupplier.join(', ') : 'All',
+      searchTerm: debouncedSearchTerm
+    },
+    selectedProduct,
+    selectedVariant,
+    activeDrawer,
+    role: user?.role || 'admin'
+  });
 
   const handleExportProductPdf = useCallback((params = {}) => {
     const targetProduct = (params && params.id) ? params : selectedProduct;

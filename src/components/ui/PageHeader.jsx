@@ -41,7 +41,7 @@ export default function PageHeader({
   iconBg,
   iconColor,
   helpTopic,
-  showAiAssistant = true,
+  showAiAssistant = false, // AI button lives exclusively in the top navigation header with full page context
   showDashboardBack = true,
 }) {
   const router = useRouter();

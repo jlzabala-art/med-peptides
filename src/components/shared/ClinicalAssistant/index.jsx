@@ -629,82 +629,226 @@ export default function ClinicalAssistant({
           const effectiveContext = dynamicPageContext || pageContext;
           if (!effectiveContext) return null;
 
-          const isPatientContext = effectiveContext.mode === 'patient' || effectiveContext.isPatientContext || Boolean(effectiveContext.patientId);
-          const isProductContext = !isPatientContext && (
-            effectiveContext.isProductPage || 
-            Boolean(effectiveContext.productName) ||
-            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/')))
+          const level = effectiveContext.level || (
+            effectiveContext.isVariantContext ? 3 :
+            (effectiveContext.isProductContext || effectiveContext.isProductPage) ? 2 :
+            (effectiveContext.isCatalogContext || effectiveContext.page === 'products' || effectiveContext.activeTab === 'products') ? 1 : null
           );
 
-          const entityTitle = effectiveContext.name || effectiveContext.productName || effectiveContext.entityName || (messages[0]?.content?.match(/about\s+([A-Za-z0-9-]+)/i)?.[1]) || 'Patient Chart';
+          const isPatientContext = effectiveContext.mode === 'patient' || effectiveContext.isPatientContext || Boolean(effectiveContext.patientId);
+          const isVariantContext = !isPatientContext && (level === 3 || Boolean(effectiveContext.isVariantContext));
+          const isProductContext = !isPatientContext && !isVariantContext && (
+            level === 2 ||
+            effectiveContext.isProductPage || 
+            Boolean(effectiveContext.productName) ||
+            Boolean(effectiveContext.name && (effectiveContext.variants || effectiveContext.category || effectiveContext.pricing)) ||
+            (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/')))
+          );
+          const isCatalogContext = !isPatientContext && !isProductContext && !isVariantContext && (
+            level === 1 ||
+            effectiveContext.activeTab === 'products' ||
+            effectiveContext.activeTab === 'catalog' ||
+            effectiveContext.page === 'products' ||
+            (typeof window !== 'undefined' && (window.location.pathname.includes('/products') || window.location.pathname.includes('/catalog')))
+          );
+
+          let entityTitle = effectiveContext.name || effectiveContext.productName || effectiveContext.entityName || (messages[0]?.content?.match(/about\s+([A-Za-z0-9-]+)/i)?.[1]);
+          if (!entityTitle) {
+            if (isPatientContext) entityTitle = 'Patient Chart';
+            else if (isVariantContext) entityTitle = `${effectiveContext.dosage || ''} ${effectiveContext.presentation || 'Variant'}`.trim();
+            else if (isProductContext) entityTitle = effectiveContext.productName || 'Compound Focus';
+            else if (isCatalogContext) entityTitle = 'Product Catalog';
+            else if (effectiveContext.label) entityTitle = effectiveContext.label;
+            else if (effectiveContext.activeTab) entityTitle = effectiveContext.activeTab.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            else entityTitle = 'Platform Workspace';
+          }
+
           const variantCount = effectiveContext.variants?.length || 0;
-          const category = effectiveContext.clinic || effectiveContext.category || '';
+          const totalProductsCount = effectiveContext.totalProducts || products?.length || 0;
+          const lowStockCount = effectiveContext.lowStockCount || 0;
+          const category = effectiveContext.clinic || effectiveContext.category || (isCatalogContext ? 'Catalog DB' : '');
+
+          const quickActions = effectiveContext.quickActions || (
+            isVariantContext ? [
+              { label: '📊 Simular Margen', prompt: `Simula márgenes para este SKU: ¿Qué precio mantiene un margen del 40% si el coste sube un 15%?` },
+              { label: '📝 Generar RFQ', prompt: `Redacta una solicitud de cotización (RFQ) formal para 100 unidades de este SKU.` }
+            ] : isProductContext ? [
+              { label: '📄 Datasheet Oficial', prompt: `Genera la ficha técnica / datasheet oficial de ${entityTitle}` },
+              { label: '🏷️ Matriz de Precios', prompt: `Muestra la matriz de precios completa (coste, clínica, wholesale, retail) para ${entityTitle}` },
+              { label: '🔗 Protocolos', prompt: `¿En qué protocolos clínicos de nuestra base de datos se incluye ${entityTitle}?` }
+            ] : isCatalogContext ? [
+              { label: '⚠️ Stock Crítico', prompt: `¿Cuáles son los productos con stock bajo o crítico en el catálogo?` },
+              { label: '📋 Catálogo Precios PDF', prompt: `Genera un catálogo de precios en tabla para todos los productos en stock` },
+              { label: '⚖️ Comparar GLP-1', prompt: `Compara las opciones de GLP-1 y análogos metabólicos en el catálogo` }
+            ] : []
+          );
+
+          const levelBadgeColor = isVariantContext ? '#c2410c' : isProductContext ? '#7c3aed' : '#003666';
+          const levelBadgeBg = isVariantContext ? 'rgba(194, 65, 12, 0.08)' : isProductContext ? 'rgba(124, 58, 237, 0.08)' : 'rgba(0, 54, 102, 0.08)';
 
           return (
             <div style={{
+              backgroundColor: isPatientContext ? 'rgba(13, 148, 136, 0.05)' : isVariantContext ? 'rgba(194, 65, 12, 0.04)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.04)' : 'var(--surface-raised, #f8fafc)',
+              borderBottom: `1px solid ${isPatientContext ? 'rgba(13, 148, 136, 0.18)' : isVariantContext ? 'rgba(194, 65, 12, 0.18)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.15)' : 'var(--border-light, #e2e8f0)'}`,
               padding: '0.45rem 1rem',
-              backgroundColor: isPatientContext ? 'rgba(13, 148, 136, 0.06)' : isProductContext ? 'rgba(124, 58, 237, 0.05)' : 'var(--surface-raised, #f8fafc)',
-              borderBottom: `1px solid ${isPatientContext ? 'rgba(13, 148, 136, 0.18)' : isProductContext ? 'rgba(124, 58, 237, 0.15)' : 'var(--border-light, #e2e8f0)'}`,
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.5rem',
-              fontSize: '0.76rem',
-              color: isPatientContext ? '#0d9488' : isProductContext ? '#7c3aed' : 'var(--text-muted, #64748b)',
-              fontWeight: 600
+              flexDirection: 'column',
+              gap: '0.35rem'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
-                <span style={{ fontSize: '0.9rem' }}>{isPatientContext ? '🩺' : isProductContext ? '🧬' : '📋'}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  <span>{isPatientContext ? 'Active Patient:' : isProductContext ? 'Active Focus:' : 'Context:'}</span>
-                  <strong style={{ color: isPatientContext ? '#0f766e' : isProductContext ? '#5b21b6' : '#0f172a' }}>{entityTitle}</strong>
-                  {variantCount > 0 && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.5rem',
+                fontSize: '0.76rem',
+                color: isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : (isProductContext || isCatalogContext) ? '#7c3aed' : 'var(--text-muted, #64748b)',
+                fontWeight: 600
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.9rem' }}>
+                    {isPatientContext ? '🩺' : isVariantContext ? '🏷️' : isProductContext ? '🧬' : '📊'}
+                  </span>
+                  
+                  {/* Level pill badge */}
+                  {(isCatalogContext || isProductContext || isVariantContext) && (
                     <span style={{
-                      fontSize: '0.68rem',
-                      padding: '1px 6px',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(124, 58, 237, 0.1)',
-                      color: '#6d28d9',
-                      fontWeight: 700
+                      fontSize: '0.62rem',
+                      fontWeight: 800,
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      backgroundColor: levelBadgeBg,
+                      color: levelBadgeColor,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase'
                     }}>
-                      {variantCount} {variantCount === 1 ? 'format' : 'formats'}
+                      {isVariantContext ? 'Nivel 3 · Variante' : isProductContext ? 'Nivel 2 · Producto' : 'Nivel 1 · Catálogo'}
                     </span>
                   )}
-                  {category && (
-                    <span style={{ fontSize: '0.68rem', opacity: 0.85 }}>· {category}</span>
-                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span>{isPatientContext ? 'Active Patient:' : isVariantContext ? 'SKU Focus:' : isProductContext ? 'Active Focus:' : isCatalogContext ? 'Scope:' : 'Context:'}</span>
+                    <strong style={{ color: isPatientContext ? '#0f766e' : isVariantContext ? '#9a3412' : (isProductContext || isCatalogContext) ? '#5b21b6' : '#0f172a' }}>
+                      {entityTitle}
+                    </strong>
+
+                    {isVariantContext && effectiveContext.pricing?.marginPct != null && (
+                      <span style={{
+                        fontSize: '0.66rem',
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        backgroundColor: '#ecfdf5',
+                        color: '#047857',
+                        fontWeight: 700
+                      }}>
+                        Margin: {effectiveContext.pricing.marginPct}%
+                      </span>
+                    )}
+
+                    {isProductContext && variantCount > 0 && (
+                      <span style={{
+                        fontSize: '0.66rem',
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                        color: '#6d28d9',
+                        fontWeight: 700
+                      }}>
+                        {variantCount} {variantCount === 1 ? 'format' : 'formats'}
+                      </span>
+                    )}
+
+                    {isCatalogContext && totalProductsCount > 0 && (
+                      <span style={{
+                        fontSize: '0.66rem',
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        backgroundColor: 'rgba(0, 54, 102, 0.08)',
+                        color: '#003666',
+                        fontWeight: 700
+                      }}>
+                        {totalProductsCount} products {lowStockCount > 0 ? `· ${lowStockCount} stock bajo` : ''}
+                      </span>
+                    )}
+
+                    {category && (
+                      <span style={{ fontSize: '0.66rem', opacity: 0.85 }}>· {category}</span>
+                    )}
+                  </div>
                 </div>
+
+                {(isPatientContext || isProductContext || isVariantContext || dynamicPageContext) && (
+                  <button
+                    onClick={clearActiveContext}
+                    title="Reset context to full catalog"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : '#8b5cf6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      gap: '4px',
+                      transition: 'all 0.2s',
+                      backgroundColor: 'rgba(0,0,0,0.03)'
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.color = '#ef4444';
+                      e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.color = isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : '#8b5cf6';
+                      e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                    }}
+                  >
+                    <span>Reset Focus</span>
+                    <X size={11} />
+                  </button>
+                )}
               </div>
-              <button
-                onClick={clearActiveContext}
-                title="Clear patient focus and return to general assistant"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: isPatientContext ? '#0d9488' : isProductContext ? '#8b5cf6' : 'var(--text-muted, #94a3b8)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '2px 6px',
-                  borderRadius: '6px',
-                  fontSize: '0.70rem',
-                  fontWeight: 700,
-                  gap: '4px',
-                  transition: 'all 0.2s',
-                  backgroundColor: 'rgba(0,0,0,0.03)'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.color = '#ef4444';
-                  e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.color = isPatientContext ? '#0d9488' : isProductContext ? '#8b5cf6' : '#94a3b8';
-                  e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
-                }}
-              >
-                <span>Clear Focus</span>
-                <X size={12} />
-              </button>
+
+              {/* Quick Action Interactive Chips */}
+              {quickActions.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflowX: 'auto', paddingBottom: '2px' }}>
+                  {quickActions.map((qa, qi) => (
+                    <button
+                      key={qi}
+                      onClick={() => handleSend(qa.prompt)}
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '999px',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(0,0,0,0.08)',
+                        color: '#334155',
+                        fontSize: '0.68rem',
+                        fontWeight: 650,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '3px',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.backgroundColor = levelBadgeBg;
+                        e.currentTarget.style.color = levelBadgeColor;
+                        e.currentTarget.style.borderColor = levelBadgeColor;
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.backgroundColor = '#ffffff';
+                        e.currentTarget.style.color = '#334155';
+                        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
+                      }}
+                    >
+                      {qa.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}

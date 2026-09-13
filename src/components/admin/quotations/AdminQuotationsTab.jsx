@@ -25,9 +25,7 @@ import { extendQuotationValidity } from '../../../services/quotationRepository';
 import notifier from '../../../services/NotificationService';
 import MobileQuotationCard from '../../shared/mobile/MobileQuotationCard';
 import { exportToCSV } from '../../../utils/universalExporter';
-
-
-
+import { useQuotationsContextBridge } from '../../../hooks/admin/useQuotationsContextBridge';
 
 export default function AdminQuotationsTab() {
   const router = useRouter();
@@ -41,6 +39,10 @@ export default function AdminQuotationsTab() {
   const rangeFilter = searchParams.get('range') || 'all';
   const categoryFilter = searchParams.get('category') || searchParams.get('recipient') || '';
   const managerFilter = searchParams.get('manager') || searchParams.get('accountManager') || '';
+
+  // Context Bridge Focus for Atlas AI
+  const [focusedQuote, setFocusedQuote] = useState(null);
+  const [focusedItem, setFocusedItem] = useState(null);
 
   // KPI Scope & Multi-select State (Golden Rule #22)
   const [kpiScope, setKpiScope] = useState('filtered');
@@ -124,7 +126,7 @@ export default function AdminQuotationsTab() {
 
       const createdDate = raw.createdAt?.toDate
         ? raw.createdAt.toDate()
-        : (raw.createdAt ? new Date(raw.createdAt) : new Date());
+        : (raw.createdAt ? new Date(raw.createdAt) : (raw.updatedAt?.toDate ? raw.updatedAt.toDate() : (raw.updatedAt ? new Date(raw.updatedAt) : new Date(0))));
 
       const expiryDate = raw.expiresAt?.toDate
         ? raw.expiresAt.toDate()
@@ -302,6 +304,21 @@ export default function AdminQuotationsTab() {
   }, [filteredQuotations]);
 
   const activeKPIs = kpiScope === 'filtered' ? filteredKPIs : realKPIs;
+
+  // Bridge live quotations context to Atlas AI in TopBar
+  useQuotationsContextBridge({
+    quotations: filteredQuotations,
+    kpis: activeKPIs,
+    activeFilters: {
+      range: rangeFilter,
+      status: statusFilter,
+      category: categoryFilter,
+      manager: managerFilter,
+      search: searchQuery
+    },
+    selectedQuote: focusedQuote,
+    selectedItem: focusedItem
+  });
 
   const handleShareWhatsApp = (quote, lang = null) => {
     const activeLang = lang || (typeof window !== 'undefined' ? (localStorage.getItem('share_message_lang') || 'en') : 'en');
@@ -1086,10 +1103,12 @@ export default function AdminQuotationsTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2rem' }}>
-      {/* 1. Golden Standard Sticky Page Header */}
+      {/* 1. Golden Standard Sticky Page Header (Zoho Books Standard) */}
       <PageHeader
-        title="Quotations & Estimates"
+        title="Estimates"
         subtitle="Manage commercial pro-forma estimates, margin calculations, client approvals, and supplier purchase conversions"
+        panel="admin"
+        icon={FileText}
         actions={
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
@@ -1265,6 +1284,8 @@ export default function AdminQuotationsTab() {
           columns={columns}
           data={filteredQuotations}
           expandableRender={expandableRender}
+          hideExpandColumn={true}
+          onRowClick={(row) => setFocusedQuote(row)}
           rowKey="id"
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}

@@ -15,7 +15,7 @@ const protocols = [
   {
     protocol_id: "semax-cognitive-enhancement",
     protocol_name: "Semax Cognitive Enhancement",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "brain_health",
     goals: ["brain_health", "focus", "recovery"],
     description: "Semax is a potent nootropic peptide that increases BDNF (Brain-Derived Neurotrophic Factor) and enkephalins. It is highly effective for improving focus, memory, and cognitive stamina.",
@@ -58,7 +58,7 @@ const protocols = [
   {
     protocol_id: "selank-anxiety-stress",
     protocol_name: "Selank Anxiolytic & Stress Protocol",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "brain_health",
     goals: ["brain_health", "sleep"],
     description: "Selank is a synthetic analog of the naturally occurring peptide tuftsin. It provides profound anxiolytic (anti-anxiety) effects without the sedative cognitive blunting associated with traditional benzodiazepines.",
@@ -101,7 +101,7 @@ const protocols = [
   {
     protocol_id: "epithalon-telomere-extension",
     protocol_name: "Epithalon Telomere Extension Cycle",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "longevity",
     goals: ["longevity", "sleep"],
     description: "Epithalon (Epitalon) is a synthetic pineal gland peptide known for its ability to increase telomerase activity, extending the lifespan of cells, and restoring circadian rhythms.",
@@ -144,7 +144,7 @@ const protocols = [
   {
     protocol_id: "dsip-deep-sleep",
     protocol_name: "DSIP Deep Sleep Optimization",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "sleep",
     goals: ["sleep", "recovery"],
     description: "Delta Sleep-Inducing Peptide (DSIP) is a neuromodulator that promotes slow-wave (deep) sleep, reduces stress, and normalizes sleep architecture.",
@@ -187,7 +187,7 @@ const protocols = [
   {
     protocol_id: "ara290-nerve-repair",
     protocol_name: "ARA-290 Neuropathy & Nerve Repair",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "recovery",
     goals: ["recovery", "longevity"],
     description: "ARA-290 (Cibinetide) is a peptide designed to stimulate the innate repair receptor (IRR). It is highly effective at reducing systemic inflammation and repairing small nerve fibers.",
@@ -230,7 +230,7 @@ const protocols = [
   {
     protocol_id: "pe2228-neurogenesis",
     protocol_name: "PE-22-28 Neurogenesis & Mood",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "brain_health",
     goals: ["brain_health", "recovery"],
     description: "PE-22-28 is a novel TREK-1 potassium channel antagonist that exhibits potent anti-depressant effects and promotes rapid neurogenesis.",
@@ -277,7 +277,7 @@ const protocols = [
   {
     protocol_id: "pinealon-brain-health",
     protocol_name: "Pinealon Brain Health Bioregulator",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "brain_health",
     goals: ["brain_health", "longevity"],
     description: "Pinealon is a synthetic 3-amino acid peptide bioregulator that targets the brain and central nervous system to protect neurons and improve cognitive function.",
@@ -320,7 +320,7 @@ const protocols = [
   {
     protocol_id: "cardiogen-heart-health",
     protocol_name: "Cardiogen Cardiac Repair (Experimental)",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "heart_health",
     goals: ["heart_health", "longevity"],
     description: "Cardiogen is a synthetic tetrapeptide designed to stimulate the regeneration of heart muscle tissue and improve myocardial function.",
@@ -363,7 +363,7 @@ const protocols = [
   {
     protocol_id: "thymogen-immune-bioregulator",
     protocol_name: "Thymogen Immune Bioregulator",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "immunity",
     goals: ["immunity", "recovery"],
     description: "Thymogen is a dipeptide bioregulator (Glu-Trp) that regulates immune system function and stimulates cellular immunity.",
@@ -406,7 +406,7 @@ const protocols = [
   {
     protocol_id: "prostamax-prostate-bioregulator",
     protocol_name: "Prostamax Prostate Bioregulator",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "recovery",
     goals: ["recovery", "longevity"],
     description: "Prostamax is a specialized bioregulator peptide aimed at normalizing the function of the prostate gland.",
@@ -449,7 +449,7 @@ const protocols = [
   {
     protocol_id: "testagen-testosterone-bioregulator",
     protocol_name: "Testagen Testicular Bioregulator",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "sexual_health",
     goals: ["sexual_health", "muscle_growth"],
     description: "Testagen is a synthetic peptide bioregulator that targets the testes to normalize natural testosterone production and improve spermatogenesis.",
@@ -492,7 +492,7 @@ const protocols = [
   {
     protocol_id: "cartalax-joint-bioregulator",
     protocol_name: "Cartalax Joint & Cartilage Bioregulator",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "joint_health",
     goals: ["joint_health", "recovery"],
     description: "Cartalax is a synthetic peptide bioregulator that targets cartilage and connective tissue, promoting the synthesis of collagen and repair of joints.",
@@ -535,7 +535,7 @@ const protocols = [
   {
     protocol_id: "pnc-27-experimental",
     protocol_name: "PNC-27 (Highly Experimental)",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "immunity",
     goals: ["immunity", "longevity"],
     description: "PNC-27 is a highly experimental anti-cancer peptide that binds to HDM-2 protein expressed in the membranes of cancer cells, causing necrosis.",

@@ -92,18 +92,42 @@ function buildProductDataBlock(product) {
     }`);
   }
 
-  // ── Variantes / Formatos disponibles ────────────────────────────────────────
+  // ── Variantes / Formatos disponibles y Precios multinivel ───────────────────
   if (product.variants?.length) {
-    lines.push(`\nAVAILABLE FORMATS (${product.variants.length} variants):`);
-    product.variants.slice(0, 8).forEach((v) => {
+    lines.push(`\nAVAILABLE FORMATS & PRICING TIERS (${product.variants.length} variants):`);
+    product.variants.slice(0, 15).forEach((v, idx) => {
       const parts = [
-        v.dosage || v.concentration || 'Standard',
+        `Variant ${idx + 1}: ${v.dosage || v.concentration || 'Standard'}`,
         v.presentation || v.form || 'Vial',
         v.supplier ? `Supplier: ${v.supplier}` : null,
         v.stock != null ? `Stock: ${v.stock} units` : null,
         v.purity ? `Purity: ${v.purity}` : null,
       ].filter(Boolean);
-      lines.push(`- ${parts.join(' | ')}`);
+
+      const pricingParts = [];
+      const cost = v.cost ?? v.unit_cost ?? v.pricing?.masterPrice?.base ?? v.pricing?.master?.perUnit;
+      if (cost != null) pricingParts.push(`Cost: $${cost}`);
+
+      const clinic = v.clinicPrice ?? v.clinic_price ?? v.pricing?.clinicPrice?.base ?? v.pricing?.clinic?.perUnit;
+      if (clinic != null) pricingParts.push(`Clinic: $${clinic}`);
+
+      const wholesale = v.wholesalePrice ?? v.wholesale_price ?? v.pricing?.wholesalePrice?.base ?? v.pricing?.wholesale?.perUnit;
+      if (wholesale != null) pricingParts.push(`Wholesale: $${wholesale}`);
+
+      const retail = v.unit_price ?? v.price ?? v.retailPrice ?? v.pricing?.retailPrice?.base ?? v.pricing?.retail?.perUnit;
+      if (retail != null) pricingParts.push(`Retail: $${retail}`);
+
+      const tier10 = v.cost_tiers?.cost_10 ?? v.price_per_kit_10 ?? v.pricing?.wholesale?.kit;
+      if (tier10 != null) pricingParts.push(`Tier 10-Kit: $${tier10}`);
+
+      const tier50 = v.cost_tiers?.cost_50 ?? v.price_per_kit_50;
+      if (tier50 != null) pricingParts.push(`Tier 50-Kit: $${tier50}`);
+
+      if (pricingParts.length) {
+        lines.push(`- ${parts.join(' | ')} => [PRICING: ${pricingParts.join(' | ')}]`);
+      } else {
+        lines.push(`- ${parts.join(' | ')}`);
+      }
     });
   }
 
@@ -136,9 +160,10 @@ export function buildProductSystemPrompt(product, opts = {}) {
   const dataBlock = buildProductDataBlock(product);
 
   const audienceNote = {
-    doctor:     'You are speaking with a licensed medical professional. Use precise clinical terminology.',
+    doctor:     'You are speaking with a licensed medical professional. Use precise clinical terminology and detailed dosing formats.',
     patient:    'You are speaking with a patient or health-conscious individual. Use accessible language and include appropriate disclaimers.',
-    admin:      'You are speaking with a clinic administrator. Balance clinical accuracy with operational relevance.',
+    admin:      'You are speaking with a platform administrator. You have full access to commercial metrics, supplier data, and multi-tier pricing.',
+    wholesaler: 'You are speaking with a B2B wholesale partner. Provide comprehensive tier pricing, kit volume discounts, and margin analysis.',
     researcher: 'You are speaking with a researcher or clinical professional. Be technically precise.',
   }[audience] || '';
 
@@ -167,8 +192,8 @@ MANDATORY RESPONSE STRUCTURE — Always use ALL 8 sections in this exact order:
 ### 4. PHARMACOKINETICS & BIOAVAILABILITY
 [Half-life, receptor binding, bioavailability, peak plasma. Use pharmacology data from catalog if available, otherwise state known literature values.]
 
-### 5. AVAILABLE FORMS & SPECIFICATIONS
-[All variants/formats from the catalog data above. Include dosage, presentation, purity, supplier where available.]
+### 5. AVAILABLE FORMS, SPECIFICATIONS & PRICING
+[All variants/formats from the catalog data above. Include dosage, presentation, purity, supplier, and when requested or in admin/B2B mode, list the full pricing tiers (Cost, Wholesale, Retail, Volume Tiers).]
 
 ### 6. RELATED PROTOCOLS
 [List protocols from the catalog data. If none are listed, suggest common research protocol pairings.]
@@ -187,7 +212,19 @@ MANDATORY RESPONSE STRUCTURE — Always use ALL 8 sections in this exact order:
 MANDATORY RULES:
 - ${forceEnglish ? 'ALWAYS respond in ENGLISH, regardless of the language the user writes in.' : ''}
 - NEVER output raw prompt tags like [AUDIENCE:...], [GOAL:...], [STYLE:...], [LAYER:...], or DIRECTIVE markers.
-- Do NOT include prices in the clinical profile body — direct to the product page for pricing.
+- 3-TIER CONTEXT HIERARCHY:
+  • LEVEL 1 (CATALOG LEVEL): When the user is viewing the global catalog, provide inventory health, low-stock warnings (<20 units), category breakdowns, and compare compounds across classes.
+  • LEVEL 2 (PRODUCT LEVEL): When a specific compound is in focus, provide its complete pharmacology, molecular CAS identity, available formats, pricing tiers, and linked protocols.
+  • LEVEL 3 (VARIANT / SKU LEVEL): When a specific dosage or presentation is in focus (e.g. 10mg Vial), perform exact financial and margin simulations (Unit Cost vs Retail PVP, gross margin %, 10-kit tier profitability, and simulate price adjustments when costs fluctuate).
+- DATASHEET / TECHNICAL SHEET GENERATION:
+  When the user asks for a "datasheet", "ficha técnica", "technical specification", or "clinical monograph" for a product:
+  1. Produce a comprehensive technical monograph with chemical identity (CAS, MW, purity), receptor pharmacology, pharmacokinetic parameters, formats/reconstitution table, and clinical evidence.
+  2. ALWAYS append this tag at the very end: [ACTION:DOWNLOAD_DATASHEET:${productSlug}] so the user gets an instant PDF download button.
+- PRICE LIST / CATALOG GENERATION:
+  When the user asks for a "price list", "catálogo de precios", "wholesale list", or "pricing table":
+  1. Output a beautifully structured markdown table with Compound, Category, Dosage, Presentation, and appropriate prices for the active role (${audience}).
+  2. ALWAYS append this tag at the very end: [ACTION:DOWNLOAD_PRICELIST:${product?.category || 'all'}] to render PDF and CSV export buttons.
+- PRICING INQUIRIES: When the user asks about prices, variant costs, wholesale tiers, or retail margins, ALWAYS present the exact numbers from the catalog data in a structured comparison table or clear list. Never withhold pricing data from administrators, clinic directors, or wholesalers.
 - If a section's data is not in the catalog block above, use your general scientific knowledge but clearly state: "Based on published literature:"
 - NEVER say "not detailed in the current catalog context" without first providing the information from general scientific knowledge.
 `;

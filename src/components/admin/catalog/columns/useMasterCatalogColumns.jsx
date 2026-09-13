@@ -513,6 +513,11 @@ export function useMasterCatalogColumns({
           presentationId: v.presentation,
           supplier: supplierIdToName[v.supplierId] || v.supplierName || v.supplierId,
           price: v.resolvedPrice?.perUnit || v.pricePerUnit || v.price,
+          unit_price: v.resolvedPrice?.perUnit || v.pricePerUnit || v.price,
+          cost: v.cost ?? v.unit_cost ?? v.pricing?.masterPrice?.base ?? v.pricing?.master?.perUnit ?? null,
+          wholesalePrice: v.wholesalePrice ?? v.wholesale_price ?? v.pricing?.wholesalePrice?.base ?? v.pricing?.wholesale?.perUnit ?? null,
+          clinicPrice: v.clinicPrice ?? v.clinic_price ?? v.pricing?.clinicPrice?.base ?? v.pricing?.clinic?.perUnit ?? null,
+          cost_tiers: v.cost_tiers || (v.price_per_kit_10 ? { cost_10: v.price_per_kit_10, cost_50: v.price_per_kit_50 } : null),
           stock: v.stock,
         }));
 

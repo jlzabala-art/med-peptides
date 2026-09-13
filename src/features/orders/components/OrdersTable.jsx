@@ -187,16 +187,19 @@ export default function OrdersTable({
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
   const pathname = usePathname();
-  const targetId = new URLSearchParams(location.search).get('orderId');
   const rowRefs = useRef({});
 
   // Pre-populate search from deep-link orderId param
   useEffect(() => {
-    if (targetId && !searchTerm) {
-      setSearchTerm(targetId);
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      const targetId = p.get('orderId');
+      if (targetId && !searchTerm) {
+        setSearchTerm(targetId);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetId]);
+  }, []);
 
   /* ── Fetch (Reactivity via useOrders) ───────────────────────────────── */
   const filters = {};

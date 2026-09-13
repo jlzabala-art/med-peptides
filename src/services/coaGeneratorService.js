@@ -19,7 +19,7 @@ export function generateCoaData(product, variant) {
 
   return {
     documentId: verificationCode,
-    company: 'REGENPEPT PHARMACEUTICAL BIOTECH',
+    company: 'ATLAS SERVICES PHARMACEUTICAL BIOTECH',
     labStandard: 'ISO/IEC 17025:2017 & cGMP 21 CFR Part 211',
     productName,
     scientificName: product?.scientificName || 'Synthetic Oligopeptide',

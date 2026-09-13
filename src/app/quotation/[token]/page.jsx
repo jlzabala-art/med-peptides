@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { fetchPublicQuotationByTokenAction, approvePublicQuotationAction } from '../../../actions/quotationsActions';
-import { FileText, CheckCircle2, Clock, ShieldCheck, Download, AlertTriangle, Snowflake, Building2, User, Sparkles, Phone, Mail, Share2, Tag, ExternalLink } from 'lucide-react';
+import { FileText, CheckCircle2, Clock, ShieldCheck, Download, AlertTriangle, Snowflake, Building2, User, Sparkles, Phone, Mail, Share2, Tag, ExternalLink, QrCode } from 'lucide-react';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import { triggerHaptic } from '@/utils/haptics';
 
@@ -271,12 +271,22 @@ export default function PublicQuotationPage() {
                             <ExternalLink size={12} /> Tech Monograph
                           </a>
                           <a
-                            href={`/api/vial-label/${prodSlug}?format=38x90`}
+                            href={`/api/vial-label/${prodSlug}?format=38x90&type=full`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ fontSize: '0.74rem', color: '#0284c7', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                            style={{ fontSize: '0.74rem', color: '#4338ca', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                            title="Download Full Specification Vial Label"
                           >
-                            <Tag size={12} /> Vial Label (38x90)
+                            <Tag size={12} /> Full Label
+                          </a>
+                          <a
+                            href={`/api/vial-label/${prodSlug}?format=38x90&type=barcode`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: '0.74rem', color: '#0369a1', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                            title="Download Barcode Only Monograph Label"
+                          >
+                            <QrCode size={12} /> Barcode Only
                           </a>
                         </div>
                       </td>
@@ -329,12 +339,20 @@ export default function PublicQuotationPage() {
                       <ExternalLink size={13} /> Tech Monograph
                     </a>
                     <a
-                      href={`/api/vial-label/${prodSlug}?format=38x90`}
+                      href={`/api/vial-label/${prodSlug}?format=38x90&type=full`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: '0.75rem', color: '#0284c7', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                      style={{ fontSize: '0.75rem', color: '#4338ca', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      <Tag size={13} /> Vial Label
+                      <Tag size={13} /> Full Label
+                    </a>
+                    <a
+                      href={`/api/vial-label/${prodSlug}?format=38x90&type=barcode`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.75rem', color: '#0369a1', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <QrCode size={13} /> Barcode Only
                     </a>
                   </div>
                 </div>

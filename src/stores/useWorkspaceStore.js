@@ -15,6 +15,11 @@ const DEFAULT_WORKSPACE = {
   operationType: 'unassigned', // 'sell_quotation' | 'sell_prescription' | 'sell_order' | 'buy_po' | 'buy_rfq' | 'unassigned'
   intent: 'sell', // 'sell' | 'buy'
   targetEntity: null, // { type: 'clinic'|'patient'|'doctor'|'wholesaler'|'supplier', id, name, email, phone }
+  selectedTargetType: 'clinic',
+  shippingMethod: 'cold_chain', // 'cold_chain' | 'express' | 'pickup'
+  shippingAddress: '',
+  shippingNotes: '',
+  discountPercent: 0,
   pricingTier: 'clinic', // 'cost' | 'wholesale' | 'clinic' | 'retail'
   currency: 'USD',
   notes: '',
@@ -52,6 +57,11 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
       operationType: 'unassigned',
       intent: initialIntent,
       targetEntity: null,
+      selectedTargetType: 'clinic',
+      shippingMethod: 'cold_chain',
+      shippingAddress: '',
+      shippingNotes: '',
+      discountPercent: 0,
       pricingTier: initialIntent === 'buy' ? 'cost' : 'clinic',
       currency: 'USD',
       notes: '',
@@ -202,7 +212,7 @@ function extractItemPrice(item) {
 
 // ─── 2. Items & Batch Modifiers Slice ──────────────────────────────────────────
 const createWorkspaceItemsSlice = (set, get) => ({
-  addItem: (item, targetWorkspaceId = null) => {
+  addItem: (item, targetWorkspaceId = null, options = {}) => {
     const { workspaces, activeWorkspaceId } = get();
     const wsId = targetWorkspaceId || activeWorkspaceId;
     const ws = workspaces[wsId] || Object.values(workspaces)[0];
@@ -247,8 +257,9 @@ const createWorkspaceItemsSlice = (set, get) => ({
       });
     }
 
+    const shouldOpen = options?.openDrawer !== undefined ? Boolean(options.openDrawer) : true;
     set((s) => ({
-      isDrawerOpen: true,
+      isDrawerOpen: shouldOpen ? true : s.isDrawerOpen,
       workspaces: {
         ...s.workspaces,
         [ws.id]: { ...ws, items: nextItems, updatedAt: Date.now() },
@@ -256,7 +267,7 @@ const createWorkspaceItemsSlice = (set, get) => ({
     }));
   },
 
-  addItems: (itemsToAdd, targetWorkspaceId = null) => {
+  addItems: (itemsToAdd, targetWorkspaceId = null, options = {}) => {
     const { workspaces, activeWorkspaceId } = get();
     const wsId = targetWorkspaceId || activeWorkspaceId;
     const ws = workspaces[wsId] || Object.values(workspaces)[0];
@@ -302,8 +313,9 @@ const createWorkspaceItemsSlice = (set, get) => ({
       }
     });
 
+    const shouldOpen = options?.openDrawer !== undefined ? Boolean(options.openDrawer) : true;
     set((s) => ({
-      isDrawerOpen: true,
+      isDrawerOpen: shouldOpen ? true : s.isDrawerOpen,
       workspaces: {
         ...s.workspaces,
         [ws.id]: { ...ws, items: nextItems, updatedAt: Date.now() },
@@ -547,6 +559,51 @@ const createWorkspaceIntentSlice = (set, get) => ({
       workspaces: {
         ...s.workspaces,
         [wsId]: { ...ws, notes, updatedAt: Date.now() },
+      },
+    }));
+  },
+
+  setSelectedTargetType: (selectedTargetType, targetWorkspaceId = null) => {
+    const wsId = targetWorkspaceId || get().activeWorkspaceId;
+    const ws = get().workspaces[wsId];
+    if (!ws) return;
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: { ...ws, selectedTargetType, updatedAt: Date.now() },
+      },
+    }));
+  },
+
+  setShippingDetails: (shippingData, targetWorkspaceId = null) => {
+    const wsId = targetWorkspaceId || get().activeWorkspaceId;
+    const ws = get().workspaces[wsId];
+    if (!ws) return;
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: {
+          ...ws,
+          shippingMethod: shippingData?.shippingMethod ?? ws.shippingMethod ?? 'cold_chain',
+          shippingAddress: shippingData?.shippingAddress ?? ws.shippingAddress ?? '',
+          shippingNotes: shippingData?.shippingNotes ?? ws.shippingNotes ?? '',
+          updatedAt: Date.now(),
+        },
+      },
+    }));
+  },
+
+  setDiscountPercent: (discountPercent, targetWorkspaceId = null) => {
+    const wsId = targetWorkspaceId || get().activeWorkspaceId;
+    const ws = get().workspaces[wsId];
+    if (!ws) return;
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: { ...ws, discountPercent: Number(discountPercent || 0), updatedAt: Date.now() },
       },
     }));
   },

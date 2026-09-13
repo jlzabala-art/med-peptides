@@ -271,7 +271,7 @@ export async function convertQuotationToSupplierPoAction(quotationId, fallbackSu
         quotationId,
         quotationNumber: quote.quotationNumber || `QUO-${year}-${quotationId.slice(0, 4)}`,
         category: quote.category || 'patient',
-        recipientName: quote.patientName || quote.clinicName || quote.wholesalerName || 'RegenPept Client',
+        recipientName: quote.patientName || quote.clinicName || quote.wholesalerName || 'Atlas Services Client',
         shippingAddress: quote.shippingAddress || quote.channelContext?.shippingAddress || null,
         supplierId: group.supplierId,
         supplierName: group.supplierName,
@@ -341,6 +341,13 @@ export async function fetchPublicQuotationByTokenAction(token) {
         if (b2bDoc.exists) {
           quoteDoc = b2bDoc;
           quoteId = b2bDoc.id;
+        } else {
+          // Fallback 3: check by quotationNumber field
+          const numQuery = await adminDb.collection('quotations').where('quotationNumber', '==', token).limit(1).get();
+          if (!numQuery.empty) {
+            quoteDoc = numQuery.docs[0];
+            quoteId = quoteDoc.id;
+          }
         }
       }
     }

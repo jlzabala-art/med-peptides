@@ -224,10 +224,12 @@ export default function SupplementCollectionPage({ onNavigate, onBack, toggleCom
 
   /* Pre-apply ?category= query param on first load */
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('category');
-    if (cat) {
-      setActiveFilters(prev => ({ ...prev, category: decodeURIComponent(cat) }));
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get('category');
+      if (cat) {
+        setActiveFilters(prev => ({ ...prev, category: decodeURIComponent(cat) }));
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

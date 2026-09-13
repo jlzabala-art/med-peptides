@@ -27,17 +27,87 @@ export default function ChatHeader({
   pageContext
 }) {
   const isPatientContext = contextMode === 'patient' || pageContext?.mode === 'patient' || Boolean(pageContext?.patientId);
-  const isProductContext = !isPatientContext && (
+  const isProtocolContext = !isPatientContext && (
+    contextMode === 'protocols' ||
+    pageContext?.mode === 'protocols' ||
+    pageContext?.activeTab === 'protocols' ||
+    pageContext?.page === 'protocols' ||
+    Boolean(pageContext?.selectedProtocol) ||
+    (typeof window !== 'undefined' && window.location.pathname.includes('/protocols'))
+  );
+  const isProductContext = !isPatientContext && !isProtocolContext && (
     pageContext?.isProductPage ||
+    Boolean(pageContext?.selectedProduct) ||
     (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
     (!pageContext && messages?.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)))
   );
+  const isCatalogContext = !isPatientContext && !isProductContext && !isProtocolContext && (
+    pageContext?.activeTab === 'products' ||
+    pageContext?.activeTab === 'catalog' ||
+    pageContext?.page === 'products' ||
+    (typeof window !== 'undefined' && (window.location.pathname.includes('/products') || window.location.pathname.includes('/catalog')))
+  );
+  const isQuotationsContext = !isPatientContext && !isProductContext && !isProtocolContext && (
+    pageContext?.isQuotationsContext ||
+    pageContext?.isEstimateContext ||
+    pageContext?.page === 'quotations' ||
+    (typeof window !== 'undefined' && (window.location.pathname.includes('/quotations') || window.location.pathname.includes('/estimates')))
+  );
+
+  const selectedProduct = pageContext?.selectedProduct || pageContext?.product;
+  const selectedProtocol = pageContext?.selectedProtocol || pageContext?.protocol;
+  const selectedQuote = pageContext?.quote;
+  const activeProductName = selectedProduct?.name || selectedProduct?.title || selectedProduct?.compound;
+  const activeProtocolName = selectedProtocol?.name || selectedProtocol?.title;
+  const activeQuoteNumber = pageContext?.quoteNumber || selectedQuote?.quotationNumber || selectedQuote?.id;
+  const activeQuoteClient = pageContext?.clientName || selectedQuote?.clientName;
 
   const isDoctorRole = contextMode === 'doctor' || contextMode === 'medical_director' || role === 'doctor' || role === 'medical_director';
-  const themeAccent = isPatientContext ? '#0d9488' : isProductContext ? '#7c3aed' : isDoctorRole ? '#0d9488' : contextMode === 'admin' ? '#1a73e8' : '#4285f4';
-  const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : isProductContext ? 'rgba(124, 58, 237, 0.08)' : isDoctorRole ? 'rgba(13, 148, 136, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : '#e8f0fe';
-  const headerTitle = isPatientContext ? '🩺 Patient Clinical Copilot' : isProductContext ? '🔬 ClinicalAI — Product Intelligence' : isDoctorRole ? '🩺 Clinical AI Copilot (Doctor)' : contextMode === 'admin' ? 'Atlas AI (Admin)' : 'Atlas AI';
-  const statusLabel = isPatientContext ? `Patient Link Active · ${pageContext?.name || 'Chart'}` : isProductContext ? 'Product Research Link Active' : isDoctorRole ? 'Clinical Link Active · Doctor Decision Support' : contextMode === 'admin' ? 'System Link Active' : 'Neural Link Active';
+  const themeAccent = isPatientContext ? '#0d9488' : isProtocolContext ? '#0d9488' : isQuotationsContext ? '#0284c7' : (isProductContext || isCatalogContext) ? '#7c3aed' : isDoctorRole ? '#0d9488' : contextMode === 'admin' ? '#1a73e8' : '#4285f4';
+  const themeBgActive = isPatientContext ? 'rgba(13, 148, 136, 0.08)' : isProtocolContext ? 'rgba(13, 148, 136, 0.08)' : isQuotationsContext ? 'rgba(2, 132, 199, 0.08)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.08)' : isDoctorRole ? 'rgba(13, 148, 136, 0.08)' : contextMode === 'admin' ? '#e8f0fe' : '#e8f0fe';
+  const headerTitle = isPatientContext 
+    ? '🩺 Patient Clinical Copilot' 
+    : isProtocolContext && activeProtocolName
+      ? `📋 ${activeProtocolName}`
+      : isProtocolContext
+        ? '📋 ClinicalAI — Protocol Hub'
+        : isQuotationsContext && activeQuoteNumber
+          ? `💼 Quote #${activeQuoteNumber} (${activeQuoteClient || 'Client'})`
+          : isQuotationsContext
+            ? '💼 Commercial AI — Estimates & Quotes'
+            : isProductContext && activeProductName
+              ? `🔬 ${activeProductName}`
+              : isProductContext
+                ? '🔬 ClinicalAI — Product Intelligence'
+                : isCatalogContext
+                  ? '🧬 Catalog & Peptide Intelligence'
+                  : isDoctorRole
+                    ? '🩺 Clinical AI Copilot (Doctor)'
+                    : contextMode === 'admin'
+                      ? 'Atlas AI (Admin)'
+                      : 'Atlas AI';
+
+  const statusLabel = isPatientContext 
+    ? `Patient Link Active · ${pageContext?.name || 'Chart'}` 
+    : isProtocolContext && activeProtocolName
+      ? `Protocol Active · ${selectedProtocol?.category || selectedProtocol?.code || 'Tier 2/3'}`
+      : isProtocolContext
+        ? `Protocol Intelligence Active · ${pageContext?.protocolsCount ? `${pageContext.protocolsCount} Protocols` : 'Protocols DB'}`
+        : isQuotationsContext && activeQuoteNumber
+          ? `Estimate Active · Margin ${pageContext?.marginPercent || selectedQuote?.marginPercent || 45}%`
+          : isQuotationsContext
+            ? `Estimates Pipeline Active · ${pageContext?.totalQuotations ? `${pageContext.totalQuotations} Quotes` : 'Pro-Forma Desk'}`
+            : isProductContext && activeProductName
+              ? `Product Active · ${selectedProduct?.sku || selectedProduct?.concentration || 'Tier 2/3'}`
+              : isProductContext 
+                ? 'Product Research Link Active' 
+                : isCatalogContext 
+                  ? 'Catalog Intelligence Active · Product DB' 
+                  : isDoctorRole 
+                    ? 'Clinical Link Active · Doctor Decision Support' 
+                    : contextMode === 'admin' 
+                      ? 'System Link Active' 
+                      : 'Neural Link Active';
 
   return (
     <div className="clinical-chat-header" style={{
@@ -95,7 +165,47 @@ export default function ChatHeader({
           }} title={`AI Assistant: ${headerTitle}`}>
             {headerTitle}
           </h3>
-          {!isProductContext && contextMode !== 'doctor' && contextMode !== 'admin' && !isMobile && (
+          {isProtocolContext && !isMobile && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: 'rgba(13, 148, 136, 0.1)',
+              border: '1px solid rgba(13, 148, 136, 0.25)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.62rem',
+              fontWeight: 850,
+              color: '#0d9488',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em',
+              flexShrink: 0
+            }} title="Protocol Intelligence Hub active">
+              <span>📋</span>
+              <span>{activeProtocolName ? 'Protocol Focus' : 'Protocols DB'}</span>
+            </div>
+          )}
+          {(isProductContext || isCatalogContext) && !isMobile && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: 'rgba(124, 58, 237, 0.1)',
+              border: '1px solid rgba(124, 58, 237, 0.25)',
+              padding: '2px 8px',
+              borderRadius: '20px',
+              fontSize: '0.62rem',
+              fontWeight: 850,
+              color: '#7c3aed',
+              textTransform: 'uppercase',
+              letterSpacing: '0.03em',
+              flexShrink: 0
+            }} title="Product Catalog Intelligence active">
+              <span>🔬</span>
+              <span>{activeProductName ? 'Product Focus' : 'Catalog DB'}</span>
+            </div>
+          )}
+          {!isProductContext && !isCatalogContext && !isProtocolContext && contextMode !== 'doctor' && contextMode !== 'admin' && !isMobile && (
             <div style={{
               display: 'flex',
               alignItems: 'center',

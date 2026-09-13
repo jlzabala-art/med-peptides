@@ -23,7 +23,8 @@ import {
   Box,
   QrCode,
   ExternalLink,
-  Building2
+  Building2,
+  Tag
 } from '@/lib/icons';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
@@ -65,13 +66,10 @@ export default function PublicDatasheetView({
   const [, startTransition] = useTransition();
   const requestedLangs = useRef(new Set());
 
+  // Strictly default to English unless explicitly requested via initialLang param
   useEffect(() => {
-    if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) return;
-    if (typeof navigator !== 'undefined') {
-      const browserLang = navigator.language?.slice(0, 2)?.toLowerCase();
-      if (browserLang && SUPPORTED_LANGUAGES.some(l => l.code === browserLang)) {
-        setLang(browserLang);
-      }
+    if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
+      setLang(initialLang);
     }
   }, [initialLang]);
 
@@ -406,8 +404,8 @@ export default function PublicDatasheetView({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `${name} (${activeFormat?.name || 'Monograph'}) — Official Monograph | RegenPept × ${supplierName}`,
-          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, synthesized under verified cGMP quality standards by ${supplierName} for RegenPept. RP-HPLC Purity ≥ 99.0%.`,
+          title: `${name} (${activeFormat?.name || 'Monograph'}) — Official Monograph | Atlas Services × ${supplierName}`,
+          text: `Official Pharmaceutical Monograph & Analytical Specifications for ${name}. Formulated as ${activeFormat?.name || 'clinical grade peptide'}, synthesized under verified cGMP quality standards by ${supplierName} for Atlas Services. RP-HPLC Purity ≥ 99.0%.`,
           url: dynamicPublicUrl,
         });
         return;
@@ -441,7 +439,7 @@ export default function PublicDatasheetView({
       `🔬 *${name}* — Official Pharmaceutical Monograph & Clinical Specifications\n\n` +
       `• *Formulation:* ${formatLabel}\n` +
       `• *Target Dose:* ${selectedStrength?.name || 'Standard'}\n` +
-      `• *Synthesis Lab:* ${supplierName} (Verified Quality Standards) for RegenPept\n` +
+      `• *Synthesis Lab:* ${supplierName} (Verified Quality Standards) for Atlas Services\n` +
       `• *Analytical Release:* RP-HPLC Purity ${purityText} · ESI-MS Mass Verified\n` +
       `• *Receptor Target Axis:* ${targetText}\n` +
       adminLine +
@@ -482,19 +480,29 @@ export default function PublicDatasheetView({
               target="_blank" 
               rel="noopener noreferrer" 
               className="pds-btn pds-btn-pdf"
+              title="Download Comprehensive Clinical Monograph (PDF)"
             >
               <Download size={14} /> {t.downloadPdf}
             </a>
 
             <a 
-              href={barcodeImageUrl} 
-              download={`LOT-${slug.toUpperCase()}-vial-barcode.svg`}
+              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=full`}
               target="_blank" 
               rel="noopener noreferrer" 
               className="pds-btn pds-btn-barcode"
-              title="Download High-Resolution Scannable Vial Barcode & QR Label"
+              title="Download Complete Specification Vial Label 38x90mm (PDF)"
             >
-              <QrCode size={14} /> Vial Barcode / QR
+              <Tag size={14} /> Full Label
+            </a>
+
+            <a 
+              href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=barcode`}
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="pds-btn pds-btn-barcode"
+              title="Download Direct Monograph Barcode & QR Label (PDF)"
+            >
+              <QrCode size={14} /> Barcode Only
             </a>
 
             <button 
@@ -507,7 +515,7 @@ export default function PublicDatasheetView({
               <span>{t.shareColleague}</span>
             </button>
 
-            <button onClick={handlePrint} className="pds-btn pds-btn-ghost pds-print-hide-desktop">
+            <button onClick={handlePrint} className="pds-btn pds-btn-ghost" title="Print Complete Monograph (All Formulations)">
               <Printer size={14} /> {t.printPdf}
             </button>
 
@@ -764,92 +772,160 @@ export default function PublicDatasheetView({
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Scientific Identity Grid */}
-        <section className="pds-specs-section">
-          <h2 className="pds-section-heading">
-            <FlaskConical size={18} color="#003666" />
-            Chemical & Molecular Specifications
-          </h2>
-
-          <div className="pds-specs-grid">
-            <div className="pds-spec-box">
-              <span className="pds-spec-label">CAS Registry Number</span>
-              <span className="pds-spec-val font-mono">{casNumber}</span>
-            </div>
-
-            {formula && (
-              <div className="pds-spec-box">
-                <span className="pds-spec-label">Molecular Formula</span>
-                <span className="pds-spec-val font-mono">{formula}</span>
+          {/* ── Complete Formulations & Strengths Matrix (Always fully visible in Print & Web) ── */}
+          <div className="pds-all-strengths-matrix">
+            <div className="pds-matrix-header-row">
+              <div>
+                <h4 className="pds-matrix-table-title">
+                  <span>📋</span> Complete Formulations & Strengths Matrix
+                </h4>
+                <p className="pds-matrix-table-sub">
+                  Full analytical index of all approved laboratory presentations, doses and preparation protocols for {name}
+                </p>
               </div>
-            )}
-
-            {mw && (
-              <div className="pds-spec-box">
-                <span className="pds-spec-label">Molecular Weight</span>
-                <span className="pds-spec-val font-mono">{mw}</span>
-              </div>
-            )}
-
-            <div className="pds-spec-box">
-              <span className="pds-spec-label">Physical Appearance</span>
-              <span className="pds-spec-val">White to off-white lyophilized powder</span>
+              <span className="pds-matrix-print-pill">
+                All Available Options Included
+              </span>
             </div>
 
-            <div className="pds-spec-box">
-              <span className="pds-spec-label">Reconstitution Vehicle</span>
-              <span className="pds-spec-val">Bacteriostatic Water (0.9% Benzyl Alcohol) or USP Saline</span>
-            </div>
-
-            <div className="pds-spec-box">
-              <span className="pds-spec-label">Lyophilized Storage</span>
-              <span className="pds-spec-val font-semibold text-sky-900">-20°C (Protect from light & humidity)</span>
+            <div className="pds-table-responsive">
+              <table className="pds-strengths-table">
+                <thead>
+                  <tr>
+                    <th>Strength / Dose</th>
+                    <th>Presentation Format</th>
+                    <th>Reconstitution Diluent</th>
+                    <th>Resulting Concentration</th>
+                    <th>Administration</th>
+                    <th>Analytical Grade</th>
+                    <th>Laboratory Verification</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {availableFormats.flatMap(fmt => {
+                    const compatStrengths = sortedStrengths.filter(s => !fmt.strengths || fmt.strengths.includes(s.id));
+                    const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: 'Standard Clinical Dose' }];
+                    return list.map(st => {
+                      const recon = getReconstitutionVolume(st.name);
+                      const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
+                      const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
+                      return (
+                        <tr key={`${fmt.id}-${st.id}`} className={isCurrentlyActive ? 'pds-row-selected' : ''}>
+                          <td>
+                            <strong>{st.name}</strong>
+                            {isCurrentlyActive && <span className="pds-active-badge">Active Selection</span>}
+                          </td>
+                          <td>{fmt.name}</td>
+                          <td>{isPenOrCart ? 'Pre-filled (Zero mixing required)' : `${recon.volume} mL BAC Water`}</td>
+                          <td className="pds-conc-cell">{isPenOrCart ? 'Pre-formulated Solution' : `${recon.concentration} mg/mL`}</td>
+                          <td>Subcutaneous (SubQ)</td>
+                          <td className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
+                          <td>{supplierName}</td>
+                        </tr>
+                      );
+                    });
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-
-          {sequence && (
-            <div className="pds-sequence-box">
-              <span className="pds-spec-label">Primary Peptide Sequence (Mono-letter Notation)</span>
-              <code className="pds-sequence-code">{sequence}</code>
-            </div>
-          )}
         </section>
 
-        {/* Analytical Traceability Card */}
+        {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}
         <section className="pds-specs-section">
           <ProductTraceabilityCard product={product} baseUrl={baseUrl} lang={lang} />
         </section>
 
-        {/* Scannable Vial Label & Batch Barcode Section */}
-        <section className="pds-vial-label-section">
+        {/* ── Block 4: Physical Labels & Dispensing Downloads ── */}
+        <section id="labels-section" className="pds-vial-label-section">
           <div className="pds-vial-label-card">
             <div className="pds-vial-label-header">
               <div className="pds-vial-label-title-group">
                 <div className="pds-vial-label-icon-badge">
-                  <QrCode size={20} color="#003666" />
+                  <QrCode size={22} color="#003666" />
                 </div>
                 <div>
-                  <h3 className="pds-vial-label-title">{t.vialQrTitle}</h3>
+                  <h3 className="pds-vial-label-title">Physical Vial Labels &amp; Batch Printing</h3>
                   <p className="pds-vial-label-subtitle">
-                    {t.vialQrSubtitle}
+                    Standard 38×90mm adhesive labels and batch sheets formatted for clinical and dispatch use.
                   </p>
                 </div>
               </div>
-              <div className="pds-vial-label-actions">
-                <a 
-                  href={barcodeImageUrl}
-                  download={`LOT-${slug.toUpperCase()}-vial-label.svg`}
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="pds-btn pds-btn-barcode"
-                >
-                  <Download size={14} /> {t.downloadLabelSvg}
-                </a>
+            </div>
+
+            {/* Dual Label Options Grid: Shipping vs Client Vial */}
+            <div className="pds-dual-labels-grid">
+              {/* Option 1: Shipping / Batch Traceability Label */}
+              <div className="pds-label-type-card">
+                <div className="pds-label-type-head">
+                  <span className="pds-label-badge-icon">📦</span>
+                  <div>
+                    <h4 className="pds-label-type-title">Shipping &amp; Traceability Label</h4>
+                    <span className="pds-label-use-tag">For Outbound Box &amp; Logistics</span>
+                  </div>
+                </div>
+                <p className="pds-label-type-desc">
+                  Discreet packaging label with high-density 1D barcode and QR code. Enables instant camera lookup of the digital monograph and laboratory certificate without displaying brand names.
+                </p>
+                <div className="pds-label-type-buttons">
+                  <a 
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping`}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="pds-btn pds-btn-barcode"
+                    title="Download 38x90mm Shipping Label (PDF)"
+                  >
+                    <QrCode size={14} /> Download 38×90mm
+                  </a>
+                  <a 
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping`}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="pds-btn pds-btn-ghost"
+                    title="Download A4 Sheet with 8 Shipping Labels"
+                  >
+                    <FileText size={14} /> Sheet (A4 ×8)
+                  </a>
+                </div>
+              </div>
+
+              {/* Option 2: Client Vial Application Label */}
+              <div className="pds-label-type-card highlight">
+                <div className="pds-label-type-head">
+                  <span className="pds-label-badge-icon">🏷️</span>
+                  <div>
+                    <h4 className="pds-label-type-title">Client Vial Application Label</h4>
+                    <span className="pds-label-use-tag active">For Customer Vial Adhesion</span>
+                  </div>
+                </div>
+                <p className="pds-label-type-desc">
+                  Full clinical specification label provided for the client or clinician to adhere directly onto the vial. Includes dose, RP-HPLC purity, handwriteable reconstitution fields, and cold-chain guidance.
+                </p>
+                <div className="pds-label-type-buttons">
+                  <a 
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client`}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="pds-btn pds-btn-pdf"
+                    title="Download 38x90mm Client Vial Label (PDF)"
+                  >
+                    <Tag size={14} /> Download 38×90mm
+                  </a>
+                  <a 
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client`}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="pds-btn pds-btn-ghost"
+                    title="Download A4 Sheet with 8 Client Vial Labels"
+                  >
+                    <FileText size={14} /> Sheet (A4 ×8)
+                  </a>
+                </div>
               </div>
             </div>
 
+            {/* Live Scannable Label Preview */}
             <div className="pds-vial-label-preview-wrap">
               {inlineSvg ? (
                 <div
@@ -868,48 +944,6 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* Reconstitution Protocol & Interactive Clinical Guide */}
-        <section id="reconstitution-guide" className="pds-guide-section">
-          <InteractiveReconstitutionGuide
-            product={product}
-            selectedStrength={selectedStrength}
-            availableStrengths={sortedStrengths}
-            activeFormatId={activeFormatId}
-            activeFormat={activeFormat}
-            supplierName={supplierName}
-            lang={lang}
-          />
-        </section>
-
-        {/* ── Provenance & Alliance (moved from top for less distraction) ── */}
-        <section className="pds-provenance-section">
-          <div className="pds-notice-card">
-            <div className="pds-notice-icon">
-              <ShieldCheck size={20} color="#0284c7" />
-            </div>
-            <div className="pds-notice-text">
-              <strong>{t.provenanceNoticeTitle}</strong>
-              <span>{t.provenanceNoticeDesc}</span>
-            </div>
-          </div>
-
-          {isStrictlyLotusland && (
-            <div className="pds-alliance-card">
-              <div className="pds-alliance-icon">
-                <ShieldCheck size={22} />
-              </div>
-              <div className="pds-alliance-body">
-                <strong className="pds-alliance-title">
-                  Relationship: RegenPept × Lotusland Clinical Synthesis Alliance
-                </strong>
-                <span>
-                  <strong>RegenPept</strong> is the clinical peptide research, quality assurance, and distribution platform. <strong>Lotusland</strong> is the primary accredited cGMP and ISO 9001 certified pharmaceutical synthesis laboratory that manufactures and lyophilizes peptide batches for RegenPept. Lotusland compounds are strictly synthesized in lyophilized subcutaneous vials (never cartridges or pens), subject to dual-stage analytical verification (RP-HPLC purity ≥ 99.0% and ESI-MS molecular confirmation).
-                </span>
-              </div>
-            </div>
-          )}
-        </section>
-
         {/* Institutional Regulatory Footnote */}
         <footer className="pds-page-footer">
           <div className="pds-footer-box">
@@ -917,7 +951,7 @@ export default function PublicDatasheetView({
               <strong>Quality & Regulatory Governance:</strong> Synthesized under certified ISO 9001:2015 and current Good Manufacturing Practice (cGMP) quality management systems. Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
             </p>
             <p className="pds-footer-meta">
-              Document Ref: PDS-{slug.toUpperCase()}-2026 • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} RegenPept
+              Document Ref: PDS-{slug.toUpperCase()}-2026 • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} Atlas Services
             </p>
           </div>
         </footer>

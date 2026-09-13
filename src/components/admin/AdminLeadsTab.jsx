@@ -67,9 +67,7 @@ export default function AdminLeadsTab({ isSubTab = false, initialLeads = null, s
   const { isAdmin, user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
-  const location = usePathname();
-  const params = new URLSearchParams(location.search);
-  const deepLinkSearch = params.get('search');
+  const pathname = usePathname();
 
   const { leads: storeLeads, loading: loadingLeads, fetchLeads: refreshLeads } = useLeadStore();
 
@@ -84,7 +82,26 @@ export default function AdminLeadsTab({ isSubTab = false, initialLeads = null, s
 
   const loading = loadingLeads || loadingMetadata;
 
-  const hasMore = false;
+  // Selected lead for detail view
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  // New Lead Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Filtering & Search
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      const deepLink = p.get('search');
+      if (deepLink) setSearchTerm(deepLink);
+    }
+  }, []);
   const loadMore = () => {};
 
   const leads = useMemo(() => {
@@ -106,11 +123,8 @@ export default function AdminLeadsTab({ isSubTab = false, initialLeads = null, s
 
   // View State
   const [currentView, setCurrentView] = useState('kanban'); // 'kanban', 'table'
-  const [searchTerm, setSearchTerm] = useState(deepLinkSearch || '');
   const [selectedTypeTab, setSelectedTypeTab] = useState('All');
   const [activeKpiFilter, setActiveKpiFilter] = useState('all');
-  // Drawer State
-  const [selectedLead, setSelectedLead] = useState(null);
 
   // Bulk Selection
   const [selectedLeadIds, setSelectedLeadIds] = useState([]);

@@ -52,7 +52,7 @@ export default function WorkspaceAddPopover({ item, children, buttonStyle = {}, 
     // If only 1 workspace exists, add directly to active workspace
     if (wsList.length <= 1) {
       const activeWs = wsList[0];
-      addItem(item, activeWs?.id);
+      addItem(item, activeWs?.id, { openDrawer: false });
       toast.success(
         (t) => (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -87,7 +87,7 @@ export default function WorkspaceAddPopover({ item, children, buttonStyle = {}, 
   };
 
   const handleSelectWorkspace = (wsId, wsName) => {
-    addItem(item, wsId);
+    addItem(item, wsId, { openDrawer: false });
     setActiveWorkspace(wsId);
     setIsOpen(false);
     toast.success(

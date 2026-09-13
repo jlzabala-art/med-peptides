@@ -477,10 +477,12 @@ export default function ProtocolCollectionPage({ onNavigate, onBack, isDoctor = 
 
   /* ── Pre-apply ?goal= query param ── */
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const goal = params.get('goal');
-    if (goal) {
-      setActiveFilters(prev => ({ ...prev, goal: decodeURIComponent(goal) }));
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const goal = params.get('goal');
+      if (goal) {
+        setActiveFilters(prev => ({ ...prev, goal: decodeURIComponent(goal) }));
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

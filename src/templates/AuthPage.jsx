@@ -41,12 +41,13 @@ export default function AuthPage({ onBack }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  // Deep-link redirect: ProtectedRoute saves the original URL in state.from
-  // (e.g. /admin?t=orders&orderId=ORD-XXX from an email CTA). After login we
-  // send the admin back there instead of the default page.
-  const redirectTo = typeof window !== 'undefined' && window.history.state?.from?.pathname
-    ? `${window.history.state.from.pathname}${window.history.state.from.search || ''}`
-    : null;
+  // Deep-link redirect: Check searchParams first, fallback to history state
+  const redirectTo = searchParams.get('redirect')
+    || searchParams.get('returnUrl')
+    || searchParams.get('next')
+    || (typeof window !== 'undefined' && window.history.state?.from?.pathname
+      ? `${window.history.state.from.pathname}${window.history.state.from.search || ''}`
+      : null);
   const { user, userProfile, updateProfileData, isProfessional, isProfessionalPending, isPhysician, isAdmin, activeRole, login, logout, resetPassword, linkPassword, loginWithGoogle, loading: authLoading } = useAuth();
   const { register, loading: registerLoading, error: registerError } = useRegistration();
   const loading = authLoading || registerLoading;
@@ -126,32 +127,26 @@ export default function AuthPage({ onBack }) {
     window.scrollTo(0, 0);
   }, []);
 
+  const resolveTargetPortal = (targetRole, userEmail, explicitRedirect) => {
+    if (explicitRedirect) return explicitRedirect;
+    const cleanEmail = (userEmail || '').toLowerCase().trim();
+    const cleanRole = (targetRole || 'guest').toLowerCase();
+    if (cleanRole === 'admin' || ADMIN_EMAILS.includes(cleanEmail)) return '/admin';
+    if (cleanRole === 'doctor' || cleanRole === 'medical_director' || cleanRole === 'fagron_doctor') return '/doctor';
+    if (cleanRole === 'wholesaler' || cleanRole === 'wholeseller') return '/wholesaler';
+    if (cleanRole === 'supplier') return '/supplier';
+    if (cleanRole === 'clinic') return '/clinic';
+    if (cleanRole === 'pharmacy' || cleanRole === 'compounding_pharmacy') return '/pharmacy';
+    if (cleanRole === 'patient') return '/patient';
+    return cleanRole === 'pending' ? null : '/admin';
+  };
+
   // Auto-redirect logged-in users to their respective dashboards
   useEffect(() => {
     if (!loading && user && userProfile) {
-      const role = (userProfile.role || 'guest').toLowerCase();
-      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(user.email?.toLowerCase());
-
-      // Do not redirect if role is pending (needs onboarding), unless user is an admin by email
-      if (role === 'pending' && !isAdminUser) {
-        return;
-      }
-
-      const isPhysicianUser = role === 'doctor';
-
-      const redirectable = isAdminUser || isPhysicianUser || role === 'wholesaler' || role === 'patient';
-      if (redirectable) {
-        if (redirectTo) {
-          router.push(redirectTo, { replace: true });
-        } else if (isAdminUser) {
-          router.push('/admin');
-        } else if (isPhysicianUser) {
-          router.push('/doctor', { replace: true });
-        } else if (role === 'wholesaler') {
-          router.push('/wholesaler', { replace: true });
-        } else if (role === 'patient') {
-          router.push('/patient', { replace: true });
-        }
+      const targetPath = resolveTargetPortal(userProfile.role, user.email, redirectTo);
+      if (targetPath) {
+        router.push(targetPath, { replace: true });
       }
     }
   }, [user, userProfile, loading, redirectTo, router]);
@@ -165,24 +160,9 @@ export default function AuthPage({ onBack }) {
       const { cred, profile } = await login(cleanEmail, password);
       setSuccess('Logged in successfully!');
 
-      const role = (profile?.role || 'guest').toLowerCase();
-      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(cred.user.email?.toLowerCase()) || ADMIN_EMAILS.includes(cleanEmail);
-      const isPhysicianUser = role === 'doctor';
-
       setTimeout(() => {
-        if (redirectTo) {
-          router.replace(redirectTo);
-        } else if (isAdminUser) {
-          router.replace('/admin');
-        } else if (isPhysicianUser) {
-          router.replace('/doctor');
-        } else if (role === 'wholesaler') {
-          router.replace('/wholesaler');
-        } else if (role === 'patient') {
-          router.replace('/patient');
-        } else {
-          router.replace('/');
-        }
+        const targetPath = resolveTargetPortal(profile?.role, cred.user?.email || cleanEmail, redirectTo);
+        router.replace(targetPath || '/admin');
       }, 300);
     } catch (err) {
       if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
@@ -385,25 +365,9 @@ export default function AuthPage({ onBack }) {
     try {
       const { cred, profile } = await loginWithGoogle();
       setSuccess('Logged in with Google successfully!');
-      const emailToCheck = (cred?.user?.email || '').toLowerCase().trim();
-      const role = (profile?.role || 'guest').toLowerCase();
-      const isAdminUser = role === 'admin' || ADMIN_EMAILS.includes(emailToCheck);
-      const isPhysicianUser = role === 'doctor';
-
       setTimeout(() => {
-        if (redirectTo) {
-          router.replace(redirectTo);
-        } else if (isAdminUser) {
-          router.replace('/admin');
-        } else if (isPhysicianUser) {
-          router.replace('/doctor');
-        } else if (role === 'wholesaler') {
-          router.replace('/wholesaler');
-        } else if (role === 'patient') {
-          router.replace('/patient');
-        } else {
-          router.replace('/');
-        }
+        const targetPath = resolveTargetPortal(profile?.role, cred?.user?.email, redirectTo);
+        router.replace(targetPath || '/admin');
       }, 300);
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
@@ -529,8 +493,15 @@ export default function AuthPage({ onBack }) {
             )}
 
             <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-              <button onClick={onBack} className="btn btn-primary" style={{ width: '100%' }}>
-                Continue Browsing
+              <button 
+                onClick={() => {
+                  const target = resolveTargetPortal(userProfile?.role, user.email, redirectTo);
+                  router.push(target || '/admin');
+                }} 
+                className="btn btn-primary" 
+                style={{ width: '100%' }}
+              >
+                Access Portal
               </button>
               <button 
                 onClick={logout} 

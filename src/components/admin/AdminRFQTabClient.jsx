@@ -31,14 +31,16 @@ export default function AdminRFQTabClient({ initialRfqs = [], isSubTab = false }
   const [parseProgress, setParseProgress] = useState({ state: 'idle', count: 0 });
   const [searchTerm, setSearchTerm] = useState('');
   const pathname = usePathname();
-  const params = new URLSearchParams(location.search);
-  const deepLinkSearch = params.get('rfqId');
 
   useEffect(() => {
-    if (deepLinkSearch) {
-      setSearchTerm(deepLinkSearch);
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const deepLink = searchParams.get('rfqId');
+      if (deepLink) {
+        setSearchTerm(deepLink);
+      }
     }
-  }, [deepLinkSearch]);
+  }, []);
 
 
   // New RFQ State

@@ -145,35 +145,6 @@ export default function CatalogTableView({
   const columns = useMemo(() => {
     const baseColumns = [
       {
-        key: 'image',
-        header: 'Image',
-        render: (row) => (
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '6px',
-              overflow: 'hidden',
-              border: '1px solid var(--border)',
-              backgroundColor: '#f8fafc',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {row.images?.length > 0 ? (
-              <img
-                src={row.images[0]}
-                alt=""
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <Box size={16} color="#94a3b8" />
-            )}
-          </div>
-        ),
-      },
-      {
         key: 'product',
         header: 'NAME',
         sortKey: 'name',

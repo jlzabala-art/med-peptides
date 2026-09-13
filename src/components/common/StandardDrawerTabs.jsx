@@ -1,9 +1,28 @@
 import React from 'react';
 
-export default function StandardDrawerTabs({ tabs, activeTab, onChange }) {
+export default function StandardDrawerTabs({ tabs, activeTab, onChange, onTabChange }) {
+  const handleChange = onTabChange || onChange || (() => {});
+
   return (
-    <div style={{ borderBottom: '1px solid #e2e8f0', marginTop: '1rem', marginBottom: '1rem' }}>
-      <div className="modal-tabs-row" style={{ display: 'flex', gap: '0', overflowX: 'auto' }}>
+    <div style={{ 
+      borderBottom: '1px solid #e2e8f0', 
+      background: '#f8fafc', 
+      padding: '4px 12px 0 12px',
+      position: 'sticky',
+      top: 0,
+      zIndex: 10
+    }}>
+      <div 
+        style={{ 
+          display: 'flex', 
+          gap: '6px', 
+          overflowX: 'auto', 
+          flexWrap: 'nowrap',
+          scrollbarWidth: 'none',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: '2px'
+        }}
+      >
         {tabs.map((tab) => {
           const tabId = typeof tab === 'object' ? tab.id : tab;
           const tabLabel = typeof tab === 'object' ? tab.label : tab;
@@ -12,19 +31,21 @@ export default function StandardDrawerTabs({ tabs, activeTab, onChange }) {
           return (
             <button
               key={tabId}
-              onClick={() => onChange(tabId)}
+              type="button"
+              onClick={() => handleChange(tabId)}
               style={{
-                padding: '0.65rem 1.1rem',
-                background: 'transparent',
-                border: 'none',
-                borderBottom: isActive ? '2.5px solid #6366f1' : '2.5px solid transparent',
-                color: isActive ? '#6366f1' : '#64748b',
+                padding: '8px 14px',
+                background: isActive ? '#ffffff' : 'transparent',
+                border: isActive ? '1px solid #cbd5e1' : '1px solid transparent',
+                borderBottom: isActive ? '2px solid var(--color-primary, #003666)' : '2px solid transparent',
+                borderRadius: '6px 6px 0 0',
+                color: isActive ? 'var(--color-primary, #003666)' : '#64748b',
                 fontWeight: isActive ? 700 : 500,
-                fontSize: '0.875rem',
+                fontSize: '0.82rem',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
-                transition: 'all 0.15s',
-                textTransform: 'capitalize',
+                flexShrink: 0,
+                transition: 'all 0.15s ease',
               }}
             >
               {tabLabel}

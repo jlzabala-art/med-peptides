@@ -46,6 +46,7 @@ export default function DataTable({
   renderBatchActions,
   // Expansion
   expandableRender,
+  hideExpandColumn = false,
   // Custom Interaction
   onRowClick,
   renderHoverActions,
@@ -931,7 +932,7 @@ export default function DataTable({
                 </th>
               )}
 
-              {expandableRender && (
+              {expandableRender && !hideExpandColumn && (
                 <th
                   style={{
                     width: '48px',
@@ -1058,7 +1059,7 @@ export default function DataTable({
               ))
             ) : error ? (
               <tr>
-                <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)}>
+                <td colSpan={columns.length + (onSelectionChange ? 1 : 0) + (expandableRender && !hideExpandColumn ? 1 : 0)}>
                     <EmptyState
                       icon={AlertTriangle}
                       title="Data Error"
@@ -1076,7 +1077,7 @@ export default function DataTable({
               <tr>
                 <td
                   colSpan={
-                    columns.length + (onSelectionChange ? 1 : 0) + (expandableRender ? 1 : 0)
+                    columns.length + (onSelectionChange ? 1 : 0) + (expandableRender && !hideExpandColumn ? 1 : 0)
                   }
                 >
                     <EmptyState
@@ -1189,7 +1190,7 @@ export default function DataTable({
                             />
                           </td>
                         )}
-                        {expandableRender && (
+                        {expandableRender && !hideExpandColumn && (
                           <td
                             style={{
                               padding: '0',
@@ -1320,7 +1321,7 @@ export default function DataTable({
                       {isExpanded && expandableRender && !virtualize && (
                         <tr style={{ backgroundColor: 'var(--color-bg-hover)' }}>
                           <td
-                            colSpan={columns.length + (onSelectionChange ? 1 : 0) + 1}
+                            colSpan={columns.length + (onSelectionChange ? 1 : 0) + (!hideExpandColumn ? 1 : 0)}
                             style={{
                               padding: '24px',
                               borderBottom: '1px solid var(--color-border)',

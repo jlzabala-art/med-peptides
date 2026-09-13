@@ -5,10 +5,28 @@ import { Home, Search, Grid, ShoppingBag, User } from '@/lib/icons';
 import { useCart } from '../context/CartProvider';
 import { useUIStore } from '../stores/uiStore';
 
+import { useAuth, ADMIN_EMAILS } from '../context/AuthContext';
+
 export default function BottomTabBar() {
   const { cartCount } = useCart();
   const setActiveModal = useUIStore(s => s.setActiveModal);
   const pathname = usePathname();
+  const { user, activeRole, isAdmin } = useAuth();
+
+  const isUserAdmin = isAdmin || activeRole === 'admin' || (user && ADMIN_EMAILS.includes(user.email?.toLowerCase()));
+  const accountHref = !user 
+    ? '/login' 
+    : isUserAdmin 
+      ? '/admin' 
+      : activeRole === 'doctor' || activeRole === 'medical_director'
+        ? '/doctor'
+        : activeRole === 'wholesaler' || activeRole === 'wholeseller'
+          ? '/wholesaler'
+          : activeRole === 'supplier'
+            ? '/supplier'
+            : activeRole === 'clinic'
+              ? '/clinic'
+              : '/patient';
 
   // We hide the bottom bar on desktop screens using CSS media queries
   return (
@@ -53,8 +71,8 @@ export default function BottomTabBar() {
       </button>
 
       <Link 
-        href="/patient" 
-        className={`tab-item ${pathname?.startsWith('/patient') || pathname?.startsWith('/doctor') || pathname?.startsWith('/login') ? 'active' : ''}`}
+        href={accountHref} 
+        className={`tab-item ${pathname?.startsWith('/patient') || pathname?.startsWith('/admin') || pathname?.startsWith('/doctor') || pathname?.startsWith('/wholesaler') || pathname?.startsWith('/login') ? 'active' : ''}`}
       >
         <User size={20} strokeWidth={2.2} />
         <span style={{ fontSize: '0.68rem', fontWeight: 600, marginTop: '2px' }}>Account</span>

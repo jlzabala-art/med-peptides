@@ -40,7 +40,7 @@ export default function RequestRfqModal({ isOpen, onClose, variant, selectedProd
       `Please attach the batch Certificate of Analysis (CoA) and estimated delivery lead time.\n\n` +
       `Best regards,\n` +
       `Procurement Department\n` +
-      `Atlas Health & RegenPept Network`
+      `Atlas Services Procurement Network`
     );
 
     window.open(`mailto:${supplierEmail}?subject=${subject}&body=${body}`, '_blank');

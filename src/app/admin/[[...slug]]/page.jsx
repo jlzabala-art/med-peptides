@@ -55,6 +55,7 @@ const getTabComponent = async (tabId) => {
     case 'knowledge-base':     return (await import('../../../components/admin/AdminStorageTab')).default;
 
     // Sales
+    case 'customers':          return (await import('../../../components/admin/AdminCustomersTab')).default;
     case 'crm':                return (await import('../../../components/admin/AdminCrmTab')).default;
     case 'leads':              return (await import('../../../components/admin/AdminLeadsTabWrapper')).default;
     case 'clinics':            return (await import('../../../components/admin/AdminClinicsTabWrapper')).default;

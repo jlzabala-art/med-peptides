@@ -20,6 +20,8 @@ function dispatchContextEvent(productsList) {
     new CustomEvent('admin-context-update', {
       detail: {
         page: 'products',
+        activeTab: 'products',
+        label: 'Product Catalog',
         totalProducts: productsList.length,
         lowStockCount: lowStock.length,
         outOfStockCount: outOfStock.length,

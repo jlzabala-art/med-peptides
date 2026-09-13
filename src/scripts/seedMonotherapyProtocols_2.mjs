@@ -15,7 +15,7 @@ const protocols = [
   {
     protocol_id: "5-amino-1mq-metabolic",
     protocol_name: "5-Amino-1MQ Metabolic Ignition",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "weight_loss",
     goals: ["weight_loss", "muscle_growth", "longevity"],
     description: "5-Amino-1MQ is a highly effective, small molecule that inhibits the NNMT enzyme, leading to a significant increase in NAD+ levels, basal metabolic rate, and fat burning, without stimulating the central nervous system.",
@@ -58,7 +58,7 @@ const protocols = [
   {
     protocol_id: "fst-344-myostatin-blocker",
     protocol_name: "FST-344 Myostatin Inhibition",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "muscle_growth",
     goals: ["muscle_growth", "recovery"],
     description: "Follistatin-344 is a powerful myostatin inhibitor that allows for rapid and profound skeletal muscle hypertrophy.",
@@ -101,7 +101,7 @@ const protocols = [
   {
     protocol_id: "igf1-lr3-muscle",
     protocol_name: "IGF-1 LR3 Hyperplasia Cycle",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "muscle_growth",
     goals: ["muscle_growth", "recovery"],
     description: "IGF-1 LR3 is a long-acting analog of human IGF-1. It significantly boosts nitrogen retention, protein synthesis, and most uniquely, promotes hyperplasia (creation of new muscle cells).",
@@ -144,7 +144,7 @@ const protocols = [
   {
     protocol_id: "peg-mgf-muscle-repair",
     protocol_name: "PEG-MGF Localized Growth & Repair",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "recovery",
     goals: ["recovery", "muscle_growth"],
     description: "PEG-MGF (Pegylated Mechano Growth Factor) is a splice variant of IGF-1 produced naturally when a muscle is placed under stress. It stimulates stem cell proliferation to repair and grow localized muscle tissue.",
@@ -191,7 +191,7 @@ const protocols = [
   {
     protocol_id: "kisspeptin-hpta-restart",
     protocol_name: "Kisspeptin-10 HPTA Axis Restart",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "sexual_health",
     goals: ["sexual_health", "muscle_growth"],
     description: "Kisspeptin-10 directly stimulates the release of GnRH from the hypothalamus, leading to a robust, pulsatile release of LH and FSH, restarting natural testosterone production.",
@@ -234,7 +234,7 @@ const protocols = [
   {
     protocol_id: "pt141-libido-enhancement",
     protocol_name: "PT-141 (Bremelanotide) Libido & Arousal",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "sexual_health",
     goals: ["sexual_health", "brain_health"],
     description: "PT-141 (Bremelanotide) works via the central nervous system to induce arousal and treat erectile dysfunction (ED) and hypoactive sexual desire disorder (HSDD) without relying on vascular mechanics like PDE5 inhibitors.",
@@ -281,7 +281,7 @@ const protocols = [
   {
     protocol_id: "mt2-melanogenesis",
     protocol_name: "MT2 Photoprotection & Tanning",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "skin_hair",
     goals: ["skin_hair", "sexual_health"],
     description: "Melanotan II (MT2) is an alpha-MSH analog that strongly stimulates melanogenesis (skin darkening) and provides systemic photoprotection against UV damage. It also acts as an aphrodisiac.",
@@ -324,7 +324,7 @@ const protocols = [
   {
     protocol_id: "snap8-wrinkle-reduction",
     protocol_name: "Snap-8 Wrinkle Defense",
-    author: "RegenPept Clinical Team",
+    author: "Atlas Services Clinical Team",
     primary_goal: "skin_hair",
     goals: ["skin_hair", "longevity"],
     description: "Snap-8 is an elongated version of Argireline (acetyl octapeptide-3). It reduces the depth of wrinkles on the face caused by the contraction of muscles of facial expression.",

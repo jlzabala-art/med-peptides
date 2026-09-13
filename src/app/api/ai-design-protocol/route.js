@@ -103,7 +103,7 @@ export async function POST(request) {
       required: ['protocolName', 'subtitle', 'therapeuticCategory', 'totalDurationWeeks', 'overview', 'phases', 'accessoriesNeeded', 'monitoringBiomarkers']
     };
 
-    const systemPrompt = `You are the Lead Medical Protocol Architect for RegenPept.
+    const systemPrompt = `You are the Lead Medical Protocol Architect for Atlas Services.
 Your task is to design an evidence-based, multi-phase clinical peptide protocol for the objective: "${targetGoal}".
 
 Parameters:

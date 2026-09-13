@@ -418,9 +418,7 @@ export default function AdminBulkOrdersTabClient({ initialData = [], isSubTab = 
   const [filterStatus, setFilter] = useState('all');
   const [unreadCount, setUnread] = useState(0);
   const [showBuilder, setShowBuilder] = useState(false);
-  const location = usePathname();
-  const params = new URLSearchParams(location.search);
-  const deepLinkSearch = params.get('search');
+  const pathname = usePathname();
 
   const { query: searchTerm, setQuery: setSearchTerm, results: searchResults, isSearching } = useAlgoliaSearch({
     indexName: algoliaConfig.indices.orders,
@@ -430,10 +428,14 @@ export default function AdminBulkOrdersTabClient({ initialData = [], isSubTab = 
   });
 
   useEffect(() => {
-    if (deepLinkSearch) {
-      setSearchTerm(deepLinkSearch);
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const deepLink = searchParams.get('search');
+      if (deepLink) {
+        setSearchTerm(deepLink);
+      }
     }
-  }, [deepLinkSearch]);
+  }, [setSearchTerm]);
 
   const orders = useMemo(() => {
     if (searchTerm && searchResults.length > 0) {

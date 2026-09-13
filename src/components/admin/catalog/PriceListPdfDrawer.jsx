@@ -171,7 +171,7 @@ export default function PriceListPdfDrawer({
 
       if (finalResult) {
         const url = finalResult.meta?.url || (finalResult.pdfBase64 ? `data:application/pdf;base64,${finalResult.pdfBase64}` : null);
-        const filename = finalResult.filename || `REGENPEPT_${gen.docType.toUpperCase()}_${refNumber}.pdf`;
+        const filename = finalResult.filename || `ATLAS_SERVICES_${gen.docType.toUpperCase()}_${refNumber}.pdf`;
         setPdfData({
           url,
           filename,

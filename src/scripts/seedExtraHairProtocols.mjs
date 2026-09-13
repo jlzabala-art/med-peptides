@@ -18,7 +18,7 @@ const extraProtocols = [
     goals: ['hair', 'skin_hair', 'aesthetics'],
     complexity_level: 'Advanced',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Stimulation of entirely new hair follicles (neogenesis)',
@@ -78,7 +78,7 @@ const extraProtocols = [
     goals: ['hair', 'skin_hair', 'aesthetics', 'anti_aging'],
     complexity_level: 'Intermediate',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Prolonged anagen (growth) phase of the hair cycle',
@@ -138,7 +138,7 @@ const extraProtocols = [
     goals: ['hair', 'skin_hair', 'aesthetics'],
     complexity_level: 'Advanced',
     fda_approved: false,
-    author: 'RegenPept Clinical Team',
+    author: 'Atlas Services Clinical Team',
     expected_outcomes: {
       bullets: [
         'Complete cessation of DHT-induced hair shedding',

@@ -251,9 +251,20 @@ export function useClinicalAI({
   const [dynamicPageContext, setDynamicPageContext] = useState(null);
 
   useEffect(() => {
-    const handler = (e) => setDynamicPageContext(e.detail);
+    const handler = (e) => {
+      const detail = e.detail;
+      setDynamicPageContext(detail);
+      if (detail?.quickActions && detail.quickActions.length > 0) {
+        const prompts = detail.quickActions.map(a => a.prompt || a.label || a);
+        setSuggestions(prompts);
+      }
+    };
     window.addEventListener('UPDATE_GLOBAL_CONTEXT', handler);
-    return () => window.removeEventListener('UPDATE_GLOBAL_CONTEXT', handler);
+    window.addEventListener('admin-context-update', handler);
+    return () => {
+      window.removeEventListener('UPDATE_GLOBAL_CONTEXT', handler);
+      window.removeEventListener('admin-context-update', handler);
+    };
   }, []);
   const [hasNewActivity, setHasNewActivity] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -741,8 +752,17 @@ export function useClinicalAI({
     const activeProductCtx = eventContextRef.current || stickyProductContext || dynamicPageContext || externalPageContext;
     const effectiveModuleMode = activeProductCtx?.moduleMode || stickyModuleMode || null;
 
+    const isCatalogLocation = 
+      effectiveModuleMode === 'catalog' ||
+      effectiveModuleMode === 'products' ||
+      pathname.includes('/products') ||
+      pathname.includes('/catalog') ||
+      activeProductCtx?.activeTab === 'products' ||
+      activeProductCtx?.activeTab === 'catalog';
+
     const isProductLocation = 
       isProductMode ||
+      isCatalogLocation ||
       effectiveModuleMode === 'product' ||
       pathname.startsWith('/product/') || 
       pathname.startsWith('/supplements/') || 
@@ -754,8 +774,12 @@ export function useClinicalAI({
     const isProtocolLocation =
       effectiveModuleMode === 'protocol' ||
       activeProductCtx?.isProtocolPage ||
+      activeProductCtx?.isProtocolContext === true ||
+      activeProductCtx?.page === 'protocols' ||
+      activeProductCtx?.activeTab === 'protocols' ||
       pathname.startsWith('/protocol/') ||
-      pathname.startsWith('/protocols/');
+      pathname.startsWith('/protocols/') ||
+      pathname.includes('/protocols');
 
     const isPrescriptionLocation =
       effectiveModuleMode === 'prescription' ||
@@ -780,6 +804,23 @@ export function useClinicalAI({
       userCtx?.role === 'supplier'
     );
 
+    // Resolve entities mentioned in query if classifyResult didn't catch them
+    const detectedHits = [...classifyResult.detected_entities];
+    if (products.length > 0) {
+      const lowerMsg = messageText.toLowerCase();
+      const matchedProd = products.find(p => {
+        const pName = (p.canonicalName || p.displayName || p.name || '').toLowerCase();
+        return pName && pName.length > 2 && lowerMsg.includes(pName);
+      });
+      if (matchedProd && !detectedHits.some(h => (h.name || '').toLowerCase() === (matchedProd.name || '').toLowerCase())) {
+        detectedHits.unshift({
+          name: matchedProd.name || matchedProd.displayName,
+          slug: matchedProd.slug || matchedProd.id,
+          entity_type: 'peptide'
+        });
+      }
+    }
+
     try {
       const bodyStr = JSON.stringify({
         message: messageText,
@@ -792,11 +833,17 @@ export function useClinicalAI({
           ...(contextMode === 'admin' ? { agentId: 'gemini-native' } : {})
         },
         context: {
-          active_entities_data: classifyResult.detected_entities.map(hit => {
-            const full = products.find(p => p.name === hit.name || p.displayName === hit.name);
+          active_entities_data: detectedHits.map(hit => {
+            const full = products.find(p => 
+              (p.name && p.name.toLowerCase() === (hit.name || '').toLowerCase()) ||
+              (p.displayName && p.displayName.toLowerCase() === (hit.name || '').toLowerCase()) ||
+              p.slug === hit.slug ||
+              p.id === hit.slug
+            );
             if (!full) return hit;
             return {
               name: full.name,
+              canonicalName: full.canonicalName,
               category: full.category,
               objective: full.objective,
               mechanisms: full.mechanisms,
@@ -806,7 +853,18 @@ export function useClinicalAI({
               dosage: full.standard_dosage,
               timing: full.timing,
               aiContent: full.aiContent,
-              pharmacology: full.pharmacology
+              pharmacology: full.pharmacology,
+              variants: (full.variants || []).map(v => ({
+                dosage: v.dosage || v.dose || 'Standard',
+                presentation: v.presentation || v.form || 'Vial',
+                supplier: v.supplier || v.supplierId || null,
+                stock: v.stock,
+                cost: v.cost ?? v.unit_cost ?? v.pricing?.masterPrice?.base ?? v.pricing?.master?.perUnit ?? null,
+                wholesalePrice: v.wholesalePrice ?? v.wholesale_price ?? v.pricing?.wholesalePrice?.base ?? v.pricing?.wholesale?.perUnit ?? null,
+                clinicPrice: v.clinicPrice ?? v.clinic_price ?? v.pricing?.clinicPrice?.base ?? v.pricing?.clinic?.perUnit ?? null,
+                retailPrice: v.unit_price ?? v.price ?? v.retailPrice ?? v.pricing?.retailPrice?.base ?? v.pricing?.retail?.perUnit ?? null,
+                cost_tiers: v.cost_tiers || (v.price_per_kit_10 ? { cost_10: v.price_per_kit_10, cost_50: v.price_per_kit_50 } : null)
+              }))
             };
           }),
           available_compounds: products.map(p => ({
@@ -843,23 +901,39 @@ export function useClinicalAI({
           },
           instructions: (() => {
             // ───────────────────────────────────────────────────
-            // RULE 1: PRODUCT MODE — Clinical Profile
+            // RULE 1: PROTOCOL MODE — Clinical Protocols & Compendium
             // ───────────────────────────────────────────────────
-            if (isProductLocation || activeProductCtx?.isProductPage) {
-              const audience = contextMode === 'admin' ? 'admin'
-                : contextMode === 'doctor' ? 'doctor'
-                : isB2B ? 'researcher'
-                : 'patient';
-              const productForPrompt = activeProductCtx || stickyProductContext || null;
-              return buildProductSystemPrompt(productForPrompt, { audience, forceEnglish: true });
+            if (isProtocolLocation) {
+              const protocolCtx = activeProductCtx?.protocol || (activeProductCtx?.phases ? activeProductCtx : null);
+              return buildProtocolSystemPrompt(protocolCtx, {
+                forceEnglish: false,
+                protocols: protocols || [],
+                phase: activeProductCtx?.phase || null,
+                role: contextMode
+              });
             }
 
             // ───────────────────────────────────────────────────
-            // RULE 2: PROTOCOL MODE — Protocol Analysis
+            // RULE 2: PRODUCT MODE — Clinical Profile
             // ───────────────────────────────────────────────────
-            if (isProtocolLocation) {
-              const protocolCtx = activeProductCtx || stickyProductContext || null;
-              return buildProtocolSystemPrompt(protocolCtx, { forceEnglish: true });
+            if (isProductLocation || activeProductCtx?.isProductPage) {
+              const audience = contextMode === 'admin' ? 'admin'
+                : (contextMode === 'doctor' || contextMode === 'medical_director') ? 'doctor'
+                : contextMode === 'wholesaler' ? 'wholesaler'
+                : isB2B ? 'researcher'
+                : 'patient';
+              let productForPrompt = activeProductCtx || stickyProductContext || null;
+              if ((!productForPrompt || !productForPrompt.variants?.length) && detectedHits.length > 0) {
+                const firstHit = detectedHits[0];
+                const matched = products.find(p => 
+                  (p.name && p.name.toLowerCase() === (firstHit.name || '').toLowerCase()) ||
+                  (p.displayName && p.displayName.toLowerCase() === (firstHit.name || '').toLowerCase()) ||
+                  p.slug === firstHit.slug ||
+                  p.id === firstHit.slug
+                );
+                if (matched) productForPrompt = matched;
+              }
+              return buildProductSystemPrompt(productForPrompt, { audience, forceEnglish: true });
             }
 
             // ───────────────────────────────────────────────────

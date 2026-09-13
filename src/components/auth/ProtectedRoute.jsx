@@ -28,18 +28,20 @@ export default function ProtectedRoute({ children, allowedRoles, requiredRole })
   React.useEffect(() => {
     if (isUnauthorized) {
       if (!user) {
-        router.push('/login');
+        const target = pathname ? `/login?redirect=${encodeURIComponent(pathname)}` : '/login';
+        router.push(target);
       } else {
         // Authenticated user lacks clearance for this area — redirect to their authorized portal
-        const roleHome = activeRole === 'doctor' ? '/doctor'
+        const roleHome = activeRole === 'doctor' || activeRole === 'medical_director' ? '/doctor'
+          : activeRole === 'wholesaler' || activeRole === 'wholeseller' ? '/wholesaler'
+          : activeRole === 'supplier' ? '/supplier'
+          : activeRole === 'clinic' ? '/clinic'
           : activeRole === 'patient' ? '/patient'
-          : activeRole === 'wholesaler' ? '/wholesaler'
-          : activeRole === 'supplier' ? '/wholesaler'
           : '/';
         router.push(roleHome);
       }
     }
-  }, [isUnauthorized, user, activeRole, router]);
+  }, [isUnauthorized, user, activeRole, pathname, router]);
 
   if (!mounted || (loading && !isAdmin)) {
     return (

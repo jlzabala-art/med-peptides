@@ -201,6 +201,17 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
             {formula || 'Synthetic Polypeptide Structure'}
           </div>
         </div>
+
+        {product?.sequence && (
+          <div style={{ backgroundColor: '#ffffff', padding: '0.85rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', gridColumn: '1 / -1' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.35rem' }}>
+              Primary Peptide Sequence (Mono-letter Notation)
+            </div>
+            <code style={{ fontSize: '0.82rem', fontFamily: 'ui-monospace, monospace', color: '#003666', wordBreak: 'break-all', display: 'block', backgroundColor: '#f1f5f9', padding: '6px 10px', borderRadius: '6px' }}>
+              {product.sequence}
+            </code>
+          </div>
+        )}
       </div>
 
       {/* ── Quality Matrix & Chain of Custody Table ── */}

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import PortalLayout from '../ui/PortalLayout';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, ADMIN_EMAILS } from '../../context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import AtlasLoadingScreen from '../ui/AtlasLoadingScreen';
 import dynamic from 'next/dynamic';
@@ -11,6 +11,7 @@ import { useNotificationContext } from '../../context/NotificationContext';
 import IOSPushBanner from '../ui/IOSPushBanner';
 import OfflineSyncProvider from '../shared/OfflineSyncProvider';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import ProfessionalWelcomeOverlay from '../ui/ProfessionalWelcomeOverlay';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
 const GlobalDrawerManager = dynamic(() => import('../shared/GlobalDrawerManager'), { ssr: false });
@@ -45,13 +46,15 @@ export default function PanelShell({
   // Handle route protection
   useEffect(() => {
     if (!loading) {
+      const isUserAdmin = activeRole === 'admin' || (user && ADMIN_EMAILS.includes(user?.email?.toLowerCase()));
       if (!user) {
-        router.replace('/login');
-      } else if (allowedRoles.length > 0 && !allowedRoles.includes(activeRole)) {
+        const target = pathname ? `/login?redirect=${encodeURIComponent(pathname)}` : '/login';
+        router.replace(target);
+      } else if (!isUserAdmin && allowedRoles.length > 0 && !allowedRoles.includes(activeRole)) {
         router.replace('/');
       }
     }
-  }, [user, activeRole, loading, allowedRoles, router]);
+  }, [user, activeRole, loading, allowedRoles, pathname, router]);
 
   // Determine the effective role for theming (fallback to the passed roleContext)
   const themeRole = activeRole || roleContext;
@@ -93,6 +96,7 @@ export default function PanelShell({
         `}</style>
         <IOSPushBanner />
         <PushNotificationPrompt />
+        <ProfessionalWelcomeOverlay />
         <PortalLayout
           sidebarNavGroups={sidebarNavGroups}
           sidebarPinnedItems={sidebarPinnedItems}

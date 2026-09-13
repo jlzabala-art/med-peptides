@@ -1,0 +1,12 @@
+.gcloudignore
+.git
+.gitignore
+node_modules/
+.next/cache/
+.next/dev/
+*.log
+*.md
+.firebase/*/functions/.next/cache/
+.firebase/*/functions/.next/dev/
+.firebase/*/functions/.next/standalone/
+.firebase/*/functions/public/

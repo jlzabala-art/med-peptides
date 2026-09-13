@@ -8,11 +8,11 @@ import GlobalSearchBar from '../ui/GlobalSearchBar';
 import EmptyState from '../ui/EmptyState';
 import MetricCard from '../ui/MetricCard';
 import { ShoppingCart, FileText, CheckCircle, Package, AlertCircle, TrendingUp, Clock, Eye } from 'lucide-react';
-import { useBulkOrders } from '../../hooks/data/useBulkOrders';
+import { useBulkOrders } from '../../hooks/admin/useBulkOrders';
 import AppActionGroup from '../ui/AppActionGroup';
 
 export default function AdminBulkOrdersTab({ isSubTab = false }) {
-  const { orders, isLoading, error } = useBulkOrders();
+  const { bulkOrders: orders = [], loading: isLoading, error } = useBulkOrders();
 
   const [searchQuery, setSearchQuery] = useState('');
   

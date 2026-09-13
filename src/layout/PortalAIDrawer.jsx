@@ -60,7 +60,7 @@ export default function PortalAIDrawer({ isOpen, onClose }) {
             <div className="drawer-header">
               <div className="drawer-title">
                 <Cpu className="title-icon" />
-                <h2>Regenpept AI</h2>
+                <h2>Atlas AI</h2>
               </div>
               <button className="close-btn" onClick={onClose} aria-label="Close Drawer">
                 <X />

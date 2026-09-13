@@ -95,7 +95,7 @@ export async function POST(request) {
       required: ['supplierIdentified', 'currency', 'totalProductsExtracted', 'items']
     };
 
-    const systemPrompt = `You are an institutional procurement analyst and peptide market specialist for RegenPept.
+    const systemPrompt = `You are an institutional procurement analyst and peptide market specialist for Atlas Services.
 Your task is to parse a supplier price sheet (PDF or image) from "${supplierName}".
 
 Extraction Guidelines:

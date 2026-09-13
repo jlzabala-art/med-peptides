@@ -387,11 +387,11 @@ export default function GlobalDrawerManager() {
           );
         }
 
-        if (drawer.type === 'product-sheet' || drawer.type === 'datasheet') {
+        if (drawer.type === 'product-sheet' || drawer.type === 'datasheet' || drawer.type === 'product') {
           return (
             <ProductDatasheetDrawer
               key={drawer.id}
-              product={drawer.data?.product || { id: drawer.resourceId }}
+              product={drawer.data?.product || (drawer.data && typeof drawer.data === 'object' && (drawer.data.name || drawer.data.id) ? drawer.data : { id: drawer.resourceId, name: drawer.resourceId })}
               isOpen={true}
               onClose={() => handleClose(drawer)}
             />

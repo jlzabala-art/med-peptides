@@ -63,6 +63,46 @@ const LEADS_QUICK_PROMPTS = [
   { label: 'Sync CRM', text: 'Sync leads with Zoho Bigin.' }
 ];
 
+const PRODUCTS_CATALOG_QUICK_PROMPTS = {
+  admin: [
+    { label: '🏷️ Pricing Tiers', text: 'Show me the pricing levels (cost, clinic, wholesale, retail) for catalog peptides.' },
+    { label: '🧬 Retatrutide Variants', text: 'What are the available variants, dosages, and prices for Retatrutide?' },
+    { label: '⚠️ Low Stock Alerts', text: 'Which peptide products and variants are low in stock (<20 units) or out of stock?' },
+    { label: '📊 Catalog Summary', text: 'Give me a summary of total active peptides, raw materials, and suppliers.' }
+  ],
+  doctor: [
+    { label: '💉 Dosages & Formats', text: 'What dosages, concentrations, and vial presentations are available for catalog peptides?' },
+    { label: '🔬 Retatrutide Evidence', text: 'What is the clinical evidence and mechanism of action for Retatrutide?' },
+    { label: '⚖️ Titration Schedule', text: 'What is the recommended titration protocol for Retatrutide?' },
+    { label: '⚠️ Contraindications', text: 'Screen contraindications for active metabolic peptides in catalog.' }
+  ],
+  medical_director: [
+    { label: '💉 Dosages & Formats', text: 'What dosages, concentrations, and vial presentations are available for catalog peptides?' },
+    { label: '🔬 Retatrutide Evidence', text: 'What is the clinical evidence and mechanism of action for Retatrutide?' },
+    { label: '⚖️ Titration Schedule', text: 'What is the recommended titration protocol for Retatrutide?' },
+    { label: '⚠️ Contraindications', text: 'Screen contraindications for active metabolic peptides in catalog.' }
+  ],
+  wholesaler: [
+    { label: '💰 Bulk Volume Tiers', text: 'What are the wholesale and kit volume tier prices (10x, 50x) for Retatrutide?' },
+    { label: '📦 Stock Availability', text: 'Check current supplier inventory availability and lead times.' },
+    { label: '📈 Highest Margin', text: 'Which peptide variants offer the best commercial margins?' }
+  ],
+  compounding_pharmacy: [
+    { label: '⚗️ Raw API vs Vials', text: 'What are the raw material API prices per gram vs finished vials?' },
+    { label: '🔬 CAS & COA Purity', text: 'Check CAS numbers and COA purity for catalog peptides.' },
+    { label: '🧊 Stability Specs', text: 'Review stability of peptides at 4°C vs -20°C.' }
+  ],
+  supplier: [
+    { label: '📄 Catalog Listings', text: 'Review supplier product listings and pricing competitiveness.' },
+    { label: '📊 Demand Forecast', text: 'Which catalog peptides have the highest demand velocity?' }
+  ],
+  default: [
+    { label: '🏷️ Pricing Tiers', text: 'Show me the pricing levels (cost, wholesale, retail) for catalog peptides.' },
+    { label: '🧬 Retatrutide Variants', text: 'What are the available variants, dosages, and formats for Retatrutide?' },
+    { label: '⚠️ Low Stock', text: 'Which peptide products are currently low in stock?' }
+  ]
+};
+
 const RESEARCH_QUICK_PROMPTS = [
   { label: 'Optimization Goals', text: 'How do I set up my research goals?' },
   { label: 'Track Biomarkers', text: 'What biomarkers should I track for cellular health?' },
@@ -1025,6 +1065,14 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                 const isProtocolContext = !isPatientContext && (pageContext?.contextType === 'protocol' || !!pageContext?.protocolName);
                 const protocolName = pageContext?.protocolName || pageContext?.name || 'this protocol';
 
+                // Catalog context takes priority when on products / catalog tab
+                const isCatalogContext = !isPatientContext && !isProductContext && (
+                  pageContext?.activeTab === 'products' ||
+                  pageContext?.activeTab === 'catalog' ||
+                  pageContext?.page === 'products' ||
+                  (typeof window !== 'undefined' && (window.location.pathname.includes('/products') || window.location.pathname.includes('/catalog')))
+                );
+
                 const promptList = isPatientContext ? buildPatientQuickPrompts(patientName) :
                   isProtocolContext ? buildProtocolQuickPrompts(protocolName) :
                   isProductContext ? [
@@ -1032,7 +1080,9 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                   { label: '💊 Dosage', text: 'What is the standard studied research dosage?' },
                   { label: '✨ Suitability', text: 'Can you ask me 3 questions about my health goals to evaluate suitability?' },
                   { label: '🧊 Reconstitution', text: 'How do I reconstitute and store this product?' }
-                ] : (pageContext?.activeTab === 'calendar' ? CALENDAR_QUICK_PROMPTS :
+                ] : isCatalogContext ? (
+                  PRODUCTS_CATALOG_QUICK_PROMPTS[contextMode] || PRODUCTS_CATALOG_QUICK_PROMPTS.admin || PRODUCTS_CATALOG_QUICK_PROMPTS.default
+                ) : (pageContext?.activeTab === 'calendar' ? CALENDAR_QUICK_PROMPTS :
                   pageContext?.activeTab === 'orders' ? ORDERS_QUICK_PROMPTS :
                   pageContext?.activeTab === 'leads' ? LEADS_QUICK_PROMPTS :
                   pageContext?.activeTab === 'zoho_books' ? [

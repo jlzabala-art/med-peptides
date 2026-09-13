@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Package, ShieldCheck, Snowflake, FileCheck, FileText, Tag, ExternalLink } from 'lucide-react';
+import { Package, ShieldCheck, Snowflake, FileCheck, FileText, Tag, ExternalLink, QrCode } from 'lucide-react';
 import CopyableId from '../../ui/CopyableId';
 import DataTable from '../../ui/DataTable';
 
@@ -103,7 +103,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                       </a>
 
                       <a
-                        href={`/api/vial-label/${slug}?format=38x90`}
+                        href={`/api/vial-label/${slug}?format=38x90&type=full`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -119,8 +119,31 @@ export default function ItemsTab({ quotation, quotationId }) {
                           alignItems: 'center',
                           gap: 3
                         }}
+                        title="Download Complete Clinical Specification Vial Label"
                       >
-                        <Tag size={11} /> Vial Label 38x90 ↗
+                        <Tag size={11} /> Full Label ↗
+                      </a>
+
+                      <a
+                        href={`/api/vial-label/${slug}?format=38x90&type=barcode`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          color: '#0369a1',
+                          background: '#e0f2fe',
+                          border: '1px solid #bae6fd',
+                          padding: '2px 7px',
+                          borderRadius: 4,
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3
+                        }}
+                        title="Download Barcode Only Label Directing to Monograph"
+                      >
+                        <QrCode size={11} /> Barcode Only ↗
                       </a>
                     </div>
                   </div>
@@ -190,6 +213,7 @@ export default function ItemsTab({ quotation, quotationId }) {
           ]}
           data={items}
           keyField="id"
+          hideExpandColumn={true}
           emptyTitle="No line items attached to this quotation"
         />
       </div>

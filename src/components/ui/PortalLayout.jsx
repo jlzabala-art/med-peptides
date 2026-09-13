@@ -397,7 +397,7 @@ export default function PortalLayout({
       display: flex;
       position: relative;
       width: 100%;
-      max-width: clamp(200px, 24vw, 380px);
+      max-width: clamp(240px, 38vw, 560px);
     }
     .portal-header-search-bar input {
       width: 100%;
@@ -558,19 +558,9 @@ export default function PortalLayout({
               <Menu size={20} color="var(--color-text-primary)" />
             </button>
           )}
-          {portalTitle ? (
-            <>
-              <span className="portal-header-title">{portalTitle}</span>
-              <span className="portal-header-sep">|</span>
-              <span className="portal-header-switcher">
-                <AdminPortalSwitcher />
-              </span>
-            </>
-          ) : (
-            <span className="portal-header-switcher">
-              <AdminPortalSwitcher />
-            </span>
-          )}
+          <span className="portal-header-switcher">
+            <AdminPortalSwitcher />
+          </span>
         </div>
 
         {/* CENTER: search bar — hidden on mobile via CSS, collapses to nothing */}
@@ -1025,7 +1015,7 @@ export default function PortalLayout({
           <div
             style={{ marginLeft: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            <UserProfileMenu roleContext={roleContext} isMobile={isMobile} />
+            <UserProfileMenu roleContext={roleContext} isMobile={isMobile} portalTitle={portalTitle} />
             {/* Role Impersonator Tool (Rule #14) — hidden on mobile topbar */}
             <span className="portal-header-impersonator-wrap">
               <RoleImpersonatorSelector />

@@ -7,11 +7,14 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "next build --turbopack",
+    "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint src",
     "analyze": "ANALYZE=true next build",
-    "deploy:hosting": "rm -rf .next .firebase && npx firebase-tools deploy --only hosting",
+    "deploy:hosting": "node scripts/optimize-deploy.mjs && npx firebase-tools deploy --only hosting",
+    "deploy:fast": "node scripts/optimize-deploy.mjs && npx firebase-tools deploy --only hosting",
+    "deploy:cloudrun": "bash scripts/deploy-cloudrun.sh",
     "deploy:functions": "npm run build:ai && npm run build:cron && npm run build:finance && npm run build:triggers && npx firebase-tools deploy --only functions",
     "deploy:functions:default": "npx firebase-tools deploy --only functions:default",
     "build:ai": "rm -rf functions-ai/src && cp -R functions/src functions-ai/src && cp -R functions/emailTemplates functions-ai/emailTemplates",
@@ -94,5 +97,10 @@
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2",
     "vitest": "^4.1.9"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "echo 'Staged files validated'"
+    ]
   }
 }

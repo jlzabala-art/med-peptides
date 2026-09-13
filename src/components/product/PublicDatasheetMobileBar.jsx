@@ -20,7 +20,8 @@ export default function PublicDatasheetMobileBar({
   selectedStrength,
   supplierName,
   dynamicPublicUrl,
-  lang = 'es'
+  pdfUrl,
+  lang = 'en'
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -54,7 +55,7 @@ export default function PublicDatasheetMobileBar({
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `${name} (${formatName}) | RegenPept`,
+          title: `${name} (${formatName}) | Atlas Services`,
           text: `Ficha técnica analítica de ${name} (${doseName}, ${formatName}) sintetizado bajo cGMP por ${supplierName}.`,
           url: dynamicPublicUrl,
         });

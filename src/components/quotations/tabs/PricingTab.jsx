@@ -204,6 +204,7 @@ export default function PricingTab({ quotation, quotationId }) {
           ]}
           data={items}
           keyField="id"
+          hideExpandColumn={true}
           emptyTitle="No line items recorded"
         />
       </div>

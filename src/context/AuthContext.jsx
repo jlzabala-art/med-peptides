@@ -11,6 +11,8 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   EmailAuthProvider,
   linkWithCredential
 } from 'firebase/auth';
@@ -158,6 +160,43 @@ export function AuthProvider({ children, serverUser = null }) {
       console.warn('Could not listen to custom role permissions:', err);
     });
     return unsubscribe;
+  }, []);
+
+  // Check for mobile redirect auth return
+  useEffect(() => {
+    getRedirectResult(auth).then(async (cred) => {
+      if (cred && cred.user) {
+        const userEmail = (cred.user.email || '').toLowerCase().trim();
+        const isAdmin = ADMIN_EMAILS.includes(userEmail);
+        const docRef = doc(db, 'users', cred.user.uid);
+        const docSnap = await getDoc(docRef);
+        let profile = null;
+        if (docSnap.exists()) {
+          profile = docSnap.data();
+          if (isAdmin && (profile.role !== 'admin' || !profile.approved)) {
+            profile = { ...profile, role: 'admin', approved: true, professionalStatus: 'approved' };
+            try { await updateDoc(docRef, { role: 'admin', approved: true, professionalStatus: 'approved' }); } catch (e) {}
+          }
+        } else {
+          const nameParts = (cred.user.displayName || '').trim().split(' ');
+          profile = {
+            firstName: nameParts[0] || '',
+            lastName: nameParts.slice(1).join(' ') || '',
+            email: userEmail,
+            role: isAdmin ? 'admin' : 'pending',
+            approved: isAdmin ? true : false,
+            createdAt: new Date().toISOString()
+          };
+          try { await setDoc(docRef, profile); } catch (e) {}
+        }
+        setUserProfile(profile);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('regenpept_userProfile', JSON.stringify(profile));
+        }
+      }
+    }).catch((err) => {
+      console.warn('[AuthContext] getRedirectResult check:', err);
+    });
   }, []);
 
   // Listen for auth state changes
@@ -424,7 +463,20 @@ export function AuthProvider({ children, serverUser = null }) {
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    const cred = await signInWithPopup(auth, provider);
+    let cred = null;
+    try {
+      cred = await signInWithPopup(auth, provider);
+    } catch (popupErr) {
+      if (
+        popupErr.code === 'auth/popup-blocked' || 
+        popupErr.code === 'auth/cancelled-popup-request'
+      ) {
+        console.info('[AuthContext] Mobile popup blocked, falling back to signInWithRedirect');
+        await signInWithRedirect(auth, provider);
+        return { cred: null, profile: null, pendingRedirect: true };
+      }
+      throw popupErr;
+    }
     
     // Check if profile exists, if not create a basic one
     const userEmail = (cred.user.email || '').toLowerCase().trim();

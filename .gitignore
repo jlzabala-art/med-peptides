@@ -63,3 +63,5 @@ pricing_integrity_report.json
 scratch_api_response.json
 merge_log.json
 migration_id_map.json
+backups/
+backups.json

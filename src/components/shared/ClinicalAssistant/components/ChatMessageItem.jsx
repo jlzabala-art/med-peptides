@@ -23,9 +23,10 @@ import AgentBadge from './AgentBadge';
 import PendingActionCard from './PendingActionCard';
 import PriceImportTable from './PriceImportTable';
 import StockImportTable from './StockImportTable';
+import CatalogActionCard from './CatalogActionCard';
 import { User, Bot, Copy, Check, Volume2, VolumeX, ThumbsUp, ThumbsDown, ExternalLink, Coins } from '@/lib/icons';
 
-export default function ChatMessageItem({ msg, idx, onProductClick, InstantResultsTabs, navigate, setIsOpen, onSend, onRate, onDeepDive, contextMode = 'patient', onConfirmAction }) {
+export default function ChatMessageItem({ msg, idx, onProductClick, InstantResultsTabs, navigate, setIsOpen, onSend, onRate, onDeepDive, contextMode = 'patient', onConfirmAction, pageContext = null }) {
   const [copyIdx, setCopyIdx] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -435,6 +436,46 @@ export default function ChatMessageItem({ msg, idx, onProductClick, InstantResul
             vialMg={metadata.visualRecon.vialMg}
             waterMl={metadata.visualRecon.waterMl}
             dosageMcg={metadata.visualRecon.dosageMcg}
+          />
+        )}
+
+        {/* ── Official Technical Datasheet Action Card ────────────── */}
+        {isAssistant && metadata.datasheetAction && (
+          <CatalogActionCard
+            type="datasheet"
+            actionData={metadata.datasheetAction}
+            contextMode={contextMode}
+            pageContext={pageContext}
+          />
+        )}
+
+        {/* ── Official Price Catalog Action Card ─────────────────── */}
+        {isAssistant && metadata.priceListAction && (
+          <CatalogActionCard
+            type="pricelist"
+            actionData={metadata.priceListAction}
+            contextMode={contextMode}
+            pageContext={pageContext}
+          />
+        )}
+
+        {/* ── Clinical Protocol Sheet Action Card ──────────────────── */}
+        {isAssistant && metadata.protocolSheetAction && (
+          <CatalogActionCard
+            type="protocol_sheet"
+            actionData={metadata.protocolSheetAction}
+            contextMode={contextMode}
+            pageContext={pageContext}
+          />
+        )}
+
+        {/* ── Clinical Protocol Compendium Action Card ─────────────── */}
+        {isAssistant && metadata.protocolCompendiumAction && (
+          <CatalogActionCard
+            type="protocol_compendium"
+            actionData={metadata.protocolCompendiumAction}
+            contextMode={contextMode}
+            pageContext={pageContext}
           />
         )}
 

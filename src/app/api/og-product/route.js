@@ -75,8 +75,8 @@ export async function GET(request) {
   <text x="460" y="434" font-family="system-ui, sans-serif" font-size="13" fill="#6ee7b7">✓  No Login Required</text>
 
   <!-- Brand -->
-  <text x="100" y="510" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" fill="white" opacity="0.9">RegenPept</text>
-  <text x="100" y="532" font-family="system-ui, sans-serif" font-size="14" fill="#64748b">regenpept.com · Clinical Product Database</text>
+  <text x="100" y="510" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" fill="white" opacity="0.9">Atlas Services</text>
+  <text x="100" y="532" font-family="system-ui, sans-serif" font-size="14" fill="#64748b">med-peptides.com · Clinical Product Database</text>
 
   <!-- QR icon hint -->
   <rect x="990" y="450" width="80" height="80" rx="12" fill="#0f172a"/>

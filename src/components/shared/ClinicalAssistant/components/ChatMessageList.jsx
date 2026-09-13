@@ -147,6 +147,7 @@ export default function ChatMessageList({
             onDeepDive={onDeepDive}
             contextMode={contextMode}
             onConfirmAction={onConfirmAction}
+            pageContext={pageContext}
           />
         ))}
 

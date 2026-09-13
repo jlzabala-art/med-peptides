@@ -135,36 +135,72 @@ function QrShareButton({ product }) {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.35rem' }}>
               <a
-                href={`/api/vial-label/${product.id}?format=38x90`}
+                href={`/api/vial-label/${product.id}?format=38x90&type=full`}
                 target="_blank"
                 rel="noreferrer"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
                   padding: '0.4rem', borderRadius: '6px',
                   border: '1px solid #e2e8f0', background: '#f8fafc',
-                  cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600, color: '#334155',
+                  cursor: 'pointer', fontSize: '0.70rem', fontWeight: 600, color: '#334155',
                   textDecoration: 'none', transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
                 onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+                title="Full Technical Specification Label (38x90mm)"
               >
-                🏷️ Vial (38x90)
+                🏷️ Full Label
               </a>
               <a
-                href={`/api/vial-label/${product.id}?format=sheet_a4`}
+                href={`/api/vial-label/${product.id}?format=38x90&type=barcode`}
                 target="_blank"
                 rel="noreferrer"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
                   padding: '0.4rem', borderRadius: '6px',
+                  border: '1px solid #bae6fd', background: '#f0f9ff',
+                  cursor: 'pointer', fontSize: '0.70rem', fontWeight: 700, color: '#0369a1',
+                  textDecoration: 'none', transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#e0f2fe'}
+                onMouseLeave={e => e.currentTarget.style.background = '#f0f9ff'}
+                title="Barcode Only Label - Direct Monograph Link (38x90mm)"
+              >
+                ⚡ Barcode Only
+              </a>
+              <a
+                href={`/api/vial-label/${product.id}?format=sheet_a4&type=full`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
+                  padding: '0.35rem', borderRadius: '6px',
                   border: '1px solid #e2e8f0', background: '#f8fafc',
-                  cursor: 'pointer', fontSize: '0.72rem', fontWeight: 600, color: '#334155',
+                  cursor: 'pointer', fontSize: '0.68rem', fontWeight: 600, color: '#64748b',
                   textDecoration: 'none', transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
                 onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+                title="A4 Sheet (8 Full Labels)"
               >
-                📋 Sheet (A4 x8)
+                📋 Sheet Full (A4)
+              </a>
+              <a
+                href={`/api/vial-label/${product.id}?format=sheet_a4&type=barcode`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem',
+                  padding: '0.35rem', borderRadius: '6px',
+                  border: '1px solid #e2e8f0', background: '#f8fafc',
+                  cursor: 'pointer', fontSize: '0.68rem', fontWeight: 600, color: '#64748b',
+                  textDecoration: 'none', transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+                onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
+                title="A4 Sheet (8 Barcode Only Labels)"
+              >
+                📋 Sheet Barcode (A4)
               </a>
             </div>
             <a

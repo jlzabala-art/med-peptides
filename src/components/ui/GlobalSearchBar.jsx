@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode } from '@/lib/icons';
+import { useRouter } from 'next/navigation';
+import { Search, X, Command, Loader, Clock, ChevronDown, Filter, QrCode, ArrowUpRight } from '@/lib/icons';
 import '../../styles/search.css';
 import MultiSelectFilter from './MultiSelectFilter';
 import SingleSelectFilter from './SingleSelectFilter';
@@ -79,8 +80,10 @@ export default function GlobalSearchBar({
   filters = [],          // Active filter chips rendered below the bar
   filterOptions = [],    // Quick-filter dropdowns rendered inside the bar
 }) {
+  const router = useRouter();
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
+  const isProtocolsPage = (namespace || '').includes('protocol') || (typeof window !== 'undefined' && window.location.pathname.includes('/protocols'));
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => {
@@ -138,7 +141,7 @@ export default function GlobalSearchBar({
               variantCount: varCount,
               indexName: 'products'
             });
-            if (prods.length >= 4) break;
+            if (prods.length >= (isProtocolsPage ? 3 : 4)) break;
           }
 
           // Deduplicate protocols by title
@@ -157,10 +160,11 @@ export default function GlobalSearchBar({
               category: 'Protocol',
               indexName: 'protocols'
             });
-            if (protos.length >= 2) break;
+            if (protos.length >= (isProtocolsPage ? 4 : 3)) break;
           }
 
-          const combined = [...prods, ...protos];
+          // Contextual ordering: if on protocols page, show protocols first; otherwise products first
+          const combined = isProtocolsPage ? [...protos, ...prods] : [...prods, ...protos];
           setSuggestions(combined);
           if (combined.length > 0 && isFocused) {
             setShowDropdown(true);
@@ -266,7 +270,6 @@ export default function GlobalSearchBar({
 
   const handleSuggestionClick = useCallback(
     (item) => {
-      onChange?.(item.name);
       saveRecentSearch(item.name);
       trackSearchClick({
         indexName: item.indexName || 'products',
@@ -275,9 +278,22 @@ export default function GlobalSearchBar({
       });
       setShowDropdown(false);
       setSelectedIndex(-1);
+
+      // Cross-entity navigation between Products and Protocols
+      if (!isProtocolsPage && item.indexName === 'protocols') {
+        router.push(`/admin/protocols?selected=${encodeURIComponent(item.id)}&q=${encodeURIComponent(item.name)}`);
+        return;
+      }
+      if (isProtocolsPage && item.indexName === 'products') {
+        router.push(`/admin/products?selected=${encodeURIComponent(item.id)}&q=${encodeURIComponent(item.name)}`);
+        return;
+      }
+
+      // In-page selection
+      onChange?.(item.name);
       inputRef.current?.focus();
     },
-    [onChange, saveRecentSearch]
+    [onChange, saveRecentSearch, isProtocolsPage, router]
   );
 
   const handleKeyDown = useCallback(
@@ -538,55 +554,80 @@ export default function GlobalSearchBar({
                 No clinical matches found
               </div>
             ) : (
-              suggestions.map((item, idx) => (
-                <div
-                  key={item.id || idx}
-                  className={`atlas-search__dropdown-item ${selectedIndex === idx ? 'atlas-search__dropdown-item--selected' : ''}`}
-                  onClick={() => handleSuggestionClick(item)}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    backgroundColor: selectedIndex === idx ? '#f1f5f9' : 'transparent'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                    <Search size={13} color="#003666" />
-                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</span>
+              suggestions.map((item, idx) => {
+                const isCrossJump = (!isProtocolsPage && item.indexName === 'protocols') || (isProtocolsPage && item.indexName === 'products');
+                return (
+                  <div
+                    key={item.id || idx}
+                    className={`atlas-search__dropdown-item ${selectedIndex === idx ? 'atlas-search__dropdown-item--selected' : ''}`}
+                    onClick={() => handleSuggestionClick(item)}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      backgroundColor: selectedIndex === idx ? '#f1f5f9' : 'transparent'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                      <Search size={13} color="#003666" />
+                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {item.variantCount > 1 && (
+                        <span
+                          style={{
+                            fontSize: '0.62rem',
+                            fontWeight: 600,
+                            padding: '2px 5px',
+                            borderRadius: '4px',
+                            backgroundColor: '#f1f5f9',
+                            color: '#64748b',
+                            border: '1px solid #e2e8f0'
+                          }}
+                        >
+                          {item.variantCount} vars
+                        </span>
+                      )}
+                      {isCrossJump ? (
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 7px',
+                            borderRadius: '6px',
+                            backgroundColor: item.indexName === 'protocols' ? '#ecfdf5' : '#eff6ff',
+                            color: item.indexName === 'protocols' ? '#047857' : '#1d4ed8',
+                            border: item.indexName === 'protocols' ? '1px solid #a7f3d0' : '1px solid #bfdbfe',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            textTransform: 'uppercase'
+                          }}
+                          title={item.indexName === 'protocols' ? 'Open in Protocols' : 'Open in Catalog'}
+                        >
+                          {item.indexName === 'protocols' ? 'Protocol' : 'Product'}
+                          <ArrowUpRight size={11} />
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: '6px',
+                            backgroundColor: item.category === 'Protocol' ? '#ecfdf5' : '#eff6ff',
+                            color: item.category === 'Protocol' ? '#065f46' : '#1e40af',
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          {item.category}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {item.variantCount > 1 && (
-                      <span
-                        style={{
-                          fontSize: '0.62rem',
-                          fontWeight: 600,
-                          padding: '2px 5px',
-                          borderRadius: '4px',
-                          backgroundColor: '#f1f5f9',
-                          color: '#64748b',
-                          border: '1px solid #e2e8f0'
-                        }}
-                      >
-                        {item.variantCount} vars
-                      </span>
-                    )}
-                    <span
-                      style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        padding: '2px 6px',
-                        borderRadius: '6px',
-                        backgroundColor: item.category === 'Protocol' ? '#ecfdf5' : '#eff6ff',
-                        color: item.category === 'Protocol' ? '#065f46' : '#1e40af',
-                        textTransform: 'uppercase'
-                      }}
-                    >
-                      {item.category}
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

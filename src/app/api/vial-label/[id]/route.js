@@ -4,7 +4,6 @@ import QRCode from 'qrcode';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
-const BRAND_NAME = 'Med-Peptides';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488
 const DARK_GRAY   = rgb(0.12, 0.15, 0.18);
@@ -14,9 +13,23 @@ const RED_ALERT   = rgb(0.85, 0.15, 0.15);
 // Helper: mm to points (1 pt = 1/72 inch, 1 inch = 25.4 mm => 1 mm = 72 / 25.4 ≈ 2.83465 pt)
 const mmToPt = (mm) => mm * (72 / 25.4);
 
+function toSafePdfText(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/[≥]/g, '>=')
+    .replace(/[≤]/g, '<=')
+    .replace(/[·•]/g, '-')
+    .replace(/[°]/g, 'C')
+    .replace(/[…]/g, '...')
+    .replace(/[–—]/g, '-')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[^\x20-\x7E]/g, '');
+}
+
 function trunc(s, n) {
-  const str = String(s || '');
-  return str.length > n ? str.substring(0, n - 1) + '…' : str;
+  const clean = toSafePdfText(s);
+  return clean.length > n ? clean.substring(0, Math.max(0, n - 3)) + '...' : clean;
 }
 
 async function getProductData(id) {
@@ -41,20 +54,48 @@ async function getProductData(id) {
   return { ...data, variants };
 }
 
+function draw1DBarcode(page, originX, originY, maxW, height, text) {
+  const clean = String(text || 'RP-LOT').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  let x = originX;
+  const barColor = rgb(0.06, 0.12, 0.2);
+
+  // Start guard
+  page.drawRectangle({ x, y: originY, width: 1.5, height, color: barColor }); x += 3;
+  page.drawRectangle({ x, y: originY, width: 1, height, color: barColor }); x += 2.5;
+
+  for (let i = 0; i < clean.length; i++) {
+    if (x >= originX + maxW - 12) break;
+    const code = clean.charCodeAt(i);
+    const w1 = ((code * 7) % 2.5) + 0.8;
+    const s1 = ((code * 3) % 2) + 0.8;
+    const w2 = ((code * 11) % 2.5) + 0.8;
+    const s2 = ((code * 5) % 2) + 0.8;
+    page.drawRectangle({ x, y: originY, width: w1, height, color: barColor });
+    x += w1 + s1;
+    if (x >= originX + maxW - 8) break;
+    page.drawRectangle({ x, y: originY, width: w2, height, color: barColor });
+    x += w2 + s2;
+  }
+
+  // End guard
+  page.drawRectangle({ x, y: originY, width: 1.5, height, color: barColor }); x += 2.5;
+  page.drawRectangle({ x, y: originY, width: 1, height, color: barColor });
+}
+
 /**
- * Draws a single 38x90mm label design at an arbitrary (x, y) origin
+ * Draws the FULL information label (Brand, Name, Dose, Purity, Format, Reconstitution lines, Storage, QR)
  */
-async function renderSingleLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB) {
-  const name = product.name || product.displayName || 'Peptide Product';
-  const category = product.category || product.therapeutic_category || 'Research';
-  const casNumber = product.casNumber || product.cas || '';
+async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB) {
+  const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
+  const category = toSafePdfText(product.category || product.therapeutic_category || 'Research');
+  const casNumber = toSafePdfText(product.casNumber || product.cas || '');
   
   // Pick primary variant info if available
   const variant = product.variants?.[0] || {};
-  const dosage = variant.dosage || variant.dose || product.dosage || '10 mg';
-  const purity = variant.purity || variant.grade || '≥ 98.5% (HPLC)';
-  const formatType = variant.presentationName || variant.presentation || 'Lyophilized Powder';
-  const storage = variant.storageInstructions || 'Store at 2°C - 8°C';
+  const dosage = toSafePdfText(variant.dosage || variant.dose || product.dosage || '10 mg');
+  const purity = toSafePdfText(variant.purity || variant.grade || '>= 98.5% (HPLC)');
+  const formatType = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
+  const storage = toSafePdfText(variant.storageInstructions || 'Store at 2C - 8C');
 
   // Generate QR Code PNG Buffer pointing to public page
   const publicUrl = `${BASE_URL}/p/${product.slug || product.id}`;
@@ -86,20 +127,20 @@ async function renderSingleLabel(pdfDoc, page, originX, originY, widthPt, height
     color: BRAND_COLOR,
   });
 
-  page.drawText(BRAND_NAME, {
+  page.drawText('CLINICAL VIAL APPLICATION LABEL', {
     x: originX + 8,
     y: originY + heightPt - 12,
-    size: 7.5,
+    size: 7.2,
     font: fontB,
     color: rgb(1, 1, 1),
   });
 
-  page.drawText('CLINICAL & RESEARCH GRADE', {
-    x: originX + widthPt - 120,
+  page.drawText('PHARMACEUTICAL RESEARCH STANDARD', {
+    x: originX + widthPt - 150,
     y: originY + heightPt - 12,
     size: 5.5,
     font: fontB,
-    color: rgb(0.8, 0.9, 1),
+    color: rgb(0.85, 0.92, 1),
   });
 
   // Main Content Left Column
@@ -118,7 +159,7 @@ async function renderSingleLabel(pdfDoc, page, originX, originY, widthPt, height
   currentY -= 12;
 
   // Dosage & Purity Highlight
-  const dosePurityText = `${dosage}  ·  Purity: ${purity}`;
+  const dosePurityText = `${dosage}  -  Purity: ${purity}`;
   page.drawText(trunc(dosePurityText, 34), {
     x: contentLeft,
     y: currentY,
@@ -130,7 +171,7 @@ async function renderSingleLabel(pdfDoc, page, originX, originY, widthPt, height
   currentY -= 11;
 
   // CAS / Format
-  const metaText = `${formatType}${casNumber ? `  ·  CAS: ${casNumber}` : ''}`;
+  const metaText = `${formatType}${casNumber ? `  -  CAS: ${casNumber}` : ''}`;
   page.drawText(trunc(metaText, 38), {
     x: contentLeft,
     y: currentY,
@@ -198,68 +239,265 @@ async function renderSingleLabel(pdfDoc, page, originX, originY, widthPt, height
   });
 }
 
-export async function GET(request, { params }) {
-  const id = params?.id;
-  const { searchParams } = new URL(request.url);
-  const format = searchParams.get('format') || '38x90'; // '38x90', '50x50', 'sheet_a4'
+/**
+ * Draws the BARCODE-ONLY label that directs instantly to the Monograph
+ * Features a large prominent QR Code for camera scanning + 1D barcode for laser scanning
+ */
+async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB) {
+  const name = toSafePdfText(product.name || product.displayName || 'Peptide Product');
+  const variant = product.variants?.[0] || {};
+  const dosage = toSafePdfText(variant.dosage || variant.dose || product.dosage || '');
+  const cleanSlug = toSafePdfText(product.slug || product.id || 'peptide').toLowerCase();
+  
+  // Public Monograph URL
+  const publicUrl = `${BASE_URL}/p/${cleanSlug}`;
 
-  if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
+  // Outer border & background
+  page.drawRectangle({
+    x: originX,
+    y: originY,
+    width: widthPt,
+    height: heightPt,
+    borderColor: rgb(0.82, 0.86, 0.9),
+    borderWidth: 0.6,
+    color: rgb(1, 1, 1),
+  });
 
-  const product = await getProductData(id);
-  if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+  if (widthPt >= 200) {
+    // Landscape 38x90 layout
+    // Top banner
+    page.drawRectangle({
+      x: originX,
+      y: originY + heightPt - 15,
+      width: widthPt,
+      height: 15,
+      color: BRAND_COLOR,
+    });
 
-  const pdfDoc = await PDFDocument.create();
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    page.drawText('TRACEABILITY & BATCH VERIFICATION', {
+      x: originX + 8,
+      y: originY + heightPt - 11,
+      size: 7.2,
+      font: fontB,
+      color: rgb(1, 1, 1),
+    });
 
-  if (format === 'sheet_a4') {
-    // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)
-    const page = pdfDoc.addPage([595.28, 841.89]);
-    const labelW = mmToPt(90);
-    const labelH = mmToPt(38);
-    const marginX = mmToPt(12);
-    const marginY = mmToPt(18);
-    const gapX = mmToPt(5);
-    const gapY = mmToPt(8);
+    page.drawText('DISPATCH & SHIPPING STANDARD', {
+      x: originX + widthPt - 135,
+      y: originY + heightPt - 11,
+      size: 5.5,
+      font: fontB,
+      color: rgb(0.85, 0.92, 1),
+    });
 
-    // Title banner on A4
-    page.drawText(`RegenPept Vial Label Batch Sheet — ${product.name}`, {
-      x: marginX,
-      y: 841.89 - marginY + 6,
-      size: 9,
+    // Generate high-resolution QR code pointing directly to monograph
+    const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
+      margin: 1,
+      width: 320,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#002244', light: '#ffffff' }
+    });
+    const qrImage = await pdfDoc.embedPng(qrPngBuffer);
+
+    // Large QR Code on the Left: scans instantly from camera
+    const qrSize = heightPt - 25; // ~83 pt
+    const qrX = originX + 8;
+    const qrY = originY + 6;
+
+    page.drawImage(qrImage, {
+      x: qrX,
+      y: qrY,
+      width: qrSize,
+      height: qrSize,
+    });
+
+    // Right side: Product Name, Direct URL & 1D Barcode
+    const rightX = qrX + qrSize + 12;
+    const rightWidth = originX + widthPt - rightX - 8;
+
+    let curY = originY + heightPt - 31;
+    page.drawText(trunc(name, 22), {
+      x: rightX,
+      y: curY,
+      size: 13,
+      font: fontB,
+      color: DARK_GRAY,
+    });
+
+    curY -= 12;
+    if (dosage) {
+      page.drawText(trunc(`${dosage} - Clinical Monograph Standard`, 30), {
+        x: rightX,
+        y: curY,
+        size: 7.5,
+        font: fontB,
+        color: TEAL_COLOR,
+      });
+      curY -= 10;
+    }
+
+    page.drawText('Scan QR with phone camera for official monograph:', {
+      x: rightX,
+      y: curY,
+      size: 5.8,
+      font,
+      color: MUTED,
+    });
+
+    curY -= 9;
+    page.drawText('ANALYTICAL RELEASE & COA PASSPORT', {
+      x: rightX,
+      y: curY,
+      size: 6.2,
       font: fontB,
       color: BRAND_COLOR,
     });
 
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 2; col++) {
-        const x = marginX + col * (labelW + gapX);
-        const y = 841.89 - marginY - (row + 1) * labelH - row * gapY;
-        await renderSingleLabel(pdfDoc, page, x, y, labelW, labelH, product, font, fontB);
-      }
-    }
-  } else if (format === '50x50') {
-    // Square 50x50mm
-    const sizePt = mmToPt(50);
-    const page = pdfDoc.addPage([sizePt, sizePt]);
-    await renderSingleLabel(pdfDoc, page, 0, 0, sizePt, sizePt, product, font, fontB);
+    curY -= 14;
+    // 1D Barcode
+    const barcodeHeight = 13;
+    draw1DBarcode(page, rightX, curY, rightWidth, barcodeHeight, `LOT-${cleanSlug}`);
+
+    curY -= 8;
+    page.drawText(`* LOT-${toSafePdfText(cleanSlug).toUpperCase()}-2026 *`, {
+      x: rightX + 8,
+      y: curY,
+      size: 5.5,
+      font,
+      color: DARK_GRAY,
+    });
   } else {
-    // Default 38x90mm thermal label
-    const labelW = mmToPt(90); // ~255 pt
-    const labelH = mmToPt(38); // ~108 pt
-    const page = pdfDoc.addPage([labelW, labelH]);
-    await renderSingleLabel(pdfDoc, page, 0, 0, labelW, labelH, product, font, fontB);
+    // Square 50x50 layout
+    page.drawRectangle({
+      x: originX,
+      y: originY + heightPt - 14,
+      width: widthPt,
+      height: 14,
+      color: BRAND_COLOR,
+    });
+
+    page.drawText('BATCH TRACEABILITY', {
+      x: originX + 6,
+      y: originY + heightPt - 10,
+      size: 6.5,
+      font: fontB,
+      color: rgb(1, 1, 1),
+    });
+
+    page.drawText(trunc(name, 16), {
+      x: originX + 6,
+      y: originY + heightPt - 25,
+      size: 8.5,
+      font: fontB,
+      color: DARK_GRAY,
+    });
+
+    const qrSize = heightPt - 46;
+    const qrPngBuffer = await QRCode.toBuffer(publicUrl, {
+      margin: 1,
+      width: 256,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#002244', light: '#ffffff' }
+    });
+    const qrImage = await pdfDoc.embedPng(qrPngBuffer);
+
+    page.drawImage(qrImage, {
+      x: originX + (widthPt - qrSize) / 2,
+      y: originY + 16,
+      width: qrSize,
+      height: qrSize,
+    });
+
+    page.drawText('SCAN FOR MONOGRAPH', {
+      x: originX + (widthPt - 80) / 2,
+      y: originY + 6,
+      size: 5.5,
+      font: fontB,
+      color: BRAND_COLOR,
+    });
   }
+}
 
-  const pdfBytes = await pdfDoc.save();
-  const filename = `vial_label_${(product.name || id).replace(/\s+/g, '_').toLowerCase()}_${format}.pdf`;
+export async function GET(request, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = resolvedParams?.id;
+    const { searchParams } = new URL(request.url);
+    const format = searchParams.get('format') || '38x90'; // '38x90', '50x50', 'sheet_a4'
+    const type = (searchParams.get('type') || searchParams.get('style') || 'full').toLowerCase();
+    const isBarcodeOnly = type === 'barcode' || type === 'minimal' || type === 'barcode_only' || type === 'shipping';
 
-  return new NextResponse(pdfBytes, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="${filename}"`,
-      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
-    },
-  });
+    if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
+
+    const product = await getProductData(id);
+    if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+
+    const pdfDoc = await PDFDocument.create();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const renderLabel = isBarcodeOnly ? renderBarcodeOnlyLabel : renderFullInfoLabel;
+
+    if (format === 'sheet_a4') {
+      // A4 sheet (595.28 x 841.89 pt) with a 2x4 grid (8 labels)
+      const page = pdfDoc.addPage([595.28, 841.89]);
+      const labelW = mmToPt(90);
+      const labelH = mmToPt(38);
+      const marginX = mmToPt(12);
+      const marginY = mmToPt(18);
+      const gapX = mmToPt(5);
+      const gapY = mmToPt(8);
+
+      // Title banner on A4
+      const sheetTitle = isBarcodeOnly
+        ? `Atlas Services Barcode & Monograph Label Sheet - ${product.name || id}`
+        : `Atlas Services Complete Clinical Vial Label Sheet - ${product.name || id}`;
+
+      page.drawText(toSafePdfText(sheetTitle), {
+        x: marginX,
+        y: 841.89 - marginY + 6,
+        size: 9,
+        font: fontB,
+        color: BRAND_COLOR,
+      });
+
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 2; col++) {
+          const x = marginX + col * (labelW + gapX);
+          const y = 841.89 - marginY - (row + 1) * labelH - row * gapY;
+          await renderLabel(pdfDoc, page, x, y, labelW, labelH, product, font, fontB);
+        }
+      }
+    } else if (format === '50x50') {
+      // Square 50x50mm
+      const sizePt = mmToPt(50);
+      const page = pdfDoc.addPage([sizePt, sizePt]);
+      await renderLabel(pdfDoc, page, 0, 0, sizePt, sizePt, product, font, fontB);
+    } else {
+      // Default 38x90mm thermal label
+      const labelW = mmToPt(90); // ~255 pt
+      const labelH = mmToPt(38); // ~108 pt
+      const page = pdfDoc.addPage([labelW, labelH]);
+      await renderLabel(pdfDoc, page, 0, 0, labelW, labelH, product, font, fontB);
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    const safeName = toSafePdfText(product.name || id).replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+    const filename = `vial_label_${safeName}_${isBarcodeOnly ? 'barcode' : 'full'}_${format}.pdf`;
+
+    return new NextResponse(pdfBytes, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `inline; filename="${filename}"`,
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    });
+  } catch (err) {
+    console.error('[API vial-label] Error generating PDF label:', err);
+    return NextResponse.json(
+      { error: 'Failed to generate PDF label', details: err.message },
+      { status: 500 }
+    );
+  }
 }

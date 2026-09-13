@@ -36,17 +36,14 @@ export default function WorkspaceFloatingDock() {
 
   return (
     <div
+      className="workspace-floating-dock-container"
       style={{
         position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        zIndex: 90,
-        maxWidth: '460px',
-        width: 'calc(100% - 48px)',
+        zIndex: 1005,
         backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #bfdbfe',
-        boxShadow: '0 10px 25px -5px rgba(0, 54, 102, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        borderRadius: '14px',
+        border: '1.5px solid #93c5fd',
+        boxShadow: '0 12px 30px -4px rgba(0, 54, 102, 0.22), 0 8px 12px -6px rgba(0, 0, 0, 0.12)',
         overflow: 'hidden',
         animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -56,6 +53,22 @@ export default function WorkspaceFloatingDock() {
         @keyframes slideUp {
           from { transform: translateY(100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
+        }
+        .workspace-floating-dock-container {
+          bottom: 24px;
+          right: 24px;
+          max-width: 440px;
+          width: calc(100% - 48px);
+        }
+        @media (max-width: 768px) {
+          .workspace-floating-dock-container {
+            bottom: calc(64px + env(safe-area-inset-bottom, 10px)) !important;
+            left: 12px !important;
+            right: 12px !important;
+            width: auto !important;
+            max-width: none !important;
+            border-radius: 12px !important;
+          }
         }
       `}</style>
 
@@ -147,22 +160,26 @@ export default function WorkspaceFloatingDock() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setDrawerOpen(true);
             }}
             style={{
-              padding: '4px 10px',
+              padding: '7px 12px',
+              minHeight: '36px',
               backgroundColor: '#2563eb',
               color: '#ffffff',
               border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
+              borderRadius: '8px',
+              fontSize: '0.78rem',
+              fontWeight: 800,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
+              touchAction: 'manipulation',
+              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
             }}
           >
             Manage <ArrowRight size={13} />

@@ -62,7 +62,7 @@ export function generateProductJsonLd(product, baseUrl = 'https://regenpept.com'
         availability: 'https://schema.org/InStock',
         seller: {
           '@type': 'Organization',
-          name: 'RegenPept'
+          name: 'Atlas Services'
         }
       }
     } : {})
@@ -91,7 +91,7 @@ export function generateProtocolJsonLd(protocol, baseUrl = 'https://regenpept.co
     },
     publisher: {
       '@type': 'Organization',
-      name: 'RegenPept Clinical Research'
+      name: 'Atlas Services Clinical Research'
     }
   };
 }

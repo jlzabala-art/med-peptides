@@ -35,16 +35,8 @@ export default function TransactionItemTable({ items, onItemsChange, transaction
               key: 'name',
               header: 'Item Details',
               render: (val, row, idx) => (
-                <div style={{ display: 'inline-flex', gap: '12px' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '4px', backgroundColor: '#f1f5f9', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                    {row.images?.[0] ? (
-                      <img src={row.images[0]} alt="thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <Box size={16} color="#94a3b8" />
-                    )}
-                  </div>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <div style={{ fontWeight: 500 }}>{row.name}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ fontWeight: 500 }}>{row.name}</div>
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SKU: {row.sku || '-'}</div>
                     <textarea
                       value={row.description || ''}

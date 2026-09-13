@@ -117,14 +117,16 @@ export default function AdminSkuMappingTab() {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
-  const params = new URLSearchParams(location.search);
-  const deepLinkSearch = params.get('search');
 
   useEffect(() => {
-    if (deepLinkSearch) {
-      setSearchQuery(deepLinkSearch);
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const deepLink = searchParams.get('search');
+      if (deepLink) {
+        setSearchQuery(deepLink);
+      }
     }
-  }, [deepLinkSearch]);
+  }, []);
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedFamilyProductId, setSelectedFamilyProductId] = useState(null);

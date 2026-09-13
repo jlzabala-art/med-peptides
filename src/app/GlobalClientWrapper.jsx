@@ -55,9 +55,16 @@ function StorefrontShell({ children }) {
       return;
     }
     if (cat === 'API Materials' || cat === 'API Dashboard' || cat === 'Wholesale') return router.push('/api-dashboard');
-    if (cat === 'Login' || cat === 'Auth') return router.push('/login');
-    if (cat === 'Admin' && window.innerWidth >= 1024) return router.push('/admin');
-    if (cat === 'Dashboard') return router.push('/patient');
+    if (cat === 'Admin') return router.push('/admin');
+    if (cat === 'Dashboard') {
+      const dashboardPath = (activeRole === 'admin') ? '/admin'
+        : (activeRole === 'doctor' || activeRole === 'medical_director') ? '/doctor'
+        : (activeRole === 'wholesaler' || activeRole === 'wholeseller') ? '/wholesaler'
+        : activeRole === 'supplier' ? '/supplier'
+        : activeRole === 'clinic' ? '/clinic'
+        : '/patient';
+      return router.push(dashboardPath);
+    }
     if (cat === 'Settings') return router.push('/settings');
     if (cat === 'Legal') return router.push('/legal');
 

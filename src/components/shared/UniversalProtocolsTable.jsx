@@ -13,6 +13,7 @@ import { updateProtocol, deleteProtocol, createProtocol, cloneProtocol } from '.
 import { useDrawer } from '../../context/DrawerContext';
 import { useOrderBuilderStore } from '../../stores/orderBuilderStore';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { useProtocolsContextBridge } from '../../hooks/admin/useProtocolsContextBridge';
 
 import DataModule from '../ui/DataModule';
 import StatusChip from '../ui/StatusChip';
@@ -121,6 +122,22 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
       goals: (Array.isArray(p.goals) && p.goals.length > 0) ? p.goals : [p.primary_goal || p.goal || 'Tissue Repair & Recovery'],
     }));
   }, [rawProtocols]);
+
+  // ── 3-Tier Clinical AI Context Bridge for Protocols ─────────────────────────
+  useProtocolsContextBridge({
+    protocols,
+    globalMetrics: metrics,
+    activeFilters: {
+      status: filterStatus,
+      goal: filterGoal,
+      range: filterRange,
+      peptides: filterPeptides,
+      search: searchTerm
+    },
+    selectedProtocol,
+    activeDrawer: selectedProtocol ? 'protocol-detail' : (showPathwayWizard ? 'pathway-wizard' : null),
+    role
+  });
 
   // Dynamic goals aggregation with live counts
   const dynamicGoalOptions = useMemo(() => {
@@ -258,7 +275,7 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
 
   // ── Direct ID Fast Path (0ms auto-expand when jumping from Product / URL) ──
   useEffect(() => {
-    const directQuery = searchParams.get('q') || searchParams.get('id');
+    const directQuery = searchParams.get('selected') || searchParams.get('protocolId') || searchParams.get('id') || searchParams.get('q');
     if (!directQuery) return;
     
     // Check if target protocol is already in memory
