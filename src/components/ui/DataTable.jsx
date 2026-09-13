@@ -866,8 +866,8 @@ export default function DataTable({
           )}
         </div>
       )}
-      {/* Desktop Contextual Selection Header */}
-      {(someSelected || allSelected || isAllMatchingSelected) && (bulkActions.length > 0 || renderBatchActions) && (
+      {/* Selection Scope Banner (Page vs Filter Totality) */}
+      {(someSelected || allSelected || isAllMatchingSelected) && (
         <div style={{
           position: 'sticky',
           top: 0,
@@ -879,8 +879,6 @@ export default function DataTable({
         }}>
           <DataTableContextualHeader
             selectedCount={selectedIds.length}
-            bulkActions={bulkActions}
-            renderBatchActions={renderBatchActions}
             selectedIds={selectedIds}
             onClearSelection={() => {
               handleToggleSelectAllMatching(false);

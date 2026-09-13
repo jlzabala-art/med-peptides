@@ -1,13 +1,18 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, X, Sparkles, Edit3, Combine, Play, Pause, FileText, MoreHorizontal } from 'lucide-react';
+import React from 'react';
+import { Check, X, Zap } from 'lucide-react';
 
+/**
+ * DataTableContextualHeader
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Responsive Selection Scope Banner for DataTable.
+ * Dedicated SOLELY to selection scope management (page vs total filtered matching items)
+ * without duplicating bulk actions (which live exclusively in StickyBulkActionBar).
+ * Fully mobile-responsive (Golden Rule #23).
+ */
 export default function DataTableContextualHeader({
   selectedCount = 0,
-  bulkActions = [],
-  renderBatchActions,
-  selectedIds = [],
   onClearSelection,
   totalItems = 0,
   totalVariants = 0,
@@ -17,106 +22,149 @@ export default function DataTableContextualHeader({
   itemNoun = 'products',
   variantNoun = 'variants'
 }) {
-  const [moreOpen, setMoreOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setMoreOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Split actions into top 3 primary actions and the rest in "More actions"
-  const primaryActions = bulkActions.slice(0, 3);
-  const secondaryActions = bulkActions.slice(3);
-
-  // Clean label helper: remove trailing (X) counter if present in label
-  const cleanLabel = (label) => {
-    if (!label) return '';
-    return label.replace(/\s*\(\d+\)\s*$/, '').trim();
-  };
-
   const showTotalityOption = totalItems > selectedCount && typeof onToggleSelectAllMatching === 'function';
 
   return (
     <div
+      className="dt-selection-banner"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
-        minHeight: '40px',
-        padding: '2px 8px',
+        minHeight: '38px',
+        padding: '4px 6px',
         backgroundColor: isAllMatchingSelected ? '#ecfdf5' : '#f0fdf4',
         fontFamily: 'var(--font-sans, inherit)',
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch',
+        gap: '8px',
+        flexWrap: 'wrap',
       }}
     >
-      {/* Left: Count + Divider + Primary Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-        {/* 1. Informational text (Styled Badge) */}
+      <style>{`
+        .dt-selection-banner-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .dt-selection-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-weight: 700;
+          font-size: 0.82rem;
+          padding: 3px 10px;
+          border-radius: 12px;
+          user-select: none;
+          white-space: nowrap;
+        }
+        .dt-toggle-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 0.76rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          white-space: nowrap;
+          min-height: 32px;
+        }
+        .dt-clear-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          border: none;
+          background: transparent;
+          color: #64748b;
+          font-weight: 600;
+          font-size: 0.78rem;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 4px;
+          min-height: 32px;
+          transition: color 0.15s ease;
+        }
+        @media (max-width: 640px) {
+          .dt-selection-banner {
+            padding: 6px 8px;
+            gap: 6px;
+          }
+          .dt-selection-banner-left {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .dt-selection-badge {
+            font-size: 0.76rem;
+            padding: 2px 8px;
+          }
+          .dt-toggle-btn {
+            font-size: 0.72rem;
+            padding: 4px 8px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 2px;
+          }
+          .dt-clear-btn {
+            font-size: 0.74rem;
+            padding: 2px 6px;
+          }
+        }
+      `}</style>
+
+      {/* Left Area: Informational Badge + Scope Switcher Button */}
+      <div className="dt-selection-banner-left">
+        {/* Informational Selection Badge */}
         {isAllMatchingSelected ? (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            fontWeight: 700,
-            color: '#065f46',
-            fontSize: '0.8rem',
-            backgroundColor: '#a7f3d0',
-            padding: '3px 9px',
-            borderRadius: '12px',
-            userSelect: 'none',
-            whiteSpace: 'nowrap'
-          }}>
-            <span>✓ All {totalItems || selectedCount} {itemNoun}</span>
-            {totalVariants > 0 && <span style={{ opacity: 0.9, fontWeight: 600 }}>({totalVariants} {variantNoun})</span>}
+          <span
+            className="dt-selection-badge"
+            style={{
+              color: '#065f46',
+              backgroundColor: '#a7f3d0',
+              border: '1px solid #6ee7b7',
+            }}
+          >
+            <Check size={13} strokeWidth={2.5} />
+            <span>All {totalItems || selectedCount} {itemNoun}</span>
+            {totalVariants > 0 && (
+              <span style={{ opacity: 0.9, fontWeight: 600 }}>
+                ({totalVariants} {variantNoun})
+              </span>
+            )}
           </span>
         ) : (
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontWeight: 700,
-            color: '#0f766e',
-            fontSize: '0.8rem',
-            backgroundColor: '#ccfbf1',
-            padding: '3px 8px',
-            borderRadius: '12px',
-            userSelect: 'none',
-            whiteSpace: 'nowrap'
-          }}>
-            {selectedCount} selected {totalItems > selectedCount ? `(${selectedCount} on page)` : ''}
+          <span
+            className="dt-selection-badge"
+            style={{
+              color: '#0f766e',
+              backgroundColor: '#ccfbf1',
+              border: '1px solid #99f6e4',
+            }}
+          >
+            <span>{selectedCount} selected</span>
+            {totalItems > selectedCount && (
+              <span style={{ opacity: 0.85, fontWeight: 500, fontSize: '0.74rem' }}>
+                (page {selectedCount})
+              </span>
+            )}
           </span>
         )}
 
-        {/* Totality Toggle Button */}
+        {/* Scope Switcher Button */}
         {isAllMatchingSelected ? (
           <button
             type="button"
+            className="dt-toggle-btn"
             onClick={(e) => {
               e.stopPropagation();
               onToggleSelectAllMatching?.(false);
             }}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
               backgroundColor: '#ffffff',
               border: '1px solid #10b981',
               color: '#047857',
-              padding: '2px 8px',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap'
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
             }}
             title={`Select only the ${selectedCount} items visible on this page`}
           >
@@ -125,204 +173,41 @@ export default function DataTableContextualHeader({
         ) : showTotalityOption ? (
           <button
             type="button"
+            className="dt-toggle-btn"
             onClick={(e) => {
               e.stopPropagation();
               onToggleSelectAllMatching?.(true);
             }}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
               backgroundColor: '#0f766e',
               border: '1px solid #0d6460',
               color: '#ffffff',
-              padding: '2px 9px',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
-              transition: 'all 0.15s ease',
-              whiteSpace: 'nowrap'
+              boxShadow: '0 1px 3px rgba(15, 118, 110, 0.25)',
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d6460'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0f766e'}
             title={`Select all ${totalItems} items matching active filters`}
           >
-            ⚡ Select all {totalItems} {itemNoun} {totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : ''}
+            <Zap size={12} fill="#ffffff" />
+            <span>Select all {totalItems} {itemNoun} {totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : ''}</span>
           </button>
         ) : null}
-
-        <span style={{ color: '#cbd5e1', fontWeight: 300, userSelect: 'none' }}>|</span>
-
-        {/* Custom renderBatchActions fallback if passed */}
-        {renderBatchActions && bulkActions.length === 0 ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {renderBatchActions(selectedIds)}
-          </div>
-        ) : (
-          primaryActions.map((action, idx) => {
-            const IconComponent = action.icon;
-            const isPrimary = idx === 0;
-            return (
-              <button
-                key={idx}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  action.onClick?.();
-                }}
-                title={cleanLabel(action.label)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  padding: '0.3rem 0.7rem',
-                  borderRadius: '6px',
-                  backgroundColor: isPrimary ? '#0f766e' : '#ffffff',
-                  border: isPrimary ? 'none' : '1px solid #cbd5e1',
-                  color: isPrimary ? '#ffffff' : '#0f172a',
-                  fontWeight: 600,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                  transition: 'all 0.15s ease',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = isPrimary ? '#0d6460' : '#f8fafc';
-                  e.currentTarget.style.borderColor = isPrimary ? 'transparent' : '#0f766e';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = isPrimary ? '#0f766e' : '#ffffff';
-                  e.currentTarget.style.borderColor = isPrimary ? 'transparent' : '#cbd5e1';
-                }}
-              >
-                {IconComponent && <IconComponent size={14} style={{ color: isPrimary ? '#ffffff' : '#0f766e', flexShrink: 0 }} />}
-                {cleanLabel(action.label)}
-              </button>
-            );
-          })
-        )}
-
-        {/* 3. Secondary Actions Dropdown */}
-        {secondaryActions.length > 0 && (
-          <div ref={dropdownRef} style={{ position: 'relative' }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setMoreOpen(prev => !prev);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.3rem 0.65rem',
-                borderRadius: '6px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
-                color: '#334155',
-                fontWeight: 600,
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                transition: 'all 0.15s ease',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.borderColor = '#0f766e';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#cbd5e1';
-              }}
-            >
-              <MoreHorizontal size={14} style={{ color: '#64748b' }} />
-              More actions
-              <ChevronDown size={13} style={{ color: '#64748b' }} />
-            </button>
-
-            {moreOpen && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 4px)',
-                  left: 0,
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.08)',
-                  border: '1px solid #cbd5e1',
-                  zIndex: 999,
-                  minWidth: '190px',
-                  padding: '4px 0',
-                  overflow: 'hidden'
-                }}
-              >
-                {secondaryActions.map((action, idx) => {
-                  const IconComp = action.icon;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMoreOpen(false);
-                        action.onClick?.();
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.55rem',
-                        width: '100%',
-                        padding: '0.55rem 0.85rem',
-                        border: 'none',
-                        backgroundColor: 'transparent',
-                        cursor: 'pointer',
-                        fontSize: '0.8rem',
-                        fontWeight: 500,
-                        color: '#1e293b',
-                        textAlign: 'left',
-                        transition: 'background-color 0.15s ease'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      {IconComp && <IconComp size={14} style={{ color: '#64748b' }} />}
-                      {cleanLabel(action.label)}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Right: Clear Selection Button */}
+      {/* Right Area: Clear Selection Button */}
       <button
+        type="button"
+        className="dt-clear-btn"
         onClick={(e) => {
           e.stopPropagation();
           onClearSelection?.();
         }}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.25rem',
-          border: 'none',
-          backgroundColor: 'transparent',
-          color: '#64748b',
-          fontWeight: 600,
-          fontSize: '0.78rem',
-          cursor: 'pointer',
-          padding: '0.25rem 0.5rem',
-          borderRadius: '4px',
-          transition: 'color 0.15s ease'
-        }}
         onMouseEnter={(e) => e.currentTarget.style.color = '#be123c'}
         onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
+        title="Deselect all items"
       >
         <X size={14} />
-        Clear
+        <span>Clear</span>
       </button>
     </div>
   );
