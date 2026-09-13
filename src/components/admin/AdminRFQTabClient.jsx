@@ -42,6 +42,12 @@ export default function AdminRFQTabClient({ initialRfqs = [], isSubTab = false }
     }
   }, []);
 
+  useEffect(() => {
+    if (!initialRfqs || initialRfqs.length === 0) {
+      loadRfqs();
+    }
+  }, [initialRfqs]);
+
 
   // New RFQ State
   const [currentRFQ, setCurrentRFQ] = useState(null);

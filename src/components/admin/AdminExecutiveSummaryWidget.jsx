@@ -1,21 +1,27 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import styles from './AdminExecutiveSummaryWidget.module.css';
+
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import TrendingUp from 'lucide-react/dist/esm/icons/trending-up';
 import FileText from 'lucide-react/dist/esm/icons/file-text';
 import Truck from 'lucide-react/dist/esm/icons/truck';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right';
-import styles from './AdminExecutiveSummaryWidget.module.css';
-import { useRouter } from 'next/navigation';
-
 import Users from 'lucide-react/dist/esm/icons/users';
 import Activity from 'lucide-react/dist/esm/icons/activity';
-import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check';
 import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign';
 import Briefcase from 'lucide-react/dist/esm/icons/briefcase';
-import Server from 'lucide-react/dist/esm/icons/server';
 import Calendar from 'lucide-react/dist/esm/icons/calendar';
 import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import Box from 'lucide-react/dist/esm/icons/box';
+import Layers from 'lucide-react/dist/esm/icons/layers';
+import FileCheck from 'lucide-react/dist/esm/icons/file-check';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Building2 from 'lucide-react/dist/esm/icons/building-2';
+
 import { formatAEDtoDual } from '../../utils/currencies';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { fetchExecutiveBriefAction } from '../../actions/adminActions';
@@ -28,7 +34,7 @@ const TIME_RANGES = [
   { id: 'year', label: 'This Year' },
 ];
 
-export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = {}, visibleKPIs = [], currentRolePreset = 'CEO' }) {
+export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = {} }) {
   const router = useRouter();
   const { effectiveRole } = useRoleAccess();
   const [timeRange, setTimeRange] = useState('today');
@@ -36,6 +42,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
   const [loadingMetrics, setLoadingMetrics] = useState(false);
 
   const activeRole = effectiveRole || 'admin';
+  const isAdmin = activeRole === 'admin';
 
   // Fetch server-calculated metrics when role or timeRange changes
   useEffect(() => {
@@ -59,95 +66,222 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
 
   const metrics = { ...initialMetrics, ...serverMetrics };
 
-  const ROLE_CARD_MAPPINGS = {
-    doctor: ['activePatients', 'pendingPrescriptions', 'activeProtocols', 'dueFollowUps'],
-    medical_director: ['activePatients', 'pendingPrescriptions', 'activeProtocols', 'dueFollowUps'],
-    patient: ['activeProtocols', 'dueFollowUps', 'openOrders', 'pendingPrescriptions'],
-    wholesaler: ['wholesaleSales', 'pendingPOs', 'openRFQs', 'openOrders'],
-    supplier: ['wholesaleSales', 'pendingPOs', 'openRFQs', 'openOrders'],
-    admin: ['revenue', 'openOrders', 'pendingApprovals', 'openRFQs'],
+  // ── Master Definitions of all 4-KPI Rows ────────────────────────────────────
+
+  const PRODUCTS_ROW = {
+    id: 'products',
+    title: '🏷️ Products & Catalog',
+    tag: 'Inventory & Compounds',
+    kpis: [
+      {
+        id: 'publishedProducts',
+        title: 'Published Compounds',
+        value: `${metrics.publishedProducts || 0} Compounds`,
+        icon: Box,
+        route: '/admin/products?status=published',
+        styleClass: styles.inventoryIcon,
+      },
+      {
+        id: 'totalVariants',
+        title: 'Catalog Formats & SKUs',
+        value: `${metrics.totalVariants || 0} Formats`,
+        icon: Layers,
+        route: '/admin/products',
+        styleClass: styles.rfqIcon,
+      },
+      {
+        id: 'lowStockAlerts',
+        title: 'Low Stock / Stockouts',
+        value: `${metrics.lowStockAlerts || 0} Alerts`,
+        icon: AlertTriangle,
+        route: '/admin/products?filter=low_stock',
+        styleClass: styles.shipmentIcon,
+      },
+      {
+        id: 'verifiedMonographs',
+        title: 'Verified CoA Monographs',
+        value: `${metrics.verifiedMonographs || 0} Verified`,
+        icon: FileCheck,
+        route: '/admin/knowledge-base',
+        styleClass: styles.revenueIcon,
+      },
+    ],
   };
 
-  const currentRoleKpis = ROLE_CARD_MAPPINGS[activeRole] || ROLE_CARD_MAPPINGS.admin;
-
-  const CARD_CONFIG = {
-    revenue: {
-      title: 'Real Revenue Generated',
-      value: formatAEDtoDual(metrics.revenue || 0),
-      icon: TrendingUp,
-      route: '/admin/revenue?filter=real',
-      styleClass: styles.revenueIcon,
-    },
-    wholesaleSales: {
-      title: 'B2B Wholesale Volume',
-      value: formatAEDtoDual(metrics.wholesaleSales || 0),
-      icon: DollarSign,
-      route: '/admin/orders?type=wholesale',
-      styleClass: styles.revenueIcon,
-    },
-    pendingPOs: {
-      title: 'Pending Purchase Orders',
-      value: `${metrics.pendingPOs || '0'} POs`,
-      icon: Briefcase,
-      route: '/admin/orders?type=po',
-      styleClass: styles.shipmentIcon,
-    },
-    openRFQs: {
-      title: 'Active RFQs Pending',
-      value: `${metrics.openRFQs || '0'} RFQs`,
-      icon: FileText,
-      route: '/admin/rfqs?status=pending',
-      styleClass: styles.rfqIcon,
-    },
-    openOrders: {
-      title: 'Pending Order Processing',
-      value: `${metrics.openOrders || '0'} Orders`,
-      icon: Truck,
-      route: '/admin/orders?status=processing',
-      styleClass: styles.shipmentIcon,
-    },
-    pendingApprovals: {
-      title: 'Users Pending Approval',
-      value: `${metrics.pendingApprovals || '0'} Approvals`,
-      icon: AlertTriangle,
-      route: '/admin/approvals?status=pending',
-      styleClass: styles.inventoryIcon,
-    },
-    activePatients: {
-      title: 'Active Enrolled Patients',
-      value: `${metrics.activePatients || '0'} Patients`,
-      icon: Users,
-      route: '/admin/patients?status=active',
-      styleClass: styles.revenueIcon,
-    },
-    pendingPrescriptions: {
-      title: 'Prescriptions Awaiting Review',
-      value: `${metrics.pendingPrescriptions || '0'} Pending`,
-      icon: FileText,
-      route: '/admin/prescriptions?status=pending',
-      styleClass: styles.rfqIcon,
-    },
-    activeProtocols: {
-      title: 'Active Clinical Protocols',
-      value: `${metrics.activeProtocols || '0'} Protocols`,
-      icon: Activity,
-      route: '/admin/protocols?status=active',
-      styleClass: styles.shipmentIcon,
-    },
-    dueFollowUps: {
-      title: 'Patient Follow-Ups Due',
-      value: `${metrics.dueFollowUps || '0'} Due`,
-      icon: AlertTriangle,
-      route: '/admin/patients?filter=followup_due',
-      styleClass: styles.inventoryIcon,
-    },
+  const SALES_ROW = {
+    id: 'sales',
+    title: '💼 Sales & Commercial Performance',
+    tag: `Period: ${TIME_RANGES.find(t => t.id === timeRange)?.label}`,
+    kpis: [
+      {
+        id: 'quotationsCount',
+        title: 'Quotations Issued',
+        value: `${metrics.quotationsCount || 0} Quotes`,
+        icon: FileText,
+        route: '/admin/quotations',
+        styleClass: styles.rfqIcon,
+      },
+      {
+        id: 'revenue',
+        title: 'Real Revenue Generated',
+        value: formatAEDtoDual(metrics.revenue || 0),
+        icon: TrendingUp,
+        route: '/admin/revenue?filter=real',
+        styleClass: styles.revenueIcon,
+      },
+      {
+        id: 'periodOrders',
+        title: 'Confirmed Sales Orders',
+        value: `${metrics.periodOrders || 0} Orders`,
+        icon: ShoppingCart,
+        route: '/admin/orders',
+        styleClass: styles.inventoryIcon,
+      },
+      {
+        id: 'avgQuotationValue',
+        title: 'Average Quotation Value',
+        value: formatAEDtoDual(metrics.avgQuotationValue || 0),
+        icon: DollarSign,
+        route: '/admin/quotations',
+        styleClass: styles.revenueIcon,
+      },
+    ],
   };
+
+  const PROCUREMENT_ROW = {
+    id: 'procurement',
+    title: '📦 Procurement & Sourcing',
+    tag: 'Supply Chain & Manufacturing',
+    kpis: [
+      {
+        id: 'openRFQs',
+        title: 'Active Sourcing RFQs',
+        value: `${metrics.openRFQs || 0} RFQs`,
+        icon: FileText,
+        route: '/admin/procurement',
+        styleClass: styles.rfqIcon,
+      },
+      {
+        id: 'pendingPOs',
+        title: 'Pending Purchase Orders',
+        value: `${metrics.pendingPOs || 0} POs`,
+        icon: Briefcase,
+        route: '/admin/purchase-orders',
+        styleClass: styles.shipmentIcon,
+      },
+      {
+        id: 'procurementSpend',
+        title: 'Sourcing Spend (Period)',
+        value: formatAEDtoDual(metrics.procurementSpend || 0),
+        icon: DollarSign,
+        route: '/admin/procurement',
+        styleClass: styles.revenueIcon,
+      },
+      {
+        id: 'activeSuppliers',
+        title: 'Active Synthesis Labs',
+        value: `${metrics.activeSuppliers || 0} Suppliers`,
+        icon: Building2,
+        route: '/admin/suppliers',
+        styleClass: styles.inventoryIcon,
+      },
+    ],
+  };
+
+  const CLINICAL_ROW = {
+    id: 'clinical',
+    title: '🩺 Clinical Operations & Medical Direction',
+    tag: 'Doctor & Patient Supervision',
+    kpis: [
+      {
+        id: 'activePatients',
+        title: 'Active Enrolled Patients',
+        value: `${metrics.activePatients || 0} Patients`,
+        icon: Users,
+        route: '/admin/patients?status=active',
+        styleClass: styles.revenueIcon,
+      },
+      {
+        id: 'pendingPrescriptions',
+        title: 'Prescriptions Awaiting Review',
+        value: `${metrics.pendingPrescriptions || 0} Pending`,
+        icon: FileText,
+        route: '/admin/prescriptions?status=pending',
+        styleClass: styles.rfqIcon,
+      },
+      {
+        id: 'activeProtocols',
+        title: 'Active Clinical Protocols',
+        value: `${metrics.activeProtocols || 0} Protocols`,
+        icon: Activity,
+        route: '/admin/protocols?status=active',
+        styleClass: styles.shipmentIcon,
+      },
+      {
+        id: 'dueFollowUps',
+        title: 'Patient Follow-Ups Due',
+        value: `${metrics.dueFollowUps || 0} Due`,
+        icon: AlertTriangle,
+        route: '/admin/patients?filter=followup_due',
+        styleClass: styles.inventoryIcon,
+      },
+    ],
+  };
+
+  const WHOLESALE_ROW = {
+    id: 'wholesale',
+    title: '🌐 Wholesaler & B2B Distribution',
+    tag: 'Institutional Network',
+    kpis: [
+      {
+        id: 'wholesaleSales',
+        title: 'B2B Wholesale Volume',
+        value: formatAEDtoDual(metrics.wholesaleSales || 0),
+        icon: DollarSign,
+        route: '/admin/orders?type=wholesale',
+        styleClass: styles.revenueIcon,
+      },
+      {
+        id: 'openOrders',
+        title: 'Pending Order Processing',
+        value: `${metrics.openOrders || 0} Orders`,
+        icon: Truck,
+        route: '/admin/orders?status=processing',
+        styleClass: styles.shipmentIcon,
+      },
+      {
+        id: 'pendingApprovals',
+        title: 'Users Pending Approval',
+        value: `${metrics.pendingApprovals || 0} Approvals`,
+        icon: AlertTriangle,
+        route: '/admin/approvals?status=pending',
+        styleClass: styles.inventoryIcon,
+      },
+      {
+        id: 'activeClinics',
+        title: 'Active Partner Clinics',
+        value: `${metrics.activeClinics || 0} Clinics`,
+        icon: Building2,
+        route: '/admin/clinics',
+        styleClass: styles.revenueIcon,
+      },
+    ],
+  };
+
+  // ── Determine which rows to display according to user role ──────────────────
+  const activeSections = isAdmin
+    ? [PRODUCTS_ROW, SALES_ROW, PROCUREMENT_ROW, CLINICAL_ROW, WHOLESALE_ROW]
+    : ['doctor', 'medical_director'].includes(activeRole)
+    ? [CLINICAL_ROW]
+    : ['wholesaler', 'supplier'].includes(activeRole)
+    ? [WHOLESALE_ROW, PROCUREMENT_ROW]
+    : [CLINICAL_ROW];
 
   const getBriefTitle = () => {
     if (['doctor', 'medical_director'].includes(activeRole)) return 'Clinical AI Brief';
     if (activeRole === 'patient') return 'Personal Health AI Brief';
     if (['wholesaler', 'supplier'].includes(activeRole)) return 'Wholesale Sourcing AI Brief';
-    return 'Executive AI Brief';
+    return 'Executive AI Command Brief';
   };
 
   return (
@@ -165,7 +299,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
           {loadingMetrics && <RefreshCw size={14} className="spin-icon" style={{ color: '#0284c7', marginLeft: '6px' }} />}
         </div>
 
-        {/* Date Range Filter Selector (Server Calculated with Touch-Friendly Buttons) */}
+        {/* Date Range Filter Selector (Server Calculated) */}
         <div 
           className="admin-time-range-bar"
           style={{ 
@@ -215,29 +349,40 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
         </div>
       </div>
 
-      <div className="dashboard-kpi-grid admin-overview-kpi-grid">
-        {currentRoleKpis.map((key) => {
-          const config = CARD_CONFIG[key];
-          if (!config) return null;
-          const IconComponent = config.icon;
-          return (
-            <div key={key} className="dashboard-kpi-card" onClick={() => router.push(config.route)}>
-              <div className={`dashboard-kpi-icon-box ${config.styleClass}`}>
-                <IconComponent size={18} />
-              </div>
-              <div className="dashboard-kpi-content">
-                <div className="dashboard-kpi-header">
-                  <span className="dashboard-kpi-value">{config.value}</span>
-                  <ArrowUpRight size={14} className={styles.arrowIcon} />
+      {/* Render 4-KPI Rows with Section Headings */}
+      {activeSections.map((section) => (
+        <div key={section.id} className={styles.rowSection}>
+          <div className={styles.rowHeader}>
+            <span className={styles.rowTitle}>{section.title}</span>
+            <span className={styles.rowTag}>{section.tag}</span>
+          </div>
+          <div className={styles.kpiRowGrid}>
+            {section.kpis.map((kpi) => {
+              const IconComponent = kpi.icon;
+              return (
+                <div 
+                  key={kpi.id} 
+                  className={styles.card} 
+                  onClick={() => router.push(kpi.route)}
+                >
+                  <div className={`${styles.iconContainer} ${kpi.styleClass}`}>
+                    <IconComponent size={18} />
+                  </div>
+                  <div className={styles.cardContent}>
+                    <div className={styles.cardHeader}>
+                      <span className={styles.cardValue}>{kpi.value}</span>
+                      <ArrowUpRight size={14} className={styles.arrowIcon} />
+                    </div>
+                    <span className={styles.cardLabel}>{kpi.title}</span>
+                  </div>
                 </div>
-                <span className="dashboard-kpi-label">{config.title}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
-      <div className={styles.footer}>
+      <div className={styles.footer} style={{ marginTop: '0.5rem' }}>
         <div className={styles.actions}>
           <button
             className={`${styles.actionBtn} ${styles.askAtlasBtn}`}
@@ -247,7 +392,7 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
               window.dispatchEvent(new CustomEvent('open-clinical-ai', {
                 detail: {
                   role: activeRole,
-                  message: `Provide a role-specific intelligence brief and key action items for my role as ${activeRole.toUpperCase()}.`,
+                  message: `Provide a comprehensive cross-domain intelligence brief and priority actions for ${activeRole.toUpperCase()}.`,
                   displayText: `${label} (${activeRole.toUpperCase()})`,
                   context: {
                     role: activeRole,
@@ -258,7 +403,13 @@ export default function AdminExecutiveSummaryWidget({ metrics: initialMetrics = 
               }));
             }}
           >
-            {['doctor', 'medical_director'].includes(activeRole) ? 'Ask Clinical AI (DOCTOR)' : activeRole === 'patient' ? 'Ask Personal AI (PATIENT)' : activeRole === 'wholesaler' || activeRole === 'supplier' ? 'Ask Wholesale AI (SUPPLY)' : 'Ask Atlas AI (ADMIN)'}
+            {['doctor', 'medical_director'].includes(activeRole) 
+              ? 'Ask Clinical AI (DOCTOR)' 
+              : activeRole === 'patient' 
+              ? 'Ask Personal AI (PATIENT)' 
+              : activeRole === 'wholesaler' || activeRole === 'supplier' 
+              ? 'Ask Wholesale AI (SUPPLY)' 
+              : 'Ask Atlas AI (ADMIN)'}
           </button>
         </div>
       </div>

@@ -38,7 +38,7 @@ export default function AdminBulkOrdersTab({ isSubTab = false }) {
       key: 'totalAmount',
       label: 'Total Value',
       width: '15%',
-      render: (row) => <span style={{ fontWeight: '500' }}>${(row.totalAmount || 0).toFixed(2)}</span>
+      render: (row) => <span style={{ fontWeight: '500' }}>${(Number(row.totalAmount) || 0).toFixed(2)}</span>
     },
     {
       key: 'status',
@@ -74,13 +74,13 @@ export default function AdminBulkOrdersTab({ isSubTab = false }) {
               key: 'unitPrice', 
               label: 'Unit Price', 
               width: '20%',
-              render: (r) => `$${(r.unitPrice || 0).toFixed(2)}`
+              render: (r) => `$${(Number(r.unitPrice) || 0).toFixed(2)}`
             },
             { 
               key: 'subtotal', 
               label: 'Subtotal', 
               width: '20%',
-              render: (r) => <span style={{ fontWeight: '500' }}>${(r.quantity * (r.unitPrice || 0)).toFixed(2)}</span>
+              render: (r) => <span style={{ fontWeight: '500' }}>${((Number(r.quantity) || 0) * (Number(r.unitPrice) || 0)).toFixed(2)}</span>
             }
           ]}
         />
@@ -115,7 +115,7 @@ export default function AdminBulkOrdersTab({ isSubTab = false }) {
         />
         <MetricCard
           title="Total Spent (MTD)"
-          value={isLoading ? '...' : `$${safeOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString()}`}
+          value={isLoading ? '...' : `$${safeOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0).toLocaleString()}`}
           icon={TrendingUp}
         />
       </div>
