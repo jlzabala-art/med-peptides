@@ -12,17 +12,10 @@ if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY && process.env.NODE_ENV === 'produ
   console.error('[Firebase] NEXT_PUBLIC_FIREBASE_API_KEY is not set. Check your .env or hosting environment variables.');
 }
 
-const isProductionHost = typeof window !== 'undefined' && (
-  window.location.hostname === 'med-peptides.com' || 
-  window.location.hostname.endsWith('.med-peptides.com')
-);
-
 const firebaseConfig = {
   // Non-secret identifiers — safe to have fallbacks for local dev convenience
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDOV2zFeLGtPsE_O2b-gR3NHZygPspiSws",
-  authDomain: isProductionHost
-    ? window.location.hostname
-    : (process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "med-peptides-app-27a3a.firebaseapp.com"),
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "med-peptides-app-27a3a.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "med-peptides-app",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "med-peptides-app.firebasestorage.app",
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "514143707883",
