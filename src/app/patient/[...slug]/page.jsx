@@ -113,6 +113,7 @@ export default function PatientDynamicRoute({ params }) {
         <SettingsWrapper />
       </AdminTabErrorBoundary>
     );
+    case 'profile':
     case 'my-profile': return (
       <AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile">
         <ProfileWrapper />

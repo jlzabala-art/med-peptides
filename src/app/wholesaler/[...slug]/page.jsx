@@ -12,7 +12,15 @@ export default function DynamicRoute({ params }) {
   
   const router = useRouter();
   const defaultTab = slug[0] || 'bulk-orders';
-  
+
+  if (path === 'profile' || path === 'my-profile') {
+    const UserProfileTab = require('../../../components/shared/UserProfileTab').default;
+    return (
+      <AdminTabErrorBoundary tabId="my-profile" tabLabel="My Profile">
+        <UserProfileTab />
+      </AdminTabErrorBoundary>
+    );
+  }
 
   return (
     <AdminTabErrorBoundary tabId={path} tabLabel={path}>

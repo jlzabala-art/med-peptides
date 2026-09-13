@@ -180,6 +180,7 @@ export default function DynamicRoute({ params }) {
     case 'research': return <ResearchWrapper />;
     case 'assistants': return <AssistantsWrapper />;
     case 'settings': return <SettingsWrapper />;
+    case 'profile':
     case 'my-profile': return <UserProfileTab />;
     default: return (
       <div style={{ padding: '3rem 1.5rem' }}>

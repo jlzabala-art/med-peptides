@@ -185,7 +185,7 @@ export default function UserProfileTab() {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-primary)', marginBottom: '1.5rem' }}>
-        My Profile & Settings
+        My Profile
       </h2>
 
       {status.message && (
@@ -201,7 +201,7 @@ export default function UserProfileTab() {
 
       <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '2rem' }}>
         <h3 style={{ fontSize: '1.2rem', fontWeight: 500, marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
-          Administrative Details
+          Personal Details
         </h3>
         {/* Avatar Selection */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>

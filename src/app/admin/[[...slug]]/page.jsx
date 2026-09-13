@@ -108,6 +108,8 @@ const getTabComponent = async (tabId) => {
     // Administration (Legacy individual links, eventually redirect or remove)
     case 'users':              return (await import('../../../components/admin/AdminUsersTab')).default;
     case 'invitations':        return (await import('../../../components/admin/AdminInvitationsTab')).default;
+    case 'profile':
+    case 'my-profile':         return (await import('../../../components/shared/UserProfileTab')).default;
     case 'settings':           return (await import('../../../components/admin/AdminSettingsTab')).default;
     case 'views':              return (await import('../../../components/admin/AdminViewsConfigTab')).default;
     case 'audit-logs':         return (await import('../../../components/admin/AdminAuditLogsTab')).default;

@@ -242,7 +242,31 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <button
                 type="button"
-                onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/settings' : `/${roleContext}/my-profile`)}
+                onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/profile' : `/${roleContext}/my-profile`)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid #f1f5f9',
+                  background: '#ffffff',
+                  cursor: 'pointer',
+                  color: '#1e293b',
+                  fontSize: '0.88rem',
+                  fontWeight: 600
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <User size={18} color="#64748b" />
+                  <span>My Profile</span>
+                </div>
+                <ChevronRight size={16} color="#94a3b8" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/settings' : `/${roleContext}/settings`)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -259,7 +283,7 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Settings size={18} color="#64748b" />
-                  <span>Account & Preferences</span>
+                  <span>Settings</span>
                 </div>
                 <ChevronRight size={16} color="#94a3b8" />
               </button>
@@ -365,7 +389,32 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
           <div style={{ padding: '8px' }}>
             <button
               type="button"
-              onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/settings' : `/${roleContext}/my-profile`)}
+              onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/profile' : `/${roleContext}/my-profile`)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                color: '#334155',
+                textAlign: 'left'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            >
+              <User size={15} color="#64748b" />
+              <span>My Profile</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleNavigate(roleContext === 'admin' ? '/admin/settings' : `/${roleContext}/settings`)}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -385,7 +434,7 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >
               <Settings size={15} color="#64748b" />
-              <span>Settings & Profile</span>
+              <span>Settings</span>
             </button>
 
             {isAdmin && (

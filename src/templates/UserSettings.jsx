@@ -22,7 +22,7 @@ export default function UserSettings({ onBack }) {
       else if (activeRole === 'supplier') router.push('/supplier-dashboard/settings', { replace: true });
       else if (activeRole === 'account_manager') router.push('/account-manager/settings', { replace: true });
     }
-  }, [activeRole, pathname, navigate]);
+  }, [activeRole, pathname, router]);
 
   const handleBack = () => {
     if (onBack) {
