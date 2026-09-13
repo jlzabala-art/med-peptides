@@ -197,7 +197,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                       </a>
 
                       <a
-                        href={`/api/vial-label/${slug}?format=38x90&type=full`}
+                        href={`/api/vial-label/${slug}?format=38x90&type=full${supplierParam ? `&${supplierParam.slice(1)}` : ''}${item.dosage ? `&dose=${encodeURIComponent(item.dosage)}` : ''}${item.variantId ? `&variantId=${encodeURIComponent(item.variantId)}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -219,7 +219,7 @@ export default function ItemsTab({ quotation, quotationId }) {
                       </a>
 
                       <a
-                        href={`/api/vial-label/${slug}?format=38x90&type=barcode`}
+                        href={`/api/vial-label/${slug}?format=38x90&type=barcode${supplierParam ? `&${supplierParam.slice(1)}` : ''}${item.dosage ? `&dose=${encodeURIComponent(item.dosage)}` : ''}${item.variantId ? `&variantId=${encodeURIComponent(item.variantId)}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{

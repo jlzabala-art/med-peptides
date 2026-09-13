@@ -168,6 +168,30 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           }}>
             {variant.id || 'variant-ref'}
           </code>
+          <a
+            href={`/api/vial-label/${encodeURIComponent(selectedProduct?.slug || selectedProduct?.id || '')}?format=38x90&type=shipping&variantId=${encodeURIComponent(variant.id || '')}&supplier=${encodeURIComponent(variant.supplierId || variant.supplier || '')}&dose=${encodeURIComponent(variant.dosage || variant.dose || '')}&presentation=${encodeURIComponent(variant.presentation || variant.format || '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 8px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              color: '#0369a1',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              transition: 'all 0.15s ease'
+            }}
+            title="Download 38x90mm label for this variant"
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e0f2fe'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
+          >
+            🏷️ Print Label
+          </a>
         </div>
 
         {/* Tab Controls */}

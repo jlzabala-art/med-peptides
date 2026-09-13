@@ -962,7 +962,7 @@ export default function AdminQuotationsTab() {
                           📄 Tech Monograph ↗
                         </a>
                         <a
-                          href={`/api/vial-label/${slug}?format=38x90`}
+                          href={`/api/vial-label/${slug}?format=38x90${sParam ? `&${sParam.slice(1)}` : ''}${item.dosage ? `&dose=${encodeURIComponent(item.dosage)}` : ''}${item.variantId ? `&variantId=${encodeURIComponent(item.variantId)}` : ''}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}

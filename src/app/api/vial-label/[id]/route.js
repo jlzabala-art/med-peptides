@@ -39,6 +39,8 @@ async function getProductData(id) {
   const cleanId = decodeURIComponent(id).trim();
 
   let doc = null;
+  let requestedVariantId = null;
+
   const byId = await adminDb.collection('products').doc(cleanId).get().catch(() => null);
   if (byId?.exists) doc = byId;
 
@@ -47,13 +49,44 @@ async function getProductData(id) {
     if (bySlug && !bySlug.empty) doc = bySlug.docs[0];
   }
 
+  // If not found as a product, check if cleanId is a variant ID by checking segments
+  if (!doc) {
+    const parts = cleanId.split('-');
+    for (let i = 0; i < parts.length; i++) {
+      for (let j = i + 1; j <= parts.length; j++) {
+        const candidateSlug = parts.slice(i, j).join('-').toLowerCase();
+        if (candidateSlug.length < 3) continue;
+        const parentCandidate = await adminDb.collection('products').doc(candidateSlug).get().catch(() => null);
+        if (parentCandidate && parentCandidate.exists) {
+          const vSnap = await parentCandidate.ref.collection('variants').doc(cleanId).get().catch(() => null);
+          if (vSnap && vSnap.exists) {
+            doc = parentCandidate;
+            requestedVariantId = vSnap.id;
+            break;
+          }
+        }
+        const bySlugCandidate = await adminDb.collection('products').where('slug', '==', candidateSlug).limit(1).get().catch(() => null);
+        if (bySlugCandidate && !bySlugCandidate.empty) {
+          const pDoc = bySlugCandidate.docs[0];
+          const vSnap = await pDoc.ref.collection('variants').doc(cleanId).get().catch(() => null);
+          if (vSnap && vSnap.exists) {
+            doc = pDoc;
+            requestedVariantId = vSnap.id;
+            break;
+          }
+        }
+      }
+      if (doc) break;
+    }
+  }
+
   if (!doc) return null;
 
   const data = { id: doc.id, ...doc.data() };
   const varSnap = await doc.ref.collection('variants').get().catch(() => null);
   const variants = (varSnap?.docs || []).map(v => ({ id: v.id, ...v.data() }));
 
-  return { ...data, variants };
+  return { ...data, variants, requestedVariantId };
 }
 
 function draw1DBarcode(page, originX, originY, maxW, height, text) {
@@ -501,33 +534,56 @@ export async function GET(request, { params }) {
 
     const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
 
-    // 1. Identify primary supplier & variant (Defaulting strictly to Lotusland for clinical vials)
+    // 1. Identify specific variant or filter criteria
+    const variantParam = searchParams.get('variantId') || searchParams.get('variant') || searchParams.get('variant_id') || product.requestedVariantId;
     const suppParam = searchParams.get('supplier');
-    const targetSupplier = (suppParam && suppParam !== 'all') ? suppParam : 'supplier-lotusland';
+    const doseParam = searchParams.get('dose') || searchParams.get('strength');
+    const formatParam = searchParams.get('presentation') || searchParams.get('format') || searchParams.get('formatId');
 
-    // Find matching variant (prioritize Lotusland)
-    const targetVariant = product.variants?.find(v => {
-      const s = String(v.supplier || v.supplierId || v.supplierName || '').toLowerCase();
-      const matchesSupp = s.includes('lotus') || (targetSupplier && s.includes(targetSupplier.replace(/^supplier-/, '')));
-      const reqDose = searchParams.get('dose');
-      if (reqDose && reqDose !== 'all') {
-        const vDose = String(v.dosage || v.dose || '').toLowerCase().replace(/\s+/g, '');
-        const rDose = String(reqDose).toLowerCase().replace(/\s+/g, '');
-        return matchesSupp && (vDose === rDose || vDose.includes(rDose));
-      }
-      return matchesSupp;
-    }) || product.variants?.find(v => {
-      const reqDose = searchParams.get('dose');
-      if (reqDose && reqDose !== 'all') {
-        const vDose = String(v.dosage || v.dose || '').toLowerCase().replace(/\s+/g, '');
-        const rDose = String(reqDose).toLowerCase().replace(/\s+/g, '');
-        return vDose === rDose || vDose.includes(rDose);
-      }
-      return true;
-    }) || product.variants?.[0] || {};
+    let targetVariant = null;
 
-    const targetDose = searchParams.get('dose') || targetVariant.dosage || targetVariant.dose || product.dosage || '10 mg';
-    const targetFormat = searchParams.get('presentation') || searchParams.get('formatId') || targetVariant.presentation || targetVariant.presentationName || 'vial';
+    // A. Direct variant match by ID
+    if (variantParam) {
+      const cleanVar = String(variantParam).toLowerCase().trim();
+      targetVariant = product.variants?.find(v => {
+        const vid = String(v.id || '').toLowerCase();
+        return vid === cleanVar || vid.includes(cleanVar);
+      });
+    }
+
+    // B. Match by supplier + dose
+    if (!targetVariant && (suppParam || doseParam)) {
+      targetVariant = product.variants?.find(v => {
+        let matchSupp = true;
+        if (suppParam && suppParam !== 'all') {
+          const s = String(v.supplierId || v.supplierName || v.supplier || '').toLowerCase().replace(/[-_\s]+/g, '');
+          const reqS = String(suppParam).toLowerCase().replace(/^supplier[-_]/, '').replace(/[-_\s]+/g, '');
+          matchSupp = s.includes(reqS) || reqS.includes(s);
+        }
+        let matchDose = true;
+        if (doseParam && doseParam !== 'all') {
+          const d = String(v.dosage || v.dose || '').toLowerCase().replace(/[-_\s]+/g, '');
+          const reqD = String(doseParam).toLowerCase().replace(/[-_\s]+/g, '');
+          matchDose = d === reqD || d.includes(reqD) || reqD.includes(d);
+        }
+        return matchSupp && matchDose;
+      });
+    }
+
+    // C. Fallback: Preferred variant or first active variant from product
+    if (!targetVariant) {
+      targetVariant = product.variants?.find(v => v.isPreferred) || product.variants?.[0] || {};
+    }
+
+    // Derive supplier, dose, and format strictly from the resolved targetVariant
+    const rawSupplier = suppParam || targetVariant.supplierId || targetVariant.supplierName || targetVariant.supplier || product.supplierId || product.supplier || '';
+    let targetSupplier = null;
+    if (rawSupplier && rawSupplier !== 'all') {
+      targetSupplier = rawSupplier.startsWith('supplier-') ? rawSupplier : `supplier-${String(rawSupplier).toLowerCase().replace(/[\s_]+/g, '-')}`;
+    }
+
+    const targetDose = doseParam || targetVariant.dosage || targetVariant.dose || product.dosage || '10 mg';
+    const targetFormat = formatParam || targetVariant.presentation || targetVariant.presentationName || targetVariant.format || 'vial';
 
     // Resolve target shared URL for the QR code
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
@@ -553,7 +609,10 @@ export async function GET(request, { params }) {
     // Deterministic anonymous batch number (Lot)
     let batchNumber = customBatch;
     if (!batchNumber) {
-      if (product.batchCode && !product.batchCode.toLowerCase().includes(cleanSlug)) {
+      const varBatch = targetVariant.batchNumber || targetVariant.batchCode || targetVariant.lotNumber;
+      if (varBatch && !varBatch.toLowerCase().includes(cleanSlug)) {
+        batchNumber = varBatch;
+      } else if (product.batchCode && !product.batchCode.toLowerCase().includes(cleanSlug)) {
         batchNumber = product.batchCode;
       } else if (product.lotNumber && !product.lotNumber.toLowerCase().includes(cleanSlug)) {
         batchNumber = product.lotNumber;

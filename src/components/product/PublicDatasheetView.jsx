@@ -69,12 +69,12 @@ export default function PublicDatasheetView({
 
   const handleCopyLabelUrl = (type) => {
     if (typeof window === 'undefined') return;
-    const url = `${window.location.origin}/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=${type}`;
+    const url = `${window.location.origin}/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=${type}${labelQueryString}`;
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(url);
       setCopiedLabelType(type);
       triggerHaptic('success');
-      toast.success(type === 'shipping' ? 'Enlace de etiqueta de envío copiado ✓' : 'Enlace de etiqueta clínica copiado ✓');
+      toast.success(type === 'shipping' ? 'Shipping label link copied ✓' : 'Clinical label link copied ✓');
       setTimeout(() => setCopiedLabelType(null), 2500);
     }
   };
@@ -368,6 +368,18 @@ export default function PublicDatasheetView({
     const q = params.toString();
     return `${baseUrl}/p/${slug}${q ? `?${q}` : ''}`;
   }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product]);
+
+  const labelQueryString = useMemo(() => {
+    const p = new URLSearchParams();
+    const supp = (activeSupplierId && activeSupplierId !== 'all') ? activeSupplierId : (product?.isSingleSupplierLocked ? product?.supplierId : null);
+    if (supp) p.set('supplier', supp);
+    const targetDose = selectedStrength?.name || selectedStrengthId;
+    if (targetDose && targetDose !== 'all') p.set('dose', targetDose);
+    if (activeFormatId && activeFormatId !== 'all') p.set('presentation', activeFormatId);
+    if (lang && lang !== 'en') p.set('lang', lang);
+    const qs = p.toString();
+    return qs ? `&${qs}` : '';
+  }, [activeSupplierId, product, selectedStrength, selectedStrengthId, activeFormatId, lang]);
 
   // ⚡ Non-blocking Access Telemetry Beacon for Tracked Client Links
   useEffect(() => {
@@ -883,7 +895,7 @@ export default function PublicDatasheetView({
                 </p>
                 <div className="pds-label-type-buttons">
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="pds-btn pds-btn-barcode"
@@ -892,7 +904,7 @@ export default function PublicDatasheetView({
                     <QrCode size={14} /> Download 38×90mm
                   </a>
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="pds-btn pds-btn-ghost"
@@ -929,7 +941,7 @@ export default function PublicDatasheetView({
                 </p>
                 <div className="pds-label-type-buttons">
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=client${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="pds-btn pds-btn-pdf"
@@ -938,7 +950,7 @@ export default function PublicDatasheetView({
                     <Tag size={14} /> Download 38×90mm
                   </a>
                   <a 
-                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client`}
+                    href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="pds-btn pds-btn-ghost"
