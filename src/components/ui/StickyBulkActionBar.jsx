@@ -16,11 +16,19 @@ export default function StickyBulkActionBar({
   bulkActions = [],
   renderBatchActions,
   selectedIds = [],
-  onClearSelection
+  onClearSelection,
+  totalItems = 0,
+  totalVariants = 0,
+  isAllMatchingSelected = false,
+  onToggleSelectAllMatching,
+  pageSize = 50,
+  itemNoun = 'products',
+  variantNoun = 'vars'
 }) {
   if (selectedCount === 0 || typeof window === 'undefined') return null;
 
   const primaryActions = bulkActions.slice(0, 4);
+  const showTotalityOption = totalItems > selectedCount && typeof onToggleSelectAllMatching === 'function';
 
   return createPortal(
     <div
@@ -40,7 +48,7 @@ export default function StickyBulkActionBar({
         color: '#ffffff',
         borderRadius: '12px',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
-        border: '1px solid #334155',
+        border: isAllMatchingSelected ? '1px solid #10b981' : '1px solid #334155',
         animation: 'slideUpBounce 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         maxWidth: '90vw',
         flexWrap: 'nowrap',
@@ -60,15 +68,69 @@ export default function StickyBulkActionBar({
       {/* Selected badge */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}>
         <span style={{
-          backgroundColor: '#0284c7', color: '#ffffff', fontSize: '0.75rem', fontWeight: 800,
-          padding: '2px 8px', borderRadius: '6px'
+          backgroundColor: isAllMatchingSelected ? '#059669' : '#0284c7',
+          color: '#ffffff',
+          fontSize: '0.75rem',
+          fontWeight: 800,
+          padding: '2px 8px',
+          borderRadius: '6px'
         }}>
-          {selectedCount}
+          {isAllMatchingSelected ? `All ${totalItems || selectedCount}` : selectedCount}
         </span>
         <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0' }}>
-          selected
+          {isAllMatchingSelected && totalVariants > 0 ? `selected (${totalVariants} ${variantNoun})` : 'selected'}
         </span>
       </div>
+
+      {/* Totality Toggle in Sticky Bar */}
+      {isAllMatchingSelected ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelectAllMatching?.(false);
+          }}
+          style={{
+            backgroundColor: '#1e293b',
+            border: '1px solid #475569',
+            color: '#94a3b8',
+            fontSize: '0.74rem',
+            fontWeight: 600,
+            padding: '2px 7px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap'
+          }}
+          title={`Select only the ${selectedCount} items visible on this page`}
+        >
+          Only page ({selectedCount})
+        </button>
+      ) : showTotalityOption ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelectAllMatching?.(true);
+          }}
+          style={{
+            backgroundColor: '#047857',
+            border: '1px solid #059669',
+            color: '#ffffff',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            transition: 'background 0.15s ease'
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#065f46'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#047857'}
+          title={`Select all ${totalItems} items matching filters`}
+        >
+          ⚡ All {totalItems} {totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : ''}
+        </button>
+      ) : null}
 
       <div style={{ width: '1px', height: '18px', backgroundColor: '#334155' }} />
 

@@ -27,6 +27,12 @@ export default function DataTable({
   selectedIds = [],
   indeterminateIds = [], // Array of IDs that should be shown as indeterminate
   onSelectionChange, // receives array of selected ids
+  // Totality Selection
+  totalVariants = 0,
+  isAllMatchingSelected: propIsAllMatchingSelected,
+  onToggleSelectAllMatching: propOnToggleSelectAllMatching,
+  itemNoun = 'products',
+  variantNoun = 'variants',
   // Pagination
   currentPage = 1,
   totalPages = 1,
@@ -116,6 +122,9 @@ export default function DataTable({
   const [focusedRowIndex, setFocusedRowIndex] = useState(-1);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [showColMenu, setShowColMenu] = useState(false);
+  const [internalAllMatching, setInternalAllMatching] = useState(false);
+  const isAllMatchingSelected = propIsAllMatchingSelected !== undefined ? propIsAllMatchingSelected : internalAllMatching;
+  const handleToggleSelectAllMatching = propOnToggleSelectAllMatching || setInternalAllMatching;
 
   // Mobile selection mode (long-press to enter)
   const [internalMobileSelectionMode, setInternalMobileSelectionMode] = useState(false);
@@ -370,12 +379,16 @@ export default function DataTable({
     if (e.target.checked) {
       onSelectionChange(data.map((item) => item[keyField]));
     } else {
+      handleToggleSelectAllMatching(false);
       onSelectionChange([]);
     }
   };
 
   const handleSelectRow = (id, checked) => {
     if (!onSelectionChange) return;
+    if (isAllMatchingSelected) {
+      handleToggleSelectAllMatching(false);
+    }
     if (checked) {
       onSelectionChange([...selectedIds, id]);
     } else {
@@ -854,13 +867,13 @@ export default function DataTable({
         </div>
       )}
       {/* Desktop Contextual Selection Header */}
-      {(someSelected || allSelected) && (bulkActions.length > 0 || renderBatchActions) && (
+      {(someSelected || allSelected || isAllMatchingSelected) && (bulkActions.length > 0 || renderBatchActions) && (
         <div style={{
           position: 'sticky',
           top: 0,
           zIndex: 15,
-          backgroundColor: '#f0fdf4',
-          borderBottom: '2px solid #0f766e',
+          backgroundColor: isAllMatchingSelected ? '#ecfdf5' : '#f0fdf4',
+          borderBottom: isAllMatchingSelected ? '2px solid #059669' : '2px solid #0f766e',
           padding: '0.25rem 0.75rem',
           boxShadow: '0 2px 4px rgba(0,0,0,0.04)'
         }}>
@@ -869,7 +882,17 @@ export default function DataTable({
             bulkActions={bulkActions}
             renderBatchActions={renderBatchActions}
             selectedIds={selectedIds}
-            onClearSelection={() => onSelectionChange?.([])}
+            onClearSelection={() => {
+              handleToggleSelectAllMatching(false);
+              onSelectionChange?.([]);
+            }}
+            totalItems={totalItems}
+            totalVariants={totalVariants}
+            isAllMatchingSelected={isAllMatchingSelected}
+            onToggleSelectAllMatching={handleToggleSelectAllMatching}
+            pageSize={data.length}
+            itemNoun={itemNoun}
+            variantNoun={variantNoun}
           />
         </div>
       )}
@@ -1532,13 +1555,23 @@ export default function DataTable({
       {/* Mobile Contextual Action Bar — reserved for mobile touch layout */}
       
       {/* Desktop Sticky Floating Bulk Action Bar */}
-      {(someSelected || allSelected) && (bulkActions.length > 0 || renderBatchActions) && (
+      {(someSelected || allSelected || isAllMatchingSelected) && (bulkActions.length > 0 || renderBatchActions) && (
         <StickyBulkActionBar
           selectedCount={selectedIds.length}
           bulkActions={bulkActions}
           renderBatchActions={renderBatchActions}
           selectedIds={selectedIds}
-          onClearSelection={() => onSelectionChange?.([])}
+          onClearSelection={() => {
+            handleToggleSelectAllMatching(false);
+            onSelectionChange?.([]);
+          }}
+          totalItems={totalItems}
+          totalVariants={totalVariants}
+          isAllMatchingSelected={isAllMatchingSelected}
+          onToggleSelectAllMatching={handleToggleSelectAllMatching}
+          pageSize={data.length}
+          itemNoun={itemNoun}
+          variantNoun="vars"
         />
       )}
     </div>

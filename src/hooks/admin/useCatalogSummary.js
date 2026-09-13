@@ -151,12 +151,14 @@ export function useCatalogSummary(options = {}) {
     }
     return unique;
   })();
-  // Use KPIs from the first page since they represent global context
+  // Use KPIs and totalGroups from the first page since they represent global filtered context
   const firstPageKpis = data?.pages?.[0]?.kpis || null;
+  const totalGroups = data?.pages?.[0]?.totalGroups ?? firstPageKpis?.totalProducts ?? 0;
 
   return {
     data:               items,
     kpis:               firstPageKpis,
+    totalGroups,
     goalFacets:         firstPageKpis?.goalFacets         || {},
     categoryFacets:     firstPageKpis?.categoryFacets     || {},
     presentationFacets: firstPageKpis?.presentationFacets || {},

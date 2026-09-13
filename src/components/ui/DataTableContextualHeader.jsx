@@ -8,7 +8,14 @@ export default function DataTableContextualHeader({
   bulkActions = [],
   renderBatchActions,
   selectedIds = [],
-  onClearSelection
+  onClearSelection,
+  totalItems = 0,
+  totalVariants = 0,
+  isAllMatchingSelected = false,
+  onToggleSelectAllMatching,
+  pageSize = 50,
+  itemNoun = 'products',
+  variantNoun = 'variants'
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -33,6 +40,8 @@ export default function DataTableContextualHeader({
     return label.replace(/\s*\(\d+\)\s*$/, '').trim();
   };
 
+  const showTotalityOption = totalItems > selectedCount && typeof onToggleSelectAllMatching === 'function';
+
   return (
     <div
       style={{
@@ -42,7 +51,7 @@ export default function DataTableContextualHeader({
         width: '100%',
         minHeight: '40px',
         padding: '2px 8px',
-        backgroundColor: '#f0fdf4',
+        backgroundColor: isAllMatchingSelected ? '#ecfdf5' : '#f0fdf4',
         fontFamily: 'var(--font-sans, inherit)',
         overflowX: 'auto',
         WebkitOverflowScrolling: 'touch',
@@ -51,21 +60,98 @@ export default function DataTableContextualHeader({
       {/* Left: Count + Divider + Primary Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
         {/* 1. Informational text (Styled Badge) */}
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-          fontWeight: 700,
-          color: '#0f766e',
-          fontSize: '0.8rem',
-          backgroundColor: '#ccfbf1',
-          padding: '3px 8px',
-          borderRadius: '12px',
-          userSelect: 'none',
-          whiteSpace: 'nowrap'
-        }}>
-          {selectedCount} selected
-        </span>
+        {isAllMatchingSelected ? (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            fontWeight: 700,
+            color: '#065f46',
+            fontSize: '0.8rem',
+            backgroundColor: '#a7f3d0',
+            padding: '3px 9px',
+            borderRadius: '12px',
+            userSelect: 'none',
+            whiteSpace: 'nowrap'
+          }}>
+            <span>✓ All {totalItems || selectedCount} {itemNoun}</span>
+            {totalVariants > 0 && <span style={{ opacity: 0.9, fontWeight: 600 }}>({totalVariants} {variantNoun})</span>}
+          </span>
+        ) : (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontWeight: 700,
+            color: '#0f766e',
+            fontSize: '0.8rem',
+            backgroundColor: '#ccfbf1',
+            padding: '3px 8px',
+            borderRadius: '12px',
+            userSelect: 'none',
+            whiteSpace: 'nowrap'
+          }}>
+            {selectedCount} selected {totalItems > selectedCount ? `(${selectedCount} on page)` : ''}
+          </span>
+        )}
+
+        {/* Totality Toggle Button */}
+        {isAllMatchingSelected ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelectAllMatching?.(false);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #10b981',
+              color: '#047857',
+              padding: '2px 8px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap'
+            }}
+            title={`Select only the ${selectedCount} items visible on this page`}
+          >
+            Select only {selectedCount} on page
+          </button>
+        ) : showTotalityOption ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelectAllMatching?.(true);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              backgroundColor: '#0f766e',
+              border: '1px solid #0d6460',
+              color: '#ffffff',
+              padding: '2px 9px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+              transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0d6460'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0f766e'}
+            title={`Select all ${totalItems} items matching active filters`}
+          >
+            ⚡ Select all {totalItems} {itemNoun} {totalVariants > 0 ? `(${totalVariants} ${variantNoun})` : ''}
+          </button>
+        ) : null}
 
         <span style={{ color: '#cbd5e1', fontWeight: 300, userSelect: 'none' }}>|</span>
 

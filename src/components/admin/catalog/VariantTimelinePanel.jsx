@@ -23,7 +23,8 @@ import {
   FileCheck,
   Barcode,
   Copy,
-  Check
+  Check,
+  Share2
 } from 'lucide-react';
 import notifier from '@/services/NotificationService';
 import { formatTimelineValue } from '../../../utils/variantTimelineHelper';
@@ -31,8 +32,8 @@ import { formatNumberAdaptive } from '../../../utils/formatters';
 import InlineEditableCell from '../../ui/InlineEditableCell';
 import SupplierAgreementCard from './cards/SupplierAgreementCard';
 import ZohoReconcilerCard from './cards/ZohoReconcilerCard';
-import BulkApiYieldCalculator from './widgets/BulkApiYieldCalculator';
 import SupplierQuotationDetailDrawer from '../quotations/SupplierQuotationDetailDrawer';
+import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
 
 /**
  * VariantTimelinePanel
@@ -46,6 +47,7 @@ import SupplierQuotationDetailDrawer from '../quotations/SupplierQuotationDetail
 export default function VariantTimelinePanel({ variant, selectedProduct, onUpdateVariantField }) {
   const [activeQuotationId, setActiveQuotationId] = useState(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [shareDrawerOpen, setShareDrawerOpen] = useState(false);
 
   // Deterministic fallback unique code if not explicitly saved on the variant
   const defaultSuppCode = (variant?.supplierId || variant?.supplier || 'RP').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
@@ -531,6 +533,31 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           >
             <span>📄</span> Sheet (×8)
           </a>
+
+          <button
+            type="button"
+            onClick={() => setShareDrawerOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              padding: '3px 9px',
+              fontSize: '0.70rem',
+              fontWeight: 600,
+              color: '#0284c7',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title={`Share label for ${selectedProduct?.name || 'Peptide'} (${currentVialCode})`}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
+          >
+            <Share2 size={11} />
+            <span>Share Label</span>
+          </button>
         </div>
       </div>
 
@@ -844,6 +871,26 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           onClose={() => setActiveQuotationId(null)}
         />
       )}
+
+      {/* Universal Share Drawer for Vial / Shipping Labels */}
+      <UniversalShareDrawer
+        isOpen={shareDrawerOpen}
+        onClose={() => setShareDrawerOpen(false)}
+        docUrl={clientLabelUrl}
+        docType="label_vial"
+        itemName={`${selectedProduct?.name || 'Peptide'} - ${variant?.dosage || ''} (${currentVialCode})`}
+        assetMeta={{
+          vialCode: currentVialCode,
+          productId: selectedProduct?.id || productSlug,
+          productName: selectedProduct?.name,
+          variantId: variant?.id,
+          dosage: variant?.dosage || variant?.dose,
+          supplier: variant?.supplierId || variant?.supplier,
+          clientLabelUrl,
+          shippingLabelUrl,
+          sheetLabelUrl
+        }}
+      />
     </div>
   );
 }

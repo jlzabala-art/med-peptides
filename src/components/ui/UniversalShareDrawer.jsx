@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import StandardDrawer from '@/components/ui/StandardDrawer';
 import notifier from '@/services/NotificationService';
 import { Copy, Check, MessageSquare, Mail, QrCode, ExternalLink, User } from 'lucide-react';
-import { fetchUsersAction } from '@/actions/usersActions';
 
 /**
  * UniversalShareDrawer
@@ -16,10 +15,13 @@ import { fetchUsersAction } from '@/actions/usersActions';
  * - Golden Rule #4: Uses StandardDrawer without context-breaking modals
  * - Golden Rule #8 & #15: Uses CSS variables & semantic colors
  */
+import RecipientHierarchySelector from '@/components/shared/RecipientHierarchySelector';
+
 export default function UniversalShareDrawer({
   isOpen,
   onClose,
-  shareUrl = '',
+  shareUrl: incomingShareUrl = '',
+  docUrl = '',
   docType = 'document',
   title = null,
   subtitle = null,
@@ -34,7 +36,9 @@ export default function UniversalShareDrawer({
   isMobile = false,
   allowedRoles = ['doctor', 'wholeseller', 'account_manager', 'patient', 'custom'],
   customMessageTemplate = null,
+  assetMeta = {},
 }) {
+  const shareUrl = incomingShareUrl || docUrl || '';
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [messageLang, setMessageLang] = useState(() => {
@@ -51,62 +55,21 @@ export default function UniversalShareDrawer({
     }
   };
 
-  // Recipient selection state
-  const [targetType, setTargetType] = useState('doctor');
-  const [targetName, setTargetName] = useState(initialRecipientName || '');
-  const [targetPhone, setTargetPhone] = useState(initialRecipientPhone || '');
-  const [targetEmail, setTargetEmail] = useState(initialRecipientEmail || '');
-  
-  // On-demand directory state (lazy loaded)
-  const [directoryContacts, setDirectoryContacts] = useState([]);
-  const [loadingDirectory, setLoadingDirectory] = useState(false);
-  const [selectedContactId, setSelectedContactId] = useState('');
+  // Recipient selection state managed via RecipientHierarchySelector
+  const [recipient, setRecipient] = useState({
+    type: 'doctor',
+    id: null,
+    name: initialRecipientName || '',
+    company: '',
+    email: initialRecipientEmail || '',
+    phone: initialRecipientPhone || '',
+    notes: '',
+  });
 
-  if (!isOpen) return null;
-
-  // On-demand fetcher: Only queries Firestore when the user picks a specific directory tab
-  const handleTabChange = async (roleKey) => {
-    setTargetType(roleKey);
-    setSelectedContactId('');
-
-    if (roleKey === 'account_manager') {
-      setTargetName(accountManagerName);
-      setTargetEmail(accountManagerEmail);
-      setDirectoryContacts([]);
-      return;
-    }
-
-    if (roleKey === 'custom') {
-      setDirectoryContacts([]);
-      return;
-    }
-
-    setLoadingDirectory(true);
-    try {
-      const dbRole = roleKey === 'doctor' ? 'doctor' 
-        : roleKey === 'wholeseller' ? 'wholeseller' 
-        : roleKey === 'patient' ? 'patient' 
-        : null;
-
-      const users = await fetchUsersAction({ limitCount: 30, role: dbRole });
-      setDirectoryContacts(users || []);
-    } catch {
-      setDirectoryContacts([]);
-    } finally {
-      setLoadingDirectory(false);
-    }
-  };
-
-  const handleSelectContact = (contactId) => {
-    setSelectedContactId(contactId);
-    const found = directoryContacts.find(c => c.id === contactId);
-    if (found) {
-      setTargetName(found.displayName || found.name || found.company || found.fullName || '');
-      setTargetEmail(found.email || '');
-      const phone = found.phone || found.phoneNumber || found.whatsapp || '';
-      if (phone) setTargetPhone(phone);
-    }
-  };
+  const targetName = recipient.name;
+  const targetPhone = recipient.phone;
+  const targetEmail = recipient.email;
+  const targetType = recipient.type;
 
   const [activeLogId, setActiveLogId] = useState(logId);
 
@@ -115,7 +78,7 @@ export default function UniversalShareDrawer({
     setActiveLogId(logId);
   }, [logId]);
 
-  const markAsSentInCrm = async (targetId) => {
+  const markAsSentInCrm = async (targetId, channel = 'link') => {
     const idToUpdate = targetId || activeLogId;
     if (!idToUpdate) return;
     try {
@@ -135,26 +98,38 @@ export default function UniversalShareDrawer({
     }
   };
 
-  // Helper to ensure tracking record exists and returns tracked URL
-  const getTrackedUrl = async () => {
+  // Helper to ensure universal tracking record exists and returns tracked URL
+  const getTrackedUrl = async (channel = 'link') => {
     if (!shareUrl) return '';
     let currentLogId = activeLogId;
 
     if (!currentLogId && (targetName || targetEmail || targetPhone)) {
       try {
-        const res = await fetch('/api/catalog/tracking-logs', {
+        const res = await fetch('/api/shares', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            docType,
-            productName: itemName,
-            sharedWith: targetName,
-            sharedPhone: targetPhone,
-            sharedEmail: targetEmail,
-            targetType,
+            assetType: docType,
+            assetTitle: itemName || `${docType.toUpperCase()}`,
+            assetMeta: {
+              shareUrl,
+              itemCount,
+              ...assetMeta,
+            },
+            recipient: {
+              type: recipient.type,
+              id: recipient.id,
+              name: recipient.name,
+              company: recipient.company,
+              email: recipient.email,
+              phone: recipient.phone,
+            },
+            notes: recipient.notes,
+            deliveryChannel: channel,
             shareUrl,
           }),
         });
+
         if (res.ok) {
           const data = await res.json();
           if (data.id) {
@@ -163,10 +138,10 @@ export default function UniversalShareDrawer({
           }
         }
       } catch (err) {
-        console.warn('Could not create tracking log:', err);
+        console.warn('Could not create universal tracking log:', err);
       }
     } else if (currentLogId) {
-      markAsSentInCrm(currentLogId);
+      markAsSentInCrm(currentLogId, channel);
     }
 
     if (currentLogId) {
@@ -296,132 +271,19 @@ export default function UniversalShareDrawer({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         
-        {/* On-Demand Recipient Target Box */}
+        {/* Hierarchical Recipient Selector (2-step: Type -> Contact) */}
         <div style={{
           border: '1px solid #e2e8f0',
           borderRadius: 10,
-          padding: '14px',
-          background: '#f8fafc',
+          padding: '12px',
+          background: '#ffffff',
           boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <User size={15} color="#003666" /> Select Recipient
-            </span>
-            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-              On-demand directory
-            </span>
-          </div>
-
-          {/* Role selector tabs */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(${roleTabDefinitions.length}, 1fr)`,
-            gap: 5,
-            marginBottom: 10,
-          }}>
-            {roleTabDefinitions.map(tab => {
-              const active = targetType === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => handleTabChange(tab.key)}
-                  style={{
-                    padding: '8px 4px',
-                    borderRadius: 6,
-                    border: active ? '2px solid #003666' : '1px solid #cbd5e1',
-                    background: active ? '#eff6ff' : '#ffffff',
-                    color: active ? '#003666' : '#475569',
-                    fontWeight: active ? 700 : 500,
-                    fontSize: '0.72rem',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 3,
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <span style={{ fontSize: '1rem' }}>{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Directory Loading State */}
-          {loadingDirectory && (
-            <div style={{ fontSize: '0.76rem', color: '#0369a1', padding: '8px', textAlign: 'center', background: '#f0f9ff', borderRadius: 6, marginBottom: 8 }}>
-              ⏳ Loading directory for {targetType}…
-            </div>
-          )}
-
-          {/* Directory Select (Lazy-populated) */}
-          {!loadingDirectory && directoryContacts.length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <select
-                value={selectedContactId}
-                onChange={e => handleSelectContact(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '7.5px 10px',
-                  borderRadius: 6,
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.8rem',
-                  background: '#ffffff',
-                  color: '#0f172a',
-                  outline: 'none',
-                }}
-              >
-                <option value="">— Pick existing contact from directory ({directoryContacts.length}) —</option>
-                {directoryContacts.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.displayName || c.name || c.company || c.fullName || c.email} {c.phone ? `(${c.phone})` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Editable contact coordinates */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 8 }}>
-            <div>
-              <span style={{ fontSize: '0.71rem', color: '#64748b', display: 'block', marginBottom: 2 }}>Recipient Name</span>
-              <input
-                type="text"
-                value={targetName}
-                onChange={e => setTargetName(e.target.value)}
-                placeholder="e.g. Dr. Vance / MedSupply EU"
-                style={{
-                  width: '100%',
-                  padding: '6.5px 8px',
-                  borderRadius: 6,
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.78rem',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-            <div>
-              <span style={{ fontSize: '0.71rem', color: '#64748b', display: 'block', marginBottom: 2 }}>WhatsApp (+Country Code)</span>
-              <input
-                type="tel"
-                value={targetPhone}
-                onChange={e => setTargetPhone(e.target.value)}
-                placeholder="e.g. +34611223344"
-                style={{
-                  width: '100%',
-                  padding: '6.5px 8px',
-                  borderRadius: 6,
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.78rem',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-          </div>
+          <RecipientHierarchySelector
+            value={recipient}
+            onChange={(rec) => setRecipient(rec)}
+            showNotesField={true}
+          />
         </div>
 
         {/* Language Selector for Share Message */}

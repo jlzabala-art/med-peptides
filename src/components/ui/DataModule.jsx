@@ -38,6 +38,9 @@ export default function DataModule({
   resultCount,
   totalItems,
   totalCount,
+  totalVariants,
+  isAllMatchingSelected,
+  onToggleSelectAllMatching,
   searchLoading,
   namespace = "search",
   data = [],
@@ -332,6 +335,9 @@ export default function DataModule({
                 onRowClick={onRowClick} 
                 expandableRender={expandableRender}
                 totalItems={totalItems || totalCount || resultCount}
+                totalVariants={totalVariants}
+                isAllMatchingSelected={isAllMatchingSelected}
+                onToggleSelectAllMatching={onToggleSelectAllMatching}
                 hasNextPage={hasNextPage !== undefined ? hasNextPage : hasMore}
                 onNextPage={loadMore || onLoadMore}
                 isLoading={loading}

@@ -8,9 +8,9 @@ export default function SavedPdfsDrawer({ isOpen, onClose }) {
     <StandardDrawer
       isOpen={isOpen}
       onClose={onClose}
-      width="1060px"
-      title="Catalog & Quotation Tracking (CRM)"
-      subtitle="Audit history, client distributions, account managers & commercial follow-ups"
+      width="1080px"
+      title="Trazabilidad & Historial de Compartidos (Shares & CRM)"
+      subtitle="Auditoría de etiquetas, catálogos, fichas técnicas y cotizaciones compartidas por destinatario y canal"
     >
       <div style={{ padding: '0.25rem 0 1.5rem 0' }}>
         <CatalogTrackingTable />

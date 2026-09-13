@@ -151,6 +151,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [activeDrawer, setActiveDrawer] = useState(null); // 'offers', 'pricing', 'competitors', 'edit', 'quick-view'
   const [selectedIds, setSelectedIds] = useState([]);
+  const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
   const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
   const [isPriceListModalOpen, setIsPriceListModalOpen] = useState(false);
@@ -187,7 +188,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
   });
 
   // 2. Fetch Catalog Data from React Query
-  const { data, kpis, goalFacets, categoryFacets, presentationFacets, supplierFacets, loading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useCatalogSummary({ 
+  const { data, kpis, totalGroups, goalFacets, categoryFacets, presentationFacets, supplierFacets, loading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useCatalogSummary({ 
     limit: 50, 
     q: debouncedSearchTerm, 
     timeframe: filterTimeframe,
@@ -420,13 +421,21 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       };
     }
 
-    const filteredProducts = hasAnyFilter ? dataWithMeta.length : ((kpis?.totalProducts != null && kpis.totalProducts > 0) ? kpis.totalProducts : globalProducts);
+    const serverTotalProducts = (totalGroups != null && totalGroups > 0)
+      ? totalGroups
+      : ((kpis?.totalProducts != null && kpis.totalProducts > 0) ? kpis.totalProducts : null);
+
+    const filteredProducts = serverTotalProducts != null
+      ? serverTotalProducts
+      : (hasAnyFilter ? dataWithMeta.length : globalProducts);
     
     let filteredVariants;
-    if (hasAnyFilter) {
+    if (kpis?.totalVariants != null && kpis.totalVariants > 0) {
+      filteredVariants = kpis.totalVariants;
+    } else if (hasAnyFilter) {
       filteredVariants = dataWithMeta.reduce((acc, p) => acc + (Array.isArray(p.variants) && p.variants.length > 0 ? p.variants.length : (p.variantsCount || 1)), 0);
     } else {
-      filteredVariants = (kpis?.totalVariants != null && kpis.totalVariants > 0) ? kpis.totalVariants : globalVariants;
+      filteredVariants = globalVariants;
     }
 
     const checkIsApi = (p) => {
@@ -813,7 +822,6 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         searchPlaceholder="Search products by name or category..."
-        resultCount={searchTerm ? dataWithMeta.length : undefined}
         namespace="admin-catalog"
         onRowClick={(row) => { setSelectedProduct(row); setActiveDrawer('offers'); }}
         expandableRender={(row) => (
@@ -1037,7 +1045,13 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
         ]}
         onClearAllFilters={clearAllFilters}
         selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
+        onSelectionChange={(ids) => {
+          setSelectedIds(ids);
+          if (!ids || ids.length === 0) setIsAllMatchingSelected(false);
+        }}
+        totalVariants={displayedMetrics.totalVariants}
+        isAllMatchingSelected={isAllMatchingSelected}
+        onToggleSelectAllMatching={setIsAllMatchingSelected}
         bulkActions={[
           {
             label: 'Quote to Client',
@@ -1049,13 +1063,26 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
             icon: Send,
             onClick: () => {
               const selectedProds = data.filter(d => selectedIds.includes(d.id));
-              notifier.info(`Initiating supplier RFQs for ${selectedProds.length} products...`);
+              const countMsg = isAllMatchingSelected
+                ? `all ${activeTotal} products (${displayedMetrics.totalVariants} variants)`
+                : `${selectedProds.length} products`;
+              notifier.info(`Initiating supplier RFQs for ${countMsg}...`);
               if (typeof openDrawer === 'function') {
                 openDrawer({
                   type: 'supplier-rfq',
                   data: {
                     source: 'bulk_catalog',
-                    products: selectedProds
+                    products: selectedProds,
+                    isAllMatchingSelected,
+                    totalMatchingCount: activeTotal,
+                    totalMatchingVariants: displayedMetrics.totalVariants,
+                    filters: {
+                      supplier: filterSupplier,
+                      category: filterCategory,
+                      goals: filterGoals,
+                      productType: filterProductType,
+                      searchTerm: debouncedSearchTerm
+                    }
                   }
                 });
               }
