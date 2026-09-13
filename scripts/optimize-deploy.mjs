@@ -111,6 +111,73 @@ function patchFirebaseTools() {
       }
     }
   }
+
+  // Patch runv2.js and cloudfunctionsv2.js to give SSR Cloud Run / GCFv2 services 1024Mi memory instead of default 256Mi
+  const runv2Paths = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/gcp/runv2.js') : '',
+    '/usr/local/lib/node_modules/firebase-tools/lib/gcp/runv2.js',
+    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/gcp/runv2.js',
+    path.resolve('node_modules/firebase-tools/lib/gcp/runv2.js'),
+  ].filter(Boolean);
+
+  for (const filePath of runv2Paths) {
+    if (fs.existsSync(filePath)) {
+      try {
+        let content = fs.readFileSync(filePath, 'utf8');
+        if (content.includes('availableMemoryMb || 256')) {
+          content = content.replace(/availableMemoryMb\s*\|\|\s*256/g, 'availableMemoryMb || 1024');
+          fs.writeFileSync(filePath, content, 'utf8');
+          console.log(`✅ [Optimize Deploy] Enhanced Cloud Run memory default to 1024Mi in:\n   ${filePath}`);
+        }
+      } catch (err) {
+        console.warn(`⚠️ [Optimize Deploy] Could not patch ${filePath}: ${err.message}`);
+      }
+    }
+  }
+
+  const gcfv2Paths = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/gcp/cloudfunctionsv2.js') : '',
+    '/usr/local/lib/node_modules/firebase-tools/lib/gcp/cloudfunctionsv2.js',
+    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/gcp/cloudfunctionsv2.js',
+    path.resolve('node_modules/firebase-tools/lib/gcp/cloudfunctionsv2.js'),
+  ].filter(Boolean);
+
+  for (const filePath of gcfv2Paths) {
+    if (fs.existsSync(filePath)) {
+      try {
+        let content = fs.readFileSync(filePath, 'utf8');
+        if (content.includes('endpoint.availableMemoryMb || backend.DEFAULT_MEMORY')) {
+          content = content.replace('endpoint.availableMemoryMb || backend.DEFAULT_MEMORY', 'endpoint.availableMemoryMb || 1024');
+          fs.writeFileSync(filePath, content, 'utf8');
+          console.log(`✅ [Optimize Deploy] Enhanced GCFv2 availableMemory default to 1024Mi in:\n   ${filePath}`);
+        }
+      } catch (err) {
+        console.warn(`⚠️ [Optimize Deploy] Could not patch ${filePath}: ${err.message}`);
+      }
+    }
+  }
+
+  const backendPaths = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/deploy/functions/backend.js') : '',
+    '/usr/local/lib/node_modules/firebase-tools/lib/deploy/functions/backend.js',
+    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/deploy/functions/backend.js',
+    path.resolve('node_modules/firebase-tools/lib/deploy/functions/backend.js'),
+  ].filter(Boolean);
+
+  for (const filePath of backendPaths) {
+    if (fs.existsSync(filePath)) {
+      try {
+        let content = fs.readFileSync(filePath, 'utf8');
+        if (content.includes('DEFAULT_MEMORY = 256')) {
+          content = content.replace('DEFAULT_MEMORY = 256', 'DEFAULT_MEMORY = 1024');
+          fs.writeFileSync(filePath, content, 'utf8');
+          console.log(`✅ [Optimize Deploy] Enhanced backend.DEFAULT_MEMORY to 1024 in:\n   ${filePath}`);
+        }
+      } catch (err) {
+        console.warn(`⚠️ [Optimize Deploy] Could not patch ${filePath}: ${err.message}`);
+      }
+    }
+  }
 }
 
 // Step 2: Prune .firebase staging directories

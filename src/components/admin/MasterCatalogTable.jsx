@@ -337,7 +337,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
           row.supplierId,
           row.supplier,
           ...(Array.isArray(row.supplierIds) ? row.supplierIds : []),
-          ...(Array.isArray(row.suppliers) ? row.suppliers : []),
+          ...(Array.isArray(row.suppliers) ? row.suppliers : []).flatMap(s => typeof s === 'object' && s !== null ? [s.id, s.name] : [s]),
           ...(row.variants || []).map(v => v.supplierId || v.supplier)
         ].filter(Boolean).map(s => String(s).toLowerCase().replace(/^supplier-/, ''));
 
@@ -369,7 +369,10 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       rows = rows.filter(row => {
         return recentImportFilter.ids.includes(row.id) || 
                recentImportFilter.ids.includes(row.slug) || 
-               (recentImportFilter.supplierId && (row.supplierId === recentImportFilter.supplierId || (row.suppliers || []).includes(recentImportFilter.supplierId)));
+               (recentImportFilter.supplierId && (
+                 row.supplierId === recentImportFilter.supplierId || 
+                 (row.suppliers || []).some(s => (typeof s === 'object' && s !== null ? s.id || s.name : s) === recentImportFilter.supplierId)
+               ));
       });
     }
 
