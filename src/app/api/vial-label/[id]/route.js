@@ -251,19 +251,25 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
  * Contains STRICTLY the square QR code + 1D scan barcode with an anonymous tracking number.
  * Absolutely zero product/drug name to ensure 100% discrete logistics.
  */
-async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customTracking, targetShareUrl) {
+async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, heightPt, product, font, fontB, customBatch, targetShareUrl) {
   const cleanSlug = toSafePdfText(product.slug || product.id || 'parcel').toLowerCase();
   
-  // Generate an anonymous tracking number that does NOT disclose the compound/product name
-  let trackingNumber = customTracking;
-  if (!trackingNumber) {
-    let hash = 0;
-    for (let i = 0; i < cleanSlug.length; i++) {
-      hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
-      hash |= 0;
+  // Generate an anonymous batch / lot number that does NOT disclose the compound/product name
+  let batchNumber = customBatch;
+  if (!batchNumber) {
+    if (product.batchCode && !product.batchCode.toLowerCase().includes(cleanSlug)) {
+      batchNumber = product.batchCode;
+    } else if (product.lotNumber && !product.lotNumber.toLowerCase().includes(cleanSlug)) {
+      batchNumber = product.lotNumber;
+    } else {
+      let hash = 0;
+      for (let i = 0; i < cleanSlug.length; i++) {
+        hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
+        hash |= 0;
+      }
+      const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
+      batchNumber = `LOT-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
     }
-    const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
-    trackingNumber = `TRK-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
   }
 
   // The square QR code opens the official shared product monograph page
@@ -290,7 +296,7 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
   const qrImage = await pdfDoc.embedPng(qrPngBuffer);
 
   if (widthPt >= 200) {
-    // 38x90mm Landscape Layout: square QR code opening shared page + 1D scan barcode and anonymous tracking number
+    // 38x90mm Landscape Layout: square QR code opening shared page + 1D scan barcode and BATCH NUMBER
     const qrSize = heightPt - 24; // ~83 pt square
     const qrX = originX + 14;
     const qrY = originY + (heightPt - qrSize) / 2;
@@ -311,13 +317,13 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       color: BRAND_COLOR,
     });
 
-    // 2. Right side: STRICTLY the 1D Scan Barcode & Anonymous Tracking Number
+    // 2. Right side: STRICTLY the 1D Scan Barcode & Anonymous BATCH NUMBER
     const rightX = qrX + qrSize + 16;
     const rightWidth = originX + widthPt - rightX - 14;
 
     let curY = originY + heightPt - 20;
 
-    page.drawText('TRACKING NUMBER', {
+    page.drawText('BATCH NUMBER', {
       x: rightX,
       y: curY,
       size: 7,
@@ -326,7 +332,7 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     });
 
     curY -= 17;
-    page.drawText(trackingNumber, {
+    page.drawText(batchNumber, {
       x: rightX,
       y: curY,
       size: 15,
@@ -337,10 +343,10 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     curY -= 12;
     // 1D Barcode
     const barcodeHeight = 28;
-    draw1DBarcode(page, rightX, curY - barcodeHeight, rightWidth, barcodeHeight, trackingNumber);
+    draw1DBarcode(page, rightX, curY - barcodeHeight, rightWidth, barcodeHeight, batchNumber);
 
     curY -= (barcodeHeight + 9);
-    page.drawText(`* ${trackingNumber} *`, {
+    page.drawText(`* ${batchNumber} *`, {
       x: rightX + 4,
       y: curY,
       size: 7.2,
@@ -368,8 +374,8 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       color: BRAND_COLOR,
     });
 
-    page.drawText(trackingNumber, {
-      x: originX + (widthPt - fontB.widthOfTextAtSize(trackingNumber, 8)) / 2,
+    page.drawText(batchNumber, {
+      x: originX + (widthPt - fontB.widthOfTextAtSize(batchNumber, 8)) / 2,
       y: originY + 12,
       size: 8,
       font: fontB,
@@ -387,7 +393,7 @@ export async function GET(request, { params }) {
     const type = (searchParams.get('type') || searchParams.get('style') || 'full').toLowerCase();
     const isBarcodeOnly = type === 'barcode' || type === 'minimal' || type === 'barcode_only' || type === 'shipping';
 
-    const customTracking = searchParams.get('tracking') || searchParams.get('trk');
+    const customBatch = searchParams.get('batch') || searchParams.get('lot') || searchParams.get('tracking') || searchParams.get('trk');
 
     if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
 
@@ -417,20 +423,26 @@ export async function GET(request, { params }) {
       targetShareUrl = `${BASE_URL}/p/${cleanSlug}${qs ? `?${qs}` : ''}`;
     }
 
-    // Deterministic anonymous tracking number
-    let trackingNumber = customTracking;
-    if (!trackingNumber) {
-      let hash = 0;
-      for (let i = 0; i < cleanSlug.length; i++) {
-        hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
-        hash |= 0;
+    // Deterministic anonymous batch number (Lot)
+    let batchNumber = customBatch;
+    if (!batchNumber) {
+      if (product.batchCode && !product.batchCode.toLowerCase().includes(cleanSlug)) {
+        batchNumber = product.batchCode;
+      } else if (product.lotNumber && !product.lotNumber.toLowerCase().includes(cleanSlug)) {
+        batchNumber = product.lotNumber;
+      } else {
+        let hash = 0;
+        for (let i = 0; i < cleanSlug.length; i++) {
+          hash = ((hash << 5) - hash) + cleanSlug.charCodeAt(i);
+          hash |= 0;
+        }
+        const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
+        batchNumber = `LOT-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
       }
-      const uniqueSeq = String(Math.abs(hash) % 900000 + 100000);
-      trackingNumber = `TRK-${uniqueSeq.slice(0, 3)}-${uniqueSeq.slice(3)}`;
     }
 
     const renderLabel = isBarcodeOnly
-      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, trackingNumber, targetShareUrl)
+      ? (doc, p, x, y, w, h) => renderBarcodeOnlyLabel(doc, p, x, y, w, h, product, font, fontB, batchNumber, targetShareUrl)
       : (doc, p, x, y, w, h) => renderFullInfoLabel(doc, p, x, y, w, h, product, font, fontB, targetShareUrl);
 
     if (format === 'sheet_a4') {
@@ -445,7 +457,7 @@ export async function GET(request, { params }) {
 
       // Title banner on A4
       const sheetTitle = isBarcodeOnly
-        ? `Atlas Logistics Discreet Parcel Traceability Labels`
+        ? `Atlas Logistics Discreet Batch & Monograph Traceability Labels`
         : `Atlas Services Complete Clinical Vial Label Sheet - ${product.name || id}`;
 
       page.drawText(toSafePdfText(sheetTitle), {
@@ -479,7 +491,7 @@ export async function GET(request, { params }) {
     const pdfBytes = await pdfDoc.save();
     const safeName = toSafePdfText(product.name || id).replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
     const filename = isBarcodeOnly
-      ? `shipping_label_${trackingNumber.toLowerCase()}_${format}.pdf`
+      ? `batch_label_${batchNumber.toLowerCase()}_${format}.pdf`
       : `vial_label_${safeName}_full_${format}.pdf`;
 
     return new NextResponse(pdfBytes, {
