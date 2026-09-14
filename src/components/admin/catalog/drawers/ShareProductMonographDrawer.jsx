@@ -185,7 +185,7 @@ export default function ShareProductMonographDrawer({
   // Generate tailored WhatsApp text
   const isEs = selectedLang === 'es';
   const isPt = selectedLang === 'pt';
-  const waIntro = isEs ? 'Ficha Técnica Clínica Oficial — Atlas Services' : isPt ? 'Ficha Técnica Clínica Oficial — Atlas Services' : 'Official Clinical Monograph — Atlas Services';
+  const waIntro = isEs ? 'Ficha Técnica Clínica Oficial — ATLAS HEALTH' : isPt ? 'Ficha Técnica Clínica Oficial — ATLAS HEALTH' : 'Official Clinical Monograph — ATLAS HEALTH';
   const waCompound = isEs ? 'Compuesto' : isPt ? 'Composto' : 'Compound';
   const waSource = isEs ? 'Laboratorio' : isPt ? 'Laboratório' : 'Laboratory';
   const waPres = isEs ? 'Presentación' : isPt ? 'Apresentação' : 'Presentation';
@@ -213,6 +213,26 @@ export default function ShareProductMonographDrawer({
   const waUrl = `https://wa.me/?text=${encodeURIComponent(waText)}`;
   const mailUrl = `mailto:?subject=${encodeURIComponent(`${waIntro} — ${productName}`)}&body=${encodeURIComponent(waText.replace(/\*/g, ''))}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(shareUrl)}`;
+
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
+
+  const handleNativeShare = async () => {
+    if (canShare) {
+      try {
+        await navigator.share({
+          title: `${productName} — ATLAS HEALTH`,
+          text: waText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.warn('Native share failed:', err);
+        }
+      }
+    }
+    handleCopy();
+  };
 
   const handleCopy = async () => {
     try {
@@ -576,7 +596,34 @@ export default function ShareProductMonographDrawer({
             Instant Clinical Dispatch:
           </span>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: canShare ? 'repeat(auto-fit, minmax(110px, 1fr))' : '1fr 1fr', gap: '8px' }}>
+            {/* Native Share (Device apps) */}
+            {canShare && (
+              <button
+                type="button"
+                onClick={handleNativeShare}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '10px 12px',
+                  background: '#003666',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: '0.84rem',
+                  fontWeight: 700,
+                  boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Share2 size={15} />
+                <span>Share Apps</span>
+              </button>
+            )}
+
             {/* WhatsApp */}
             <a
               href={waUrl}
@@ -620,7 +667,7 @@ export default function ShareProductMonographDrawer({
               }}
             >
               <Send size={15} />
-              <span>Email Monograph</span>
+              <span>Email</span>
             </a>
           </div>
         </div>
@@ -640,7 +687,7 @@ export default function ShareProductMonographDrawer({
             Direct PDF generation for thermal label printers. The square QR code opens this exact shared monograph view upon scan.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
             {/* Shipping Label (Discreet) */}
             <a
               href={`/api/vial-label/${encodeURIComponent(slug)}?format=38x90&type=shipping${queryString ? `&${queryString}` : ''}`}
@@ -663,7 +710,7 @@ export default function ShareProductMonographDrawer({
               }}
             >
               <QrCode size={14} />
-              <span>Shipping Label (Discreet)</span>
+              <span>Shipping Label</span>
             </a>
 
             {/* Client Label (Full Specs) */}
@@ -688,7 +735,7 @@ export default function ShareProductMonographDrawer({
               }}
             >
               <FileText size={14} />
-              <span>Client Label (Full Specs)</span>
+              <span>Client Label</span>
             </a>
           </div>
         </div>

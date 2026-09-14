@@ -1062,7 +1062,7 @@ export default function PublicDatasheetView({
               <strong>Quality & Regulatory Governance:</strong> Synthesized under certified ISO 9001:2015 and current Good Manufacturing Practice (cGMP) quality management systems. Sourced through authorized synthesis partner ({supplierName}). All analytical batches undergo independent dual-column RP-HPLC and LC-MS release testing. This technical document is intended exclusively for authorized medical professionals, clinical researchers, and institutional partners.
             </p>
             <p className="pds-footer-meta">
-              Document Ref: PDS-{slug.toUpperCase()}-2026 • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} Atlas Services
+              Document Ref: PDS-{slug.toUpperCase()}-2026 • Verified on Atlas Health Clinical Engine • {new Date().getFullYear()} ATLAS HEALTH Clinical Portal
             </p>
           </div>
         </footer>

@@ -1036,6 +1036,10 @@ export default function SharedCatalogClientView({
           .checkout-form-grid {
             grid-template-columns: 1fr !important;
           }
+          .checkout-modal-card {
+            padding: 16px 14px !important;
+            border-radius: 14px !important;
+          }
         }
       `}</style>
 
@@ -2265,7 +2269,7 @@ export default function SharedCatalogClientView({
           padding: '16px',
           zIndex: 100
         }}>
-          <div style={{
+          <div className="checkout-modal-card" style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             maxWidth: '520px',
