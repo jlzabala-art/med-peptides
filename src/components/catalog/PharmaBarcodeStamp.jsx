@@ -5,23 +5,26 @@ import { generateBarcode128Svg } from '@/utils/pharmaBarcode';
 import { ShieldCheck } from 'lucide-react';
 
 export default function PharmaBarcodeStamp({
-  batchCode = 'RP-AT-260914-120-0',
-  label = 'OFFICIAL LOT / BATCH VERIFICATION',
+  catalogCode = null,
+  batchCode = null,
+  code = 'RP-AT-260914-120-0',
+  label = 'OFFICIAL CATALOG ID VERIFICATION',
   theme = 'dark', // 'dark' (for blue executive card) | 'light' (for white cards)
   width = 210,
   height = 28
 }) {
+  const displayCode = catalogCode || batchCode || code;
   const isDark = theme === 'dark';
   const barColor = isDark ? '#ffffff' : '#002244';
 
   const barcodeSvg = useMemo(() => {
-    return generateBarcode128Svg(batchCode, {
+    return generateBarcode128Svg(displayCode, {
       width,
       height,
       color: barColor,
       bgColor: 'transparent'
     });
-  }, [batchCode, barColor, width, height]);
+  }, [displayCode, barColor, width, height]);
 
   return (
     <div
@@ -67,7 +70,7 @@ export default function PharmaBarcodeStamp({
         }}
       />
 
-      {/* Human-Readable Batch Code */}
+      {/* Human-Readable Catalog ID Code */}
       <div
         style={{
           fontSize: '0.72rem',
@@ -78,7 +81,7 @@ export default function PharmaBarcodeStamp({
           marginTop: '3px',
         }}
       >
-        {batchCode}
+        {displayCode}
       </div>
     </div>
   );

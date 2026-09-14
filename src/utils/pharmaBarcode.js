@@ -19,7 +19,7 @@ const SUPPLIER_CODE_MAP = {
 };
 
 /**
- * Genera un código de lote farmacéutico intuitivo para el equipo comercial:
+ * Genera un código identificador de catálogo institucional (Catalog ID) intuitivo para el equipo comercial:
  * Formato: RP-[SUPPLIER]-[AAMMDD]-[FACTOR]-[CHECK]
  * Ej: RP-LL-260914-120-7
  *  - LL: Lotusland
@@ -27,7 +27,7 @@ const SUPPLIER_CODE_MAP = {
  *  - 120: Factor 1.20 (+20% markup)
  *  - 7: Checksum hex
  */
-export function generatePharmaBatchCode({
+export function generatePharmaCatalogCode({
   supplierId = null,
   catalogueFilter = null,
   issuedAt = null,
@@ -68,6 +68,10 @@ export function generatePharmaBatchCode({
   return `${prefix}-${sCode}-${dateCode}-${factor}-${checkHex}`;
 }
 
+// Aliases for backwards compatibility and clean naming
+export const generatePharmaBatchCode = generatePharmaCatalogCode;
+export const generateCatalogCode = generatePharmaCatalogCode;
+
 // ── Code 128 Subset B Patterns ──────────────────────────────────────────────
 const CODE128_PATTERNS = [
   '212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213',
@@ -87,14 +91,9 @@ const START_B = 104;
 const STOP = 106;
 
 /**
- * Genera el SVG vectorial de un código de barras Code 128 (Subset B)
+ * Genera la secuencia binaria de módulos ('1' = barra, '0' = espacio) para Code 128-B
  */
-export function generateBarcode128Svg(text, {
-  width = 240,
-  height = 36,
-  color = '#002244',
-  bgColor = 'transparent'
-} = {}) {
+export function getBarcode128Modules(text) {
   const clean = String(text || '').trim();
   if (!clean) return '';
 
@@ -124,6 +123,21 @@ export function generateBarcode128Svg(text, {
       modules += (isBar ? '1' : '0').repeat(runLen);
     }
   });
+
+  return modules;
+}
+
+/**
+ * Genera el SVG vectorial de un código de barras Code 128 (Subset B)
+ */
+export function generateBarcode128Svg(text, {
+  width = 240,
+  height = 36,
+  color = '#002244',
+  bgColor = 'transparent'
+} = {}) {
+  const modules = getBarcode128Modules(text);
+  if (!modules) return '';
 
   const quietZone = 8;
   const fullWidthModules = modules.length + quietZone * 2;

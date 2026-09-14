@@ -18,7 +18,7 @@ import AtlasAIDrawer from '../components/shared/AtlasAIDrawer';
 import { useFirestoreData } from '../hooks/useFirestoreData';
 
 // Routes that have their own dashboard/portal layout or are standalone public views — B2C shell must be hidden
-const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/session-ended', '/shared', '/quotation', '/p', '/verify'];
+const PORTAL_PREFIXES = ['/admin', '/doctor', '/patient', '/clinic', '/supplier', '/wholesaler', '/pharmacy', '/login', '/session-ended', '/shared', '/quotation', '/p', '/verify', '/c'];
 
 function StorefrontShell({ children }) {
   const { isProfessional, activeRole } = useAuth();

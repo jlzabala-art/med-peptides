@@ -6,9 +6,11 @@ import { Smartphone, Check, Copy, ExternalLink, Sparkles } from 'lucide-react';
 
 export default function Interactive3DScanCard({
   url = '',
+  catalogCode = '',
   batchCode = '',
   recipientName = ''
 }) {
+  const displayCode = catalogCode || batchCode;
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -246,7 +248,7 @@ export default function Interactive3DScanCard({
             <span>Scan with phone camera</span>
           </div>
 
-          {batchCode && (
+          {displayCode && (
             <div
               style={{
                 marginTop: '4px',
@@ -256,7 +258,7 @@ export default function Interactive3DScanCard({
                 letterSpacing: '0.04em',
               }}
             >
-              REF: {batchCode}
+              CATALOG ID: {displayCode}
             </div>
           )}
         </div>

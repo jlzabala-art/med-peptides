@@ -39,6 +39,7 @@ export async function POST(request) {
 
     const catalogPayload = {
       catalogId: `CAT-${Date.now().toString(36).toUpperCase()}`,
+      catalogCode: batchCode,
       batchCode,
       supplierId,
       catalogueFilter,
@@ -72,6 +73,7 @@ export async function POST(request) {
     try {
       await adminDb.collection('shared_catalog_links').doc(linkId).set({
         catalogId: linkId,
+        catalogCode: batchCode,
         batchCode,
         supplierId,
         catalogueFilter,

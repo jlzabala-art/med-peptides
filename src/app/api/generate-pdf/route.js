@@ -22,7 +22,37 @@ import { PRESENTATION_LABELS } from '@/constants/presentationTypes';
 import { isVariantMatchingFilter, sanitizePdfText } from '@/utils/strictFilterEngine';
 import { generateSignedQuoteToken } from '@/services/dynamicPricingEngine';
 import { generatePdfSchema } from '@/schemas/apiSchemas';
+import { getBarcode128Modules } from '@/utils/pharmaBarcode';
 import { randomUUID } from 'crypto';
+
+const GOAL_LABEL_MAP = {
+  anti_aging: 'Longevity & Anti-Aging',
+  recovery: 'Recovery & Tissue Repair',
+  metabolic: 'Metabolic & Weight',
+  cognitive: 'Cognitive & Neuro',
+  energy: 'Energy & Mitochondrial',
+  sexual_health: 'Sexual Health & Vitality',
+  immune: 'Immune Optimization',
+  hair_skin: 'Hair & Aesthetic Health',
+  sleep: 'Sleep & Circadian Rhythm',
+};
+
+function getProductGoalsDisplay(p) {
+  const list = Array.isArray(p.goals) && p.goals.length > 0
+    ? p.goals
+    : (p.goal ? [p.goal] : (Array.isArray(p.canonicalGoals) ? p.canonicalGoals : []));
+  if (list.length === 0) {
+    const norm = `${p.name || ''} ${p.slug || ''}`.toLowerCase();
+    if (norm.includes('bpc') || norm.includes('tb-500') || norm.includes('kpv') || norm.includes('ghk')) return 'Recovery & Tissue Repair';
+    if (norm.includes('sema') || norm.includes('tirz') || norm.includes('reta') || norm.includes('aod')) return 'Metabolic & Weight';
+    if (norm.includes('epith') || norm.includes('mots') || norm.includes('ss-31') || norm.includes('foxo4')) return 'Longevity & Anti-Aging';
+    if (norm.includes('semax') || norm.includes('selank') || norm.includes('dihexa')) return 'Cognitive & Neuro';
+    if (norm.includes('cjc') || norm.includes('ipam') || norm.includes('tesa') || norm.includes('serm')) return 'Hormonal & Growth Factor';
+    if (norm.includes('pt-141') || norm.includes('kiss')) return 'Sexual Health & Vitality';
+    return '';
+  }
+  return list.map(g => GOAL_LABEL_MAP[g] || g).slice(0, 2).join(' • ');
+}
 
 const TIER_MAPPING = { cost: 'master', wholeseller: 'wholesale', clinic: 'clinic', retail: 'retail' };
 const TIER_LABELS = { master: 'Direct Institutional Rate (B2B)', wholesale: 'Wholesaler Tier', clinic: 'Clinical Partner Tier', retail: 'Standard Catalog' };
@@ -338,8 +368,9 @@ export async function POST(request) {
     catalogueFilter = null,
     // categoryFilter: scope document to a specific category (e.g. 'peptide')
     categoryFilter = body.categoryFilter || body.category || null,
-    // batchCode: institutional pharma lot code (e.g. RP-LL-260914-120-7)
-    batchCode = body.batchCode || null,
+    // catalogCode / batchCode: institutional catalog verification code (e.g. RP-LL-260914-120-7)
+    catalogCode = body.catalogCode || body.batchCode || null,
+    batchCode = body.catalogCode || body.batchCode || null,
   } = body;
 
   const anonymousSupplierMap = new Map();
@@ -809,7 +840,7 @@ export async function POST(request) {
 
         const drawHeader = (p) => {
           p.drawRectangle({ x: 0, y: H - 14, width: W, height: 14, color: BRAND });
-          const docLabel = docType === 'quotation' ? L.quotation : docType === 'catalog' ? L.catalog : L.priceList;
+          const docLabel = docType === 'quotation' ? L.quotation : 'OFFICIAL CLINICAL PEPTIDE CATALOG';
           p.drawText(BRAND_NAME, { x: MRG, y: H - 38, size: 13, font: helveticaBold, color: BRAND });
           const brandW = helveticaBold.widthOfTextAtSize(BRAND_NAME, 13);
           p.drawText(docLabel, { x: MRG + brandW + 12, y: H - 38, size: 10.5, font: helvetica, color: ACCENT });
@@ -833,7 +864,7 @@ export async function POST(request) {
           cover.drawRectangle({ x: 0, y: H - 290, width: W, height: 12, color: ACCENT });
           cover.drawText(BRAND_NAME, { x: MRG, y: H - 100, size: 34, font: helveticaBold, color: rgb(1, 1, 1) });
           cover.drawText(BRAND_SUBTITLE, { x: MRG, y: H - 132, size: 13, font: helvetica, color: rgb(0.75, 0.88, 0.97) });
-          const docLabelCover = docType === 'quotation' ? L.quotation : docType === 'catalog' ? L.catalog : L.priceList;
+          const docLabelCover = docType === 'quotation' ? L.quotation : 'Official Clinical Peptide Catalog';
           cover.drawText(docLabelCover, { x: MRG, y: H - 180, size: 22, font: helveticaBold, color: rgb(1, 1, 1) });
           
           const coverBadgeText = tierHeaderBadge;
@@ -847,45 +878,120 @@ export async function POST(request) {
             ...(docType === 'quotation' ? [`${L.ref}: ${refNumber}`] : []),
             ...(recipientName ? [`${L.preparedFor}: ${recipientName}`] : []),
             ...(validUntil ? [`${L.validUntil}: ${validUntil}`] : []),
-            ...(batchCode ? [`Verification Lot: ${batchCode}`] : []),
+            ...(catalogCode || batchCode ? [`Catalog ID: ${catalogCode || batchCode}`] : []),
             ...(isExWorks ? [`Commercial Terms: Ex-Works (EXW) — Europe`] : []),
             ...(shippingNote && shippingNote.trim() ? [`Shipping: ${shippingNote.trim()}`] : []),
             ...(accountManagerName || accountManagerEmail ? [`Account Manager: ${accountManagerName || ''} ${accountManagerEmail ? `<${accountManagerEmail}>` : ''}`.trim()] : []),
             `Products: ${allItems.length} total variant presentations`,
           ].forEach(line => { cover.drawText(line, { x: MRG, y: cy, size: 11, font: helvetica, color: BRAND }); cy -= 20; });
 
-          // Draw Interactive QR Code on Cover Page
+          // Draw Interactive 3D Holographic Style QR & Barcode Card on Cover Page
           if (qrImage) {
-            const qrCardX = W - MRG - 130;
-            const qrCardY = H - 470;
+            const qrCardX = W - MRG - 170;
+            const qrCardY = H - 535;
+            const qrCardW = 170;
+            const qrCardH = 205;
+
+            // Dark Navy 3D Card Background (matching Interactive3DScanCard)
             cover.drawRectangle({
               x: qrCardX,
               y: qrCardY,
-              width: 130,
-              height: 140,
-              color: rgb(0.97, 0.98, 1),
-              borderColor: rgb(0.8, 0.88, 0.95),
-              borderWidth: 1
+              width: qrCardW,
+              height: qrCardH,
+              color: rgb(0.03, 0.13, 0.27),
+              borderColor: rgb(0.22, 0.74, 0.97),
+              borderWidth: 1.2
             });
-            cover.drawImage(qrImage, {
-              x: qrCardX + 15,
-              y: qrCardY + 30,
-              width: 100,
-              height: 100
-            });
-            cover.drawText('📱 SCAN FOR WEB APP', {
-              x: qrCardX + 12,
-              y: qrCardY + 18,
-              size: 7.5,
+
+            // Card Header Text
+            const cardHeadText = '📱 DIRECT WEB ACCESS';
+            cover.drawText(cardHeadText, {
+              x: qrCardX + (qrCardW - helveticaBold.widthOfTextAtSize(cardHeadText, 8)) / 2,
+              y: qrCardY + qrCardH - 18,
+              size: 8,
               font: helveticaBold,
-              color: BRAND
+              color: rgb(0.49, 0.83, 0.99)
             });
-            cover.drawText('Interactive Cart & Dosages', {
-              x: qrCardX + 12,
-              y: qrCardY + 8,
+
+            const subHeadText = 'Scan with phone camera';
+            cover.drawText(subHeadText, {
+              x: qrCardX + (qrCardW - helvetica.widthOfTextAtSize(subHeadText, 6.5)) / 2,
+              y: qrCardY + qrCardH - 28,
               size: 6.5,
               font: helvetica,
-              color: MUTED
+              color: rgb(0.75, 0.88, 0.97)
+            });
+
+            // QR Code in White Frame
+            const qrSize = 92;
+            const qrFrameX = qrCardX + (qrCardW - qrSize - 8) / 2;
+            const qrFrameY = qrCardY + 68;
+            cover.drawRectangle({
+              x: qrFrameX,
+              y: qrFrameY,
+              width: qrSize + 8,
+              height: qrSize + 8,
+              color: rgb(1, 1, 1),
+            });
+            cover.drawImage(qrImage, {
+              x: qrFrameX + 4,
+              y: qrFrameY + 4,
+              width: qrSize,
+              height: qrSize
+            });
+
+            // White Barcode & Catalog ID Box
+            const barBoxX = qrCardX + 10;
+            const barBoxY = qrCardY + 10;
+            const barBoxW = qrCardW - 20;
+            const barBoxH = 50;
+
+            cover.drawRectangle({
+              x: barBoxX,
+              y: barBoxY,
+              width: barBoxW,
+              height: barBoxH,
+              color: rgb(1, 1, 1),
+            });
+
+            // Label
+            const stampLabel = 'CATALOG VERIFICATION ID';
+            cover.drawText(stampLabel, {
+              x: barBoxX + (barBoxW - helveticaBold.widthOfTextAtSize(stampLabel, 5.8)) / 2,
+              y: barBoxY + barBoxH - 9,
+              size: 5.8,
+              font: helveticaBold,
+              color: rgb(0.01, 0.2, 0.4)
+            });
+
+            // Barcode
+            const activeCode = catalogCode || batchCode || 'RP-AT-260914-120-0';
+            const modules = getBarcode128Modules(activeCode);
+            if (modules) {
+              const barH = 20;
+              const barY = barBoxY + 16;
+              const innerW = barBoxW - 12;
+              const moduleW = innerW / modules.length;
+              for (let mIdx = 0; mIdx < modules.length; mIdx++) {
+                if (modules[mIdx] === '1') {
+                  cover.drawRectangle({
+                    x: barBoxX + 6 + mIdx * moduleW,
+                    y: barY,
+                    width: moduleW + 0.15,
+                    height: barH,
+                    color: rgb(0, 0.13, 0.27)
+                  });
+                }
+              }
+            }
+
+            // Human-Readable Catalog ID
+            cover.drawText(activeCode, {
+              x: barBoxX + (barBoxW - helveticaBold.widthOfTextAtSize(activeCode, 6.8)) / 2,
+              y: barBoxY + 5,
+              size: 6.8,
+              font: helveticaBold,
+              color: rgb(0, 0.13, 0.27)
             });
           }
 
@@ -931,6 +1037,8 @@ export async function POST(request) {
                 slug: item.slug || (pName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
                 category: item.category,
                 goal: item.goal,
+                goals: Array.isArray(item.goals) ? item.goals : (item.goal ? [item.goal] : (item.canonicalGoals || [])),
+                canonicalGoals: item.canonicalGoals || [],
                 casNumber: item.casNumber,
                 target: item.target,
                 description: item.description,
@@ -946,7 +1054,7 @@ export async function POST(request) {
           let groupMinSpace = 24 + 32; // Banner + baseline product header
           if (firstProduct) {
             const firstMatchedProtocols = productProtocolsMap.get(firstProduct.slug) || productProtocolsMap.get(firstProduct.productId) || productProtocolsMap.get(firstProduct.name.toLowerCase()) || [];
-            const hasFirstMeta = Boolean(firstProduct.goal || firstProduct.casNumber);
+            const hasFirstMeta = Boolean(firstProduct.goal || firstProduct.casNumber || getProductGoalsDisplay(firstProduct));
             const hasFirstProtocols = firstMatchedProtocols.length > 0;
             const hasFirstDesc = (showDescription || docType === 'catalog') && Boolean(firstProduct.description);
             const firstProdHeaderSpace = 32 + (hasFirstMeta ? 14 : 0) + (hasFirstProtocols ? 14 : 0) + (hasFirstDesc ? 14 : 0);
@@ -973,7 +1081,7 @@ export async function POST(request) {
             });
 
             const matchedProtocols = productProtocolsMap.get(pObj.slug) || productProtocolsMap.get(pObj.productId) || productProtocolsMap.get(pName.toLowerCase()) || [];
-            const hasMeta = Boolean(pObj.goal || pObj.casNumber);
+            const hasMeta = Boolean(pObj.goal || pObj.casNumber || getProductGoalsDisplay(pObj));
             const hasProtocols = matchedProtocols.length > 0;
             const hasDesc = (showDescription || docType === 'catalog') && Boolean(pObj.description);
 
@@ -1029,12 +1137,32 @@ export async function POST(request) {
 
             currentY -= 19;
 
-            // Visual Badges / Pills for Target & CAS
-            if (hasMeta) {
+            // Visual Badges / Pills for Goals, Target & CAS
+            const goalsDisplay = getProductGoalsDisplay(pObj);
+            const showPillRow = Boolean(goalsDisplay || pObj.goal || pObj.casNumber);
+            if (showPillRow) {
               let curPillX = MRG + 8;
 
-              // Target Pill
-              if (pObj.goal) {
+              // Clinical Goals Pill (highlighted in soft blue)
+              if (goalsDisplay) {
+                const goalTxt = `🎯 ${trunc(goalsDisplay, 50)}`;
+                const gW = helveticaBold.widthOfTextAtSize(goalTxt, 6.8);
+                page.drawRectangle({
+                  x: curPillX,
+                  y: currentY - 2,
+                  width: gW + 10,
+                  height: 12,
+                  color: rgb(0.91, 0.96, 1),
+                });
+                page.drawText(goalTxt, {
+                  x: curPillX + 5,
+                  y: currentY + 1.5,
+                  size: 6.8,
+                  font: helveticaBold,
+                  color: rgb(0.08, 0.35, 0.65),
+                });
+                curPillX += gW + 14;
+              } else if (pObj.goal) {
                 const targetTxt = `Target: ${pObj.goal}`;
                 const tW = helveticaBold.widthOfTextAtSize(targetTxt, 6.8);
                 page.drawRectangle({
@@ -1493,27 +1621,6 @@ export async function POST(request) {
               size: fSize,
               font: helvetica,
               color: rgb(0.45, 0.48, 0.52),
-            });
-          }
-
-          // ── shippingNote: prominent amber highlighted line above footer ──────
-          if (shippingNote && shippingNote.trim()) {
-            const snText = `✦ ${shippingNote.trim()}`;
-            const snW = Math.min(helveticaBold.widthOfTextAtSize(snText, 7.5), W - MRG * 2 - 10);
-            // Amber pill background
-            p.drawRectangle({
-              x: MRG,
-              y: 40,
-              width: snW + 16,
-              height: 13,
-              color: rgb(1, 0.97, 0.88),
-            });
-            p.drawText(trunc(snText, 120), {
-              x: MRG + 8,
-              y: 44,
-              size: 7.5,
-              font: helveticaBold,
-              color: rgb(0.6, 0.38, 0),
             });
           }
         });

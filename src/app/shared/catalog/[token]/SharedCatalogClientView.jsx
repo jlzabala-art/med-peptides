@@ -36,7 +36,7 @@ import {
 import AlgoliaRecommendCrossSell from '@/components/catalog/AlgoliaRecommendCrossSell';
 import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
-import { generatePharmaBatchCode } from '@/utils/pharmaBarcode';
+import { generatePharmaCatalogCode, generatePharmaBatchCode } from '@/utils/pharmaBarcode';
 
 export default function SharedCatalogClientView({
   catalogMeta,
@@ -105,8 +105,8 @@ export default function SharedCatalogClientView({
     }
   }, [catalogMeta?.catalogId]);
 
-  const batchCode = React.useMemo(() => {
-    return catalogMeta?.batchCode || generatePharmaBatchCode({
+  const catalogCode = React.useMemo(() => {
+    return catalogMeta?.catalogCode || catalogMeta?.batchCode || generatePharmaCatalogCode({
       supplierId: catalogMeta?.supplierId,
       catalogueFilter: catalogMeta?.catalogueFilter,
       issuedAt: catalogMeta?.issuedAt || catalogMeta?.iat,
@@ -114,8 +114,10 @@ export default function SharedCatalogClientView({
       prefix: 'RP'
     });
   }, [catalogMeta]);
+  const batchCode = catalogCode;
 
   const [isGoalDropdownOpen, setIsGoalDropdownOpen] = React.useState(false);
+  const [isFormatDropdownOpen, setIsFormatDropdownOpen] = React.useState(false);
 
   // ── Clinic Portal Registration Modal State ───────────────────────────────
   const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
@@ -1541,13 +1543,14 @@ export default function SharedCatalogClientView({
         <div className="header-card">
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
             <div style={{ flex: '1 1 560px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#93c5fd', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                <Sparkles size={14} />
-                <span>Clinical Portfolio & Therapeutic Vademecum</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                <h1 style={{ fontSize: '1.85rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2, color: '#ffffff' }}>
+                  Official Clinical Peptide Catalog
+                </h1>
+                <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#93c5fd', background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', padding: '2px 10px', borderRadius: '12px' }}>
+                  {isProtocolCatalog ? 'Peptides & Protocols' : 'Lyophilized Formulations'}
+                </span>
               </div>
-              <h1 style={{ fontSize: '1.85rem', fontWeight: 800, margin: 0, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-                Official Clinical Formulations & Product Portfolio
-              </h1>
               <p style={{ margin: '8px 0 0 0', fontSize: '0.875rem', color: '#e0f2fe', lineHeight: 1.45, maxWidth: '640px' }}>
                 Analytical-grade lyophilized peptide vials, multi-dose presentations, and standardized therapeutic protocols. Verified direct delivery terms for authorized healthcare institutions.
               </p>
@@ -1593,12 +1596,12 @@ export default function SharedCatalogClientView({
                   <Download size={17} />
                   <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
                 </button>
-                <PharmaBarcodeStamp batchCode={batchCode} theme="dark" width={200} height={26} />
+                <PharmaBarcodeStamp catalogCode={catalogCode} batchCode={batchCode} theme="dark" width={200} height={26} />
               </div>
 
               {/* 3D Holographic Interactive Scan Card */}
               <div className="header-card-qr">
-                <Interactive3DScanCard url={shareUrl} batchCode={batchCode} recipientName={catalogMeta?.recipientName} />
+                <Interactive3DScanCard url={shareUrl} catalogCode={catalogCode} batchCode={batchCode} recipientName={catalogMeta?.recipientName} />
               </div>
             </div>
           </div>
@@ -1821,172 +1824,135 @@ export default function SharedCatalogClientView({
                 </>
               )}
             </div>
-          </div>
 
-          {/* Quick Goals Horizontal Scroll Bar (Mobile & Desktop) */}
-          <div className="chips-scroll-container" style={{
-            display: 'flex',
-            gap: '6px',
-            alignItems: 'center',
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            padding: '4px 0',
-            scrollbarWidth: 'none'
-          }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              🎯 Goals:
-            </span>
-            <button
-              type="button"
-              onClick={() => clearGoals()}
-              style={{
-                padding: '5px 12px',
-                borderRadius: '16px',
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: '1px solid',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                backgroundColor: selectedGoals.length === 0 ? '#003666' : '#ffffff',
-                color: selectedGoals.length === 0 ? '#ffffff' : '#475569',
-                borderColor: selectedGoals.length === 0 ? '#003666' : '#cbd5e1',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              All ({products.length})
-            </button>
-            {availableGoals?.map(goal => {
-              const active = selectedGoals.includes(goal.id);
-              return (
-                <button
-                  key={goal.id}
-                  type="button"
-                  onClick={() => toggleGoal(goal.id)}
-                  style={{
-                    padding: '5px 12px',
-                    borderRadius: '16px',
-                    fontSize: '0.76rem',
-                    fontWeight: active ? 800 : 600,
-                    cursor: 'pointer',
-                    border: '1px solid',
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    backgroundColor: active ? '#0284c7' : '#ffffff',
-                    color: active ? '#ffffff' : '#334155',
-                    borderColor: active ? '#0284c7' : '#cbd5e1',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    boxShadow: active ? '0 1px 3px rgba(2, 132, 199, 0.25)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {active && <span>✓</span>}
-                  <span>{goal.label}</span>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    opacity: active ? 0.95 : 0.75,
-                    backgroundColor: active ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                    padding: '1px 5px',
-                    borderRadius: '8px'
-                  }}>
-                    {goal.count}
+            {/* Dedicated Packaging & Format Dropdown */}
+            <div className="format-dropdown-container" style={{
+              position: 'relative',
+              flex: '0 1 240px',
+              minWidth: '200px',
+              boxSizing: 'border-box'
+            }}>
+              <button
+                type="button"
+                onClick={() => setIsFormatDropdownOpen(prev => !prev)}
+                style={{
+                  width: '100%',
+                  height: '42px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  backgroundColor: (packagingMode !== 'all' || dosageFilter === 'high_dose') ? '#f0fdf4' : '#ffffff',
+                  border: (packagingMode !== 'all' || dosageFilter === 'high_dose') ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>
+                    {dosageFilter === 'high_dose' ? '💪' : packagingMode === 'kits' ? '📦' : packagingMode === 'units' ? '🧪' : '✨'}
                   </span>
-                </button>
-              );
-            })}
-          </div>
+                  <span style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: (packagingMode !== 'all' || dosageFilter === 'high_dose') ? '#15803d' : '#0f172a',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {dosageFilter === 'high_dose'
+                      ? 'High Dose (≥10mg)'
+                      : packagingMode === 'kits'
+                      ? '10-Vial Kits'
+                      : packagingMode === 'units'
+                      ? 'Single Vials (1–9)'
+                      : 'All Formats & Kits'}
+                  </span>
+                </div>
+                <ChevronDown size={14} color="#64748b" style={{ transform: isFormatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+              </button>
 
-          {/* Quick Format & Packaging Selector */}
-          <div className="chips-scroll-container" style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', padding: '2px 0' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
-              Format:
-            </span>
+              {isFormatDropdownOpen && (
+                <>
+                  <div
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
+                    onClick={() => setIsFormatDropdownOpen(false)}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: '46px',
+                    right: 0,
+                    width: '270px',
+                    maxWidth: '92vw',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid #e2e8f0',
+                    zIndex: 1000,
+                    padding: '8px',
+                  }}>
+                    <div style={{ padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Format & Presentation
+                      </span>
+                    </div>
 
-            <button
-              type="button"
-              onClick={() => setPackagingMode('all')}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '16px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: '1px solid',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                backgroundColor: packagingMode === 'all' ? '#003666' : '#f1f5f9',
-                color: packagingMode === 'all' ? '#ffffff' : '#475569',
-                borderColor: packagingMode === 'all' ? '#003666' : '#e2e8f0',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              ✨ All Formats
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPackagingMode('kits')}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '16px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: '1px solid',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                backgroundColor: packagingMode === 'kits' ? '#16a34a' : '#f0fdf4',
-                color: packagingMode === 'kits' ? '#ffffff' : '#15803d',
-                borderColor: packagingMode === 'kits' ? '#15803d' : '#bbf7d0',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              📦 10-Vial Kits (Best Savings)
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPackagingMode('units')}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '16px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: '1px solid',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                backgroundColor: packagingMode === 'units' ? '#0284c7' : '#f0f9ff',
-                color: packagingMode === 'units' ? '#ffffff' : '#0369a1',
-                borderColor: packagingMode === 'units' ? '#0284c7' : '#bae6fd',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              🧪 Single Vials (1–9)
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setDosageFilter(dosageFilter === 'high_dose' ? 'all' : 'high_dose')}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '16px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: '1px solid',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                backgroundColor: dosageFilter === 'high_dose' ? '#7c3aed' : '#f5f3ff',
-                color: dosageFilter === 'high_dose' ? '#ffffff' : '#6d28d9',
-                borderColor: dosageFilter === 'high_dose' ? '#6d28d9' : '#ddd6fe',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              💪 High Dose (≥10mg)
-            </button>
+                    {[
+                      { id: 'all', label: 'All Formats', icon: '✨', desc: 'Single vials & 10-vial kits' },
+                      { id: 'kits', label: '10-Vial Kits', icon: '📦', desc: 'Bulk volume best savings' },
+                      { id: 'units', label: 'Single Vials (1–9)', icon: '🧪', desc: 'Individual test vials' },
+                      { id: 'high_dose', label: 'High Dose (≥10mg)', icon: '💪', desc: 'Concentrated formulations' },
+                    ].map(opt => {
+                      const isSelected = opt.id === 'high_dose'
+                        ? dosageFilter === 'high_dose'
+                        : (packagingMode === opt.id && dosageFilter !== 'high_dose');
+                      return (
+                        <div
+                          key={opt.id}
+                          onClick={() => {
+                            if (opt.id === 'high_dose') {
+                              setDosageFilter('high_dose');
+                              setPackagingMode('all');
+                            } else {
+                              setDosageFilter('all');
+                              setPackagingMode(opt.id);
+                            }
+                            setIsFormatDropdownOpen(false);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            backgroundColor: isSelected ? '#f0fdf4' : 'transparent',
+                            transition: 'background 0.12s ease',
+                            marginBottom: '2px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '0.95rem' }}>{opt.icon}</span>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span style={{ fontSize: '0.82rem', fontWeight: isSelected ? 800 : 600, color: isSelected ? '#15803d' : '#1e293b' }}>
+                                {opt.label}
+                              </span>
+                              <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                                {opt.desc}
+                              </span>
+                            </div>
+                          </div>
+                          {isSelected && <span style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.82rem' }}>✓</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
