@@ -24,21 +24,45 @@ function patchFirebaseTools() {
     globalNpmRoot = execSync('npm root -g', { encoding: 'utf8', timeout: 5000 }).trim();
   } catch (_) {}
 
-  const nextUtilsPaths = [
-    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/frameworks/next/utils.js') : '',
-    '/usr/local/lib/node_modules/firebase-tools/lib/frameworks/next/utils.js',
-    '/opt/hostedtoolcache/node/*/x64/lib/node_modules/firebase-tools/lib/frameworks/next/utils.js',
-    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/frameworks/next/utils.js',
-    path.resolve('node_modules/firebase-tools/lib/frameworks/next/utils.js'),
+  // Find all possible locations of firebase-tools (global, local, npx cache)
+  const baseToolsDirs = [
+    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools') : '',
+    '/usr/local/lib/node_modules/firebase-tools',
+    '/opt/hostedtoolcache/node/*/x64/lib/node_modules/firebase-tools',
+    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools',
+    path.resolve('node_modules/firebase-tools'),
   ].filter(Boolean);
+
+  // Scan ~/.npm/_npx for cached npx firebase-tools runners
+  try {
+    const homeDir = process.env.HOME || '/Users/joseluiszabala';
+    const npxCacheDir = path.join(homeDir, '.npm/_npx');
+    if (fs.existsSync(npxCacheDir)) {
+      const hashes = fs.readdirSync(npxCacheDir);
+      for (const hash of hashes) {
+        const candidate = path.join(npxCacheDir, hash, 'node_modules/firebase-tools');
+        if (fs.existsSync(candidate)) {
+          baseToolsDirs.push(candidate);
+        }
+      }
+    }
+  } catch (_) {}
+
+  const nextUtilsPaths = baseToolsDirs.map(d => path.join(d, 'lib/frameworks/next/utils.js'));
+  const nextIndexPaths = baseToolsDirs.map(d => path.join(d, 'lib/frameworks/next/index.js'));
+  const prepareUploadPaths = baseToolsDirs.map(d => path.join(d, 'lib/deploy/functions/prepareFunctionsUpload.js'));
+  const runv2Paths = baseToolsDirs.map(d => path.join(d, 'lib/gcp/runv2.js'));
+  const gcfv2Paths = baseToolsDirs.map(d => path.join(d, 'lib/gcp/cloudfunctionsv2.js'));
+  const backendPaths = baseToolsDirs.map(d => path.join(d, 'lib/deploy/functions/backend.js'));
 
   for (const filePath of nextUtilsPaths) {
     if (fs.existsSync(filePath)) {
       try {
         let content = fs.readFileSync(filePath, 'utf8');
-        const searchRegex = /ignore:\s*\[\s*\(0,\s*path_1\.join\)\("cache",\s*"\*\*"[^\n]*\],/g;
         const robustReplacement = 'ignore: ["cache/**", "cache", "dev/**", "dev", "standalone/**", "standalone"],';
 
+        // Match ANY ignore: [...] within getProductionDistDirFiles
+        const searchRegex = /ignore:\s*\[\s*\(0,\s*path_1\.join\)\("cache"[^\]]*\],/g;
         if (searchRegex.test(content)) {
           content = content.replace(searchRegex, robustReplacement);
           fs.writeFileSync(filePath, content, 'utf8');
@@ -53,13 +77,6 @@ function patchFirebaseTools() {
   }
 
   // Patch next/index.js to avoid copying heavy public/ directory to Cloud Functions (served by Firebase Hosting CDN)
-  const nextIndexPaths = [
-    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/frameworks/next/index.js') : '',
-    '/usr/local/lib/node_modules/firebase-tools/lib/frameworks/next/index.js',
-    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/frameworks/next/index.js',
-    path.resolve('node_modules/firebase-tools/lib/frameworks/next/index.js'),
-  ].filter(Boolean);
-
   for (const filePath of nextIndexPaths) {
     if (fs.existsSync(filePath)) {
       try {
@@ -77,21 +94,14 @@ function patchFirebaseTools() {
           );
         }
         fs.writeFileSync(filePath, content, 'utf8');
-        console.log(`✅ [Optimize Deploy] Successfully patched frameworks/next/index.js (public & emptyDir) at:\n   ${filePath}`);
+        console.log(`✅ [Optimize Deploy] Successfully patched frameworks/next/index.js at:\n   ${filePath}`);
       } catch (err) {
         console.warn(`⚠️ [Optimize Deploy] Could not patch ${filePath}: ${err.message}`);
       }
     }
   }
 
-  // Patch prepareFunctionsUpload to ensure packageSource ignores .next/cache, public, and static assets
-  const prepareUploadPaths = [
-    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js') : '',
-    '/usr/local/lib/node_modules/firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js',
-    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js',
-    path.resolve('node_modules/firebase-tools/lib/deploy/functions/prepareFunctionsUpload.js'),
-  ].filter(Boolean);
-
+  // Patch prepareFunctionsUpload to ensure packageSource ignores .next/cache, dev, public, and static assets
   for (const filePath of prepareUploadPaths) {
     if (fs.existsSync(filePath)) {
       try {
@@ -99,12 +109,12 @@ function patchFirebaseTools() {
         const searchRegex = /ignore\.push\(.*CONFIG_DEST_FILE\);/;
         const replacement = 'ignore.push("**/cache", "**/cache/**", "**/.next/cache", "**/.next/cache/**", "**/dev", "**/dev/**", "**/.next/dev", "**/.next/dev/**", "**/public", "**/public/**", "**/.next/static", "**/.next/static/**", "**/.next/standalone", "**/.next/standalone/**", "**/node_modules/typescript", "**/node_modules/typescript/**", "firebase-debug.log", "firebase-debug.*.log", CONFIG_DEST_FILE);';
 
-        if (searchRegex.test(content) && !content.includes('"**/cache"')) {
+        if (searchRegex.test(content) && !content.includes('"**/dev"')) {
           content = content.replace(searchRegex, replacement);
           fs.writeFileSync(filePath, content, 'utf8');
           console.log(`✅ [Optimize Deploy] Successfully enhanced prepareFunctionsUpload.js at:\n   ${filePath}`);
-        } else if (content.includes('"**/cache"')) {
-          console.log(`⚡ [Optimize Deploy] prepareFunctionsUpload.js already optimized with directory ignore rules at:\n   ${filePath}`);
+        } else if (content.includes('"**/dev"')) {
+          console.log(`⚡ [Optimize Deploy] prepareFunctionsUpload.js already optimized at:\n   ${filePath}`);
         }
       } catch (err) {
         console.warn(`⚠️ [Optimize Deploy] Could not patch ${filePath}: ${err.message}`);
@@ -113,13 +123,6 @@ function patchFirebaseTools() {
   }
 
   // Patch runv2.js and cloudfunctionsv2.js to give SSR Cloud Run / GCFv2 services 1024Mi memory instead of default 256Mi
-  const runv2Paths = [
-    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/gcp/runv2.js') : '',
-    '/usr/local/lib/node_modules/firebase-tools/lib/gcp/runv2.js',
-    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/gcp/runv2.js',
-    path.resolve('node_modules/firebase-tools/lib/gcp/runv2.js'),
-  ].filter(Boolean);
-
   for (const filePath of runv2Paths) {
     if (fs.existsSync(filePath)) {
       try {
@@ -135,13 +138,6 @@ function patchFirebaseTools() {
     }
   }
 
-  const gcfv2Paths = [
-    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/gcp/cloudfunctionsv2.js') : '',
-    '/usr/local/lib/node_modules/firebase-tools/lib/gcp/cloudfunctionsv2.js',
-    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/gcp/cloudfunctionsv2.js',
-    path.resolve('node_modules/firebase-tools/lib/gcp/cloudfunctionsv2.js'),
-  ].filter(Boolean);
-
   for (const filePath of gcfv2Paths) {
     if (fs.existsSync(filePath)) {
       try {
@@ -156,13 +152,6 @@ function patchFirebaseTools() {
       }
     }
   }
-
-  const backendPaths = [
-    globalNpmRoot ? path.join(globalNpmRoot, 'firebase-tools/lib/deploy/functions/backend.js') : '',
-    '/usr/local/lib/node_modules/firebase-tools/lib/deploy/functions/backend.js',
-    '/Users/joseluiszabala/.npm-global/lib/node_modules/firebase-tools/lib/deploy/functions/backend.js',
-    path.resolve('node_modules/firebase-tools/lib/deploy/functions/backend.js'),
-  ].filter(Boolean);
 
   for (const filePath of backendPaths) {
     if (fs.existsSync(filePath)) {
@@ -253,15 +242,23 @@ function ensureRootGcloudIgnore() {
   fs.writeFileSync(rootIgnorePath, content, 'utf8');
 }
 
-// Step 4: Purge root .next/cache before staging so firebase-tools does not copy 2+ GB into Cloud Functions
+// Step 4: Purge root .next/cache and .next/dev before staging so firebase-tools does not copy 2+ GB into Cloud Functions
 function purgeNextCache() {
-  const rootCachePath = path.resolve('.next/cache');
-  if (fs.existsSync(rootCachePath)) {
-    try {
-      fs.rmSync(rootCachePath, { recursive: true, force: true });
-      console.log('🧹 [Optimize Deploy] Purged root .next/cache (compiler cache removed from deployment package)');
-    } catch (err) {
-      console.warn(`⚠️ [Optimize Deploy] Could not delete root .next/cache: ${err.message}`);
+  const pathsToPurge = [
+    { p: path.resolve('.next/cache'), label: 'compiler cache (.next/cache)' },
+    { p: path.resolve('.next/dev'), label: 'development cache (.next/dev)' },
+    { p: path.resolve('.next/diagnostics'), label: 'build diagnostics (.next/diagnostics)' },
+    { p: path.resolve('.firebase'), label: 'stale staging directory (.firebase)' },
+  ];
+
+  for (const { p, label } of pathsToPurge) {
+    if (fs.existsSync(p)) {
+      try {
+        fs.rmSync(p, { recursive: true, force: true });
+        console.log(`🧹 [Optimize Deploy] Purged ${label}`);
+      } catch (err) {
+        console.warn(`⚠️ [Optimize Deploy] Could not delete ${p}: ${err.message}`);
+      }
     }
   }
 }
