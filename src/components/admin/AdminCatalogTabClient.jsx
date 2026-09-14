@@ -226,7 +226,19 @@ function CatalogExportDropdown({
             {actionLoading === 'lotusland-pdf'
               ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
               : <span>📑</span>}
-            {actionLoading === 'lotusland-pdf' ? 'Generating PDF…' : `Lotusland / RegenPept Catalog (PDF)`}
+            <span style={{ flex: 1 }}>{actionLoading === 'lotusland-pdf' ? 'Generating PDF…' : `Lotusland / RegenPept Catalog (PDF)`}</span>
+            <span style={{
+              marginLeft: 'auto',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              backgroundColor: '#e0f2fe',
+              color: '#0369a1',
+              whiteSpace: 'nowrap'
+            }}>
+              104 variants
+            </span>
           </button>
           <button
             onClick={() => { onLotuslandWeb(); setExportOpen(false); }}
@@ -244,7 +256,19 @@ function CatalogExportDropdown({
             {actionLoading === 'lotusland-web'
               ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
               : <Globe size={14} color="#0284c7" />}
-            {actionLoading === 'lotusland-web' ? 'Creating Web Share…' : `Lotusland Web Share`}
+            <span style={{ flex: 1 }}>{actionLoading === 'lotusland-web' ? 'Creating Web Share…' : `Lotusland Web Share`}</span>
+            <span style={{
+              marginLeft: 'auto',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              backgroundColor: '#e0f2fe',
+              color: '#0284c7',
+              whiteSpace: 'nowrap'
+            }}>
+              104 variants
+            </span>
           </button>
 
           {/* LARIMEDICAL */}
@@ -268,7 +292,19 @@ function CatalogExportDropdown({
             {actionLoading === 'larimedical-pdf'
               ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
               : <span>📑</span>}
-            {actionLoading === 'larimedical-pdf' ? 'Generating PDF…' : `LARIMEDICAL Catalog (PDF)`}
+            <span style={{ flex: 1 }}>{actionLoading === 'larimedical-pdf' ? 'Generating PDF…' : `LARIMEDICAL Catalog (PDF)`}</span>
+            <span style={{
+              marginLeft: 'auto',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              backgroundColor: '#ecfdf5',
+              color: '#047857',
+              whiteSpace: 'nowrap'
+            }}>
+              8 variants
+            </span>
           </button>
           <button
             onClick={() => { onLarimedicalWeb(); setExportOpen(false); }}
@@ -286,7 +322,19 @@ function CatalogExportDropdown({
             {actionLoading === 'larimedical-web'
               ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
               : <Globe size={14} color="#0d9488" />}
-            {actionLoading === 'larimedical-web' ? 'Creating Web Share…' : `LARIMEDICAL Web Share`}
+            <span style={{ flex: 1 }}>{actionLoading === 'larimedical-web' ? 'Creating Web Share…' : `LARIMEDICAL Web Share`}</span>
+            <span style={{
+              marginLeft: 'auto',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              backgroundColor: '#ecfdf5',
+              color: '#0f766e',
+              whiteSpace: 'nowrap'
+            }}>
+              8 variants
+            </span>
           </button>
 
           {/* EuroPeptides */}
@@ -310,7 +358,19 @@ function CatalogExportDropdown({
             {actionLoading === 'europeptides-pdf'
               ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
               : <span>📑</span>}
-            {actionLoading === 'europeptides-pdf' ? 'Generating PDF…' : `EuroPeptides Catalog (PDF)`}
+            <span style={{ flex: 1 }}>{actionLoading === 'europeptides-pdf' ? 'Generating PDF…' : `EuroPeptides Catalog (PDF)`}</span>
+            <span style={{
+              marginLeft: 'auto',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              backgroundColor: '#eff6ff',
+              color: '#1e40af',
+              whiteSpace: 'nowrap'
+            }}>
+              54 variants
+            </span>
           </button>
           <button
             onClick={() => { onEuropeptidesWeb(); setExportOpen(false); }}
@@ -328,7 +388,19 @@ function CatalogExportDropdown({
             {actionLoading === 'europeptides-web'
               ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
               : <Globe size={14} color="#0284c7" />}
-            {actionLoading === 'europeptides-web' ? 'Creating Web Share…' : `EuroPeptides Web Share`}
+            <span style={{ flex: 1 }}>{actionLoading === 'europeptides-web' ? 'Creating Web Share…' : `EuroPeptides Web Share`}</span>
+            <span style={{
+              marginLeft: 'auto',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              padding: '2px 7px',
+              borderRadius: '9999px',
+              backgroundColor: '#eff6ff',
+              color: '#0369a1',
+              whiteSpace: 'nowrap'
+            }}>
+              54 variants
+            </span>
           </button>
         </div>
       )}
@@ -608,15 +680,11 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     onNewProduct:        handleNewProduct,
     onLotuslandPDF:      () => handleSupplierPDF('lotusland', 'Lotusland / RegenPept', 'lotusland-pdf', {
       catalogueFilter: 'RegenPept',
-      categoryFilter: 'peptide',
-      productTypeFilter: 'finished_product',
       productIds: []
     }),
     onLotuslandWeb:      () => handleSupplierWebShare('supplier-lotusland', 'Lotusland / RegenPept', 'lotusland-web', {
       catalogueFilter: 'RegenPept',
-      category: 'peptide',
-      categoryFilter: 'peptide',
-      productTypeFilter: 'finished_product'
+      category: 'all'
     }),
     onLarimedicalPDF:    () => handleSupplierPDF('supplier-larimedical', 'LARIMEDICAL (Sterilia)', 'larimedical-pdf', { currency: 'EUR' }),
     onLarimedicalWeb:    () => handleSupplierWebShare('supplier-larimedical', 'LARIMEDICAL (Sterilia)', 'larimedical-web', { currency: 'EUR' }),

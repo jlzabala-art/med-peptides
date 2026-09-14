@@ -162,7 +162,21 @@ export default function UnifiedExportDrawer({
                     cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s ease'
                   }}
                 >
-                  <div style={{ fontSize: '1.25rem', marginBottom: '0.2rem' }}>{cat.flag}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '0.2rem' }}>
+                    <span style={{ fontSize: '1.25rem' }}>{cat.flag}</span>
+                    {cat.variantCount && (
+                      <span style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        padding: '1px 6px',
+                        borderRadius: '9999px',
+                        backgroundColor: isSelected ? '#bae6fd' : '#f1f5f9',
+                        color: isSelected ? '#0369a1' : '#475569'
+                      }}>
+                        {cat.variantCount} variants
+                      </span>
+                    )}
+                  </div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 700, color: isSelected ? '#0369a1' : '#1e293b' }}>
                     {cat.brandName}
                   </div>

@@ -15,7 +15,8 @@ export const EXPORT_CATALOGUES = [
     defaultCurrency: 'USD',
     warehouse: 'Poland, USA, and UK',
     defaultCostMarginAvailable: true,
-    description: '103 variants portfolio (Peptides & Research Supplies)'
+    variantCount: 104,
+    description: '104 variants portfolio (Peptides & Research Supplies)'
   },
   {
     id: 'larimedical',
@@ -26,6 +27,7 @@ export const EXPORT_CATALOGUES = [
     defaultCurrency: 'EUR',
     warehouse: 'EU Hub - Spain (Alcoy, Alicante)',
     defaultCostMarginAvailable: true,
+    variantCount: 8,
     description: 'Sterile Mesotherapy Solutions (Spain)'
   },
   {
@@ -37,6 +39,7 @@ export const EXPORT_CATALOGUES = [
     defaultCurrency: 'EUR',
     warehouse: 'EU Hub - Bulgaria',
     defaultCostMarginAvailable: false,
+    variantCount: 54,
     description: 'European Peptide Formulations'
   }
 ];
