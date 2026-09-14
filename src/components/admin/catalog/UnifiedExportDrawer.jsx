@@ -6,6 +6,7 @@ import { EXPORT_CATALOGUES } from '@/config/exportCatalogues';
 import { exportCatalogToXlsx } from '@/utils/exportCatalogToXlsx';
 import { exportCatalogToCsv } from '@/utils/exportCatalogToExcel';
 import { FileText, Globe, FileSpreadsheet, Loader, Check, ExternalLink, ShieldCheck, Warehouse, Sparkles } from '@/lib/icons';
+import { toast as hotToast } from 'react-hot-toast';
 
 export default function UnifiedExportDrawer({
   isOpen,
@@ -14,8 +15,9 @@ export default function UnifiedExportDrawer({
   onGeneratePDF,
   onGenerateWebShare,
   actionLoading,
-  toast,
+  toast: externalToast,
 }) {
+  const toast = externalToast || hotToast;
   const [selectedCatId, setSelectedCatId] = useState(initialCatalogueId);
   const [markupPercent, setMarkupPercent] = useState(0);
   const [selectedCurrency, setSelectedCurrency] = useState('USD');

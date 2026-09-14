@@ -3,9 +3,11 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Download, Plus, FileText, ChevronDown, BookOpen, Loader, Globe } from '@/lib/icons';
 import { useDrawer } from '@/context/DrawerContext';
-import { useToast } from '@/hooks/useToast';
+import { toast } from 'react-hot-toast';
+import notifier from '@/services/NotificationService';
 import { EXPORT_CATALOGUES } from '@/config/exportCatalogues';
 import UnifiedExportDrawer from './catalog/UnifiedExportDrawer';
+import CatalogExportStatusDock from './catalog/CatalogExportStatusDock';
 import MasterCatalogTable from './MasterCatalogTable';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -51,6 +53,8 @@ function CatalogExportDropdown({
       <button
         type="button"
         onClick={() => setExportOpen(prev => !prev)}
+        disabled={Boolean(actionLoading)}
+        aria-busy={Boolean(actionLoading)}
         className="gcp-btn-secondary"
         style={{
           display: 'flex',
@@ -60,11 +64,20 @@ function CatalogExportDropdown({
           minHeight: '38px',
           padding: isMobile ? '0.45rem 0.65rem' : '0.45rem 0.75rem',
           whiteSpace: 'nowrap',
+          opacity: actionLoading ? 0.75 : 1,
+          cursor: actionLoading ? 'not-allowed' : 'pointer',
+          transition: 'all 0.15s ease'
         }}
         title="Export Catalog & Price Lists"
       >
-        <Download size={15} />
-        <span className={isMobile ? '' : 'btn-label'}>Export</span>
+        {actionLoading ? (
+          <Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />
+        ) : (
+          <Download size={15} />
+        )}
+        <span className={isMobile ? '' : 'btn-label'}>
+          {actionLoading ? 'Exporting…' : 'Export'}
+        </span>
         <ChevronDown size={13} style={{ opacity: 0.6 }} />
       </button>
 
@@ -489,6 +502,8 @@ function MobileCatalogActions(props) {
       <button
         type="button"
         onClick={props.onOpenExportHub}
+        disabled={Boolean(props.actionLoading)}
+        aria-busy={Boolean(props.actionLoading)}
         className="gcp-btn-secondary"
         title="Export Hub & Price Lists"
         style={{ 
@@ -502,11 +517,18 @@ function MobileCatalogActions(props) {
           whiteSpace: 'nowrap',
           fontSize: '0.84rem',
           fontWeight: 700,
-          borderRadius: '10px'
+          borderRadius: '10px',
+          opacity: props.actionLoading ? 0.75 : 1,
+          cursor: props.actionLoading ? 'not-allowed' : 'pointer',
+          transition: 'all 0.15s ease'
         }}
       >
-        <Download size={15} />
-        <span>Export</span>
+        {props.actionLoading ? (
+          <Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />
+        ) : (
+          <Download size={15} />
+        )}
+        <span>{props.actionLoading ? 'Exporting…' : 'Export'}</span>
       </button>
     </div>
   );
@@ -517,8 +539,8 @@ function MobileCatalogActions(props) {
 ───────────────────────────────────────────────────────────────── */
 export default function AdminCatalogTabClient({ initialProducts, globalMetrics, readOnly = false }) {
   const { openDrawer } = useDrawer();
-  const { toast } = useToast();
   const [actionLoading, setActionLoading] = useState(null);
+  const [exportStatus, setExportStatus] = useState(null);
   const [markupPercent, setMarkupPercent] = useState(20);
   const [isExportHubOpen, setIsExportHubOpen] = useState(false);
 
@@ -536,10 +558,29 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
   const handleSupplierPDF = useCallback(async (supplierFilter, supplierLabel, loadingKey, extraParams = {}) => {
     if (actionLoading) return;
     setActionLoading(loadingKey);
-    toast?.info?.(`📄 Generating ${supplierLabel} PDF Catalog (Cost +${markupPercent}% EXW)…`);
+
+    const variantCount = extraParams.variantCount || (
+      loadingKey.includes('lotusland') ? 104 :
+      loadingKey.includes('larimedical') ? 8 :
+      loadingKey.includes('europeptides') ? 54 : null
+    );
+
+    setExportStatus({
+      id: loadingKey,
+      type: 'pdf',
+      title: `${supplierLabel} Catalog (PDF)`,
+      variantCount,
+      markupPercent,
+      state: 'loading',
+      stepMessage: `Compiling ${variantCount ? `${variantCount} variants` : 'items'} & generating high-resolution PDF pages…`,
+      resultUrl: null,
+      errorMessage: null
+    });
+
+    toast.loading(`📄 Generating ${supplierLabel} PDF (${variantCount ? `${variantCount} variants, ` : ''}Cost +${markupPercent}% EXW)…`, { id: 'catalog-export-toast' });
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 35_000);
+    const timeoutId = setTimeout(() => controller.abort(), 45_000);
 
     try {
       const productIds = extraParams.productIds !== undefined
@@ -563,7 +604,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
           showKitPrice:      true,
           kitSize:           10,
           coverPage:         true,
-          currency:          'USD',
+          currency:          extraParams.currency || 'USD',
           groupBy:           'category',
           sortBy:            'name',
           showDosage:        true,
@@ -611,23 +652,50 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
       }
 
       if (finalUrl) {
-        window.open(finalUrl, '_blank');
-        toast?.success?.(`✅ ${supplierLabel} PDF Catalog (+${markupPercent}%) opened in new tab.`);
+        try {
+          window.open(finalUrl, '_blank', 'noopener,noreferrer');
+        } catch (e) {
+          console.warn('Direct popup blocked, user can open via dock button', e);
+        }
+        toast.success(`✅ ${supplierLabel} PDF Catalog (+${markupPercent}%) ready!`, { id: 'catalog-export-toast' });
+        setExportStatus({
+          id: loadingKey,
+          type: 'pdf',
+          title: `${supplierLabel} Catalog (PDF)`,
+          variantCount,
+          markupPercent,
+          state: 'success',
+          stepMessage: 'PDF document generated and ready to download.',
+          resultUrl: finalUrl,
+          errorMessage: null
+        });
+        return { url: finalUrl };
       } else {
         throw new Error('PDF generation failed to return a valid URL.');
       }
     } catch (err) {
       clearTimeout(timeoutId);
       console.error(`[handleSupplierPDF ${supplierLabel}]`, err);
-      if (err.name === 'AbortError') {
-        toast?.error?.('⏱️ PDF generation timed out. Please try again.');
-      } else {
-        toast?.error?.(`❌ PDF generation failed: ${err.message}`);
-      }
+      const errMsg = err.name === 'AbortError'
+        ? 'PDF generation timed out. Please try again.'
+        : `PDF generation failed: ${err.message}`;
+      toast.error(`❌ ${errMsg}`, { id: 'catalog-export-toast' });
+      setExportStatus({
+        id: loadingKey,
+        type: 'pdf',
+        title: `${supplierLabel} Catalog (PDF)`,
+        variantCount,
+        markupPercent,
+        state: 'error',
+        stepMessage: null,
+        resultUrl: null,
+        errorMessage: errMsg
+      });
+      throw err;
     } finally {
       setActionLoading(null);
     }
-  }, [initialProducts, actionLoading, markupPercent, toast]);
+  }, [initialProducts, actionLoading, markupPercent]);
 
   /**
    * Helper to generate a preconfigured supplier Web Share with Margin over Cost and EXW terms
@@ -635,7 +703,26 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
   const handleSupplierWebShare = useCallback(async (supplierId, supplierLabel, loadingKey, extraParams = {}) => {
     if (actionLoading) return;
     setActionLoading(loadingKey);
-    toast?.info?.(`🔗 Creating ${supplierLabel} Web Share link (Cost +${markupPercent}% EXW)…`);
+
+    const variantCount = extraParams.variantCount || (
+      loadingKey.includes('lotusland') ? 104 :
+      loadingKey.includes('larimedical') ? 8 :
+      loadingKey.includes('europeptides') ? 54 : null
+    );
+
+    setExportStatus({
+      id: loadingKey,
+      type: 'web',
+      title: `${supplierLabel} Web Share`,
+      variantCount,
+      markupPercent,
+      state: 'loading',
+      stepMessage: 'Creating secure 30-day interactive client link…',
+      resultUrl: null,
+      errorMessage: null
+    });
+
+    toast.loading(`🔗 Creating ${supplierLabel} Web Share link (${variantCount ? `${variantCount} variants, ` : ''}Cost +${markupPercent}% EXW)…`, { id: 'catalog-export-toast' });
 
     try {
       const res = await fetch('/api/catalog/share', {
@@ -645,7 +732,7 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
           supplierId,
           priceSource: 'cost',
           priceMarkupPercent: markupPercent,
-          currency: 'USD',
+          currency: extraParams.currency || 'USD',
           recipientName: `${supplierLabel} Healthcare Providers`,
           recipientType: 'clinic',
           validityDays: 30,
@@ -660,18 +747,47 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
 
       const data = await res.json();
       if (data.shareableUrl) {
-        window.open(data.shareableUrl, '_blank');
-        toast?.success?.(`✅ ${supplierLabel} Web Share (+${markupPercent}%) opened in new tab!`);
+        try {
+          window.open(data.shareableUrl, '_blank', 'noopener,noreferrer');
+        } catch (e) {
+          console.warn('Direct popup blocked, user can open via dock button', e);
+        }
+        toast.success(`✅ ${supplierLabel} Web Share link (+${markupPercent}%) created!`, { id: 'catalog-export-toast' });
+        setExportStatus({
+          id: loadingKey,
+          type: 'web',
+          title: `${supplierLabel} Web Share`,
+          variantCount,
+          markupPercent,
+          state: 'success',
+          stepMessage: 'Interactive Web Share link is active.',
+          resultUrl: data.shareableUrl,
+          errorMessage: null
+        });
+        return { shareableUrl: data.shareableUrl };
       } else {
         throw new Error('Failed to obtain shareable link.');
       }
     } catch (err) {
       console.error(`[handleSupplierWebShare ${supplierLabel}]`, err);
-      toast?.error?.(`❌ Web Share generation failed: ${err.message}`);
+      const errMsg = `Web Share generation failed: ${err.message}`;
+      toast.error(`❌ ${errMsg}`, { id: 'catalog-export-toast' });
+      setExportStatus({
+        id: loadingKey,
+        type: 'web',
+        title: `${supplierLabel} Web Share`,
+        variantCount,
+        markupPercent,
+        state: 'error',
+        stepMessage: null,
+        resultUrl: null,
+        errorMessage: errMsg
+      });
+      throw err;
     } finally {
       setActionLoading(null);
     }
-  }, [actionLoading, markupPercent, toast]);
+  }, [actionLoading, markupPercent]);
 
   const sharedActions = {
     onExportJSON:        handleExportJSON,
@@ -728,7 +844,12 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
         onGeneratePDF={handleSupplierPDF}
         onGenerateWebShare={handleSupplierWebShare}
         actionLoading={actionLoading}
-        toast={toast}
+      />
+
+      {/* Real-time Operation Status Dock (Mobile & Laptop) */}
+      <CatalogExportStatusDock
+        status={exportStatus}
+        onDismiss={() => setExportStatus(null)}
       />
     </>
   );
