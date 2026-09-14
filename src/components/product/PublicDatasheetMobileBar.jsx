@@ -57,7 +57,9 @@ export default function PublicDatasheetMobileBar({
       try {
         await navigator.share({
           title: `${name} (${formatName}) | ATLAS HEALTH`,
-          text: `Ficha técnica analítica de ${name} (${doseName}, ${formatName}) sintetizado bajo cGMP por ${supplierName}.`,
+          text: isEs
+            ? `Ficha técnica analítica de ${name} (${doseName}, ${formatName}) sintetizado bajo cGMP por ${supplierName}.`
+            : `Analytical technical monograph for ${name} (${doseName}, ${formatName}) synthesized under cGMP by ${supplierName}.`,
           url: dynamicPublicUrl,
         });
         return;
@@ -83,7 +85,7 @@ export default function PublicDatasheetMobileBar({
   };
 
   return (
-    <aside className="pds-mobile-bar" aria-label="Acciones Rápidas del Producto">
+    <aside className="pds-mobile-bar" aria-label="Product Quick Actions">
       <div className="pds-mb-inner">
         {/* Left: Active Configuration Chip */}
         <div className="pds-mb-spec">
@@ -99,8 +101,8 @@ export default function PublicDatasheetMobileBar({
               type="button"
               onClick={handleScrollToReconstitution}
               className="pds-mb-btn pds-mb-btn-calc"
-              title="Ir a Calculadora de Reconstitución"
-              aria-label="Ir a Calculadora de Reconstitución"
+              title="Go to Reconstitution Calculator"
+              aria-label="Go to Reconstitution Calculator"
             >
               <FlaskConical size={18} />
             </button>
@@ -127,8 +129,8 @@ export default function PublicDatasheetMobileBar({
             type="button"
             onClick={handleShare}
             className="pds-mb-btn pds-mb-btn-share"
-            title="Compartir Ficha Técnica"
-            aria-label="Compartir Ficha Técnica"
+            title="Share Technical Datasheet"
+            aria-label="Share Technical Datasheet"
           >
             {copied ? <Check size={18} color="#16a34a" /> : <Share2 size={18} />}
           </button>

@@ -410,7 +410,7 @@ export default function SharedCatalogClientView({
       setPlacedOrderCode(data.orderCode);
     } catch (err) {
       console.error('Error placing draft order:', err);
-      setOrderSubmitError(err.message || 'Error al registrar el pedido en la plataforma.');
+      setOrderSubmitError(err.message || 'Error submitting order to the platform.');
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -1314,7 +1314,7 @@ export default function SharedCatalogClientView({
           {/* Quick Format & Packaging Selector */}
           <div className="chips-scroll-container" style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', padding: '2px 0' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
-              Formato:
+              Format:
             </span>
 
             <button
@@ -1335,7 +1335,7 @@ export default function SharedCatalogClientView({
                 transition: 'all 0.15s ease'
               }}
             >
-              ✨ Todos los Formatos
+              ✨ All Formats
             </button>
 
             <button
@@ -1356,7 +1356,7 @@ export default function SharedCatalogClientView({
                 transition: 'all 0.15s ease'
               }}
             >
-              📦 Kits de 10 Viales (Mayor Ahorro)
+              📦 10-Vial Kits (Best Savings)
             </button>
 
             <button
@@ -1377,7 +1377,7 @@ export default function SharedCatalogClientView({
                 transition: 'all 0.15s ease'
               }}
             >
-              🧪 Solo Unitario (1–9)
+              🧪 Single Vials (1–9)
             </button>
 
             <button
@@ -1398,7 +1398,7 @@ export default function SharedCatalogClientView({
                 transition: 'all 0.15s ease'
               }}
             >
-              💪 Alta Dosis (≥10mg)
+              💪 High Dose (≥10mg)
             </button>
           </div>
         </div>
@@ -1580,14 +1580,14 @@ export default function SharedCatalogClientView({
                                     {v.dosage || v.name || 'Standard Presentation'}
                                   </div>
                                   <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
-                                    <span style={{ textTransform: 'capitalize' }}>Formato: {v.presentation || 'Vial'}</span>
+                                    <span style={{ textTransform: 'capitalize' }}>Format: {v.presentation || 'Vial'}</span>
                                     <span>•</span>
                                     {isOutOfStock ? (
-                                      <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 Agotado</span>
+                                      <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 Out of Stock</span>
                                     ) : isDemand ? (
-                                      <span style={{ color: '#d97706', fontWeight: 600 }}>🟡 Bajo Demanda (3–7 Días)</span>
+                                      <span style={{ color: '#d97706', fontWeight: 600 }}>🟡 On Demand (3–7 Days)</span>
                                     ) : (
-                                      <span style={{ color: '#16a34a', fontWeight: 600 }}>🟢 En Stock</span>
+                                      <span style={{ color: '#16a34a', fontWeight: 600 }}>🟢 In Stock</span>
                                     )}
                                   </div>
                                 </div>
@@ -1600,7 +1600,7 @@ export default function SharedCatalogClientView({
                                     <div className="single-unit-box">
                                       <div>
                                         <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                                          Unitario (1–9)
+                                          Single (1–9)
                                         </div>
                                         <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666' }}>
                                           {currencySymbol}{displayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{currentCurrency}</span>
@@ -1632,7 +1632,7 @@ export default function SharedCatalogClientView({
                                             fontSize: '1rem',
                                             color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1'
                                           }}
-                                          title="Disminuir 1 Unidad"
+                                          title="Decrease 1 Unit"
                                         >
                                           -
                                         </button>
@@ -1656,7 +1656,7 @@ export default function SharedCatalogClientView({
                                             fontWeight: 800,
                                             fontSize: '1rem'
                                           }}
-                                          title="Añadir 1 Unidad"
+                                          title="Add 1 Unit"
                                         >
                                           +
                                         </button>
@@ -1680,7 +1680,7 @@ export default function SharedCatalogClientView({
                                           {currencySymbol}{kitDisplayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#166534' }}>/ pack</span>
                                         </div>
                                         <div style={{ fontSize: '0.68rem', color: '#166534', fontWeight: 600 }}>
-                                          ({currencySymbol}{tier10Rate.toFixed(2)} / ud)
+                                          ({currencySymbol}{tier10Rate.toFixed(2)} / unit)
                                         </div>
                                       </div>
 
@@ -1710,7 +1710,7 @@ export default function SharedCatalogClientView({
                                                 color: '#166534',
                                                 fontSize: '1rem'
                                               }}
-                                              title="Quitar 1 Kit (-10)"
+                                              title="Remove 1 Kit (-10)"
                                             >
                                               -
                                             </button>
@@ -1734,7 +1734,7 @@ export default function SharedCatalogClientView({
                                                 fontWeight: 800,
                                                 fontSize: '1rem'
                                               }}
-                                              title="Añadir 1 Kit (+10)"
+                                              title="Add 1 Kit (+10)"
                                             >
                                               +
                                             </button>
@@ -1755,7 +1755,7 @@ export default function SharedCatalogClientView({
                                               borderRadius: '6px'
                                             }}
                                           >
-                                            + Añadir Kit (10)
+                                            + Add Kit (10)
                                           </button>
                                         )}
                                       </div>
@@ -2011,7 +2011,7 @@ export default function SharedCatalogClientView({
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
             >
               <Send size={16} />
-              <span>{cartTotalUnits > 0 ? `Enviar Pedido (${cartTotalUnits}) 🚀` : 'Enviar Pedido'}</span>
+              <span>{cartTotalUnits > 0 ? `Submit Order (${cartTotalUnits}) 🚀` : 'Submit Order'}</span>
             </button>
           </div>
         </div>
@@ -2245,7 +2245,7 @@ export default function SharedCatalogClientView({
                   }}
                 >
                   <Send size={14} />
-                  <span>Enviar Pedido</span>
+                  <span>Submit Order</span>
                 </button>
               </div>
             </div>
@@ -2298,7 +2298,7 @@ export default function SharedCatalogClientView({
                 </div>
 
                 <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
-                  ¡Pedido Enviado a la Plataforma!
+                  Order Submitted to Platform!
                 </h2>
                 
                 <div style={{
@@ -2329,13 +2329,13 @@ export default function SharedCatalogClientView({
                   marginBottom: '20px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#166534', marginBottom: '6px' }}>
-                    <CheckCircle2 size={16} color="#16a34a" /> Notificación Activada en Panel de Operaciones
+                    <CheckCircle2 size={16} color="#16a34a" /> Notification Activated in Operations Desk
                   </div>
                   <div>
-                    Tu pedido ha quedado registrado como <strong>Pendiente de Aprobación</strong>. La administración y operaciones ya tienen la alerta en su panel para validar existencias, emitir la pro-forma definitiva y coordinar el despacho.
+                    Your order has been recorded as <strong>Pending Approval</strong>. Administration and operations have received the alert to verify inventory, issue the final pro-forma invoice, and coordinate dispatch.
                   </div>
                   <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px dashed #cbd5e1', fontSize: '0.78rem', color: '#64748b' }}>
-                    Cliente: <strong>{checkoutForm.clinicName || catalogMeta?.recipientName}</strong> • Total: <strong>{currencySymbol}{grandTotal.toFixed(2)} {currentCurrency} ({cartTotalUnits} unidades)</strong>
+                    Client: <strong>{checkoutForm.clinicName || catalogMeta?.recipientName}</strong> • Total: <strong>{currencySymbol}{grandTotal.toFixed(2)} {currentCurrency} ({cartTotalUnits} units)</strong>
                   </div>
                 </div>
 
@@ -2362,7 +2362,7 @@ export default function SharedCatalogClientView({
                     }}
                   >
                     <Download size={18} />
-                    <span>{isGeneratingProForma ? 'Generando PDF...' : 'Descargar Pro-Forma Oficial (PDF)'}</span>
+                    <span>{isGeneratingProForma ? 'Generating PDF...' : 'Download Official Pro-Forma (PDF)'}</span>
                   </button>
 
                   <button
@@ -2385,7 +2385,7 @@ export default function SharedCatalogClientView({
                     }}
                   >
                     <MessageSquare size={17} color="#16a34a" />
-                    <span>Enviar Copia de Respaldo por WhatsApp (Opcional)</span>
+                    <span>Send Backup Copy via WhatsApp (Optional)</span>
                   </button>
 
                   <button
@@ -2406,7 +2406,7 @@ export default function SharedCatalogClientView({
                       marginTop: '4px'
                     }}
                   >
-                    Cerrar y Continuar en el Catálogo
+                    Close & Continue Browsing Catalog
                   </button>
                 </div>
               </div>
@@ -2419,10 +2419,10 @@ export default function SharedCatalogClientView({
                     </div>
                     <div>
                       <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                        Confirmar y Enviar Pedido a la Plataforma
+                        Confirm & Submit Order to Platform
                       </h3>
                       <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                        Registro directo en portal y alerta inmediata a operaciones
+                        Direct portal registration and immediate operations dispatch alert
                       </p>
                     </div>
                   </div>
@@ -2448,14 +2448,14 @@ export default function SharedCatalogClientView({
                 }}>
                   <div>
                     <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
-                      Total del Pedido Estimado
+                      Estimated Order Total
                     </div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>
-                      {cartTotalUnits} unidades • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency}
+                      {cartTotalUnits} units • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
-                    {activeShipping.flag} Destino {activeShipping.code}
+                    {activeShipping.flag} Destination {activeShipping.code}
                   </div>
                 </div>
 
@@ -2463,7 +2463,7 @@ export default function SharedCatalogClientView({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      Clínica / Profesional Médico *
+                      Clinic / Medical Professional *
                     </label>
                     <input
                       type="text"
@@ -2485,7 +2485,7 @@ export default function SharedCatalogClientView({
                   <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Persona de Contacto
+                        Contact Person
                       </label>
                       <input
                         type="text"
@@ -2505,7 +2505,7 @@ export default function SharedCatalogClientView({
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        NIF / CIF / Tax ID (Opcional)
+                        VAT / Tax ID (Optional)
                       </label>
                       <input
                         type="text"
@@ -2528,7 +2528,7 @@ export default function SharedCatalogClientView({
                   <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Email Profesional
+                        Professional Email
                       </label>
                       <input
                         type="email"
@@ -2548,7 +2548,7 @@ export default function SharedCatalogClientView({
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Teléfono / WhatsApp *
+                        Phone / WhatsApp *
                       </label>
                       <input
                         type="tel"
@@ -2570,13 +2570,13 @@ export default function SharedCatalogClientView({
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      Dirección de Entrega y Ciudad / País
+                      Delivery Address, City / Country
                     </label>
                     <input
                       type="text"
                       value={checkoutForm.deliveryAddress}
                       onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryAddress: e.target.value })}
-                      placeholder="Calle, Edificio Médico, Ciudad, País"
+                      placeholder="Street, Medical Facility, City, Country"
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -2591,13 +2591,13 @@ export default function SharedCatalogClientView({
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      Instrucciones Especiales / Notas
+                      Special Instructions / Delivery Notes
                     </label>
                     <textarea
                       rows={2}
                       value={checkoutForm.deliveryNotes}
                       onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryNotes: e.target.value })}
-                      placeholder="e.g. Horario preferido de recepción en clínica..."
+                      placeholder="e.g. Preferred clinic delivery hours..."
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -2652,7 +2652,7 @@ export default function SharedCatalogClientView({
                     }}
                   >
                     <Package size={18} />
-                    <span>{isSubmittingOrder ? 'Enviando Pedido a Plataforma...' : '🚀 Enviar Pedido a la Plataforma'}</span>
+                    <span>{isSubmittingOrder ? 'Submitting Order to Platform...' : '🚀 Submit Order to Platform'}</span>
                   </button>
 
                   <button
@@ -2676,7 +2676,7 @@ export default function SharedCatalogClientView({
                     }}
                   >
                     <Download size={16} />
-                    <span>{isGeneratingProForma ? 'Generando PDF...' : '📄 Descargar Pro-Forma Previa (PDF)'}</span>
+                    <span>{isGeneratingProForma ? 'Generating PDF...' : '📄 Download Draft Pro-Forma (PDF)'}</span>
                   </button>
                 </div>
               </div>
