@@ -485,6 +485,16 @@ export default function SharedCatalogClientView({
           flex-wrap: wrap;
           gap: 10px;
         }
+        .topbar-row-logistics {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .topbar-row-access {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
         .topbar-currency-toggle {
           display: inline-flex;
           background-color: #f1f5f9;
@@ -574,6 +584,9 @@ export default function SharedCatalogClientView({
         .topbar-apply-btn:hover {
           opacity: 0.95;
           box-shadow: 0 3px 10px rgba(0, 54, 102, 0.35);
+        }
+        .access-label-compact {
+          display: none;
         }
         /* Executive Header Card */
         .header-card {
@@ -905,58 +918,102 @@ export default function SharedCatalogClientView({
             margin: 0 auto 10px auto !important;
           }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
           .topbar-inner {
-            padding: 8px 10px;
-            gap: 8px;
+            padding: 8px 12px !important;
+            gap: 10px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
           }
           .topbar-brand {
-            width: 100%;
-            justify-content: space-between;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
           }
           .topbar-brand-title {
-            font-size: 0.85rem;
+            font-size: 0.88rem !important;
           }
           .portal-verified-badge {
             display: none !important;
           }
           .topbar-actions {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 4px;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .topbar-row-logistics {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 6px !important;
+          }
+          .topbar-row-access {
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
           }
           .topbar-destination {
-            padding: 3px 6px;
-            flex-shrink: 0;
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            padding: 5px 8px !important;
+            font-size: 0.74rem !important;
+            display: flex !important;
+            align-items: center !important;
+            overflow: hidden !important;
           }
           .topbar-destination select {
-            max-width: 86px !important;
-            font-size: 0.72rem !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            font-size: 0.74rem !important;
+            text-overflow: ellipsis !important;
+          }
+          .topbar-currency-toggle {
+            flex-shrink: 0 !important;
           }
           .currency-btn {
-            padding: 3px 6px;
-            font-size: 0.72rem;
+            padding: 5px 8px !important;
+            font-size: 0.72rem !important;
           }
           .topbar-cart-pill {
-            padding: 4px 8px;
-            font-size: 0.74rem;
-            flex-shrink: 0;
+            flex-shrink: 0 !important;
+            padding: 5px 8px !important;
+            font-size: 0.72rem !important;
           }
-          .topbar-signin-btn {
-            padding: 4px 8px;
-            font-size: 0.72rem;
-            flex-shrink: 0;
-          }
+          .topbar-signin-btn,
           .topbar-apply-btn {
-            padding: 4px 8px;
-            font-size: 0.72rem;
-            flex-shrink: 0;
-            white-space: nowrap;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            min-height: 38px !important;
+            padding: 6px 10px !important;
+            font-size: 0.76rem !important;
+            border-radius: 8px !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+          }
+          .access-label-full {
+            display: none !important;
+          }
+          .access-label-compact {
+            display: inline !important;
+          }
+          .chips-scroll-container {
+            flex-wrap: wrap !important;
+          }
+          .header-card-actions {
+            width: 100% !important;
+            margin-top: 10px !important;
+          }
+          .header-card-actions button {
+            width: 100% !important;
+            justify-content: center !important;
+            min-height: 42px !important;
           }
           .dock-wrapper {
             padding: 8px 10px max(12px, env(safe-area-inset-bottom, 12px)) 10px !important;
@@ -1004,82 +1061,88 @@ export default function SharedCatalogClientView({
           </div>
 
           <div className="topbar-actions">
-            {/* Destination Selector */}
-            <div className="topbar-destination">
-              <span style={{ marginRight: '5px' }}>✈️</span>
-              <select
-                value={selectedShipping}
-                onChange={(e) => setSelectedShipping(e.target.value)}
-                style={{
-                  background: 'transparent',
-                  color: '#0f172a',
-                  border: 'none',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  outline: 'none',
-                  maxWidth: '170px'
-                }}
-              >
-                {SHIPPING_DESTINATIONS.map(d => (
-                  <option key={d.id} value={d.id}>
-                    {d.flag} {d.code} (+{currencySymbol}{currentCurrency === 'EUR' ? d.costEUR : d.costUSD})
-                  </option>
-                ))}
-              </select>
+            {/* Line 1: Logistics Controls (Destination, Currency, Cart) */}
+            <div className="topbar-row-logistics">
+              {/* Destination Selector */}
+              <div className="topbar-destination">
+                <span style={{ marginRight: '5px' }}>✈️</span>
+                <select
+                  value={selectedShipping}
+                  onChange={(e) => setSelectedShipping(e.target.value)}
+                  style={{
+                    background: 'transparent',
+                    color: '#0f172a',
+                    border: 'none',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    outline: 'none',
+                    maxWidth: '170px'
+                  }}
+                >
+                  {SHIPPING_DESTINATIONS.map(d => (
+                    <option key={d.id} value={d.id}>
+                      {d.flag} {d.code} (+{currencySymbol}{currentCurrency === 'EUR' ? d.costEUR : d.costUSD})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Currency Toggle */}
+              <div className="topbar-currency-toggle">
+                <button
+                  type="button"
+                  onClick={() => setCurrentCurrency('USD')}
+                  className={`currency-btn ${currentCurrency === 'USD' ? 'active' : 'inactive'}`}
+                >
+                  $ USD
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentCurrency('EUR')}
+                  className={`currency-btn ${currentCurrency === 'EUR' ? 'active' : 'inactive'}`}
+                >
+                  € EUR
+                </button>
+              </div>
+
+              {/* Top Cart Pill (if active) */}
+              {cartTotalUnits > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIsCartOpen(!isCartOpen)}
+                  className="topbar-cart-pill"
+                  title="Review Order"
+                >
+                  <Package size={14} />
+                  <span>{cartTotalUnits} Vials</span>
+                  <span>•</span>
+                  <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
+                </button>
+              )}
             </div>
 
-            {/* Currency Toggle */}
-            <div className="topbar-currency-toggle">
+            {/* Line 2: Clinical Provider Access & Registration */}
+            <div className="topbar-row-access">
+              <a
+                href="/auth/login"
+                className="topbar-signin-btn"
+                title="Provider Authentication"
+              >
+                <Lock size={13} color="#003666" />
+                <span>Sign In</span>
+              </a>
+
               <button
                 type="button"
-                onClick={() => setCurrentCurrency('USD')}
-                className={`currency-btn ${currentCurrency === 'USD' ? 'active' : 'inactive'}`}
+                onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
+                className="topbar-apply-btn"
               >
-                $ USD
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentCurrency('EUR')}
-                className={`currency-btn ${currentCurrency === 'EUR' ? 'active' : 'inactive'}`}
-              >
-                € EUR
+                <Building2 size={13} />
+                <span className="access-label-full">Apply for Portal Access</span>
+                <span className="access-label-compact">Portal Access</span>
               </button>
             </div>
-
-            {/* Top Cart Pill (if active) */}
-            {cartTotalUnits > 0 && (
-              <button
-                type="button"
-                onClick={() => setIsCartOpen(!isCartOpen)}
-                className="topbar-cart-pill"
-                title="Review Order"
-              >
-                <Package size={14} />
-                <span>{cartTotalUnits} Vials</span>
-                <span>•</span>
-                <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
-              </button>
-            )}
-
-            {/* Provider Sign In & Registration Actions */}
-            <a
-              href="/auth/login"
-              className="topbar-signin-btn"
-              title="Provider Authentication"
-            >
-              <Lock size={13} color="#003666" />
-              <span>Sign In</span>
-            </a>
-
-            <button
-              type="button"
-              onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
-              className="topbar-apply-btn"
-            >
-              <Building2 size={13} />
-              <span>Apply for Portal Access</span>
-            </button>
           </div>
         </div>
       </header>
@@ -1117,7 +1180,7 @@ export default function SharedCatalogClientView({
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+            <div className="header-card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
               <button
                 onClick={handleDownloadPdf}
                 disabled={isGeneratingPdf}
