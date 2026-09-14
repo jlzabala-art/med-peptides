@@ -301,8 +301,8 @@ export default function PriceListPdfDrawer({
             border: '1px solid #cbd5e1',
             borderRadius: 8,
             fontSize: '0.78rem',
-            fontWeight: 600,
-            color: '#0f172a',
+            fontWeight: 700,
+            color: '#334155',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
@@ -310,7 +310,7 @@ export default function PriceListPdfDrawer({
             gap: 6,
           }}
         >
-          <FileSpreadsheet size={14} color="#16a34a" /> Excel (.csv)
+          <FileSpreadsheet size={14} color="#0284c7" /> Excel (.csv)
         </button>
 
         <button
@@ -319,12 +319,12 @@ export default function PriceListPdfDrawer({
           disabled={gen.canonicalMetrics.variantCount === 0 || isSharingWebCatalog}
           style={{
             padding: '9px 10px',
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
             borderRadius: 8,
             fontSize: '0.78rem',
             fontWeight: 700,
-            color: '#166534',
+            color: '#1d4ed8',
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
@@ -332,7 +332,7 @@ export default function PriceListPdfDrawer({
             gap: 6,
           }}
         >
-          {isSharingWebCatalog ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} color="#16a34a" />}
+          {isSharingWebCatalog ? <Loader2 size={14} className="animate-spin" /> : <Share2 size={14} color="#2563eb" />}
           {isSharingWebCatalog ? 'Generating...' : '🌐 Share Web'}
         </button>
       </div>

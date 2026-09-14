@@ -21,7 +21,9 @@ import {
   ExternalLink,
   Trash2,
   Filter,
-  Send
+  Send,
+  Check,
+  X
 } from 'lucide-react';
 import { resolveVariantClinicalImage, resolveProtocolClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
@@ -42,6 +44,8 @@ export default function SharedCatalogClientView({
     activeTab, setActiveTab,
     searchQuery, setSearchQuery,
     selectedGoal, setSelectedGoal,
+    selectedGoals, setSelectedGoals,
+    toggleGoal, clearGoals,
     availableGoals,
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
@@ -82,10 +86,12 @@ export default function SharedCatalogClientView({
     includePrices,
   });
 
+  const [isGoalDropdownOpen, setIsGoalDropdownOpen] = React.useState(false);
+
   // ── Clinic Portal Registration Modal State ───────────────────────────────
   const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
   const [registerForm, setRegisterForm] = React.useState({
-    clinicName: catalogMeta?.recipientName || '',
+    clinicName: '', // Always generic and empty by default, never pre-filled with vendor/portal names
     contactName: '',
     email: '',
     phone: '',
@@ -1094,6 +1100,155 @@ export default function SharedCatalogClientView({
             border-radius: 14px !important;
           }
         }
+
+        /* Institutional Portal Access Modal */
+        .access-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background-color: rgba(15, 23, 42, 0.65);
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          box-sizing: border-box;
+        }
+        .access-modal-card {
+          background-color: #ffffff;
+          border-radius: 16px;
+          max-width: 620px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+          border: 1px solid #e2e8f0;
+          padding: 26px 28px;
+          position: relative;
+          box-sizing: border-box;
+        }
+        .access-modal-header {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          margin-bottom: 6px;
+          padding-right: 44px;
+        }
+        .access-modal-close-btn {
+          position: absolute;
+          top: 18px;
+          right: 18px;
+          border: none;
+          background: #f1f5f9;
+          cursor: pointer;
+          color: #64748b;
+          font-size: 1.1rem;
+          font-weight: 700;
+          width: 34px;
+          height: 34px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.15s ease;
+          z-index: 2;
+        }
+        .access-modal-close-btn:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
+        .access-form-section {
+          background: #f8fafc;
+          border: 1px solid #f1f5f9;
+          border-radius: 10px;
+          padding: 12px 14px;
+          margin-bottom: 12px;
+        }
+        .access-section-title {
+          font-size: 0.72rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: #0284c7;
+          margin: 0 0 10px 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .access-form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .access-field-label {
+          display: block;
+          font-size: 0.76rem;
+          font-weight: 700;
+          color: #334155;
+          margin-bottom: 5px;
+        }
+        .access-input-control {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          font-size: 0.86rem;
+          color: #0f172a;
+          background-color: #ffffff;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .access-input-control:focus {
+          outline: none;
+          border-color: #003666;
+          box-shadow: 0 0 0 3px rgba(0, 54, 102, 0.12);
+        }
+        .access-actions-row {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 10px;
+          margin-top: 14px;
+        }
+        @media (max-width: 640px) {
+          .access-modal-card {
+            padding: 20px 16px !important;
+            border-radius: 14px !important;
+            max-height: 92vh !important;
+          }
+          .access-modal-header {
+            padding-right: 36px !important;
+          }
+          .access-modal-close-btn {
+            top: 14px !important;
+            right: 14px !important;
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .access-form-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+          }
+          .access-input-control {
+            font-size: 16px !important;
+            padding: 11px 12px !important;
+            min-height: 44px !important;
+          }
+          .access-actions-row {
+            flex-direction: column-reverse !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+          }
+          .access-actions-row button {
+            width: 100% !important;
+            justify-content: center !important;
+            min-height: 44px !important;
+            font-size: 0.9rem !important;
+          }
+        }
       `}</style>
 
       {/* Sandboxed Institutional Navigation Topbar */}
@@ -1244,7 +1399,7 @@ export default function SharedCatalogClientView({
                 <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
                   {isProtocolCatalog 
                     ? `📋 ${protocols.length} Clinical Protocols`
-                    : `📦 ${products.length} Formulations • ${totalVariants} Presentations`}
+                    : `📦 ${products.length} Products • ${totalVariants} Variants`}
                 </span>
               </div>
             </div>
@@ -1325,43 +1480,252 @@ export default function SharedCatalogClientView({
               )}
             </div>
 
-            {/* Dedicated Canonical Goals Dropdown Select */}
+            {/* Dedicated Canonical Goals Multi-Select Popover */}
             <div className="category-dropdown-container" style={{
-              flex: '0 1 260px',
+              position: 'relative',
+              flex: '0 1 290px',
               minWidth: '220px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: '#ffffff',
-              border: '1px solid #cbd5e1',
-              borderRadius: '8px',
-              padding: '0 12px',
-              height: '42px',
               boxSizing: 'border-box'
             }}>
-              <Filter size={15} color="#0284c7" style={{ flexShrink: 0 }} />
-              <select
-                value={selectedGoal}
-                onChange={(e) => setSelectedGoal(e.target.value)}
+              <button
+                type="button"
+                onClick={() => setIsGoalDropdownOpen(prev => !prev)}
                 style={{
-                  border: 'none',
-                  background: 'transparent',
-                  outline: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  color: '#0f172a',
                   width: '100%',
-                  cursor: 'pointer'
+                  height: '42px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  backgroundColor: selectedGoals.length > 0 ? '#eff6ff' : '#ffffff',
+                  border: selectedGoals.length > 0 ? '1.5px solid #3b82f6' : '1px solid #cbd5e1',
+                  borderRadius: '8px',
+                  padding: '0 12px',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <option value="all">All Clinical Goals ({products.length})</option>
-                {availableGoals?.map(goal => (
-                  <option key={goal.id} value={goal.id}>
-                    {goal.label} ({goal.count})
-                  </option>
-                ))}
-              </select>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                  <Filter size={15} color={selectedGoals.length > 0 ? '#1d4ed8' : '#0284c7'} style={{ flexShrink: 0 }} />
+                  <span style={{
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: selectedGoals.length > 0 ? '#1e40af' : '#0f172a',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {selectedGoals.length === 0
+                      ? `All Clinical Goals (${products.length})`
+                      : selectedGoals.length === 1
+                      ? `${availableGoals.find(g => g.id === selectedGoals[0])?.label || selectedGoals[0]}`
+                      : `${selectedGoals.length} Goals Selected`}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                  {selectedGoals.length > 0 && (
+                    <span style={{
+                      backgroundColor: '#2563eb',
+                      color: '#ffffff',
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      padding: '1px 6px',
+                      borderRadius: '10px'
+                    }}>
+                      {selectedGoals.length}
+                    </span>
+                  )}
+                  <ChevronDown size={14} color="#64748b" style={{ transform: isGoalDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                </div>
+              </button>
+
+              {/* Popover Dropdown */}
+              {isGoalDropdownOpen && (
+                <>
+                  <div
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }}
+                    onClick={() => setIsGoalDropdownOpen(false)}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: '46px',
+                    right: 0,
+                    width: '320px',
+                    maxWidth: '92vw',
+                    backgroundColor: '#ffffff',
+                    borderRadius: '12px',
+                    boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid #e2e8f0',
+                    zIndex: 1000,
+                    padding: '10px',
+                    maxHeight: '380px',
+                    overflowY: 'auto'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px 8px', borderBottom: '1px solid #f1f5f9', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Clinical Goals (Multi-Select)
+                      </span>
+                      {selectedGoals.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => clearGoals()}
+                          style={{ border: 'none', background: 'transparent', color: '#dc2626', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Reset All
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Select one or more</span>
+                      )}
+                    </div>
+
+                    <div
+                      onClick={() => clearGoals()}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        backgroundColor: selectedGoals.length === 0 ? '#f0fdf4' : 'transparent',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.82rem', fontWeight: selectedGoals.length === 0 ? 800 : 600, color: selectedGoals.length === 0 ? '#15803d' : '#1e293b' }}>
+                        ✨ All Clinical Goals
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>({products.length})</span>
+                    </div>
+
+                    {availableGoals?.map(goal => {
+                      const isChecked = selectedGoals.includes(goal.id);
+                      return (
+                        <div
+                          key={goal.id}
+                          onClick={() => toggleGoal(goal.id)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 10px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            backgroundColor: isChecked ? '#eff6ff' : 'transparent',
+                            transition: 'background 0.12s ease',
+                            gap: '10px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}} // handled by parent onClick
+                              style={{ accentColor: '#003666', width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+                            />
+                            <span style={{
+                              fontSize: '0.82rem',
+                              fontWeight: isChecked ? 700 : 500,
+                              color: isChecked ? '#1e40af' : '#1e293b',
+                              lineHeight: 1.3,
+                              wordBreak: 'break-word'
+                            }}>
+                              {goal.label}
+                            </span>
+                          </div>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: isChecked ? '#2563eb' : '#64748b',
+                            backgroundColor: isChecked ? '#dbeafe' : '#f1f5f9',
+                            padding: '2px 6px',
+                            borderRadius: '6px',
+                            flexShrink: 0
+                          }}>
+                            {goal.count}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
+          </div>
+
+          {/* Quick Goals Horizontal Scroll Bar (Mobile & Desktop) */}
+          <div className="chips-scroll-container" style={{
+            display: 'flex',
+            gap: '6px',
+            alignItems: 'center',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            padding: '4px 0',
+            scrollbarWidth: 'none'
+          }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              🎯 Goals:
+            </span>
+            <button
+              type="button"
+              onClick={() => clearGoals()}
+              style={{
+                padding: '5px 12px',
+                borderRadius: '16px',
+                fontSize: '0.76rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: '1px solid',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                backgroundColor: selectedGoals.length === 0 ? '#003666' : '#ffffff',
+                color: selectedGoals.length === 0 ? '#ffffff' : '#475569',
+                borderColor: selectedGoals.length === 0 ? '#003666' : '#cbd5e1',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              All ({products.length})
+            </button>
+            {availableGoals?.map(goal => {
+              const active = selectedGoals.includes(goal.id);
+              return (
+                <button
+                  key={goal.id}
+                  type="button"
+                  onClick={() => toggleGoal(goal.id)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '16px',
+                    fontSize: '0.76rem',
+                    fontWeight: active ? 800 : 600,
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    backgroundColor: active ? '#0284c7' : '#ffffff',
+                    color: active ? '#ffffff' : '#334155',
+                    borderColor: active ? '#0284c7' : '#cbd5e1',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    boxShadow: active ? '0 1px 3px rgba(2, 132, 199, 0.25)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {active && <span>✓</span>}
+                  <span>{goal.label}</span>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    opacity: active ? 0.95 : 0.75,
+                    backgroundColor: active ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                    padding: '1px 5px',
+                    borderRadius: '8px'
+                  }}>
+                    {goal.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Quick Format & Packaging Selector */}
@@ -2528,7 +2892,7 @@ export default function SharedCatalogClientView({
                       type="text"
                       value={checkoutForm.clinicName}
                       onChange={(e) => setCheckoutForm({ ...checkoutForm, clinicName: e.target.value })}
-                      placeholder="e.g. Lotusland Regenerative Clinic"
+                      placeholder="e.g. Longevity Medical Clinic / Practice Name"
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -2747,66 +3111,27 @@ export default function SharedCatalogClientView({
       {/* ── Clinic Portal Access Registration Modal ──────────────────────── */}
       {isRegisterModalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.7)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-          }}
+          className="access-modal-overlay"
           onClick={(e) => {
             if (e.target === e.currentTarget && !isSubmittingRegister) {
               setIsRegisterModalOpen(false);
             }
           }}
         >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              maxWidth: '540px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              border: '1px solid #e2e8f0',
-              padding: '28px',
-              position: 'relative'
-            }}
-          >
+          <div className="access-modal-card">
             {/* Close Button */}
             <button
               type="button"
+              className="access-modal-close-btn"
               onClick={() => setIsRegisterModalOpen(false)}
               disabled={isSubmittingRegister}
-              style={{
-                position: 'absolute',
-                top: '18px',
-                right: '18px',
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                color: '#64748b',
-                fontSize: '1.2rem',
-                fontWeight: 700,
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              aria-label="Close modal"
+              aria-label="Close application modal"
             >
               ✕
             </button>
 
             {registerSubmitted ? (
-              <div style={{ textAlign: 'center', padding: '20px 8px' }}>
+              <div style={{ textAlign: 'center', padding: '24px 8px' }}>
                 <div
                   style={{
                     width: '64px',
@@ -2847,7 +3172,7 @@ export default function SharedCatalogClientView({
                   </div>
                 )}
                 <p style={{ color: '#64748b', fontSize: '0.825rem', lineHeight: 1.5, margin: '0 0 24px' }}>
-                  Our medical compliance team will review your professional license and practice credentials within 24 business hours. You will receive your dedicated portal sign-in credentials via email.
+                  Our medical compliance team will review your professional credentials within 24 business hours. You will receive your dedicated portal sign-in instructions via email.
                 </p>
                 <button
                   type="button"
@@ -2860,7 +3185,7 @@ export default function SharedCatalogClientView({
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '8px',
-                    padding: '10px 24px',
+                    padding: '11px 26px',
                     fontWeight: 700,
                     fontSize: '0.875rem',
                     cursor: 'pointer'
@@ -2871,33 +3196,34 @@ export default function SharedCatalogClientView({
               </div>
             ) : (
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <div className="access-modal-header">
                   <div
                     style={{
-                      width: '36px',
-                      height: '36px',
+                      width: '38px',
+                      height: '38px',
                       borderRadius: '8px',
                       backgroundColor: '#eff6ff',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#0284c7'
+                      color: '#0284c7',
+                      flexShrink: 0
                     }}
                   >
-                    <ShieldCheck size={22} />
+                    <ShieldCheck size={24} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.25 }}>
                       Institutional Portal Access Application
                     </h3>
-                    <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', display: 'block', marginTop: '2px' }}>
                       Certified medical clinics, practitioners & healthcare organizations only.
                     </span>
                   </div>
                 </div>
 
-                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.45, margin: '8px 0 16px' }}>
-                  Apply for institutional tier pricing, clinical dosing documentation, cold-chain logistics, and automated prescription processing.
+                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.45, margin: '6px 0 16px' }}>
+                  Apply for verified clinic pricing, clinical dosing documentation, cold-chain logistics, and automated prescription replenishment.
                 </p>
 
                 {registerError && (
@@ -2909,210 +3235,173 @@ export default function SharedCatalogClientView({
                       borderRadius: '8px',
                       padding: '10px 14px',
                       fontSize: '0.825rem',
-                      marginBottom: '16px'
+                      marginBottom: '14px'
                     }}
                   >
                     ⚠️ {registerError}
                   </div>
                 )}
 
-                <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Clinic / Practice Name *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Longevity Institute"
-                        value={registerForm.clinicName}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, clinicName: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem'
-                        }}
-                      />
+                <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Practice & Contact Details */}
+                  <div className="access-form-section">
+                    <div className="access-section-title">
+                      <Building2 size={13} />
+                      <span>Practice & Contact Information</span>
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Lead Practitioner / Contact *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Dr. / Director Full Name"
-                        value={registerForm.contactName}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, contactName: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem'
-                        }}
-                      />
-                    </div>
-                  </div>
+                    <div className="access-form-grid" style={{ marginBottom: '10px' }}>
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Clinic / Practice Name <span style={{ color: '#dc2626' }}>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Longevity Medical Clinic / Practice Name"
+                          value={registerForm.clinicName}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, clinicName: e.target.value }))}
+                          className="access-input-control"
+                        />
+                      </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Professional Email *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        placeholder="practitioner@clinic.com"
-                        value={registerForm.email}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem'
-                        }}
-                      />
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Lead Practitioner / Contact <span style={{ color: '#dc2626' }}>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Dr. / Director Full Name"
+                          value={registerForm.contactName}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, contactName: e.target.value }))}
+                          className="access-input-control"
+                        />
+                      </div>
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Phone / WhatsApp
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="+1 (555) 000-0000"
-                        value={registerForm.phone}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, phone: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem'
-                        }}
-                      />
+                    <div className="access-form-grid">
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Professional Email <span style={{ color: '#dc2626' }}>*</span>
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          placeholder="practitioner@clinic.com"
+                          value={registerForm.email}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
+                          className="access-input-control"
+                        />
+                      </div>
+
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Phone / WhatsApp
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="+1 (555) 000-0000"
+                          value={registerForm.phone}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, phone: e.target.value }))}
+                          className="access-input-control"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Country of Practice
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. United States, Spain, Mexico"
-                        value={registerForm.country}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, country: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem'
-                        }}
-                      />
+                  {/* Clinical Profile & Requirements */}
+                  <div className="access-form-section">
+                    <div className="access-section-title">
+                      <ShieldCheck size={13} />
+                      <span>Clinical Profile & Monthly Volume</span>
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Clinical Specialty
-                      </label>
-                      <select
-                        value={registerForm.specialty}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, specialty: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem',
-                          backgroundColor: '#ffffff'
-                        }}
-                      >
-                        <option value="Anti-Aging & Longevity Medicine">Anti-Aging & Longevity Medicine</option>
-                        <option value="Endocrinology & Metabolic Health">Endocrinology & Metabolic Health</option>
-                        <option value="Sports Medicine & Orthopedics">Sports Medicine & Orthopedics</option>
-                        <option value="Functional & Integrative Medicine">Functional & Integrative Medicine</option>
-                        <option value="Medical Aesthetic & Dermatology">Medical Aesthetic & Dermatology</option>
-                        <option value="Clinical Compounding & Pharmacy">Clinical Compounding & Pharmacy</option>
-                        <option value="Biomedical Research Institute">Biomedical Research Institute</option>
-                        <option value="Other Clinical Specialty">Other Clinical Specialty</option>
-                      </select>
-                    </div>
-                  </div>
+                    <div className="access-form-grid" style={{ marginBottom: '10px' }}>
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Country of Practice
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. United States, Spain, Mexico, UAE"
+                          value={registerForm.country}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, country: e.target.value }))}
+                          className="access-input-control"
+                        />
+                      </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Medical License / NPI / Reg. ID
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. MD-12345678 (Optional)"
-                        value={registerForm.licenseNumber}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, licenseNumber: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem'
-                        }}
-                      />
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Clinical Specialty
+                        </label>
+                        <select
+                          value={registerForm.specialty}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, specialty: e.target.value }))}
+                          className="access-input-control"
+                          style={{ backgroundColor: '#ffffff' }}
+                        >
+                          <option value="Anti-Aging & Longevity Medicine">Anti-Aging & Longevity Medicine</option>
+                          <option value="Endocrinology & Metabolic Health">Endocrinology & Metabolic Health</option>
+                          <option value="Sports Medicine & Orthopedics">Sports Medicine & Orthopedics</option>
+                          <option value="Functional & Integrative Medicine">Functional & Integrative Medicine</option>
+                          <option value="Medical Aesthetic & Dermatology">Medical Aesthetic & Dermatology</option>
+                          <option value="Clinical Compounding & Pharmacy">Clinical Compounding & Pharmacy</option>
+                          <option value="Biomedical Research Institute">Biomedical Research Institute</option>
+                          <option value="Other Clinical Specialty">Other Clinical Specialty</option>
+                        </select>
+                      </div>
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                        Est. Monthly Peptide Volume
-                      </label>
-                      <select
-                        value={registerForm.estimatedMonthlyVolume}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, estimatedMonthlyVolume: e.target.value }))}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '8px',
-                          fontSize: '0.85rem',
-                          backgroundColor: '#ffffff'
-                        }}
-                      >
-                        <option value="10 - 25 vials / month">10 - 25 vials / month</option>
-                        <option value="25 - 100 vials / month">25 - 100 vials / month (Standard Practice)</option>
-                        <option value="100 - 500 vials / month">100 - 500 vials / month (Multi-Doctor Clinic)</option>
-                        <option value="500+ vials / month">500+ vials / month (Institutional Supply)</option>
-                      </select>
+                    <div className="access-form-grid">
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Medical License / NPI / Reg. ID <span style={{ fontWeight: 400, color: '#94a3b8' }}>(Optional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. MD-12345678"
+                          value={registerForm.licenseNumber}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, licenseNumber: e.target.value }))}
+                          className="access-input-control"
+                        />
+                      </div>
+
+                      <div className="access-field-group">
+                        <label className="access-field-label">
+                          Est. Monthly Peptide Volume
+                        </label>
+                        <select
+                          value={registerForm.estimatedMonthlyVolume}
+                          onChange={(e) => setRegisterForm(prev => ({ ...prev, estimatedMonthlyVolume: e.target.value }))}
+                          className="access-input-control"
+                          style={{ backgroundColor: '#ffffff' }}
+                        >
+                          <option value="10 - 25 vials / month">10 - 25 vials / month</option>
+                          <option value="25 - 100 vials / month">25 - 100 vials / month (Standard Practice)</option>
+                          <option value="100 - 500 vials / month">100 - 500 vials / month (Multi-Doctor Clinic)</option>
+                          <option value="500+ vials / month">500+ vials / month (Institutional Supply)</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 
+                  {/* Specific Formulations / Notes */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                      Additional Clinical Requirements or Specific Formulations
+                    <label className="access-field-label">
+                      Additional Clinical Requirements or Specific Formulations <span style={{ fontWeight: 400, color: '#94a3b8' }}>(Optional)</span>
                     </label>
                     <textarea
                       rows={2}
                       placeholder="Specify any target formulations, recurring protocol requirements or compound purity needs..."
                       value={registerForm.notes}
                       onChange={(e) => setRegisterForm(prev => ({ ...prev, notes: e.target.value }))}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
-                        fontSize: '0.85rem',
-                        resize: 'vertical'
-                      }}
+                      className="access-input-control"
+                      style={{ resize: 'vertical' }}
                     />
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                  <div className="access-actions-row">
                     <button
                       type="button"
                       onClick={() => setIsRegisterModalOpen(false)}
@@ -3122,10 +3411,11 @@ export default function SharedCatalogClientView({
                         color: '#475569',
                         border: '1px solid #cbd5e1',
                         borderRadius: '8px',
-                        padding: '9px 18px',
+                        padding: '10px 20px',
                         fontWeight: 700,
                         fontSize: '0.85rem',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
                       }}
                     >
                       Cancel
@@ -3139,14 +3429,17 @@ export default function SharedCatalogClientView({
                         color: '#ffffff',
                         border: 'none',
                         borderRadius: '8px',
-                        padding: '10px 22px',
+                        padding: '10px 24px',
                         fontWeight: 700,
-                        fontSize: '0.85rem',
+                        fontSize: '0.86rem',
                         cursor: isSubmittingRegister ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: '6px',
-                        opacity: isSubmittingRegister ? 0.7 : 1
+                        opacity: isSubmittingRegister ? 0.7 : 1,
+                        boxShadow: '0 2px 6px rgba(0, 54, 102, 0.25)',
+                        transition: 'all 0.15s ease'
                       }}
                     >
                       <ShieldCheck size={16} />

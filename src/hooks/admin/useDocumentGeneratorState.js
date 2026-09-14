@@ -155,8 +155,8 @@ export function useDocumentGeneratorState(selectedProducts = [], initialConfig =
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [includeBibliography, setIncludeBibliography] = useState(false);
   const [supplierMasking, setSupplierMasking] = useState('real'); // 'real' | 'anonymous'
-  const [showPricePerMg, setShowPricePerMg] = useState(true);
-  const [showWarehouse, setShowWarehouse] = useState(true);
+  const [showPricePerMg, setShowPricePerMg] = useState(false);
+  const [showWarehouse, setShowWarehouse] = useState(false);
   // Product type scope filter for hybrid products (Fase 2)
   const [productTypeFilter, setProductTypeFilter] = useState('all'); // 'all' | 'finished_product' | 'raw_material' | 'diagnostic' | 'service'
   const [supplierFilter, setSupplierFilter] = useState(initialConfig?.supplierFilter || initialConfig?.supplierId || null);

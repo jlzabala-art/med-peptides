@@ -25,7 +25,7 @@ import { generatePdfSchema } from '@/schemas/apiSchemas';
 import { randomUUID } from 'crypto';
 
 const TIER_MAPPING = { cost: 'master', wholeseller: 'wholesale', clinic: 'clinic', retail: 'retail' };
-const TIER_LABELS = { master: 'Supplier Cost (Master)', wholesale: 'Wholesaler Price', clinic: 'Clinic Price', retail: 'Retail Price (Web Public)' };
+const TIER_LABELS = { master: 'Authorized Clinical Portfolio', wholesale: 'Wholesaler Tier', clinic: 'Clinical Partner Tier', retail: 'Standard Catalog' };
 const CURRENCY_SYMBOLS = { USD: '$', EUR: '€', MXN: '$' };
 const FALLBACK_FX = { USD: 1, EUR: 0.92, MXN: 17.5 };
 
@@ -314,9 +314,9 @@ export async function POST(request) {
     showSupplier = true, showDosage = true, showPresentation = true,
     showPurity = false, showReconstitution = false, showGauge = true,
     showPackSize = true, showSampleType = true, showBiomarkers = false,
-    showDescription = false, showKitPrice = false, kitSize = 10,
+    showDescription = false, showKitPrice = true, kitSize = 10,
     showProtocols = false, onlyInStock = false, includeBibliography = false,
-    supplierMasking = 'real', showPricePerMg = true, showWarehouse = true,
+    supplierMasking = 'real', showPricePerMg = false, showWarehouse = false,
     watermark = 'none', language = 'en', pdfLanguage = 'en',
     coverPage = false, recipientName = '', validUntil = '',
     clientId = null, priceOverrides = null, commercialNotes = '',
@@ -379,14 +379,14 @@ export async function POST(request) {
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const TIER_SHORT_LABELS = {
-    cost: 'Master Cost',
-    master: 'Master Cost',
-    wholeseller: 'Wholesale',
-    wholesale: 'Wholesale',
-    clinic: 'Clinic Price',
-    retail: 'Retail Price',
+    cost: 'Unit Price',
+    master: 'Unit Price',
+    wholeseller: 'Unit Price',
+    wholesale: 'Unit Price',
+    clinic: 'Unit Price',
+    retail: 'Unit Price',
   };
-  const priceColShort = `${TIER_SHORT_LABELS[canonicalTier] || 'Price'}${effectiveIncoterm ? ` ${effectiveIncoterm}` : ''}`;
+  const priceColShort = `${TIER_SHORT_LABELS[canonicalTier] || 'Unit Price'}`;
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -748,30 +748,30 @@ export async function POST(request) {
 
         const cols = [
           { key: 'dosage', label: 'Dosage', x: MRG + 10, align: 'left', maxLen: 16 },
-          { key: 'presentation', label: 'Presentation / Format', x: MRG + 95, align: 'left', maxLen: 22 },
+          { key: 'presentation', label: 'Presentation / Format', x: MRG + 115, align: 'left', maxLen: 24 },
         ];
         if (showPricePerMg) {
           cols.push({
             key: 'pricePerMg',
             label: `Rate (${CURRENCY_SYMBOLS[currency] || currency})`,
-            rightX: RIGHT_X - (includePrices ? (showKitPrice ? 190 : 95) : 0),
+            rightX: RIGHT_X - (includePrices ? (showKitPrice ? 200 : 100) : 0),
             align: 'right',
             maxLen: 15,
-          });
-        }
-        if (includePrices && showKitPrice) {
-          cols.push({
-            key: 'kitPrice',
-            label: `Kit (x${kitSize})${effectiveIncoterm ? ` ${effectiveIncoterm}` : ''}`,
-            rightX: RIGHT_X - 95,
-            align: 'right',
-            maxLen: 16,
           });
         }
         if (includePrices) {
           cols.push({
             key: 'price',
-            label: `${priceColShort} (${CURRENCY_SYMBOLS[currency] || currency})`,
+            label: `Unit Price (${CURRENCY_SYMBOLS[currency] || currency})`,
+            rightX: RIGHT_X - (showKitPrice ? 105 : 0),
+            align: 'right',
+            maxLen: 18,
+          });
+        }
+        if (includePrices && showKitPrice) {
+          cols.push({
+            key: 'kitPrice',
+            label: `Pack 10 Vials (${CURRENCY_SYMBOLS[currency] || currency})`,
             rightX: RIGHT_X,
             align: 'right',
             maxLen: 20,
@@ -978,7 +978,7 @@ export async function POST(request) {
             const hasDesc = (showDescription || docType === 'catalog') && Boolean(pObj.description);
 
             // Check space for Product Header + Metadata + Protocols + Table Header + Variants
-            const neededSpace = 32 + (hasMeta ? 14 : 0) + (hasProtocols ? 14 : 0) + (hasDesc ? 14 : 0) + 20 + Math.min(2, pObj.variants.length) * 17;
+            const neededSpace = 34 + (hasMeta ? 18 : 0) + (hasProtocols ? 18 : 0) + (hasDesc ? 16 : 0) + 24 + Math.min(2, pObj.variants.length) * 18;
             ensureSpace(neededSpace);
 
             // Product Header Row — Card Style with Left Brand Accent
@@ -1021,7 +1021,7 @@ export async function POST(request) {
               color: ACCENT,
             });
 
-            currentY -= 17;
+            currentY -= 19;
 
             // Visual Badges / Pills for Target & CAS
             if (hasMeta) {
@@ -1060,7 +1060,7 @@ export async function POST(request) {
                 });
               }
 
-              currentY -= 14;
+              currentY -= 17;
             }
 
             // Interactive Named Clinical Protocol Cards
@@ -1072,7 +1072,7 @@ export async function POST(request) {
                 const prW = helveticaBold.widthOfTextAtSize(protTxt, 6.8);
                 if (protPillX + prW + 12 > RIGHT_X) {
                   protPillX = MRG + 8;
-                  currentY -= 14;
+                  currentY -= 16;
                 }
                 page.drawRectangle({
                   x: protPillX,
@@ -1090,7 +1090,7 @@ export async function POST(request) {
                 });
                 protPillX += prW + 12;
               });
-              currentY -= 14;
+              currentY -= 17;
             }
 
             // Description Line if enabled
@@ -1102,8 +1102,10 @@ export async function POST(request) {
                 font: helvetica,
                 color: rgb(0.45, 0.45, 0.45),
               });
-              currentY -= 11;
+              currentY -= 14;
             }
+
+            currentY -= 4;
 
             // Table Column Headers (Rendered directly before variant data)
             drawTableHeader();
@@ -1215,7 +1217,7 @@ export async function POST(request) {
                 // Column 2: Presentation / Format
                 const formatText = item.presentationOnly || item.variantName || 'Vial';
                 page.drawText(formatText, {
-                  x: MRG + 95,
+                  x: MRG + 115,
                   y: currentY,
                   size: 8.2,
                   font: helvetica,
@@ -1230,7 +1232,7 @@ export async function POST(request) {
 
                 if (isCategoryBestValue) {
                   const formatW = helvetica.widthOfTextAtSize(formatText, 8.2);
-                  const bvX = MRG + 95 + formatW + 8;
+                  const bvX = MRG + 115 + formatW + 8;
                   const bvBadgeW = 44;
                   page.drawRectangle({
                     x: bvX,

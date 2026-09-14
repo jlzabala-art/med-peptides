@@ -127,10 +127,36 @@ export function useSharedCatalogState({
   // ── Filters ────────────────────────────────────────────────────────────────
   const [activeTab,          setActiveTab]          = useState(isProtocolCatalog ? 'protocols' : 'products');
   const [searchQuery,        setSearchQuery]        = useState('');
-  const [selectedGoal,       setSelectedGoal]       = useState('all');
+  const [selectedGoals,      setSelectedGoals]      = useState([]); // array of goal ids, empty = all
   const [dosageFilter,       setDosageFilter]       = useState('all');
   const [routeFilter,        setRouteFilter]        = useState('all');
   const [packagingMode,      setPackagingMode]      = useState('all'); // 'all' | 'kits' | 'units'
+
+  // Backward compatibility: selectedGoal is single string or 'all'
+  const selectedGoal = selectedGoals.length === 1 ? selectedGoals[0] : (selectedGoals.length === 0 ? 'all' : selectedGoals[0]);
+  const setSelectedGoal = useCallback((goalOrGoals) => {
+    if (!goalOrGoals || goalOrGoals === 'all') {
+      setSelectedGoals([]);
+    } else if (Array.isArray(goalOrGoals)) {
+      setSelectedGoals(goalOrGoals);
+    } else {
+      setSelectedGoals([goalOrGoals]);
+    }
+  }, []);
+
+  const toggleGoal = useCallback((goalId) => {
+    if (!goalId || goalId === 'all') {
+      setSelectedGoals([]);
+      return;
+    }
+    setSelectedGoals(prev =>
+      prev.includes(goalId) ? prev.filter(g => g !== goalId) : [...prev, goalId]
+    );
+  }, []);
+
+  const clearGoals = useCallback(() => {
+    setSelectedGoals([]);
+  }, []);
 
   // Alias for backward compatibility
   const selectedCategory = selectedGoal;
@@ -172,8 +198,24 @@ export function useSharedCatalogState({
   });
 
   // ── Checkout form ─────────────────────────────────────────────────────────
+  const getCleanClinicName = () => {
+    const raw = catalogMeta?.recipientName || catalogMeta?.clientName || '';
+    const lower = raw.toLowerCase();
+    if (
+      !raw ||
+      lower.includes('lotusland') ||
+      lower.includes('regenpept') ||
+      lower.includes('valued partner') ||
+      lower.includes('healthcare provider') ||
+      lower.includes('client')
+    ) {
+      return '';
+    }
+    return raw;
+  };
+
   const [checkoutForm, setCheckoutForm] = useState({
-    clinicName:      catalogMeta?.recipientName || catalogMeta?.clientName || '',
+    clinicName:      getCleanClinicName(),
     contactPerson:   catalogMeta?.recipientContact || catalogMeta?.contactPerson || catalogMeta?.contactName || '',
     email:           catalogMeta?.recipientEmail || catalogMeta?.clientEmail || '',
     phone:           catalogMeta?.recipientPhone || catalogMeta?.clientPhone || '',
@@ -358,7 +400,7 @@ export function useSharedCatalogState({
   const filteredProducts = useMemo(() => {
     return enrichedProducts
       .filter(p => {
-        const matchGoal = selectedGoal === 'all' || p.canonicalGoals.includes(selectedGoal);
+        const matchGoal = selectedGoals.length === 0 || selectedGoals.some(g => p.canonicalGoals.includes(g));
         const cleanQuery = searchQuery.trim().toLowerCase();
         const matchQuery = !cleanQuery ||
           (p.canonicalName && p.canonicalName.toLowerCase().includes(cleanQuery)) ||
@@ -405,19 +447,19 @@ export function useSharedCatalogState({
           variants: sortedVariants
         };
       });
-  }, [enrichedProducts, selectedGoal, searchQuery, dosageFilter, packagingMode, routeFilter]);
+  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter]);
 
   const filteredProtocols = useMemo(() => {
     return protocols.filter(proto => {
       const protoGoals = resolveProductCanonicalGoals(proto);
-      const matchGoal = selectedGoal === 'all' || protoGoals.includes(selectedGoal);
+      const matchGoal = selectedGoals.length === 0 || selectedGoals.some(g => protoGoals.includes(g));
       const matchQuery = !searchQuery ||
         proto.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         proto.goal.toLowerCase().includes(searchQuery.toLowerCase()) ||
         proto.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchGoal && matchQuery;
     });
-  }, [protocols, searchQuery, selectedGoal]);
+  }, [protocols, searchQuery, selectedGoals]);
 
 
   const toggleExpand = useCallback((productId) => {
@@ -495,6 +537,8 @@ export function useSharedCatalogState({
     activeTab, setActiveTab,
     searchQuery, setSearchQuery,
     selectedGoal, setSelectedGoal,
+    selectedGoals, setSelectedGoals,
+    toggleGoal, clearGoals,
     availableGoals,
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
