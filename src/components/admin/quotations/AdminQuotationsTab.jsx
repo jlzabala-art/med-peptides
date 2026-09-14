@@ -40,14 +40,14 @@ export default function AdminQuotationsTab() {
   const savedKpiRange = typeof window !== 'undefined' 
     ? (sessionStorage.getItem('admin_kpi_time_range') || localStorage.getItem('admin_kpi_time_range'))
     : null;
-  const rangeFilter = urlRange !== null && urlRange !== undefined ? urlRange : (savedKpiRange || 'week');
+  const rangeFilter = urlRange !== null && urlRange !== undefined ? urlRange : (savedKpiRange || 'month');
   const categoryFilter = searchParams.get('category') || searchParams.get('recipient') || '';
   const managerFilter = searchParams.get('manager') || searchParams.get('accountManager') || '';
 
   // Synchronize URL query parameter with the active range on initial load if missing (Golden Rule #24)
   useEffect(() => {
     if (!searchParams.get('range') && !searchParams.get('timeframe')) {
-      const defaultRange = savedKpiRange || 'week';
+      const defaultRange = savedKpiRange || 'month';
       const params = new URLSearchParams(searchParams.toString());
       params.set('range', defaultRange);
       router.replace(`${pathname}?${params.toString()}`);
@@ -95,7 +95,8 @@ export default function AdminQuotationsTab() {
 
   // Firestore Collection for Quotations
   const { data: rawQuotations = [], isLoading: loadingQuotes, refresh: refreshQuotes } = useFirestoreCollection('quotations', {
-    limitCount: 150,
+    limitCount: 300,
+    orderByFields: [['createdAt', 'desc']],
   });
 
   // Authoritative Normalizer: strictly processes real Firestore records from the 'quotations' collection
@@ -1339,6 +1340,7 @@ export default function AdminQuotationsTab() {
           rowKey="id"
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
+          alwaysShowPagination={true}
           bulkActions={[
             {
               label: `📲 Share Selected (${selectedIds.length})`,
