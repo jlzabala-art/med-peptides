@@ -131,6 +131,28 @@ export default function SharedCatalogClientView({
     }
   };
 
+  // ── Telemetry: Report cart interactions to backend for engagement tracking ──
+  React.useEffect(() => {
+    if (!catalogMeta?.catalogId || !cartItems || cartItems.length === 0) return;
+    const timer = setTimeout(() => {
+      fetch('/api/catalog/tracking-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'cart_update',
+          catalogId: catalogMeta.catalogId,
+          cartItemsCount: cartItems.length,
+          cartItems: cartItems.map(c => ({
+            name: c.productName || 'Compound',
+            qty: c.quantity || 1,
+            price: c.unitPrice || 0
+          }))
+        })
+      }).catch(() => {});
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [cartItems, catalogMeta?.catalogId]);
+
   // ── Catalog PDF download — uses fetch+NDJSON streaming ──
   const handleDownloadPdf = async () => {
     setIsGeneratingPdf(true);
@@ -172,6 +194,8 @@ export default function SharedCatalogClientView({
       const decoder = new TextDecoder('utf-8');
       let buffer = '';
       let finalUrl = null;
+      let directBase64 = null;
+      let downloadFilename = `Atlas_Health_Official_Catalog_${new Date().toISOString().split('T')[0]}.pdf`;
 
       while (true) {
         const { value, done } = await reader.read();
@@ -183,8 +207,13 @@ export default function SharedCatalogClientView({
             if (!line.trim()) continue;
             try {
               const data = JSON.parse(line);
-              if (data.type === 'done' && data.meta?.url) finalUrl = data.meta.url;
-              else if (data.type === 'error') throw new Error(data.message);
+              if (data.type === 'done') {
+                if (data.filename) downloadFilename = data.filename;
+                if (data.pdfBase64) directBase64 = data.pdfBase64;
+                if (data.meta?.url) finalUrl = data.meta.url;
+              } else if (data.type === 'error') {
+                throw new Error(data.message);
+              }
             } catch (e) {
               console.warn('NDJSON parsing chunk error:', e);
             }
@@ -193,14 +222,35 @@ export default function SharedCatalogClientView({
         if (done) break;
       }
 
-      if (finalUrl) {
+      if (directBase64) {
+        try {
+          const byteCharacters = atob(directBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = downloadFilename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+        } catch (b64Err) {
+          console.warn('Direct base64 blob dump failed, falling back to URL:', b64Err);
+          if (finalUrl) window.open(finalUrl, '_blank');
+        }
+      } else if (finalUrl) {
         try {
           const pdfRes = await fetch(finalUrl);
           const pdfBlob = await pdfRes.blob();
           const blobUrl = window.URL.createObjectURL(pdfBlob);
           const a = document.createElement('a');
           a.href = blobUrl;
-          a.download = `Atlas_Health_Official_Catalog_${new Date().toISOString().split('T')[0]}.pdf`;
+          a.download = downloadFilename;
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -209,7 +259,7 @@ export default function SharedCatalogClientView({
           window.open(finalUrl, '_blank');
         }
       } else {
-        throw new Error('PDF generation completed without returning a valid URL.');
+        throw new Error('PDF generation completed without returning a valid URL or payload.');
       }
     } catch (err) {
       console.error('Error downloading PDF:', err);

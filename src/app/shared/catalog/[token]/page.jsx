@@ -15,11 +15,44 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
-  const title = 'Official Formulations & Product Portfolio | Atlas Health';
-  const description = 'Access the verified clinical portfolio of analytical grade peptide formulations, multi-dose presentations, 10-vial kits, and Ex-Works (EXW) pricing for authorized healthcare clinics and providers.';
+  const resolvedParams = await params;
+  const token = resolvedParams?.token;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides-app.web.app';
-  const ogImageUrl = `${appUrl}/og-preview.png`;
+  let catalogData = {};
+  if (token) {
+    const v = verifySignedQuoteToken(token);
+    if (v.valid && v.payload) {
+      catalogData = v.payload;
+    } else {
+      try {
+        const snap = await adminDb.collection('shared_catalog_links').doc(token).get();
+        if (snap.exists) {
+          catalogData = snap.data() || {};
+        }
+      } catch (e) {
+        // Fallback to default
+      }
+    }
+  }
+
+  const recipientName = catalogData.recipientName;
+  const supplierId = catalogData.supplierId || '';
+  const catalogueFilter = catalogData.catalogueFilter || '';
+  const currency = catalogData.currency || 'USD';
+  const validityDays = catalogData.validityDays || 30;
+
+  const isLotusland = supplierId.includes('lotusland') || catalogueFilter.toLowerCase().includes('regenpept');
+  const supplierTitle = isLotusland ? 'Lotusland • RegenPept Formulations' : 'Atlas Health Formulations';
+
+  const title = (recipientName && recipientName !== 'Valued Partner')
+    ? `Atlas Health • Portafolio Clínico: ${recipientName}`
+    : `Atlas Health • ${supplierTitle}`;
+
+  const description = `Catálogo clínico oficial y formulaciones analíticas (${supplierTitle}) en ${currency}. Enlace verificado y exclusivo${recipientName && recipientName !== 'Valued Partner' ? ` para ${recipientName}` : ''}. Validez: ${validityDays} días.`;
+
+  const appUrl = 'https://med-peptides.com';
+  const ogImageUrl = `${appUrl}/og-catalog.jpg`;
+  const catalogCode = catalogData.catalogId || token || '';
 
   return {
     title,
@@ -29,11 +62,28 @@ export async function generateMetadata({ params }) {
       description,
       type: 'website',
       siteName: 'Atlas Health • Clinical Portfolio',
-      locale: 'en_US',
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }]
+      url: `${appUrl}/c/${catalogCode}`,
+      locale: 'es_ES',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+          type: 'image/jpeg',
+        }
+      ]
     },
-    twitter: { card: 'summary_large_image', title, description, images: [ogImageUrl] },
-    other: { 'whatsapp:title': title, 'whatsapp:description': description }
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImageUrl]
+    },
+    other: {
+      'whatsapp:title': title,
+      'whatsapp:description': description
+    }
   };
 }
 
@@ -156,7 +206,32 @@ async function fetchCatalogData(supplierId, category, catalogueFilter) {
 export default async function SharedCatalogPage({ params }) {
   const resolvedParams = await params;
   const token = resolvedParams?.token;
-  const verification = verifySignedQuoteToken(token);
+  let verification = verifySignedQuoteToken(token);
+  let resolvedDoc = null;
+
+  if (!verification.valid && token) {
+    try {
+      const linkSnap = await adminDb.collection('shared_catalog_links').doc(token).get();
+      if (linkSnap.exists) {
+        resolvedDoc = linkSnap.data() || {};
+        if (resolvedDoc.status === 'revoked') {
+          verification = { valid: false, revoked: true };
+        } else if (resolvedDoc.token) {
+          const v = verifySignedQuoteToken(resolvedDoc.token);
+          if (v.valid) {
+            verification = v;
+          } else {
+            verification = { valid: false, expired: v.expired };
+          }
+        } else if (resolvedDoc.status === 'active') {
+          const isExpired = resolvedDoc.expiresAt && new Date(resolvedDoc.expiresAt) < new Date();
+          verification = { valid: !isExpired, expired: isExpired, payload: resolvedDoc };
+        }
+      }
+    } catch (docErr) {
+      console.warn('[SharedCatalogPage] Error loading short link document:', docErr);
+    }
+  }
 
   if (!verification.valid) {
     return (
@@ -180,10 +255,12 @@ export default async function SharedCatalogPage({ params }) {
             <AlertTriangle size={32} />
           </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-            {verification.expired ? 'Catalog Link Expired' : 'Invalid Catalog Link'}
+            {verification.revoked ? 'Catalog Link Revoked' : verification.expired ? 'Catalog Link Expired' : 'Invalid Catalog Link'}
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.925rem', lineHeight: '1.5', marginBottom: '24px' }}>
-            {verification.expired
+            {verification.revoked
+              ? 'This shared price list has been revoked or updated by the account manager. Please request a new access link.'
+              : verification.expired
               ? 'This shared product portfolio link has exceeded its validity period. Please contact your account manager to request an updated access link.'
               : 'The security signature on this catalog link is invalid or has been revoked.'}
           </p>
@@ -192,18 +269,18 @@ export default async function SharedCatalogPage({ params }) {
     );
   }
 
-  const payload = verification.payload || {};
+  const payload = verification.payload || resolvedDoc || {};
 
   // F-B: Guarantee catalogId is always defined — derive from token if missing
-  const catalogId = payload.catalogId ||
+  const catalogId = payload.catalogId || (resolvedDoc?.catalogId) ||
     `CAT-${(payload.supplierId || 'ATL').toUpperCase().slice(0, 6)}-${Date.now().toString(36).toUpperCase()}`;
 
   // Check Firestore for remote revocation & update visit analytics
-  let linkData = {};
+  let linkData = resolvedDoc || {};
   if (catalogId) {
     try {
       const linkDocRef = adminDb.collection('shared_catalog_links').doc(catalogId);
-      const linkSnap = await linkDocRef.get();
+      const linkSnap = resolvedDoc ? { exists: true, data: () => resolvedDoc } : await linkDocRef.get();
       if (linkSnap.exists) {
         linkData = linkSnap.data() || {};
         if (linkData.status === 'revoked') {

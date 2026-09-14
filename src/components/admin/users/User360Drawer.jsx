@@ -15,12 +15,18 @@ import {
   Eye, 
   SlidersHorizontal, 
   CheckCircle,
-  FileText
+  FileText,
+  Share2,
+  Send,
+  Clock,
+  RefreshCw,
+  MessageSquare
 } from '@/lib/icons';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '@/firebase';
 import notifier from '@/services/NotificationService';
 import CopyableId from '@/components/ui/CopyableId';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 export default function User360Drawer({
   isOpen,
@@ -31,6 +37,11 @@ export default function User360Drawer({
 }) {
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Shared Catalogs State
+  const [sharedLinks, setSharedLinks] = useState([]);
+  const [isLoadingLinks, setIsLoadingLinks] = useState(false);
+  const [isSharingLotus, setIsSharingLotus] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -84,6 +95,101 @@ export default function User360Drawer({
       });
     }
   }, [user]);
+
+  // Load shared catalog links for this specific user
+  const fetchSharedLinks = async () => {
+    if (!user) return;
+    const userId = user.id || user.uid;
+    setIsLoadingLinks(true);
+    try {
+      let links = [];
+      if (userId) {
+        const q = query(
+          collection(db, 'shared_catalog_links'),
+          where('recipientUserId', '==', userId),
+          limit(25)
+        );
+        const snap = await getDocs(q);
+        snap.forEach(d => links.push({ id: d.id, ...d.data() }));
+      }
+      // Also fallback by phone if available
+      const phone = user.phone || user.phoneNumber;
+      if (phone && links.length === 0) {
+        const qPhone = query(
+          collection(db, 'shared_catalog_links'),
+          where('recipientPhone', '==', phone),
+          limit(25)
+        );
+        const snapPhone = await getDocs(qPhone);
+        snapPhone.forEach(d => {
+          if (!links.some(l => l.id === d.id)) links.push({ id: d.id, ...d.data() });
+        });
+      }
+      // Sort newest first
+      links.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setSharedLinks(links);
+    } catch (err) {
+      console.warn('Error loading user shared catalogs:', err);
+    } finally {
+      setIsLoadingLinks(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'catalogs' && user) {
+      fetchSharedLinks();
+    }
+  }, [activeTab, user]);
+
+  const handleShareLotusland = async () => {
+    const userId = user?.id || user?.uid;
+    const fullName = formData.displayName || 'Doctor / Partner';
+    const phone = formData.phone || '';
+    const email = formData.email || '';
+
+    setIsSharingLotus(true);
+    try {
+      const res = await fetch('/api/catalog/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          supplierId: 'supplier-lotusland',
+          catalogueFilter: 'RegenPept',
+          recipientUserId: userId,
+          recipientName: fullName,
+          recipientPhone: phone,
+          recipientEmail: email,
+          recipientType: formData.role || 'clinic',
+          priceSource: formData.pricingChannel || 'clinic',
+          currency: 'USD',
+          channel: 'whatsapp',
+          sentBy: 'Atlas Commercial Desk'
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate link');
+
+      const shortUrl = data.shortUrl || data.shareableUrl;
+      const cleanPhone = phone.replace(/[^\d]/g, '');
+      const message = `Hola ${fullName}, te comparto el catálogo clínico oficial de formulaciones analíticas de Lotusland / RegenPept:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier cotización o pedido.`;
+
+      if (cleanPhone) {
+        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        notifier.success(`Enlace corto generado y WhatsApp abierto: ${shortUrl}`);
+      } else {
+        await navigator.clipboard.writeText(message);
+        notifier.success(`Enlace corto copiado al portapapeles: ${shortUrl}`);
+      }
+
+      await fetchSharedLinks();
+    } catch (err) {
+      console.error('Error sharing Lotusland catalog:', err);
+      notifier.error(err.message || 'Error generating catalog link');
+    } finally {
+      setIsSharingLotus(false);
+    }
+  };
 
   if (!user) return null;
 
@@ -156,7 +262,8 @@ export default function User360Drawer({
             { key: 'profile', label: 'Identity & Profile', icon: User },
             { key: 'pricing', label: 'Pricing & Channels', icon: DollarSign },
             { key: 'permissions', label: 'Atomic RBAC & AI', icon: ShieldCheck },
-            { key: 'erp', label: 'Zoho ERP & Billing', icon: Building2 }
+            { key: 'erp', label: 'Zoho ERP & Billing', icon: Building2 },
+            { key: 'catalogs', label: 'Catalogs & Shares', icon: FileText }
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -452,6 +559,225 @@ export default function User360Drawer({
                   </a>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: Shared Catalogs & Client Activity */}
+        {activeTab === 'catalogs' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Action Banner: Send Lotusland Catalog */}
+            <div style={{
+              padding: '1rem',
+              borderRadius: '12px',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <MessageSquare size={16} /> Compartir Catálogo Lotusland
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#334155', marginTop: '0.2rem', lineHeight: 1.4 }}>
+                    Genera un enlace corto (<code style={{ color: '#166534', fontWeight: 700 }}>/c/CAT-...</code>) con vista previa de WhatsApp y registra la trazabilidad del cliente.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleShareLotusland}
+                  disabled={isSharingLotus}
+                  style={{
+                    padding: '0.55rem 1rem',
+                    backgroundColor: '#16a34a',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: isSharingLotus ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    boxShadow: '0 2px 4px rgba(22,163,74,0.3)',
+                    flexShrink: 0
+                  }}
+                >
+                  <Send size={14} /> {isSharingLotus ? 'Generando...' : 'Enviar por WhatsApp'}
+                </button>
+              </div>
+
+              <div style={{ fontSize: '0.72rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span>Destinatario: <strong>{formData.displayName || 'Valued Partner'}</strong></span>
+                <span>Canal: <strong>{formData.pricingChannel.toUpperCase()}</strong></span>
+                <span>Teléfono: <strong>{formData.phone || 'No registrado'}</strong></span>
+              </div>
+            </div>
+
+            {/* Metrics Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+              <div style={{ padding: '0.65rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>{sharedLinks.length}</div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Enlaces Compartidos</div>
+              </div>
+              <div style={{ padding: '0.65rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#16a34a' }}>
+                  {sharedLinks.reduce((acc, curr) => acc + (curr.visitsCount || 0), 0)}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Aperturas / Visitas</div>
+              </div>
+              <div style={{ padding: '0.65rem', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0284c7' }}>
+                  {sharedLinks.filter(l => l.status === 'engaged' || l.status === 'converted' || l.cartItemsCount > 0).length}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Con Interacción</div>
+              </div>
+            </div>
+
+            {/* Shared Links History List */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>
+                  Historial de Envíos y Telemetría:
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchSharedLinks}
+                  disabled={isLoadingLinks}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    fontSize: '0.74rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.2rem'
+                  }}
+                >
+                  <RefreshCw size={12} /> Actualizar
+                </button>
+              </div>
+
+              {isLoadingLinks ? (
+                <div style={{ padding: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
+                  Cargando actividad...
+                </div>
+              ) : sharedLinks.length === 0 ? (
+                <div style={{
+                  padding: '1.5rem',
+                  textAlign: 'center',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '8px',
+                  border: '1px dashed #cbd5e1',
+                  color: '#64748b',
+                  fontSize: '0.8rem'
+                }}>
+                  No se han enviado catálogos a este usuario todavía. Haz clic en <strong>Enviar por WhatsApp</strong> para iniciar el contacto.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {sharedLinks.map(link => {
+                    const shortUrl = link.shortUrl || `https://med-peptides.com/c/${link.catalogId}`;
+                    const createdDate = link.createdAt ? new Date(link.createdAt).toLocaleDateString() : 'N/A';
+                    const lastVisited = link.lastVisitedAt ? new Date(link.lastVisitedAt).toLocaleString() : null;
+
+                    return (
+                      <div
+                        key={link.id}
+                        style={{
+                          padding: '0.75rem',
+                          borderRadius: '8px',
+                          border: '1px solid #e2e8f0',
+                          backgroundColor: '#ffffff',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.4rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <CopyableId value={link.catalogId || link.id} />
+                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
+                              {link.catalogueFilter || (link.supplierId ? link.supplierId.replace(/^supplier-/, '') : 'General')}
+                            </span>
+                          </div>
+                          <StatusBadge status={link.status || 'sent'} />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: '#64748b' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                            <Clock size={12} /> Enviado: {createdDate} ({link.channel || 'whatsapp'})
+                          </div>
+                          <div>
+                            <strong>{link.visitsCount || 0} visitas</strong>
+                            {lastVisited && <span style={{ marginLeft: '0.3rem' }}>(última: {lastVisited})</span>}
+                          </div>
+                        </div>
+
+                        {link.cartSummary && (
+                          <div style={{
+                            padding: '0.35rem 0.5rem',
+                            backgroundColor: '#f5f3ff',
+                            borderRadius: '6px',
+                            border: '1px solid #ddd6fe',
+                            fontSize: '0.72rem',
+                            color: '#6d28d9'
+                          }}>
+                            🛒 Carrito activo: {link.cartSummary}
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.4rem', marginTop: '0.2rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(shortUrl);
+                              notifier.success('Enlace corto copiado: ' + shortUrl);
+                            }}
+                            style={{
+                              padding: '0.3rem 0.6rem',
+                              backgroundColor: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.2rem',
+                              color: '#334155'
+                            }}
+                          >
+                            <Copy size={12} /> Copiar Link
+                          </button>
+                          <a
+                            href={shortUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              padding: '0.3rem 0.6rem',
+                              backgroundColor: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              textDecoration: 'none',
+                              color: '#0284c7',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.2rem',
+                              fontWeight: 600
+                            }}
+                          >
+                            <ExternalLink size={12} /> Ver Catálogo
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}

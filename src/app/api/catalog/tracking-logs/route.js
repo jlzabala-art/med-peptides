@@ -74,12 +74,47 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // ── Branch A: Telemetry View Event (from navigator.sendBeacon) ──
+    // ── Branch A: Telemetry View & Engagement Event ──
+    if (body.event === 'cart_update' && (body.catalogId || body.id)) {
+      const targetId = body.catalogId || body.id;
+      try {
+        const linkRef = adminDb.collection('shared_catalog_links').doc(targetId);
+        await linkRef.set({
+          status: 'engaged',
+          lastCartUpdateAt: new Date().toISOString(),
+          cartItemsCount: body.cartItemsCount || (body.cartItems ? body.cartItems.length : 0),
+          cartSummary: (body.cartItems || []).slice(0, 5).map(c => `${c.qty || c.quantity || 1}x ${c.name || c.productName || 'Item'}`).join(', '),
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (e) {
+        console.warn('Error recording cart_update telemetry:', e);
+      }
+      return NextResponse.json({ success: true, event: 'cart_update_recorded' });
+    }
+
     if (body.event === 'view' || body.action === 'view' || (body.id && body.viewedAt)) {
-      const logRef = adminDb.collection('catalog_generation_logs').doc(body.id);
+      const targetId = body.id || body.catalogId;
+      try {
+        // Also update shared_catalog_links if exists
+        const linkRef = adminDb.collection('shared_catalog_links').doc(targetId);
+        const linkSnap = await linkRef.get();
+        if (linkSnap.exists) {
+          const lData = linkSnap.data() || {};
+          await linkRef.update({
+            status: lData.status === 'converted' ? 'converted' : lData.status === 'engaged' ? 'engaged' : 'viewed',
+            lastVisitedAt: body.viewedAt || new Date().toISOString(),
+            visitsCount: FieldValue.increment(1),
+            updatedAt: new Date().toISOString()
+          });
+        }
+      } catch (err) {
+        // Non-blocking
+      }
+
+      const logRef = adminDb.collection('catalog_generation_logs').doc(targetId);
       const docSnap = await logRef.get();
       if (!docSnap.exists) {
-        return NextResponse.json({ error: 'Tracking record not found' }, { status: 404 });
+        return NextResponse.json({ success: true, event: 'view_recorded_on_link' });
       }
 
       const existing = docSnap.data();

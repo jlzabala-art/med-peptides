@@ -1597,8 +1597,9 @@ export async function POST(request) {
           console.error('Error logging catalog generation:', logErr);
         }
 
-        // Use the Cloud Storage URL
-        emit({ type: 'done', filename, meta: { pages: totalPages, variants: allItems.length, url, logId } });
+        // Provide both direct base64 for immediate browser download and Cloud Storage URL
+        const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
+        emit({ type: 'done', filename, pdfBase64, meta: { pages: totalPages, variants: allItems.length, url, logId } });
         controller.close();
       } catch (err) {
         console.error('[/api/generate-pdf] POST stream error:', err);

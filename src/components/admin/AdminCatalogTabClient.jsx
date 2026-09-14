@@ -626,6 +626,8 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
       const reader = res.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let finalUrl = null;
+      let rawPdfBase64 = null;
+      let downloadFilename = null;
       let buffer = '';
 
       while (true) {
@@ -638,8 +640,10 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
             if (!line.trim()) continue;
             try {
               const data = JSON.parse(line);
-              if (data.type === 'done' && data.meta?.url) {
-                finalUrl = data.meta.url;
+              if (data.type === 'done') {
+                finalUrl = data.meta?.url || null;
+                rawPdfBase64 = data.pdfBase64 || null;
+                downloadFilename = data.filename || null;
               } else if (data.type === 'error') {
                 throw new Error(data.message);
               }
@@ -651,12 +655,52 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
         if (done) break;
       }
 
-      if (finalUrl) {
-        const fullUrl = finalUrl.startsWith('http') ? finalUrl : `${window.location.origin}${finalUrl}`;
-        try {
-          window.open(fullUrl, '_blank', 'noopener,noreferrer');
-        } catch (e) {
-          console.warn('Direct popup blocked, user can open via dock button', e);
+      if (rawPdfBase64 || finalUrl) {
+        const fullUrl = finalUrl || '#';
+        const finalFilename = downloadFilename || `${supplierLabel}_Catalog_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+        // Direct local file dump to the user's computer
+        if (rawPdfBase64) {
+          try {
+            const byteCharacters = atob(rawPdfBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = finalFilename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+          } catch (dumpErr) {
+            console.warn('Base64 direct blob dump failed, falling back to URL download:', dumpErr);
+            if (finalUrl) {
+              const a = document.createElement('a');
+              a.href = finalUrl;
+              a.download = finalFilename;
+              a.target = '_blank';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            }
+          }
+        } else if (finalUrl) {
+          try {
+            const a = document.createElement('a');
+            a.href = finalUrl;
+            a.download = finalFilename;
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          } catch (e) {
+            console.warn('Direct popup blocked, user can open via dock button', e);
+          }
         }
         toast.success(`✅ ${supplierLabel} PDF Catalog (+${markupPercent}%) ready!`, { id: 'catalog-export-toast' });
         setExportStatus({

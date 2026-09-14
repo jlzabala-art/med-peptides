@@ -28,7 +28,7 @@ import {
   Users, UserCheck, ShieldCheck, Mail, Archive,
   Trash2, Plus, Edit, AlertCircle, XCircle, Eye,
   Building2, DollarSign, CheckCircle2, Search, Download, UserPlus, Clock, Stethoscope, Sparkles,
-  FileText, Package, Calendar
+  FileText, Package, Calendar, Share2, MessageSquare
 } from 'lucide-react';
 
 import { useFirestorePaginatedCollection } from '../../../hooks/data/useFirestorePaginatedCollection';
@@ -309,6 +309,56 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     });
   }
 
+  async function handleQuickShareLotusland(targetUser) {
+    const fullName = getUserFullName(targetUser);
+    const phone = targetUser.phone || targetUser.phoneNumber || '';
+    const email = targetUser.email || targetUser.contactEmail || '';
+    const userId = targetUser.id || targetUser.uid;
+    const priceSource = targetUser.pricingChannel || targetUser.priceTier || (targetUser.role === 'wholesaler' ? 'wholeseller' : 'clinic');
+
+    const toastId = toast.loading(`Generating Lotusland catalog link for ${fullName}...`);
+
+    try {
+      const res = await fetch('/api/catalog/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          supplierId: 'supplier-lotusland',
+          catalogueFilter: 'RegenPept',
+          recipientUserId: userId,
+          recipientName: fullName,
+          recipientPhone: phone,
+          recipientEmail: email,
+          recipientType: targetUser.role || 'clinic',
+          priceSource,
+          currency: 'USD',
+          channel: 'whatsapp',
+          sentBy: user?.email || 'admin'
+        })
+      });
+
+      const data = await res.json();
+      toast.dismiss(toastId);
+      if (!res.ok) throw new Error(data.error || 'Failed to generate link');
+
+      const shortUrl = data.shortUrl || data.shareableUrl;
+      const cleanPhone = phone.replace(/[^\d]/g, '');
+      const msg = `Hola ${fullName}, te comparto el catálogo clínico oficial de formulaciones analíticas de Lotusland / RegenPept:\n\n🔗 ${shortUrl}\n\nQuedo a tu disposición para cualquier cotización o pedido.`;
+
+      if (cleanPhone) {
+        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        toast.success(`WhatsApp opened for ${fullName} with short link: ${shortUrl}`);
+      } else {
+        await navigator.clipboard.writeText(msg);
+        toast.success(`Short link copied to clipboard for ${fullName} (${shortUrl})`);
+      }
+    } catch (err) {
+      toast.dismiss(toastId);
+      console.error('Error sharing Lotusland catalog:', err);
+      toast.error(err.message || 'Error generating shared link');
+    }
+  }
+
   async function handleImpersonate(userId) {
     if (readOnly) return;
     notifier.confirmCritical("Are you sure you want to log in as this user in a new tab?", async () => {
@@ -581,6 +631,16 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             onClick: (e) => { e.stopPropagation(); handleToggleApproval(u, false); }
           });
         }
+
+        // Lotusland Catalog Direct WhatsApp Share Action
+        actions.push({
+          label: 'Share Lotusland',
+          icon: Share2,
+          onClick: (e) => { 
+            e.stopPropagation(); 
+            handleQuickShareLotusland(u);
+          }
+        });
 
         // AI User Intelligence Action
         actions.push({
