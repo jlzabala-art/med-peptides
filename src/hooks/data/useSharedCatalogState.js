@@ -18,6 +18,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import { GOAL_TYPES, VALID_GOALS, GOAL_LABELS } from '@/constants/goalTypes';
+import { searchAlgolia } from '@/services/algoliaSearch';
 
 // ── Shipping destinations ─────────────────────────────────────────────────────
 export const SHIPPING_DESTINATIONS = [
@@ -131,6 +132,62 @@ export function useSharedCatalogState({
   const [dosageFilter,       setDosageFilter]       = useState('all');
   const [routeFilter,        setRouteFilter]        = useState('all');
   const [packagingMode,      setPackagingMode]      = useState('all'); // 'all' | 'kits' | 'units'
+
+  // Algolia Instant Search integration with typo-tolerance & clinical synonyms
+  const [algoliaMatchProductIds, setAlgoliaMatchProductIds] = useState(null);
+  const [algoliaMatchProtoIds,   setAlgoliaMatchProtoIds]   = useState(null);
+  const [isSearchingAlgolia,     setIsSearchingAlgolia]     = useState(false);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setAlgoliaMatchProductIds(null);
+      setAlgoliaMatchProtoIds(null);
+      setIsSearchingAlgolia(false);
+      return;
+    }
+
+    let active = true;
+    setIsSearchingAlgolia(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchAlgolia(q, { distinct: false, hitsPerPage: 40 });
+        if (!active) return;
+        if (res?.products?.length > 0 || res?.protocols?.length > 0) {
+          const prodIds = new Set();
+          res.products.forEach(p => {
+            if (p.objectID) prodIds.add(String(p.objectID).toLowerCase());
+            if (p.id) prodIds.add(String(p.id).toLowerCase());
+            if (p.slug) prodIds.add(String(p.slug).toLowerCase());
+            if (p.canonicalName) prodIds.add(String(p.canonicalName).toLowerCase());
+          });
+          const protoIds = new Set();
+          res.protocols?.forEach(pr => {
+            if (pr.objectID) protoIds.add(String(pr.objectID).toLowerCase());
+            if (pr.id) protoIds.add(String(pr.id).toLowerCase());
+            if (pr.slug) protoIds.add(String(pr.slug).toLowerCase());
+          });
+          setAlgoliaMatchProductIds(prodIds);
+          setAlgoliaMatchProtoIds(protoIds);
+        } else {
+          setAlgoliaMatchProductIds(null);
+          setAlgoliaMatchProtoIds(null);
+        }
+      } catch (err) {
+        if (active) {
+          setAlgoliaMatchProductIds(null);
+          setAlgoliaMatchProtoIds(null);
+        }
+      } finally {
+        if (active) setIsSearchingAlgolia(false);
+      }
+    }, 200);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
 
   // Backward compatibility: selectedGoal is single string or 'all'
   const selectedGoal = selectedGoals.length === 1 ? selectedGoals[0] : (selectedGoals.length === 0 ? 'all' : selectedGoals[0]);
@@ -402,7 +459,16 @@ export function useSharedCatalogState({
       .filter(p => {
         const matchGoal = selectedGoals.length === 0 || selectedGoals.some(g => p.canonicalGoals.includes(g));
         const cleanQuery = searchQuery.trim().toLowerCase();
+        
+        const isAlgoliaMatch = algoliaMatchProductIds && (
+          (p.id && algoliaMatchProductIds.has(String(p.id).toLowerCase())) ||
+          (p.slug && algoliaMatchProductIds.has(String(p.slug).toLowerCase())) ||
+          (p.canonicalName && algoliaMatchProductIds.has(String(p.canonicalName).toLowerCase())) ||
+          p.variants.some(v => v.id && algoliaMatchProductIds.has(String(v.id).toLowerCase()))
+        );
+
         const matchQuery = !cleanQuery ||
+          isAlgoliaMatch ||
           (p.canonicalName && p.canonicalName.toLowerCase().includes(cleanQuery)) ||
           (p.name && p.name.toLowerCase().includes(cleanQuery)) ||
           (p.description && p.description.toLowerCase().includes(cleanQuery)) ||
@@ -447,19 +513,26 @@ export function useSharedCatalogState({
           variants: sortedVariants
         };
       });
-  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter]);
+  }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter, algoliaMatchProductIds]);
 
   const filteredProtocols = useMemo(() => {
     return protocols.filter(proto => {
       const protoGoals = resolveProductCanonicalGoals(proto);
       const matchGoal = selectedGoals.length === 0 || selectedGoals.some(g => protoGoals.includes(g));
+      
+      const isAlgoliaMatch = algoliaMatchProtoIds && (
+        (proto.id && algoliaMatchProtoIds.has(String(proto.id).toLowerCase())) ||
+        (proto.slug && algoliaMatchProtoIds.has(String(proto.slug).toLowerCase()))
+      );
+
       const matchQuery = !searchQuery ||
+        isAlgoliaMatch ||
         proto.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         proto.goal.toLowerCase().includes(searchQuery.toLowerCase()) ||
         proto.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchGoal && matchQuery;
     });
-  }, [protocols, searchQuery, selectedGoals]);
+  }, [protocols, searchQuery, selectedGoals, algoliaMatchProtoIds]);
 
 
   const toggleExpand = useCallback((productId) => {
@@ -536,6 +609,7 @@ export function useSharedCatalogState({
     // Filter state
     activeTab, setActiveTab,
     searchQuery, setSearchQuery,
+    isSearchingAlgolia,
     selectedGoal, setSelectedGoal,
     selectedGoals, setSelectedGoals,
     toggleGoal, clearGoals,

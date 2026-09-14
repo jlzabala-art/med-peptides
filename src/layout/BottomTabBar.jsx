@@ -11,7 +11,14 @@ export default function BottomTabBar() {
   const { cartCount } = useCart();
   const setActiveModal = useUIStore(s => s.setActiveModal);
   const pathname = usePathname();
-  const { user, activeRole, isAdmin } = useAuth();
+  const { user, activeRole, isAdmin, loading } = useAuth();
+
+  // Si el usuario no está registrado / logueado, NUNCA debe aparecer la barra inferior en modo móvil
+  const isAuthenticated = Boolean(user && user.uid && activeRole !== 'guest');
+
+  if (!isAuthenticated || loading) {
+    return null;
+  }
 
   const isUserAdmin = isAdmin || activeRole === 'admin' || (user && ADMIN_EMAILS.includes(user.email?.toLowerCase()));
   const accountHref = !user 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generateSignedQuoteToken } from '@/services/dynamicPricingEngine';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { generatePharmaBatchCode } from '@/utils/pharmaBarcode';
 
 export async function POST(request) {
   try {
@@ -27,8 +28,18 @@ export async function POST(request) {
       notes = ''
     } = body;
 
+    const issuedAt = new Date().toISOString();
+    const batchCode = generatePharmaBatchCode({
+      supplierId,
+      catalogueFilter,
+      issuedAt,
+      priceMarkupPercent: Number(priceMarkupPercent) || 0,
+      prefix: 'RP'
+    });
+
     const catalogPayload = {
       catalogId: `CAT-${Date.now().toString(36).toUpperCase()}`,
+      batchCode,
       supplierId,
       catalogueFilter,
       productIds,
@@ -46,7 +57,7 @@ export async function POST(request) {
       accountManagerEmail,
       validityDays,
       notes,
-      issuedAt: new Date().toISOString()
+      issuedAt
     };
 
     const token = generateSignedQuoteToken(catalogPayload, validityDays * 24);
@@ -61,6 +72,7 @@ export async function POST(request) {
     try {
       await adminDb.collection('shared_catalog_links').doc(linkId).set({
         catalogId: linkId,
+        batchCode,
         supplierId,
         catalogueFilter,
         priceSource,

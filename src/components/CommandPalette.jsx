@@ -15,7 +15,7 @@ import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useDebounce } from '../hooks/useDebounce';
-import { searchFederatedEntities, searchOrders } from '../services/searchProviders';
+import { searchFederatedEntities, searchOrders, searchQuotations } from '../services/searchProviders';
 import { useWorkspaceStore } from '../stores/useWorkspaceStore';
 import { logger } from '../utils/logger';
 
@@ -186,15 +186,17 @@ export default function CommandPalette({ isOpen, onClose, navGroups = [], pinned
     const actionResults = QUICK_ACTIONS.filter(a => fuzzyMatch(lowerQ, a.label));
     const routeResults = systemRoutes.filter(r => fuzzyMatch(lowerQ, r.label));
     try {
-      const [federatedResults, orderResults] = await Promise.all([
+      const [federatedResults, orderResults, quotationResults] = await Promise.all([
         searchFederatedEntities(q, portalType, config.routePrefix),
-        searchOrders(q, portalType, user)
+        searchOrders(q, portalType, user),
+        searchQuotations(q, portalType, user)
       ]);
       setResults([
         ...actionResults,
         ...routeResults,
         ...federatedResults,
         ...orderResults,
+        ...quotationResults,
       ]);
     } catch (err) {
       logger.error('Omni-search error', { error: err });

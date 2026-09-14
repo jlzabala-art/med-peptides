@@ -23,14 +23,20 @@ import {
   Filter,
   Send,
   Check,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { resolveVariantClinicalImage, resolveProtocolClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import {
   useSharedCatalogState,
   SHIPPING_DESTINATIONS,
 } from '../../../../hooks/data/useSharedCatalogState';
+import AlgoliaRecommendCrossSell from '@/components/catalog/AlgoliaRecommendCrossSell';
+import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
+import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
+import { generatePharmaBatchCode } from '@/utils/pharmaBarcode';
 
 export default function SharedCatalogClientView({
   catalogMeta,
@@ -85,6 +91,29 @@ export default function SharedCatalogClientView({
     priceSource,
     includePrices,
   });
+
+  const { user, activeRole, logout } = useAuth();
+  const isAuthenticated = Boolean(user && user.uid && activeRole !== 'guest');
+
+  const [shareUrl, setShareUrl] = React.useState('');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin;
+      const cleanPath = catalogMeta?.catalogId ? `/c/${catalogMeta.catalogId}` : window.location.pathname;
+      setShareUrl(`${origin}${cleanPath}`);
+    }
+  }, [catalogMeta?.catalogId]);
+
+  const batchCode = React.useMemo(() => {
+    return catalogMeta?.batchCode || generatePharmaBatchCode({
+      supplierId: catalogMeta?.supplierId,
+      catalogueFilter: catalogMeta?.catalogueFilter,
+      issuedAt: catalogMeta?.issuedAt || catalogMeta?.iat,
+      priceMarkupPercent: catalogMeta?.priceMarkupPercent || 0,
+      prefix: 'RP'
+    });
+  }, [catalogMeta]);
 
   const [isGoalDropdownOpen, setIsGoalDropdownOpen] = React.useState(false);
 
@@ -169,6 +198,7 @@ export default function SharedCatalogClientView({
         body: JSON.stringify({
           docType: 'catalog',
           productIds: products.map(p => p.id),
+          batchCode,
           includePrices,
           priceTier: priceSource,
           currency: currentCurrency,
@@ -178,6 +208,8 @@ export default function SharedCatalogClientView({
           incoterm: 'DAP',
           showKitPrice: true,
           kitSize: 10,
+          showPricePerMg: false,
+          showWarehouse: false,
           showDescription: true,
           showSupplier: false,
           showDosage: true,
@@ -582,12 +614,31 @@ export default function SharedCatalogClientView({
         .topbar-destination {
           display: inline-flex;
           align-items: center;
+          gap: 6px;
           background-color: #f8fafc;
-          padding: 3px 10px;
+          padding: 5px 12px;
           border-radius: 8px;
           border: 1px solid #e2e8f0;
           font-size: 0.8rem;
           color: #334155;
+          min-width: 180px;
+          flex-shrink: 0;
+          transition: all 0.15s ease;
+        }
+        .topbar-destination:hover {
+          background-color: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+        .topbar-destination select {
+          background: transparent;
+          color: #0f172a;
+          border: none;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          outline: none;
+          width: 100%;
+          white-space: nowrap;
         }
         .topbar-cart-pill {
           display: inline-flex;
@@ -655,6 +706,39 @@ export default function SharedCatalogClientView({
           padding: 28px 32px;
           margin-bottom: 24px;
           box-shadow: 0 10px 30px -5px rgba(0, 54, 102, 0.25);
+        }
+        .header-meta-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 14px;
+          font-size: 0.8rem;
+          color: #ffffff;
+        }
+        .header-meta-pill {
+          background-color: rgba(255, 255, 255, 0.18);
+          backdrop-filter: blur(4px);
+          padding: 6px 14px;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.8rem;
+          color: #ffffff;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .header-card-right {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 18px;
+          justify-content: flex-end;
+        }
+        .header-card-qr {
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
         .tab-button {
           padding: 8px 16px;
@@ -870,6 +954,34 @@ export default function SharedCatalogClientView({
           .header-card h1 {
             font-size: 1.35rem !important;
           }
+          .header-meta-container {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            width: 100% !important;
+            margin-top: 14px !important;
+          }
+          .header-meta-pill {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 8px 10px !important;
+            font-size: 0.74rem !important;
+            border-radius: 8px !important;
+            white-space: nowrap !important;
+          }
+          .header-meta-pill.pill-full {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            font-size: 0.78rem !important;
+            font-weight: 700 !important;
+            background-color: rgba(255, 255, 255, 0.22) !important;
+            border: 1px solid rgba(255, 255, 255, 0.28) !important;
+            padding: 9px 12px !important;
+          }
           .product-card {
             padding: 12px 10px !important;
             margin-bottom: 12px !important;
@@ -1005,9 +1117,10 @@ export default function SharedCatalogClientView({
           .topbar-row-logistics {
             width: 100% !important;
             display: flex !important;
+            flex-wrap: wrap !important;
             align-items: center !important;
             justify-content: space-between !important;
-            gap: 6px !important;
+            gap: 8px !important;
           }
           .topbar-row-access {
             width: 100% !important;
@@ -1016,19 +1129,22 @@ export default function SharedCatalogClientView({
             gap: 8px !important;
           }
           .topbar-destination {
-            flex: 1 1 auto !important;
-            min-width: 0 !important;
-            padding: 5px 8px !important;
-            font-size: 0.74rem !important;
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            padding: 7px 12px !important;
+            font-size: 0.82rem !important;
             display: flex !important;
             align-items: center !important;
-            overflow: hidden !important;
+            box-sizing: border-box !important;
+            border-radius: 8px !important;
           }
           .topbar-destination select {
             width: 100% !important;
             max-width: 100% !important;
-            font-size: 0.74rem !important;
-            text-overflow: ellipsis !important;
+            font-size: 0.82rem !important;
+            white-space: nowrap !important;
           }
           .topbar-currency-toggle {
             flex-shrink: 0 !important;
@@ -1065,14 +1181,27 @@ export default function SharedCatalogClientView({
           .chips-scroll-container {
             flex-wrap: wrap !important;
           }
+          .header-card-right {
+            width: 100% !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 14px !important;
+            margin-top: 14px !important;
+          }
           .header-card-actions {
             width: 100% !important;
-            margin-top: 10px !important;
+            margin-top: 0 !important;
+            align-items: center !important;
           }
           .header-card-actions button {
             width: 100% !important;
             justify-content: center !important;
             min-height: 42px !important;
+          }
+          .header-card-qr {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
           }
           .dock-wrapper {
             padding: 8px 10px max(12px, env(safe-area-inset-bottom, 12px)) 10px !important;
@@ -1276,8 +1405,8 @@ export default function SharedCatalogClientView({
             {/* Line 1: Logistics Controls (Destination, Currency, Cart) */}
             <div className="topbar-row-logistics">
               {/* Destination Selector */}
-              <div className="topbar-destination" style={{ padding: '3px 8px', maxWidth: '125px' }}>
-                <span style={{ marginRight: '4px' }}>✈️</span>
+              <div className="topbar-destination">
+                <span>✈️</span>
                 <select
                   value={selectedShipping}
                   onChange={(e) => setSelectedShipping(e.target.value)}
@@ -1285,12 +1414,12 @@ export default function SharedCatalogClientView({
                     background: 'transparent',
                     color: '#0f172a',
                     border: 'none',
-                    fontSize: '0.78rem',
+                    fontSize: '0.8rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     outline: 'none',
                     width: '100%',
-                    textOverflow: 'ellipsis'
+                    whiteSpace: 'nowrap'
                   }}
                   title={activeShipping.label}
                 >
@@ -1346,26 +1475,62 @@ export default function SharedCatalogClientView({
               )}
             </div>
 
-            {/* Line 2: Clinical Provider Access & Registration */}
+            {/* Line 2: Clinical Provider Access & Registration / Sign Out */}
             <div className="topbar-row-access">
-              <a
-                href="/login"
-                className="topbar-signin-btn"
-                title="Provider Authentication"
-              >
-                <Lock size={13} color="#003666" />
-                <span>Sign In</span>
-              </a>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await logout();
+                    } catch (e) {
+                      console.error('Sign out error:', e);
+                    }
+                  }}
+                  className="topbar-signin-btn"
+                  title={`Sign Out (${user.email || 'Provider'})`}
+                >
+                  <LogOut size={13} color="#b91c1c" />
+                  <span>Sign Out</span>
+                </button>
+              ) : (
+                <a
+                  href="/login"
+                  className="topbar-signin-btn"
+                  title="Provider Authentication"
+                >
+                  <Lock size={13} color="#003666" />
+                  <span>Sign In</span>
+                </a>
+              )}
 
-              <button
-                type="button"
-                onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
-                className="topbar-apply-btn"
-              >
-                <Building2 size={13} />
-                <span className="access-label-full">Apply for Portal Access</span>
-                <span className="access-label-compact">Portal Access</span>
-              </button>
+              {isAuthenticated ? (
+                <a
+                  href={
+                    activeRole === 'admin' ? '/admin' :
+                    activeRole === 'doctor' || activeRole === 'medical_director' ? '/doctor' :
+                    activeRole === 'wholesaler' ? '/wholesaler' :
+                    activeRole === 'supplier' ? '/supplier' :
+                    activeRole === 'clinic' ? '/clinic' : '/patient'
+                  }
+                  className="topbar-apply-btn"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Building2 size={13} />
+                  <span className="access-label-full">Open My Portal</span>
+                  <span className="access-label-compact">My Portal</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { setRegisterSubmitted(false); setRegisterError(''); setIsRegisterModalOpen(true); }}
+                  className="topbar-apply-btn"
+                >
+                  <Building2 size={13} />
+                  <span className="access-label-full">Apply for Portal Access</span>
+                  <span className="access-label-compact">Portal Access</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -1387,49 +1552,54 @@ export default function SharedCatalogClientView({
                 Analytical-grade lyophilized peptide vials, multi-dose presentations, and standardized therapeutic protocols. Verified direct delivery terms for authorized healthcare institutions.
               </p>
               
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px', fontSize: '0.8rem', color: '#ffffff' }}>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
-                  📅 Effective: {catalogMeta.issuedAt || catalogMeta.iat 
-                    ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-                    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              <div className="header-meta-container">
+                <span className="header-meta-pill">
+                  📅 {catalogMeta.issuedAt || catalogMeta.iat 
+                    ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </span>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
+                <span className="header-meta-pill">
                   🏷️ {priceTierLabel}
                 </span>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
+                <span className="header-meta-pill pill-full">
                   {isProtocolCatalog 
                     ? `📋 ${protocols.length} Clinical Protocols`
-                    : `📦 ${products.length} Products • ${totalVariants} Variants`}
+                    : `📦 ${products.length} Products • ${totalVariants} Verified Variants`}
                 </span>
               </div>
             </div>
 
-            <div className="header-card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
-              <button
-                onClick={handleDownloadPdf}
-                disabled={isGeneratingPdf}
-                style={{
-                  backgroundColor: '#ffffff',
-                  color: '#003666',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '13px 22px',
-                  fontWeight: 800,
-                  fontSize: '0.9rem',
-                  cursor: isGeneratingPdf ? 'wait' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Download size={17} />
-                <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
-              </button>
-              <span style={{ fontSize: '0.72rem', color: '#bae6fd', paddingLeft: '4px' }}>
-                Complete Vademecum (PDF with COA References)
-              </span>
+            <div className="header-card-right">
+              <div className="header-card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={isGeneratingPdf}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    color: '#003666',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '13px 22px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    cursor: isGeneratingPdf ? 'wait' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Download size={17} />
+                  <span>{isGeneratingPdf ? 'Generating PDF...' : 'Download Official PDF'}</span>
+                </button>
+                <PharmaBarcodeStamp batchCode={batchCode} theme="dark" width={200} height={26} />
+              </div>
+
+              {/* 3D Holographic Interactive Scan Card */}
+              <div className="header-card-qr">
+                <Interactive3DScanCard url={shareUrl} batchCode={batchCode} recipientName={catalogMeta?.recipientName} />
+              </div>
             </div>
           </div>
         </div>
@@ -2574,6 +2744,16 @@ export default function SharedCatalogClientView({
                   );
                 })}
               </div>
+
+              {/* Algolia AI Synergies & Reconstitution Supplies Cross-Sell */}
+              <AlgoliaRecommendCrossSell
+                cartItems={cartItems}
+                products={products}
+                onAddToCart={(variant, product) => updateQuantity(variant, product, 1)}
+                currencySymbol={currencySymbol}
+                fxMultiplier={fxMultiplier}
+                currentCurrency={currentCurrency}
+              />
 
               {/* Shipping Destination selector in Drawer */}
               <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '4px' }}>

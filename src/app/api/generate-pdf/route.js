@@ -25,7 +25,7 @@ import { generatePdfSchema } from '@/schemas/apiSchemas';
 import { randomUUID } from 'crypto';
 
 const TIER_MAPPING = { cost: 'master', wholeseller: 'wholesale', clinic: 'clinic', retail: 'retail' };
-const TIER_LABELS = { master: 'Authorized Clinical Portfolio', wholesale: 'Wholesaler Tier', clinic: 'Clinical Partner Tier', retail: 'Standard Catalog' };
+const TIER_LABELS = { master: 'Direct Institutional Rate (B2B)', wholesale: 'Wholesaler Tier', clinic: 'Clinical Partner Tier', retail: 'Standard Catalog' };
 const CURRENCY_SYMBOLS = { USD: '$', EUR: '€', MXN: '$' };
 const FALLBACK_FX = { USD: 1, EUR: 0.92, MXN: 17.5 };
 
@@ -123,28 +123,20 @@ function generateRefNumber() {
 }
 
 const SUPPLIER_WAREHOUSES = {
-  'lotusland': 'Asia / HK Hub (Hong Kong)',
-  'np labs': 'EU Hub (Athens, Greece)',
-  'nplabs': 'EU Hub (Athens, Greece)',
-  'pod poland': 'EU Central (Warsaw, Poland)',
-  'europeptides': 'EU Hub (Sofia, Bulgaria)',
-  '24genetics': 'EU South (Madrid, Spain)',
-  'fagron': 'EU South (Madrid, Spain)',
-  'eterna': 'EU South (Madrid, Spain)',
-  'bioniq': 'UK Hub (London)',
-  'vallida': 'UK Hub (London)',
-  'bloodo': 'EU North (Vilnius, Lithuania)',
+  'lotusland': 'EU Verified Logistics Hub',
+  'np labs': 'EU Verified Logistics Hub',
+  'nplabs': 'EU Verified Logistics Hub',
+  'pod poland': 'EU Central Logistics Hub',
+  'europeptides': 'EU Verified Logistics Hub',
+  '24genetics': 'EU Verified Logistics Hub',
+  'fagron': 'EU Verified Logistics Hub',
+  'eterna': 'EU Verified Logistics Hub',
+  'bioniq': 'Authorized Logistics Depot',
+  'vallida': 'Authorized Logistics Depot',
+  'bloodo': 'EU Verified Logistics Hub',
 };
 
 function getSupplierWarehouse(supplierName, country, catalogBrand) {
-  const normCat = (catalogBrand || '').toLowerCase().trim();
-  if (normCat.includes('regenpept')) return 'Poland, USA, and UK';
-
-  const norm = (supplierName || '').toLowerCase().trim();
-  for (const [k, v] of Object.entries(SUPPLIER_WAREHOUSES)) {
-    if (norm.includes(k)) return v;
-  }
-  if (country) return `Regional Warehouse (${country})`;
   return 'EU Verified Logistics Hub';
 }
 
@@ -346,6 +338,8 @@ export async function POST(request) {
     catalogueFilter = null,
     // categoryFilter: scope document to a specific category (e.g. 'peptide')
     categoryFilter = body.categoryFilter || body.category || null,
+    // batchCode: institutional pharma lot code (e.g. RP-LL-260914-120-7)
+    batchCode = body.batchCode || null,
   } = body;
 
   const anonymousSupplierMap = new Map();
@@ -746,35 +740,40 @@ export async function POST(request) {
           p.drawText(wmText, { x: 120, y: H / 2 - 30, size: 62, font: helveticaBold, color: rgb(0.88, 0.88, 0.88), rotate: degrees(45), opacity: 0.18 });
         };
 
+        const presX = MRG + 85;
+        const rateRightX = RIGHT_X - (includePrices ? (showKitPrice ? 195 : 100) : 0);
+        const priceRightX = RIGHT_X - (showKitPrice ? 105 : 0);
+        const kitRightX = RIGHT_X;
+
         const cols = [
-          { key: 'dosage', label: 'Dosage', x: MRG + 10, align: 'left', maxLen: 16 },
-          { key: 'presentation', label: 'Presentation / Format', x: MRG + 115, align: 'left', maxLen: 24 },
+          { key: 'dosage', label: 'Dosage', x: MRG + 10, align: 'left', maxLen: 14 },
+          { key: 'presentation', label: 'Presentation / Format', x: presX, align: 'left', maxLen: 32 },
         ];
         if (showPricePerMg) {
           cols.push({
             key: 'pricePerMg',
             label: `Rate (${CURRENCY_SYMBOLS[currency] || currency})`,
-            rightX: RIGHT_X - (includePrices ? (showKitPrice ? 200 : 100) : 0),
+            rightX: rateRightX,
             align: 'right',
-            maxLen: 15,
+            maxLen: 14,
           });
         }
         if (includePrices) {
           cols.push({
             key: 'price',
             label: `Unit Price (${CURRENCY_SYMBOLS[currency] || currency})`,
-            rightX: RIGHT_X - (showKitPrice ? 105 : 0),
+            rightX: priceRightX,
             align: 'right',
-            maxLen: 18,
+            maxLen: 16,
           });
         }
         if (includePrices && showKitPrice) {
           cols.push({
             key: 'kitPrice',
             label: `Pack 10 Vials (${CURRENCY_SYMBOLS[currency] || currency})`,
-            rightX: RIGHT_X,
+            rightX: kitRightX,
             align: 'right',
-            maxLen: 20,
+            maxLen: 18,
           });
         }
 
@@ -848,6 +847,7 @@ export async function POST(request) {
             ...(docType === 'quotation' ? [`${L.ref}: ${refNumber}`] : []),
             ...(recipientName ? [`${L.preparedFor}: ${recipientName}`] : []),
             ...(validUntil ? [`${L.validUntil}: ${validUntil}`] : []),
+            ...(batchCode ? [`Verification Lot: ${batchCode}`] : []),
             ...(isExWorks ? [`Commercial Terms: Ex-Works (EXW) — Europe`] : []),
             ...(shippingNote && shippingNote.trim() ? [`Shipping: ${shippingNote.trim()}`] : []),
             ...(accountManagerName || accountManagerEmail ? [`Account Manager: ${accountManagerName || ''} ${accountManagerEmail ? `<${accountManagerEmail}>` : ''}`.trim()] : []),
@@ -986,10 +986,11 @@ export async function POST(request) {
             // Left 3.5px accent bar
             page.drawRectangle({ x: MRG, y: currentY - 4, width: 3.5, height: 18, color: BRAND });
 
-            // Product Name
-            page.drawText(pName, { x: MRG + 8, y: currentY, size: 9.5, font: helveticaBold, color: BRAND });
+            // Product Name (truncated if exceptionally long)
+            const safePName = trunc(pName, 36);
+            page.drawText(safePName, { x: MRG + 8, y: currentY, size: 9.5, font: helveticaBold, color: BRAND });
             
-            const pNameW = helveticaBold.widthOfTextAtSize(pName, 9.5);
+            const pNameW = helveticaBold.widthOfTextAtSize(safePName, 9.5);
             const refBadge = `[${pObj.refCode}]`;
             page.drawText(refBadge, {
               x: MRG + 12 + pNameW,
@@ -1000,26 +1001,31 @@ export async function POST(request) {
             });
             const refW = helveticaBold.widthOfTextAtSize(refBadge, 7.5);
 
-            if (pObj.variants.length > 1) {
-              page.drawText(`(${pObj.variants.length} presentations available)`, { 
-                x: MRG + 16 + pNameW + refW, 
-                y: currentY, 
-                size: 7.5, 
-                font: helvetica, 
-                color: MUTED 
-              });
-            }
-
             // Right side of product row: Monograph Link
             const monographLabel = `Monograph: /product/${pObj.slug}`;
             const monoW = helvetica.widthOfTextAtSize(monographLabel, 6.8);
+            const monoLeftX = RIGHT_X - monoW;
             page.drawText(monographLabel, {
-              x: RIGHT_X - monoW,
+              x: monoLeftX,
               y: currentY,
               size: 6.8,
               font: helvetica,
               color: ACCENT,
             });
+
+            if (pObj.variants.length > 1) {
+              const presText = `(${pObj.variants.length} presentations available)`;
+              const presW = helvetica.widthOfTextAtSize(presText, 7.5);
+              if (MRG + 16 + pNameW + refW + presW < monoLeftX - 10) {
+                page.drawText(presText, { 
+                  x: MRG + 16 + pNameW + refW, 
+                  y: currentY, 
+                  size: 7.5, 
+                  font: helvetica, 
+                  color: MUTED 
+                });
+              }
+            }
 
             currentY -= 19;
 
@@ -1161,7 +1167,7 @@ export async function POST(request) {
                 color: rgb(0.962, 0.975, 0.99),
               });
               
-              const sHeaderTitle = `> ${sObj.displayName.toUpperCase()}`;
+              const sHeaderTitle = showSupplier ? `> ${sObj.displayName.toUpperCase()}` : '> DIRECT INSTITUTIONAL SPECIFICATION';
               page.drawText(sHeaderTitle, {
                 x: MRG + 6,
                 y: currentY + 1,
@@ -1171,7 +1177,7 @@ export async function POST(request) {
               });
               const sTitleW = helveticaBold.widthOfTextAtSize(sHeaderTitle, 7.5);
 
-              if (showWarehouse && sObj.warehouse) {
+              if (showWarehouse && showSupplier && sObj.warehouse) {
                 const whText = `[Warehouse: ${sObj.warehouse}]`;
                 page.drawText(whText, {
                   x: MRG + 12 + sTitleW,
@@ -1206,7 +1212,7 @@ export async function POST(request) {
 
                 // Column 1: Dosage
                 const doseText = `•  ${item.doseOnly || item.dosage || '-'}`;
-                page.drawText(trunc(doseText, cols[0].maxLen || 16), {
+                page.drawText(trunc(doseText, cols[0].maxLen || 14), {
                   x: MRG + 10,
                   y: currentY,
                   size: 8.5,
@@ -1214,15 +1220,10 @@ export async function POST(request) {
                   color: rgb(0.12, 0.15, 0.2),
                 });
 
-                // Column 2: Presentation / Format
-                const formatText = item.presentationOnly || item.variantName || 'Vial';
-                page.drawText(formatText, {
-                  x: MRG + 115,
-                  y: currentY,
-                  size: 8.2,
-                  font: helvetica,
-                  color: rgb(0.3, 0.35, 0.4),
-                });
+                // Available horizontal space before first price column
+                const firstPriceRightX = showPricePerMg ? rateRightX : (includePrices ? priceRightX : RIGHT_X);
+                const priceLeftBoundary = includePrices ? (firstPriceRightX - 78) : RIGHT_X;
+                const maxPresAvailW = Math.max(110, priceLeftBoundary - presX - 8);
 
                 // Micro-badge Best Value for the lowest price/mg in this category
                 const itemCatKey = (item.category || pObj.category || 'Other').toLowerCase().trim();
@@ -1230,9 +1231,30 @@ export async function POST(request) {
                 const currentRate = (item.numDose > 0 && item.priceUSD != null) ? (item.priceUSD / item.numDose) : null;
                 const isCategoryBestValue = catBest && currentRate != null && Math.abs(currentRate - catBest.minRate) < 0.0001;
 
+                const badgeSpace = isCategoryBestValue ? 52 : 0;
+                const maxFormatW = maxPresAvailW - badgeSpace;
+
+                // Dynamically measure and truncate presentation text to prevent any overlap
+                let formatText = item.presentationOnly || item.variantName || 'Vial';
+                if (helvetica.widthOfTextAtSize(formatText, 8.2) > maxFormatW) {
+                  while (formatText.length > 3 && helvetica.widthOfTextAtSize(formatText + '...', 8.2) > maxFormatW) {
+                    formatText = formatText.slice(0, -1);
+                  }
+                  formatText = formatText.trim() + '...';
+                }
+
+                // Column 2: Presentation / Format
+                page.drawText(formatText, {
+                  x: presX,
+                  y: currentY,
+                  size: 8.2,
+                  font: helvetica,
+                  color: rgb(0.3, 0.35, 0.4),
+                });
+
                 if (isCategoryBestValue) {
                   const formatW = helvetica.widthOfTextAtSize(formatText, 8.2);
-                  const bvX = MRG + 115 + formatW + 8;
+                  const bvX = presX + formatW + 6;
                   const bvBadgeW = 44;
                   page.drawRectangle({
                     x: bvX,

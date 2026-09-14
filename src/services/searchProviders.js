@@ -172,3 +172,31 @@ export async function searchOrders(q, portalType, currentUser) {
     return [];
   }
 }
+
+export async function searchQuotations(q, portalType = 'admin', currentUser = null) {
+  if (portalType !== 'admin' && portalType !== 'doctor') return [];
+  const lowerQ = q.toLowerCase();
+  try {
+    const qSnap = await getDocs(query(collection(db, 'quotations'), limit(40)));
+    return qSnap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(qt => {
+        const client = (qt.recipientName || qt.clientName || qt.customerName || '').toLowerCase();
+        const num = (qt.quoteNumber || qt.id || '').toLowerCase();
+        const mgr = (qt.accountManagerName || '').toLowerCase();
+        return client.includes(lowerQ) || num.includes(lowerQ) || mgr.includes(lowerQ);
+      })
+      .slice(0, 4)
+      .map(qt => ({
+        id: `quote-${qt.id}`,
+        label: `Quote: ${qt.recipientName || qt.clientName || 'Partner'} (${qt.quoteNumber || qt.id.slice(0, 8)})`,
+        sublabel: qt.totalAmount ? `Total: $${Number(qt.totalAmount).toFixed(2)} • ${qt.status || 'Draft'}` : qt.status,
+        path: `/admin/quotations?quoteId=${qt.id}`,
+        type: 'Quotation',
+        icon: FileText
+      }));
+  } catch (err) {
+    logger.warn('[searchProviders] Error searching quotations:', err.message);
+    return [];
+  }
+}
