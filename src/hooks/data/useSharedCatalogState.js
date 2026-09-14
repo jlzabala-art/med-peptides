@@ -16,14 +16,15 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { sortVariantsAscending } from '@/utils/variantSorter';
 
 // ── Shipping destinations ─────────────────────────────────────────────────────
 export const SHIPPING_DESTINATIONS = [
-  { id: 'eu',     label: 'European Union (Cold-Chain Express 2–4 Days)', costUSD: 78,  costEUR: 70,  flag: '🇪🇺', code: 'EU',     leadTime: '2–4 Days' },
-  { id: 'uk_ch',  label: 'UK & Switzerland (Priority Medical Courier)',   costUSD: 95,  costEUR: 85,  flag: '🇬🇧', code: 'UK/CH',  leadTime: '3–5 Days' },
-  { id: 'us_ca',  label: 'USA & Canada (Direct Cold-Chain Courier)',     costUSD: 115, costEUR: 105, flag: '🇺🇸', code: 'USA/CA', leadTime: '4–6 Days' },
+  { id: 'eu',     label: 'European Union (Express Courier 2–4 Days)',     costUSD: 78,  costEUR: 70,  flag: '🇪🇺', code: 'EU',     leadTime: '2–4 Days' },
+  { id: 'uk_ch',  label: 'UK & Switzerland (Priority Courier 3–5 Days)',  costUSD: 95,  costEUR: 85,  flag: '🇬🇧', code: 'UK/CH',  leadTime: '3–5 Days' },
+  { id: 'us_ca',  label: 'USA & Canada (Direct Courier 4–6 Days)',        costUSD: 115, costEUR: 105, flag: '🇺🇸', code: 'USA/CA', leadTime: '4–6 Days' },
   { id: 'gcc',    label: 'GCC & Middle East (Express Courier UAE/KSA)',   costUSD: 110, costEUR: 100, flag: '🇦🇪', code: 'GCC',    leadTime: '3–5 Days' },
-  { id: 'latam',  label: 'Latin America (DHL Medical Express)',           costUSD: 145, costEUR: 130, flag: '🌎', code: 'LATAM',  leadTime: '5–8 Days' },
+  { id: 'latam',  label: 'Latin America (DHL Express)',                   costUSD: 145, costEUR: 130, flag: '🌎', code: 'LATAM',  leadTime: '5–8 Days' },
   { id: 'intl',   label: 'Rest of World (Global Priority Express)',       costUSD: 165, costEUR: 150, flag: '🌐', code: 'INTL',   leadTime: '5–9 Days' },
 ];
 
@@ -69,6 +70,7 @@ export function useSharedCatalogState({
   const [selectedCategory,   setSelectedCategory]   = useState('all');
   const [dosageFilter,       setDosageFilter]       = useState('all');
   const [routeFilter,        setRouteFilter]        = useState('all');
+  const [packagingMode,      setPackagingMode]      = useState('all'); // 'all' | 'kits' | 'units'
 
   // ── Currency & Shipping ───────────────────────────────────────────────────
   const [currentCurrency,    setCurrentCurrency]    = useState(currency || 'USD');
@@ -107,13 +109,13 @@ export function useSharedCatalogState({
 
   // ── Checkout form ─────────────────────────────────────────────────────────
   const [checkoutForm, setCheckoutForm] = useState({
-    clinicName:      catalogMeta?.recipientName || '',
-    contactPerson:   '',
-    email:           '',
-    phone:           '',
-    vatTaxId:        '',
-    deliveryAddress: '',
-    cityCountry:     '',
+    clinicName:      catalogMeta?.recipientName || catalogMeta?.clientName || '',
+    contactPerson:   catalogMeta?.recipientContact || catalogMeta?.contactPerson || catalogMeta?.contactName || '',
+    email:           catalogMeta?.recipientEmail || catalogMeta?.clientEmail || '',
+    phone:           catalogMeta?.recipientPhone || catalogMeta?.clientPhone || '',
+    vatTaxId:        catalogMeta?.vatTaxId || catalogMeta?.taxId || '',
+    deliveryAddress: catalogMeta?.deliveryAddress || catalogMeta?.shippingAddress || '',
+    cityCountry:     catalogMeta?.cityCountry || catalogMeta?.country || '',
     deliveryNotes:   '',
   });
 
@@ -274,40 +276,56 @@ export function useSharedCatalogState({
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter(p => {
-      const matchCat   = selectedCategory === 'all' || p.category === selectedCategory;
-      const matchQuery = !searchQuery ||
-        p.canonicalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.variants.some(v =>
-          v.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          v.dosage?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+    return products
+      .filter(p => {
+        const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
+        const cleanQuery = searchQuery.trim().toLowerCase();
+        const matchQuery = !cleanQuery ||
+          (p.canonicalName && p.canonicalName.toLowerCase().includes(cleanQuery)) ||
+          (p.name && p.name.toLowerCase().includes(cleanQuery)) ||
+          (p.description && p.description.toLowerCase().includes(cleanQuery)) ||
+          p.variants.some(v =>
+            (v.name && v.name.toLowerCase().includes(cleanQuery)) ||
+            (v.dosage && v.dosage.toLowerCase().includes(cleanQuery))
+          );
 
-      let matchDosage = true;
-      if (dosageFilter === 'kits') {
-        matchDosage = p.variants.some(v => v.kitPrice && v.kitPrice > 0);
-      } else if (dosageFilter === 'high_dose') {
-        matchDosage = p.variants.some(v => {
-          const doseMatch = v.dosage?.match(/(\d+(\.\d+)?)\s*mg/i);
-          return doseMatch && parseFloat(doseMatch[1]) >= 10;
-        });
-      }
+        let matchPackaging = true;
+        if (packagingMode === 'kits' || dosageFilter === 'kits') {
+          matchPackaging = p.variants.some(v => v.kitPrice && v.kitPrice > 0);
+        }
 
-      let matchRoute = true;
-      if (routeFilter !== 'all' && ROUTE_MAP[routeFilter]) {
-        const keywords = ROUTE_MAP[routeFilter];
-        matchRoute = p.variants.some(v => {
-          const pres = (v.presentation || '').toLowerCase();
-          const desc = (p.description  || '').toLowerCase();
-          const cat  = (p.category     || '').toLowerCase();
-          return keywords.some(k => pres.includes(k) || desc.includes(k) || cat.includes(k));
-        });
-      }
+        let matchDosage = true;
+        if (dosageFilter === 'high_dose') {
+          matchDosage = p.variants.some(v => {
+            const doseMatch = v.dosage?.match(/(\d+(\.\d+)?)\s*mg/i);
+            return doseMatch && parseFloat(doseMatch[1]) >= 10;
+          });
+        }
 
-      return matchCat && matchQuery && matchDosage && matchRoute;
-    });
-  }, [products, selectedCategory, searchQuery, dosageFilter, routeFilter]);
+        let matchRoute = true;
+        if (routeFilter !== 'all' && ROUTE_MAP[routeFilter]) {
+          const keywords = ROUTE_MAP[routeFilter];
+          matchRoute = p.variants.some(v => {
+            const pres = (v.presentation || '').toLowerCase();
+            const desc = (p.description  || '').toLowerCase();
+            const cat  = (p.category     || '').toLowerCase();
+            return keywords.some(k => pres.includes(k) || desc.includes(k) || cat.includes(k));
+          });
+        }
+
+        return matchCat && matchQuery && matchPackaging && matchDosage && matchRoute;
+      })
+      .map(p => {
+        const sortedVariants = sortVariantsAscending(p.variants);
+        const validPrices = sortedVariants.map(v => v.price > 0 ? v.price : null).filter(Boolean);
+        const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : p.minPrice;
+        return {
+          ...p,
+          minPrice: minPrice > 0 ? minPrice : p.minPrice,
+          variants: sortedVariants
+        };
+      });
+  }, [products, selectedCategory, searchQuery, dosageFilter, packagingMode, routeFilter]);
 
   const filteredProtocols = useMemo(() => {
     return protocols.filter(proto => {
@@ -430,6 +448,8 @@ export function useSharedCatalogState({
     filteredProducts,
     filteredProtocols,
     totalVariants,
+    packagingMode,
+    setPackagingMode,
 
     // Labels
     priceTierLabel,

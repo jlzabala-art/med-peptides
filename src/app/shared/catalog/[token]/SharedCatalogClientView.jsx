@@ -19,9 +19,12 @@ import {
   ClipboardList,
   Sparkles,
   ExternalLink,
-  Trash2
+  Trash2,
+  Filter,
+  Send
 } from 'lucide-react';
 import { resolveVariantClinicalImage, resolveProtocolClinicalImage } from '@/utils/clinicalImageResolver';
+import { sortVariantsAscending } from '@/utils/variantSorter';
 import {
   useSharedCatalogState,
   SHIPPING_DESTINATIONS,
@@ -40,6 +43,7 @@ export default function SharedCatalogClientView({
     searchQuery, setSearchQuery,
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
+    packagingMode, setPackagingMode,
     currentCurrency, setCurrentCurrency,
     selectedShipping, setSelectedShipping,
     activeShipping,
@@ -149,11 +153,11 @@ export default function SharedCatalogClientView({
           showDosage: true,
           showPresentation: true,
           showPurity: true,
-          shippingNote: `Delivered Priority Cold-Chain Freight (${activeShipping.flag} ${activeShipping.label}): +${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}`,
+          shippingNote: `Delivered Priority Freight ([${activeShipping.code}] ${(activeShipping.label || '').replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/gu, '').trim()}): +${currencySymbol}${shippingCost.toFixed(2)} ${currentCurrency}`,
           supplierFilter: catalogMeta?.supplierId || null,
           category: catalogMeta?.category || null,
-          accountManagerName: catalogMeta?.accountManagerName || 'Atlas Commercial Desk',
-          accountManagerEmail: catalogMeta?.accountManagerEmail || 'commercial@atlashealth.com'
+          accountManagerName: catalogMeta?.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk' ? catalogMeta.accountManagerName : null,
+          accountManagerEmail: catalogMeta?.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' ? catalogMeta.accountManagerEmail : null
         })
       });
 
@@ -241,7 +245,14 @@ export default function SharedCatalogClientView({
       doc.setFontSize(8.5);
       doc.setTextColor(224, 242, 254);
       doc.text('Official Clinical Formulations & Specialty Quotation', 14, 22);
-      doc.text('Commercial Desk: orders@atlas-solutions.com', 14, 28);
+      const validContactEmail = catalogMeta?.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' && catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com'
+        ? catalogMeta.accountManagerEmail
+        : null;
+      if (validContactEmail) {
+        doc.text(`Contact: ${validContactEmail}`, 14, 28);
+      } else {
+        doc.text('Institutional Orders & Dispensation Verification', 14, 28);
+      }
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
@@ -274,17 +285,25 @@ export default function SharedCatalogClientView({
       doc.setFontSize(8.5);
       doc.setTextColor(71, 85, 105);
       doc.text(`Pricing Tier: Clinical / Healthcare Provider`, 120, 52);
-      doc.text(`Destination: ${activeShipping.flag} ${activeShipping.label}`, 120, 57);
+      const cleanDestLabel = (activeShipping.label || '').replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/gu, '').trim();
+      doc.text(`Destination: [${activeShipping.code}] ${cleanDestLabel}`, 120, 57);
       doc.text(`Payment: Wire Transfer (IBAN) / Credit Card (Stripe)`, 120, 62);
 
       const tableRows = cartItems.map((item, idx) => {
         const isBulk = item.quantity >= 10 && item.tier10UnitPrice && item.tier10UnitPrice > 0;
         const itemUnitPrice = (isBulk ? item.tier10UnitPrice : item.price) * fxMultiplier;
         const itemTotal = item.quantity * itemUnitPrice;
+        const kits = Math.floor(item.quantity / 10);
+        const singles = item.quantity % 10;
+        const formatLabel = item.presentation || 'Vial';
+        const packDesc = kits > 0
+          ? `${kits} Kit${kits > 1 ? 's' : ''} (10 pk)${singles > 0 ? ` + ${singles} Single${singles > 1 ? 's' : ''}` : ''}`
+          : `${singles} Single ${formatLabel}${singles > 1 ? 's' : ''}`;
+
         return [
           idx + 1,
           item.productName,
-          `${item.dosage || 'Standard'} • Format: ${item.presentation || 'Vial'}${isBulk ? ' (10+ Tier Rate)' : ''}`,
+          `${item.dosage || 'Standard'}\nFormat: ${formatLabel} • ${packDesc}${isBulk ? ' [10+ Rate]' : ''}`,
           item.quantity,
           `${currencySymbol}${itemUnitPrice.toFixed(2)} ${currentCurrency}`,
           `${currencySymbol}${itemTotal.toFixed(2)} ${currentCurrency}`
@@ -293,15 +312,15 @@ export default function SharedCatalogClientView({
 
       doc.autoTable({
         startY: 70,
-        head: [['#', 'Formulation', 'Presentation & Dosage', 'Qty', 'Unit Price', 'Total']],
+        head: [['#', 'Formulation', 'Presentation & Packaging', 'Qty', 'Unit Price', 'Total']],
         body: tableRows,
         theme: 'grid',
         headStyles: { fillColor: [0, 54, 102], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
         bodyStyles: { fontSize: 8, textColor: [15, 23, 42] },
         columnStyles: {
           0: { cellWidth: 10, halign: 'center' },
-          1: { cellWidth: 55, fontStyle: 'bold' },
-          2: { cellWidth: 55 },
+          1: { cellWidth: 52, fontStyle: 'bold' },
+          2: { cellWidth: 58 },
           3: { cellWidth: 16, halign: 'center' },
           4: { cellWidth: 26, halign: 'right' },
           5: { cellWidth: 26, halign: 'right', fontStyle: 'bold' }
@@ -336,7 +355,7 @@ export default function SharedCatalogClientView({
       doc.setTextColor(100, 116, 139);
       doc.text('CONFIDENTIAL CLINICAL QUOTATION', 14, 280);
       doc.setFont('helvetica', 'normal');
-      doc.text('Quotation valid for 30 calendar days from issue date. Cold-chain guaranteed under WHO/GDP standards.', 14, 285);
+      doc.text('Quotation valid for 30 calendar days from issue date. Analytical purity and clinical specifications verified.', 14, 285);
 
       doc.save(`Atlas_Health_ProForma_${quoteId}_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
@@ -376,8 +395,8 @@ export default function SharedCatalogClientView({
           currencySymbol,
           totalUnits: cartTotalUnits,
           catalogId: catalogMeta?.catalogId,
-          accountManagerName: catalogMeta?.accountManagerName || 'Atlas Commercial Desk',
-          accountManagerEmail: catalogMeta?.accountManagerEmail || '',
+          accountManagerName: (catalogMeta?.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk') ? catalogMeta.accountManagerName : '',
+          accountManagerEmail: (catalogMeta?.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com') ? catalogMeta.accountManagerEmail : '',
           accountManagerId: catalogMeta?.accountManagerId || '',
           source: 'shared_catalog'
         })
@@ -389,13 +408,9 @@ export default function SharedCatalogClientView({
       }
 
       setPlacedOrderCode(data.orderCode);
-      // Trigger WhatsApp
-      handleConfirmWhatsApp();
     } catch (err) {
       console.error('Error placing draft order:', err);
-      setOrderSubmitError(err.message || 'Error processing order inquiry.');
-      // Fallback: still open WhatsApp
-      handleConfirmWhatsApp();
+      setOrderSubmitError(err.message || 'Error al registrar el pedido en la plataforma.');
     } finally {
       setIsSubmittingOrder(false);
     }
@@ -705,9 +720,76 @@ export default function SharedCatalogClientView({
           font-weight: 700;
           cursor: pointer;
         }
+        .cart-mobile-backdrop {
+          display: none;
+        }
+        .cart-drawer-wrapper {
+          position: fixed;
+          bottom: 74px;
+          left: 0;
+          right: 0;
+          pointer-events: none;
+          z-index: 60;
+        }
+        .cart-drawer-container {
+          maxWidth: 1120px;
+          margin: 0 auto;
+          padding: 0 16px;
+          display: flex;
+          justify-content: flex-end;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .cart-drawer-card {
+          pointer-events: auto;
+          max-width: 450px;
+          width: 100%;
+          background-color: #ffffff;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+          border: 1px solid #e2e8f0;
+          padding: 16px;
+          max-height: 500px;
+          overflow-y: auto;
+        }
+        .mobile-drag-indicator {
+          display: none;
+        }
+
+        .variant-info-col {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: 1 1 220px;
+        }
+        .variant-pricing-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .single-unit-box {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background-color: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 6px 10px;
+        }
+        .kit-pack-box {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background-color: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          border-radius: 8px;
+          padding: 6px 12px;
+        }
+
         @media (max-width: 768px) {
           .catalog-container {
-            padding: 10px 8px 105px 8px;
+            padding: 10px 8px 115px 8px;
           }
           .header-card {
             padding: 16px 14px;
@@ -717,9 +799,58 @@ export default function SharedCatalogClientView({
             font-size: 1.35rem !important;
           }
           .product-card {
-            padding: 12px 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+            padding: 12px 10px !important;
+            margin-bottom: 12px !important;
+            border-radius: 10px !important;
+          }
+          .variants-section-container {
+            padding: 8px 6px !important;
+            border-radius: 8px !important;
+          }
+          .variant-card {
+            padding: 10px 10px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+            margin-bottom: 6px !important;
+          }
+          .variant-info-col {
+            flex: 0 0 auto !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            margin-bottom: 2px !important;
+          }
+          .variant-pricing-actions {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          }
+          .single-unit-box {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 8px 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .kit-pack-box {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 8px 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .catalog-search-box {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+          }
+          .category-dropdown-container {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 0 !important;
           }
           .product-desc-clamp {
             display: -webkit-box;
@@ -730,6 +861,48 @@ export default function SharedCatalogClientView({
           }
           .mobile-hide {
             display: none !important;
+          }
+          .cart-mobile-backdrop {
+            display: block !important;
+            position: fixed !important;
+            inset: 0 !important;
+            background-color: rgba(15, 23, 42, 0.55) !important;
+            backdrop-filter: blur(4px) !important;
+            z-index: 998 !important;
+          }
+          .cart-drawer-wrapper {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            pointer-events: none !important;
+            z-index: 999 !important;
+          }
+          .cart-drawer-container {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          .cart-drawer-card {
+            pointer-events: auto !important;
+            max-width: 100vw !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            border-radius: 20px 20px 0 0 !important;
+            border: none !important;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.25) !important;
+            padding: 12px 16px max(18px, env(safe-area-inset-bottom, 18px)) 16px !important;
+            max-height: 84vh !important;
+            overflow-y: auto !important;
+          }
+          .mobile-drag-indicator {
+            display: block !important;
+            width: 40px !important;
+            height: 4px !important;
+            border-radius: 2px !important;
+            background-color: #cbd5e1 !important;
+            margin: 0 auto 10px auto !important;
           }
         }
         @media (max-width: 640px) {
@@ -785,34 +958,6 @@ export default function SharedCatalogClientView({
             flex-shrink: 0;
             white-space: nowrap;
           }
-          .variant-card {
-            padding: 10px 8px !important;
-            flex-direction: column !important;
-            align-items: stretch !important;
-            gap: 10px !important;
-          }
-          .variant-pricing-actions {
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 6px !important;
-          }
-          .single-unit-box {
-            width: 100% !important;
-            box-sizing: border-box !important;
-            padding: 8px 10px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-          }
-          .kit-pack-box {
-            width: 100% !important;
-            box-sizing: border-box !important;
-            padding: 8px 10px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-          }
           .dock-wrapper {
             padding: 8px 10px max(12px, env(safe-area-inset-bottom, 12px)) 10px !important;
           }
@@ -830,12 +975,6 @@ export default function SharedCatalogClientView({
           .dock-actions button {
             justify-content: center !important;
             min-height: 44px !important;
-          }
-          .cart-drawer-card {
-            max-width: calc(100vw - 20px) !important;
-            margin: 0 10px !important;
-            padding: 14px !important;
-            max-height: 55vh !important;
           }
           .checkout-form-grid {
             grid-template-columns: 1fr !important;
@@ -975,9 +1114,6 @@ export default function SharedCatalogClientView({
                     ? `📋 ${protocols.length} Clinical Protocols`
                     : `📦 ${products.length} Formulations • ${totalVariants} Presentations`}
                 </span>
-                <span style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: '6px', fontWeight: 600 }}>
-                  ❄️ 2–8°C GDP Cold-Chain Certified
-                </span>
               </div>
             </div>
 
@@ -1011,38 +1147,6 @@ export default function SharedCatalogClientView({
           </div>
         </div>
 
-        {/* Commercial Incoterms Banner */}
-        <div style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '10px',
-          padding: '12px 18px',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '10px',
-          fontSize: '0.82rem',
-          color: '#1e40af'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ backgroundColor: '#2563eb', color: '#ffffff', padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '0.72rem' }}>
-              DAP
-            </span>
-            <span style={{ fontWeight: 700, color: '#1e3a8a' }}>
-              Commercial Terms: Direct Delivery (DAP)
-            </span>
-            <span style={{ color: '#93c5fd' }}>•</span>
-            <span style={{ color: '#3b82f6' }}>
-              All unit and kit prices are quoted in {currentCurrency}. Certified cold-chain courier freight is calculated based on destination at checkout.
-            </span>
-          </div>
-          <div style={{ fontWeight: 700, color: '#1d4ed8', fontSize: '0.78rem' }}>
-            Atlas Commercial Desk
-          </div>
-        </div>
-
         {/* View Switcher Tabs (Only if dedicated protocol catalog or both exist explicitly) */}
         {isProtocolCatalog && (
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
@@ -1056,47 +1160,99 @@ export default function SharedCatalogClientView({
           </div>
         )}
 
-        {/* Search & Filter Bar */}
-        <div className="filter-bar">
-          <div className="catalog-search-box">
-            <Search size={16} color="#64748b" style={{ flexShrink: 0 }} />
-            <input
-              type="text"
-              placeholder="Search peptide, dosage (e.g. 10mg), category..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: '0.875rem',
-                color: '#0f172a',
-                width: '100%',
-                height: '100%'
-              }}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+        {/* Search, Category Dropdown & Packaging Mode Controls */}
+        <div className="filter-bar" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', width: '100%' }}>
+            {/* Search Input for product & dosage */}
+            <div className="catalog-search-box" style={{ flex: '1 1 260px' }}>
+              <Search size={16} color="#64748b" style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Buscar por producto, principio activo, dosis (ej. 5mg)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  fontSize: '0.875rem',
+                  color: '#0f172a',
+                  width: '100%',
+                  height: '100%'
+                }}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                  title="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Dedicated Category Dropdown Select */}
+            <div className="category-dropdown-container" style={{
+              flex: '0 1 240px',
+              minWidth: '200px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              padding: '0 12px',
+              height: '42px',
+              boxSizing: 'border-box'
+            }}>
+              <Filter size={15} color="#0284c7" style={{ flexShrink: 0 }} />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  outline: 'none',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  width: '100%',
+                  cursor: 'pointer'
+                }}
               >
-                ✕
-              </button>
-            )}
+                <option value="all">Todas las Categorías ({products.length})</option>
+                {categories.filter(c => c !== 'all').map(cat => {
+                  const count = products.filter(p => p.category === cat).length;
+                  const label = {
+                    peptide: 'Péptidos',
+                    weight_loss: 'Metabólico & GLP-1',
+                    longevity: 'Longevidad & Biorreguladores',
+                    supplement: 'Suplementos & Biorreguladores',
+                    nutricosmetics: 'Estética & Piel',
+                    clinical_supplies: 'Suministros Clínicos',
+                    raw_material: 'Materia Prima'
+                  }[cat] || cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                  return (
+                    <option key={cat} value={cat}>
+                      {label} ({count})
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
 
-          {/* Quick Smart Filters & Category Filters in smooth horizontal scroll row */}
-          <div className="chips-scroll-container">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`category-chip ${selectedCategory === 'all' ? 'active' : 'inactive'}`}
-            >
-              All Formulations ({products.length})
-            </button>
+          {/* Quick Format & Packaging Selector */}
+          <div className="chips-scroll-container" style={{ display: 'flex', gap: '8px', alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch', padding: '2px 0' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', flexShrink: 0 }}>
+              Formato:
+            </span>
 
             <button
-              onClick={() => setDosageFilter(dosageFilter === 'kits' ? 'all' : 'kits')}
+              type="button"
+              onClick={() => setPackagingMode('all')}
               style={{
                 padding: '6px 14px',
                 borderRadius: '16px',
@@ -1106,16 +1262,59 @@ export default function SharedCatalogClientView({
                 border: '1px solid',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
-                backgroundColor: dosageFilter === 'kits' ? '#16a34a' : '#f0fdf4',
-                color: dosageFilter === 'kits' ? '#ffffff' : '#15803d',
-                borderColor: dosageFilter === 'kits' ? '#15803d' : '#bbf7d0',
+                backgroundColor: packagingMode === 'all' ? '#003666' : '#f1f5f9',
+                color: packagingMode === 'all' ? '#ffffff' : '#475569',
+                borderColor: packagingMode === 'all' ? '#003666' : '#e2e8f0',
                 transition: 'all 0.15s ease'
               }}
             >
-              📦 10-Pack Kits
+              ✨ Todos los Formatos
             </button>
 
             <button
+              type="button"
+              onClick={() => setPackagingMode('kits')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '16px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: '1px solid',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                backgroundColor: packagingMode === 'kits' ? '#16a34a' : '#f0fdf4',
+                color: packagingMode === 'kits' ? '#ffffff' : '#15803d',
+                borderColor: packagingMode === 'kits' ? '#15803d' : '#bbf7d0',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              📦 Kits de 10 Viales (Mayor Ahorro)
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPackagingMode('units')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '16px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: '1px solid',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                backgroundColor: packagingMode === 'units' ? '#0284c7' : '#f0f9ff',
+                color: packagingMode === 'units' ? '#ffffff' : '#0369a1',
+                borderColor: packagingMode === 'units' ? '#0284c7' : '#bae6fd',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              🧪 Solo Unitario (1–9)
+            </button>
+
+            <button
+              type="button"
               onClick={() => setDosageFilter(dosageFilter === 'high_dose' ? 'all' : 'high_dose')}
               style={{
                 padding: '6px 14px',
@@ -1132,30 +1331,8 @@ export default function SharedCatalogClientView({
                 transition: 'all 0.15s ease'
               }}
             >
-              💪 High Dose (≥10mg)
+              💪 Alta Dosis (≥10mg)
             </button>
-
-            {categories.filter(c => c !== 'all').map(cat => {
-              const label = {
-                peptide: 'Peptides',
-                weight_loss: 'Metabolic & GLP-1',
-                longevity: 'Longevity & Bioregulators',
-                supplement: 'Bioregulators & Supplements',
-                nutricosmetics: 'Aesthetic & Skin',
-                clinical_supplies: 'Clinical Supplies',
-                raw_material: 'Raw Materials'
-              }[cat] || cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`category-chip ${selectedCategory === cat ? 'active' : 'inactive'}`}
-                >
-                  {label}
-                </button>
-              );
-            })}
           </div>
         </div>
 
@@ -1210,22 +1387,6 @@ export default function SharedCatalogClientView({
                             }}>
                               {prod.purity}
                             </span>
-                            {prod.requiresColdChain && (
-                              <span style={{
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
-                                backgroundColor: '#eff6ff',
-                                color: '#2563eb',
-                                padding: '3px 8px',
-                                borderRadius: '5px',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                border: '1px solid #bfdbfe'
-                              }}>
-                                <Snowflake size={12} /> 2-8°C Cold Chain
-                              </span>
-                            )}
                             <span style={{
                               fontSize: '0.72rem',
                               fontWeight: 600,
@@ -1290,7 +1451,7 @@ export default function SharedCatalogClientView({
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {prod.variants.map((v, vIdx) => {
+                        {sortVariantsAscending(prod.variants).map((v, vIdx) => {
                           const displayPrice = (v.price > 0 ? v.price : 0) * fxMultiplier;
                           const tier10Rate = (v.tier10UnitPrice && v.tier10UnitPrice > 0 ? v.tier10UnitPrice : (v.price > 0 ? v.price * 0.9 : 0)) * fxMultiplier;
                           const kitDisplayPrice = (v.kitPrice && v.kitPrice > 0 ? v.kitPrice : tier10Rate * 10) * fxMultiplier;
@@ -1306,6 +1467,14 @@ export default function SharedCatalogClientView({
                           const savingsPct = displayPrice > 0 && tier10Rate > 0 && tier10Rate < displayPrice
                             ? Math.round((1 - (tier10Rate / displayPrice)) * 100)
                             : 0;
+
+                          const stockRaw = (v.stockType || v.availability || prod.stockType || 'on_demand').toLowerCase();
+                          const isOutOfStock = stockRaw.includes('out') || stockRaw.includes('agotado');
+                          const isDemand = stockRaw.includes('demand') || stockRaw.includes('pedido') || !stockRaw;
+
+                          const showUnits = packagingMode === 'all' || packagingMode === 'units';
+                          const showKits = (packagingMode === 'all' || packagingMode === 'kits') && kitDisplayPrice > 0;
+                          const kitsInCart = Math.floor((cart[v.id]?.quantity || 0) / 10);
 
                           return (
                             <div
@@ -1323,7 +1492,7 @@ export default function SharedCatalogClientView({
                                 gap: '12px',
                               }}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 220px' }}>
+                              <div className="variant-info-col">
                                 <div style={{
                                   width: '32px',
                                   height: '32px',
@@ -1339,106 +1508,100 @@ export default function SharedCatalogClientView({
                                 }}>
                                   #{vIdx + 1}
                                 </div>
-                                <div>
-                                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.92rem', lineHeight: 1.2 }}>
                                     {v.dosage || v.name || 'Standard Presentation'}
                                   </div>
-                                  <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span style={{ textTransform: 'capitalize' }}>Format: {v.presentation || 'Vial'}</span>
+                                  <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                                    <span style={{ textTransform: 'capitalize' }}>Formato: {v.presentation || 'Vial'}</span>
                                     <span>•</span>
-                                    <span style={{ color: '#16a34a', fontWeight: 600 }}>In Stock (Available)</span>
+                                    {isOutOfStock ? (
+                                      <span style={{ color: '#dc2626', fontWeight: 700 }}>🔴 Agotado</span>
+                                    ) : isDemand ? (
+                                      <span style={{ color: '#d97706', fontWeight: 600 }}>🟡 Bajo Demanda (3–7 Días)</span>
+                                    ) : (
+                                      <span style={{ color: '#16a34a', fontWeight: 600 }}>🟢 En Stock</span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
 
                               {includePrices && (
-                                <div className="variant-pricing-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                <div className="variant-pricing-actions">
                                   {/* Single Unit (1-9) Box & Counter */}
-                                  <div className="single-unit-box" style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    backgroundColor: '#f8fafc',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: '8px',
-                                    padding: '4px 8px',
-                                  }}>
-                                    <div style={{ textAlign: 'right' }}>
-                                      <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                                        Single (1–9)
+                                  {showUnits && (
+                                    <div className="single-unit-box">
+                                      <div>
+                                        <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
+                                          Unitario (1–9)
+                                        </div>
+                                        <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666' }}>
+                                          {currencySymbol}{displayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{currentCurrency}</span>
+                                        </div>
                                       </div>
-                                      <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#003666' }}>
-                                        {currencySymbol}{displayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{currentCurrency}</span>
+                                      <div style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        backgroundColor: '#ffffff',
+                                        borderRadius: '6px',
+                                        border: '1px solid #cbd5e1',
+                                        padding: '1px',
+                                        marginLeft: '2px'
+                                      }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => updateQuantity(v, prod, -1)}
+                                          disabled={!cart[v.id]?.quantity}
+                                          style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            cursor: cart[v.id]?.quantity ? 'pointer' : 'default',
+                                            fontWeight: 800,
+                                            fontSize: '1rem',
+                                            color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1'
+                                          }}
+                                          title="Disminuir 1 Unidad"
+                                        >
+                                          -
+                                        </button>
+                                        <span style={{ minWidth: '28px', textAlign: 'center', fontWeight: 800, fontSize: '0.85rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
+                                          {cart[v.id]?.quantity || 0}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => updateQuantity(v, prod, 1)}
+                                          style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: '#003666',
+                                            color: '#ffffff',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontWeight: 800,
+                                            fontSize: '1rem'
+                                          }}
+                                          title="Añadir 1 Unidad"
+                                        >
+                                          +
+                                        </button>
                                       </div>
                                     </div>
-                                    <div style={{
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      backgroundColor: '#ffffff',
-                                      borderRadius: '6px',
-                                      border: '1px solid #cbd5e1',
-                                      padding: '1px',
-                                      marginLeft: '2px'
-                                    }}>
-                                      <button
-                                        type="button"
-                                        onClick={() => updateQuantity(v, prod, -1)}
-                                        disabled={!cart[v.id]?.quantity}
-                                        style={{
-                                          width: '26px',
-                                          height: '26px',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          background: 'transparent',
-                                          border: 'none',
-                                          cursor: cart[v.id]?.quantity ? 'pointer' : 'default',
-                                          fontWeight: 800,
-                                          color: cart[v.id]?.quantity ? '#0f172a' : '#cbd5e1'
-                                        }}
-                                        title="Decrease 1 Unit"
-                                      >
-                                        -
-                                      </button>
-                                      <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 800, fontSize: '0.82rem', color: cart[v.id]?.quantity ? '#003666' : '#64748b' }}>
-                                        {cart[v.id]?.quantity || 0}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={() => updateQuantity(v, prod, 1)}
-                                        style={{
-                                          width: '26px',
-                                          height: '26px',
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          background: '#003666',
-                                          color: '#ffffff',
-                                          border: 'none',
-                                          borderRadius: '4px',
-                                          cursor: 'pointer',
-                                          fontWeight: 800
-                                        }}
-                                        title="Add 1 Single Unit"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                  </div>
+                                  )}
 
                                   {/* 10-Unit Pack Volume Price & Direct Kit Action Button */}
-                                  {kitDisplayPrice > 0 && (
-                                    <div className="kit-pack-box" style={{
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: '10px',
-                                      backgroundColor: '#f0fdf4',
-                                      borderRadius: '8px',
-                                      padding: '4px 10px',
-                                      border: '1px solid #bbf7d0',
-                                    }}>
-                                      <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                                  {showKits && (
+                                    <div className="kit-pack-box">
+                                      <div>
+                                        <div style={{ fontSize: '0.65rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                           <span>📦 Pack ×10 {unitPlural}</span>
                                           {savingsPct > 0 && (
                                             <span style={{ backgroundColor: '#16a34a', color: '#ffffff', fontSize: '0.6rem', padding: '1px 4px', borderRadius: '4px', fontWeight: 800 }}>
@@ -1450,28 +1613,82 @@ export default function SharedCatalogClientView({
                                           {currencySymbol}{kitDisplayPrice.toFixed(2)} <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#166534' }}>/ pack</span>
                                         </div>
                                         <div style={{ fontSize: '0.68rem', color: '#166534', fontWeight: 600 }}>
-                                          ({currencySymbol}{tier10Rate.toFixed(2)} / unit)
+                                          ({currencySymbol}{tier10Rate.toFixed(2)} / ud)
                                         </div>
                                       </div>
 
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <button
-                                          type="button"
-                                          onClick={() => updateQuantity(v, prod, 10)}
-                                          className="add-kit-btn"
-                                          title="Add 1 Full Pack of 10 Vials at Discount"
-                                        >
-                                          + Add Kit (10)
-                                        </button>
-
-                                        {(cart[v.id]?.quantity || 0) >= 10 && (
+                                      <div>
+                                        {kitsInCart >= 1 ? (
+                                          <div style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '6px',
+                                            border: '1px solid #86efac',
+                                            padding: '1px',
+                                          }}>
+                                            <button
+                                              type="button"
+                                              onClick={() => updateQuantity(v, prod, -10)}
+                                              style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                fontWeight: 800,
+                                                color: '#166534',
+                                                fontSize: '1rem'
+                                              }}
+                                              title="Quitar 1 Kit (-10)"
+                                            >
+                                              -
+                                            </button>
+                                            <span style={{ minWidth: '48px', textAlign: 'center', fontWeight: 800, fontSize: '0.78rem', color: '#15803d' }}>
+                                              {kitsInCart} Kit{kitsInCart > 1 ? 's' : ''}
+                                            </span>
+                                            <button
+                                              type="button"
+                                              onClick={() => updateQuantity(v, prod, 10)}
+                                              style={{
+                                                width: '32px',
+                                                height: '32px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                background: '#16a34a',
+                                                color: '#ffffff',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontWeight: 800,
+                                                fontSize: '1rem'
+                                              }}
+                                              title="Añadir 1 Kit (+10)"
+                                            >
+                                              +
+                                            </button>
+                                          </div>
+                                        ) : (
                                           <button
                                             type="button"
-                                            onClick={() => updateQuantity(v, prod, -10)}
-                                            className="remove-kit-btn"
-                                            title="Remove 1 Kit (10 Vials)"
+                                            onClick={() => updateQuantity(v, prod, 10)}
+                                            className="add-kit-btn"
+                                            style={{
+                                              minHeight: '34px',
+                                              padding: '6px 14px',
+                                              fontSize: '0.78rem',
+                                              fontWeight: 800,
+                                              display: 'inline-flex',
+                                              alignItems: 'center',
+                                              gap: '5px',
+                                              borderRadius: '6px'
+                                            }}
                                           >
-                                            -1 Kit
+                                            + Añadir Kit (10)
                                           </button>
                                         )}
                                       </div>
@@ -1626,10 +1843,14 @@ export default function SharedCatalogClientView({
           width: '100%',
           boxSizing: 'border-box'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <div className="mobile-hide" style={{ fontSize: '0.825rem', color: '#475569' }}>
-              <strong>{catalogMeta.accountManagerName || 'Atlas Commercial Desk'}</strong> • {catalogMeta.accountManagerEmail || 'commercial@atlashealth.com'}
-            </div>
+            {catalogMeta.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk' && (
+              <div className="mobile-hide" style={{ fontSize: '0.825rem', color: '#475569' }}>
+                <strong>{catalogMeta.accountManagerName}</strong>
+                {catalogMeta.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' && catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com' && (
+                  <span> • {catalogMeta.accountManagerEmail}</span>
+                )}
+              </div>
+            )}
 
             {cartTotalUnits > 0 && (
               <div style={{
@@ -1676,9 +1897,8 @@ export default function SharedCatalogClientView({
                 </button>
               </div>
             )}
-          </div>
 
-          <div className="dock-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="dock-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {cartTotalUnits > 0 && (
               <button
                 onClick={handleCopyOrderSummary}
@@ -1723,8 +1943,8 @@ export default function SharedCatalogClientView({
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#15803d'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
             >
-              <MessageSquare size={16} />
-              <span>{cartTotalUnits > 0 ? `WhatsApp Order (${cartTotalUnits})` : 'Inquire via WhatsApp'}</span>
+              <Send size={16} />
+              <span>{cartTotalUnits > 0 ? `Enviar Pedido (${cartTotalUnits}) 🚀` : 'Enviar Pedido'}</span>
             </button>
           </div>
         </div>
@@ -1957,8 +2177,8 @@ export default function SharedCatalogClientView({
                     gap: '6px'
                   }}
                 >
-                  <MessageSquare size={14} />
-                  <span>Send Order</span>
+                  <Send size={14} />
+                  <span>Enviar Pedido</span>
                 </button>
               </div>
             </div>
@@ -1993,294 +2213,407 @@ export default function SharedCatalogClientView({
             border: '1px solid #e2e8f0',
             padding: '24px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Package size={20} />
+            {placedOrderCode ? (
+              <div style={{ textAlign: 'center', padding: '12px 6px' }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: '#f0fdf4',
+                  border: '2px solid #bbf7d0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px auto',
+                  color: '#16a34a'
+                }}>
+                  <CheckCircle2 size={36} />
                 </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
-                    Confirm Clinical Order Inquiry
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
-                    Direct dispatch & pro-forma processing
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCheckoutModalOpen(false)}
-                style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}
-              >
-                ✕
-              </button>
-            </div>
 
-            {/* Order Estimate Summary Badge */}
-            <div style={{
-              backgroundColor: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              borderRadius: '10px',
-              padding: '12px 14px',
-              marginBottom: '16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div>
-                <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
-                  Total Estimated Order
-                </div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>
-                  {cartTotalUnits} units • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency}
-                </div>
-              </div>
-              <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
-                {activeShipping.flag} {activeShipping.code} Destination
-              </div>
-            </div>
-
-            {/* Form Fields */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                  Clinic / Doctor Name *
-                </label>
-                <input
-                  type="text"
-                  value={checkoutForm.clinicName}
-                  onChange={(e) => setCheckoutForm({ ...checkoutForm, clinicName: e.target.value })}
-                  placeholder="e.g. Lotusland Regenerative Clinic"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.85rem',
-                    color: '#0f172a',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                    Contact Person
-                  </label>
-                  <input
-                    type="text"
-                    value={checkoutForm.contactPerson}
-                    onChange={(e) => setCheckoutForm({ ...checkoutForm, contactPerson: e.target.value })}
-                    placeholder="Dr. Smith"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                      color: '#0f172a',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                    VAT / Tax ID (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={checkoutForm.vatTaxId}
-                    onChange={(e) => setCheckoutForm({ ...checkoutForm, vatTaxId: e.target.value })}
-                    placeholder="e.g. EU123456789"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                      color: '#0f172a',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                    Professional Email
-                  </label>
-                  <input
-                    type="email"
-                    value={checkoutForm.email}
-                    onChange={(e) => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
-                    placeholder="practitioner@clinic.com"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                      color: '#0f172a',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                    Phone / WhatsApp *
-                  </label>
-                  <input
-                    type="tel"
-                    value={checkoutForm.phone}
-                    onChange={(e) => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
-                    placeholder="+1 (555) 000-0000"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.85rem',
-                      color: '#0f172a',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                  Delivery Address & City / Country
-                </label>
-                <input
-                  type="text"
-                  value={checkoutForm.deliveryAddress}
-                  onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryAddress: e.target.value })}
-                  placeholder="Street, Medical Building, City, Country"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.85rem',
-                    color: '#0f172a',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                  Special Instructions / Courier Notes
-                </label>
-                <textarea
-                  rows={2}
-                  value={checkoutForm.deliveryNotes}
-                  onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryNotes: e.target.value })}
-                  placeholder="e.g. Priority cold-chain delivery required"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.85rem',
-                    color: '#0f172a',
-                    boxSizing: 'border-box',
-                    resize: 'none'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Placed Order Notification Banner */}
-            {placedOrderCode && (
-              <div style={{
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                fontSize: '0.825rem',
-                color: '#15803d',
-                marginTop: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <CheckCircle2 size={18} color="#16a34a" />
-                <div>
-                  <strong>Order Draft #{placedOrderCode} registered in portal.</strong> Our operations team and your account manager have been dispatched an immediate alert.
-                </div>
-              </div>
-            )}
-
-            {orderSubmitError && (
-              <div style={{
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                fontSize: '0.825rem',
-                color: '#b91c1c',
-                marginTop: '14px'
-              }}>
-                ⚠️ {orderSubmitError}
-              </div>
-            )}
-
-            {/* Modal Actions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-              <button
-                type="button"
-                onClick={handlePlaceOrderDraft}
-                disabled={isSubmittingOrder}
-                style={{
-                  width: '100%',
-                  backgroundColor: '#16a34a',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '12px 20px',
+                <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: '0 0 6px 0' }}>
+                  ¡Pedido Enviado a la Plataforma!
+                </h2>
+                
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '6px',
+                  padding: '4px 12px',
+                  fontSize: '0.9rem',
                   fontWeight: 800,
-                  fontSize: '0.95rem',
-                  cursor: isSubmittingOrder ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 14px rgba(22, 163, 74, 0.3)',
-                  opacity: isSubmittingOrder ? 0.75 : 1,
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <MessageSquare size={18} />
-                <span>{isSubmittingOrder ? 'Registering Draft & Opening WhatsApp...' : 'Submit Order & Send via WhatsApp 🚀'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleDownloadProFormaPdf()}
-                disabled={isGeneratingProForma}
-                style={{
-                  width: '100%',
-                  backgroundColor: '#f8fafc',
                   color: '#003666',
-                  border: '1px solid #cbd5e1',
+                  marginBottom: '16px'
+                }}>
+                  Ref: #{placedOrderCode}
+                </div>
+
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
                   borderRadius: '10px',
-                  padding: '10px 20px',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
+                  padding: '14px',
+                  textAlign: 'left',
+                  fontSize: '0.85rem',
+                  color: '#334155',
+                  lineHeight: '1.5',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#166534', marginBottom: '6px' }}>
+                    <CheckCircle2 size={16} color="#16a34a" /> Notificación Activada en Panel de Operaciones
+                  </div>
+                  <div>
+                    Tu pedido ha quedado registrado como <strong>Pendiente de Aprobación</strong>. La administración y operaciones ya tienen la alerta en su panel para validar existencias, emitir la pro-forma definitiva y coordinar el despacho.
+                  </div>
+                  <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px dashed #cbd5e1', fontSize: '0.78rem', color: '#64748b' }}>
+                    Cliente: <strong>{checkoutForm.clinicName || catalogMeta?.recipientName}</strong> • Total: <strong>{currencySymbol}{grandTotal.toFixed(2)} {currentCurrency} ({cartTotalUnits} unidades)</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadProFormaPdf()}
+                    disabled={isGeneratingProForma}
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#003666',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '12px 20px',
+                      fontWeight: 800,
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 54, 102, 0.25)'
+                    }}
+                  >
+                    <Download size={18} />
+                    <span>{isGeneratingProForma ? 'Generando PDF...' : 'Descargar Pro-Forma Oficial (PDF)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirmWhatsApp}
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#f0fdf4',
+                      color: '#166534',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '10px',
+                      padding: '11px 20px',
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <MessageSquare size={17} color="#16a34a" />
+                    <span>Enviar Copia de Respaldo por WhatsApp (Opcional)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCheckoutModalOpen(false);
+                      setPlacedOrderCode('');
+                    }}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'transparent',
+                      color: '#64748b',
+                      border: 'none',
+                      padding: '8px',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      marginTop: '4px'
+                    }}
+                  >
+                    Cerrar y Continuar en el Catálogo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Package size={20} />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                        Confirmar y Enviar Pedido a la Plataforma
+                      </h3>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b' }}>
+                        Registro directo en portal y alerta inmediata a operaciones
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsCheckoutModalOpen(false)}
+                    style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#94a3b8' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Order Estimate Summary Badge */}
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '10px',
+                  padding: '12px 14px',
+                  marginBottom: '16px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                <Download size={16} />
-                <span>{isGeneratingProForma ? 'Generating PDF...' : '📄 Download Official Pro-Forma (PDF)'}</span>
-              </button>
-            </div>
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Total del Pedido Estimado
+                    </div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>
+                      {cartTotalUnits} unidades • {currencySymbol}{grandTotal.toFixed(2)} {currentCurrency}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
+                    {activeShipping.flag} Destino {activeShipping.code}
+                  </div>
+                </div>
+
+                {/* Form Fields */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      Clínica / Profesional Médico *
+                    </label>
+                    <input
+                      type="text"
+                      value={checkoutForm.clinicName}
+                      onChange={(e) => setCheckoutForm({ ...checkoutForm, clinicName: e.target.value })}
+                      placeholder="e.g. Lotusland Regenerative Clinic"
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem',
+                        color: '#0f172a',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Persona de Contacto
+                      </label>
+                      <input
+                        type="text"
+                        value={checkoutForm.contactPerson}
+                        onChange={(e) => setCheckoutForm({ ...checkoutForm, contactPerson: e.target.value })}
+                        placeholder="Dr. Smith"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        NIF / CIF / Tax ID (Opcional)
+                      </label>
+                      <input
+                        type="text"
+                        value={checkoutForm.vatTaxId}
+                        onChange={(e) => setCheckoutForm({ ...checkoutForm, vatTaxId: e.target.value })}
+                        placeholder="e.g. EU123456789"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Email Profesional
+                      </label>
+                      <input
+                        type="email"
+                        value={checkoutForm.email}
+                        onChange={(e) => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
+                        placeholder="practitioner@clinic.com"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        Teléfono / WhatsApp *
+                      </label>
+                      <input
+                        type="tel"
+                        value={checkoutForm.phone}
+                        onChange={(e) => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
+                        placeholder="+1 (555) 000-0000"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.85rem',
+                          color: '#0f172a',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      Dirección de Entrega y Ciudad / País
+                    </label>
+                    <input
+                      type="text"
+                      value={checkoutForm.deliveryAddress}
+                      onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryAddress: e.target.value })}
+                      placeholder="Calle, Edificio Médico, Ciudad, País"
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem',
+                        color: '#0f172a',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      Instrucciones Especiales / Notas
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={checkoutForm.deliveryNotes}
+                      onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryNotes: e.target.value })}
+                      placeholder="e.g. Horario preferido de recepción en clínica..."
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem',
+                        color: '#0f172a',
+                        boxSizing: 'border-box',
+                        resize: 'none'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {orderSubmitError && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    fontSize: '0.825rem',
+                    color: '#b91c1c',
+                    marginTop: '14px'
+                  }}>
+                    ⚠️ {orderSubmitError}
+                  </div>
+                )}
+
+                {/* Modal Actions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+                  <button
+                    type="button"
+                    onClick={handlePlaceOrderDraft}
+                    disabled={isSubmittingOrder}
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#16a34a',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '12px 20px',
+                      fontWeight: 800,
+                      fontSize: '0.95rem',
+                      cursor: isSubmittingOrder ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(22, 163, 74, 0.3)',
+                      opacity: isSubmittingOrder ? 0.75 : 1,
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <Package size={18} />
+                    <span>{isSubmittingOrder ? 'Enviando Pedido a Plataforma...' : '🚀 Enviar Pedido a la Plataforma'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadProFormaPdf()}
+                    disabled={isGeneratingProForma}
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#f8fafc',
+                      color: '#003666',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '10px',
+                      padding: '10px 20px',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Download size={16} />
+                    <span>{isGeneratingProForma ? 'Generando PDF...' : '📄 Descargar Pro-Forma Previa (PDF)'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

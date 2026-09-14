@@ -9,10 +9,9 @@ import { PRICING_TIER } from '@/constants/productEnums';
 import { AlertTriangle } from 'lucide-react';
 import SharedCatalogClientView from './SharedCatalogClientView';
 
-// ── F-E: ISR with 10-min revalidation instead of force-dynamic ────────────────
-// Prices refresh every 10 minutes on the CDN edge. For live pricing, revert to
-// `export const dynamic = 'force-dynamic'` and remove this line.
-export const revalidate = 600;
+// ── Live Pricing & Stock: Fetch directly from Firestore on request ─────────────
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
   const title = 'Official Formulations & Product Portfolio | Atlas Health';
@@ -103,57 +102,53 @@ function resolveCanonicalPrice(variant, { canonicalTier, markupFactor, markupPer
 
 // ── F-D: Cached Firestore fetch (TTL = 10 min, keyed by supplierId + category) ─
 
-const fetchCatalogData = unstable_cache(
-  async (supplierId, category, catalogueFilter) => {
-    let productsQuery = adminDb.collection('products')
-      .where('status', 'in', ['active', 'published', 'out of stock']);
+async function fetchCatalogData(supplierId, category, catalogueFilter) {
+  let productsQuery = adminDb.collection('products')
+    .where('status', 'in', ['active', 'published', 'out of stock']);
 
-    if (supplierId && supplierId !== 'all') {
-      const sCore = String(supplierId).toLowerCase().replace(/^supplier-/, '');
-      // If filtering by specific supplier, use array-contains on supplierIds if available
-      productsQuery = productsQuery.where('supplierIds', 'array-contains', supplierId.startsWith('supplier-') ? supplierId : `supplier-${supplierId}`);
-    }
+  if (supplierId && supplierId !== 'all') {
+    const sCore = String(supplierId).toLowerCase().replace(/^supplier-/, '');
+    // If filtering by specific supplier, use array-contains on supplierIds if available
+    productsQuery = productsQuery.where('supplierIds', 'array-contains', supplierId.startsWith('supplier-') ? supplierId : `supplier-${supplierId}`);
+  }
 
-    let productsSnapshot, protosSnapshot;
-    try {
-      [productsSnapshot, protosSnapshot] = await Promise.all([
-        productsQuery.get(),
-        adminDb.collection('protocols').limit(60).get()
-      ]);
-    } catch (queryErr) {
-      // Fallback to unindexed query if composite index is pending
-      const fallbackQuery = adminDb.collection('products').where('status', 'in', ['active', 'published', 'out of stock']);
-      [productsSnapshot, protosSnapshot] = await Promise.all([
-        fallbackQuery.get(),
-        adminDb.collection('protocols').limit(60).get()
-      ]);
-    }
+  let productsSnapshot, protosSnapshot;
+  try {
+    [productsSnapshot, protosSnapshot] = await Promise.all([
+      productsQuery.get(),
+      adminDb.collection('protocols').limit(60).get()
+    ]);
+  } catch (queryErr) {
+    // Fallback to unindexed query if composite index is pending
+    const fallbackQuery = adminDb.collection('products').where('status', 'in', ['active', 'published', 'out of stock']);
+    [productsSnapshot, protosSnapshot] = await Promise.all([
+      fallbackQuery.get(),
+      adminDb.collection('protocols').limit(60).get()
+    ]);
+  }
 
-    // Build variants map grouped by productId directly from each product's subcollection
-    const variantsByProduct = {};
-    await Promise.all(
-      productsSnapshot.docs.map(async (doc) => {
-        const vSnap = await doc.ref.collection('variants').get();
-        const activeVars = [];
-        vSnap.docs.forEach(vd => {
-          const vData = vd.data();
-          if (vData.isActive !== false && vData.status !== 'archived') {
-            activeVars.push({ id: vd.id, ...vData });
-          }
-        });
-        variantsByProduct[doc.id] = activeVars;
-      })
-    );
+  // Build variants map grouped by productId directly from each product's subcollection
+  const variantsByProduct = {};
+  await Promise.all(
+    productsSnapshot.docs.map(async (doc) => {
+      const vSnap = await doc.ref.collection('variants').get();
+      const activeVars = [];
+      vSnap.docs.forEach(vd => {
+        const vData = vd.data();
+        if (vData.isActive !== false && vData.status !== 'archived') {
+          activeVars.push({ id: vd.id, ...vData });
+        }
+      });
+      variantsByProduct[doc.id] = activeVars;
+    })
+  );
 
-    return {
-      productDocs: productsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })),
-      variantsByProduct,
-      protoDocs: protosSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
-    };
-  },
-  ['shared-catalog-data'],
-  { revalidate: 600, tags: ['catalog', 'products', 'variants', 'protocols'] }
-);
+  return {
+    productDocs: productsSnapshot.docs.map(d => ({ id: d.id, ...d.data() })),
+    variantsByProduct,
+    protoDocs: protosSnapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+  };
+}
 
 // ── Page Component ─────────────────────────────────────────────────────────────
 
@@ -203,53 +198,57 @@ export default async function SharedCatalogPage({ params }) {
     `CAT-${(payload.supplierId || 'ATL').toUpperCase().slice(0, 6)}-${Date.now().toString(36).toUpperCase()}`;
 
   // Check Firestore for remote revocation & update visit analytics
+  let linkData = {};
   if (catalogId) {
     try {
       const linkDocRef = adminDb.collection('shared_catalog_links').doc(catalogId);
       const linkSnap = await linkDocRef.get();
-      if (linkSnap.exists && linkSnap.data().status === 'revoked') {
-        return (
-          <div style={{
-            minHeight: '100vh', backgroundColor: '#f8fafc',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '24px', fontFamily: 'Inter, system-ui, sans-serif'
-          }}>
+      if (linkSnap.exists) {
+        linkData = linkSnap.data() || {};
+        if (linkData.status === 'revoked') {
+          return (
             <div style={{
-              backgroundColor: '#ffffff', borderRadius: '16px',
-              border: '1px solid #fee2e2', padding: '40px',
-              maxWidth: '520px', width: '100%', textAlign: 'center',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
+              minHeight: '100vh', backgroundColor: '#f8fafc',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '24px', fontFamily: 'Inter, system-ui, sans-serif'
             }}>
               <div style={{
-                width: '64px', height: '64px', borderRadius: '50%',
-                backgroundColor: '#fef2f2', color: '#dc2626',
-                display: 'inline-flex', alignItems: 'center',
-                justifyContent: 'center', marginBottom: '20px'
+                backgroundColor: '#ffffff', borderRadius: '16px',
+                border: '1px solid #fee2e2', padding: '40px',
+                maxWidth: '520px', width: '100%', textAlign: 'center',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)'
               }}>
-                <AlertTriangle size={32} />
+                <div style={{
+                  width: '64px', height: '64px', borderRadius: '50%',
+                  backgroundColor: '#fef2f2', color: '#dc2626',
+                  display: 'inline-flex', alignItems: 'center',
+                  justifyContent: 'center', marginBottom: '20px'
+                }}>
+                  <AlertTriangle size={32} />
+                </div>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+                  Catalog Link Access Revoked
+                </h1>
+                <p style={{ color: '#64748b', fontSize: '0.925rem', lineHeight: '1.5', marginBottom: '24px' }}>
+                  This shared price list has been revoked or updated by the account manager. Please request a new access link.
+                </p>
               </div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-                Catalog Link Access Revoked
-              </h1>
-              <p style={{ color: '#64748b', fontSize: '0.925rem', lineHeight: '1.5', marginBottom: '24px' }}>
-                This shared price list has been revoked or updated by the account manager. Please request a new access link.
-              </p>
             </div>
-          </div>
-        );
-      }
+          );
+        }
 
-      // Record visit count asynchronously
-      linkDocRef.set({
-        visitsCount: (linkSnap.data()?.visitsCount || 0) + 1,
-        lastVisitedAt: new Date().toISOString()
-      }, { merge: true }).catch(() => {});
+        // Record visit count asynchronously
+        linkDocRef.set({
+          visitsCount: (linkData.visitsCount || 0) + 1,
+          lastVisitedAt: new Date().toISOString()
+        }, { merge: true }).catch(() => {});
+      }
     } catch (err) {
       // Non-blocking fallback
     }
   }
 
-  const catalogMeta = { ...payload, catalogId };
+  const catalogMeta = { ...linkData, ...payload, catalogId };
 
   const priceSource     = catalogMeta.priceSource || 'cost';
   const includePrices   = catalogMeta.includePrices !== false;
