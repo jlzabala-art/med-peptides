@@ -161,7 +161,8 @@ export default function User360Drawer({
           recipientEmail: email,
           recipientType: formData.role || 'clinic',
           priceSource: formData.pricingChannel || 'clinic',
-          currency: 'USD',
+          priceMarkupPercent: Number(formData.customDiscountPct || user?.priceMarkupPercent || 30),
+          currency: user?.currency || 'USD',
           channel: 'whatsapp',
           sentBy: 'Atlas Commercial Desk'
         })
@@ -210,6 +211,7 @@ export default function User360Drawer({
         pricingChannel: formData.pricingChannel,
         priceTier: formData.pricingChannel,
         customDiscountPct: Number(formData.customDiscountPct || 0),
+        priceMarkupPercent: Number(formData.customDiscountPct || 0),
         clinicName: formData.clinicName,
         phone: formData.phone,
         zohoContactId: formData.zohoContactId,
@@ -247,7 +249,7 @@ export default function User360Drawer({
       isOpen={isOpen}
       onClose={onClose}
       title={formData.displayName || formData.email || 'User Profile 360°'}
-      subtitle={`UID: ${user.id || user.uid || '---'} · Role: ${formData.role.toUpperCase()}`}
+      subtitle={`UID: ${user.id || user.uid || '---'} · Role: ${formData.role.toUpperCase()}${(user.zohoContactId || user.biginContactId || user.zohoSyncStatus === 'synced') ? ' · ⚡ Bigin Synced' : ''}`}
       width="580px"
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -296,6 +298,39 @@ export default function User360Drawer({
         {/* Tab 1: Profile & Identity */}
         {activeTab === 'profile' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {(user.zohoContactId || user.biginContactId || user.zohoSyncStatus === 'synced') && (
+              <div style={{
+                padding: '0.65rem 0.85rem',
+                borderRadius: '10px',
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CheckCircle size={16} color="#16a34a" />
+                  <div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#166534' }}>
+                      Sincronizado con Zoho Bigin CRM ✓
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#475569' }}>
+                      Contact ID: <strong>{user.zohoContactId || user.biginContactId}</strong> {user.zohoAccountId ? `· Account ID: ${user.zohoAccountId}` : ''}
+                    </div>
+                  </div>
+                </div>
+                <span style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: '#dcfce7',
+                  color: '#15803d'
+                }}>
+                  BIDIRECTIONAL SYNC
+                </span>
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '0.3rem' }}>

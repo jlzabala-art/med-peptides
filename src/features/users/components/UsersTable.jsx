@@ -315,8 +315,10 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
     const email = targetUser.email || targetUser.contactEmail || '';
     const userId = targetUser.id || targetUser.uid;
     const priceSource = targetUser.pricingChannel || targetUser.priceTier || (targetUser.role === 'wholesaler' ? 'wholeseller' : 'clinic');
+    const priceMarkup = Number(targetUser.customDiscountPct || targetUser.priceMarkupPercent || 30);
+    const currency = targetUser.currency || 'USD';
 
-    const toastId = toast.loading(`Generating Lotusland catalog link for ${fullName}...`);
+    const toastId = toast.loading(`Generating Lotusland catalog link for ${fullName} (${priceMarkup}% rate)...`);
 
     try {
       const res = await fetch('/api/catalog/share', {
@@ -331,7 +333,8 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           recipientEmail: email,
           recipientType: targetUser.role || 'clinic',
           priceSource,
-          currency: 'USD',
+          priceMarkupPercent: priceMarkup,
+          currency,
           channel: 'whatsapp',
           sentBy: user?.email || 'admin'
         })
@@ -500,8 +503,29 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               {initial}
             </div>
             <div style={{ minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-main)', wordBreak: 'break-word' }}>
-                {name}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 600, color: 'var(--text-main)', wordBreak: 'break-word' }}>
+                  {name}
+                </span>
+                {(u.zohoContactId || u.biginContactId || u.zohoSyncStatus === 'synced') && (
+                  <span
+                    title={`Sincronizado con Zoho Bigin (ID: ${u.zohoContactId || u.biginContactId})`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      fontSize: '0.66rem',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: '4px',
+                      backgroundColor: '#f0fdf4',
+                      color: '#166534',
+                      border: '1px solid #bbf7d0'
+                    }}
+                  >
+                    ⚡ Bigin Synced ✓
+                  </span>
+                )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', wordBreak: 'break-word' }}>{email}</span>
@@ -577,7 +601,14 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
               cursor: 'pointer'
             }}
           >
-            <span>{channelLabels[currentChannel] || currentChannel}</span>
+            <span>
+              {channelLabels[currentChannel] || currentChannel}
+              {Boolean(u.customDiscountPct || u.priceMarkupPercent) && (
+                <strong style={{ marginLeft: '4px', color: '#0369a1' }}>
+                  ({u.customDiscountPct || u.priceMarkupPercent}%)
+                </strong>
+              )}
+            </span>
             <span style={{ fontSize: '0.7rem', opacity: 0.4, flexShrink: 0 }}>✏️</span>
             <select
               value={currentChannel}
