@@ -41,6 +41,8 @@ export default function SharedCatalogClientView({
   const {
     activeTab, setActiveTab,
     searchQuery, setSearchQuery,
+    selectedGoal, setSelectedGoal,
+    availableGoals,
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
     packagingMode, setPackagingMode,
@@ -417,6 +419,7 @@ export default function SharedCatalogClientView({
   };
 
   const handleOpenWhatsAppCheckout = () => {
+    if (cartTotalUnits === 0) return;
     setIsCheckoutModalOpen(true);
   };
 
@@ -1068,8 +1071,8 @@ export default function SharedCatalogClientView({
             {/* Line 1: Logistics Controls (Destination, Currency, Cart) */}
             <div className="topbar-row-logistics">
               {/* Destination Selector */}
-              <div className="topbar-destination">
-                <span style={{ marginRight: '5px' }}>✈️</span>
+              <div className="topbar-destination" style={{ padding: '3px 8px', maxWidth: '125px' }}>
+                <span style={{ marginRight: '4px' }}>✈️</span>
                 <select
                   value={selectedShipping}
                   onChange={(e) => setSelectedShipping(e.target.value)}
@@ -1081,14 +1084,19 @@ export default function SharedCatalogClientView({
                     fontWeight: 700,
                     cursor: 'pointer',
                     outline: 'none',
-                    maxWidth: '170px'
+                    width: '100%',
+                    textOverflow: 'ellipsis'
                   }}
+                  title={activeShipping.label}
                 >
-                  {SHIPPING_DESTINATIONS.map(d => (
-                    <option key={d.id} value={d.id}>
-                      {d.flag} {d.code} (+{currencySymbol}{currentCurrency === 'EUR' ? d.costEUR : d.costUSD})
-                    </option>
-                  ))}
+                  {SHIPPING_DESTINATIONS.map(d => {
+                    const cost = currentCurrency === 'EUR' ? d.costEUR : currentCurrency === 'AED' ? (d.costAED || Math.round(d.costUSD * 3.6725)) : d.costUSD;
+                    return (
+                      <option key={d.id} value={d.id}>
+                        {d.flag} {d.code} (+{currencySymbol}{cost})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -1107,6 +1115,13 @@ export default function SharedCatalogClientView({
                   className={`currency-btn ${currentCurrency === 'EUR' ? 'active' : 'inactive'}`}
                 >
                   € EUR
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentCurrency('AED')}
+                  className={`currency-btn ${currentCurrency === 'AED' ? 'active' : 'inactive'}`}
+                >
+                  AED
                 </button>
               </div>
 
@@ -1129,7 +1144,7 @@ export default function SharedCatalogClientView({
             {/* Line 2: Clinical Provider Access & Registration */}
             <div className="topbar-row-access">
               <a
-                href="/auth/login"
+                href="/login"
                 className="topbar-signin-btn"
                 title="Provider Authentication"
               >
@@ -1260,10 +1275,10 @@ export default function SharedCatalogClientView({
               )}
             </div>
 
-            {/* Dedicated Category Dropdown Select */}
+            {/* Dedicated Canonical Goals Dropdown Select */}
             <div className="category-dropdown-container" style={{
-              flex: '0 1 240px',
-              minWidth: '200px',
+              flex: '0 1 260px',
+              minWidth: '220px',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -1276,8 +1291,8 @@ export default function SharedCatalogClientView({
             }}>
               <Filter size={15} color="#0284c7" style={{ flexShrink: 0 }} />
               <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                value={selectedGoal}
+                onChange={(e) => setSelectedGoal(e.target.value)}
                 style={{
                   border: 'none',
                   background: 'transparent',
@@ -1289,24 +1304,12 @@ export default function SharedCatalogClientView({
                   cursor: 'pointer'
                 }}
               >
-                <option value="all">All Categories ({products.length})</option>
-                {categories.filter(c => c !== 'all').map(cat => {
-                  const count = products.filter(p => p.category === cat).length;
-                  const label = {
-                    peptide: 'Peptides',
-                    weight_loss: 'Metabolic & GLP-1',
-                    longevity: 'Longevity & Cellular Repair',
-                    supplement: 'Supplements & Bioregulators',
-                    nutricosmetics: 'Aesthetics & Dermatology',
-                    clinical_supplies: 'Clinical Supplies',
-                    raw_material: 'Raw Materials'
-                  }[cat] || cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                  return (
-                    <option key={cat} value={cat}>
-                      {label} ({count})
-                    </option>
-                  );
-                })}
+                <option value="all">All Clinical Goals ({products.length})</option>
+                {availableGoals?.map(goal => (
+                  <option key={goal.id} value={goal.id}>
+                    {goal.label} ({goal.count})
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -1992,23 +1995,26 @@ export default function SharedCatalogClientView({
 
             <button
               onClick={handleOpenWhatsAppCheckout}
+              disabled={cartTotalUnits === 0}
+              title={cartTotalUnits === 0 ? 'Add formulations to order before submitting' : 'Submit formal order'}
               style={{
-                backgroundColor: '#16a34a',
+                backgroundColor: cartTotalUnits === 0 ? '#94a3b8' : '#16a34a',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
                 padding: '10px 18px',
                 fontWeight: 700,
                 fontSize: '0.875rem',
-                cursor: 'pointer',
+                cursor: cartTotalUnits === 0 ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                boxShadow: cartTotalUnits === 0 ? 'none' : '0 4px 12px rgba(22, 163, 74, 0.25)',
+                opacity: cartTotalUnits === 0 ? 0.65 : 1,
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#15803d'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
+              onMouseEnter={(e) => { if (cartTotalUnits > 0) e.currentTarget.style.backgroundColor = '#15803d'; }}
+              onMouseLeave={(e) => { if (cartTotalUnits > 0) e.currentTarget.style.backgroundColor = '#16a34a'; }}
             >
               <Send size={16} />
               <span>{cartTotalUnits > 0 ? `Submit Order (${cartTotalUnits}) 🚀` : 'Submit Order'}</span>
@@ -2228,16 +2234,19 @@ export default function SharedCatalogClientView({
                 <button
                   type="button"
                   onClick={handleOpenWhatsAppCheckout}
+                  disabled={cartTotalUnits === 0}
+                  title={cartTotalUnits === 0 ? 'Add formulations to order before submitting' : 'Submit formal order'}
                   style={{
                     flex: 1,
-                    backgroundColor: '#16a34a',
+                    backgroundColor: cartTotalUnits === 0 ? '#94a3b8' : '#16a34a',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '8px 12px',
                     fontWeight: 700,
                     fontSize: '0.8rem',
-                    cursor: 'pointer',
+                    cursor: cartTotalUnits === 0 ? 'not-allowed' : 'pointer',
+                    opacity: cartTotalUnits === 0 ? 0.65 : 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

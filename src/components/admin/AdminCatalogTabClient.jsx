@@ -652,8 +652,9 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
       }
 
       if (finalUrl) {
+        const fullUrl = finalUrl.startsWith('http') ? finalUrl : `${window.location.origin}${finalUrl}`;
         try {
-          window.open(finalUrl, '_blank', 'noopener,noreferrer');
+          window.open(fullUrl, '_blank', 'noopener,noreferrer');
         } catch (e) {
           console.warn('Direct popup blocked, user can open via dock button', e);
         }
@@ -666,10 +667,10 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
           markupPercent,
           state: 'success',
           stepMessage: 'PDF document generated and ready to download.',
-          resultUrl: finalUrl,
+          resultUrl: fullUrl,
           errorMessage: null
         });
-        return { url: finalUrl };
+        return { url: fullUrl };
       } else {
         throw new Error('PDF generation failed to return a valid URL.');
       }

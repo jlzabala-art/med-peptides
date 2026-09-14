@@ -39,8 +39,8 @@ export const generatePdfSchema = z.object({
   shippingNote: z.string().optional().default(''),
   supplierFilter: z.string().optional().nullable().default(null),
   category: z.string().optional().nullable().default(null),
-  accountManagerName: z.string().optional().default('Atlas Commercial Desk'),
-  accountManagerEmail: z.string().optional().default('commercial@atlashealth.com'),
+  accountManagerName: z.string().optional().nullable().default('Atlas Commercial Desk'),
+  accountManagerEmail: z.string().optional().nullable().default('commercial@atlashealth.com'),
 });
 
 // ── Export Catalog Schema ─────────────────────────────────────────────────────

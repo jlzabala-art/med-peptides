@@ -24,9 +24,40 @@ export function parseDosageNumber(dosageStr) {
   return null;
 }
 
-export function sortVariantsAscending(variants = []) {
+export function deduplicateVariants(variants = []) {
   if (!Array.isArray(variants)) return [];
-  return [...variants].sort((a, b) => {
+  const map = new Map();
+  for (const v of variants) {
+    if (!v) continue;
+    const rawDose = (v.dosage || v.strength || v.name || '').trim().toLowerCase();
+    const cleanDose = rawDose.replace(/\s+/g, '').replace(/\.0+mg/i, 'mg');
+    const cleanFormat = (v.presentation || v.format || 'vial').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const key = `${cleanDose}__${cleanFormat}`;
+
+    if (!map.has(key)) {
+      map.set(key, v);
+    } else {
+      const existing = map.get(key);
+      const existingPrice = Number(existing.price || existing.unitPrice || 0);
+      const newPrice = Number(v.price || v.unitPrice || 0);
+      // Prefer variant with a valid price over unpriced
+      if (newPrice > 0 && existingPrice === 0) {
+        map.set(key, { ...existing, ...v });
+      } else if (newPrice > 0 && existingPrice > 0) {
+        // If both have prices, keep the one with kit price or volume tier
+        if ((v.kitPrice || v.tier10UnitPrice) && !(existing.kitPrice || existing.tier10UnitPrice)) {
+          map.set(key, { ...existing, ...v });
+        }
+      }
+    }
+  }
+  return Array.from(map.values());
+}
+
+export function sortVariantsAscending(variants = [], shouldDeduplicate = true) {
+  if (!Array.isArray(variants)) return [];
+  const list = shouldDeduplicate ? deduplicateVariants(variants) : variants;
+  return [...list].sort((a, b) => {
     const doseA = parseDosageNumber(a.dosage || a.strength || a.name);
     const doseB = parseDosageNumber(b.dosage || b.strength || b.name);
 
@@ -45,3 +76,4 @@ export function sortVariantsAscending(variants = []) {
     return (a.dosage || a.name || '').localeCompare(b.dosage || b.name || '', undefined, { numeric: true });
   });
 }
+

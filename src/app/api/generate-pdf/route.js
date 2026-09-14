@@ -22,6 +22,7 @@ import { PRESENTATION_LABELS } from '@/constants/presentationTypes';
 import { isVariantMatchingFilter, sanitizePdfText } from '@/utils/strictFilterEngine';
 import { generateSignedQuoteToken } from '@/services/dynamicPricingEngine';
 import { generatePdfSchema } from '@/schemas/apiSchemas';
+import { randomUUID } from 'crypto';
 
 const TIER_MAPPING = { cost: 'master', wholeseller: 'wholesale', clinic: 'clinic', retail: 'retail' };
 const TIER_LABELS = { master: 'Supplier Cost (Master)', wholesale: 'Wholesaler Price', clinic: 'Clinic Price', retail: 'Retail Price (Web Public)' };
@@ -79,22 +80,25 @@ async function saveQuotationMetadata({
 
 async function saveToCloudStorage(pdfBytes, filename) {
   try {
-    // Attempt to upload to default bucket
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'regenpept-app';
-    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`;
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+      process.env.FIREBASE_STORAGE_BUCKET ||
+      'med-peptides-app.firebasestorage.app';
     const bucket = getStorage().bucket(bucketName);
     
     const file = bucket.file(`pdfs/${filename}`);
-    await file.save(pdfBytes, {
-      metadata: { contentType: 'application/pdf' },
+    const token = randomUUID();
+
+    await file.save(Buffer.from(pdfBytes), {
+      metadata: {
+        contentType: 'application/pdf',
+        metadata: {
+          firebaseStorageDownloadTokens: token,
+        },
+      },
     });
     
-    // Get a signed URL valid for 30 days
-    const [url] = await file.getSignedUrl({
-      action: 'read',
-      expires: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
-    });
-    
+    // Permanent, publicly accessible Firebase Storage download URL
+    const url = `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucketName)}/o/${encodeURIComponent(`pdfs/${filename}`)}?alt=media&token=${token}`;
     return url;
   } catch (err) {
     console.warn('[generate-pdf] Failed to upload to Cloud Storage:', err.message);
@@ -1495,7 +1499,26 @@ export async function POST(request) {
         const filename = `atlas_solutions_${docType}_${docSuffix}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
         emit({ type: 'progress', step: 'saving_pdf', message: 'Saving to Cloud Storage...', meta: {} });
-        const url = await saveToCloudStorage(pdfBytes, filename);
+        let url = await saveToCloudStorage(pdfBytes, filename);
+
+        // Fail-safe: In case Cloud Storage upload fails or takes too long, cache PDF in memory
+        if (!url) {
+          const pdfId = `pdf_${Date.now()}_${randomUUID().replace(/-/g, '').substring(0, 10)}`;
+          if (!globalThis.__pdfDownloadCache) {
+            globalThis.__pdfDownloadCache = new Map();
+          }
+          globalThis.__pdfDownloadCache.set(pdfId, {
+            bytes: Buffer.from(pdfBytes),
+            filename,
+            createdAt: Date.now(),
+          });
+          // Prune entries older than 30 mins
+          const cutoff = Date.now() - 30 * 60 * 1000;
+          for (const [k, v] of globalThis.__pdfDownloadCache.entries()) {
+            if (v.createdAt < cutoff) globalThis.__pdfDownloadCache.delete(k);
+          }
+          url = `/api/generate-pdf/download/${pdfId}`;
+        }
         
         // Save metadata to Firestore including snapshot for idempotent regeneration
         const configSnapshot = {

@@ -17,15 +17,16 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { sortVariantsAscending } from '@/utils/variantSorter';
+import { GOAL_TYPES, VALID_GOALS, GOAL_LABELS } from '@/constants/goalTypes';
 
 // ── Shipping destinations ─────────────────────────────────────────────────────
 export const SHIPPING_DESTINATIONS = [
-  { id: 'eu',     label: 'European Union (Express Courier 2–4 Days)',     costUSD: 78,  costEUR: 70,  flag: '🇪🇺', code: 'EU',     leadTime: '2–4 Days' },
-  { id: 'uk_ch',  label: 'UK & Switzerland (Priority Courier 3–5 Days)',  costUSD: 95,  costEUR: 85,  flag: '🇬🇧', code: 'UK/CH',  leadTime: '3–5 Days' },
-  { id: 'us_ca',  label: 'USA & Canada (Direct Courier 4–6 Days)',        costUSD: 115, costEUR: 105, flag: '🇺🇸', code: 'USA/CA', leadTime: '4–6 Days' },
-  { id: 'gcc',    label: 'GCC & Middle East (Express Courier UAE/KSA)',   costUSD: 110, costEUR: 100, flag: '🇦🇪', code: 'GCC',    leadTime: '3–5 Days' },
-  { id: 'latam',  label: 'Latin America (DHL Express)',                   costUSD: 145, costEUR: 130, flag: '🌎', code: 'LATAM',  leadTime: '5–8 Days' },
-  { id: 'intl',   label: 'Rest of World (Global Priority Express)',       costUSD: 165, costEUR: 150, flag: '🌐', code: 'INTL',   leadTime: '5–9 Days' },
+  { id: 'eu',     label: 'European Union (Express Courier 2–4 Days)',     costUSD: 78,  costEUR: 70,  costAED: 285, flag: '🇪🇺', code: 'EU',     leadTime: '2–4 Days' },
+  { id: 'uk_ch',  label: 'UK & Switzerland (Priority Courier 3–5 Days)',  costUSD: 95,  costEUR: 85,  costAED: 350, flag: '🇬🇧', code: 'UK/CH',  leadTime: '3–5 Days' },
+  { id: 'us_ca',  label: 'USA & Canada (Direct Courier 4–6 Days)',        costUSD: 115, costEUR: 105, costAED: 420, flag: '🇺🇸', code: 'USA/CA', leadTime: '4–6 Days' },
+  { id: 'gcc',    label: 'GCC & Middle East (Express Courier UAE/KSA)',   costUSD: 110, costEUR: 100, costAED: 400, flag: '🇦🇪', code: 'GCC',    leadTime: '3–5 Days' },
+  { id: 'latam',  label: 'Latin America (DHL Express)',                   costUSD: 145, costEUR: 130, costAED: 530, flag: '🌎', code: 'LATAM',  leadTime: '5–8 Days' },
+  { id: 'intl',   label: 'Rest of World (Global Priority Express)',       costUSD: 165, costEUR: 150, costAED: 600, flag: '🌐', code: 'INTL',   leadTime: '5–9 Days' },
 ];
 
 // ── Administration route keyword map ─────────────────────────────────────────
@@ -37,6 +38,65 @@ const ROUTE_MAP = {
   longevity:  ['longevity', 'anti-aging', 'regeneration', 'antiaging'],
   metabolic:  ['metabolic', 'weight', 'fat', 'glucose', 'insulin'],
 };
+
+/**
+ * Resolves canonical clinical/wellness goals for any product or protocol.
+ */
+export function resolveProductCanonicalGoals(product) {
+  if (!product) return [GOAL_TYPES.GENERAL_HEALTH];
+  const goals = new Set();
+  
+  if (Array.isArray(product.canonicalGoals) && product.canonicalGoals.length > 0) {
+    product.canonicalGoals.forEach(g => {
+      const norm = String(g).toLowerCase().trim().replace(/[-\s]/g, '_');
+      if (VALID_GOALS.has(norm)) goals.add(norm);
+    });
+  }
+  if (Array.isArray(product.goals) && product.goals.length > 0) {
+    product.goals.forEach(g => {
+      const norm = String(g).toLowerCase().trim().replace(/[-\s]/g, '_');
+      if (VALID_GOALS.has(norm)) goals.add(norm);
+      else if (norm.includes('aging') || norm.includes('longevity')) goals.add(GOAL_TYPES.ANTI_AGING);
+      else if (norm.includes('fat') || norm.includes('weight') || norm.includes('metabolic')) goals.add(GOAL_TYPES.FAT_LOSS);
+      else if (norm.includes('repair') || norm.includes('recovery') || norm.includes('tissue') || norm.includes('injury')) goals.add(GOAL_TYPES.TISSUE_REPAIR);
+      else if (norm.includes('cognit') || norm.includes('neuro') || norm.includes('focus') || norm.includes('sleep') || norm.includes('mood')) goals.add(GOAL_TYPES.COGNITIVE);
+      else if (norm.includes('muscle') || norm.includes('growth') || norm.includes('hypertrophy') || norm.includes('gh')) goals.add(GOAL_TYPES.MUSCLE_GROWTH);
+      else if (norm.includes('libido') || norm.includes('sexual') || norm.includes('hormon')) goals.add(GOAL_TYPES.LIBIDO_WELLNESS);
+      else if (norm.includes('immune') || norm.includes('health') || norm.includes('wellness') || norm.includes('suppl')) goals.add(GOAL_TYPES.GENERAL_HEALTH);
+    });
+  }
+  if (product.goal || product.primary_goal) {
+    const norm = String(product.goal || product.primary_goal).toLowerCase().trim().replace(/[-\s]/g, '_');
+    if (VALID_GOALS.has(norm)) goals.add(norm);
+    else if (norm.includes('aging') || norm.includes('longevity')) goals.add(GOAL_TYPES.ANTI_AGING);
+    else if (norm.includes('fat') || norm.includes('weight') || norm.includes('metabolic')) goals.add(GOAL_TYPES.FAT_LOSS);
+    else if (norm.includes('repair') || norm.includes('recovery')) goals.add(GOAL_TYPES.TISSUE_REPAIR);
+    else if (norm.includes('cognit') || norm.includes('neuro') || norm.includes('sleep')) goals.add(GOAL_TYPES.COGNITIVE);
+    else if (norm.includes('muscle') || norm.includes('growth')) goals.add(GOAL_TYPES.MUSCLE_GROWTH);
+    else if (norm.includes('libido') || norm.includes('sexual')) goals.add(GOAL_TYPES.LIBIDO_WELLNESS);
+    else if (norm.includes('immune') || norm.includes('health')) goals.add(GOAL_TYPES.GENERAL_HEALTH);
+  }
+  if (goals.size === 0) {
+    const cat = String(product.category || '').toLowerCase();
+    const name = String(product.canonicalName || product.name || product.title || '').toLowerCase();
+    if (cat.includes('weight') || name.includes('semaglutide') || name.includes('tirzepatide') || name.includes('retatrutide') || name.includes('aod') || name.includes('5-amino')) {
+      goals.add(GOAL_TYPES.FAT_LOSS);
+    } else if (cat.includes('longevity') || cat.includes('nutricosmetic') || name.includes('epitalon') || name.includes('nad') || name.includes('ghk')) {
+      goals.add(GOAL_TYPES.ANTI_AGING);
+    } else if (name.includes('bpc') || name.includes('tb-500') || name.includes('tb4') || name.includes('kpv')) {
+      goals.add(GOAL_TYPES.TISSUE_REPAIR);
+    } else if (name.includes('cjc') || name.includes('ipamorelin') || name.includes('sermorelin') || name.includes('tesamorelin') || name.includes('mk-677') || name.includes('hexarelin') || name.includes('igf')) {
+      goals.add(GOAL_TYPES.MUSCLE_GROWTH);
+    } else if (name.includes('selank') || name.includes('semax') || name.includes('dihexa') || name.includes('dsip')) {
+      goals.add(GOAL_TYPES.COGNITIVE);
+    } else if (name.includes('pt-141') || name.includes('kisspeptin') || name.includes('oxytocin')) {
+      goals.add(GOAL_TYPES.LIBIDO_WELLNESS);
+    } else {
+      goals.add(GOAL_TYPES.GENERAL_HEALTH);
+    }
+  }
+  return Array.from(goals);
+}
 
 /**
  * @param {{
@@ -67,10 +127,14 @@ export function useSharedCatalogState({
   // ── Filters ────────────────────────────────────────────────────────────────
   const [activeTab,          setActiveTab]          = useState(isProtocolCatalog ? 'protocols' : 'products');
   const [searchQuery,        setSearchQuery]        = useState('');
-  const [selectedCategory,   setSelectedCategory]   = useState('all');
+  const [selectedGoal,       setSelectedGoal]       = useState('all');
   const [dosageFilter,       setDosageFilter]       = useState('all');
   const [routeFilter,        setRouteFilter]        = useState('all');
   const [packagingMode,      setPackagingMode]      = useState('all'); // 'all' | 'kits' | 'units'
+
+  // Alias for backward compatibility
+  const selectedCategory = selectedGoal;
+  const setSelectedCategory = setSelectedGoal;
 
   // ── Currency & Shipping ───────────────────────────────────────────────────
   const [currentCurrency,    setCurrentCurrency]    = useState(currency || 'USD');
@@ -132,8 +196,8 @@ export function useSharedCatalogState({
   }, [cart, catalogId]);
 
   // ── FX & Shipping ─────────────────────────────────────────────────────────
-  const fxMultiplier   = currentCurrency === 'EUR' ? 0.92 : 1;
-  const currencySymbol = currentCurrency === 'EUR' ? '€' : '$';
+  const fxMultiplier   = currentCurrency === 'EUR' ? 0.92 : currentCurrency === 'AED' ? 3.6725 : 1;
+  const currencySymbol = currentCurrency === 'EUR' ? '€' : currentCurrency === 'AED' ? 'AED ' : '$';
 
   const activeShipping = useMemo(
     () => SHIPPING_DESTINATIONS.find(s => s.id === selectedShipping) || SHIPPING_DESTINATIONS[0],
@@ -141,9 +205,12 @@ export function useSharedCatalogState({
   );
 
   const shippingCost = useMemo(
-    () => currentCurrency === 'EUR' ? activeShipping.costEUR : activeShipping.costUSD,
+    () => currentCurrency === 'EUR' ? activeShipping.costEUR
+        : currentCurrency === 'AED' ? (activeShipping.costAED || Math.round(activeShipping.costUSD * 3.6725))
+        : activeShipping.costUSD,
     [activeShipping, currentCurrency]
   );
+
 
   // ── Cart computed values ───────────────────────────────────────────────────
   const cartItems = useMemo(
@@ -269,16 +336,29 @@ export function useSharedCatalogState({
     [products]
   );
 
-  const categories = useMemo(() => {
-    const set = new Set();
-    products.forEach(p => { if (p.category) set.add(p.category); });
-    return ['all', ...Array.from(set)];
+  // ── Enriched Products with Canonical Clinical Goals ───────────────────────
+  const enrichedProducts = useMemo(() => {
+    return products.map(p => ({
+      ...p,
+      canonicalGoals: resolveProductCanonicalGoals(p),
+    }));
   }, [products]);
 
+  const availableGoals = useMemo(() => {
+    return Object.entries(GOAL_LABELS).map(([id, label]) => {
+      const count = enrichedProducts.filter(p => p.canonicalGoals.includes(id)).length;
+      return { id, label, count };
+    }).filter(g => g.count > 0);
+  }, [enrichedProducts]);
+
+  const categories = useMemo(() => {
+    return ['all', ...availableGoals.map(g => g.id)];
+  }, [availableGoals]);
+
   const filteredProducts = useMemo(() => {
-    return products
+    return enrichedProducts
       .filter(p => {
-        const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
+        const matchGoal = selectedGoal === 'all' || p.canonicalGoals.includes(selectedGoal);
         const cleanQuery = searchQuery.trim().toLowerCase();
         const matchQuery = !cleanQuery ||
           (p.canonicalName && p.canonicalName.toLowerCase().includes(cleanQuery)) ||
@@ -313,7 +393,7 @@ export function useSharedCatalogState({
           });
         }
 
-        return matchCat && matchQuery && matchPackaging && matchDosage && matchRoute;
+        return matchGoal && matchQuery && matchPackaging && matchDosage && matchRoute;
       })
       .map(p => {
         const sortedVariants = sortVariantsAscending(p.variants);
@@ -325,17 +405,20 @@ export function useSharedCatalogState({
           variants: sortedVariants
         };
       });
-  }, [products, selectedCategory, searchQuery, dosageFilter, packagingMode, routeFilter]);
+  }, [enrichedProducts, selectedGoal, searchQuery, dosageFilter, packagingMode, routeFilter]);
 
   const filteredProtocols = useMemo(() => {
     return protocols.filter(proto => {
+      const protoGoals = resolveProductCanonicalGoals(proto);
+      const matchGoal = selectedGoal === 'all' || protoGoals.includes(selectedGoal);
       const matchQuery = !searchQuery ||
         proto.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         proto.goal.toLowerCase().includes(searchQuery.toLowerCase()) ||
         proto.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchQuery;
+      return matchGoal && matchQuery;
     });
-  }, [protocols, searchQuery]);
+  }, [protocols, searchQuery, selectedGoal]);
+
 
   const toggleExpand = useCallback((productId) => {
     setExpandedProducts(prev => {
@@ -411,6 +494,8 @@ export function useSharedCatalogState({
     // Filter state
     activeTab, setActiveTab,
     searchQuery, setSearchQuery,
+    selectedGoal, setSelectedGoal,
+    availableGoals,
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
     routeFilter, setRouteFilter,

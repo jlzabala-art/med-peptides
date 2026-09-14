@@ -74,6 +74,21 @@ const nextConfig = {
       },
     ];
   },
+
+  async redirects() {
+    return [
+      {
+        source: '/auth/login',
+        destination: '/login',
+        permanent: false,
+      },
+      {
+        source: '/auth',
+        destination: '/login',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default async function config() {

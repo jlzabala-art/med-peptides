@@ -6,6 +6,7 @@ import { sanitizeForClient } from '@/utils/sanitizeForClient';
 import { filterProductVariantsStrictly } from '@/utils/strictFilterEngine';
 import { resolveVariantPrice } from '@/utils/resolvePrice';
 import { PRICING_TIER } from '@/constants/productEnums';
+import { sortVariantsAscending, deduplicateVariants } from '@/utils/variantSorter';
 import { AlertTriangle } from 'lucide-react';
 import SharedCatalogClientView from './SharedCatalogClientView';
 
@@ -347,10 +348,11 @@ export default async function SharedCatalogPage({ params }) {
       ? resolvedVariants.filter(v => v.price > 0)
       : resolvedVariants; // Unpriced vademecum — show all
 
-    if (pricedVariants.length === 0) continue;
+    const uniqueVariants = deduplicateVariants(pricedVariants);
+    if (uniqueVariants.length === 0) continue;
 
-    const minPrice = includePrices ? Math.min(...pricedVariants.map(v => v.price)) : 0;
-    const maxPrice = includePrices ? Math.max(...pricedVariants.map(v => v.price)) : 0;
+    const minPrice = includePrices ? Math.min(...uniqueVariants.map(v => v.price)) : 0;
+    const maxPrice = includePrices ? Math.max(...uniqueVariants.map(v => v.price)) : 0;
 
     products.push({
       id:               data.id,
@@ -365,7 +367,7 @@ export default async function SharedCatalogPage({ params }) {
       tags:             Array.isArray(data.tags) ? data.tags : [],
       minPrice,
       maxPrice,
-      variants:         pricedVariants
+      variants:         sortVariantsAscending(uniqueVariants)
     });
   }
 
