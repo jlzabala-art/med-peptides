@@ -14,6 +14,7 @@
 
 import { resolveCasNumber } from '../utils/casResolver';
 import { getPeptideScientificData } from '../utils/knownPeptideData';
+import { isVehicleProduct, isApiProduct } from '../utils/calculateProductCompleteness';
 
 export const AUTHORITATIVE_PEPTIDE_KNOWLEDGE_BASE = {
   calcitonin: {

@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 import { calculateProductCompleteness } from '@/utils/calculateProductCompleteness';
 import { enrichProductDocument } from '@/services/clinicalEnrichmentEngine';
 import { resolveCasNumber } from '@/utils/casResolver';
+import { normalizeProductMeta } from '@/utils/productNormalizer';
 import { verifyAdminAuth } from '@/lib/serverAuth';
 
 export async function POST(request) {
@@ -199,8 +200,6 @@ export async function POST(request) {
       const variantsSnap = await docRef.collection('variants').get();
       if (!variantsSnap.empty) {
         const batch = adminDb.batch();
-        const { normalizeProductMeta } = require('@/utils/productNormalizer');
-        
         variantsSnap.docs.forEach(vDoc => {
           const vData = vDoc.data();
           const normalized = normalizeProductMeta(vData);

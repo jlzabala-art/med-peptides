@@ -551,9 +551,13 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
     setEnrichingStatusMessage(`✨ Enriqueciendo "${name}" con IA...`);
 
     try {
+      const token = user?.getIdToken ? await user.getIdToken() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/admin/enrich-product', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           productId: prodId,
           canonicalName: product.canonicalName,

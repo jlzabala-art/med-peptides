@@ -5,6 +5,7 @@ import StandardDrawer from '../../ui/StandardDrawer';
 import { calculateProductCompleteness } from '../../../utils/calculateProductCompleteness';
 import { Sparkles, CheckCircle2, AlertCircle, RefreshCw, Info, Database, Beaker, FileCheck } from '@/lib/icons';
 import notifier from '../../../services/NotificationService';
+import { auth } from '@/firebase';
 
 const ENRICHMENT_STEPS = [
   { id: 1, label: 'Taxonomy & Domain Schema', icon: Database, desc: 'Classifying category & clinical validation rules' },
@@ -61,9 +62,13 @@ export default function ProductEnrichmentModal({ isOpen, onClose, product: initi
     }, 450);
 
     try {
+      const token = auth?.currentUser ? await auth.currentUser.getIdToken() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/admin/enrich-product', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           productId: activeProduct.id,
           canonicalName: activeProduct.canonicalName || activeProduct.name,

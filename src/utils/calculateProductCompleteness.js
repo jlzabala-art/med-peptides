@@ -275,7 +275,7 @@ const API_RAW_MATERIAL_SCHEMA = [
     check: p => !!(p.hasCOA || p.coaUrl || p.variants?.some(v => v.hasCOA)) },
 ];
 
-function isVehicleProduct(product) {
+export function isVehicleProduct(product) {
   if (!product) return false;
   const cat = (product.categoryId || product.category || '').toLowerCase().trim();
   const name = (product.name || product.canonicalName || '').toLowerCase();
@@ -293,20 +293,27 @@ function isVehicleProduct(product) {
   );
 }
 
-function isApiProduct(product) {
+export function isApiProduct(product) {
   if (!product) return false;
   if (isVehicleProduct(product)) return false;
   const cat = (product.categoryId || product.category || '').toLowerCase().trim();
   const type = (product.productType || product.type || product.product_type || '').toLowerCase().trim();
   const name = (product.name || product.canonicalName || '').toLowerCase();
   
+  // Finished peptides, hormones, and finished products belong to PEPTIDE/HORMONE schema
+  if (type === 'finished_product') return false;
+  if (cat === 'peptide' || cat === 'peptides' || cat === 'hormone' || cat === 'hormone optimization') {
+    if (type !== 'raw_material' && type !== 'api_raw_material') return false;
+  }
+  
+  // Explicit raw material / bulk API indicators
   if (type === 'raw_material' || type === 'api_raw_material' || product.is_raw_material === true || product.isApi === true) return true;
   if (cat === 'raw_material' || cat === 'api_raw_material' || cat === 'active_ingredient' || cat === 'api') return true;
   if (product.compoundingRules && !isVehicleProduct(product)) return true;
   if (Array.isArray(product.programs) && product.programs.length > 0) return true;
   if (Array.isArray(product.tags) && product.tags.some(t => String(t).startsWith('fagron-genomics-') || t === 'Fagron Genomics')) return true;
-  if (Array.isArray(product.availableTypes) && product.availableTypes.includes('raw_material')) return true;
-  if (Array.isArray(product.variants) && product.variants.some(v => v.type === 'raw_material' || v.format?.toLowerCase().includes('raw') || v.format?.toLowerCase().includes('bulk') || v.format?.toLowerCase().includes('powder') || v.format?.toLowerCase().includes('api'))) return true;
+  if (Array.isArray(product.availableTypes) && product.availableTypes.includes('raw_material') && !product.availableTypes.includes('finished_product')) return true;
+  if (Array.isArray(product.variants) && product.variants.some(v => v.type === 'raw_material' || v.format?.toLowerCase() === 'bulk_powder' || v.format?.toLowerCase() === 'raw_api')) return true;
   
   return false;
 }
