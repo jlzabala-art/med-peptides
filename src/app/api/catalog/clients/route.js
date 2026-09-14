@@ -112,14 +112,44 @@ export async function GET(request) {
       }
     });
 
-    // ── 4. Local filter if q provided ─────────────────────────────────────
-    const filtered = q
-      ? results.filter(r =>
-          r.name.toLowerCase().includes(q) ||
-          r.email.toLowerCase().includes(q) ||
-          (r.country || '').toLowerCase().includes(q)
-        )
-      : results;
+    // ── 4. Patients ──────────────────────────────────────────────────────
+    const patientSnap = await adminDb.collection('patients').limit(limit).get().catch(() => ({ docs: [] }));
+    const patients = [];
+    patientSnap.docs.forEach(doc => {
+      const d = doc.data();
+      const name = d.name || `${d.firstName || ''} ${d.lastName || ''}`.trim() || d.email;
+      const email = d.email || '';
+      if (!name && !email) return;
+      const key = `patient_${doc.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        const item = {
+          id: doc.id,
+          name: name || email,
+          email,
+          type: 'patient',
+          country: d.country || '',
+          phone: d.phone || '',
+        };
+        results.push(item);
+        patients.push(item);
+      }
+    });
+
+    // ── 5. Local filter if q or type provided ─────────────────────────────
+    const reqType = (searchParams.get('type') || '').toLowerCase().trim();
+    let filtered = results;
+    if (reqType && reqType !== 'all') {
+      filtered = filtered.filter(r => r.type?.toLowerCase() === reqType);
+    }
+    if (q) {
+      filtered = filtered.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        r.email.toLowerCase().includes(q) ||
+        (r.country || '').toLowerCase().includes(q) ||
+        (r.phone || '').includes(q)
+      );
+    }
 
     filtered.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -130,9 +160,94 @@ export async function GET(request) {
       wholesellers,
       clinics,
       doctors,
+      patients,
     });
   } catch (err) {
-    console.error('[/api/catalog/clients] Error:', err);
+    console.error('[/api/catalog/clients GET] Error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/catalog/clients
+ * Creates a new client/recipient entity (clinic, doctor, wholeseller, patient)
+ */
+export async function POST(request) {
+  try {
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not initialized' }, { status: 500 });
+    }
+    const body = await request.json();
+    const { type = 'clinic', name, email = '', phone = '', country = '' } = body;
+
+    if (!name?.trim()) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    const cleanName = name.trim();
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPhone = (phone || '').trim();
+    const cleanCountry = (country || '').trim();
+    const now = new Date().toISOString();
+
+    let createdItem = null;
+
+    if (type === 'clinic') {
+      const docRef = await adminDb.collection('clinics').add({
+        name: cleanName,
+        email: cleanEmail,
+        contactEmail: cleanEmail,
+        phone: cleanPhone,
+        country: cleanCountry,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      });
+      createdItem = { id: docRef.id, name: cleanName, email: cleanEmail, phone: cleanPhone, country: cleanCountry, type: 'clinic' };
+    } else if (type === 'wholeseller') {
+      const docRef = await adminDb.collection('wholesellers').add({
+        companyName: cleanName,
+        name: cleanName,
+        email: cleanEmail,
+        contactEmail: cleanEmail,
+        phone: cleanPhone,
+        country: cleanCountry,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      });
+      createdItem = { id: docRef.id, name: cleanName, email: cleanEmail, phone: cleanPhone, country: cleanCountry, type: 'wholeseller' };
+    } else if (type === 'doctor') {
+      const docRef = await adminDb.collection('users').add({
+        displayName: cleanName,
+        name: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        country: cleanCountry,
+        role: 'doctor',
+        status: 'approved',
+        createdAt: now,
+        updatedAt: now,
+      });
+      createdItem = { id: docRef.id, name: cleanName, email: cleanEmail, phone: cleanPhone, country: cleanCountry, type: 'doctor' };
+    } else if (type === 'patient') {
+      const docRef = await adminDb.collection('patients').add({
+        name: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        country: cleanCountry,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      });
+      createdItem = { id: docRef.id, name: cleanName, email: cleanEmail, phone: cleanPhone, country: cleanCountry, type: 'patient' };
+    } else {
+      createdItem = { id: `custom_${Date.now()}`, name: cleanName, email: cleanEmail, phone: cleanPhone, country: cleanCountry, type: type || 'general' };
+    }
+
+    return NextResponse.json({ success: true, item: createdItem });
+  } catch (err) {
+    console.error('[/api/catalog/clients POST] Error:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

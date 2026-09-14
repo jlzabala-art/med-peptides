@@ -9,6 +9,7 @@ import { EXPORT_CATALOGUES } from '@/config/exportCatalogues';
 import UnifiedExportDrawer from './catalog/UnifiedExportDrawer';
 import CatalogExportStatusDock from './catalog/CatalogExportStatusDock';
 import MasterCatalogTable from './MasterCatalogTable';
+import CatalogExportPopover from './catalog/popovers/CatalogExportPopover';
 
 /* ─────────────────────────────────────────────────────────────────
    Catalog Export Dropdown — Shared by Desktop & Mobile
@@ -16,40 +17,20 @@ import MasterCatalogTable from './MasterCatalogTable';
 function CatalogExportDropdown({
   onExportJSON,
   onExportCSV,
-  onLotuslandPDF,
-  onLotuslandWeb,
-  onLarimedicalPDF,
-  onLarimedicalWeb,
-  onEuropeptidesPDF,
-  onEuropeptidesWeb,
+  onGeneratePDF,
+  onGenerateWebShare,
   onOpenExportHub,
   markupPercent,
   setMarkupPercent,
   actionLoading,
   isMobile = false,
+  filteredProductIds = [],
 }) {
   const [exportOpen, setExportOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close on outside click (supporting touch pointerdown for mobile with safety delay)
-  useEffect(() => {
-    if (!exportOpen) return;
-    const handleClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setExportOpen(false);
-      }
-    };
-    const timer = setTimeout(() => {
-      document.addEventListener('pointerdown', handleClick);
-    }, 40);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('pointerdown', handleClick);
-    };
-  }, [exportOpen]);
-
   return (
-    <div ref={dropdownRef} style={{ position: 'relative' }}>
+    <div ref={dropdownRef} style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
       <button
         type="button"
         onClick={() => setExportOpen(prev => !prev)}
@@ -61,12 +42,14 @@ function CatalogExportDropdown({
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.35rem',
-          minHeight: '38px',
-          padding: isMobile ? '0.45rem 0.65rem' : '0.45rem 0.75rem',
+          minHeight: isMobile ? '44px' : '38px',
+          padding: isMobile ? '0.5rem 0.65rem' : '0.45rem 0.75rem',
           whiteSpace: 'nowrap',
           opacity: actionLoading ? 0.75 : 1,
           cursor: actionLoading ? 'not-allowed' : 'pointer',
-          transition: 'all 0.15s ease'
+          transition: 'all 0.15s ease',
+          width: isMobile ? '100%' : 'auto',
+          borderRadius: isMobile ? '10px' : '6px',
         }}
         title="Export Catalog & Price Lists"
       >
@@ -81,342 +64,21 @@ function CatalogExportDropdown({
         <ChevronDown size={13} style={{ opacity: 0.6 }} />
       </button>
 
-      {exportOpen && (
-        <div style={{
-          position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
-          minWidth: '290px',
-          maxWidth: 'min(340px, calc(100vw - 20px))',
-          maxHeight: '75vh',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          background: '#ffffff',
-          border: '1px solid var(--color-border, #e2e8f0)',
-          borderRadius: '10px',
-          boxShadow: '0 10px 32px rgba(0,0,0,0.18)',
-          zIndex: 9999,
-        }}>
-          {/* Export Hub */}
-          <div style={{ padding: '0.45rem 0.85rem', fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Export Hub
-          </div>
-          <button
-            onClick={() => { onOpenExportHub?.(); setExportOpen(false); }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.6rem 1rem', border: 'none', background: '#f0f9ff',
-              cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, color: '#0369a1', textAlign: 'left',
-              borderBottom: '1px solid #e0f2fe'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#e0f2fe'}
-            onMouseLeave={e => e.currentTarget.style.background = '#f0f9ff'}
-          >
-            🚀 Open Unified Export Hub…
-          </button>
-
-          <div style={{ padding: '0.45rem 0.85rem 0.2rem 0.85rem', fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Export Raw Data
-          </div>
-          <button
-            onClick={() => { onExportJSON(); setExportOpen(false); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.55rem 1rem', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 500, color: '#1e293b', textAlign: 'left' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            <span>💾</span> JSON (Full Products & Variants)
-          </button>
-          <button
-            onClick={() => { onExportCSV(); setExportOpen(false); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.55rem 1rem', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.84rem', fontWeight: 500, color: '#1e293b', textAlign: 'left' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            <span>📊</span> CSV (Spreadsheet Format)
-          </button>
-
-          {/* Quick Margin / Markup Selector — Two Rows for comfortable ergonomics */}
-          <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
-          <div style={{ padding: '0.6rem 0.85rem', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>
-                📊 Margin on Cost:
-              </span>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0369a1', backgroundColor: '#e0f2fe', padding: '2px 7px', borderRadius: '4px' }}>
-                +{markupPercent}%
-              </span>
-            </div>
-
-            {/* Row 1: Low-range benchmarks */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '6px' }}>
-              {[0, 15, 20].map(pct => (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setMarkupPercent(pct); }}
-                  style={{
-                    padding: '6px 0',
-                    fontSize: '0.74rem',
-                    fontWeight: markupPercent === pct ? 800 : 600,
-                    borderRadius: '5px',
-                    border: markupPercent === pct ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: markupPercent === pct ? '#0284c7' : '#ffffff',
-                    color: markupPercent === pct ? '#ffffff' : '#475569',
-                    cursor: 'pointer',
-                    transition: 'all 0.12s ease'
-                  }}
-                  title={pct === 0 ? 'Exact Cost (0% Margin)' : `+${pct}% Margin`}
-                >
-                  {pct === 0 ? '0% Cost' : `+${pct}%`}
-                </button>
-              ))}
-            </div>
-
-            {/* Row 2: Mid/High-range benchmarks + Custom input */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) 52px', gap: '6px', alignItems: 'center' }}>
-              {[25, 30, 40].map(pct => (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setMarkupPercent(pct); }}
-                  style={{
-                    padding: '6px 0',
-                    fontSize: '0.74rem',
-                    fontWeight: markupPercent === pct ? 800 : 600,
-                    borderRadius: '5px',
-                    border: markupPercent === pct ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
-                    backgroundColor: markupPercent === pct ? '#0284c7' : '#ffffff',
-                    color: markupPercent === pct ? '#ffffff' : '#475569',
-                    cursor: 'pointer',
-                    transition: 'all 0.12s ease'
-                  }}
-                  title={`+${pct}% Margin`}
-                >
-                  +{pct}%
-                </button>
-              ))}
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <input
-                  type="number"
-                  min="0"
-                  max="300"
-                  value={markupPercent}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => setMarkupPercent(Math.max(0, parseInt(e.target.value) || 0))}
-                  style={{
-                    width: '100%',
-                    padding: '5px 2px',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    textAlign: 'center',
-                    borderRadius: '5px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff'
-                  }}
-                  title="Custom Margin %"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Lotusland */}
-          <div style={{ padding: '0.45rem 0.85rem 0.2rem 0.85rem', fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Lotusland ({markupPercent === 0 ? 'Cost EXW (0%)' : `EXW +${markupPercent}%`})
-          </div>
-          <button
-            onClick={() => { onLotuslandPDF(); setExportOpen(false); }}
-            disabled={Boolean(actionLoading)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.45rem 1rem', border: 'none', background: 'none',
-              cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '0.84rem', fontWeight: 600, color: '#0369a1', textAlign: 'left',
-              opacity: actionLoading === 'lotusland-pdf' ? 0.6 : 1,
-            }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = '#f0f9ff'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            {actionLoading === 'lotusland-pdf'
-              ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              : <span>📑</span>}
-            <span style={{ flex: 1 }}>{actionLoading === 'lotusland-pdf' ? 'Generating PDF…' : `Lotusland / RegenPept Catalog (PDF)`}</span>
-            <span style={{
-              marginLeft: 'auto',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: '#e0f2fe',
-              color: '#0369a1',
-              whiteSpace: 'nowrap'
-            }}>
-              104 variants
-            </span>
-          </button>
-          <button
-            onClick={() => { onLotuslandWeb(); setExportOpen(false); }}
-            disabled={Boolean(actionLoading)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.45rem 1rem', border: 'none', background: 'none',
-              cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '0.84rem', fontWeight: 600, color: '#0284c7', textAlign: 'left',
-              opacity: actionLoading === 'lotusland-web' ? 0.6 : 1,
-            }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = '#f0f9ff'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            {actionLoading === 'lotusland-web'
-              ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              : <Globe size={14} color="#0284c7" />}
-            <span style={{ flex: 1 }}>{actionLoading === 'lotusland-web' ? 'Creating Web Share…' : `Lotusland Web Share`}</span>
-            <span style={{
-              marginLeft: 'auto',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: '#e0f2fe',
-              color: '#0284c7',
-              whiteSpace: 'nowrap'
-            }}>
-              104 variants
-            </span>
-          </button>
-
-          {/* LARIMEDICAL */}
-          <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
-          <div style={{ padding: '0.45rem 0.85rem 0.2rem 0.85rem', fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            🇪🇸 LARIMEDICAL ({markupPercent === 0 ? 'Cost (0%)' : `+${markupPercent}%`})
-          </div>
-          <button
-            onClick={() => { onLarimedicalPDF(); setExportOpen(false); }}
-            disabled={Boolean(actionLoading)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.45rem 1rem', border: 'none', background: 'none',
-              cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '0.84rem', fontWeight: 600, color: '#047857', textAlign: 'left',
-              opacity: actionLoading === 'larimedical-pdf' ? 0.6 : 1,
-            }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = '#ecfdf5'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            {actionLoading === 'larimedical-pdf'
-              ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              : <span>📑</span>}
-            <span style={{ flex: 1 }}>{actionLoading === 'larimedical-pdf' ? 'Generating PDF…' : `LARIMEDICAL Catalog (PDF)`}</span>
-            <span style={{
-              marginLeft: 'auto',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: '#ecfdf5',
-              color: '#047857',
-              whiteSpace: 'nowrap'
-            }}>
-              8 variants
-            </span>
-          </button>
-          <button
-            onClick={() => { onLarimedicalWeb(); setExportOpen(false); }}
-            disabled={Boolean(actionLoading)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.45rem 1rem', border: 'none', background: 'none',
-              cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '0.84rem', fontWeight: 600, color: '#0f766e', textAlign: 'left',
-              opacity: actionLoading === 'larimedical-web' ? 0.6 : 1,
-            }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = '#f0fdfa'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            {actionLoading === 'larimedical-web'
-              ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              : <Globe size={14} color="#0d9488" />}
-            <span style={{ flex: 1 }}>{actionLoading === 'larimedical-web' ? 'Creating Web Share…' : `LARIMEDICAL Web Share`}</span>
-            <span style={{
-              marginLeft: 'auto',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: '#ecfdf5',
-              color: '#0f766e',
-              whiteSpace: 'nowrap'
-            }}>
-              8 variants
-            </span>
-          </button>
-
-          {/* EuroPeptides */}
-          <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
-          <div style={{ padding: '0.45rem 0.85rem 0.2rem 0.85rem', fontSize: '0.68rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            EuroPeptides (EXW +{markupPercent}%)
-          </div>
-          <button
-            onClick={() => { onEuropeptidesPDF(); setExportOpen(false); }}
-            disabled={Boolean(actionLoading)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.45rem 1rem', border: 'none', background: 'none',
-              cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '0.84rem', fontWeight: 600, color: '#1e40af', textAlign: 'left',
-              opacity: actionLoading === 'europeptides-pdf' ? 0.6 : 1,
-            }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = '#eff6ff'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            {actionLoading === 'europeptides-pdf'
-              ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              : <span>📑</span>}
-            <span style={{ flex: 1 }}>{actionLoading === 'europeptides-pdf' ? 'Generating PDF…' : `EuroPeptides Catalog (PDF)`}</span>
-            <span style={{
-              marginLeft: 'auto',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: '#eff6ff',
-              color: '#1e40af',
-              whiteSpace: 'nowrap'
-            }}>
-              54 variants
-            </span>
-          </button>
-          <button
-            onClick={() => { onEuropeptidesWeb(); setExportOpen(false); }}
-            disabled={Boolean(actionLoading)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%',
-              padding: '0.45rem 1rem', border: 'none', background: 'none',
-              cursor: actionLoading ? 'not-allowed' : 'pointer',
-              fontSize: '0.84rem', fontWeight: 600, color: '#0369a1', textAlign: 'left',
-              opacity: actionLoading === 'europeptides-web' ? 0.6 : 1,
-            }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.background = '#e0f2fe'; }}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            {actionLoading === 'europeptides-web'
-              ? <Loader size={14} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
-              : <Globe size={14} color="#0284c7" />}
-            <span style={{ flex: 1 }}>{actionLoading === 'europeptides-web' ? 'Creating Web Share…' : `EuroPeptides Web Share`}</span>
-            <span style={{
-              marginLeft: 'auto',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: '#eff6ff',
-              color: '#0369a1',
-              whiteSpace: 'nowrap'
-            }}>
-              54 variants
-            </span>
-          </button>
-        </div>
-      )}
+      <CatalogExportPopover
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        anchorRef={dropdownRef}
+        onExportJSON={onExportJSON}
+        onExportCSV={onExportCSV}
+        onOpenExportHub={onOpenExportHub}
+        onGeneratePDF={onGeneratePDF}
+        onGenerateWebShare={onGenerateWebShare}
+        markupPercent={markupPercent}
+        setMarkupPercent={setMarkupPercent}
+        actionLoading={actionLoading}
+        isMobile={isMobile}
+        filteredProductIds={filteredProductIds}
+      />
     </div>
   );
 }
@@ -499,37 +161,9 @@ function MobileCatalogActions(props) {
         <FileText size={15} />
         <span>Import</span>
       </button>
-      <button
-        type="button"
-        onClick={props.onOpenExportHub}
-        disabled={Boolean(props.actionLoading)}
-        aria-busy={Boolean(props.actionLoading)}
-        className="gcp-btn-secondary"
-        title="Export Hub & Price Lists"
-        style={{ 
-          flex: 1,
-          display: 'inline-flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          gap: '0.3rem',
-          padding: '0.5rem 0.4rem', 
-          minHeight: '44px', 
-          whiteSpace: 'nowrap',
-          fontSize: '0.84rem',
-          fontWeight: 700,
-          borderRadius: '10px',
-          opacity: props.actionLoading ? 0.75 : 1,
-          cursor: props.actionLoading ? 'not-allowed' : 'pointer',
-          transition: 'all 0.15s ease'
-        }}
-      >
-        {props.actionLoading ? (
-          <Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />
-        ) : (
-          <Download size={15} />
-        )}
-        <span>{props.actionLoading ? 'Exporting…' : 'Export'}</span>
-      </button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <CatalogExportDropdown {...props} isMobile={true} />
+      </div>
     </div>
   );
 }
@@ -839,6 +473,8 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
     onExportCSV:         handleExportCSV,
     onImportPriceList:   handleImportPriceList,
     onNewProduct:        handleNewProduct,
+    onGeneratePDF:       handleSupplierPDF,
+    onGenerateWebShare:  handleSupplierWebShare,
     onLotuslandPDF:      () => handleSupplierPDF('lotusland', 'Lotusland / RegenPept', 'lotusland-pdf', {
       catalogueFilter: 'RegenPept',
       productIds: []
