@@ -81,20 +81,20 @@ export function useCatalogItemMutations({ refresh, user } = {}) {
       };
       const updatedVariants = [...(row.variants || []), newVariant];
       await updateProduct(row.id, { variants: updatedVariants }, { strict: false });
-      notifier.success('Borrador de variante añadido');
+      notifier.success('Variant draft added successfully');
       refresh?.();
     } catch (error) {
-      notifier.error('Error al añadir variante: ' + error.message);
+      notifier.error('Failed to add variant: ' + error.message);
     }
   }, [refresh]);
 
   const handleArchiveProduct = useCallback(async (row) => {
     notifier.confirmCritical(
-      `¿Archivar producto "${row.canonicalName || row.name}"? Pasará a estado Archived y no será visible en pedidos activos.`,
+      `Archive product "${row.canonicalName || row.name}"? Status will change to Archived and it will not be visible in active orders.`,
       async () => {
         try {
           await updateProduct(row.id, { status: 'archived', isActive: false }, { strict: false });
-          notifier.success(`"${row.canonicalName || row.name}" archivado con éxito.`);
+          notifier.success(`"${row.canonicalName || row.name}" archived successfully.`);
           refresh?.();
         } catch (e) {
           notifier.error('Archive failed: ' + e.message);

@@ -219,10 +219,10 @@ export default function BulkApiYieldCalculator({ variant, selectedProduct }) {
             Total Vials Yield
           </div>
           <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#7c3aed' }}>
-            {formatNumberAdaptive(calculations.totalVials)} viales
+            {formatNumberAdaptive(calculations.totalVials)} vials
           </div>
           <span style={{ fontSize: '0.65rem', color: '#64748b' }}>
-            de {targetDoseMg}mg ({calculations.totalBacteriostaticWaterLiters.toFixed(2)}L BAC Water)
+            at {targetDoseMg}mg ({calculations.totalBacteriostaticWaterLiters.toFixed(2)}L BAC Water)
           </span>
         </div>
 

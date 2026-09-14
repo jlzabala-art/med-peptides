@@ -1235,7 +1235,7 @@ export default function SharedCatalogClientView({
               <Search size={16} color="#64748b" style={{ flexShrink: 0 }} />
               <input
                 type="text"
-                placeholder="Buscar por producto, principio activo, dosis (ej. 5mg)..."
+                placeholder="Search by product, active compound, dosage (e.g. 5mg)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -1253,7 +1253,7 @@ export default function SharedCatalogClientView({
                   type="button"
                   onClick={() => setSearchQuery('')}
                   style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
-                  title="Limpiar búsqueda"
+                  title="Clear search"
                 >
                   ✕
                 </button>
@@ -1289,17 +1289,17 @@ export default function SharedCatalogClientView({
                   cursor: 'pointer'
                 }}
               >
-                <option value="all">Todas las Categorías ({products.length})</option>
+                <option value="all">All Categories ({products.length})</option>
                 {categories.filter(c => c !== 'all').map(cat => {
                   const count = products.filter(p => p.category === cat).length;
                   const label = {
-                    peptide: 'Péptidos',
-                    weight_loss: 'Metabólico & GLP-1',
-                    longevity: 'Longevidad & Biorreguladores',
-                    supplement: 'Suplementos & Biorreguladores',
-                    nutricosmetics: 'Estética & Piel',
-                    clinical_supplies: 'Suministros Clínicos',
-                    raw_material: 'Materia Prima'
+                    peptide: 'Peptides',
+                    weight_loss: 'Metabolic & GLP-1',
+                    longevity: 'Longevity & Cellular Repair',
+                    supplement: 'Supplements & Bioregulators',
+                    nutricosmetics: 'Aesthetics & Dermatology',
+                    clinical_supplies: 'Clinical Supplies',
+                    raw_material: 'Raw Materials'
                   }[cat] || cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                   return (
                     <option key={cat} value={cat}>

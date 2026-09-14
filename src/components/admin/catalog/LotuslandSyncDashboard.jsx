@@ -219,12 +219,12 @@ export default function LotuslandSyncDashboard() {
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-      if (!Array.isArray(data) || !data[0]?.product) throw new Error('Formato inválido. Se espera un array con campos: product, dosage, quantity, perVialPriceUSD, perKitPriceUSD, presentation.');
+      if (!Array.isArray(data) || !data[0]?.product) throw new Error('Invalid format. Expected an array of objects with fields: product, dosage, quantity, perVialPriceUSD, perKitPriceUSD, presentation.');
       setJsonData(data);
       setPhase('ready');
-      toast.success(`${data.length} variantes cargadas desde ${file.name}`);
+      toast.success(`${data.length} variants loaded from ${file.name}`);
     } catch (err) {
-      toast.error(err.message || 'Error al parsear el JSON');
+      toast.error(err.message || 'Error parsing JSON');
       setPhase('idle');
     }
     e.target.value = '';

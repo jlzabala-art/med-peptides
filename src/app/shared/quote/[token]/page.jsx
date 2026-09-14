@@ -61,12 +61,12 @@ export default async function SharedQuotePage({ params }) {
             <AlertTriangle size={32} />
           </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-            {verification.expired ? 'Cotización Expirada' : 'Enlace No Válido'}
+            {verification.expired ? 'Quotation Expired' : 'Invalid Link'}
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.925rem', lineHeight: '1.5', marginBottom: '24px' }}>
             {verification.expired 
-              ? 'Esta cotización ha superado su período de validez (48 horas) para proteger las fluctuaciones de costes. Por favor solicita una nueva cotización actualizada.'
-              : 'El enlace de cotización proporcionado tiene una firma digital alterada o ha sido revocado.'}
+              ? 'This quotation has exceeded its validity period (48 hours) to protect against cost fluctuations. Please request an updated quotation.'
+              : 'The quotation link provided has an invalid digital signature or has been revoked.'}
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default async function SharedQuotePage({ params }) {
   }
 
   const quote = verification.payload;
-  const expirationDate = new Date(quote.exp).toLocaleDateString('es-ES', {
+  const expirationDate = new Date(quote.exp).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -117,7 +117,7 @@ export default async function SharedQuotePage({ params }) {
               </span>
             </div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-              Cotización Oficial #{quote.quoteId}
+              Official Quotation #{quote.quoteId}
             </h1>
           </div>
 
@@ -133,7 +133,7 @@ export default async function SharedQuotePage({ params }) {
           }}>
             <Lock size={14} color="#4ade80" />
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f0fdf4' }}>
-              Firma Digital Verificada (HMAC-SHA256)
+              Verified Digital Signature (HMAC-SHA256)
             </span>
           </div>
         </div>
@@ -148,23 +148,23 @@ export default async function SharedQuotePage({ params }) {
           backgroundColor: '#fafbfc'
         }}>
           <div>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Preparado Para</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Prepared For</span>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>{quote.clientName}</div>
             {quote.clientEmail && <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{quote.clientEmail}</div>}
           </div>
 
           <div>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Canal de Facturación</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Billing Channel</span>
             <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0284c7', marginTop: '2px' }}>
-              {quote.channel === 'clinic' ? 'Tarifa Profesional Médica' : quote.channel.toUpperCase()}
+              {quote.channel === 'clinic' ? 'Professional Medical Tier' : quote.channel.toUpperCase()}
             </div>
           </div>
 
           <div>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Vigencia de Precios</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Price Validity</span>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#d97706', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
               <Clock size={14} />
-              <span>Hasta {expirationDate}</span>
+              <span>Valid Until {expirationDate}</span>
             </div>
           </div>
         </div>
@@ -174,9 +174,9 @@ export default async function SharedQuotePage({ params }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
-                <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Producto / Formulación</th>
-                <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'center' }}>Cantidad</th>
-                <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Precio Unitario</th>
+                <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Product / Formulation</th>
+                <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'center' }}>Quantity</th>
+                <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Unit Price</th>
                 <th style={{ padding: '12px 8px', fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Subtotal</th>
               </tr>
             </thead>
@@ -185,7 +185,7 @@ export default async function SharedQuotePage({ params }) {
                 <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                   <td style={{ padding: '16px 8px' }}>
                     <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.925rem' }}>{item.name}</div>
-                    {item.dosage && <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Dosis: {item.dosage}</div>}
+                    {item.dosage && <div style={{ fontSize: '0.78rem', color: '#64748b' }}>Dosage: {item.dosage}</div>}
                     {item.sku && <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'monospace' }}>SKU: {item.sku}</div>}
                   </td>
                   <td style={{ padding: '16px 8px', textAlign: 'center', fontWeight: 600, color: '#334155' }}>
@@ -205,14 +205,14 @@ export default async function SharedQuotePage({ params }) {
           {/* Summary & Totals */}
           <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '260px', fontSize: '0.875rem', color: '#64748b' }}>
-              <span>Subtotal Productos:</span>
+              <span>Products Subtotal:</span>
               <strong style={{ color: '#0f172a' }}>{quote.subtotal.toFixed(2)} {quote.currency}</strong>
             </div>
 
             {quote.coldChainFee > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '260px', fontSize: '0.875rem', color: '#0284c7' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Snowflake size={14} /> Cadena de Frío:
+                  <Snowflake size={14} /> Cold Chain Logistics:
                 </span>
                 <strong>{quote.coldChainFee.toFixed(2)} {quote.currency}</strong>
               </div>
@@ -249,10 +249,10 @@ export default async function SharedQuotePage({ params }) {
           }}>
             <div>
               <div style={{ fontWeight: 700, color: '#166534', fontSize: '0.95rem' }}>
-                ¿Deseas confirmar este pedido?
+                Confirm this Purchase Order?
               </div>
               <div style={{ fontSize: '0.8rem', color: '#15803d' }}>
-                Al confirmar, se generará la orden de compra y se enviará la factura proforma.
+                Upon confirmation, a formal purchase order will be generated and the pro-forma invoice will be issued.
               </div>
             </div>
 
@@ -271,7 +271,7 @@ export default async function SharedQuotePage({ params }) {
               boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
             }}>
               <CheckCircle2 size={18} />
-              <span>Aceptar Cotización y Emitir PO</span>
+              <span>Accept Quotation & Issue PO</span>
             </button>
           </div>
         </div>
