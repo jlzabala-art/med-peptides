@@ -213,9 +213,9 @@ export default function CatalogExportPopover({
     marginBottom: '6px',
   };
 
-  // ── Footer — always-visible primary CTA buttons ─────────────────────────────
+  // ── Footer — single-line primary CTA buttons (side-by-side) ────────────────
   const drawerFooter = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
       {/* PDF */}
       <button
         type="button"
@@ -223,19 +223,21 @@ export default function CatalogExportPopover({
         disabled={Boolean(actionLoading)}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          gap: '0.5rem', width: '100%', padding: '0.7rem 1rem',
+          gap: '0.4rem', padding: '0.65rem 0.5rem',
           border: 'none', borderRadius: '8px', cursor: actionLoading ? 'not-allowed' : 'pointer',
           backgroundColor: '#0369a1', color: '#ffffff',
-          fontSize: '0.85rem', fontWeight: 700,
+          fontSize: '0.8rem', fontWeight: 700,
           opacity: actionLoading ? 0.7 : 1,
           boxShadow: '0 2px 6px rgba(3,105,161,0.28)',
-          transition: 'background 0.12s ease',
+          whiteSpace: 'nowrap',
+          transition: 'all 0.12s ease',
         }}
+        title={`Download PDF Catalog (+${markupPercent}%)`}
       >
         {actionLoading?.includes('pdf')
-          ? <Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />
+          ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} />
           : <span>📄</span>}
-        <span>{actionLoading?.includes('pdf') ? 'Generating PDF…' : `Download PDF Catalog (+${markupPercent}%)`}</span>
+        <span>{actionLoading?.includes('pdf') ? 'Generating…' : `PDF (+${markupPercent}%)`}</span>
       </button>
 
       {/* Web Share */}
@@ -245,19 +247,21 @@ export default function CatalogExportPopover({
         disabled={Boolean(actionLoading)}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          gap: '0.5rem', width: '100%', padding: '0.7rem 1rem',
+          gap: '0.4rem', padding: '0.65rem 0.5rem',
           border: '1.5px solid #bae6fd', borderRadius: '8px',
           cursor: actionLoading ? 'not-allowed' : 'pointer',
           backgroundColor: '#f0f9ff', color: '#0284c7',
-          fontSize: '0.85rem', fontWeight: 700,
+          fontSize: '0.8rem', fontWeight: 700,
           opacity: actionLoading ? 0.7 : 1,
-          transition: 'background 0.12s ease',
+          whiteSpace: 'nowrap',
+          transition: 'all 0.12s ease',
         }}
+        title={`Generate Web Link (+${markupPercent}%)`}
       >
         {actionLoading?.includes('web')
-          ? <Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />
-          : <Globe size={15} />}
-        <span>{actionLoading?.includes('web') ? 'Generating Link…' : `Generate Web Link (+${markupPercent}%)`}</span>
+          ? <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} />
+          : <Globe size={14} />}
+        <span>{actionLoading?.includes('web') ? 'Linking…' : `Web Link (+${markupPercent}%)`}</span>
       </button>
     </div>
   );

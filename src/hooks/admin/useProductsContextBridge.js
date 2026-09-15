@@ -71,9 +71,9 @@ export function useProductsContextBridge({
         },
         summary: `Variant Focus: ${activeProd.canonicalName || activeProd.name} - ${activeVar.dosage || ''} ${activeVar.presentation || ''} (SKU: ${activeVar.sku || 'N/A'}). Unit Cost: $${cost}, Retail: $${retail}, Margin: ${marginPct}%. Stock: ${activeVar.stock ?? 'Available'}.`,
         quickActions: [
-          { label: '📊 Simular Margen', prompt: `Simula márgenes para ${activeProd.canonicalName || activeProd.name} (${activeVar.dosage || ''}): ¿Qué pasa si el coste de $${cost} varía un 10%?` },
-          { label: '📝 Generar RFQ', prompt: `Redacta una solicitud de cotización (RFQ) para 100 unidades del SKU ${activeVar.sku || activeVar.id || activeProd.name}` },
-          { label: '🏷️ Comparar Proveedores', prompt: `Compara las opciones de proveedores disponibles para ${activeVar.dosage || ''} de ${activeProd.name}` }
+          { label: '📊 Margin Simulator', prompt: `Simulate margins for ${activeProd.canonicalName || activeProd.name} (${activeVar.dosage || ''}): What happens if the cost of $${cost} changes by 10%?` },
+          { label: '📝 Draft RFQ', prompt: `Draft a Request for Quotation (RFQ) for 100 units of SKU ${activeVar.sku || activeVar.id || activeProd.name}` },
+          { label: '🏷️ Compare Sources', prompt: `Compare available supplier sources for ${activeVar.dosage || ''} of ${activeProd.name}` }
         ]
       };
     } else if (activeProd) {
@@ -98,16 +98,17 @@ export function useProductsContextBridge({
           dosage: v.dosage || v.dose,
           presentation: v.presentation || v.form,
           cost: v.cost ?? v.unit_cost,
-          retail: v.unit_price ?? v.price,
-          stock: v.stock
+          retail: v.retailPrice ?? v.retail_price,
+          wholesale: v.wholesalePrice ?? v.wholesale_price,
+          supplier: v.supplier || v.supplierName || 'Atlas'
         })),
         pharmacology: activeProd.pharmacology || {},
         summary: `Product Focus: ${prodName} (CAS: ${activeProd.cas || 'N/A'}). Category: ${activeProd.category || 'General'}. Formats: ${variants.length} available variants. Primary target: ${activeProd.target || 'Peptide receptor'}.`,
         quickActions: [
-          { label: '📄 Datasheet Oficial', prompt: `Genera la ficha técnica / datasheet oficial de ${prodName}` },
-          { label: '🏷️ Matriz de Precios', prompt: `Muestra la matriz de precios completa (coste, clínica, wholesale, retail) para ${prodName}` },
-          { label: '🔗 Protocolos Clínicos', prompt: `¿En qué protocolos clínicos de nuestra base de datos se utiliza ${prodName} y cómo se titula?` },
-          { label: '🧪 Guía Reconstitución', prompt: `¿Cuál es el protocolo de reconstitución y estabilidad para ${prodName}?` }
+          { label: '📄 Official Monograph', prompt: `Generate the official clinical monograph and datasheet for ${prodName}` },
+          { label: '🏷️ Pricing Matrix', prompt: `Show the complete pricing matrix (cost, clinic, wholesale, retail) for ${prodName}` },
+          { label: '🔗 Clinical Protocols', prompt: `Which clinical protocols in our database feature ${prodName} and what are their titles?` },
+          { label: '🧪 Reconstitution Guide', prompt: `What is the recommended reconstitution protocol and stability parameter for ${prodName}?` }
         ]
       };
     } else {
@@ -132,10 +133,10 @@ export function useProductsContextBridge({
         categories: categories.slice(0, 8),
         summary: `Catalog View: ${totalCount} compounds indexed (${lowStockCount} low stock, ${outOfStockCount} out of stock). Active category: ${activeFilters.category || 'All'}.`,
         quickActions: [
-          { label: '⚠️ Alertas Stock Crítico', prompt: '¿Cuáles son los productos con stock bajo o crítico que debemos reponer urgentemente?' },
-          { label: '📋 Catálogo de Precios PDF', prompt: 'Genera un catálogo de precios en tabla para todos los productos en stock' },
-          { label: '📊 Resumen de Rotación', prompt: 'Genera un resumen ejecutivo del estado del catálogo y las categorías principales' },
-          { label: '⚖️ Comparar GLP-1/GIP', prompt: 'Compara las opciones de GLP-1 y análogos metabólicos disponibles en nuestro catálogo' }
+          { label: '⚠️ Low Stock Alerts', prompt: 'Which products currently have low or critical stock levels requiring replenishment?' },
+          { label: '📋 Price List PDF', prompt: 'Generate a structured price list table for all in-stock catalog products' },
+          { label: '📊 Turnover Overview', prompt: 'Generate an executive summary of catalog inventory and primary therapeutic categories' },
+          { label: '⚖️ Compare GLP-1/GIP', prompt: 'Compare GLP-1 receptor agonists and dual GIP/GLP-1 analogues in our catalog' }
         ]
       };
     }

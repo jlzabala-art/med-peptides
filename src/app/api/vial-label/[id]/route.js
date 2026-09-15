@@ -30,9 +30,38 @@ function toSafePdfText(s) {
     .replace(/[^\x20-\x7E]/g, '');
 }
 
-function trunc(s, n) {
-  const clean = toSafePdfText(s);
-  return clean.length > n ? clean.substring(0, Math.max(0, n - 3)) + '...' : clean;
+/**
+ * Dynamically scales text down until it fits within maxWidth,
+ * avoiding arbitrary character truncations (...) whenever possible.
+ */
+function fitText(page, text, font, initialSize, minSize, maxWidth, x, y, options = {}) {
+  const safe = toSafePdfText(text);
+  let size = initialSize;
+  while (size > minSize && font.widthOfTextAtSize(safe, size) > maxWidth) {
+    size -= 0.15;
+  }
+  let finalText = safe;
+  if (font.widthOfTextAtSize(finalText, size) > maxWidth) {
+    while (finalText.length > 3 && font.widthOfTextAtSize(finalText + '...', size) > maxWidth) {
+      finalText = finalText.slice(0, -1);
+    }
+    finalText += '...';
+  }
+  const textWidth = font.widthOfTextAtSize(finalText, size);
+  let renderX = x;
+  if (options.align === 'right') {
+    renderX = x - textWidth;
+  } else if (options.align === 'center') {
+    renderX = x + (maxWidth - textWidth) / 2;
+  }
+  page.drawText(finalText, {
+    x: renderX,
+    y,
+    size,
+    font,
+    color: options.color || DARK_GRAY,
+  });
+  return { size, width: textWidth, text: finalText };
 }
 
 async function getProductData(id) {
@@ -187,31 +216,34 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   const dosage = toSafePdfText(targetDose || variant.dosage || variant.dose || product.dosage || '10 mg');
   const supplierDisplay = toSafePdfText(targetSupplierName || variant.supplierName || variant.supplier || product.supplierName || 'Lotusland Limited');
   const purity = toSafePdfText(variant.purity || variant.grade || '>= 99.0% (HPLC)');
-  const formatType = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
-  const storage = toSafePdfText(variant.storageInstructions || 'Store Desiccated at -20C');
+  const rawFormat = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
+  const formatType = rawFormat.toLowerCase().includes('vial') ? rawFormat : `${rawFormat} (Vial)`;
+  const rawStorage = toSafePdfText(variant.storageInstructions || 'Store desiccated at -20C (2-8C once recon)');
+  const storage = rawStorage.length > 45 ? 'Store at -20C (2-8C once reconst.)' : rawStorage;
 
   // ── Smart reconstitution volume calculator ────────────────────────────────
-  // Target concentrations: 2 mg/mL (primary, most common clinical dilution)
-  // and 1 mg/mL (secondary / high-volume dilution). Volume = strength / conc.
+  // Aligned with clinical standards: 2.0 mL standard for 5-15 mg vials
   const mgMatch = String(dosage).match(/(\d+(?:\.\d+)?)\s*mg/i);
-  let concText = '1.0 mL BAC Water (Sterile Water alternative)';
+  let concText = '2.0 mL BAC Water (Sterile Water alt.)';
   if (mgMatch) {
     const mg = parseFloat(mgMatch[1]);
-    // Primary: aim for 2 mg/mL → round to 1 decimal
-    const vol2 = (mg / 2.0);
-    // Secondary: aim for 1 mg/mL
-    const vol1 = (mg / 1.0);
-    // Pick the most practical primary volume:
-    // If vol2 < 0.5 mL, switch primary to 0.5 mg/mL to avoid impractical volumes
-    if (vol2 < 0.5) {
-      // Very low dose — suggest 0.25 mL → high conc, or 0.5 mL → standard
-      const volHalf = (mg / 0.5).toFixed(1);
-      concText = `${vol2.toFixed(1)} mL BAC Water (${(mg/vol2).toFixed(1)} mg/mL)  |  Alt: ${volHalf} mL (0.5 mg/mL)`;
+    let volPrimary = 2.0;
+    if (mg <= 5) {
+      volPrimary = 2.0;
+    } else if (mg <= 15) {
+      volPrimary = 2.0;
+    } else if (mg <= 30) {
+      volPrimary = 3.0;
+    } else if (mg <= 50) {
+      volPrimary = 5.0;
     } else {
-      concText = `${vol2.toFixed(1)} mL BAC Water (2 mg/mL)  |  Alt: ${vol1.toFixed(1)} mL (1 mg/mL)`;
+      volPrimary = Math.min(10.0, Math.round((mg / 15.0) * 2) / 2);
     }
+    const concPrimary = (mg / volPrimary).toFixed(1).replace(/\.0$/, '');
+    const volAlt = volPrimary === 2.0 ? '1.0' : (volPrimary / 2).toFixed(1).replace(/\.0$/, '');
+    const concAlt = (mg / parseFloat(volAlt)).toFixed(1).replace(/\.0$/, '');
+    concText = `${volPrimary.toFixed(1)} mL BAC Water (${concPrimary} mg/mL) - Alt: ${volAlt} mL (${concAlt} mg/mL)`;
   }
-
 
   // Generate QR Code PNG Buffer pointing to specific variant/dose/supplier public page
   const cleanSlug = toSafePdfText(product.slug || product.id || 'product').toLowerCase();
@@ -246,63 +278,46 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
 
   const leftLabelTitle = 'CLINICAL VIAL APPLICATION';
   const rightLabelTag = `${supplierDisplay.toUpperCase()} QUALIFIED`;
-  const cleanTag = trunc(rightLabelTag, 28);
-  const rightLabelTagW = fontB.widthOfTextAtSize(cleanTag, 5.2);
 
   page.drawText(leftLabelTitle, {
     x: originX + 8,
     y: originY + heightPt - 10,
-    size: 6.5,
+    size: 6.2,
     font: fontB,
     color: rgb(1, 1, 1),
   });
 
-  page.drawText(cleanTag, {
-    x: originX + widthPt - rightLabelTagW - 8,
-    y: originY + heightPt - 10,
-    size: 5.2,
-    font: fontB,
+  // Right tag with auto-fitting so it never cuts off
+  fitText(page, rightLabelTag, fontB, 5.2, 3.8, widthPt / 2 - 12, originX + widthPt - 8, originY + heightPt - 10, {
+    align: 'right',
     color: rgb(0.85, 0.92, 1),
   });
 
   // Main Content Left Column
   const contentLeft = originX + 8;
-  let currentY = originY + heightPt - 27;
+  const qrSize = 68; // ~68 pt square
+  const qrX = originX + widthPt - qrSize - 10;
+  const qrY = originY + 16;
+  const maxContentW = qrX - contentLeft - 6; // ~163 pt
+
+  let currentY = originY + heightPt - 26;
 
   // Product Name
-  page.drawText(trunc(name, 26), {
-    x: contentLeft,
-    y: currentY,
-    size: 12.5,
-    font: fontB,
-    color: DARK_GRAY,
-  });
+  fitText(page, name, fontB, 12.0, 8.5, maxContentW, contentLeft, currentY, { color: DARK_GRAY });
 
   currentY -= 11;
 
   // Dosage & Purity Highlight - explicitly shows selected dosage
   const dosePurityText = `Dose: ${dosage}   -   Purity: ${purity}`;
-  page.drawText(trunc(dosePurityText, 34), {
-    x: contentLeft,
-    y: currentY,
-    size: 7.2,
-    font: fontB,
-    color: TEAL_COLOR,
-  });
+  fitText(page, dosePurityText, fontB, 6.8, 4.8, maxContentW, contentLeft, currentY, { color: TEAL_COLOR });
 
-  currentY -= 10;
+  currentY -= 9.5;
 
   // CAS / Format
-  const metaText = `${formatType}${casNumber ? `  -  CAS: ${casNumber}` : ''}`;
-  page.drawText(trunc(metaText, 38), {
-    x: contentLeft,
-    y: currentY,
-    size: 6.2,
-    font,
-    color: MUTED,
-  });
+  const metaText = `${formatType}${casNumber ? `   -   CAS: ${casNumber}` : ''}`;
+  fitText(page, metaText, font, 5.8, 4.5, maxContentW, contentLeft, currentY, { color: MUTED });
 
-  currentY -= 8;
+  currentY -= 7.5;
 
   // Reconstitution Fill-in Fields (Handwriteable)
   page.drawLine({
@@ -312,17 +327,8 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: rgb(0.88, 0.9, 0.93),
   });
 
-  currentY -= 9;
-  page.drawText('Reconst. Date: _______________   Exp: ___________', {
-    x: contentLeft,
-    y: currentY,
-    size: 5.8,
-    font,
-    color: DARK_GRAY,
-  });
-
   currentY -= 8.5;
-  page.drawText(`Diluent: ${trunc(concText, 44)}`, {
+  page.drawText('Reconst. Date: _______________   Exp: ___________', {
     x: contentLeft,
     y: currentY,
     size: 5.4,
@@ -330,31 +336,21 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     color: DARK_GRAY,
   });
 
+  currentY -= 8.0;
+  const diluentText = `Diluent: ${concText}`;
+  fitText(page, diluentText, font, 5.2, 4.2, maxContentW, contentLeft, currentY, { color: DARK_GRAY });
+
   // Warning & Storage footer inside label
-  currentY -= 8.5;
-  page.drawText(`Storage: ${trunc(storage, 35)}`, {
-    x: contentLeft,
-    y: currentY,
-    size: 5.2,
-    font,
-    color: MUTED,
-  });
+  currentY -= 8.0;
+  const storageText = `Storage: ${storage}`;
+  fitText(page, storageText, font, 5.0, 4.0, maxContentW, contentLeft, currentY, { color: MUTED });
 
   // Batch number and supplier reference line
-  currentY -= 8.5;
-  page.drawText(`Batch: ${batchNumber}   •   Lab: ${trunc(supplierDisplay, 20)}`, {
-    x: contentLeft,
-    y: currentY,
-    size: 5.5,
-    font: fontB,
-    color: DARK_GRAY,
-  });
+  currentY -= 8.0;
+  const batchLabText = `Batch: ${batchNumber}   -   Lab: ${supplierDisplay}`;
+  fitText(page, batchLabText, fontB, 5.3, 4.2, maxContentW, contentLeft, currentY, { color: DARK_GRAY });
 
   // QR Code on the Right
-  const qrSize = 68; // ~68 pt square
-  const qrX = originX + widthPt - qrSize - 10;
-  const qrY = originY + 16;
-
   page.drawImage(qrImage, {
     x: qrX,
     y: qrY,
@@ -362,20 +358,19 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
     height: qrSize,
   });
 
-  page.drawText('SCAN FOR GUIDE', {
-    x: qrX + (qrSize - fontB.widthOfTextAtSize('SCAN FOR GUIDE', 4.8)) / 2,
+  const scanGuideTag = 'SCAN FOR GUIDE';
+  const scanGuideW = fontB.widthOfTextAtSize(scanGuideTag, 4.8);
+  page.drawText(scanGuideTag, {
+    x: qrX + (qrSize - scanGuideW) / 2,
     y: qrY - 6,
     size: 4.8,
     font: fontB,
     color: BRAND_COLOR,
   });
 
-  const suppUnderQr = trunc(supplierDisplay, 16);
-  page.drawText(suppUnderQr, {
-    x: qrX + (qrSize - font.widthOfTextAtSize(suppUnderQr, 4.4)) / 2,
-    y: qrY - 12,
-    size: 4.4,
-    font,
+  // Supplier under QR code with dynamic scaling so it is never truncated
+  fitText(page, supplierDisplay, font, 4.4, 3.2, qrSize + 8, qrX + (qrSize / 2), qrY - 12, {
+    align: 'center',
     color: MUTED,
   });
 }
@@ -446,8 +441,10 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    page.drawText('SCAN QR FOR GUIDE', {
-      x: qrX + (qrSize - fontB.widthOfTextAtSize('SCAN QR FOR GUIDE', 5)) / 2,
+    const scanTag = 'SCAN QR FOR GUIDE';
+    const scanTagW = fontB.widthOfTextAtSize(scanTag, 5);
+    page.drawText(scanTag, {
+      x: qrX + (qrSize - scanTagW) / 2,
       y: qrY - 7,
       size: 5,
       font: fontB,
@@ -463,29 +460,24 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     page.drawText('BATCH NUMBER', {
       x: rightX,
       y: curY,
-      size: 7,
+      size: 6.8,
       font: fontB,
       color: MUTED,
     });
 
     const codeTag = `COD: ${discreetCode}`;
-    const codeTagW = fontB.widthOfTextAtSize(codeTag, 7);
+    const codeTagW = fontB.widthOfTextAtSize(codeTag, 6.8);
     page.drawText(codeTag, {
       x: rightX + rightWidth - codeTagW,
       y: curY,
-      size: 7,
+      size: 6.8,
       font: fontB,
       color: DARK_GRAY,
     });
 
     curY -= 17;
-    page.drawText(batchNumber, {
-      x: rightX,
-      y: curY,
-      size: 15,
-      font: fontB,
-      color: DARK_GRAY,
-    });
+    // DYNAMIC FONT SIZE FOR BATCH NUMBER so it NEVER clips!
+    fitText(page, batchNumber, fontB, 13.0, 7.5, rightWidth - 2, rightX, curY, { color: DARK_GRAY });
 
     curY -= 12;
     // 1D Barcode
@@ -493,22 +485,19 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
     draw1DBarcode(page, rightX, curY - barcodeHeight, rightWidth, barcodeHeight, batchNumber);
 
     curY -= (barcodeHeight + 9);
-    page.drawText(`* ${batchNumber} *`, {
-      x: rightX + 4,
+    // Center human-readable batch code directly under the barcode without colliding with REF tag!
+    const humanBatch = `* ${batchNumber} *`;
+    let humanBatchSize = 6.4;
+    while (humanBatchSize > 4.5 && font.widthOfTextAtSize(humanBatch, humanBatchSize) > (rightWidth - 4)) {
+      humanBatchSize -= 0.3;
+    }
+    const humanBatchW = font.widthOfTextAtSize(humanBatch, humanBatchSize);
+    page.drawText(humanBatch, {
+      x: rightX + (rightWidth - humanBatchW) / 2,
       y: curY,
-      size: 7.2,
+      size: humanBatchSize,
       font,
       color: DARK_GRAY,
-    });
-
-    const refTag = `REF: ${discreetCode}`;
-    const refTagW = font.widthOfTextAtSize(refTag, 6.8);
-    page.drawText(refTag, {
-      x: rightX + rightWidth - refTagW,
-      y: curY,
-      size: 6.8,
-      font,
-      color: MUTED,
     });
   } else {
     // 50x50mm Square Layout
@@ -523,19 +512,19 @@ async function renderBarcodeOnlyLabel(pdfDoc, page, originX, originY, widthPt, h
       height: qrSize,
     });
 
-    page.drawText('SCAN QR FOR GUIDE', {
-      x: originX + (widthPt - fontB.widthOfTextAtSize('SCAN QR FOR GUIDE', 5.2)) / 2,
+    const scanTag = 'SCAN QR FOR GUIDE';
+    const scanTagW = fontB.widthOfTextAtSize(scanTag, 5.2);
+    page.drawText(scanTag, {
+      x: originX + (widthPt - scanTagW) / 2,
       y: qrY - 7,
       size: 5.2,
       font: fontB,
       color: BRAND_COLOR,
     });
 
-    page.drawText(`BATCH: ${batchNumber}   •   COD: ${discreetCode}`, {
-      x: originX + (widthPt - fontB.widthOfTextAtSize(`BATCH: ${batchNumber}   •   COD: ${discreetCode}`, 6.5)) / 2,
-      y: originY + 12,
-      size: 6.5,
-      font: fontB,
+    const bottomTag = `BATCH: ${batchNumber}   -   COD: ${discreetCode}`;
+    fitText(page, bottomTag, fontB, 6.5, 4.5, widthPt - 8, originX + widthPt / 2, originY + 12, {
+      align: 'center',
       color: DARK_GRAY,
     });
   }
@@ -596,7 +585,13 @@ export async function GET(request, { params }) {
           const reqD = String(doseParam).toLowerCase().replace(/[-_\s]+/g, '');
           matchDose = d === reqD || d.includes(reqD) || reqD.includes(d);
         }
-        return matchSupp && matchDose;
+        let matchFormat = true;
+        if (formatParam && formatParam !== 'all') {
+          const f = String(v.presentation || v.presentationName || v.format || '').toLowerCase().replace(/[-_\s]+/g, '');
+          const reqF = String(formatParam).toLowerCase().replace(/[-_\s]+/g, '');
+          matchFormat = f.includes(reqF) || reqF.includes(f);
+        }
+        return matchSupp && matchDose && matchFormat;
       });
     }
 

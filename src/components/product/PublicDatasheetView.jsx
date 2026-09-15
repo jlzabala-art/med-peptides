@@ -542,6 +542,19 @@ export default function PublicDatasheetView({
 
             <button 
               type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                const el = document.getElementById('reconstitution-guide');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="pds-btn pds-btn-ghost"
+              title="Interactive Reconstitution Calculator & Syringe Visualizer"
+            >
+              <FlaskConical size={14} /> Reconstitution
+            </button>
+
+            <button 
+              type="button"
               onClick={() => setIsShareDrawerOpen(true)} 
               className="pds-btn pds-btn-ghost" 
               title={t.shareColleague}
@@ -913,6 +926,19 @@ export default function PublicDatasheetView({
               </table>
             </div>
           </div>
+        </section>
+
+        {/* ── Block 2.5: Interactive Reconstitution Simulator & Precision Syringe Visualizer ── */}
+        <section id="reconstitution-guide" className="pds-reconstitution-section">
+          <InteractiveReconstitutionGuide
+            product={product}
+            selectedStrength={selectedStrength}
+            availableStrengths={sortedStrengths}
+            activeFormatId={activeFormatId}
+            activeFormat={activeFormat}
+            supplierName={supplierName}
+            lang={lang}
+          />
         </section>
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}

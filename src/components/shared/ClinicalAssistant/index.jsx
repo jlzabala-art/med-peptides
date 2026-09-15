@@ -670,16 +670,16 @@ export default function ClinicalAssistant({
 
           const quickActions = effectiveContext.quickActions || (
             isVariantContext ? [
-              { label: '📊 Simular Margen', prompt: `Simula márgenes para este SKU: ¿Qué precio mantiene un margen del 40% si el coste sube un 15%?` },
-              { label: '📝 Generar RFQ', prompt: `Redacta una solicitud de cotización (RFQ) formal para 100 unidades de este SKU.` }
+              { label: '📊 Margin Simulator', prompt: `Simulate margins for this SKU: What price maintains a 40% margin if unit cost rises by 15%?` },
+              { label: '📝 Draft RFQ', prompt: `Draft a formal Request for Quotation (RFQ) for 100 units of this SKU.` }
             ] : isProductContext ? [
-              { label: '📄 Datasheet Oficial', prompt: `Genera la ficha técnica / datasheet oficial de ${entityTitle}` },
-              { label: '🏷️ Matriz de Precios', prompt: `Muestra la matriz de precios completa (coste, clínica, wholesale, retail) para ${entityTitle}` },
-              { label: '🔗 Protocolos', prompt: `¿En qué protocolos clínicos de nuestra base de datos se incluye ${entityTitle}?` }
+              { label: '📄 Official Monograph', prompt: `Generate the official clinical monograph and datasheet for ${entityTitle}` },
+              { label: '🏷️ Pricing Matrix', prompt: `Display the complete pricing matrix (cost, clinic, wholesale, retail) for ${entityTitle}` },
+              { label: '🔗 Clinical Protocols', prompt: `Which clinical protocols in our database include ${entityTitle}?` }
             ] : isCatalogContext ? [
-              { label: '⚠️ Stock Crítico', prompt: `¿Cuáles son los productos con stock bajo o crítico en el catálogo?` },
-              { label: '📋 Catálogo Precios PDF', prompt: `Genera un catálogo de precios en tabla para todos los productos en stock` },
-              { label: '⚖️ Comparar GLP-1', prompt: `Compara las opciones de GLP-1 y análogos metabólicos en el catálogo` }
+              { label: '⚠️ Low Stock', prompt: `Which products in our catalog currently have low or critical stock levels?` },
+              { label: '📋 Price List PDF', prompt: `Generate a structured price list table for all in-stock catalog products` },
+              { label: '⚖️ Compare GLP-1', prompt: `Compare GLP-1 receptor agonists and metabolic analogues in the catalog` }
             ] : []
           );
 
@@ -721,7 +721,7 @@ export default function ClinicalAssistant({
                       letterSpacing: '0.04em',
                       textTransform: 'uppercase'
                     }}>
-                      {isVariantContext ? 'Nivel 3 · Variante' : isProductContext ? 'Nivel 2 · Producto' : 'Nivel 1 · Catálogo'}
+                      {isVariantContext ? 'Tier 3 · Variant' : isProductContext ? 'Tier 2 · Product' : 'Tier 1 · Catalog'}
                     </span>
                   )}
 
@@ -766,7 +766,7 @@ export default function ClinicalAssistant({
                         color: '#003666',
                         fontWeight: 700
                       }}>
-                        {totalProductsCount} products {lowStockCount > 0 ? `· ${lowStockCount} stock bajo` : ''}
+                        {totalProductsCount} products {lowStockCount > 0 ? `· ${lowStockCount} low stock` : ''}
                       </span>
                     )}
 
@@ -1009,10 +1009,6 @@ export default function ClinicalAssistant({
             onUploadPrice={handleUploadPrice}
             onUploadStock={handleUploadStock}
           />
-        </div>
-        {/* Widget Watermark */}
-        <div style={{ textAlign: 'right', fontSize: '10px', color: 'var(--text-muted)', opacity: 0.5, padding: '0 1rem 0.5rem 0', position: 'absolute', bottom: 0, right: 0, zIndex: 10 }}>
-          Widget: ClinicAIWidget (Agent: {agentType})
         </div>
       </div>
     </div>
