@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Download, Plus, FileText, ChevronDown, BookOpen, Loader, Globe } from '@/lib/icons';
 import { useDrawer } from '@/context/DrawerContext';
 import { toast } from 'react-hot-toast';
@@ -27,15 +27,15 @@ function CatalogExportDropdown({
   filteredProductIds = [],
 }) {
   const [exportOpen, setExportOpen] = useState(false);
-  const dropdownRef = useRef(null);
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
+    <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
       <button
         type="button"
         onClick={() => setExportOpen(prev => !prev)}
         disabled={Boolean(actionLoading)}
         aria-busy={Boolean(actionLoading)}
+        aria-expanded={exportOpen}
         className="gcp-btn-secondary"
         style={{
           display: 'flex',
@@ -64,10 +64,11 @@ function CatalogExportDropdown({
         <ChevronDown size={13} style={{ opacity: 0.6 }} />
       </button>
 
+      {/* CatalogExportPopover now renders as a StandardDrawer (portal-based).
+          No anchorRef or isMobile needed — StandardDrawer handles both. */}
       <CatalogExportPopover
         isOpen={exportOpen}
         onClose={() => setExportOpen(false)}
-        anchorRef={dropdownRef}
         onExportJSON={onExportJSON}
         onExportCSV={onExportCSV}
         onOpenExportHub={onOpenExportHub}
@@ -76,7 +77,6 @@ function CatalogExportDropdown({
         markupPercent={markupPercent}
         setMarkupPercent={setMarkupPercent}
         actionLoading={actionLoading}
-        isMobile={isMobile}
         filteredProductIds={filteredProductIds}
       />
     </div>

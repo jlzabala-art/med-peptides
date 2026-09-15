@@ -25,7 +25,21 @@ export default function VialLabelPrinter({ product, selectedVariant, onClose }) 
   const storageTemp   = product.storage_conditions?.dry || '−20°C to −80°C';
   const mw            = product.molecular_weight ? `MW: ${product.molecular_weight} Da` : null;
   const lot           = `LOT-${new Date().getFullYear()}-${(product.id || product.name || '').slice(0, 4).toUpperCase()}`;
-  const productUrl    = `https://Atlas Health-app-27a3a.web.app/product/${product.slug || product.name?.toLowerCase().replace(/\s+/g, '-')}`;
+  const productUrl    = `https://med-peptides.com/p/${product.slug || product.name?.toLowerCase().replace(/\s+/g, '-')}`;
+
+  // ── Smart reconstitution suggestion (mirrors vial-label API logic) ──────────
+  const reconstitutionLine = (() => {
+    const mgMatch = String(variantDosage).match(/(\d+(?:\.\d+)?)\s*mg/i);
+    if (!mgMatch) return 'BAC Water / Sterile Water';
+    const mg = parseFloat(mgMatch[1]);
+    const vol2 = mg / 2.0;
+    const vol1 = mg / 1.0;
+    if (vol2 < 0.5) {
+      const volHalf = (mg / 0.5).toFixed(1);
+      return `${vol2.toFixed(2)} mL (${(mg/vol2).toFixed(0)} mg/mL) | Alt: ${volHalf} mL`;
+    }
+    return `${vol2.toFixed(1)} mL BAC Water → 2 mg/mL | Alt: ${vol1.toFixed(1)} mL → 1 mg/mL`;
+  })();
 
   const handlePrint = () => {
     const printStyle = `
@@ -145,6 +159,9 @@ export default function VialLabelPrinter({ product, selectedVariant, onClose }) 
                 )}
                 <div style={{ fontSize: '6px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
                   Store: {storageTemp}
+                </div>
+                <div style={{ fontSize: '5.5px', color: '#0369a1', fontWeight: 700, marginTop: '1px', lineHeight: 1.3 }}>
+                  Recons.: {reconstitutionLine}
                 </div>
                 <div style={{ fontSize: '6px', color: 'var(--color-text-tertiary)' }}>{lot}</div>
                 <div style={{ fontSize: '5.5px', color: 'var(--color-text-tertiary)', marginTop: '1px' }}>

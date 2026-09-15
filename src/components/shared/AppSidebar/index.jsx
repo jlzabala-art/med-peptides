@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo } from 'react';
-import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building, Eye, X } from '@/lib/icons';
+import { Plus, MoreHorizontal, LogOut, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Star, LayoutDashboard, Users, CheckSquare, Building, Eye, X, History } from '@/lib/icons';
 import AtlasHealthLogo from '../../brand/AtlasHealthLogo';
 import { useNavigationStore } from '../../../stores/navigationStore';
 import { useSimulationStore, ALL_ROLES } from '../../../stores/useSimulationStore';
@@ -118,17 +118,26 @@ export default function AppSidebar({
     }
   }, [isMobile, isOpen]);
 
-  // Auto-expand the group that contains the current active route (desktop only, for deep routes)
+  // Auto-expand ONLY the group that contains the current active route (single-open accordion)
   useEffect(() => {
-    if (!pathname || isMobile) return;
-    // Extract the slug from /admin/<slug>
+    if (!pathname) return;
     const parts = pathname.split('/').filter(Boolean);
     const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
-    if (!currentSlug) return;
+    let activeGroupId = null;
     for (const group of filteredGroups) {
-      const hasActive = group.items?.some(item => item.id === currentSlug && item.id !== '');
-      if (hasActive && !expandedGroups.includes(group.id)) {
-        toggleGroup(group.id);
+      const hasActive = group.items?.some(item => 
+        item.id === currentSlug || (currentSlug === '' && (item.id === '' || item.id === 'dashboard' || item.id === 'overview'))
+      );
+      if (hasActive) {
+        activeGroupId = group.id;
+        break;
+      }
+    }
+    if (activeGroupId) {
+      if (isMobile) {
+        setMobileExpandedGroups([activeGroupId]);
+      } else {
+        setExpandedGroups([activeGroupId]);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -385,12 +394,22 @@ export default function AppSidebar({
           </div>
         )}
 
-        {/* Recents Section */}
-        {expanded && recents.length > 0 && (
+        {/* Recents Section — always visible/open */}
+        {recents.length > 0 && (
           <div className="sb-group">
-            <div className="sb-group-header">Recent</div>
+            {expanded ? (
+              <div className="sb-group-header">Recent</div>
+            ) : (
+              <div 
+                className="sb-group-header-mini" 
+                title="Recent items"
+                style={{ display: 'flex', justifyContent: 'center', padding: '6px 0', color: 'var(--sb-muted)' }}
+              >
+                <History size={16} />
+              </div>
+            )}
             <div className="sb-group-items">
-              {recents.map(id => renderItem(getItemById(id), 1, 'recent-'))}
+              {recents.slice(0, 4).map(id => renderItem(getItemById(id), 1, 'recent-'))}
             </div>
           </div>
         )}
@@ -409,11 +428,12 @@ export default function AppSidebar({
           const handleGroupToggle = () => {
             if (isMobile) {
               setMobileExpandedGroups(prev =>
-                prev.includes(group.id) ? prev.filter(id => id !== group.id) : [...prev, group.id]
+                prev.includes(group.id) ? [] : [group.id]
               );
             } else {
               if (!expanded) setExpanded(true);
-              toggleGroup(group.id);
+              // Single-open accordion: only THIS group can be open (all others closed)
+              setExpandedGroups(expandedGroups.includes(group.id) ? [] : [group.id]);
             }
           };
 
@@ -466,9 +486,9 @@ export default function AppSidebar({
                 )}
               </button>
 
-              {/* Sub-items (Level 2) */}
-              {(isGroupExpanded || !expanded) && (
-                <div className={`sb-group-items ${!expanded ? 'sb-flyout' : ''}`}>
+              {/* Sub-items (Level 2) — ONLY render when this group is the one expanded! */}
+              {isGroupExpanded && (
+                <div className="sb-group-items">
                   {group.items?.map(item => renderItem(item, 2, `group-${group.id}-`))}
                 </div>
               )}

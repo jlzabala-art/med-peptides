@@ -37,6 +37,7 @@ import AlgoliaRecommendCrossSell from '@/components/catalog/AlgoliaRecommendCros
 import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
 import { generatePharmaCatalogCode, generatePharmaBatchCode } from '@/utils/pharmaBarcode';
+import { buildTranslator, getPersistedLang, persistLang, SUPPORTED_LANGS } from './catalogI18n';
 
 export default function SharedCatalogClientView({
   catalogMeta,
@@ -96,6 +97,18 @@ export default function SharedCatalogClientView({
   const isAuthenticated = Boolean(user && user.uid && activeRole !== 'guest');
 
   const [shareUrl, setShareUrl] = React.useState('');
+
+  // ── Language toggle (EN by default, ES optional) ──────────────────────────
+  const [lang, setLang] = React.useState('en');
+  React.useEffect(() => {
+    const persisted = getPersistedLang();
+    setLang(persisted);
+  }, []);
+  const t = buildTranslator(lang);
+  const handleLangToggle = (newLang) => {
+    setLang(newLang);
+    persistLang(newLang);
+  };
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1467,7 +1480,7 @@ export default function SharedCatalogClientView({
                   type="button"
                   onClick={() => setIsCartOpen(!isCartOpen)}
                   className="topbar-cart-pill"
-                  title="Review Order"
+                  title={t('order.title', 'Review Order')}
                 >
                   <Package size={14} />
                   <span>{cartTotalUnits} Vials</span>
@@ -1475,6 +1488,33 @@ export default function SharedCatalogClientView({
                   <span>{currencySymbol}{grandTotal.toFixed(2)}</span>
                 </button>
               )}
+            </div>
+
+            {/* Language toggle EN / ES */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
+              {SUPPORTED_LANGS.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => handleLangToggle(l)}
+                  style={{
+                    padding: '3px 9px',
+                    borderRadius: '6px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    transition: 'all 0.15s ease',
+                    backgroundColor: lang === l ? '#003666' : 'transparent',
+                    color:           lang === l ? '#ffffff' : '#64748b',
+                    borderColor:     lang === l ? '#003666' : '#cbd5e1',
+                    letterSpacing: '0.03em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {l === 'en' ? '🇬🇧 EN' : '🇪🇸 ES'}
+                </button>
+              ))}
             </div>
 
             {/* Line 2: Clinical Provider Access & Registration / Sign Out */}

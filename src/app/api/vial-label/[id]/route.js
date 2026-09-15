@@ -190,14 +190,28 @@ async function renderFullInfoLabel(pdfDoc, page, originX, originY, widthPt, heig
   const formatType = toSafePdfText(variant.presentationName || variant.presentation || 'Lyophilized Powder');
   const storage = toSafePdfText(variant.storageInstructions || 'Store Desiccated at -20C');
 
-  // Dynamic reconstitution concentration calculation based on selected dosage
+  // ── Smart reconstitution volume calculator ────────────────────────────────
+  // Target concentrations: 2 mg/mL (primary, most common clinical dilution)
+  // and 1 mg/mL (secondary / high-volume dilution). Volume = strength / conc.
   const mgMatch = String(dosage).match(/(\d+(?:\.\d+)?)\s*mg/i);
-  let concText = '2.0 mL BAC / Sterile Water';
+  let concText = '1.0 mL BAC Water (Sterile Water alternative)';
   if (mgMatch) {
     const mg = parseFloat(mgMatch[1]);
-    const conc = (mg / 2.0).toFixed(1);
-    concText = `2.0 mL BAC Water (Resulting Conc: ${conc} mg/mL)`;
+    // Primary: aim for 2 mg/mL → round to 1 decimal
+    const vol2 = (mg / 2.0);
+    // Secondary: aim for 1 mg/mL
+    const vol1 = (mg / 1.0);
+    // Pick the most practical primary volume:
+    // If vol2 < 0.5 mL, switch primary to 0.5 mg/mL to avoid impractical volumes
+    if (vol2 < 0.5) {
+      // Very low dose — suggest 0.25 mL → high conc, or 0.5 mL → standard
+      const volHalf = (mg / 0.5).toFixed(1);
+      concText = `${vol2.toFixed(1)} mL BAC Water (${(mg/vol2).toFixed(1)} mg/mL)  |  Alt: ${volHalf} mL (0.5 mg/mL)`;
+    } else {
+      concText = `${vol2.toFixed(1)} mL BAC Water (2 mg/mL)  |  Alt: ${vol1.toFixed(1)} mL (1 mg/mL)`;
+    }
   }
+
 
   // Generate QR Code PNG Buffer pointing to specific variant/dose/supplier public page
   const cleanSlug = toSafePdfText(product.slug || product.id || 'product').toLowerCase();

@@ -14,6 +14,7 @@ import DataTable from '../../ui/DataTable';
 import StatusChip from '../../ui/StatusChip';
 import ImportPrescriptionModal from '../../../features/prescriptions/components/ImportPrescriptionModal';
 import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
+import CatalogSharesHistoryTable from '../catalog/CatalogSharesHistoryTable';
 
 // ── Physician form schema ────────────────────────────────────────────────────
 export const physicianSchema = [
@@ -265,6 +266,7 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
     { id: 'patients',      label: 'Patients',      count: patients.length      || null },
     { id: 'prescriptions', label: 'Prescriptions', count: prescriptions.length || null },
     { id: 'orders',        label: 'Orders',        count: orders.length        || null },
+    { id: 'catalogos',     label: 'Catálogos' },
     { id: 'timeline',      label: 'Timeline' },
   ];
 
@@ -375,6 +377,10 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
                 emptyTitle="No orders found"
                 emptySubtitle="Orders are linked to patients. No orders found for this physician's patients."
               />
+            )}
+
+            {activeTab === 'catalogos' && (
+              <CatalogSharesHistoryTable recipientId={currentDoctor?.id} />
             )}
 
             {activeTab === 'timeline' && (

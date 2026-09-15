@@ -69,7 +69,7 @@ export async function POST(request) {
 
     const linkId = catalogPayload.catalogId;
 
-    // 1. Persist link record in Firestore collection `shared_catalog_links`
+     // 1. Persist link record in Firestore collection `shared_catalog_links`
     try {
       await adminDb.collection('shared_catalog_links').doc(linkId).set({
         catalogId: linkId,
@@ -91,18 +91,29 @@ export async function POST(request) {
         token,
         shortUrl,
         longUrl,
+        shareableUrl: shortUrl,
         channel,
         sentBy,
+        sourceType: 'web', // 'web' | 'pdf'
         status: 'sent', // 'sent' | 'viewed' | 'engaged' | 'converted' | 'revoked'
         visitsCount: 0,
         lastVisitedAt: null,
+        // Interaction tracking for CatalogSharesHistoryTable
+        interactions: {
+          pdfDownloaded: false,
+          webOpened: false,
+          orderPlaced: false,
+          lastInteractionAt: null,
+        },
         expiresAt: new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000).toISOString(),
+        issuedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }, { merge: true });
     } catch (dbErr) {
       console.warn('[share/route.js] Could not persist link in Firestore:', dbErr.message);
     }
+
 
     // 2. Also register in universal `shared_records` for 360 User CRM tracking
     try {
