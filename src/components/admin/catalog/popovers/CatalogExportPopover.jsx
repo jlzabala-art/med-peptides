@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Download, Globe, ChevronDown, ChevronUp, Loader,
-  Search, Plus, X, Building, User, Users, ShieldCheck,
+  Search, Plus, X, Building, User, Users, ShieldCheck, CheckCircle,
 } from '@/lib/icons';
 import { toast } from 'react-hot-toast';
 import StandardDrawer from '@/components/ui/StandardDrawer';
@@ -134,7 +134,7 @@ export default function CatalogExportPopover({
 
   const handleQuickCreateClient = async (e) => {
     e.preventDefault();
-    if (!newName.trim()) { toast.error('Indica el nombre'); return; }
+    if (!newName.trim()) { toast.error('Please enter a name'); return; }
     setIsCreatingClient(true);
     try {
       const res = await fetch('/api/catalog/clients', {
@@ -356,8 +356,8 @@ export default function CatalogExportPopover({
         </div>
 
         {/* ── 3. RECIPIENT / CLIENT ───────────────────────────────────────── */}
-        <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.75rem', backgroundColor: '#ffffff' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <label style={{ ...sectionLabel, marginBottom: 0 }}>3 · Recipient / Client</label>
             {selectedClient && (
               <button
@@ -365,107 +365,140 @@ export default function CatalogExportPopover({
                 onClick={() => setSelectedClient(null)}
                 style={{ border: 'none', background: 'none', fontSize: '0.68rem', fontWeight: 700, color: '#dc2626', cursor: 'pointer', padding: 0 }}
               >
-                Clear
+                Clear selection
               </button>
             )}
           </div>
 
-          {/* Type pills */}
-          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '8px' }}>
-            {RECIPIENT_TYPES.map(rt => {
-              const active = recipientType === rt.id;
-              const Icon = rt.icon;
-              return (
-                <button
-                  key={rt.id}
-                  type="button"
-                  onClick={() => handleTypeChange(rt.id)}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '3px',
-                    padding: '4px 9px', fontSize: '0.7rem', fontWeight: active ? 700 : 500,
-                    borderRadius: '6px',
-                    border: active ? '1.5px solid #0284c7' : '1px solid #e2e8f0',
-                    backgroundColor: active ? '#f0f9ff' : '#ffffff',
-                    color: active ? '#0284c7' : '#64748b',
-                    cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.1s ease',
-                  }}
-                >
-                  <Icon size={11} />
-                  <span>{rt.label}</span>
-                </button>
-              );
-            })}
+          {/* Primary Dropdown: Recipient Type */}
+          <div style={{ position: 'relative' }}>
+            <select
+              value={recipientType}
+              onChange={e => handleTypeChange(e.target.value)}
+              style={{
+                ...INPUT_STYLE,
+                padding: '0.55rem 2rem 0.55rem 0.75rem',
+                fontWeight: 600,
+                appearance: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+              }}
+            >
+              <option value="general">General (Standard Portfolio)</option>
+              <option value="clinic">Clinic</option>
+              <option value="doctor">Doctor</option>
+              <option value="wholeseller">Wholesaler</option>
+              <option value="patient">Patient</option>
+            </select>
+            <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>
+              <ChevronDown size={14} />
+            </div>
           </div>
 
-          {/* Step 2: specific selection */}
+          {/* Unfolded Second Level */}
           {recipientType === 'general' ? (
-            <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px', padding: '2px 0' }}>
+            <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px' }}>
               <ShieldCheck size={14} color="#0d9488" />
               <span>Standard clinical catalog — general partner distribution.</span>
             </div>
-          ) : selectedClient ? (
-            /* Active chip */
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '0.5rem 0.7rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac',
-              borderRadius: '7px', fontSize: '0.78rem', color: '#166534',
-            }}>
-              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                <span style={{ fontWeight: 700 }}>{selectedClient.name}</span>
-                {selectedClient.email && (
-                  <span style={{ opacity: 0.75, fontSize: '0.7rem', marginLeft: '6px' }}>({selectedClient.email})</span>
+          ) : (
+            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Select {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label || 'Client'}
+                </span>
+                {!showQuickAdd && (
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickAdd(true)}
+                    style={{ background: 'none', border: 'none', padding: 0, fontSize: '0.7rem', fontWeight: 700, color: '#0284c7', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                  >
+                    <Plus size={11} />
+                    <span>Add new</span>
+                  </button>
                 )}
               </div>
-              <button type="button" onClick={() => setSelectedClient(null)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#166534', marginLeft: '8px' }}>
-                <X size={13} />
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Search input */}
-              <div style={{ position: 'relative', marginBottom: '4px' }}>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder={`Search ${recipientType}…`}
-                  style={{ ...INPUT_STYLE, paddingRight: '1.8rem' }}
-                />
-                <div style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }}>
-                  {isLoadingClients ? <Loader size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Search size={12} />}
+
+              {/* Secondary Dropdown: Specific entity selection */}
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={selectedClient ? selectedClient.id : ''}
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val === '__add_new__') {
+                      setShowQuickAdd(true);
+                    } else if (val === '') {
+                      setSelectedClient(null);
+                    } else {
+                      const found = clientsList.find(c => c.id === val);
+                      if (found) {
+                        setSelectedClient(found);
+                        setShowQuickAdd(false);
+                      }
+                    }
+                  }}
+                  style={{
+                    ...INPUT_STYLE,
+                    padding: '0.55rem 2rem 0.55rem 0.75rem',
+                    fontWeight: 600,
+                    appearance: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    backgroundColor: selectedClient ? '#f0fdf4' : '#ffffff',
+                    borderColor: selectedClient ? '#86efac' : '#cbd5e1',
+                    color: selectedClient ? '#166534' : '#1e293b',
+                  }}
+                >
+                  <option value="">
+                    {isLoadingClients
+                      ? `Loading ${recipientType}s…`
+                      : `-- All ${RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}s (General for this role) --`}
+                  </option>
+                  {clientsList.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} {item.country ? `· ${item.country}` : item.email ? `· ${item.email}` : ''}
+                    </option>
+                  ))}
+                  <option value="__add_new__">
+                    ➕ Add new {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label}…
+                  </option>
+                </select>
+                <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#64748b' }}>
+                  {isLoadingClients ? <Loader size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <ChevronDown size={14} />}
                 </div>
               </div>
 
-              {/* Results */}
-              {clientsList.length > 0 && !showQuickAdd && (
-                <div style={{ maxHeight: '108px', overflowY: 'auto', border: '1px solid #f1f5f9', borderRadius: '7px', marginBottom: '6px' }}>
-                  {clientsList.map(item => (
-                    <div
-                      key={item.id}
-                      onClick={() => setSelectedClient(item)}
-                      style={{ padding: '5px 9px', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}
-                    >
-                      <span style={{ fontWeight: 600, color: '#1e293b' }}>{item.name}</span>
-                      <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{item.email || item.country}</span>
-                    </div>
-                  ))}
+              {/* Selected Entity Indicator */}
+              {selectedClient && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '6px 10px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0',
+                  borderRadius: '6px', fontSize: '0.75rem', color: '#166534', marginTop: '2px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                    <CheckCircle size={13} color="#16a34a" />
+                    <span style={{ fontWeight: 700, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {selectedClient.name}
+                    </span>
+                    {(selectedClient.email || selectedClient.country) && (
+                      <span style={{ opacity: 0.75, fontSize: '0.68rem' }}>
+                        ({selectedClient.email || selectedClient.country})
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClient(null)}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#166534', display: 'flex', alignItems: 'center' }}
+                    title="Remove client"
+                  >
+                    <X size={13} />
+                  </button>
                 </div>
               )}
 
-              {/* Quick-add toggle */}
-              {!showQuickAdd ? (
-                <button
-                  type="button"
-                  onClick={() => setShowQuickAdd(true)}
-                  style={{ background: 'none', border: 'none', padding: '3px 0', fontSize: '0.72rem', fontWeight: 700, color: '#0284c7', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
-                >
-                  <Plus size={12} />
-                  <span>Add new {RECIPIENT_TYPES.find(r => r.id === recipientType)?.label || 'recipient'}…</span>
-                </button>
-              ) : (
-                /* Inline quick-add form */
+              {/* Quick-add form inline */}
+              {showQuickAdd && (
                 <form
                   onSubmit={handleQuickCreateClient}
                   style={{ marginTop: '6px', padding: '10px', backgroundColor: '#f8fafc', borderRadius: '7px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '6px' }}
@@ -478,8 +511,8 @@ export default function CatalogExportPopover({
                       <X size={12} />
                     </button>
                   </div>
-                  <input type="text"  required autoFocus placeholder="Name / Company Name *" value={newName}  onChange={e => setNewName(e.target.value)}  style={{ ...INPUT_STYLE }} />
-                  <input type="email"           placeholder="Contact email"                   value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{ ...INPUT_STYLE }} />
+                  <input type="text" required autoFocus placeholder="Name / Company Name *" value={newName} onChange={e => setNewName(e.target.value)} style={{ ...INPUT_STYLE }} />
+                  <input type="email" placeholder="Contact email" value={newEmail} onChange={e => setNewEmail(e.target.value)} style={{ ...INPUT_STYLE }} />
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <input type="text" placeholder="Phone / WhatsApp" value={newPhone} onChange={e => setNewPhone(e.target.value)} style={{ ...INPUT_STYLE, flex: 1 }} />
                     <button
@@ -491,7 +524,7 @@ export default function CatalogExportPopover({
                   </div>
                 </form>
               )}
-            </>
+            </div>
           )}
         </div>
 
