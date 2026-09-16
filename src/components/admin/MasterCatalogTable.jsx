@@ -52,7 +52,16 @@ import {
   X
 } from 'lucide-react';
 
-export default function MasterCatalogTable({ initialProducts, globalMetrics, headerProps = {}, headerActions, mobileHeaderActions }) {
+export default function MasterCatalogTable({
+  initialProducts,
+  globalMetrics,
+  headerProps = {},
+  headerActions,
+  mobileHeaderActions,
+  readOnly = false,
+  lockedSupplier = null,
+  defaultSupplier = null
+}) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -187,6 +196,19 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
     return null;
   });
 
+  const effectiveSupplierFilter = useMemo(() => {
+    if (lockedSupplier) {
+      return Array.isArray(lockedSupplier) ? lockedSupplier : [lockedSupplier];
+    }
+    if (filterSupplier && filterSupplier.length > 0) {
+      return filterSupplier;
+    }
+    if (defaultSupplier) {
+      return Array.isArray(defaultSupplier) ? defaultSupplier : [defaultSupplier];
+    }
+    return [];
+  }, [lockedSupplier, filterSupplier, defaultSupplier]);
+
   // 2. Fetch Catalog Data from React Query
   const { data, kpis, totalGroups, goalFacets, categoryFacets, presentationFacets, supplierFacets, loading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useCatalogSummary({ 
     limit: 50, 
@@ -196,7 +218,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
     goals: filterGoals,
     formatId: filterFormatId,
     presentation: filterPresentation,
-    supplier: filterSupplier,
+    supplier: effectiveSupplierFilter,
     productType: filterProductType,
     tag: filterTags,
     tagMode: filterTagMode,
@@ -331,7 +353,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       rows = rows.filter(row => filterSubcategory.includes(inferProductSubcategory(row)));
     }
 
-    if (filterSupplier.length > 0) {
+    if (effectiveSupplierFilter.length > 0) {
       rows = rows.filter(row => {
         const rowSuppliers = [
           row.supplierId,
@@ -341,9 +363,9 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
           ...(row.variants || []).map(v => v.supplierId || v.supplier)
         ].filter(Boolean).map(s => String(s).toLowerCase().replace(/^supplier-/, ''));
 
-        return filterSupplier.some(s => {
+        return effectiveSupplierFilter.some(s => {
           const cleanS = String(s).toLowerCase().replace(/^supplier-/, '');
-          return rowSuppliers.includes(cleanS);
+          return rowSuppliers.some(rs => rs.includes(cleanS) || cleanS.includes(rs));
         });
       });
     }
@@ -391,7 +413,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
       }
     }
     return uniqueRows;
-  }, [data, optimisticOverrides, supplierIdToName, getCategoryLabel, filterCategory, filterProductType, filterTags, filterTagMode, filterPriority, filterSubcategory, filterSupplier, filterGoals, filterQuality, filterTimeframe, recentImportFilter]);
+  }, [data, optimisticOverrides, supplierIdToName, getCategoryLabel, filterCategory, filterProductType, filterTags, filterTagMode, filterPriority, filterSubcategory, effectiveSupplierFilter, filterGoals, filterQuality, filterTimeframe, recentImportFilter]);
 
   // Server-side KPIs derivation (Rule #22)
   const displayedMetrics = useMemo(() => {
@@ -1023,7 +1045,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
             })).sort((a, b) => (b.count || 0) - (a.count || 0)),
             onChange: (vals) => setMultiParam('presentation', vals)
           },
-          {
+          ...(!lockedSupplier ? [{
             key: 'supplier',
             label: 'Supplier',
             pluralLabel: 'Suppliers',
@@ -1035,7 +1057,7 @@ export default function MasterCatalogTable({ initialProducts, globalMetrics, hea
               count: supplierFacets[s.value] ?? 0,
             })).sort((a, b) => (b.count || 0) - (a.count || 0)),
             onChange: (vals) => setMultiParam('supplier', vals)
-          },
+          }] : []),
           {
             key: 'quality',
             label: 'Data Quality',

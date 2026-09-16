@@ -440,19 +440,45 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
               )}
             </div>
           </div>
-          {/* New Rx quick action */}
-          <button
-            onClick={() => openDrawer('rx-builder', 'new', {
-              initialDoctor: { id: currentDoctor.id, name: doctorName },
-              initialDoctorId: currentDoctor.id,
-              initialDoctorName: doctorName,
-              sourceModule: 'physician-profile',
-            })}
-            className="gcp-btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginLeft: 'auto', flexShrink: 0, fontSize: '0.82rem', padding: '0.45rem 0.9rem' }}
-          >
-            <ClipboardList size={14} /> New Prescription
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto', flexShrink: 0 }}>
+            <a
+              href={`/doctor?simulate=${currentDoctor.id === 'dr-hanieh-erdmann' || currentDoctor.lastName?.includes('Erdmann') ? 'dr-hanieh-erdmann' : currentDoctor.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="gcp-btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.8rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: '1.5px solid #003666',
+                backgroundColor: '#f8fafc',
+                color: '#003666',
+                fontWeight: 700,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer'
+              }}
+              title="Open Doctor Clinical Portal Simulation"
+            >
+              🩺 Simulate Doctor Portal
+            </a>
+            {/* New Rx quick action */}
+            <button
+              onClick={() => openDrawer('rx-builder', 'new', {
+                initialDoctor: { id: currentDoctor.id, name: doctorName },
+                initialDoctorId: currentDoctor.id,
+                initialDoctorName: doctorName,
+                sourceModule: 'physician-profile',
+              })}
+              className="gcp-btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', padding: '0.45rem 0.9rem' }}
+            >
+              <ClipboardList size={14} /> New Prescription
+            </button>
+          </div>
         </div>
       }
       headerColor="var(--color-bg-surface)"

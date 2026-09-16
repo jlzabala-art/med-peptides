@@ -61,6 +61,47 @@ const ALL_TABS = [
   { id: 'settings',              label: 'Settings',              icon: Settings,        alwaysOn: true },
 ];
 
+export const DR_HANIEH_ERDMANN_PROFILE = {
+  id: 'dr-hanieh-erdmann',
+  firstName: 'Hanieh',
+  lastName: 'Erdmann',
+  displayName: 'Dr. Hanieh Erdmann',
+  doctorName: 'Dr. Hanieh Erdmann',
+  specialty: 'German Board Certified Specialist Dermatologist & Trichologist',
+  license: 'DHA-00013060-006',
+  clinicName: 'Bedaya Polyclinic L.L.C.',
+  clinicAddress: 'Al Razi Bldg 64, Block B, Dubai Healthcare City',
+  email: 'dr.erdmann@bedayaclinic.ae',
+  phone: '+971 4 333 3955',
+  patientCount: 12,
+  prescriptionCount: 18,
+  role: 'doctor',
+  isIndividualDoctor: true
+};
+
+const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
+  {
+    id: 'overview', label: 'Clinical Overview', emoji: '📊',
+    items: [{ id: 'overview', label: 'Dashboard', icon: LayoutDashboard }],
+  },
+  {
+    id: 'clinical', label: 'My Clinical Practice', emoji: '🩺',
+    items: [
+      { id: 'patients', label: 'My Patients', icon: Users },
+      { id: 'prescriptions-history', label: 'Prescriptions & Lifecycle', icon: Pill },
+      { id: 'new-prescription', label: 'New Prescription', icon: Plus },
+      { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'appointments', label: 'Consultations', icon: Calendar },
+    ],
+  },
+  {
+    id: 'account', label: 'Doctor Credentials', emoji: '🛡️',
+    items: [
+      { id: 'settings', label: 'DHA License & Profile', icon: Settings }
+    ],
+  },
+];
+
 const DOCTOR_NAV_GROUPS = [
   {
     id: 'overview', label: 'Overview', emoji: '📊',
@@ -88,6 +129,7 @@ const DOCTOR_NAV_GROUPS = [
     id: 'orders', label: 'Orders & Protocols', emoji: '📦',
     items: [
       { id: 'orders',    label: 'Orders',    icon: ShoppingBag },
+      { id: 'catalog',   label: 'Lotusland Formulary', icon: ShoppingBag },
       { id: 'protocols', label: 'Protocols', icon: FileText, disabled: false },
       { id: 'catalog-builder', label: 'Catalog Builder', icon: Blocks, disabled: false },
       { id: 'messages', label: 'Messages', icon: MessageSquare, disabled: false }
@@ -104,6 +146,7 @@ const DOCTOR_NAV_GROUPS = [
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 import PanelShell from '../components/shell/PanelShell';
+import IndividualDoctorSimulationBanner from '../components/doctor/IndividualDoctorSimulationBanner';
 import { LayoutDashboard, Users, UserCheck, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker } from '@/lib/icons';
 
 export const DoctorContext = React.createContext({});
@@ -122,8 +165,25 @@ export default function DoctorDashboard({ children }) {
 
   // Impersonation state for administrators
   const [doctorsList, setDoctorsList] = useState([]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState(() => sessionStorage.getItem('impersonatedDoctorId') || '');
-  const [selectedDoctorProfile, setSelectedDoctorProfile] = useState(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('simulate') === 'dr-hanieh-erdmann') return 'dr-hanieh-erdmann';
+      return sessionStorage.getItem('impersonatedDoctorId') || '';
+    }
+    return '';
+  });
+  const [selectedDoctorProfile, setSelectedDoctorProfile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('simulate') === 'dr-hanieh-erdmann' || sessionStorage.getItem('impersonatedDoctorId') === 'dr-hanieh-erdmann') {
+        return DR_HANIEH_ERDMANN_PROFILE;
+      }
+    }
+    return null;
+  });
+
+  const isSimulatingDrErdmann = selectedDoctorId === 'dr-hanieh-erdmann';
   // Staff doctor profile fetching
   const [staffDoctorProfile, setStaffDoctorProfile] = useState(null);
   const isStaffUser = baseRole === 'staff';
@@ -181,18 +241,37 @@ export default function DoctorDashboard({ children }) {
     return new Promise(resolve => setTimeout(resolve, 800));
   };
 
+  const handleExitSimulation = () => {
+    setSelectedDoctorId('');
+    setSelectedDoctorProfile(null);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('impersonatedDoctorId');
+    }
+    router.push('/admin');
+  };
+
+  const effectiveDoctorId = isSimulatingDrErdmann ? 'dr-hanieh-erdmann' : doctorId;
+  const effectiveDoctorMeta = isSimulatingDrErdmann ? DR_HANIEH_ERDMANN_PROFILE : doctorMeta;
+
   return (
     <PullToRefreshWrapper onRefresh={handleRefresh}>
       <PanelShell 
         allowedRoles={['doctor', 'admin', 'staff']}
-        sidebarNavGroups={DOCTOR_NAV_GROUPS}
+        sidebarNavGroups={isSimulatingDrErdmann ? INDIVIDUAL_DOCTOR_NAV_GROUPS : DOCTOR_NAV_GROUPS}
         activeNavId={activeTab}
         onNavigate={(id) => router.push(`/doctor/${id}`)}
-        portalTitle="Clinical Portal"
+        portalTitle={isSimulatingDrErdmann ? 'Doctor Clinical Portal' : 'Clinical Portal'}
         roleContext="doctor"
         pageContext={{ activeTab }}
       >
-      {isAdmin && (
+      {isSimulatingDrErdmann ? (
+        <IndividualDoctorSimulationBanner
+          doctor={DR_HANIEH_ERDMANN_PROFILE}
+          patientCount={12}
+          prescriptionCount={18}
+          onExit={handleExitSimulation}
+        />
+      ) : isAdmin ? (
         <div style={{
           background: '#fff7e6',
           borderBottom: '1px solid #ffe7ba',
@@ -213,7 +292,10 @@ export default function DoctorDashboard({ children }) {
               onChange={(e) => {
                 const id = e.target.value;
                 setSelectedDoctorId(id);
-                if (id) {
+                if (id === 'dr-hanieh-erdmann') {
+                  sessionStorage.setItem('impersonatedDoctorId', id);
+                  setSelectedDoctorProfile(DR_HANIEH_ERDMANN_PROFILE);
+                } else if (id) {
                   sessionStorage.setItem('impersonatedDoctorId', id);
                   const profile = doctorsList.find(d => d.id === id);
                   setSelectedDoctorProfile(profile || null);
@@ -234,7 +316,10 @@ export default function DoctorDashboard({ children }) {
               }}
             >
               <option value="">— Select Doctor (Viewing as Self) —</option>
-              {doctorsList.map(docItem => (
+              <option value="dr-hanieh-erdmann" style={{ fontWeight: 'bold', color: '#003666' }}>
+                🇩🇪 Dr. Hanieh Erdmann (German Specialist • DHA-00013060-006 • Bedaya Polyclinic)
+              </option>
+              {doctorsList.filter(d => d.id !== 'dr-hanieh-erdmann').map(docItem => (
                 <option key={docItem.id} value={docItem.id}>
                   Dr. {docItem.firstName || ''} {docItem.lastName || ''} ({docItem.email || 'No email'})
                 </option>
@@ -243,11 +328,18 @@ export default function DoctorDashboard({ children }) {
           </div>
           <span style={{ fontSize: '11px', color: '#8c8c8c', fontWeight: 600 }}>Developer Tool</span>
         </div>
-      )}
+      ) : null}
 
-      <div style={{ padding: '2rem' }}>
+      <div style={{ padding: '1.5rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
-          <DoctorContext.Provider value={{ doctorId, doctorMeta, sharedPatients, setSharedPatients }}>
+          <DoctorContext.Provider value={{
+            doctorId: effectiveDoctorId,
+            doctorMeta: effectiveDoctorMeta,
+            isSimulatingDrErdmann,
+            isIndividualDoctor: isSimulatingDrErdmann,
+            sharedPatients,
+            setSharedPatients
+          }}>
             {children}
           </DoctorContext.Provider>
         </AdminTabErrorBoundary>

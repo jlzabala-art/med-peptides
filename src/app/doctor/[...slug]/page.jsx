@@ -150,9 +150,42 @@ function LeadsWrapper() {
 }
 
 function DoctorCatalogWrapper() {
+  const { isSimulatingDrErdmann, isIndividualDoctor } = useContext(DoctorContext) || {};
+  const isLockedLotusland = isSimulatingDrErdmann || isIndividualDoctor;
+
   return (
-    <div style={{ padding: '1rem' }}>
-      <AdminCatalogTabClient readOnly={true} />
+    <div style={{ padding: '0 0.5rem 2rem' }}>
+      {isLockedLotusland && (
+        <div style={{
+          marginBottom: '1rem',
+          padding: '12px 18px',
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px'
+        }}>
+          <div>
+            <div style={{ fontWeight: 800, color: '#1e40af', fontSize: '0.90rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🌿</span>
+              <span>Lotusland Limited — Authorized Clinical Formulary</span>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#3b82f6', marginTop: '2px' }}>
+              Exclusive authorized clinical catalog for Dr. Hanieh Erdmann. Access restricted to Lotusland peptide preparations and sterile compounding devices.
+            </div>
+          </div>
+          <span style={{ fontSize: '0.72rem', background: '#dbeafe', color: '#1d4ed8', padding: '3px 10px', borderRadius: '12px', fontWeight: 700, border: '1px solid #93c5fd' }}>
+            Exclusive Supplier: Lotusland
+          </span>
+        </div>
+      )}
+      <AdminCatalogTabClient
+        readOnly={true}
+        lockedSupplier={isLockedLotusland ? 'supplier-lotusland' : null}
+      />
     </div>
   );
 }

@@ -54,8 +54,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
   const [mobileActionPatient, setMobileActionPatient] = useState(null);
 
   const { is, role } = useRoleAccess();
-  const isMedicalDirector = is('medical_director') || is('admin') || role === 'medical_director';
-  const effectiveDoctorId = isMedicalDirector ? null : doctorId;
+  const isMedicalDirector = (is('medical_director') || role === 'medical_director') && viewMode !== 'doctor';
+  const effectiveDoctorId = (viewMode === 'doctor' && doctorId) ? doctorId : (isMedicalDirector ? null : doctorId);
 
   const handleMobileQuickAction = useCallback((action, patient) => {
     if (action === 'menu') { setMobileActionPatient(patient); }
@@ -177,7 +177,18 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
 
     // Filter by effectiveDoctorId if specified (Medical Director has null effectiveDoctorId)
     if (effectiveDoctorId) {
-      list = list.filter(p => p.physicianId === effectiveDoctorId || p.assignedDoctorId === effectiveDoctorId || (Array.isArray(p.doctorIds) && p.doctorIds.includes(effectiveDoctorId)));
+      list = list.filter(p => {
+        if (effectiveDoctorId === 'dr-hanieh-erdmann') {
+          const docStr = `${p.doctorName || ''} ${p.physicianName || ''} ${p.prescribingDoctor || ''} ${p.clinicName || ''} ${p.clinic || ''}`.toLowerCase();
+          if (docStr.includes('erdmann') || docStr.includes('bedaya')) return true;
+        }
+        return (
+          p.physicianId === effectiveDoctorId ||
+          p.assignedDoctorId === effectiveDoctorId ||
+          p.doctorId === effectiveDoctorId ||
+          (Array.isArray(p.doctorIds) && p.doctorIds.includes(effectiveDoctorId))
+        );
+      });
     }
 
     // Multi-patient query support (comma-separated search) with diacritic-insensitivity

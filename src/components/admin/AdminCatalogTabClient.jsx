@@ -171,7 +171,7 @@ function MobileCatalogActions(props) {
 /* ─────────────────────────────────────────────────────────────────
    Main component
 ───────────────────────────────────────────────────────────────── */
-export default function AdminCatalogTabClient({ initialProducts, globalMetrics, readOnly = false }) {
+export default function AdminCatalogTabClient({ initialProducts, globalMetrics, readOnly = false, lockedSupplier = null, defaultSupplier = null }) {
   const { openDrawer } = useDrawer();
   const [actionLoading, setActionLoading] = useState(null);
   const [exportStatus, setExportStatus] = useState(null);
@@ -512,6 +512,8 @@ export default function AdminCatalogTabClient({ initialProducts, globalMetrics, 
           initialProducts={initialProducts}
           globalMetrics={globalMetrics}
           readOnly={readOnly}
+          lockedSupplier={lockedSupplier}
+          defaultSupplier={defaultSupplier}
           headerActions={<DesktopCatalogActions {...sharedActions} />}
           mobileHeaderActions={<MobileCatalogActions {...sharedActions} />}
         />

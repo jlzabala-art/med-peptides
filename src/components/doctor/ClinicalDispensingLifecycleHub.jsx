@@ -46,14 +46,14 @@ import notifier from '../../services/NotificationService';
  *   2. Medical Prescription & Magistral Formulation
  *   3. Patient Pro-Forma Invoice & Billing
  *   4. Patient Payment Settlement & Verification
- *   5. Temperature-Controlled Cold-Chain Dispensing & Refill Tracking
+ *   5. Courier Dispensing & Refill Tracking
  */
 export default function ClinicalDispensingLifecycleHub({
   doctorId,
   clinicId,
   currentDoctor,
   title = 'Patient Care & Dispensing Lifecycle',
-  subtitle = 'End-to-end clinical workflow: Diagnostic recommendation ➔ Prescription formulation ➔ Patient billing ➔ Cold-chain delivery'
+  subtitle = 'End-to-end clinical workflow: Diagnostic recommendation ➔ Prescription formulation ➔ Patient billing ➔ Courier delivery'
 }) {
   const [prescriptions, setPrescriptions] = useState([]);
   const [ordersMap, setOrdersMap] = useState({});
@@ -183,7 +183,7 @@ export default function ClinicalDispensingLifecycleHub({
       // Stage 5: Fulfillment & Delivery
       const fulfillmentStatus = linkedOrder?.fulfillmentStatus || rx.fulfillmentStatus || 'in_transit';
       const trackingNumber = linkedOrder?.trackingNumber || rx.trackingNumber || 'DHL-DXB-98421034';
-      const courier = linkedOrder?.courier || rx.courier || 'DHL Medical Cold-Chain (2-8°C)';
+      const courier = linkedOrder?.courier || rx.courier || 'DHL Express Courier';
       const deliveryAddress = linkedOrder?.customerAddress || rx.clinicAddress || 'Villa 2, Street 49th, Al Wasl, Dubai - UAE';
 
       // Current active stage (1 to 5)
@@ -396,7 +396,7 @@ export default function ClinicalDispensingLifecycleHub({
   // ── 6. WhatsApp Direct Message Helper ───────────────────────────────────────
   const handleOpenWhatsApp = (item) => {
     const cleanPhone = (item.patientPhone || '+971544060080').replace(/[^\d+]/g, '').replace('+', '');
-    const msg = `Hello ${item.patientName}, Dr. Hanieh Erdmann's clinic has updated your prescription (${item.rxCode}). Your compounded TrichoSol formula is currently ${item.fulfillmentStatus === 'delivered' ? 'delivered' : 'in cold-chain transit (DHL: ' + item.trackingNumber + ')'}. Please reach out if you have any clinical questions.`;
+    const msg = `Hello ${item.patientName}, Dr. Hanieh Erdmann's clinic has updated your prescription (${item.rxCode}). Your compounded TrichoSol formula is currently ${item.fulfillmentStatus === 'delivered' ? 'delivered' : 'in transit with courier (DHL: ' + item.trackingNumber + ')'}. Please reach out if you have any clinical questions.`;
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -485,7 +485,7 @@ export default function ClinicalDispensingLifecycleHub({
     },
     {
       key: 'fulfillment',
-      header: 'Cold-Chain Delivery',
+      header: 'Delivery Status',
       width: '15%',
       render: (row) => (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -578,11 +578,11 @@ export default function ClinicalDispensingLifecycleHub({
               </span>
             </div>
 
-            {/* Step 5: Cold-Chain Delivery */}
+            {/* Step 5: Courier Delivery */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#2563eb', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚚</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>5. Cold-Chain Delivery</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>5. Courier Delivery</span>
               </div>
               <span style={{ fontSize: '0.70rem', color: '#2563eb', fontWeight: 700, paddingLeft: '26px' }}>
                 {row.fulfillmentStatus === 'delivered' ? 'Delivered' : 'In Transit (DHL)'}
@@ -794,13 +794,13 @@ export default function ClinicalDispensingLifecycleHub({
 
         <div style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '10px', padding: '10px 14px' }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Cold-Chain In Transit
+            In Transit (Courier)
           </div>
           <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#7e22ce', marginTop: '2px' }}>
             {kpis.transitCount}
           </div>
           <div style={{ fontSize: '0.70rem', color: '#9333ea', marginTop: '2px' }}>
-            DHL Medical Express (2°C – 8°C)
+            DHL Express Dispatch
           </div>
         </div>
 

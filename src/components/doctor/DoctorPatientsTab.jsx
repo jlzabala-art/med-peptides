@@ -19,9 +19,9 @@ export default function DoctorPatientsTab({ doctorId }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeCohort, setActiveCohort] = useState('all');
-  const { is, role } = useRoleAccess();
-  const isMedicalDirector = is('medical_director') || is('admin') || role === 'medical_director';
-  const effectiveDocId = isMedicalDirector ? null : doctorId;
+  const isSimulation = searchParams.get('simulate') === 'dr-hanieh-erdmann' || doctorId === 'dr-hanieh-erdmann';
+  const isMedicalDirector = !isSimulation && (is('medical_director') || (is('admin') && !doctorId) || role === 'medical_director');
+  const effectiveDocId = isSimulation ? (doctorId || 'dr-hanieh-erdmann') : (isMedicalDirector ? null : doctorId);
 
   useEffect(() => {
     const urlCohort = searchParams.get('cohort');
