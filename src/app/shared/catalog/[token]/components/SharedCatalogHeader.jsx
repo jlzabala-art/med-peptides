@@ -28,6 +28,16 @@ const URGENCY_STYLES = {
   expired:  { bg: 'rgba(100,116,139,0.2)', border: '#94a3b8', color: '#cbd5e1' },
 };
 
+const DEFAULT_PHARMA_MARGIN_THEME = {
+  tierCode: 'INSTITUTIONAL',
+  tierLabel: 'Lyophilized Formulations',
+  gradient: 'linear-gradient(135deg, #00284d 0%, #004d80 50%, #003366 100%)',
+  borderColor: 'rgba(255, 255, 255, 0.2)',
+  glow: 'rgba(0, 0, 0, 0.2)',
+  accentColor: '#93c5fd',
+  pillBg: 'rgba(255, 255, 255, 0.12)',
+};
+
 /**
  * SharedCatalogHeader — Executive header card with dynamic pharma margin theme,
  * 3D holographic QR scan card, PDF download button, and protocol toggle.
@@ -51,15 +61,16 @@ export default function SharedCatalogHeader({
   setActiveTab,
 }) {
   const validity = useValidityCountdown(catalogMeta);
+  const theme = pharmaMarginTheme || DEFAULT_PHARMA_MARGIN_THEME;
   return (
     <>
       {/* Executive Header Card with Dynamic Pharma Margin Theme & Optimized Laptop Layout */}
       <div
         className="header-card"
         style={{
-          background: pharmaMarginTheme.gradient,
-          border: `1px solid ${pharmaMarginTheme.borderColor}`,
-          boxShadow: `0 12px 32px -6px rgba(0, 0, 0, 0.38), 0 0 20px ${pharmaMarginTheme.glow}`
+          background: theme.gradient,
+          border: `1px solid ${theme.borderColor}`,
+          boxShadow: `0 12px 32px -6px rgba(0, 0, 0, 0.38), 0 0 20px ${theme.glow}`
         }}
       >
         <div className="header-card-inner">
@@ -71,14 +82,14 @@ export default function SharedCatalogHeader({
               <span style={{
                 fontSize: '0.74rem',
                 fontWeight: 800,
-                color: pharmaMarginTheme.accentColor,
-                backgroundColor: pharmaMarginTheme.pillBg,
-                border: `1px solid ${pharmaMarginTheme.borderColor}`,
+                color: theme.accentColor,
+                backgroundColor: theme.pillBg,
+                border: `1px solid ${theme.borderColor}`,
                 padding: '3px 10px',
                 borderRadius: '12px',
                 letterSpacing: '0.02em'
               }}>
-                {isProtocolCatalog ? 'Peptides & Protocols' : pharmaMarginTheme.tierLabel}
+                {isProtocolCatalog ? 'Peptides & Protocols' : theme.tierLabel}
               </span>
             </div>
             <p style={{ margin: '6px 0 0 0', fontSize: '0.84rem', color: '#e0f2fe', lineHeight: 1.4, maxWidth: '580px' }}>
@@ -91,8 +102,8 @@ export default function SharedCatalogHeader({
                   ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                   : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
               </span>
-              <span className="header-meta-pill" style={{ borderColor: pharmaMarginTheme.borderColor, color: pharmaMarginTheme.accentColor }}>
-                🏷️ {priceTierLabel} ({pharmaMarginTheme.tierCode})
+              <span className="header-meta-pill" style={{ borderColor: theme.borderColor, color: theme.accentColor }}>
+                🏷️ {priceTierLabel} ({theme.tierCode})
               </span>
               {/* Validity countdown pill */}
               {validity && (

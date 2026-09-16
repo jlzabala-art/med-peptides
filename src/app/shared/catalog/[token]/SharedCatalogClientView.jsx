@@ -27,6 +27,7 @@ import AlgoliaRecommendCrossSell from '@/components/catalog/AlgoliaRecommendCros
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
 import { generatePharmaCatalogCode, generatePharmaBatchCode } from '@/utils/pharmaBarcode';
 import { buildTranslator, getPersistedLang, persistLang, SUPPORTED_LANGS } from './catalogI18n';
+import { ProtocolPreviewModal } from '@/components/protocol/ProtocolPreviewModal';
 // ── Extracted sub-components ──────────────────────────────────────────────────
 import SharedCatalogStyles from './components/SharedCatalogStyles';
 import SharedCatalogTopNav from './components/SharedCatalogTopNav';
@@ -34,6 +35,90 @@ import SharedCatalogHeader from './components/SharedCatalogHeader';
 import SharedCatalogFilterBar from './components/SharedCatalogFilterBar';
 import SharedCatalogProductCard from './components/SharedCatalogProductCard';
 import SharedCatalogFloatingDock from './components/SharedCatalogFloatingDock';
+
+function getPharmaMarginTheme(priceSource, meta = {}) {
+  const margin = Number(meta?.margin || meta?.marginPercent || 0);
+  const src = (priceSource || meta?.priceSource || '').toLowerCase();
+
+  if (src === 'cost' || src === 'b2b-dir') {
+    return {
+      tierCode: 'DIR-TERMS',
+      tierLabel: 'Direct B2B Terms',
+      gradient: 'linear-gradient(135deg, #022c22 0%, #064e3b 50%, #047857 100%)',
+      borderColor: 'rgba(52, 211, 153, 0.35)',
+      glow: 'rgba(16, 185, 129, 0.25)',
+      accentColor: '#6ee7b7',
+      pillBg: 'rgba(6, 78, 59, 0.6)',
+    };
+  }
+  if (src === 'wholesaler' || src === 'wholeseller') {
+    return {
+      tierCode: margin ? `WHOLESALE (+${margin}%)` : 'WHOLESALE-PORTFOLIO',
+      tierLabel: margin ? `Wholesale (+${margin}%)` : 'B2B Wholesale Portfolio',
+      gradient: 'linear-gradient(135deg, #00284d 0%, #003666 50%, #0284c7 100%)',
+      borderColor: 'rgba(56, 189, 248, 0.35)',
+      glow: 'rgba(14, 165, 233, 0.25)',
+      accentColor: '#7dd3fc',
+      pillBg: 'rgba(2, 132, 199, 0.25)',
+    };
+  }
+  if (src === 'clinic') {
+    return {
+      tierCode: margin ? `CLINICAL (+${margin}%)` : 'CLINICAL-TERMS',
+      tierLabel: margin ? `Clinical (+${margin}%)` : 'Clinical Healthcare Terms',
+      gradient: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
+      borderColor: 'rgba(165, 180, 252, 0.35)',
+      glow: 'rgba(99, 102, 241, 0.25)',
+      accentColor: '#c7d2fe',
+      pillBg: 'rgba(67, 56, 202, 0.25)',
+    };
+  }
+  if (src === 'retail') {
+    return {
+      tierCode: 'MSRP-REF',
+      tierLabel: 'Clinical Reference Portfolio (MSRP)',
+      gradient: 'linear-gradient(135deg, #18181b 0%, #27272a 50%, #3f3f46 100%)',
+      borderColor: 'rgba(212, 212, 216, 0.35)',
+      glow: 'rgba(161, 161, 170, 0.25)',
+      accentColor: '#e4e4e7',
+      pillBg: 'rgba(63, 63, 70, 0.3)',
+    };
+  }
+  return {
+    tierCode: 'INSTITUTIONAL',
+    tierLabel: 'Verified Institutional Terms',
+    gradient: 'linear-gradient(135deg, #00284d 0%, #004d80 50%, #003366 100%)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    glow: 'rgba(0, 0, 0, 0.2)',
+    accentColor: '#93c5fd',
+    pillBg: 'rgba(255, 255, 255, 0.12)',
+  };
+}
+
+function getRelatedProtocols(product, allProtocols) {
+  if (!allProtocols || allProtocols.length === 0 || !product) return [];
+  const prodNameLower = (product.canonicalName || product.name || '').toLowerCase().trim();
+  const prodSlugLower = (product.slug || product.id || '').toLowerCase().trim();
+  const cleanTokens = prodNameLower
+    .replace(/[^a-z0-9\s-]/gi, ' ')
+    .split(/\s+/)
+    .filter(t => t.length > 2 && !['vial', 'mg', 'peptide', 'blend', 'spray', 'capsule', 'pen', 'solution'].includes(t));
+
+  return allProtocols.filter(proto => {
+    const compounds = Array.isArray(proto.compounds) ? proto.compounds : [];
+    const hasMatchingCompound = compounds.some(c => {
+      const cName = (typeof c === 'string' ? c : (c?.name || c?.drugName || '')).toLowerCase();
+      if (!cName) return false;
+      if (cName.includes(prodNameLower) || prodNameLower.includes(cName)) return true;
+      return cleanTokens.some(tok => cName.includes(tok));
+    });
+    if (hasMatchingCompound) return true;
+    const titleLower = (proto.title || proto.name || '').toLowerCase();
+    if (titleLower.includes(prodNameLower) || (prodSlugLower && titleLower.includes(prodSlugLower))) return true;
+    if (cleanTokens.length > 0 && cleanTokens.some(tok => titleLower.includes(tok))) return true;
+    return false;
+  });
+}
 
 export default function SharedCatalogClientView({
   catalogMeta,
@@ -127,6 +212,24 @@ export default function SharedCatalogClientView({
 
   const [isGoalDropdownOpen, setIsGoalDropdownOpen] = React.useState(false);
   const [isFormatDropdownOpen, setIsFormatDropdownOpen] = React.useState(false);
+
+  const pharmaMarginTheme = React.useMemo(() => {
+    return getPharmaMarginTheme(priceSource, catalogMeta);
+  }, [priceSource, catalogMeta]);
+
+  const [showProtocolsUnderProducts, setShowProtocolsUnderProducts] = React.useState(false);
+  const [onlyWithProtocols, setOnlyWithProtocols] = React.useState(false);
+  const [selectedPublicProtocol, setSelectedPublicProtocol] = React.useState(null);
+
+  const productsWithProtocolsCount = React.useMemo(() => {
+    if (!protocols || protocols.length === 0) return 0;
+    return (filteredProducts || []).filter(prod => getRelatedProtocols(prod, protocols).length > 0).length;
+  }, [filteredProducts, protocols]);
+
+  const displayedProducts = React.useMemo(() => {
+    if (!onlyWithProtocols) return filteredProducts || [];
+    return (filteredProducts || []).filter(prod => getRelatedProtocols(prod, protocols).length > 0);
+  }, [filteredProducts, onlyWithProtocols, protocols]);
 
   // ── Clinic Portal Registration Modal State ───────────────────────────────
   const [isRegisterModalOpen, setIsRegisterModalOpen] = React.useState(false);
@@ -1602,6 +1705,17 @@ export default function SharedCatalogClientView({
             )}
           </div>
         </div>
+      )}
+
+      {/* Public Protocol Dossier Modal */}
+      {selectedPublicProtocol && (
+        <ProtocolPreviewModal
+          protocol={selectedPublicProtocol}
+          onClose={() => setSelectedPublicProtocol(null)}
+          updateCart={updateQuantity}
+          localTier={priceSource}
+          audienceType={activeRole === 'patient' ? 'patient' : 'doctor'}
+        />
       )}
     </div>
   );
