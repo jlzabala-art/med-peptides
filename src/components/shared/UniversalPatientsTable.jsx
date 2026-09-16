@@ -15,6 +15,7 @@ import DataModule from '../ui/DataModule';
 import AIQuickActionButton from '../ui/AIQuickActionButton';
 import PatientFormDrawer from '../admin/patients/PatientFormDrawer';
 import PatientProfileWorkspace from '../admin/patients/PatientProfileWorkspace';
+import PatientsKPIs from '../admin/patients/PatientsKPIs';
 import StandardDrawer from '../ui/StandardDrawer';
 import { formatAEDtoDual } from '../../utils/currencies';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
