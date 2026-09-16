@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText } from '@/lib/icons';
+import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
@@ -402,6 +402,55 @@ export const getPrescriptionColumns = (options = {}) => {
                 } catch (err) {
                   console.error('PDF export error:', err);
                   toast.error('Failed to generate PDF: ' + err.message, { id: toastId });
+                }
+              }
+            },
+            {
+              type: 'action',
+              label: 'Pharmapolis A4 Stickers (PDF)',
+              icon: Tag,
+              onClick: async () => {
+                const toastId = toast.loading('Generating Pharmapolis A4 Stickers…');
+                try {
+                  const { generatePharmapolisStickersPDF } = await import('../../../services/pharmapolisLabelService');
+                  const patientObj = rx.patient || {
+                    name: rx.patientName || 'Patient',
+                    dob: rx.patientDob || rx.dob || '—',
+                    fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
+                  };
+                  await generatePharmapolisStickersPDF(patientObj, [rx]);
+                  toast.success('Pharmapolis A4 Stickers downloaded!', { id: toastId });
+                } catch (err) {
+                  console.error('Sticker export error:', err);
+                  toast.error('Failed to generate stickers: ' + err.message, { id: toastId });
+                }
+              }
+            },
+            {
+              type: 'action',
+              label: 'Pharmapolis Sticker (PNG)',
+              icon: Download,
+              onClick: async () => {
+                const toastId = toast.loading('Generating Sticker PNG…');
+                try {
+                  const { generatePharmapolisStickerPNG } = await import('../../../services/pharmapolisLabelService');
+                  const patientObj = rx.patient || {
+                    name: rx.patientName || 'Patient',
+                    dob: rx.patientDob || rx.dob || '—',
+                    fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
+                  };
+                  const dataUrl = await generatePharmapolisStickerPNG(patientObj, rx);
+                  const link = document.createElement('a');
+                  link.href = dataUrl;
+                  const slug = (patientObj.name || 'patient').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                  link.download = `pharmapolis_sticker_${slug}_${rx.id?.slice(0, 6)}.png`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  toast.success('Sticker PNG downloaded!', { id: toastId });
+                } catch (err) {
+                  console.error('PNG export error:', err);
+                  toast.error('Failed to generate PNG: ' + err.message, { id: toastId });
                 }
               }
             },

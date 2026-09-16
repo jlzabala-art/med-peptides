@@ -22,6 +22,7 @@ export default function WorkspaceFinancialAccordion({
   grossMarginAmount,
   marginPercent,
   onSetDiscountPercent,
+  isDoctor = false,
 }) {
   const isBuy = activeWs?.intent === 'buy';
 
@@ -29,7 +30,7 @@ export default function WorkspaceFinancialAccordion({
     <div
       style={{
         backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
+        border: `1px solid ${isDoctor ? '#99f6e4' : '#cbd5e1'}`,
         borderRadius: '12px',
         overflow: 'hidden',
         boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
@@ -51,13 +52,17 @@ export default function WorkspaceFinancialAccordion({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isExpanded ? <ChevronDown size={18} style={{ color: '#003666' }} /> : <ChevronRight size={18} style={{ color: '#64748b' }} />}
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <DollarSign size={17} /> Commercial Financials & Margins
+          {isExpanded ? (
+            <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666' }} />
+          ) : (
+            <ChevronRight size={18} style={{ color: '#64748b' }} />
+          )}
+          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <DollarSign size={17} /> {isDoctor ? 'Prescription Total (Clinic Price)' : 'Commercial Financials & Margins'}
           </span>
         </div>
 
-        <span style={{ fontSize: '0.94rem', fontWeight: 900, color: '#003666' }}>
+        <span style={{ fontSize: '0.94rem', fontWeight: 900, color: isDoctor ? '#0f766e' : '#003666' }}>
           ${grandTotal.toFixed(2)}
         </span>
       </div>

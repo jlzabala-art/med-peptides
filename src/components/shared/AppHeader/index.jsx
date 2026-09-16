@@ -84,9 +84,19 @@ export default function AppHeader({
     return 'RP';
   };
 
-  const displayName = userProfile?.firstName 
-    ? `${userProfile.firstName} ${userProfile.lastName || ''}`.trim()
-    : userProfile?.name || user?.email || 'User';
+  const isDoctorSession = simulatedRole === 'doctor' || (typeof window !== 'undefined' && (sessionStorage.getItem('impersonatedDoctorId') === 'dr-hanieh-erdmann' || window.location.pathname.startsWith('/doctor')));
+
+  const effectiveDisplayName = isDoctorSession ? 'Dr. Hanieh Erdmann' : (
+    userProfile?.firstName 
+      ? `${userProfile.firstName} ${userProfile.lastName || ''}`.trim()
+      : userProfile?.name || user?.email || 'User'
+  );
+
+  const effectiveRoleLabel = isDoctorSession 
+    ? 'Specialist Dermatologist • DHA-00013060' 
+    : (activeRole === 'b2c' ? 'Patient' : (activeRole || 'User'));
+
+  const effectiveInitials = isDoctorSession ? 'HE' : getInitials();
 
   return (
     <>
@@ -239,19 +249,19 @@ export default function AppHeader({
           style={{ position: 'relative' }}
         >
           <div className="app-header-avatar" style={{ overflow: 'hidden' }}>
-            {(userProfile?.photoURL || user?.photoURL) ? (
+            {!isDoctorSession && (userProfile?.photoURL || user?.photoURL) ? (
               <img 
                 src={userProfile?.photoURL || user?.photoURL} 
                 alt="Profile Avatar" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
               />
             ) : (
-              getInitials()
+              effectiveInitials
             )}
           </div>
           <div className="app-header-user-info">
-            <span className="app-header-user-name">{displayName}</span>
-            <span className="app-header-user-role">{activeRole === 'b2c' ? 'Patient' : (activeRole || 'User')}</span>
+            <span className="app-header-user-name">{effectiveDisplayName}</span>
+            <span className="app-header-user-role">{effectiveRoleLabel}</span>
           </div>
           <ChevronDown size={14} color="var(--color-text-secondary)" style={{ marginLeft: '4px' }} />
           {isUserMenuOpen && (

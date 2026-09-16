@@ -7,10 +7,17 @@ import { useDrawer } from '../../../context/DrawerContext';
 import {
   FileText,
   ShieldCheck,
-  Truck
+  Truck,
+  Tag,
+  Layers,
+  Sparkles,
+  Stethoscope
 } from '@/lib/icons';
 import notifier from '../../../services/NotificationService';
 import { searchCatalogFast } from '../../../repositories/workspaceSearchRepository';
+import { useRoleAccess } from '../../../hooks/useRoleAccess';
+import { resolveVariantPrice } from '../../../utils/resolvePrice';
+import PatientLabelSheetModal from '../../admin/prescriptions/PatientLabelSheetModal';
 
 // Modular Subcomponents
 import SaveKitModal from './drawer/SaveKitModal';
@@ -100,6 +107,10 @@ export default function WorkspaceDrawer() {
   const wsList = Object.values(workspaces || {});
   const activeWs = workspaces[activeWorkspaceId] || wsList[0] || null;
 
+  const { is, can, role } = useRoleAccess();
+  const isDoctor = role === 'doctor' || is('doctor') || !can('manage:suppliers');
+  const [isStickerModalOpen, setIsStickerModalOpen] = useState(false);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -143,9 +154,76 @@ export default function WorkspaceDrawer() {
   const discountPercent = activeWs.discountPercent || 0;
 
   const getItemUnitPrice = (it) => {
+    if (it.customPrice != null && !isDoctor) return Number(it.customPrice);
+    if (isDoctor) {
+      const resolved = resolveVariantPrice(it, { tier: 'clinic' });
+      const amount = resolved?.amount ?? Number(it.unitPrice || it.price || it.unitRate || 0);
+      return isNaN(amount) ? 0 : amount;
+    }
     const p = Number(it.unitPrice || it.price || it.unitRate || 0);
     return isNaN(p) ? 0 : p;
   };
+
+  const handleSaveAsProtocol = async () => {
+    if (items.length === 0) {
+      notifier.warning('Please add compounds to workspace before creating a protocol.');
+      return;
+    }
+    try {
+      const { createProtocol } = await import('../../../repositories/protocolRepository');
+      const protocolName = activeWs.name || 'Custom Clinical Protocol';
+      const newId = await createProtocol({
+        protocol_name: protocolName,
+        title: protocolName,
+        category: 'Doctor Prescribed Protocol',
+        visibility: 'private',
+        drugs_used: items.map(it => ({
+          product_title: it.canonicalName,
+          dosage: it.dosage,
+          format: it.format,
+          quantity: it.quantity,
+          route: it.route || 'Subcutaneous (SC)',
+        })),
+        phases: [{
+          phase_title: 'Primary Regimen',
+          duration_weeks: 4,
+          drugs_used: items.map(it => ({
+            product_title: it.canonicalName,
+            dosage: it.dosage,
+            format: it.format,
+            quantity: it.quantity,
+            route: it.route || 'Subcutaneous (SC)',
+          })),
+        }],
+      });
+      notifier.success(`Clinical Protocol "${protocolName}" saved (#${newId.slice(0, 6)})!`);
+    } catch (err) {
+      console.error('Save protocol error:', err);
+      notifier.error('Failed to save protocol: ' + err.message);
+    }
+  };
+
+  const workspacePrescriptions = items.map((it, idx) => ({
+    id: `WS-${(it.productId || it.id || idx).toString().slice(0, 8)}`,
+    name: it.canonicalName,
+    title: it.canonicalName,
+    volume: it.format || 'Standard Vial',
+    dosage: it.dosage || 'Standard',
+    instructions: it.instructions || `Administer ${it.dosage || 'prescribed dose'} as clinically directed by physician.`,
+    quantityBottles: it.quantity || 1,
+    items: [{
+      name: it.canonicalName,
+      strength: it.dosage || 'Standard',
+    }],
+  }));
+
+  const targetPatient = activeWs.targetEntity?.type === 'patient'
+    ? activeWs.targetEntity
+    : {
+        name: activeWs.targetEntity?.name || 'Patient Chart',
+        id: activeWs.targetEntity?.id || 'pat-workspace',
+        fileNumber: activeWs.targetEntity?.fileNumber || '50957',
+      };
 
   const subtotalSaleAmount = items.reduce((sum, it) => {
     const qty = Number(it.quantity || 1);
@@ -401,6 +479,7 @@ export default function WorkspaceDrawer() {
             }
             setIsSaveKitModalOpen(true);
           }}
+          isDoctor={isDoctor}
         />
 
         {/* Scrollable Body: Accordion Sections */}
@@ -426,6 +505,7 @@ export default function WorkspaceDrawer() {
             onLoadKit={(kitId) => loadKitIntoWorkspace(kitId, activeWs.id)}
             onDeleteKit={deleteSavedKit}
             searchingCatalog={searchingCatalog}
+            isDoctor={isDoctor}
           />
 
           {/* Section 2: Recipient & Operational Intent */}
@@ -436,15 +516,18 @@ export default function WorkspaceDrawer() {
             onSetIntent={(intent) => setWorkspaceIntent(intent, activeWs.id)}
             onSetTargetEntity={(ent) => setTargetEntity(ent, activeWs.id)}
             onSetSelectedTargetType={(type) => setSelectedTargetType(type, activeWs.id)}
+            isDoctor={isDoctor}
           />
 
-          {/* Section 3: Cold-Chain & Shipping Logistics */}
-          <WorkspaceShippingAccordion
-            isExpanded={sectionExpanded.shipping}
-            onToggleExpand={() => toggleSection('shipping')}
-            activeWs={activeWs}
-            onUpdateShipping={(details) => setShippingDetails(details, activeWs.id)}
-          />
+          {/* Section 3: Cold-Chain & Shipping Logistics (Only in commercial mode or if expanded) */}
+          {!isDoctor && (
+            <WorkspaceShippingAccordion
+              isExpanded={sectionExpanded.shipping}
+              onToggleExpand={() => toggleSection('shipping')}
+              activeWs={activeWs}
+              onUpdateShipping={(details) => setShippingDetails(details, activeWs.id)}
+            />
+          )}
 
           {/* Section 4: Commercial Financials & Margins */}
           <WorkspaceFinancialAccordion
@@ -460,6 +543,7 @@ export default function WorkspaceDrawer() {
             grossMarginAmount={grossMarginAmount}
             marginPercent={marginPercent}
             onSetDiscountPercent={(pct) => setDiscountPercent(pct, activeWs.id)}
+            isDoctor={isDoctor}
           />
         </div>
 
@@ -484,7 +568,7 @@ export default function WorkspaceDrawer() {
                 padding: '12px 14px',
                 backgroundColor: '#f8fafc',
                 border: '1px dashed #cbd5e1',
-                borderRadius: '9px',
+                borderRadius: '99px',
                 textAlign: 'center',
                 color: '#64748b',
                 fontSize: '0.82rem',
@@ -495,9 +579,111 @@ export default function WorkspaceDrawer() {
                 gap: '8px',
               }}
             >
-              <span>💡 Add items above to unlock Quotations & Prescriptions</span>
+              <span>💡 Add compounds above to unlock actions</span>
             </div>
+          ) : isDoctor ? (
+            /* ── Doctor Actions (Clinical Focus) ── */
+            <>
+              <button
+                type="button"
+                onClick={handleExecutePrescription}
+                style={{
+                  width: '100%',
+                  minHeight: '46px',
+                  padding: '12px',
+                  backgroundColor: '#0d9488',
+                  color: 'white',
+                  borderRadius: '10px',
+                  border: 'none',
+                  fontSize: '0.92rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 8px rgba(13, 148, 136, 0.25)',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <ShieldCheck size={18} /> Prescribe All in Rx Builder (${grandTotal.toFixed(2)})
+              </button>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsStickerModalOpen(true)}
+                  style={{
+                    minHeight: '40px',
+                    padding: '8px 10px',
+                    backgroundColor: '#f0fdfa',
+                    color: '#0f766e',
+                    borderRadius: '8px',
+                    border: '1.5px solid #99f6e4',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    touchAction: 'manipulation',
+                  }}
+                  title="Print Pharmapolis A4 Stickers (7.5x4.5cm) for all staged compounds"
+                >
+                  <Tag size={15} /> Pharmapolis Stickers
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveAsProtocol}
+                  style={{
+                    minHeight: '40px',
+                    padding: '8px 10px',
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    borderRadius: '8px',
+                    border: '1.5px solid #bfdbfe',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    touchAction: 'manipulation',
+                  }}
+                  title="Save staged compounds as a new clinical protocol"
+                >
+                  <Layers size={15} /> Save as Protocol
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowPdfPreview(true)}
+                style={{
+                  width: '100%',
+                  padding: '7px',
+                  backgroundColor: '#f8fafc',
+                  color: '#475569',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <FileText size={13} /> 👁️ Quick Live Document Summary
+              </button>
+            </>
           ) : (
+            /* ── Admin / Commercial Actions ── */
             <>
               {activeWs.intent === 'buy' ? (
                 <button
@@ -550,30 +736,53 @@ export default function WorkspaceDrawer() {
                   >
                     <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleExecutePrescription}
-                    style={{
-                      width: '100%',
-                      minHeight: '44px',
-                      padding: '11px',
-                      backgroundColor: '#0d9488',
-                      color: 'white',
-                      borderRadius: '10px',
-                      border: 'none',
-                      fontSize: '0.88rem',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
-                      touchAction: 'manipulation',
-                    }}
-                  >
-                    <ShieldCheck size={16} /> Create Rx Prescription
-                  </button>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleExecutePrescription}
+                      style={{
+                        minHeight: '40px',
+                        padding: '8px',
+                        backgroundColor: '#0d9488',
+                        color: 'white',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
+                        touchAction: 'manipulation',
+                      }}
+                    >
+                      <ShieldCheck size={15} /> Create Rx
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsStickerModalOpen(true)}
+                      style={{
+                        minHeight: '40px',
+                        padding: '8px',
+                        backgroundColor: '#f0fdfa',
+                        color: '#0f766e',
+                        borderRadius: '8px',
+                        border: '1.5px solid #99f6e4',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        touchAction: 'manipulation',
+                      }}
+                    >
+                      <Tag size={15} /> Pharmapolis Stickers
+                    </button>
+                  </div>
                 </>
               )}
 
@@ -627,6 +836,14 @@ export default function WorkspaceDrawer() {
         shippingCost={shippingCost}
         discountAmount={discountAmount}
         grandTotal={grandTotal}
+      />
+
+      {/* Pharmapolis A4 Stickers Modal (7.5x4.5cm) for all Workspace Items */}
+      <PatientLabelSheetModal
+        isOpen={isStickerModalOpen}
+        onClose={() => setIsStickerModalOpen(false)}
+        patient={targetPatient}
+        prescriptions={workspacePrescriptions}
       />
     </>
   , document.body);

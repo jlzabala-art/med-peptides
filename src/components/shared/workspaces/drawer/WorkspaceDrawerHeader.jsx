@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Briefcase, X, Plus, Edit2, Check, Copy, Trash2, Layers } from '@/lib/icons';
+import { Briefcase, X, Plus, Edit2, Check, Copy, Trash2, Layers, Stethoscope } from '@/lib/icons';
 
 export default function WorkspaceDrawerHeader({
   activeWs,
@@ -14,6 +14,7 @@ export default function WorkspaceDrawerHeader({
   onClearWorkspace,
   onDeleteWorkspace,
   onOpenSaveKitModal,
+  isDoctor = false,
 }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -59,20 +60,20 @@ export default function WorkspaceDrawerHeader({
               width: '38px',
               height: '38px',
               borderRadius: '9px',
-              backgroundColor: activeWs?.intent === 'buy' ? 'rgba(194, 65, 12, 0.1)' : 'rgba(0, 54, 102, 0.08)',
-              color: activeWs?.intent === 'buy' ? '#c2410c' : '#003666',
+              backgroundColor: isDoctor ? 'rgba(13, 148, 136, 0.12)' : (activeWs?.intent === 'buy' ? 'rgba(194, 65, 12, 0.1)' : 'rgba(0, 54, 102, 0.08)'),
+              color: isDoctor ? '#0d9488' : (activeWs?.intent === 'buy' ? '#c2410c' : '#003666'),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <Briefcase size={20} />
+            {isDoctor ? <Stethoscope size={20} /> : <Briefcase size={20} />}
           </div>
           <div style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap' }}>
-                Operational Workspace
+                {isDoctor ? 'Clinical Prescribing Workspace' : 'Operational Workspace'}
               </h3>
               <span
                 style={{
@@ -80,17 +81,17 @@ export default function WorkspaceDrawerHeader({
                   fontWeight: 800,
                   padding: '2px 7px',
                   borderRadius: '99px',
-                  backgroundColor: activeWs?.intent === 'buy' ? '#ffedd5' : '#e0f2fe',
-                  color: activeWs?.intent === 'buy' ? '#9a3412' : '#0369a1',
+                  backgroundColor: isDoctor ? '#ccfbf1' : (activeWs?.intent === 'buy' ? '#ffedd5' : '#e0f2fe'),
+                  color: isDoctor ? '#0f766e' : (activeWs?.intent === 'buy' ? '#9a3412' : '#0369a1'),
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                 }}
               >
-                {activeWs?.intent === 'buy' ? 'BUY' : 'SELL'}
+                {isDoctor ? 'CLINICAL RX' : (activeWs?.intent === 'buy' ? 'BUY' : 'SELL')}
               </span>
             </div>
             <p style={{ margin: '2px 0 0', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
-              Multi-compound staging & document generator
+              {isDoctor ? 'Stage compounds & generate prescriptions or protocols' : 'Multi-compound staging & document generator'}
             </p>
           </div>
         </div>

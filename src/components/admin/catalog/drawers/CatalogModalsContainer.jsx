@@ -7,6 +7,7 @@ import UniversalProductQuickView from '../../../shared/UniversalProductQuickView
 
 const ProductDetailsDrawer = dynamic(() => import('../../products/ProductDetailsDrawer'), { ssr: false });
 const CatalogOffersPricingDrawer = dynamic(() => import('./CatalogOffersPricingDrawer'), { ssr: false });
+const ClinicalProductSheetDrawer = dynamic(() => import('../../../doctor/catalog/ClinicalProductSheetDrawer'), { ssr: false });
 const PriceListPdfDrawer = dynamic(() => import('../PriceListPdfDrawer'), { ssr: false });
 const SavedPdfsDrawer = dynamic(() => import('../SavedPdfsDrawer'), { ssr: false });
 const ProductBulkEditModal = dynamic(() => import('../ProductBulkEditModal'), { ssr: false });
@@ -15,6 +16,7 @@ const ProductEnrichmentModal = dynamic(() => import('../ProductEnrichmentModal')
 const ScanPriceListWidget = dynamic(() => import('../../ScanPriceListWidget'), { ssr: false });
 const ProductTransactionsDrawer = dynamic(() => import('./ProductTransactionsDrawer'), { ssr: false });
 const ProductDatasheetDrawer = dynamic(() => import('../components/ProductDatasheetDrawer'), { ssr: false });
+import { useRoleAccess } from '../../../../hooks/useRoleAccess';
 
 export default function CatalogModalsContainer({
   activeDrawer,
@@ -61,6 +63,9 @@ export default function CatalogModalsContainer({
   queryClient,
   openDrawer
 }) {
+  const { is, can } = useRoleAccess();
+  const isDoctorView = is('doctor') || !can('manage:suppliers');
+
   return (
     <>
       <ProductDetailsDrawer
@@ -106,33 +111,45 @@ export default function CatalogModalsContainer({
         }}
       />
 
-      <CatalogOffersPricingDrawer
-        isOpen={!!selectedProduct && !!activeDrawer && ['offers', 'pricing', 'competitors'].includes(activeDrawer)}
-        activeDrawer={activeDrawer}
-        onClose={() => {
-          setSelectedProduct(null);
-          setActiveDrawer(null);
-        }}
-        selectedProduct={selectedProduct}
-        setSelectedProduct={setSelectedProduct}
-        displayCurrency={displayCurrency}
-        setDisplayCurrency={setDisplayCurrency}
-        priceView={priceView}
-        setPriceView={setPriceView}
-        commercialChannel={commercialChannel}
-        setCommercialChannel={setCommercialChannel}
-        filterSupplier={filterSupplier}
-        resolveSupplierName={resolveSupplierName}
-        handleExportProductPdf={handleExportProductPdf}
-        onOpenImportPriceList={(initData) => {
-          setScanPriceListInitialData(initData);
-          setIsScanPriceListOpen(true);
-          if (typeof openDrawer === 'function') {
-            openDrawer('import-price-list', 'new', initData);
-          }
-        }}
-        refresh={refresh}
-      />
+      {isDoctorView ? (
+        <ClinicalProductSheetDrawer
+          isOpen={!!selectedProduct && !!activeDrawer && ['offers', 'pricing', 'competitors', 'quick-view'].includes(activeDrawer)}
+          onClose={() => {
+            setSelectedProduct(null);
+            setActiveDrawer(null);
+          }}
+          product={selectedProduct}
+          displayCurrency={displayCurrency}
+        />
+      ) : (
+        <CatalogOffersPricingDrawer
+          isOpen={!!selectedProduct && !!activeDrawer && ['offers', 'pricing', 'competitors'].includes(activeDrawer)}
+          activeDrawer={activeDrawer}
+          onClose={() => {
+            setSelectedProduct(null);
+            setActiveDrawer(null);
+          }}
+          selectedProduct={selectedProduct}
+          setSelectedProduct={setSelectedProduct}
+          displayCurrency={displayCurrency}
+          setDisplayCurrency={setDisplayCurrency}
+          priceView={priceView}
+          setPriceView={setPriceView}
+          commercialChannel={commercialChannel}
+          setCommercialChannel={setCommercialChannel}
+          filterSupplier={filterSupplier}
+          resolveSupplierName={resolveSupplierName}
+          handleExportProductPdf={handleExportProductPdf}
+          onOpenImportPriceList={(initData) => {
+            setScanPriceListInitialData(initData);
+            setIsScanPriceListOpen(true);
+            if (typeof openDrawer === 'function') {
+              openDrawer('import-price-list', 'new', initData);
+            }
+          }}
+          refresh={refresh}
+        />
+      )}
 
       <PriceListPdfDrawer
         key={pdfCustomProduct ? `pdf-${pdfCustomProduct.id}` : 'global-pdf'}

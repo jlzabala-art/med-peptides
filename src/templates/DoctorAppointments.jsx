@@ -94,7 +94,7 @@ export default function DoctorAppointments() {
 
         setKpis({
           prescriptionsToday: rxToday,
-          pendingFollowUps: refillSnap.size,
+          pendingFollowUps: refillData.length,
           testsDue: 0,
           totalConsultations: loadedEvents.length,
         });
@@ -396,20 +396,34 @@ export default function DoctorAppointments() {
         <h3 style={{ ...styles.cardTitle, color: '#0284c7' }}>Atlas Clinical Insights</h3>
       </div>
       <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <div style={styles.insightAlert}>
-          <AlertTriangle size={14} color="#ea580c" style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}>
-            <strong>2 Prescriptions</strong> expire this week. Automated follow-up suggested.
-          </span>
-        </div>
-        <div style={styles.insightAlert}>
-          <CheckCircle2 size={14} color="#059669" style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.4 }}>
-            <strong>Gwen Stacy's</strong> genetic markers indicate high compatibility for current
-            protocol.
-          </span>
-        </div>
-        <button style={styles.btnAiAction}>Automate Follow-Ups</button>
+        {events.length > 0 ? (
+          <>
+            <div style={styles.insightAlert}>
+              <CheckCircle2 size={14} color="#059669" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.4 }}>
+                <strong>{events.length} Active Clinical Event{events.length > 1 ? 's' : ''}</strong> registered on schedule.
+              </span>
+            </div>
+            {kpis.pendingFollowUps > 0 && (
+              <div style={styles.insightAlert}>
+                <AlertTriangle size={14} color="#ea580c" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '13px', color: '#9a3412', lineHeight: 1.4 }}>
+                  <strong>{kpis.pendingFollowUps} Follow-up{kpis.pendingFollowUps > 1 ? 's' : ''}</strong> pending doctor review.
+                </span>
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={styles.insightAlert}>
+            <CheckCircle2 size={14} color="#0284c7" style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: '13px', color: '#0369a1', lineHeight: 1.4 }}>
+              All assigned patient treatment cycles and cold-chain logistics are synchronized.
+            </span>
+          </div>
+        )}
+        <button style={styles.btnAiAction} onClick={() => notifier.info('Clinical follow-up scheduler active.')}>
+          Review Active Protocols
+        </button>
       </div>
     </div>
   );

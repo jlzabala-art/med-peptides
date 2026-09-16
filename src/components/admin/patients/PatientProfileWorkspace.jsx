@@ -13,8 +13,9 @@ import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
 import { useDrawer } from '../../../context/DrawerContext';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
-import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2 } from '@/lib/icons';
+import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2, Tag } from '@/lib/icons';
 import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
+import PatientLabelSheetModal from '../prescriptions/PatientLabelSheetModal';
 
 import { patientRepository } from '../../../repositories/patientRepository';
 import { UniversalForm } from '../../shared/UniversalFormDrawer';
@@ -178,6 +179,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
   const [patient, setPatient] = useState(initialPatient || {});
   const [serverBundle, setServerBundle] = useState(null);
   const [isEditingCareTeam, setIsEditingCareTeam] = useState(false);
+  const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
 
   useEffect(() => {
     if (initialPatient) {
@@ -437,6 +439,25 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
               <FileText size={14} /> Create Quote
             </button>
           )}
+
+          <button
+            onClick={() => setIsLabelModalOpen(true)}
+            className="gcp-btn-secondary"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              backgroundColor: '#f0fdfa',
+              color: '#0f766e',
+              borderColor: '#99f6e4',
+              fontSize: '0.8125rem',
+              padding: '0.4rem 0.8rem',
+              fontWeight: 600,
+            }}
+            title="Generate Pharmapolis A4 Stickers (7.5 × 4.5 cm) in PDF & PNG"
+          >
+            <Tag size={14} /> Stickers (7.5x4.5cm)
+          </button>
 
           <button
             onClick={onClose}
@@ -1072,6 +1093,14 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
 
         </div>
       </div>
+
+      {/* Pharmapolis A4 Stickers Modal (7.5 × 4.5 cm) */}
+      <PatientLabelSheetModal
+        isOpen={isLabelModalOpen}
+        onClose={() => setIsLabelModalOpen(false)}
+        patient={patient}
+        prescriptions={clientPrescriptions || []}
+      />
     </div>
   );
 }

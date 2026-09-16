@@ -198,7 +198,7 @@ export default function DoctorProtocolsTab({ doctorId }) {
             <Card key={p.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#0f172a', fontWeight: 800, lineHeight: 1.3 }}>
-                  {p.protocol_name || p.title}
+                  {p.name || p.protocol_name || p.title}
                 </h3>
                 {p.visibility === 'public' ? (
                   <Lock size={16} color="#64748b" title="Read-only Public Protocol" />

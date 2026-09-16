@@ -1,0 +1,382 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+}
+
+.topBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.categoryBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 3px 10px;
+  background-color: #f0fdfa;
+  color: #0d9488;
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.gmpBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 3px 10px;
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.sterileBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 3px 10px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.heroSection {
+  display: grid;
+  grid-template-columns: 1fr 230px;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+@media (max-width: 640px) {
+  .heroSection {
+    grid-template-columns: 1fr;
+  }
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.productTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.synonymsText {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.molecularSpecs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.molecularSpecs span {
+  background-color: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.clinicPriceCard {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+  border: 1.5px solid #5eead4;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.08);
+}
+
+.priceLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.priceLabel {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.authorizedTag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background-color: #0d9488;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.priceAmount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f766e;
+  margin: 0.25rem 0;
+}
+
+.priceNote {
+  font-size: 0.7rem;
+  color: #475569;
+  margin-bottom: 0.75rem;
+}
+
+.prescribeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #0d9488;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+}
+
+.prescribeButton:hover {
+  background-color: #0f766e;
+}
+
+.variantSelectorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sectionLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.variantPills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.variantPill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.variantPill:hover {
+  border-color: #0d9488;
+}
+
+.variantPillActive {
+  background-color: #f0fdfa;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+}
+
+.pillStrength {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pillName {
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.cardSection {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  background-color: #ffffff;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cardTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.indicationsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.indicationItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.indicationCheck {
+  color: #0d9488;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.gridTwoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .gridTwoCols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.infoCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem;
+  background-color: #f8fafc;
+}
+
+.miniCardTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 0;
+}
+
+.infoValue {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0.25rem 0 0.15rem 0;
+}
+
+.infoSubtext {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.guidelineBox {
+  background-color: #f8fafc;
+  border-left: 3px solid #0d9488;
+  padding: 0.75rem 1rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.guidelineText {
+  font-size: 0.82rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.storageCard {
+  display: flex;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+}
+
+.storageIconWrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.storageContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.storageTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0369a1;
+  margin: 0;
+}
+
+.storageText {
+  font-size: 0.78rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.bottomBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 0.5rem;
+}
+
+.bottomPriceLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-right: 0.4rem;
+}
+
+.bottomPriceVal {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f766e;
+}

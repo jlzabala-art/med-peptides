@@ -538,30 +538,42 @@ export const getAllProtocols = async () => {
 /**
  * Fetch protocols with pagination
  */
-export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 20, options = {}) => {
+export const getPaginatedProtocols = async (lastDocSnap = null, pageSize = 50, options = {}) => {
     try {
-        let constraints = [];
-        if (options.visibility) {
-            constraints.push(where('visibility', '==', options.visibility));
-        }
+        let q;
         if (options.authorId) {
-            constraints.push(where('authorId', '==', options.authorId));
-        }
-        
-        let q = query(
-            collection(db, COLLECTION_NAME),
-            ...constraints,
-            orderBy('created_at', 'desc'),
-            limit(pageSize)
-        );
-        if (lastDocSnap) {
-            q = query(q, startAfter(lastDocSnap));
+            q = query(
+                collection(db, COLLECTION_NAME),
+                where('authorId', '==', options.authorId),
+                limit(pageSize)
+            );
+        } else {
+            // Atlas Health / Public protocols
+            q = query(
+                collection(db, COLLECTION_NAME),
+                limit(pageSize * 2)
+            );
         }
         const snap = await getDocs(q);
+        let protocols = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (options.visibility === 'public') {
+            // Keep public and standard team protocols (exclude private protocols of other users)
+            protocols = protocols.filter(p => p.visibility !== 'private' || !p.authorId);
+        }
+
+        protocols.sort((a, b) => {
+            const nameA = (a.name || a.protocol_name || a.title || '').toLowerCase();
+            const nameB = (b.name || b.protocol_name || b.title || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        protocols = protocols.slice(0, pageSize);
+
         return {
-            protocols: snap.docs.map(d => ({ id: d.id, ...d.data() })),
+            protocols,
             lastDoc: snap.docs[snap.docs.length - 1] || null,
-            hasMore: snap.docs.length === pageSize
+            hasMore: snap.docs.length >= pageSize
         };
     } catch (error) {
         logger.error('[protocolStorage] getPaginatedProtocols:', error);

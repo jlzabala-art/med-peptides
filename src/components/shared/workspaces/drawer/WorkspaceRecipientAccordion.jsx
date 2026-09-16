@@ -20,10 +20,11 @@ export default function WorkspaceRecipientAccordion({
   onSetIntent,
   onSetTargetEntity,
   onSetSelectedTargetType,
+  isDoctor = false,
 }) {
-  const selectedTargetType = activeWs?.selectedTargetType || 'clinic';
+  const selectedTargetType = isDoctor ? 'patient' : (activeWs?.selectedTargetType || 'clinic');
   const targetEntity = activeWs?.targetEntity || null;
-  const isBuy = activeWs?.intent === 'buy';
+  const isBuy = !isDoctor && activeWs?.intent === 'buy';
 
   const [entities, setEntities] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -82,9 +83,13 @@ export default function WorkspaceRecipientAccordion({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isExpanded ? <ChevronDown size={18} style={{ color: '#003666' }} /> : <ChevronRight size={18} style={{ color: '#64748b' }} />}
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Users size={17} /> Operational Routing & Recipient
+          {isExpanded ? (
+            <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666' }} />
+          ) : (
+            <ChevronRight size={18} style={{ color: '#64748b' }} />
+          )}
+          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Users size={17} /> {isDoctor ? 'Target Patient' : 'Operational Routing & Recipient'}
           </span>
         </div>
 
@@ -104,7 +109,7 @@ export default function WorkspaceRecipientAccordion({
               borderRadius: '99px',
             }}
           >
-            + Assign
+            + Assign {isDoctor ? 'Patient' : ''}
           </span>
         )}
       </div>
@@ -112,56 +117,58 @@ export default function WorkspaceRecipientAccordion({
       {/* Body Content */}
       {isExpanded && (
         <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#ffffff' }}>
-          {/* Intent Toggle */}
-          <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '9px' }}>
-            <button
-              type="button"
-              onClick={() => onSetIntent('sell')}
-              style={{
-                flex: 1,
-                padding: '8px 10px',
-                borderRadius: '7px',
-                border: 'none',
-                backgroundColor: !isBuy ? '#003666' : 'transparent',
-                color: !isBuy ? '#ffffff' : '#475569',
-                fontSize: '0.78rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                touchAction: 'manipulation',
-              }}
-            >
-              <DollarSign size={14} /> SELL (Quote / Rx)
-            </button>
-            <button
-              type="button"
-              onClick={() => onSetIntent('buy')}
-              style={{
-                flex: 1,
-                padding: '8px 10px',
-                borderRadius: '7px',
-                border: 'none',
-                backgroundColor: isBuy ? '#c2410c' : 'transparent',
-                color: isBuy ? '#ffffff' : '#475569',
-                fontSize: '0.78rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                touchAction: 'manipulation',
-              }}
-            >
-              <Truck size={14} /> BUY (Supplier PO)
-            </button>
-          </div>
+          {/* Intent Toggle (Only in Admin/Commercial mode) */}
+          {!isDoctor && (
+            <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '9px' }}>
+              <button
+                type="button"
+                onClick={() => onSetIntent('sell')}
+                style={{
+                  flex: 1,
+                  padding: '8px 10px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  backgroundColor: !isBuy ? '#003666' : 'transparent',
+                  color: !isBuy ? '#ffffff' : '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <DollarSign size={14} /> SELL (Quote / Rx)
+              </button>
+              <button
+                type="button"
+                onClick={() => onSetIntent('buy')}
+                style={{
+                  flex: 1,
+                  padding: '8px 10px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  backgroundColor: isBuy ? '#c2410c' : 'transparent',
+                  color: isBuy ? '#ffffff' : '#475569',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <Truck size={14} /> BUY (Supplier PO)
+              </button>
+            </div>
+          )}
 
-          {/* Type Selector (when SELL intent) */}
-          {!isBuy && (
+          {/* Type Selector (when SELL intent in Commercial mode) */}
+          {!isDoctor && !isBuy && (
             <div style={{ display: 'flex', gap: '4px', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
               {[
                 { type: 'clinic', label: '🏥 Clinic' },
