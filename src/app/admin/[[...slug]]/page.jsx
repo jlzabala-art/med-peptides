@@ -44,7 +44,10 @@ const getTabComponent = async (tabId) => {
     case 'products':
     case 'catalog':
     case 'catalog-builder':
-    case 'alternatives':       return (await import('../../../components/admin/AdminProductsTab')).default;
+    case 'alternatives':
+    case 'workplace':
+    case 'workspace':
+    case 'workspaces':         return (await import('../../../components/admin/AdminProductsTab')).default;
     case 'pricing-engine':     return (await import('../../../components/admin/AdminPricingEngineTab')).default;
     case 'prices':
     case 'pricing-visibility': return (await import('../../../components/admin/AdminPricesTab')).default;

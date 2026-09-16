@@ -87,6 +87,41 @@ const nextConfig = {
         destination: '/login',
         permanent: false,
       },
+      {
+        source: '/workplace',
+        destination: '/admin/catalog',
+        permanent: false,
+      },
+      {
+        source: '/workspace',
+        destination: '/admin/catalog',
+        permanent: false,
+      },
+      {
+        source: '/wholesaler-dashboard',
+        destination: '/wholesaler',
+        permanent: false,
+      },
+      {
+        source: '/pharmacy-dashboard',
+        destination: '/pharmacy',
+        permanent: false,
+      },
+      {
+        source: '/saved',
+        destination: '/cart',
+        permanent: false,
+      },
+      {
+        source: '/saved/:path*',
+        destination: '/cart',
+        permanent: false,
+      },
+      {
+        source: '/orders/history',
+        destination: '/orders',
+        permanent: false,
+      },
     ];
   },
 };

@@ -343,6 +343,15 @@ export default function PublicDatasheetView({
     }
   }, [filteredStrengths, selectedStrengthId, sortedStrengths]);
 
+  // Optional Reconstitution Section State (Respects ?reconstitution=false)
+  const [showReconstitutionSection, setShowReconstitutionSection] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('reconstitution') === 'false' || p.get('reconstitution') === '0') return false;
+    }
+    return true;
+  });
+
   const selectedStrength = useMemo(() => {
     return filteredStrengths.find(s => s.id === selectedStrengthId) 
       || sortedStrengths.find(s => s.id === selectedStrengthId) 
@@ -928,17 +937,58 @@ export default function PublicDatasheetView({
           </div>
         </section>
 
-        {/* ── Block 2.5: Interactive Reconstitution Simulator & Precision Syringe Visualizer ── */}
+        {/* ── Block 2.5: Interactive Reconstitution Simulator & Precision Syringe Visualizer (Optional & Toggleable) ── */}
         <section id="reconstitution-guide" className="pds-reconstitution-section">
-          <InteractiveReconstitutionGuide
-            product={product}
-            selectedStrength={selectedStrength}
-            availableStrengths={sortedStrengths}
-            activeFormatId={activeFormatId}
-            activeFormat={activeFormat}
-            supplierName={supplierName}
-            lang={lang}
-          />
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '12px',
+            marginBottom: showReconstitutionSection ? '14px' : '0',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FlaskConical size={17} color="#0284c7" />
+              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>
+                Reconstitution Simulator & Syringe Visualizer
+              </span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '10px' }}>
+                Optional Tool
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowReconstitutionSection(prev => !prev)}
+              style={{
+                backgroundColor: showReconstitutionSection ? '#f1f5f9' : '#003666',
+                color: showReconstitutionSection ? '#334155' : '#ffffff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {showReconstitutionSection ? 'Hide Section ✕' : 'Show Simulator ▾'}
+            </button>
+          </div>
+
+          {showReconstitutionSection && (
+            <InteractiveReconstitutionGuide
+              product={product}
+              selectedStrength={selectedStrength}
+              availableStrengths={sortedStrengths}
+              activeFormatId={activeFormatId}
+              activeFormat={activeFormat}
+              supplierName={supplierName}
+              lang={lang}
+            />
+          )}
         </section>
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}

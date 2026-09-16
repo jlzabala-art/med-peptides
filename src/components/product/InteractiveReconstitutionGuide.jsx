@@ -93,49 +93,66 @@ export default function InteractiveReconstitutionGuide({
     return match ? parseFloat(match[1]) : 10;
   }, [selectedStrength, product]);
 
+  // Dynamic clinical default dose calculation (prevents overfill/red warning on low-strength vials like 2mg)
+  const getClinicalDefaultDose = (mgVal, blendMode = false, unit = 'mg') => {
+    const mg = Number(mgVal) || 10;
+    if (unit === 'mcg') {
+      if (mg <= 2) return 250;
+      if (mg <= 5) return 500;
+      return 1000;
+    }
+    if (blendMode) return 2.0;
+    if (mg <= 2) return 0.5; // 0.5 mg @ 1.0 mg/mL = 0.50 mL = 50 Units (calm clinical blue)
+    if (mg <= 5) return 1.0; // 1.0 mg @ 2.5 mg/mL = 0.40 mL = 40 Units
+    if (mg <= 10) return 2.0; // 2.0 mg @ 5.0 mg/mL = 0.40 mL = 40 Units
+    return 2.5;
+  };
+
   // Interactive state
   const [vialMg, setVialMg] = useState(initialVialMg);
   const [bacWaterMl, setBacWaterMl] = useState(2.0); // 2.0 mL standard clinical benchmark
   const [doseUnit, setDoseUnit] = useState('mg'); // 'mg' | 'mcg'
-  const [doseValue, setDoseValue] = useState(isBlend ? 2.0 : 2.5);
+  const [doseValue, setDoseValue] = useState(() => getClinicalDefaultDose(initialVialMg, isBlend, 'mg'));
 
   // Update vial content whenever page changes selected active vial presentation
   useEffect(() => {
     if (initialVialMg && initialVialMg > 0) {
       setVialMg(initialVialMg);
       // Auto-tune solvent recommendation based on total active content
-      // Matches the tiered concentration logic in PublicDatasheetView
+      let newBac = 2.0;
       if (isBlend) {
-        // Multi-peptide blends (KLOW, GLOW): Target ~15 mg/mL for comfortable SubQ draw volumes
         const rawVol = initialVialMg / 15.0;
-        const snapped = Math.min(10.0, Math.max(1.0, Math.round(rawVol * 2) / 2));
-        setBacWaterMl(snapped);
+        newBac = Math.min(10.0, Math.max(1.0, Math.round(rawVol * 2) / 2));
       } else if (initialVialMg <= 5) {
-        setBacWaterMl(2.0);  // 2.5 mg/mL — easy low-dose titration
+        newBac = 2.0;  // easy low-dose titration
       } else if (initialVialMg <= 15) {
-        setBacWaterMl(2.0);  // 5.0–7.5 mg/mL
+        newBac = 2.0;
       } else if (initialVialMg <= 30) {
-        setBacWaterMl(4.0);  // 5.0–7.5 mg/mL
+        newBac = 4.0;
       } else if (initialVialMg <= 50) {
-        setBacWaterMl(5.0);  // 5.0–10.0 mg/mL
+        newBac = 5.0;
       } else {
         const rawVol = initialVialMg / 15.0;
-        const snapped = Math.min(10.0, Math.round(rawVol * 2) / 2);
-        setBacWaterMl(snapped);
+        newBac = Math.min(10.0, Math.round(rawVol * 2) / 2);
       }
+      setBacWaterMl(newBac);
+      // Auto-reset dose to safe clinical level for this vial strength
+      setDoseValue(getClinicalDefaultDose(initialVialMg, isBlend, doseUnit));
     }
   }, [initialVialMg, isBlend]);
 
-  // Adjust default dose when vial or unit changes
+  // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded
   useEffect(() => {
-    if (doseUnit === 'mcg') {
-      setDoseValue(prev => (prev > 50 ? prev : Math.min(1000, Math.round(vialMg * 100))));
-    } else if (isBlend) {
-      setDoseValue(prev => (prev <= 10 ? prev : 2.0));
-    } else {
-      setDoseValue(prev => (prev <= 50 ? prev : Math.min(10, +(vialMg / 4).toFixed(1))));
+    const conc = vialMg > 0 && bacWaterMl > 0 ? vialMg / bacWaterMl : 1;
+    const reqVol = doseUnit === 'mcg' ? (doseValue / 1000) / conc : doseValue / conc;
+    const units = reqVol * 100;
+
+    if (units > 100 || (doseUnit === 'mg' && doseValue > vialMg)) {
+      setDoseValue(getClinicalDefaultDose(vialMg, isBlend, doseUnit));
+    } else if (doseUnit === 'mcg' && doseValue < 50) {
+      setDoseValue(getClinicalDefaultDose(vialMg, isBlend, 'mcg'));
     }
-  }, [vialMg, doseUnit, isBlend]);
+  }, [vialMg, bacWaterMl, doseUnit, isBlend]);
 
   // ── Precision Pharmacokinetic Calculations ─────────────────────────────────
   const {

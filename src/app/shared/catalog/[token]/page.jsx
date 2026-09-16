@@ -41,18 +41,19 @@ export async function generateMetadata({ params }) {
   const currency = catalogData.currency || 'USD';
   const validityDays = catalogData.validityDays || 30;
 
-  const isLotusland = supplierId.includes('lotusland') || catalogueFilter.toLowerCase().includes('regenpept');
-  const supplierTitle = isLotusland ? 'Lotusland • RegenPept Formulations' : 'Atlas Health Formulations';
+  const isLotusland = supplierId.includes('lotusland') || catalogueFilter.toLowerCase().includes('lotus');
+  const supplierTitle = isLotusland ? 'Lotusland Research Formulations' : 'Clinical Peptide Formulations';
 
-  const title = (recipientName && recipientName !== 'Valued Partner')
-    ? `Atlas Health • Portafolio Clínico: ${recipientName}`
-    : `Atlas Health • ${supplierTitle}`;
+  const hasRecipient = Boolean(recipientName && recipientName !== 'Valued Partner');
+  const title = hasRecipient
+    ? `Official Clinical Peptide Catalog • ${recipientName}`
+    : `Official Clinical Peptide Catalog • ${supplierTitle}`;
 
-  const description = `Catálogo clínico oficial y formulaciones analíticas (${supplierTitle}) en ${currency}. Enlace verificado y exclusivo${recipientName && recipientName !== 'Valued Partner' ? ` para ${recipientName}` : ''}. Validez: ${validityDays} días.`;
+  const description = `Official clinical peptide portfolio and analytical-grade lyophilized formulations in ${currency}. Verified institutional delivery terms${hasRecipient ? ` for ${recipientName}` : ''}. Live synchronized stock, batch traceability & verified analytical assays.`;
 
   const appUrl = 'https://med-peptides.com';
-  const ogImageUrl = `${appUrl}/og-catalog.jpg`;
   const catalogCode = catalogData.catalogId || token || '';
+  const ogImageUrl = `${appUrl}/og-catalog.png`;
 
   return {
     title,
@@ -61,16 +62,16 @@ export async function generateMetadata({ params }) {
       title,
       description,
       type: 'website',
-      siteName: 'Atlas Health • Clinical Portfolio',
+      siteName: 'Official Clinical Peptide Catalog',
       url: `${appUrl}/c/${catalogCode}`,
-      locale: 'es_ES',
+      locale: 'en_US',
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: title,
-          type: 'image/jpeg',
+          alt: 'Official Clinical Peptide Catalog Verification & 3D Barcode',
+          type: 'image/png',
         }
       ]
     },
@@ -451,18 +452,24 @@ export default async function SharedCatalogPage({ params }) {
   // Sort by name for deterministic output (helps CDN cache stability)
   products.sort((a, b) => a.canonicalName.localeCompare(b.canonicalName));
 
-  // ── Build Protocols ──────────────────────────────────────────────────────────
+  // ── Build Protocols (Clinical Dossier Only — Zero Economic Data) ───────────
   const protocols = protoDocs
     .filter(p => p.status !== 'archived' && p.status !== 'draft')
     .map(p => ({
-      id:           p.id,
-      title:        p.title || p.name || 'Clinical Protocol',
-      goal:         p.goal || p.category || 'Therapeutic Optimization',
-      targetSystem: p.targetSystem || p.indication || 'Cellular System',
-      duration:     p.duration || '8 – 12 Weeks',
-      compounds:    Array.isArray(p.compounds) ? p.compounds : (Array.isArray(p.drugs) ? p.drugs : []),
-      description:  p.summary || p.description || p.clinicalRationale || '',
-      phasesCount:  Array.isArray(p.phases) ? p.phases.length : 1
+      id:                  p.id,
+      title:               p.title || p.name || 'Clinical Protocol',
+      goal:                p.goal || p.category || 'Therapeutic Optimization',
+      targetSystem:        p.targetSystem || p.indication || 'Cellular System',
+      duration:            p.duration || '8 – 12 Weeks',
+      compounds:           Array.isArray(p.compounds) ? p.compounds : (Array.isArray(p.drugs) ? p.drugs : []),
+      description:         p.summary || p.description || p.clinicalRationale || '',
+      phasesCount:         Array.isArray(p.phases) ? p.phases.length : 1,
+      phases:              Array.isArray(p.phases) ? p.phases : [],
+      dosage:              p.dosage || p.dose || '',
+      frequency:           p.frequency || p.schedule || '',
+      administrationRoute: p.administrationRoute || p.route || 'Subcutaneous (SubQ)',
+      cautions:            p.cautions || p.contraindications || '',
+      scientificRationale: p.scientificRationale || p.mechanism || ''
     }));
 
   return (
