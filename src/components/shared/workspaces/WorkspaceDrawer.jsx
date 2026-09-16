@@ -712,7 +712,7 @@ export default function WorkspaceDrawer() {
                   >
                     <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
                   </button>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isDoctor ? '1fr' : '1fr 1fr', gap: '8px' }}>
                     <button
                       type="button"
                       onClick={handleExecutePrescription}
@@ -736,28 +736,30 @@ export default function WorkspaceDrawer() {
                     >
                       <ShieldCheck size={15} /> Create Rx
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsStickerModalOpen(true)}
-                      style={{
-                        minHeight: '40px',
-                        padding: '8px',
-                        backgroundColor: '#f0fdfa',
-                        color: '#0f766e',
-                        borderRadius: '8px',
-                        border: '1.5px solid #99f6e4',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        touchAction: 'manipulation',
-                      }}
-                    >
-                      <Tag size={15} /> Pharmapolis Stickers
-                    </button>
+                    {!isDoctor && (
+                      <button
+                        type="button"
+                        onClick={() => setIsStickerModalOpen(true)}
+                        style={{
+                          minHeight: '40px',
+                          padding: '8px',
+                          backgroundColor: '#f0fdfa',
+                          color: '#0f766e',
+                          borderRadius: '8px',
+                          border: '1.5px solid #99f6e4',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <Tag size={15} /> Pharmapolis Stickers
+                      </button>
+                    )}
                   </div>
                 </>
               )}
@@ -815,12 +817,14 @@ export default function WorkspaceDrawer() {
       />
 
       {/* Pharmapolis A4 Stickers Modal (7.5x4.5cm) for all Workspace Items */}
-      <PatientLabelSheetModal
-        isOpen={isStickerModalOpen}
-        onClose={() => setIsStickerModalOpen(false)}
-        patient={targetPatient}
-        prescriptions={workspacePrescriptions}
-      />
+      {!isDoctor && (
+        <PatientLabelSheetModal
+          isOpen={isStickerModalOpen}
+          onClose={() => setIsStickerModalOpen(false)}
+          patient={targetPatient}
+          prescriptions={workspacePrescriptions}
+        />
+      )}
     </>
   , document.body);
 }

@@ -14,7 +14,6 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import ProfessionalWelcomeOverlay from '../ui/ProfessionalWelcomeOverlay';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
-const GlobalDrawerManager = dynamic(() => import('../shared/GlobalDrawerManager'), { ssr: false });
 const PushNotificationPrompt = dynamic(() => import('../ui/PushNotificationPrompt'), { ssr: false });
 const IncomingOrderAcknowledgmentModal = dynamic(() => import('../shared/IncomingOrderAcknowledgmentModal'), { ssr: false });
 
@@ -112,9 +111,6 @@ export default function PanelShell({
           {children}
         </PortalLayout>
         <GlobalQuickCreateHandler />
-        <Suspense fallback={null}>
-          <GlobalDrawerManager />
-        </Suspense>
       </div>
     </OfflineSyncProvider>
   );

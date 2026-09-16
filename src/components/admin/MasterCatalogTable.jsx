@@ -18,6 +18,7 @@ import { useProtocols } from '../../hooks/admin/useProtocols';
 import { calculateProductCompleteness } from '../../utils/calculateProductCompleteness';
 import { inferProductSubcategory, getProductAvailableTypes } from '../../utils/productNormalizer';
 import { CLINICAL_GOALS } from '../../config/goals';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 // ── Modular Catalog Components & Hooks ─────────────────────────────────────────
 import { useCatalogUrlFilters } from './catalog/hooks/useCatalogUrlFilters';
@@ -1082,6 +1083,36 @@ export default function MasterCatalogTable({
         isAllMatchingSelected={isAllMatchingSelected}
         onToggleSelectAllMatching={setIsAllMatchingSelected}
         bulkActions={[
+          {
+            label: 'Send to Workspace',
+            icon: Package,
+            onClick: () => {
+              const selectedProds = (data || []).filter(d => selectedIds.includes(d.id));
+              if (selectedProds.length === 0) return;
+              const itemsToAdd = selectedProds.map(prod => {
+                const v0 = prod.variants?.[0] || prod.variant || {};
+                const resolvedUnitPrice = Number(
+                  prod.unitPrice || prod.price || prod.unitRate || prod.unit_price ||
+                  v0.resolvedPrice?.perUnit || v0.unitPrice || v0.price || v0.tier1Price || v0.tier1_price || v0.retailPrice ||
+                  prod.pricing?.retailPrice || prod.pricing?.tier1Price || prod.tier1_price || prod.tier1Price || prod.retailPrice || 0
+                );
+                const supplierCost = Number(prod.supplierCost || v0.supplierCost || prod.pricing?.supplierCost || 0);
+
+                return {
+                  id: prod.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+                  productId: prod.id,
+                  canonicalName: prod.canonicalName || prod.name || prod.product_title || 'Catalog Item',
+                  dosage: prod.dosage || v0.dosage || 'Standard',
+                  format: prod.format || v0.format || 'Vial',
+                  unitPrice: resolvedUnitPrice,
+                  supplierCost,
+                  quantity: 1,
+                };
+              });
+              useWorkspaceStore.getState().addItems(itemsToAdd, undefined, { openDrawer: true });
+              notifier.success(`Loaded ${itemsToAdd.length} products into active workspace!`);
+            }
+          },
           {
             label: 'Quote to Client',
             icon: FileText,

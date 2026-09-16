@@ -27,9 +27,11 @@ import { useDrawer } from '../../context/DrawerContext';
 import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 import BuilderProtocolSearch from './order-builder/BuilderProtocolSearch';
 import MobilePrescriptionCard from './mobile/MobilePrescriptionCard';
-import { Eye, Edit3, XCircle } from '@/lib/icons';
+import { Eye, Edit3, XCircle, Tag, Package } from '@/lib/icons';
 import notifier from '../../services/NotificationService';
 import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
+import { useRoleAccess } from '../../hooks/useRoleAccess';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 export default function UniversalPrescriptionsTable({ doctorId, patientId, readOnly = false, hideHeader = false, title = 'Prescriptions', subtitle = 'System of record for all patient prescriptions and recommendations.', serverKPIs, enableAskAtlas = false, initialData }) {
   const { openDrawer } = useDrawer();
@@ -74,6 +76,10 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const urlRxId = searchParams.get('id') || '';
 
   const [loadingUrlItem, setLoadingUrlItem] = useState(false);
+
+  const { is, effectiveRole } = useRoleAccess();
+  const isDoctor = is('doctor') || effectiveRole === 'doctor';
+  const canGenerateLabels = !isDoctor && effectiveRole !== 'doctor';
 
   const effectiveDoctorId = doctorId || urlDoctorId;
 
@@ -349,7 +355,124 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     });
   }, [openDrawer]);
 
-  const columns = useMemo(() => getPrescriptionColumns({ onEdit: handleEdit, onRefresh: refresh, onRefill: handleRefill }), [handleEdit, refresh, handleRefill]);
+  const columns = useMemo(() => getPrescriptionColumns({
+    onEdit: handleEdit,
+    onRefresh: refresh,
+    onRefill: handleRefill,
+    isDoctor,
+    role: effectiveRole
+  }), [handleEdit, refresh, handleRefill, isDoctor, effectiveRole]);
+
+  const bulkActions = useMemo(() => {
+    const actions = [
+      {
+        label: '📦 Send to Workspace',
+        icon: Package,
+        onClick: (selectedRows) => {
+          if (!selectedRows || selectedRows.length === 0) return;
+          
+          let allItems = [];
+          let targetPatient = null;
+          
+          selectedRows.forEach(rx => {
+            const patientName = rx.patient?.name || rx.patientName || 'Patient';
+            const pId = rx.patientId || rx.patient?.id || '';
+            if (!targetPatient && (pId || patientName !== 'Patient')) {
+              targetPatient = {
+                type: 'patient',
+                id: pId,
+                name: patientName,
+                email: rx.patient?.email || rx.patientEmail || '',
+                phone: rx.patient?.phone || rx.patientPhone || '',
+                fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
+              };
+            }
+            const rawItems = rx.items || rx.compounds || rx.products || [];
+            rawItems.forEach((i, idx) => {
+              allItems.push({
+                id: i.id || i.variantId || i.productId || `rx_${rx.id}_item_${idx}`,
+                productId: i.productId || i.id,
+                variantId: i.variantId || i.id,
+                canonicalName: i.name || i.productName || i.product_title || 'Medication',
+                sku: i.sku || '',
+                dosage: i.dosage || i.dose || '',
+                format: i.format || i.dosage_form || 'Vial',
+                quantity: parseInt(i.quantity, 10) || 1,
+                unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                supplierCost: parseFloat(i.supplierCost || 0),
+                supplierName: rx.supplierName || 'Pharmapolis Ltd',
+                category: i.category || 'Prescription Biologics',
+                prescriptionId: rx.id,
+                prescriptionCode: rx.prescriptionCode || rx.id,
+                patientName,
+                patientId: pId,
+              });
+            });
+          });
+          
+          if (allItems.length === 0) {
+            toast.error('Selected prescriptions have no items to send');
+            return;
+          }
+          
+          const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+          addItems(allItems, activeWorkspaceId, { openDrawer: true });
+          if (targetPatient) {
+            setTargetEntity(targetPatient, activeWorkspaceId);
+          }
+          setOperationType('sell_prescription', activeWorkspaceId);
+          setWorkspaceIntent('sell', activeWorkspaceId);
+          setDrawerOpen(true);
+          toast.success(`${allItems.length} compounds from ${selectedRows.length} prescriptions added to workspace`);
+        }
+      },
+      {
+        label: '📄 Export CSV',
+        icon: Download,
+        onClick: (selectedRows) => {
+          if (!selectedRows || selectedRows.length === 0) return;
+          const exportCols = [
+            { key: 'id', header: 'ID', accessor: rx => rx.id || '' },
+            { key: 'patientName', header: 'Patient', accessor: rx => rx.patient?.name || rx.patientName || '' },
+            { key: 'doctorName', header: 'Doctor', accessor: rx => rx.doctor?.name || rx.doctorName || '' },
+            { key: 'status', header: 'Status', accessor: rx => rx.status || 'draft' },
+            { key: 'total', header: 'Total ($)', accessor: rx => Number(rx.total || 0).toFixed(2) }
+          ];
+          exportToCSV(selectedRows, exportCols, `prescriptions_selected_${Date.now()}.csv`);
+          toast.success(`Exported ${selectedRows.length} prescriptions to CSV`);
+        }
+      }
+    ];
+
+    if (canGenerateLabels) {
+      actions.push({
+        label: '🏷️ Pharmapolis Stickers',
+        icon: Tag,
+        onClick: async (selectedRows) => {
+          if (!selectedRows || selectedRows.length === 0) return;
+          const toastId = toast.loading('Generating bulk Pharmapolis stickers…');
+          try {
+            const { generatePharmapolisStickersPDF } = await import('../../services/pharmapolisLabelService');
+            const first = selectedRows[0];
+            const patientObj = first.patient || {
+              name: first.patientName || 'Multiple Patients',
+              dob: first.patientDob || first.dob || '—',
+              fileNumber: first.fileNumber || first.patientId || first.id?.slice(0, 8),
+            };
+            await generatePharmapolisStickersPDF(patientObj, selectedRows);
+            toast.success(`Pharmapolis stickers generated for ${selectedRows.length} prescriptions`, { id: toastId });
+          } catch (err) {
+            console.error('Bulk sticker generation error:', err);
+            toast.error('Failed to generate stickers: ' + err.message, { id: toastId });
+          }
+        }
+      });
+    }
+
+    return actions;
+  }, [canGenerateLabels]);
 
   // Filter definitions for DataModule
   const filterOptions = useMemo(() => [
@@ -521,6 +644,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
         isFetchingMore={isFetchingMore}
         isSearchActive={isAlgoliaActive}
         columns={columns}
+        bulkActions={bulkActions}
         expandableRender={prescriptionExpandableRender}
         selectedIds={Array.from(selectedIds)}
         onSelectionChange={(newArr) => {

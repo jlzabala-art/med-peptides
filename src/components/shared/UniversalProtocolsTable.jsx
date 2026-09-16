@@ -508,7 +508,87 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
         description: "Try adjusting your search or filters, or create a new protocol."
       }}
       bulkActions={[
-         { label: 'Assign Category', icon: <Archive size={14}/>, onClick: () => setShowBulkCategoryPicker(true) }
+        {
+          label: '📦 Send to Workspace',
+          icon: <Briefcase size={14}/>,
+          onClick: (selectedRows) => {
+            if (!selectedRows || selectedRows.length === 0) return;
+            let allItems = [];
+            selectedRows.forEach(p => {
+              const protocolItems = (p.phases || []).flatMap(phase => 
+                (phase.drugs_used || phase.products || []).map(d => ({
+                  productId: d.productId || d.id || d.product_slug || `proto_${p.id}_item`,
+                  canonicalName: d.product_title || d.name || 'Protocol Medication',
+                  dosage: d.weekly_dose || d.dosage || '',
+                  quantity: 1,
+                  unitPrice: Number(d.price || 150),
+                  supplierCost: Number(d.supplierCost || 85),
+                  format: d.format || 'Vial',
+                  protocolId: p.id,
+                  protocolName: p.name || p.title
+                }))
+              );
+              if (protocolItems.length > 0) {
+                allItems.push(...protocolItems);
+              } else {
+                allItems.push({
+                  productId: p.id,
+                  canonicalName: p.name || p.title || 'Clinical Protocol Kit',
+                  dosage: `${p.duration_weeks || 4} wks`,
+                  quantity: 1,
+                  unitPrice: 250,
+                  supplierCost: 120,
+                  format: 'Kit',
+                  protocolId: p.id,
+                  protocolName: p.name || p.title
+                });
+              }
+            });
+
+            const { addItems, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+            addItems(allItems, activeWorkspaceId, { openDrawer: true });
+            setDrawerOpen(true);
+            notifier.success(`Loaded ${allItems.length} compound(s) from ${selectedRows.length} protocol(s) into Workspace!`);
+          }
+        },
+        {
+          label: 'Assign Category',
+          icon: <Archive size={14}/>,
+          onClick: () => setShowBulkCategoryPicker(true)
+        },
+        {
+          label: 'Bulk Archive',
+          icon: <Pause size={14}/>,
+          onClick: async (selectedRows) => {
+            if (!selectedRows || selectedRows.length === 0) return;
+            try {
+              for (const p of selectedRows) {
+                await updateProtocol(p.id, { status: 'archived' });
+              }
+              notifier.success(`Archived ${selectedRows.length} protocols`);
+              refetchProtocols();
+            } catch (err) {
+              notifier.error('Failed to archive protocols: ' + err.message);
+            }
+          }
+        },
+        {
+          label: 'Export CSV',
+          icon: <Download size={14}/>,
+          onClick: async (selectedRows) => {
+            if (!selectedRows || selectedRows.length === 0) return;
+            const { exportToCSV } = await import('../../utils/universalExporter');
+            const cols = [
+              { key: 'id', header: 'ID', accessor: p => p.id },
+              { key: 'name', header: 'Protocol Name', accessor: p => p.name || p.title || '' },
+              { key: 'category', header: 'Category', accessor: p => p.category || p.therapeutic_category || '' },
+              { key: 'status', header: 'Status', accessor: p => p.status || 'draft' },
+              { key: 'duration_weeks', header: 'Duration (wks)', accessor: p => p.duration_weeks || 4 }
+            ];
+            exportToCSV(selectedRows, cols, `protocols_export_${Date.now()}.csv`);
+            notifier.success(`Exported ${selectedRows.length} protocols to CSV`);
+          }
+        }
       ]}
       columns={[
         {

@@ -679,6 +679,65 @@ export default function OrdersTable({
             selectable={!readOnly}
             selectedIds={selectedOrderIds}
             onSelectionChange={setSelectedOrderIds}
+            bulkActions={[
+              {
+                label: '🚚 Mark Shipped',
+                icon: Truck,
+                onClick: async (selectedRows) => {
+                  const rows = (Array.isArray(selectedRows) && selectedRows.length > 0)
+                    ? selectedRows
+                    : (paginatedOrders || []).filter(o => selectedOrderIds.includes(o.id));
+                  if (!rows.length) return;
+                  try {
+                    for (const order of rows) {
+                      await orderRepository.updateOrder(order.id, { status: 'Shipped' });
+                    }
+                    notifier.success(`Marked ${rows.length} order(s) as Shipped`);
+                    setSelectedOrderIds([]);
+                  } catch (err) {
+                    notifier.error('Failed to update orders: ' + err.message);
+                  }
+                }
+              },
+              {
+                label: '✓ Mark Delivered',
+                icon: CheckCircle2,
+                onClick: async (selectedRows) => {
+                  const rows = (Array.isArray(selectedRows) && selectedRows.length > 0)
+                    ? selectedRows
+                    : (paginatedOrders || []).filter(o => selectedOrderIds.includes(o.id));
+                  if (!rows.length) return;
+                  try {
+                    for (const order of rows) {
+                      await orderRepository.updateOrder(order.id, { status: 'Delivered' });
+                    }
+                    notifier.success(`Marked ${rows.length} order(s) as Delivered`);
+                    setSelectedOrderIds([]);
+                  } catch (err) {
+                    notifier.error('Failed to update orders: ' + err.message);
+                  }
+                }
+              },
+              {
+                label: 'Export CSV',
+                icon: Download,
+                onClick: (selectedRows) => {
+                  const rows = (Array.isArray(selectedRows) && selectedRows.length > 0)
+                    ? selectedRows
+                    : (paginatedOrders || []).filter(o => selectedOrderIds.includes(o.id));
+                  if (!rows.length) return;
+                  const cols = [
+                    { key: 'id', header: 'Order ID', accessor: o => o.id },
+                    { key: 'customer', header: 'Customer', accessor: o => o.customerName || o.shippingAddress?.fullName || 'Guest' },
+                    { key: 'status', header: 'Status', accessor: o => o.status || 'Pending' },
+                    { key: 'total', header: 'Total ($)', accessor: o => Number(o.total || 0).toFixed(2) },
+                    { key: 'createdAt', header: 'Date', accessor: o => o.createdAt ? new Date(o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt).toLocaleDateString() : '' }
+                  ];
+                  exportToCSV(rows, cols, `orders_export_${Date.now()}.csv`);
+                  notifier.success(`Exported ${rows.length} orders to CSV`);
+                }
+              }
+            ]}
             globalSearch={false}
             emptyState={{
               icon: <Package size={40} />,

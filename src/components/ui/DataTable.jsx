@@ -1556,7 +1556,15 @@ export default function DataTable({
       {(someSelected || allSelected || isAllMatchingSelected) && (bulkActions.length > 0 || renderBatchActions) && (
         <StickyBulkActionBar
           selectedCount={selectedIds.length}
-          bulkActions={bulkActions}
+          bulkActions={bulkActions.map(a => ({
+            ...a,
+            onClick: (e) => {
+              const selectedRows = paginatedData.filter(r =>
+                selectedIds.includes(r[keyField] ?? paginatedData.indexOf(r))
+              );
+              a.onClick?.(selectedRows, selectedIds);
+            }
+          }))}
           renderBatchActions={renderBatchActions}
           selectedIds={selectedIds}
           onClearSelection={() => {
