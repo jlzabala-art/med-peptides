@@ -1,0 +1,38 @@
+# Ignore dependency and build cache directories
+node_modules
+.next/cache
+.next/dev
+.next/diagnostics
+.firebase
+
+# Ignore git and CI/CD metadata
+.git
+.github
+.husky
+
+# Ignore functions subdirectories (deployed separately to Cloud Functions)
+functions
+functions-ai
+functions-cron
+functions-finance
+functions-triggers
+
+# Ignore large local folders, bundles, PDFs, and backups
+backups
+migration_bundle
+HORTMAN
+test-screenshots
+cloudrun_backend
+.vercel
+*.pdf
+
+# Ignore documentation, tests, and temporary artifacts
+tests
+docs
+*.md
+.DS_Store
+*.log
+npm-debug.log*
+
+# Ignore sensitive local environment overrides (baked at build or passed via Cloud Run)
+.env*.local
