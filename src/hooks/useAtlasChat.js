@@ -33,10 +33,20 @@ export function useAtlasChat() {
     const messagesRef = collection(db, 'users', user.uid, 'atlas_sessions', 'latest', 'messages');
     const q = query(messagesRef, orderBy('createdAt', 'asc'));
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setMessages(msgs);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setMessages(msgs);
+      },
+      (error) => {
+        if (error?.code === 'permission-denied') {
+          console.warn('[useAtlasChat] Chat history subscription not permitted for current user.');
+          return;
+        }
+        console.warn('[useAtlasChat] Error in chat messages listener:', error);
+      }
+    );
 
     return () => unsubscribe();
   }, [user]);

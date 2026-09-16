@@ -24,16 +24,26 @@ export function useNotificationListener() {
       limit(50)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifs = [];
-      let unread = 0;
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        notifs.push({ id: docSnap.id, ...data });
-        if (!data.read) unread++;
-      });
-      setNotifications(notifs, unread);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notifs = [];
+        let unread = 0;
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          notifs.push({ id: docSnap.id, ...data });
+          if (!data.read) unread++;
+        });
+        setNotifications(notifs, unread);
+      },
+      (error) => {
+        if (error?.code === 'permission-denied') {
+          console.warn('[useNotificationListener] Notifications subscription not permitted for current user.');
+          return;
+        }
+        console.warn('[useNotificationListener] Error in notifications listener:', error);
+      }
+    );
 
     return () => unsubscribe();
   }, [user, setNotifications, clearNotifications]);

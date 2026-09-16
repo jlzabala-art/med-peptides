@@ -52,6 +52,9 @@ export default function IncomingOrderAcknowledgmentModal() {
   useEffect(() => {
     if (!isEligibleRole || !user) return;
 
+    let unsubscribe = () => {};
+    let fallbackUnsubscribe = () => {};
+
     // Listen in real-time to unacknowledged draft orders
     try {
       const q = query(
@@ -62,7 +65,7 @@ export default function IncomingOrderAcknowledgmentModal() {
         limit(10)
       );
 
-      const unsubscribe = onSnapshot(
+      unsubscribe = onSnapshot(
         q,
         (snapshot) => {
           const orders = snapshot.docs.map((doc) => ({
@@ -72,26 +75,45 @@ export default function IncomingOrderAcknowledgmentModal() {
           setUnacknowledgedOrders(orders);
         },
         (error) => {
+          // If permission is denied, log quietly and do not trigger an uncaught fallback query
+          if (error?.code === 'permission-denied') {
+            console.warn('[IncomingOrderAcknowledgment] Orders subscription not permitted for current credentials.');
+            return;
+          }
+
           console.warn('[IncomingOrderAcknowledgment] Snapshot listener fallback:', error);
           // Fallback query if compound index is building
-          const fallbackQ = query(
-            collection(db, 'orders'),
-            where('status', '==', 'draft'),
-            limit(20)
-          );
-          onSnapshot(fallbackQ, (fallbackSnap) => {
-            const filtered = fallbackSnap.docs
-              .map((doc) => ({ id: doc.id, ...doc.data() }))
-              .filter((o) => o.requiresAcknowledgment && !o.acknowledged);
-            setUnacknowledgedOrders(filtered);
-          });
+          try {
+            const fallbackQ = query(
+              collection(db, 'orders'),
+              where('status', '==', 'draft'),
+              limit(20)
+            );
+            fallbackUnsubscribe = onSnapshot(
+              fallbackQ,
+              (fallbackSnap) => {
+                const filtered = fallbackSnap.docs
+                  .map((doc) => ({ id: doc.id, ...doc.data() }))
+                  .filter((o) => o.requiresAcknowledgment && !o.acknowledged);
+                setUnacknowledgedOrders(filtered);
+              },
+              (fallbackErr) => {
+                console.warn('[IncomingOrderAcknowledgment] Fallback listener error:', fallbackErr);
+              }
+            );
+          } catch (e) {
+            console.warn('[IncomingOrderAcknowledgment] Fallback query error:', e);
+          }
         }
       );
-
-      return () => unsubscribe();
     } catch (err) {
       console.error('[IncomingOrderAcknowledgment] Error subscribing:', err);
     }
+
+    return () => {
+      unsubscribe();
+      fallbackUnsubscribe();
+    };
   }, [isEligibleRole, user]);
 
   if (!isEligibleRole || unacknowledgedOrders.length === 0) {
