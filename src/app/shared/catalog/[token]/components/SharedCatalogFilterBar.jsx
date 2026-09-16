@@ -362,75 +362,8 @@ export default function SharedCatalogFilterBar({
         </div>
       </div>
 
-      {/* Quick Filter Chips & Optional Protocol Integrations Row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '2px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-          {/* Optional: Filter only formulations with clinical protocols */}
-          {protocols.length > 0 && productsWithProtocolsCount > 0 && (
-            <button
-              type="button"
-              onClick={() => setOnlyWithProtocols(prev => !prev)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '5px 11px',
-                borderRadius: '20px',
-                border: onlyWithProtocols ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
-                backgroundColor: onlyWithProtocols ? '#f0f9ff' : '#ffffff',
-                color: onlyWithProtocols ? '#0369a1' : '#475569',
-                fontSize: '0.76rem',
-                fontWeight: onlyWithProtocols ? 800 : 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              title="Show only formulations that have clinical administration protocols"
-            >
-              <ClipboardList size={13} color={onlyWithProtocols ? '#0284c7' : '#64748b'} />
-              <span>Clinical Protocols Available</span>
-              <span style={{
-                fontSize: '0.7rem',
-                fontWeight: 800,
-                backgroundColor: onlyWithProtocols ? '#0284c7' : '#f1f5f9',
-                color: onlyWithProtocols ? '#ffffff' : '#475569',
-                padding: '1px 6px',
-                borderRadius: '10px'
-              }}>
-                {productsWithProtocolsCount}
-              </span>
-              {onlyWithProtocols && <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>✓</span>}
-            </button>
-          )}
-
-          {/* Optional: Toggle protocol pills under product cards */}
-          {protocols.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowProtocolsUnderProducts(prev => !prev)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '5px 10px',
-                borderRadius: '20px',
-                border: '1px solid #e2e8f0',
-                backgroundColor: showProtocolsUnderProducts ? '#f8fafc' : '#f1f5f9',
-                color: showProtocolsUnderProducts ? '#0f172a' : '#94a3b8',
-                fontSize: '0.74rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-              title="Toggle visibility of clinical protocol badges on cards"
-            >
-              <span>Protocol Badges:</span>
-              <span style={{ fontWeight: 800, color: showProtocolsUnderProducts ? '#0284c7' : '#64748b' }}>
-                {showProtocolsUnderProducts ? 'Visible' : 'Hidden'}
-              </span>
-            </button>
-          )}
-        </div>
-
-        {/* Formulations count indicator */}
+      {/* Formulations count indicator */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '2px' }}>
         <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
           Showing {displayedProducts.length} of {products.length} formulations
         </div>

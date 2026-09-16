@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ClipboardList, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 /**
  * SharedCatalogFloatingDock — Fixed bottom action bar with:
@@ -87,15 +87,6 @@ export default function SharedCatalogFloatingDock({
         )}
 
         <div className="dock-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {cartTotalUnits > 0 && (
-            <button
-              onClick={handleCopyOrderSummary}
-              style={{ backgroundColor: '#ffffff', color: '#334155', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '9px 14px', fontWeight: 700, fontSize: '0.825rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'all 0.15s ease' }}
-            >
-              <ClipboardList size={15} color="#0284c7" />
-              <span>{copiedToast ? 'Copied ✓' : 'Copy Order'}</span>
-            </button>
-          )}
 
           <button
             onClick={handleOpenWhatsAppCheckout}

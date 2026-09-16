@@ -133,22 +133,6 @@ export default function SharedCatalogHeader({
                   ? `📋 ${protocols.length} Clinical Protocols`
                   : `📦 ${products.length} Products • ${totalVariants} Verified Variants`}
               </span>
-              {protocols.length > 0 && !isProtocolCatalog && (
-                <button
-                  type="button"
-                  onClick={() => setShowProtocolsUnderProducts(prev => !prev)}
-                  className="header-meta-pill"
-                  style={{
-                    background: showProtocolsUnderProducts ? 'rgba(167, 139, 250, 0.28)' : 'rgba(255, 255, 255, 0.12)',
-                    borderColor: showProtocolsUnderProducts ? '#a78bfa' : 'rgba(255, 255, 255, 0.2)',
-                    color: showProtocolsUnderProducts ? '#f5f3ff' : '#ffffff',
-                    cursor: 'pointer'
-                  }}
-                  title="Toggle public clinical protocol links under catalog products"
-                >
-                  📋 Protocols: {showProtocolsUnderProducts ? 'Enabled ✓' : 'Hidden'}
-                </button>
-              )}
             </div>
           </div>
 

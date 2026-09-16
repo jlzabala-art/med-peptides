@@ -328,36 +328,6 @@ export default function SharedCatalogProductCard({
         </div>
       </div>
 
-      {/* Optional Clinical Protocols Badges */}
-      {showProtocolsUnderProducts && (() => {
-        const related = getRelatedProtocols(prod, protocols);
-        if (!related || related.length === 0) return null;
-        return (
-          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed #e2e8f0', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              <ClipboardList size={13} color="#0284c7" />
-              <span>Clinical Protocols:</span>
-            </div>
-            {related.map(proto => (
-              <button
-                key={proto.id}
-                type="button"
-                onClick={() => setSelectedPublicProtocol(proto)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '20px', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', color: '#0369a1', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s ease' }}
-                title={`Open clinical protocol dossier: ${proto.title}`}
-              >
-                <span>{proto.title}</span>
-                {proto.duration && (
-                  <span style={{ fontSize: '0.68rem', backgroundColor: '#e0f2fe', color: '#0284c7', padding: '1px 5px', borderRadius: '10px', fontWeight: 800 }}>
-                    {proto.duration}
-                  </span>
-                )}
-                <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>↗</span>
-              </button>
-            ))}
-          </div>
-        );
-      })()}
 
       {/* Zero-Economic Clinical Information Request Micro-Panel */}
       <ClinicalInfoRequestPanel product={prod} catalogMeta={catalogMeta} />

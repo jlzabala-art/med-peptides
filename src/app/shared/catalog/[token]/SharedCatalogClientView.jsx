@@ -738,81 +738,41 @@ export default function SharedCatalogClientView({
           displayedProducts={displayedProducts}
         />
 
-        {/* ── MAIN CONTENT: Products Grid / Protocol List ── */}
-        {activeTab !== 'protocols' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {displayedProducts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔬</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>No formulations found</div>
-                <p style={{ color: '#64748b', marginTop: '6px', fontSize: '0.9rem' }}>Try adjusting your search or category filters.</p>
-                <button
-                  type="button"
-                  onClick={() => { setSearchQuery(''); clearGoals(); setPackagingMode('all'); setDosageFilter('all'); setOnlyWithProtocols(false); }}
-                  style={{ marginTop: '14px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 18px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
-                >
-                  Reset All Filters
-                </button>
-              </div>
-            ) : (
-              displayedProducts.map(prod => (
-                <SharedCatalogProductCard
-                  key={prod.id}
-                  prod={prod}
-                  includePrices={includePrices}
-                  fxMultiplier={fxMultiplier}
-                  currentCurrency={currentCurrency}
-                  currencySymbol={currencySymbol}
-                  packagingMode={packagingMode}
-                  cart={cart}
-                  updateQuantity={updateQuantity}
-                  showProtocolsUnderProducts={showProtocolsUnderProducts}
-                  protocols={protocols}
-                  setSelectedPublicProtocol={setSelectedPublicProtocol}
-                  catalogMeta={catalogMeta}
-                />
-              ))
-            )}
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {filteredProtocols.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📋</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>No protocols found</div>
-              </div>
-            ) : (
-              filteredProtocols.map(proto => (
-                <div
-                  key={proto.id}
-                  style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
-                  onClick={() => setSelectedPublicProtocol(proto)}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 200px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{proto.title}</span>
-                        {proto.duration && (
-                          <span style={{ fontSize: '0.72rem', backgroundColor: '#eff6ff', color: '#2563eb', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>{proto.duration}</span>
-                        )}
-                      </div>
-                      {proto.description && (
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>{proto.description}</p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setSelectedPublicProtocol(proto); }}
-                      style={{ backgroundColor: '#f0f9ff', color: '#0284c7', border: '1px solid #bae6fd', borderRadius: '8px', padding: '6px 14px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                    >
-                      View Dossier ↗
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+        {/* ── MAIN CONTENT: Products Grid ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {displayedProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 24px', color: '#64748b' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔬</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a' }}>No formulations found</div>
+              <p style={{ color: '#64748b', marginTop: '6px', fontSize: '0.9rem' }}>Try adjusting your search or category filters.</p>
+              <button
+                type="button"
+                onClick={() => { setSearchQuery(''); clearGoals(); setPackagingMode('all'); setDosageFilter('all'); setOnlyWithProtocols(false); }}
+                style={{ marginTop: '14px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '9px 18px', fontWeight: 700, fontSize: '0.875rem', cursor: 'pointer' }}
+              >
+                Reset All Filters
+              </button>
+            </div>
+          ) : (
+            displayedProducts.map(prod => (
+              <SharedCatalogProductCard
+                key={prod.id}
+                prod={prod}
+                includePrices={includePrices}
+                fxMultiplier={fxMultiplier}
+                currentCurrency={currentCurrency}
+                currencySymbol={currencySymbol}
+                packagingMode={packagingMode}
+                cart={cart}
+                updateQuantity={updateQuantity}
+                showProtocolsUnderProducts={false}
+                protocols={protocols}
+                setSelectedPublicProtocol={setSelectedPublicProtocol}
+                catalogMeta={catalogMeta}
+              />
+            ))
+          )}
+        </div>
 
         {/* Algolia Cross-sell (optional) */}
         {cartItems.length > 0 && !isProtocolCatalog && (
