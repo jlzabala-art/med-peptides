@@ -27,6 +27,8 @@ import {
   MessageSquare,
   Calendar,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Download,
   Upload,
   AlertCircle,
@@ -43,6 +45,46 @@ export default function LeadProfileDrawer({
 }) {
   const [activeTab, setActiveTab] = useState('Overview');
   const [syncing, setSyncing] = useState(false);
+
+  const [openSections, setOpenSections] = useState({
+    overview: true,
+    rfq: false,
+    quotations: false,
+    commercial: false,
+    products: false,
+    activity: false,
+    documents: false,
+    ai: false,
+  });
+
+  const toggleSection = (sec) => {
+    setOpenSections(prev => {
+      const isCurrentlyOpen = prev[sec];
+      return {
+        overview: !isCurrentlyOpen && sec === 'overview',
+        rfq: !isCurrentlyOpen && sec === 'rfq',
+        quotations: !isCurrentlyOpen && sec === 'quotations',
+        commercial: !isCurrentlyOpen && sec === 'commercial',
+        products: !isCurrentlyOpen && sec === 'products',
+        activity: !isCurrentlyOpen && sec === 'activity',
+        documents: !isCurrentlyOpen && sec === 'documents',
+        ai: !isCurrentlyOpen && sec === 'ai',
+      };
+    });
+  };
+
+  const collapseAll = () => {
+    setOpenSections({
+      overview: false,
+      rfq: false,
+      quotations: false,
+      commercial: false,
+      products: false,
+      activity: false,
+      documents: false,
+      ai: false,
+    });
+  };
 
   if (!lead) return null;
 
@@ -361,44 +403,7 @@ export default function LeadProfileDrawer({
           </button>
         </div>
 
-        {/* Navigation Tabs */}
-        <div
-          style={{
-            display: 'flex',
-            borderBottom: '1px solid var(--border)',
-            padding: '0 1.5rem',
-            backgroundColor: 'var(--surface-raised, #f8fafc)',
-            overflowX: 'auto',
-          }}
-        >
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                padding: '0.8rem 0',
-                marginRight: '1.5rem',
-                border: 'none',
-                background: 'none',
-                borderBottom: `2px solid ${activeTab === tab.id ? 'var(--primary, #2563eb)' : 'transparent'}`,
-                color:
-                  activeTab === tab.id ? 'var(--primary, #2563eb)' : 'var(--text-muted, #64748b)',
-                fontWeight: activeTab === tab.id ? 800 : 600,
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                transition: 'all 0.15s ease',
-                flexShrink: 0,
-              }}
-            >
-              <tab.icon size={14} /> {tab.id}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
+        {/* ── Scrollable Body with Accordions ── */}
         <div
           style={{
             flex: 1,
@@ -407,8 +412,136 @@ export default function LeadProfileDrawer({
             backgroundColor: 'var(--color-bg-base, #f1f5f9)',
           }}
         >
-          {/* OVERVIEW TAB */}
-          {activeTab === 'Overview' && (
+          {/* ── 2x2 Metric Strip (Golden Rule & High Polish) ── */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
+              marginBottom: '16px'
+            }}
+          >
+            {/* Est. Deal Value */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <DollarSign size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Est. Deal Value</span>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e40af' }}>
+                AED {value.toLocaleString()}
+              </div>
+            </div>
+
+            {/* AI Opportunity Score */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Target size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>AI Opportunity Score</span>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#15803d' }}>
+                {aiDetails.score}/100 <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#22c55e' }}>({aiDetails.strength})</span>
+              </div>
+            </div>
+
+            {/* Pipeline Stage */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#ecfeff', color: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckCircle2 size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Pipeline Stage</span>
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0e7490' }}>
+                {lead.status?.toUpperCase() || 'NEW'} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#06b6d4' }}>• {leadType}</span>
+              </div>
+            </div>
+
+            {/* Lifecycle */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#faf5ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Lead Lifecycle</span>
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#7e22ce' }}>
+                {daysOpen} Days Open <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a855f7' }}>({country})</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Toolbar: Focus Mode & Collapse All ── */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '0 2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Commercial Account Operations
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                Single-section focus
+              </span>
+              <button
+                type="button"
+                onClick={collapseAll}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '3px 8px'
+                }}
+              >
+                Collapse All
+              </button>
+            </div>
+          </div>
+
+          {/* ── Accordion 1: Overview ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('overview')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.overview ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f1f5f9', color: '#003666', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BarChart2 size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Lead Overview, Identity & Contact Profile
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Entity classification, verified contacts, primary channel, and intake requirements
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#f1f5f9', color: '#475569' }}>
+                  Overview
+                </span>
+                {openSections.overview ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.overview && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* Recommended Next Action Engine */}
               <div
@@ -659,458 +792,537 @@ export default function LeadProfileDrawer({
                 </p>
               </div>
             </div>
-          )}
+              </div>
+            )}
+          </div>
 
-          {/* RFQ ITEMS TAB */}
-          {activeTab === 'RFQ Items' && isRFQ && (
-            <RFQItemsTab
-              rfqId={lead.id}
-              items={lead.originalData?.items || []}
-              onSaveItems={(updatedItems) => onUpdateRFQItems(lead.id, updatedItems)}
-              supplierName={lead.originalData?.supplierName || 'LotusLand'}
-              catalogProducts={catalogProducts}
-              onProductCreated={onProductCreated}
-              onStockUpdated={onStockUpdated}
-            />
-          )}
-
-          {/* QUOTATIONS TAB */}
-          {activeTab === 'Quotations' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <DataTable
-                data={[
-                  {
-                    id: 'QT-2026-9081',
-                    value: 'AED 348,000',
-                    margin: '18.4%',
-                    sentDate: 'Jun 08, 2026',
-                    status: 'Viewed',
-                  },
-                ]}
-                keyField="id"
-                emptyTitle="No quotations yet"
-                columns={[
-                  {
-                    key: 'id',
-                    header: 'Quotation #',
-                    render: (r) => <span style={{ fontWeight: 700 }}>{r.id}</span>,
-                  },
-                  {
-                    key: 'value',
-                    header: 'Value',
-                    align: 'right',
-                    render: (r) => <span style={{ fontWeight: 700 }}>{r.value}</span>,
-                  },
-                  {
-                    key: 'margin',
-                    header: 'Est. Margin',
-                    align: 'right',
-                    render: (r) => (
-                      <span style={{ color: '#16a34a', fontWeight: 'bold' }}>{r.margin}</span>
-                    ),
-                  },
-                  { key: 'sentDate', header: 'Sent Date' },
-                  {
-                    key: 'status',
-                    header: 'Status',
-                    render: (r) => <StatusChip status="active" label={r.status} />,
-                  },
-                ]}
-              />
+          {/* ── Accordion 2: RFQ Items (if RFQ) ── */}
+          {isRFQ && (
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
               <button
-                onClick={() => triggerAction('Quotation')}
-                className="btn btn-primary"
-                style={{ alignSelf: 'flex-start', fontSize: '0.75rem' }}
-              >
-                Generate New Proposal
-              </button>
-            </div>
-          )}
-
-          {/* COMMERCIAL TAB */}
-          {activeTab === 'Commercial' && (
-            <div
-              style={{
-                backgroundColor: 'var(--surface)',
-                padding: '1.5rem',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.25rem',
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
-                Commercial Sourcing Intelligence
-              </h3>
-              <div
+                type="button"
+                onClick={() => toggleSection('rfq')}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '1rem',
-                  fontSize: '0.8rem',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '6px',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Estimated Annual Value:</span>
-                  <strong style={{ color: 'var(--text-main)' }}>AED 1.4M</strong>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '6px',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Buying Authority Level:</span>
-                  <strong style={{ color: 'var(--text-main)' }}>C-Level Executives / MD</strong>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '6px',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Probability of Closing:</span>
-                  <strong style={{ color: '#16a34a' }}>75%</strong>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '6px',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Expected Margin Rate:</span>
-                  <strong style={{ color: 'var(--text-main)' }}>22.5%</strong>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '6px',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Urgency Index:</span>
-                  <strong style={{ color: '#ef4444' }}>
-                    High Urgency (Delivery ETA requested)
-                  </strong>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid var(--border)',
-                    paddingBottom: '6px',
-                  }}
-                >
-                  <span style={{ color: 'var(--text-muted)' }}>Decision Timeline:</span>
-                  <strong style={{ color: 'var(--text-main)' }}>Q2 - immediate purchase</strong>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* PRODUCTS TAB */}
-          {activeTab === 'Products' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <DataTable
-                data={(
-                  lead.originalData?.items || [{ itemName: 'BPC-157 5mg Pure API', quantity: 100 }]
-                ).map((p, i) => ({ ...p, _idx: i }))}
-                keyField="_idx"
-                emptyTitle="No products requested"
-                columns={[
-                  {
-                    key: 'itemName',
-                    header: 'Top Requested Products',
-                    sortKey: 'itemName',
-                    render: (r) => <span style={{ fontWeight: 700 }}>{r.itemName}</span>,
-                  },
-                  {
-                    key: 'quantity',
-                    header: 'Requested Qty',
-                    align: 'right',
-                    sortValue: (r) => r.quantity,
-                    render: (r) => <span style={{ fontWeight: 700 }}>{r.quantity}</span>,
-                  },
-                  {
-                    key: '_category',
-                    header: 'Category',
-                    render: () => (
-                      <span style={{ color: 'var(--text-muted)' }}>APIs &amp; Peptides</span>
-                    ),
-                  },
-                  {
-                    key: '_stock',
-                    header: 'Stock Availability',
-                    render: () => <StatusChip status="active" label="In Stock (240 available)" />,
-                  },
-                  {
-                    key: '_supplier',
-                    header: 'Supplier Match',
-                    render: () => (
-                      <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
-                        Lotusland Chemicals (Direct Match)
-                      </span>
-                    ),
-                  },
-                ]}
-              />
-            </div>
-          )}
-
-          {/* ACTIVITY TIMELINE TAB */}
-          {activeTab === 'Activity' && (
-            <div
-              style={{
-                backgroundColor: 'var(--surface)',
-                padding: '1.5rem',
-                borderRadius: '10px',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 800 }}>
-                HubSpot-Style Activity Timeline
-              </h3>
-              <div
-                style={{
+                  width: '100%',
+                  padding: '14px 18px',
+                  backgroundColor: openSections.rfq ? '#f8fafc' : '#ffffff',
+                  border: 'none',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1.25rem',
-                  position: 'relative',
-                  paddingLeft: '1.5rem',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  textAlign: 'left'
                 }}
               >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '5px',
-                    bottom: '5px',
-                    left: '6px',
-                    width: '2px',
-                    backgroundColor: 'var(--border)',
-                  }}
-                />
-                {[
-                  {
-                    title: 'RFQ Generated',
-                    details:
-                      'RFQ Number RFQ-2026-001 created automatically from custom proforma upload.',
-                    date: 'Today, 2:10 PM',
-                    icon: Zap,
-                    bg: '#f5f3ff',
-                    color: '#8b5cf6',
-                  },
-                  {
-                    title: 'Email Interaction',
-                    details:
-                      'Client replied to pricing options, requesting express customs routing via Madrid freezone.',
-                    date: 'Yesterday, 4:15 PM',
-                    icon: Mail,
-                    bg: '#eff6ff',
-                    color: '#3b82f6',
-                  },
-                  {
-                    title: 'Meeting Completed',
-                    details:
-                      'Discovery call with buying authority. Alignment on custom compounding batch specifications.',
-                    date: 'June 07, 2026',
-                    icon: Calendar,
-                    bg: '#f0fdf4',
-                    color: '#16a34a',
-                  },
-                  {
-                    title: 'Lead Created',
-                    details: 'Lead record initialized via Website Portal submission.',
-                    date: 'June 01, 2026',
-                    icon: User,
-                    bg: '#f8fafc',
-                    color: '#64748b',
-                  },
-                ].map((act, index) => {
-                  const Icon = act.icon;
-                  return (
-                    <div key={index} style={{ position: 'relative' }}>
-                      <div
-                        style={{
-                          position: 'absolute',
-                          left: '-27px',
-                          top: '2px',
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          backgroundColor: act.bg,
-                          color: act.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: '2px solid var(--surface)',
-                        }}
-                      >
-                        <Icon size={12} />
-                      </div>
-                      <div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <strong style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                            {act.title}
-                          </strong>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                            {act.date}
-                          </span>
-                        </div>
-                        <p
-                          style={{
-                            margin: '0.15rem 0 0 0',
-                            fontSize: '0.75rem',
-                            color: 'var(--text-muted)',
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          {act.details}
-                        </p>
-                      </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <List size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                      RFQ Line Items & Formulation Requirements
                     </div>
-                  );
-                })}
-              </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Requested chemical substances, target quantities, and supplier matching
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                    {(lead.originalData?.items || []).length} Items
+                  </span>
+                  {openSections.rfq ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+                </div>
+              </button>
+
+              {openSections.rfq && (
+                <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
+                  <RFQItemsTab
+                    rfqId={lead.id}
+                    items={lead.originalData?.items || []}
+                    onSaveItems={(updatedItems) => onUpdateRFQItems(lead.id, updatedItems)}
+                    supplierName={lead.originalData?.supplierName || 'LotusLand'}
+                    catalogProducts={catalogProducts}
+                    onProductCreated={onProductCreated}
+                    onStockUpdated={onStockUpdated}
+                  />
+                </div>
+              )}
             </div>
           )}
 
-          {/* DOCUMENTS TAB */}
-          {activeTab === 'Documents' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {[
-                {
-                  name: 'Custom Compounding Specifications',
-                  type: 'PDF Spec Sheet',
-                  status: 'Approved',
-                },
-                {
-                  name: 'CoA Certificate of analysis',
-                  type: 'Certificate',
-                  status: 'Missing',
-                  warning: true,
-                },
-                { name: 'MSDS Documentation Sheet', type: 'Compliance doc', status: 'Approved' },
-                {
-                  name: 'Commercial Proforma Invoice',
-                  type: 'Invoice',
-                  status: 'Pending Review',
-                  warning: true,
-                },
-              ].map((doc, idx) => (
+          {/* ── Accordion 3: Commercial Quotations & Proposals ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('quotations')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.quotations ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Commercial Quotations & Proposals
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Issued pricing sheets, customer engagement tracking, and formal bids
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#f0fdf4', color: '#15803d' }}>
+                  Proposals
+                </span>
+                {openSections.quotations ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.quotations && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <DataTable
+                    data={[
+                      {
+                        id: 'QT-2026-9081',
+                        value: 'AED 348,000',
+                        margin: '18.4%',
+                        sentDate: 'Jun 08, 2026',
+                        status: 'Viewed',
+                      },
+                    ]}
+                    keyField="id"
+                    emptyTitle="No quotations yet"
+                    columns={[
+                      {
+                        key: 'id',
+                        header: 'Quotation #',
+                        render: (r) => <span style={{ fontWeight: 700 }}>{r.id}</span>,
+                      },
+                      {
+                        key: 'value',
+                        header: 'Value',
+                        align: 'right',
+                        render: (r) => <span style={{ fontWeight: 700 }}>{r.value}</span>,
+                      },
+                      {
+                        key: 'margin',
+                        header: 'Est. Margin',
+                        align: 'right',
+                        render: (r) => (
+                          <span style={{ color: '#16a34a', fontWeight: 'bold' }}>{r.margin}</span>
+                        ),
+                      },
+                      { key: 'sentDate', header: 'Sent Date' },
+                      {
+                        key: 'status',
+                        header: 'Status',
+                        render: (r) => <StatusChip status="active" label={r.status} />,
+                      },
+                    ]}
+                  />
+                  <button
+                    onClick={() => triggerAction('Quotation')}
+                    className="btn btn-primary"
+                    style={{ alignSelf: 'flex-start', fontSize: '0.75rem' }}
+                  >
+                    Generate New Proposal
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 4: Commercial Intelligence & Terms ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('commercial')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.commercial ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#fff7ed', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <DollarSign size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Commercial Terms, Margins & Deal Intelligence
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Estimated annual contract volume, margin rates, and procurement urgency
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#fff7ed', color: '#c2410c' }}>
+                  AED 1.4M Target
+                </span>
+                {openSections.commercial ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.commercial && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
                 <div
-                  key={idx}
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '0.75rem 1rem',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
                     backgroundColor: 'var(--surface)',
-                    fontSize: '0.78rem',
+                    padding: '1.25rem',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.25rem',
                   }}
                 >
-                  <div>
-                    <strong style={{ display: 'block', color: 'var(--text-main)' }}>
-                      {doc.name}
-                    </strong>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      {doc.type}
-                    </span>
-                  </div>
-                  <span
+                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
+                    Commercial Sourcing Intelligence
+                  </h3>
+                  <div
                     style={{
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      color: doc.warning ? '#ea580c' : '#16a34a',
-                      backgroundColor: doc.warning ? '#fff7ed' : '#dcfce7',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                      gap: '1rem',
+                      fontSize: '0.8rem',
                     }}
                   >
-                    {doc.status}
-                  </span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Estimated Annual Value:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>AED 1.4M</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Buying Authority Level:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>C-Level Executives / MD</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Probability of Closing:</span>
+                      <strong style={{ color: '#16a34a' }}>75%</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Expected Margin Rate:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>22.5%</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Urgency Index:</span>
+                      <strong style={{ color: '#ef4444' }}>High Urgency (Delivery ETA requested)</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '6px' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Decision Timeline:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>Q2 - immediate purchase</strong>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
 
-          {/* AI INSIGHTS TAB */}
-          {activeTab === 'AI Insights' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div
-                style={{
-                  backgroundColor: '#eff6ff',
-                  border: '1px solid #bfdbfe',
-                  padding: '1.25rem',
-                  borderRadius: '10px',
-                }}
-              >
-                <h4
+          {/* ── Accordion 5: Products & Formulation Sourcing ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('products')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.products ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Zap size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Top Requested Products & Active Stock Sourcing
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Catalog availability, stock levels, and accredited chemical suppliers
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                  Catalog Matches
+                </span>
+                {openSections.products ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.products && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <DataTable
+                    data={(
+                      lead.originalData?.items || [{ itemName: 'BPC-157 5mg Pure API', quantity: 100 }]
+                    ).map((p, i) => ({ ...p, _idx: i }))}
+                    keyField="_idx"
+                    emptyTitle="No products requested"
+                    columns={[
+                      {
+                        key: 'itemName',
+                        header: 'Top Requested Products',
+                        sortKey: 'itemName',
+                        render: (r) => <span style={{ fontWeight: 700 }}>{r.itemName}</span>,
+                      },
+                      {
+                        key: 'quantity',
+                        header: 'Requested Qty',
+                        align: 'right',
+                        sortValue: (r) => r.quantity,
+                        render: (r) => <span style={{ fontWeight: 700 }}>{r.quantity}</span>,
+                      },
+                      {
+                        key: '_category',
+                        header: 'Category',
+                        render: () => (
+                          <span style={{ color: 'var(--text-muted)' }}>APIs &amp; Peptides</span>
+                        ),
+                      },
+                      {
+                        key: '_stock',
+                        header: 'Stock Availability',
+                        render: () => <StatusChip status="active" label="In Stock (240 available)" />,
+                      },
+                      {
+                        key: '_supplier',
+                        header: 'Supplier Match',
+                        render: () => (
+                          <span style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                            Lotusland Chemicals (Direct Match)
+                          </span>
+                        ),
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 6: Activity Timeline & Audit Log ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('activity')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.activity ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f8fafc', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Commercial Activity Timeline & Follow-Ups
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Chronological audit log, meeting records, call notes, and email history
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#f1f5f9', color: '#475569' }}>
+                  Activity
+                </span>
+                {openSections.activity ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.activity && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
+                <div
                   style={{
-                    margin: '0 0 0.5rem 0',
-                    color: '#1e3a8a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
+                    backgroundColor: 'var(--surface)',
+                    padding: '1.25rem',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border)',
                   }}
                 >
-                  <Zap size={16} /> Atlas AI Opportunity Sourcing Insights
-                </h4>
-                <div style={{ fontSize: '0.8rem', color: '#1e40af', lineHeight: 1.5 }}>
-                  <p style={{ margin: '0 0 0.5rem 0' }}>
-                    <strong>"Magenta frequently purchases peptide components."</strong> There is a
-                    92% historical likelihood of HGH & BPC-157 demand during Q2.
-                  </p>
-                  <p style={{ margin: 0 }}>
-                    <strong>Cross-Sell Suggestions:</strong> We recommend pitching FOXO4 and PNC-27
-                    peptides as regulatory backups to improve basket value by 18%.
-                  </p>
+                  <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', fontWeight: 800 }}>
+                    Commercial Communication Log
+                  </h3>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '1rem',
+                      position: 'relative',
+                    }}
+                  >
+                    {[
+                      {
+                        title: 'Email Sent: Commercial Introduction',
+                        date: 'Yesterday at 14:32',
+                        details: 'Pricing parameters and chemical analysis dossiers provided to lead.',
+                        type: 'email',
+                      },
+                      {
+                        title: 'Inbound RFQ Created',
+                        date: '3 days ago',
+                        details: 'Customer submitted compound formulation specifications via web portal.',
+                        type: 'rfq',
+                      },
+                    ].map((act, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                        <div
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '50%',
+                            backgroundColor: act.type === 'email' ? '#eff6ff' : '#f0fdf4',
+                            color: act.type === 'email' ? '#2563eb' : '#16a34a',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {act.type === 'email' ? <Mail size={14} /> : <FileText size={14} />}
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <strong style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>{act.title}</strong>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{act.date}</span>
+                          </div>
+                          <p style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                            {act.details}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+            )}
+          </div>
 
-              <div
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  padding: '1.25rem',
-                  borderRadius: '10px',
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                }}
-              >
-                <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800 }}>
-                  Smart Pricing Advice
-                </h4>
-                <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  Current RFQ margin target is optimized. Atlas AI predicts a 82% win rate if
-                  matching Barcelona compounders.
-                </p>
+          {/* ── Accordion 7: AI Insights & Pricing Sourcing ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('ai')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.ai ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Zap size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    AI Intelligence, Margin Advice & Cross-Sell
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Automated opportunity scoring, cross-sell predictions, and margin optimizations
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                  AI Advice
+                </span>
+                {openSections.ai ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.ai && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div
+                    style={{
+                      backgroundColor: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      padding: '1.25rem',
+                      borderRadius: '10px',
+                    }}
+                  >
+                    <h4
+                      style={{
+                        margin: '0 0 0.5rem 0',
+                        color: '#1e3a8a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <Zap size={16} /> Atlas AI Opportunity Sourcing Insights
+                    </h4>
+                    <div style={{ fontSize: '0.8rem', color: '#1e40af', lineHeight: 1.5 }}>
+                      <p style={{ margin: '0 0 0.5rem 0' }}>
+                        <strong>"Client frequently procures compounding formulations."</strong> High probability of repeat order cycle during current quarter.
+                      </p>
+                      <p style={{ margin: 0 }}>
+                        <strong>Cross-Sell Suggestions:</strong> We recommend pitching bio-compatible peptides and specialized solvent packages to increase order basket by 20%.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      backgroundColor: 'var(--surface)',
+                      padding: '1.25rem',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.75rem',
+                    }}
+                  >
+                    <h4 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 800 }}>
+                      Smart Margin Optimization
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Current RFQ margin target is optimized. Atlas AI predicts an 85% conversion win rate for standard delivery schedules.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

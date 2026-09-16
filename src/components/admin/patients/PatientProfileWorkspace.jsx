@@ -13,7 +13,7 @@ import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
 import { useDrawer } from '../../../context/DrawerContext';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
-import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase } from '@/lib/icons';
+import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2 } from '@/lib/icons';
 import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
 
 import { patientRepository } from '../../../repositories/patientRepository';
@@ -253,278 +253,39 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
     : (serverBundle?.orders || []);
 
   const displayName = patient?.name || `${patient?.firstName || ''} ${patient?.lastName || ''}`.trim() || patient?.email || 'Patient';
+  const [openSections, setOpenSections] = useState({
+    demographics: true,
+    careTeam: false,
+    prescriptions: false,
+    orders: false,
+    biomarkers: false,
+    activity: false,
+  });
 
-  const tabs = [
-    {
-      id: 'overview',
-      label: 'Patient Profile & Clinical Info',
-      icon: User,
-      content: (
-        <div className={styles.overviewGrid}>
-          {/* Left Column: Demographics Form (colSpan5) */}
-          <div className={styles.colSpan5} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className={styles.infoCard}>
-              <UniversalForm
-                schema={patientSchema}
-                initialData={patient}
-                initialMode="view"
-                onSubmit={handleUpdatePatient}
-                submitLabel="Save Changes"
-                customHeader={
-                  <h3
-                    style={{
-                      fontSize: '0.85rem',
-                      fontWeight: 800,
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                      marginBottom: '1rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    <User size={16} /> Demographics & Contact
-                  </h3>
-                }
-              />
-            </div>
+  const toggleSection = (sec) => {
+    setOpenSections(prev => {
+      const isCurrentlyOpen = prev[sec];
+      return {
+        demographics: !isCurrentlyOpen && sec === 'demographics',
+        careTeam: !isCurrentlyOpen && sec === 'careTeam',
+        prescriptions: !isCurrentlyOpen && sec === 'prescriptions',
+        orders: !isCurrentlyOpen && sec === 'orders',
+        biomarkers: !isCurrentlyOpen && sec === 'biomarkers',
+        activity: !isCurrentlyOpen && sec === 'activity',
+      };
+    });
+  };
 
-            {/* Portal Link */}
-            <PortalAccessPanel patient={patient} />
-          </div>
-
-          {/* Right Column: Clinical Status, Care Team & AI Summary (colSpan7) */}
-          <div className={styles.colSpan7} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* Care Team & Clinic Card */}
-            <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <h3 style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                  Clinic Assignment & Care Team
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setIsEditingCareTeam(!isEditingCareTeam)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '0.75rem',
-                    color: isEditingCareTeam ? '#dc2626' : '#0284c7',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontWeight: 600
-                  }}
-                >
-                  {isEditingCareTeam ? <><X size={12} /> Done</> : <><Edit2 size={12} /> Edit Assignment</>}
-                </button>
-              </div>
-
-              {isEditingCareTeam ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#f8fafc', padding: '0.875rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Primary Clinic</label>
-                    <ClinicPicker
-                      value={patient.clinicId || patient.clinic}
-                      clinicName={patient.clinic}
-                      onChange={async (selected) => {
-                        if (selected) {
-                          await handleUpdatePatient({
-                            clinicId: selected.clinicId || '',
-                            clinic: selected.clinicName || '',
-                            clinicName: selected.clinicName || ''
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Attending Physician</label>
-                    <PhysicianPicker
-                      value={patient.physicianId || patient.physician}
-                      physicianName={patient.physician}
-                      clinicFilter={patient.clinicId || patient.clinic}
-                      onChange={async (selected) => {
-                        if (selected) {
-                          await handleUpdatePatient({
-                            physicianId: selected.physicianId || '',
-                            physician: selected.physicianName || '',
-                            physicianName: selected.physicianName || ''
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', alignItems: 'center' }}>
-                  {patient.clinic && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 12px', backgroundColor: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
-                      🏥 {patient.clinic}
-                    </span>
-                  )}
-                  {patient.physicianId ? (
-                    <EntityLink type="physician" id={patient.physicianId} label={patient.physician || 'View Primary Doctor'} size="md" />
-                  ) : patient.physician ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 12px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
-                      🩺 {patient.physician}
-                    </span>
-                  ) : null}
-                  {prescriptions && prescriptions.length > 0 && (
-                    <EntityLink type="prescription" id={prescriptions[0].id} label={`Latest Rx: ${prescriptions[0].protocolName || 'View'}`} size="md" />
-                  )}
-                  {!patient.clinic && !patient.physician && (!prescriptions || prescriptions.length === 0) && (
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No clinic or doctor assigned yet</span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* AI Clinical Summary & Active Status */}
-            <div className={styles.aiCard}>
-              <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Activity size={16} /> Clinical Prescription Status
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {prescriptions && prescriptions.length > 0 ? (
-                  <>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                      <FileText size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
-                        {prescriptions.length} prescription(s) registered. Last on {prescriptions[0]?.createdAt?.seconds ? new Date(prescriptions[0].createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}.
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                      <Clock size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
-                        Current status: <strong>{prescriptions[0]?.status || 'pending'}</strong>.
-                      </span>
-                    </div>
-                    <button
-                      style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent('open-ai-chat', { 
-                          detail: { 
-                            mode: 'patient', 
-                            context: { 
-                              patientId: patient.id, 
-                              name: displayName,
-                              clinic: patient.clinic,
-                              prescriptionCount: prescriptions.length,
-                              lastPrescriptionStatus: prescriptions[0]?.status
-                            } 
-                          } 
-                        }));
-                      }}
-                    >
-                      <Activity size={14} /> Open AI Clinical Analysis
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                      <AlertCircle size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
-                        No prescriptions on record. You can draft an initial protocol.
-                      </span>
-                    </div>
-                    <button
-                      style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
-                      onClick={() => openDrawer('rx-builder', 'new', { initialPatient: { id: patient.id, name: displayName, email: patient.email } })}
-                    >
-                      <FilePlus size={14} /> Create First Prescription
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'records',
-      label: 'Prescriptions & Orders',
-      icon: FileText,
-      content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Universal Prescriptions Table */}
-          <UniversalPrescriptionsTable
-            patientId={patient.id}
-            title="Prescriptions"
-            subtitle={`All medical prescriptions on file for ${displayName}`}
-            hideHeader={false}
-            readOnly={false}
-          />
-
-          {/* Real Pharmacy Orders */}
-          <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ShoppingCart size={16} /> Pharmacy Orders & Tracking
-            </h3>
-            {loadingOrders ? (
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading orders...</div>
-            ) : orders && orders.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {orders.map((order) => (
-                  <div key={order.id} style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                      <CopyableId value={order.id} displayValue={order.id.slice(0, 8)} />
-                      <StatusChip status={order.status || 'processing'} />
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      Total: ${order.total || order.amount || 0} · Date: {order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                No pharmacy orders logged yet for this patient.
-              </div>
-            )}
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'biomarkers',
-      label: 'Lab & Biomarkers',
-      icon: FlaskConical || Activity,
-      content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <BiomarkersPanel 
-            patientId={patient.id} 
-            patientName={displayName} 
-            prescriptions={prescriptions || []} 
-          />
-        </div>
-      ),
-    },
-    {
-      id: 'activity',
-      label: 'Appointments & Tasks',
-      icon: CalendarIcon,
-      content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <PatientCalendar 
-            patient={patient} 
-            prescriptions={prescriptions || []} 
-            orders={orders || []} 
-          />
-          <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
-              Clinical Tasks & Reminders
-            </h3>
-            <div style={{ height: '400px' }}>
-              <TasksEngine entityId={patient.id} />
-            </div>
-          </div>
-        </div>
-      ),
-    },
-  ];
-
+  const collapseAll = () => {
+    setOpenSections({
+      demographics: false,
+      careTeam: false,
+      prescriptions: false,
+      orders: false,
+      biomarkers: false,
+      activity: false,
+    });
+  };
 
   return (
     <div className={styles.workspaceContainer}>
@@ -583,7 +344,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
             onClick={() => {
               window.dispatchEvent(new CustomEvent('open-ai-chat', { 
                 detail: { 
-                  mode: 'patient',
+                  mode: 'patient', 
                   moduleMode: 'patient',
                   productMode: false,
                   clearHistory: true,
@@ -689,10 +450,596 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
 
       {/* Main Content Layout */}
       <div className={styles.mainLayout}>
-        <div className={styles.contentArea}>
-          <Tabs activeTab={activeTab} onChange={setActiveTab} tabs={tabs} />
+        <div className={styles.contentArea} style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+          
+          {/* ── 2x2 Metric Strip (Golden Rule & High Polish) ── */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
+              marginBottom: '16px'
+            }}
+          >
+            {/* Active Prescriptions */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Active Prescriptions</span>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e40af' }}>
+                {prescriptions.length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#3b82f6' }}>Protocol(s)</span>
+              </div>
+            </div>
+
+            {/* Pharmacy Orders */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShoppingCart size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Dispensations & Orders</span>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#15803d' }}>
+                {orders.length} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#22c55e' }}>Order(s)</span>
+              </div>
+            </div>
+
+            {/* Supervisory Physician */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#ecfeff', color: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Stethoscope size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Attending Physician</span>
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0e7490', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {patient.physician || 'Direct Medical Desk'}
+              </div>
+            </div>
+
+            {/* Clinical & Portal Status */}
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#faf5ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Activity size={16} />
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Clinical Status</span>
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#7e22ce' }}>
+                {patient.status || 'Active'} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a855f7' }}>• Verified</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Toolbar: Focus Mode & Collapse All ── */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', padding: '0 2px' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Patient Clinical Record & Operations
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                Single-section focus
+              </span>
+              <button
+                type="button"
+                onClick={collapseAll}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  color: '#475569',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '3px 8px'
+                }}
+              >
+                Collapse All
+              </button>
+            </div>
+          </div>
+
+          {/* ── Accordion 1: Demographics, Contact & Portal Access ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('demographics')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.demographics ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f1f5f9', color: '#003666', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Demographics, Contact & Portal Access
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Personal identification, residential address, emergency phone, and portal linking
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#f1f5f9', color: '#475569' }}>
+                  Verified Record
+                </span>
+                {openSections.demographics ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.demographics && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                  {/* Left Column: Demographics Form */}
+                  <div className={styles.infoCard}>
+                    <UniversalForm
+                      schema={patientSchema}
+                      initialData={patient}
+                      initialMode="view"
+                      onSubmit={handleUpdatePatient}
+                      submitLabel="Save Changes"
+                      customHeader={
+                        <h3
+                          style={{
+                            fontSize: '0.85rem',
+                            fontWeight: 800,
+                            color: 'var(--text-muted)',
+                            textTransform: 'uppercase',
+                            marginBottom: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                          }}
+                        >
+                          <User size={16} /> Demographics & Identity
+                        </h3>
+                      }
+                    />
+                  </div>
+
+                  {/* Right Column: Portal Link & AI Summary */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <PortalAccessPanel patient={patient} />
+                    
+                    <div className={styles.aiCard}>
+                      <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Activity size={16} /> Clinical Prescription Overview
+                      </h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                        {prescriptions && prescriptions.length > 0 ? (
+                          <>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                              <FileText size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+                              <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
+                                {prescriptions.length} active prescription(s) registered. Latest status: <strong>{prescriptions[0]?.status || 'Active'}</strong>.
+                              </span>
+                            </div>
+                            <button
+                              style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
+                              onClick={() => {
+                                window.dispatchEvent(new CustomEvent('open-ai-chat', { 
+                                  detail: { 
+                                    mode: 'patient', 
+                                    context: { 
+                                      patientId: patient.id, 
+                                      name: displayName,
+                                      clinic: patient.clinic,
+                                      prescriptionCount: prescriptions.length,
+                                      lastPrescriptionStatus: prescriptions[0]?.status
+                                    } 
+                                  } 
+                                }));
+                              }}
+                            >
+                              <Activity size={14} /> Open AI Clinical Analysis
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                              <AlertCircle size={14} color="#0284c7" style={{ marginTop: '2px', flexShrink: 0 }} />
+                              <span style={{ fontSize: '0.85rem', color: '#0c4a6e' }}>
+                                No active prescriptions logged. You can draft an initial protocol.
+                              </span>
+                            </div>
+                            <button
+                              style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
+                              onClick={() => openDrawer('rx-builder', 'new', { initialPatient: { id: patient.id, name: displayName, email: patient.email } })}
+                            >
+                              <FilePlus size={14} /> Create First Prescription
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 2: Clinic Assignment & Care Team ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('careTeam')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.careTeam ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#ecfeff', color: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Stethoscope size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Supervisory Doctor & Clinic Assignment
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Assigned clinical center, supervisory practitioner, and direct medical responsibilities
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#ecfeff', color: '#0e7490' }}>
+                  {patient.clinic || 'Affiliated Clinic'}
+                </span>
+                {openSections.careTeam ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.careTeam && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ fontSize: '0.80rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+                    Care Team Configuration
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingCareTeam(!isEditingCareTeam)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '0.75rem',
+                      color: isEditingCareTeam ? '#dc2626' : '#0284c7',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: 700
+                    }}
+                  >
+                    {isEditingCareTeam ? <><X size={12} /> Done</> : <><Edit2 size={12} /> Edit Care Team Assignment</>}
+                  </button>
+                </div>
+
+                {isEditingCareTeam ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Primary Clinic</label>
+                      <ClinicPicker
+                        value={patient.clinicId || patient.clinic}
+                        clinicName={patient.clinic}
+                        onChange={async (selected) => {
+                          if (selected) {
+                            await handleUpdatePatient({
+                              clinicId: selected.clinicId || '',
+                              clinic: selected.clinicName || '',
+                              clinicName: selected.clinicName || ''
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '4px', display: 'block' }}>Attending Physician</label>
+                      <PhysicianPicker
+                        value={patient.physicianId || patient.physician}
+                        physicianName={patient.physician}
+                        clinicFilter={patient.clinicId || patient.clinic}
+                        onChange={async (selected) => {
+                          if (selected) {
+                            await handleUpdatePatient({
+                              physicianId: selected.physicianId || '',
+                              physician: selected.physicianName || '',
+                              physicianName: selected.physicianName || ''
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+                    {patient.clinic && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', backgroundColor: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
+                        🏥 {patient.clinic}
+                      </span>
+                    )}
+                    {patient.physicianId ? (
+                      <EntityLink type="physician" id={patient.physicianId} label={patient.physician || 'View Primary Doctor'} size="md" />
+                    ) : patient.physician ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600 }}>
+                        🩺 {patient.physician}
+                      </span>
+                    ) : null}
+                    {prescriptions && prescriptions.length > 0 && (
+                      <EntityLink type="prescription" id={prescriptions[0].id} label={`Latest Rx: ${prescriptions[0].protocolName || 'View'}`} size="md" />
+                    )}
+                    {!patient.clinic && !patient.physician && (!prescriptions || prescriptions.length === 0) && (
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No clinic or doctor assigned yet</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 3: Prescriptions & Magistral Formulations ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('prescriptions')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.prescriptions ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Prescriptions & Magistral Formulations
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Active compound formulations, API dosages, posology schedules, and dispensing status
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                  {prescriptions.length} Active Rx
+                </span>
+                {openSections.prescriptions ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.prescriptions && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                  <button
+                    onClick={() => {
+                      openDrawer('rx-builder', 'new', {
+                        initialPatient: { id: patient.id, name: displayName, email: patient.email },
+                        sourceModule: 'patient-profile',
+                      });
+                    }}
+                    className="gcp-btn-primary"
+                    style={{ fontSize: '0.80rem', padding: '6px 14px' }}
+                  >
+                    <FilePlus size={14} /> Create New Prescription
+                  </button>
+                </div>
+                <UniversalPrescriptionsTable
+                  patientId={patient.id}
+                  title="Patient Prescriptions"
+                  subtitle={`All authorized medical protocols issued for ${displayName}`}
+                  hideHeader={true}
+                  readOnly={false}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 4: Pharmacy Orders & Cold-Chain Delivery ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('orders')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.orders ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShoppingCart size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Pharmacy Orders & Insulated Logistics
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Fulfilled pharmacy deliveries, cold-chain packaging (2-8°C), and tracking history
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#f0fdf4', color: '#15803d' }}>
+                  {orders.length} Dispensations
+                </span>
+                {openSections.orders ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.orders && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                {loadingOrders ? (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading pharmacy orders...</div>
+                ) : orders && orders.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {orders.map((order) => (
+                      <div key={order.id} style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: '#f8fafc' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>PO #{order.code || order.orderCode || order.id.slice(0, 8)}</span>
+                            <CopyableId value={order.id} displayValue={order.id.slice(0, 8)} />
+                          </div>
+                          <StatusChip status={order.status || 'processing'} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.80rem', color: 'var(--text-muted)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <span>Total: <strong>${order.total || order.amount || 0}</strong></span>
+                          <span>Delivery: ❄️ 2-8°C Insulated Express</span>
+                          <span>Date: {order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'Recent'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic', padding: '1rem 0' }}>
+                    No pharmacy orders logged yet for this patient.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 5: Lab Biomarkers & Clinical Diagnostics ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('biomarkers')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.biomarkers ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#faf5ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FlaskConical size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Laboratory Biomarkers & Clinical Diagnostics
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Chronological blood biomarkers, hormone profiles, and therapy progression analytics
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#faf5ff', color: '#7e22ce' }}>
+                  Diagnostic Panel
+                </span>
+                {openSections.biomarkers ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.biomarkers && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                <BiomarkersPanel 
+                  patientId={patient.id} 
+                  patientName={displayName} 
+                  prescriptions={prescriptions || []} 
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion 6: Appointments & Clinical Tasks ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('activity')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.activity ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#fffbeb', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CalendarIcon size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Appointments & Clinical Action Items
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Scheduled follow-up consultations, calendar events, and operational reminders
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#fffbeb', color: '#b45309' }}>
+                  Schedule & Tasks
+                </span>
+                {openSections.activity ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.activity && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <PatientCalendar 
+                  patient={patient} 
+                  prescriptions={prescriptions || []} 
+                  orders={orders || []} 
+                />
+                <div style={{ backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border)', padding: '1.25rem' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                    Clinical Tasks & Reminders
+                  </h4>
+                  <div style={{ height: '380px' }}>
+                    <TasksEngine entityId={patient.id} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
   );
 }
+

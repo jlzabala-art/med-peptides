@@ -18,6 +18,7 @@ import PageHeader from '../ui/PageHeader';
 import DataModule from '../ui/DataModule';
 import StandardDrawer from '../ui/StandardDrawer';
 import CreateWholesellerDrawer from './CreateWholesellerDrawer';
+import WholesalerProfileWorkspace from './wholesellers/WholesalerProfileWorkspace';
 import Modal from '../ui/Modal';
 import AccountManagerSelect from '../ui/AccountManagerSelect';
 import { DataTableSkeleton } from '../ui';
@@ -294,6 +295,25 @@ export default function AdminWholesellersTabClient({ isMobile, initialData }) {
           refresh();
         }}
       />
+
+      {/* Wholesaler Profile Workspace Drawer */}
+      <StandardDrawer
+        isOpen={Boolean(selectedWholeseller)}
+        onClose={() => setSelectedWholeseller(null)}
+        title={selectedWholeseller?.name || 'Wholesaler Profile'}
+        width="820px"
+      >
+        {selectedWholeseller && (
+          <WholesalerProfileWorkspace
+            wholeseller={selectedWholeseller}
+            onClose={() => setSelectedWholeseller(null)}
+            onUpdate={async (id, data) => {
+              await handleUpdate(id, data);
+              refresh();
+            }}
+          />
+        )}
+      </StandardDrawer>
 
       {/* Assign Manager Modal */}
       <Modal

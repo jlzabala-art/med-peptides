@@ -22,7 +22,7 @@ export default function AdminCrmTab() {
       />
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
-        <Tabs tabs={tabs} defaultTab="crm" />
+        <Tabs tabs={tabs} defaultTab="leads" />
       </div>
     </div>
   );
