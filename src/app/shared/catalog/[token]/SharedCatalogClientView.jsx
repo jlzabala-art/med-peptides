@@ -769,6 +769,7 @@ export default function SharedCatalogClientView({
                   showProtocolsUnderProducts={showProtocolsUnderProducts}
                   protocols={protocols}
                   setSelectedPublicProtocol={setSelectedPublicProtocol}
+                  catalogMeta={catalogMeta}
                 />
               ))
             )}

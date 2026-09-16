@@ -4,10 +4,12 @@ import React from 'react';
 import { Package, CheckCircle2, ClipboardList } from 'lucide-react';
 import { resolveVariantClinicalImage } from '@/utils/clinicalImageResolver';
 import { sortVariantsAscending } from '@/utils/variantSorter';
+import ClinicalInfoRequestPanel from './ClinicalInfoRequestPanel';
 
 /**
  * SharedCatalogProductCard — Renders a single product card with all its variants,
- * pricing boxes, kit/unit counters, and optional clinical protocol badges.
+ * pricing boxes, kit/unit counters, optional clinical protocol badges, and
+ * zero-economic clinical information request micro-form.
  */
 export default function SharedCatalogProductCard({
   prod,
@@ -21,6 +23,7 @@ export default function SharedCatalogProductCard({
   showProtocolsUnderProducts,
   protocols,
   setSelectedPublicProtocol,
+  catalogMeta,
 }) {
   const startingPrice = (prod.minPrice > 0 ? prod.minPrice : (prod.variants[0]?.price || 0)) * fxMultiplier;
 
@@ -355,6 +358,9 @@ export default function SharedCatalogProductCard({
           </div>
         );
       })()}
+
+      {/* Zero-Economic Clinical Information Request Micro-Panel */}
+      <ClinicalInfoRequestPanel product={prod} catalogMeta={catalogMeta} />
     </div>
   );
 }
