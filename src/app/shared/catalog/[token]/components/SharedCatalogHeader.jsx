@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Download, ClipboardList, Clock } from 'lucide-react';
+import { Download, ClipboardList, Clock, ShieldCheck } from 'lucide-react';
 import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
 
@@ -87,8 +87,12 @@ export default function SharedCatalogHeader({
                 border: `1px solid ${theme.borderColor}`,
                 padding: '3px 10px',
                 borderRadius: '12px',
-                letterSpacing: '0.02em'
+                letterSpacing: '0.02em',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}>
+                <ShieldCheck size={12} />
                 {isProtocolCatalog ? 'Peptides & Protocols' : theme.tierLabel}
               </span>
             </div>
@@ -101,9 +105,6 @@ export default function SharedCatalogHeader({
                 📅 {catalogMeta.issuedAt || catalogMeta.iat
                   ? new Date(catalogMeta.issuedAt || catalogMeta.iat).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                   : new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-              </span>
-              <span className="header-meta-pill" style={{ borderColor: theme.borderColor, color: theme.accentColor }}>
-                🏷️ {priceTierLabel} ({theme.tierCode})
               </span>
               {/* Validity countdown pill */}
               {validity && (

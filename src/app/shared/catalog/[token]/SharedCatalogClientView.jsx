@@ -42,8 +42,8 @@ function getPharmaMarginTheme(priceSource, meta = {}) {
 
   if (src === 'cost' || src === 'b2b-dir') {
     return {
-      tierCode: 'DIR-TERMS',
-      tierLabel: 'Direct B2B Terms',
+      tierCode: 'INSTITUTIONAL DIRECT',
+      tierLabel: 'Institutional Direct',
       gradient: 'linear-gradient(135deg, #022c22 0%, #064e3b 50%, #047857 100%)',
       borderColor: 'rgba(52, 211, 153, 0.35)',
       glow: 'rgba(16, 185, 129, 0.25)',
@@ -53,8 +53,8 @@ function getPharmaMarginTheme(priceSource, meta = {}) {
   }
   if (src === 'wholesaler' || src === 'wholeseller') {
     return {
-      tierCode: margin ? `WHOLESALE (+${margin}%)` : 'WHOLESALE-PORTFOLIO',
-      tierLabel: margin ? `Wholesale (+${margin}%)` : 'B2B Wholesale Portfolio',
+      tierCode: margin ? `WHOLESALE (+${margin}%)` : 'WHOLESALE',
+      tierLabel: margin ? `Wholesale (+${margin}%)` : 'Wholesale Portfolio',
       gradient: 'linear-gradient(135deg, #00284d 0%, #003666 50%, #0284c7 100%)',
       borderColor: 'rgba(56, 189, 248, 0.35)',
       glow: 'rgba(14, 165, 233, 0.25)',
@@ -64,7 +64,7 @@ function getPharmaMarginTheme(priceSource, meta = {}) {
   }
   if (src === 'clinic') {
     return {
-      tierCode: margin ? `CLINICAL (+${margin}%)` : 'CLINICAL-TERMS',
+      tierCode: margin ? `CLINICAL (+${margin}%)` : 'CLINICAL',
       tierLabel: margin ? `Clinical (+${margin}%)` : 'Clinical Healthcare Terms',
       gradient: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)',
       borderColor: 'rgba(165, 180, 252, 0.35)',
@@ -75,8 +75,8 @@ function getPharmaMarginTheme(priceSource, meta = {}) {
   }
   if (src === 'retail') {
     return {
-      tierCode: 'MSRP-REF',
-      tierLabel: 'Clinical Reference Portfolio (MSRP)',
+      tierCode: 'REFERENCE',
+      tierLabel: 'Reference Portfolio (MSRP)',
       gradient: 'linear-gradient(135deg, #18181b 0%, #27272a 50%, #3f3f46 100%)',
       borderColor: 'rgba(212, 212, 216, 0.35)',
       glow: 'rgba(161, 161, 170, 0.25)',

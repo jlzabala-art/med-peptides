@@ -590,11 +590,11 @@ export function useSharedCatalogState({
   // ── Subtle institutional price tier label (no cost or internal margin exposure) ──
   const priceTierLabel = includePrices
     ? ({
-        cost:        'Institutional Terms (B2B-DIR)',
-        wholesaler:  'B2B Wholesale Portfolio',
-        wholeseller: 'B2B Wholesale Portfolio', // legacy alias
-        clinic:      'Clinical Healthcare Provider Terms',
-        retail:      'Clinical Reference Portfolio (MSRP)',
+        cost:        'Institutional Direct',
+        wholesaler:  'Wholesale Portfolio',
+        wholeseller: 'Wholesale Portfolio',
+        clinic:      'Clinical Healthcare Provider',
+        retail:      'Reference Portfolio (MSRP)',
       }[priceSource] || 'Verified Institutional Terms')
     : 'Clinical Vademecum (Reference Portfolio)';
 
