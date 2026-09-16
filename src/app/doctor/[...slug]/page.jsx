@@ -29,6 +29,7 @@ const DoctorResearch = dynamic(() => import('../../../templates/DoctorResearch')
 const CatalogCreatorFlow = dynamic(() => import('../../../components/wholesaler/CatalogCreatorFlow'), { ssr: false });
 const UserProfileTab = dynamic(() => import('../../../components/shared/UserProfileTab'), { ssr: false });
 const AdminCatalogTabClient = dynamic(() => import('../../../components/admin/AdminCatalogTabClient'), { ssr: false });
+const DoctorSharedInfoWidget = dynamic(() => import('../../../components/doctor/DoctorSharedInfoWidget'), { ssr: false });
 
 // ── Bridge wrappers ──────────────────────────────────────────────────────────
 function OverviewWrapper() {
@@ -190,6 +191,20 @@ function DoctorCatalogWrapper() {
   );
 }
 
+function SharedInfoWrapper() {
+  const { doctorId, doctorMeta } = useContext(DoctorContext) || {};
+  const router = useRouter();
+  return (
+    <div style={{ padding: '0 0.5rem 2rem' }}>
+      <DoctorSharedInfoWidget
+        doctorId={doctorId}
+        doctorName={doctorMeta?.name}
+        onNavigate={(target) => router.push(`/doctor/${target}`)}
+      />
+    </div>
+  );
+}
+
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
 export default function DynamicRoute({ params }) {
   const resolvedParams = React.use(params);
@@ -197,6 +212,8 @@ export default function DynamicRoute({ params }) {
   const path = slug.join('/');
 
   switch (path) {
+    case 'shared':
+    case 'shared-info': return <SharedInfoWrapper />;
     case 'catalog':
     case 'products': return <DoctorCatalogWrapper />;
     case 'new-prescription': return <NewPrescriptionWrapper />;

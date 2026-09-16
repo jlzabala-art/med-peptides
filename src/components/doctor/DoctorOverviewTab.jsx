@@ -34,6 +34,7 @@ import Spinner from '../ui/Spinner';
 import { useTranslation } from 'react-i18next';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import notifier from '../../services/NotificationService';
+import DoctorSharedInfoWidget from './DoctorSharedInfoWidget';
 
 // Dynamic Widgets
 import DraggableDashboard from '../widgets/core/DraggableDashboard';
@@ -170,53 +171,45 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
             </div>
             <div>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, letterSpacing: '-0.01em', color: '#ffffff' }}>
-                {isSimulatingDrErdmann ? 'Dr. Hanieh Erdmann • Clinical Command Hub' : 'Medical Director Hub'}
+                {isSimulatingDrErdmann 
+                  ? 'Dr. Hanieh Erdmann • Clinical Practice Cockpit' 
+                  : (doctorMeta?.name ? `${doctorMeta.name} • Clinical Practice Cockpit` : 'Clinical Practice Cockpit')}
               </h2>
               <span style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 500 }}>
-                {isSimulatingDrErdmann ? 'German Board Certified Specialist Dermatologist & Trichologist • Operational Overview' : `${doctorMeta?.name || 'Dr. Clinical Director'} • Operational Overview`}
+                {isSimulatingDrErdmann 
+                  ? 'German Board Certified Specialist Dermatologist & Trichologist • Active Consultations' 
+                  : (doctorMeta?.specialty ? `${doctorMeta.specialty} • Active Consultations` : 'Specialist Consultation & Active Peptide Therapies')}
               </span>
             </div>
           </div>
 
-          {/* Staged Workspace Cart Button */}
+          {/* Quick Action: New Clinical Prescription */}
           <button
             type="button"
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => setShowBuilder(!showBuilder)}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '10px 16px',
+              padding: '10px 18px',
               minHeight: '44px',
               borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.18)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              color: '#ffffff',
-              fontSize: '0.82rem',
+              backgroundColor: showBuilder ? '#ffffff' : '#38bdf8',
+              color: showBuilder ? '#003666' : '#0f172a',
+              border: 'none',
+              fontSize: '0.84rem',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
               transition: 'all 0.15s ease',
             }}
           >
-            <Briefcase size={16} />
-            <span>Workspace Cart</span>
-            <span
-              style={{
-                backgroundColor: '#38bdf8',
-                color: '#0f172a',
-                fontSize: '0.72rem',
-                fontWeight: 900,
-                padding: '2px 7px',
-                borderRadius: '99px',
-              }}
-            >
-              {wsItemsCount}
-            </span>
+            <Plus size={16} />
+            <span>{showBuilder ? 'Close Rx Form' : 'New Prescription'}</span>
           </button>
         </div>
 
-        {/* Quick Launch Action Chips (Mobile Horizontal Scrollable with 44px min touch targets) */}
+        {/* Quick Launch Clinical Action Chips */}
         <div
           style={{
             display: 'flex',
@@ -229,56 +222,6 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
         >
           <button
             type="button"
-            onClick={() => setShowBuilder(!showBuilder)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: showBuilder ? '#ffffff' : '#38bdf8',
-              color: showBuilder ? '#003666' : '#0f172a',
-              border: 'none',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
-          >
-            <Plus size={15} />
-            <span>{showBuilder ? 'Close Rx Form' : 'New Rx Prescription'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('open-quotation-wizard', { detail: { type: 'manual' } }));
-              notifier.info('Opening B2B Quotation Wizard');
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              color: '#ffffff',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <FileText size={15} />
-            <span>Create B2B Quote</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => {
               window.dispatchEvent(new CustomEvent('open-quick-create', { detail: { type: 'new-patient' } }));
             }}
@@ -289,7 +232,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               padding: '10px 16px',
               minHeight: '44px',
               borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
               border: '1px solid rgba(255, 255, 255, 0.25)',
               color: '#ffffff',
               fontSize: '0.82rem',
@@ -304,7 +247,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
 
           <button
             type="button"
-            onClick={() => onNavigate?.('catalog-builder')}
+            onClick={() => onNavigate?.('catalog')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -312,7 +255,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               padding: '10px 16px',
               minHeight: '44px',
               borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
               border: '1px solid rgba(255, 255, 255, 0.25)',
               color: '#ffffff',
               fontSize: '0.82rem',
@@ -321,8 +264,31 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               whiteSpace: 'nowrap',
             }}
           >
-            <Package size={15} />
-            <span>Catalog Builder</span>
+            <Pill size={15} />
+            <span>Lotusland Formulary</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onNavigate?.('protocols')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 16px',
+              minHeight: '44px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              color: '#ffffff',
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <FlaskConical size={15} />
+            <span>Clinical Protocols</span>
           </button>
 
           <button
@@ -335,7 +301,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               padding: '10px 16px',
               minHeight: '44px',
               borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              backgroundColor: 'rgba(255, 255, 255, 0.14)',
               border: '1px solid rgba(255, 255, 255, 0.25)',
               color: '#ffffff',
               fontSize: '0.82rem',
@@ -345,7 +311,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
             }}
           >
             <MessageSquare size={15} />
-            <span>Messages</span>
+            <span>Patient Inquiries</span>
           </button>
         </div>
       </div>
@@ -454,10 +420,10 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
             </p>
           </div>
           <button
-            onClick={() => onNavigate?.('catalog-builder')}
+            onClick={() => onNavigate?.('catalog')}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '0.65rem 1.1rem', borderRadius: '8px', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', width: 'fit-content' }}
           >
-            {t('doctor.overview.open_generator', 'View Catalog')} <ArrowRight size={16} />
+            {t('doctor.overview.open_generator', 'View Formulary')} <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -478,6 +444,14 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
           <UniversalOrderBuilder mode='prescription' onSaved={() => setShowBuilder(false)} onCanceled={() => setShowBuilder(false)} />
         </Card>
       )}
+
+      {/* 🌿 SHARED INFO & AUTHORIZED FORMULARIES / PROTOCOLS */}
+      <DoctorSharedInfoWidget
+        compact={true}
+        doctorId={doctorId}
+        doctorName={doctorMeta?.name}
+        onNavigate={onNavigate}
+      />
 
       {/* 👥 VERIFIED ACTIVE PATIENT DOSSIER & PRESCRIPTION SUMMARY */}
       {isSimulatingDrErdmann && (

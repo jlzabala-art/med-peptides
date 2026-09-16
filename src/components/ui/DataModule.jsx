@@ -60,6 +60,7 @@ export default function DataModule({
   bulkActions = [], // { label, icon, onClick, variant }
   mobileOverflowActions = [], // Added for MobilePageActions ••• menu
   breadcrumbs, // Array of breadcrumbs
+  panel, // Role/panel context (admin, doctor, patient, etc.)
   // Footer props
   lastUpdated,
   onRefresh,
@@ -207,6 +208,7 @@ export default function DataModule({
             icon={Icon}
             actions={finalActions}
             breadcrumbs={breadcrumbs}
+            panel={panel}
           />
         </div>
       )}

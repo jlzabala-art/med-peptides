@@ -47,15 +47,19 @@ export default function PageHeader({
   const router = useRouter();
   const pathname = usePathname();
 
-  const dashboardRoute = DASHBOARD_ROUTES[panel] || `/${panel}`;
-  const dashboardLabel = DASHBOARD_LABELS[panel] || 'Dashboard';
+  const effectivePanel = (panel && panel !== 'admin') 
+    ? panel 
+    : (pathname?.startsWith('/doctor') ? 'doctor' : (panel || 'admin'));
+
+  const dashboardRoute = DASHBOARD_ROUTES[effectivePanel] || `/${effectivePanel}`;
+  const dashboardLabel = DASHBOARD_LABELS[effectivePanel] || 'Dashboard';
   const isDashboardRoot = pathname === dashboardRoute || pathname === `${dashboardRoute}/`;
 
-  // Auto-generate breadcrumbs if not explicitly provided and not on root dashboard
-  const finalBreadcrumbs = breadcrumbs || (!isDashboardRoot ? [
+  // Auto-generate breadcrumbs if not explicitly set to false and not on root dashboard
+  const finalBreadcrumbs = (breadcrumbs === false || breadcrumbs === null) ? null : (breadcrumbs || (!isDashboardRoot ? [
     { label: `🏠 ${dashboardLabel}`, href: dashboardRoute },
     { label: title }
-  ] : null);
+  ] : null));
 
   // Determine default accent colors based on panel
   let defaultIconColor = 'var(--color-primary, #003666)';

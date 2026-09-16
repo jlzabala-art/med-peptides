@@ -190,34 +190,69 @@ export function useClinicalAI({
   const supportShownThisSession = useRef(false);
   const typingIntervalRef = useRef(null);
 
+  // Derive scoped user & role keys to guarantee complete AI context isolation
+  const getScopedUserKey = useCallback(() => {
+    if (typeof window === 'undefined') return 'anon';
+    const impersonated = sessionStorage.getItem('impersonatedDoctorId');
+    if (impersonated) return `doc_${impersonated}`;
+    if (userCtx?.uid) return `usr_${userCtx.uid}`;
+    return 'anon';
+  }, [userCtx?.uid]);
+
+  const getScopedRoleKey = useCallback(() => {
+    return contextMode || userCtx?.role || 'clinical';
+  }, [contextMode, userCtx?.role]);
+
+  const currentScopeUser = getScopedUserKey();
+  const currentScopeRole = getScopedRoleKey();
+
+  const getSessionsStorageKey = useCallback((u = currentScopeUser, r = currentScopeRole) => `clinicalAI_sessions_${u}_${r}`, [currentScopeUser, currentScopeRole]);
+  const getActiveSessionStorageKey = useCallback((u = currentScopeUser, r = currentScopeRole) => `clinicalAI_activeSession_${u}_${r}`, [currentScopeUser, currentScopeRole]);
+  const getMessagesStorageKey = useCallback((sid, u = currentScopeUser, r = currentScopeRole) => `clinicalAI_messages_${u}_${r}_${sid}`, [currentScopeUser, currentScopeRole]);
+
+  const getInitialGreeting = useCallback((r = currentScopeRole) => {
+    const isDoctor = r === 'doctor' || r === 'medical_director';
+    const initialGreeting = isDoctor
+      ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
+      : r === 'admin' 
+      ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
+      : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
+    return [{
+      role: 'assistant',
+      content: initialGreeting,
+      timestamp: Date.now()
+    }];
+  }, [currentScopeRole]);
+
   const [sessionId, setSessionId] = useState(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('clinicalAI_activeSessionId');
+      const u = (userCtx?.uid ? `usr_${userCtx.uid}` : (sessionStorage.getItem('impersonatedDoctorId') ? `doc_${sessionStorage.getItem('impersonatedDoctorId')}` : 'anon'));
+      const r = contextMode || userCtx?.role || 'clinical';
+      const stored = localStorage.getItem(`clinicalAI_activeSession_${u}_${r}`);
       if (stored) return stored;
-      // Prefix uid_ so the Cloud Function recognizes authenticated sessions
-      const uid = userCtx?.uid || null;
-      return uid ? `uid_${uid}_${uuidv4()}` : uuidv4();
+      return u !== 'anon' ? `uid_${u}_${uuidv4()}` : uuidv4();
     }
     return uuidv4();
   });
 
-  // When user logs in, upgrade the anonymous sessionId to a uid-prefixed one
-  // so the Cloud Function correctly identifies authenticated users (20+ queries/day)
+  // When user logs in or impersonation switches, stamp sessionId with scope
   useEffect(() => {
-    if (userCtx?.uid) {
+    if (userCtx?.uid || currentScopeUser !== 'anon') {
       setSessionId(prev => {
-        if (prev.startsWith(`uid_${userCtx.uid}`)) return prev; // already stamped
-        const newId = `uid_${userCtx.uid}_${uuidv4()}`;
-        safeSetLocalStorage('clinicalAI_activeSessionId', newId);
+        if (prev.startsWith(`uid_${currentScopeUser}`)) return prev;
+        const newId = `uid_${currentScopeUser}_${uuidv4()}`;
+        safeSetLocalStorage(getActiveSessionStorageKey(), newId);
         return newId;
       });
     }
-  }, [userCtx?.uid]);
+  }, [userCtx?.uid, currentScopeUser, getActiveSessionStorageKey]);
 
   const [sessions, setSessions] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('clinicalAI_sessions');
+        const u = (userCtx?.uid ? `usr_${userCtx.uid}` : (sessionStorage.getItem('impersonatedDoctorId') ? `doc_${sessionStorage.getItem('impersonatedDoctorId')}` : 'anon'));
+        const r = contextMode || userCtx?.role || 'clinical';
+        const saved = localStorage.getItem(`clinicalAI_sessions_${u}_${r}`);
         return saved ? JSON.parse(saved) : [];
       } catch {
         return [];
@@ -228,23 +263,27 @@ export function useClinicalAI({
 
   const [messages, setMessages] = useState(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(`clinicalAI_messages_${sessionId}`);
+      const u = (userCtx?.uid ? `usr_${userCtx.uid}` : (sessionStorage.getItem('impersonatedDoctorId') ? `doc_${sessionStorage.getItem('impersonatedDoctorId')}` : 'anon'));
+      const r = contextMode || userCtx?.role || 'clinical';
+      const storedSid = localStorage.getItem(`clinicalAI_activeSession_${u}_${r}`);
+      const sid = storedSid || sessionId;
+      const saved = localStorage.getItem(`clinicalAI_messages_${u}_${r}_${sid}`);
       const parsed = saved ? JSON.parse(saved) : null;
       if (parsed && parsed.length > 0) {
         return parsed;
       }
     }
-      const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
-      const initialGreeting = isDoctor
-        ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
-        : contextMode === 'admin' 
-        ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
-        : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
-      return [{
-        role: 'assistant',
-        content: initialGreeting,
-        timestamp: Date.now()
-      }];
+    const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
+    const initialGreeting = isDoctor
+      ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
+      : contextMode === 'admin' 
+      ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
+      : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
+    return [{
+      role: 'assistant',
+      content: initialGreeting,
+      timestamp: Date.now()
+    }];
   });
 
   const [sessionIntents, setSessionIntents] = useState([]);
@@ -292,21 +331,21 @@ export function useClinicalAI({
     }
   }, [isLoading, isTyping]);
 
-  // Save active session ID and update list
+  // Save active session ID and update list for this isolated user and role
   useEffect(() => {
-    safeSetLocalStorage('clinicalAI_activeSessionId', sessionId);
+    safeSetLocalStorage(getActiveSessionStorageKey(), sessionId);
     // Update sessions list if this session is new
     setSessions(prev => {
       if (prev.find(s => s.id === sessionId)) return prev;
       const newSessions = [{ 
         id: sessionId, 
-        title: 'New Research Thread', 
+        title: currentScopeRole === 'doctor' ? 'New Clinical Case' : 'New Research Thread', 
         timestamp: Date.now() 
       }, ...prev].slice(0, 15);
-      safeSetLocalStorage('clinicalAI_sessions', JSON.stringify(newSessions));
+      safeSetLocalStorage(getSessionsStorageKey(), JSON.stringify(newSessions));
       return newSessions;
     });
-  }, [sessionId]);
+  }, [sessionId, getActiveSessionStorageKey, getSessionsStorageKey, currentScopeRole]);
 
   // Update session title based on first user message
   useEffect(() => {
@@ -314,43 +353,81 @@ export function useClinicalAI({
     if (firstUserMsg) {
       setSessions(prev => {
         const updated = prev.map(s => s.id === sessionId ? { ...s, title: firstUserMsg.content.slice(0, 30) + '...' } : s);
-        safeSetLocalStorage('clinicalAI_sessions', JSON.stringify(updated));
+        safeSetLocalStorage(getSessionsStorageKey(), JSON.stringify(updated));
         return updated;
       });
     }
-  }, [messages, sessionId]);
+  }, [messages, sessionId, getSessionsStorageKey]);
+
+  // Cross-user and cross-role isolation observer: whenever active user or role changes, switch memory cleanly
+  const activeScopeRef = useRef(`${currentScopeUser}__${currentScopeRole}`);
+  useEffect(() => {
+    const currentScope = `${currentScopeUser}__${currentScopeRole}`;
+    if (activeScopeRef.current !== currentScope) {
+      activeScopeRef.current = currentScope;
+      queryCacheRef.current.clear();
+
+      let scopedSessions = [];
+      try {
+        const raw = localStorage.getItem(getSessionsStorageKey(currentScopeUser, currentScopeRole));
+        if (raw) scopedSessions = JSON.parse(raw);
+      } catch {}
+      setSessions(scopedSessions);
+
+      let targetSid = localStorage.getItem(getActiveSessionStorageKey(currentScopeUser, currentScopeRole));
+      if (!targetSid || !scopedSessions.some(s => s.id === targetSid)) {
+        targetSid = scopedSessions[0]?.id || (currentScopeUser !== 'anon' ? `uid_${currentScopeUser}_${uuidv4()}` : uuidv4());
+      }
+      setSessionId(targetSid);
+
+      let loadedMsgs = null;
+      try {
+        const rawMsgs = localStorage.getItem(getMessagesStorageKey(targetSid, currentScopeUser, currentScopeRole));
+        if (rawMsgs) loadedMsgs = JSON.parse(rawMsgs);
+      } catch {}
+
+      if (loadedMsgs && loadedMsgs.length > 0) {
+        setMessages(loadedMsgs);
+      } else {
+        setMessages(getInitialGreeting(currentScopeRole));
+      }
+      setSuggestions([]);
+      setSessionIntents([]);
+      activityRef.current = { messagesSent: 0, comparisonCount: 0 };
+    }
+  }, [currentScopeUser, currentScopeRole, getSessionsStorageKey, getActiveSessionStorageKey, getMessagesStorageKey, getInitialGreeting]);
 
   const createNewSession = useCallback(() => {
-    const newId = uuidv4();
+    const newId = currentScopeUser !== 'anon' ? `uid_${currentScopeUser}_${uuidv4()}` : uuidv4();
     setSessionId(newId);
     setSuggestions([]);
-    const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
-    const initialGreeting = isDoctor
-      ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
-      : contextMode === 'admin' 
-      ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
-      : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
-    setMessages([{
-      role: 'assistant',
-      content: initialGreeting,
-      timestamp: Date.now()
-    }]);
-  }, [contextMode]);
+    const freshGreeting = getInitialGreeting(currentScopeRole);
+    setMessages(freshGreeting);
+    safeSetLocalStorage(getActiveSessionStorageKey(), newId);
+    safeSetLocalStorage(getMessagesStorageKey(newId), JSON.stringify(freshGreeting));
+  }, [currentScopeUser, currentScopeRole, getInitialGreeting, getActiveSessionStorageKey, getMessagesStorageKey]);
 
   const loadSession = useCallback((id) => {
     setSessionId(id);
+    safeSetLocalStorage(getActiveSessionStorageKey(), id);
     setSuggestions([]);
-    const saved = localStorage.getItem(`clinicalAI_messages_${id}`);
+    const saved = localStorage.getItem(getMessagesStorageKey(id));
     if (saved) {
-      setMessages(JSON.parse(saved));
+      try {
+        setMessages(JSON.parse(saved));
+      } catch {
+        setMessages(getInitialGreeting(currentScopeRole));
+      }
+    } else {
+      setMessages(getInitialGreeting(currentScopeRole));
     }
-  }, []);
+  }, [getMessagesStorageKey, getInitialGreeting, currentScopeRole, getActiveSessionStorageKey]);
 
   const deleteSession = useCallback((id) => {
-    localStorage.removeItem(`clinicalAI_messages_${id}`);
+    localStorage.removeItem(getMessagesStorageKey(id));
     setSessions(prev => {
       const filtered = prev.filter(s => s.id !== id);
-      safeSetLocalStorage('clinicalAI_sessions', JSON.stringify(filtered));
+      safeSetLocalStorage(getSessionsStorageKey(), JSON.stringify(filtered));
       if (sessionId === id) {
         if (filtered.length > 0) {
           loadSession(filtered[0].id);
@@ -360,7 +437,7 @@ export function useClinicalAI({
       }
       return filtered;
     });
-  }, [sessionId, loadSession, createNewSession]);
+  }, [sessionId, loadSession, createNewSession, getMessagesStorageKey, getSessionsStorageKey]);
 
   const [queriesToday, setQueriesToday] = useState(0);
   const maxFreeQueries = 5;
@@ -413,30 +490,19 @@ export function useClinicalAI({
 
   useEffect(() => {
     if (messages.length > 0) {
-      safeSetLocalStorage(`clinicalAI_messages_${sessionId}`, JSON.stringify(messages));
+      safeSetLocalStorage(getMessagesStorageKey(sessionId), JSON.stringify(messages));
     }
-  }, [messages, sessionId]);
+  }, [messages, sessionId, getMessagesStorageKey]);
 
   const clearSession = useCallback(() => {
-    const isDoctor = contextMode === 'doctor' || contextMode === 'medical_director';
-    const initialGreeting = isDoctor
-      ? "Hello Doctor 👋 I'm your Clinical Decision Copilot. How can I assist with your patient evaluations, protocols, or biomarker reviews today?"
-      : contextMode === 'admin' 
-      ? "Hey! 👋 I'm your System Admin Assistant. How can I help you manage the platform today?" 
-      : "Hey! 👋 I'm your Research Assistant. How can I help you explore your optimization goals today?";
-    const defaultGreeting = [{
-      role: 'assistant',
-      content: initialGreeting,
-      timestamp: Date.now()
-    }];
+    const defaultGreeting = getInitialGreeting(currentScopeRole);
     setMessages(defaultGreeting);
     setSuggestions([]);
     setSessionIntents([]);
-    safeSetLocalStorage(`clinicalAI_messages_${sessionId}`, JSON.stringify(defaultGreeting));
-    localStorage.removeItem(`clinical_ai_session_${sessionId}`);
+    safeSetLocalStorage(getMessagesStorageKey(sessionId), JSON.stringify(defaultGreeting));
     activityRef.current = { messagesSent: 0, comparisonCount: 0 };
     exploredCompoundsRef.current = [];
-  }, [sessionId, contextMode]);
+  }, [sessionId, getMessagesStorageKey, getInitialGreeting, currentScopeRole]);
 
   const inferIntentFromMessage = useCallback((text) => {
     const lower = text.toLowerCase();
@@ -883,11 +949,14 @@ export function useClinicalAI({
           })),
           current_page: pathname,
           research_mode: true,
-          user_profile: userCtx ? {
-            goals: userCtx.goals || [],
-            interests: userCtx.interests || [],
+          user_profile: {
+            user_id: currentScopeUser,
+            role: currentScopeRole,
+            doctor_id: typeof window !== 'undefined' ? (sessionStorage.getItem('impersonatedDoctorId') || null) : null,
+            goals: userCtx?.goals || [],
+            interests: userCtx?.interests || [],
             research_level: activeBeginnerMode ? 'beginner' : (userCtx?.researchLevel || 'intermediate')
-          } : null,
+          },
           page_context: { 
             path: pathname,
             isProductPage: pathname.startsWith('/product/'),
@@ -909,17 +978,29 @@ export function useClinicalAI({
             ...(dynamicPageContext || {})
           },
           instructions: (() => {
+            const tenantPrivacyHeader = `
+=== STRICT USER & TENANT PRIVACY DIRECTIVE ===
+Active User Scope: ${currentScopeUser}
+Active Role Scope: ${currentScopeRole}
+1. ZERO CROSS-TENANT CONTAMINATION: You are operating in a strictly isolated session for THIS user (${currentScopeUser}) under the role (${currentScopeRole}).
+2. NEVER mention, assume, extrapolate, or leak information from any other user, doctor, patient, clinic, or system role.
+3. Treat any context or history outside this specific conversation as strictly confidential and non-existent.
+4. Only reference records, protocols, prescriptions, and formularies assigned to or explicitly shared with this user.
+==============================================
+`;
+
             // ───────────────────────────────────────────────────
             // RULE 1: PROTOCOL MODE — Clinical Protocols & Compendium
             // ───────────────────────────────────────────────────
             if (isProtocolLocation) {
               const protocolCtx = activeProductCtx?.protocol || (activeProductCtx?.phases ? activeProductCtx : null);
-              return buildProtocolSystemPrompt(protocolCtx, {
+              return `${tenantPrivacyHeader}
+${buildProtocolSystemPrompt(protocolCtx, {
                 forceEnglish: false,
                 protocols: protocols || [],
                 phase: activeProductCtx?.phase || null,
                 role: contextMode
-              });
+              })}`;
             }
 
             // ───────────────────────────────────────────────────
@@ -942,7 +1023,8 @@ export function useClinicalAI({
                 );
                 if (matched) productForPrompt = matched;
               }
-              return buildProductSystemPrompt(productForPrompt, { audience, forceEnglish: true });
+              return `${tenantPrivacyHeader}
+${buildProductSystemPrompt(productForPrompt, { audience, forceEnglish: true })}`;
             }
 
             // ───────────────────────────────────────────────────
@@ -950,7 +1032,8 @@ export function useClinicalAI({
             // ───────────────────────────────────────────────────
             if (isPrescriptionLocation) {
               const rxCtx = activeProductCtx || stickyProductContext || null;
-              return buildPrescriptionSystemPrompt(rxCtx, { forceEnglish: true });
+              return `${tenantPrivacyHeader}
+${buildPrescriptionSystemPrompt(rxCtx, { forceEnglish: true })}`;
             }
 
             // ───────────────────────────────────────────────────
@@ -958,7 +1041,8 @@ export function useClinicalAI({
             // ───────────────────────────────────────────────────
             if (isSupplierLocation) {
               const supplierCtx = activeProductCtx || stickyProductContext || null;
-              return buildSupplierSystemPrompt(supplierCtx, { forceEnglish: true });
+              return `${tenantPrivacyHeader}
+${buildSupplierSystemPrompt(supplierCtx, { forceEnglish: true })}`;
             }
 
             // ───────────────────────────────────────────────────
@@ -966,11 +1050,19 @@ export function useClinicalAI({
             // ───────────────────────────────────────────────────
             const currentActiveRole = activeProductCtx?.activeRole || userCtx?.role;
             if (['doctor', 'medical_director'].includes(currentActiveRole) || effectiveModuleMode === 'doctor') {
-              return `
+              const activeDoctorId = typeof window !== 'undefined' ? (sessionStorage.getItem('impersonatedDoctorId') || userCtx?.uid || 'doctor') : 'doctor';
+              const doctorDisplayName = typeof window !== 'undefined' ? (sessionStorage.getItem('impersonatedDoctorName') || userCtx?.name || 'Dr. Erdmann') : 'Doctor';
+              return `${tenantPrivacyHeader}
 --- CLINICAL OVERSIGHT & DOCTOR MODE ACTIVE ---
-You are "Clinical AI", the Atlas Health medical & clinical advisor. Help the physician evaluate clinical protocols, analyze patient cases, review prescriptions, and provide evidence-backed peptide intelligence.
-Active Role: ${currentActiveRole?.toUpperCase() || 'DOCTOR'}
-Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Clinical Oversight'}.
+You are "Clinical AI", the clinical decision copilot assisting ${doctorDisplayName} (Physician ID: ${activeDoctorId}).
+Active Role: DOCTOR / CLINICAL PRACTITIONER
+Current Workspace Context: ${externalPageContext?.label || externalPageContext?.activeTab || 'Clinical Practice'}.
+
+CLINICAL BOUNDARIES & DATA PRIVACY:
+- You are assisting ONLY this individual physician (${doctorDisplayName}).
+- You must strictly consider ONLY patients, prescriptions, protocols, and formularies belonging to or shared with this doctor.
+- NEVER access, assume, or reference data from other medical practices, other clinicians, or administrative system logs.
+- Support evidence-backed peptide intelligence, dosing protocols, biomarker review, and clinical contraindications for this doctor's assigned patients.
 MANDATORY: ALWAYS respond in ENGLISH regardless of the user's input language.
 `;
             }
@@ -979,7 +1071,7 @@ MANDATORY: ALWAYS respond in ENGLISH regardless of the user's input language.
             // RULE 6: ADMIN OPERATIONS (genérico, último recurso)
             // ───────────────────────────────────────────────────
             if (contextMode === 'admin' || currentActiveRole === 'admin') {
-              return `
+              return `${tenantPrivacyHeader}
 --- ADMIN MODE ACTIVE ---
 You are "Atlas AI", the Atlas Health administrative assistant. Help the administrator manage users, analyze business metrics, and audit the system.
 Current Tab: ${externalPageContext?.label || externalPageContext?.activeTab || 'Admin Portal'}.
@@ -989,7 +1081,7 @@ MANDATORY: ALWAYS respond in ENGLISH regardless of the user's input language.
 `;
             }
 
-            return `
+            return `${tenantPrivacyHeader}
 --- GENERAL CLINICAL & RESEARCH INTELLIGENCE MODE ---
 You are ClinicalAI, expert clinical research assistant.
 ${buildClinicalAITrainingBlock(detectedIntent, isB2B ? 'doctor' : 'patient')}

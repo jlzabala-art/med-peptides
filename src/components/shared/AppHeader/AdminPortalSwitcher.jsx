@@ -35,7 +35,7 @@ const PORTALS = [
   },
   {
     id: 'dr_hanieh_erdmann',
-    label: '🇩🇪 Dr. Hanieh Erdmann (DHA Simulation)',
+    label: '🇩🇪 Dr. Hanieh Erdmann',
     description: 'DHA-00013060-006 • Bedaya Polyclinic L.L.C. (Dubai)',
     icon: Stethoscope,
     route: '/doctor?simulate=dr-hanieh-erdmann',

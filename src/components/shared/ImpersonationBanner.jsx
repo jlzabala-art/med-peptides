@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useAdminRoleSimulation } from '@/hooks/admin/useAdminRoleSimulation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, X, ShieldAlert, LogOut } from '@/lib/icons';
 import { normalizeRole, ROLE_METADATA } from '@/constants/roles';
 
 export default function ImpersonationBanner() {
+  const pathname = usePathname();
   const { isSimulating, simulatedRole, impersonatedUser, exitImpersonation } = useAdminRoleSimulation();
   const { user, switchActiveRole } = useAuth();
   const [sessionImpersonating, setSessionImpersonating] = useState(false);
@@ -17,6 +19,10 @@ export default function ImpersonationBanner() {
       setSessionImpersonating(isSessionImp);
     }
   }, [user]);
+
+  // Si estamos en el portal médico o rol doctor, no mostrar ninguna advertencia de simulación
+  const isDoctorPortal = pathname?.startsWith('/doctor') || simulatedRole === 'doctor' || simulatedRole === 'dr_hanieh_erdmann';
+  if (isDoctorPortal) return null;
 
   const active = isSimulating || sessionImpersonating;
   if (!active) return null;

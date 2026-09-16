@@ -260,6 +260,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       subtitle={subtitle}
       icon={Users}
       hideHeader={hideHeader}
+      panel={viewMode === 'doctor' || effectiveDoctorId ? 'doctor' : 'admin'}
+      breadcrumbs={viewMode === 'doctor' || effectiveDoctorId ? false : undefined}
       actions={!readOnly ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <AIQuickActionButton
@@ -306,6 +308,8 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
         <PatientsKPIs 
           filteredCount={finalFiltered.length} 
           isFiltered={Boolean(searchTerm || filters.status || filters.clinic || filters.physician)} 
+          scopedPatients={effectiveDoctorId ? finalFiltered : null}
+          isDoctorMode={Boolean(effectiveDoctorId || viewMode === 'doctor')}
         />
       }
       filterOptions={[

@@ -55,7 +55,7 @@ const ALL_TABS = [
   { id: 'orders',                label: 'Orders',                icon: ShoppingBag,     perm: 'canBulkOrder' },
   { id: 'recommendations',       label: 'Recommendations',       icon: ClipboardList,   perm: 'canRecommend' },
   { id: 'protocols',             label: 'Protocols',             icon: FlaskConical,    alwaysOn: true },
-  { id: 'catalog-builder',       label: 'Catalog Builder',       icon: ShoppingBag,     alwaysOn: true },
+  { id: 'shared-info',           label: 'Shared with Me',        icon: Share2,          alwaysOn: true },
   { id: 'messages',              label: 'Messages',              icon: MessageSquare,   alwaysOn: true },
   { id: 'assistants',            label: 'Staff & Assistants',    icon: Users,           perm: 'manageStaff' },
   { id: 'settings',              label: 'Settings',              icon: Settings,        alwaysOn: true },
@@ -95,7 +95,14 @@ const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
       { id: 'prescriptions-history', label: 'Prescriptions & Lifecycle', icon: Pill },
       { id: 'new-prescription', label: 'New Prescription', icon: Plus },
       { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'protocols', label: 'Clinical Protocols', icon: FlaskConical },
       { id: 'appointments', label: 'Consultations', icon: Calendar },
+    ],
+  },
+  {
+    id: 'shared', label: 'Shared Info & Formularies', emoji: '🔗',
+    items: [
+      { id: 'shared-info', label: 'Shared with Me', icon: Share2 },
     ],
   },
   {
@@ -132,11 +139,11 @@ const DOCTOR_NAV_GROUPS = [
   {
     id: 'orders', label: 'Orders & Protocols', emoji: '📦',
     items: [
-      { id: 'orders',    label: 'Orders',    icon: ShoppingBag },
-      { id: 'catalog',   label: 'Lotusland Formulary', icon: ShoppingBag },
-      { id: 'protocols', label: 'Protocols', icon: FileText, disabled: false },
-      { id: 'catalog-builder', label: 'Catalog Builder', icon: Blocks, disabled: false },
-      { id: 'messages', label: 'Messages', icon: MessageSquare, disabled: false }
+      { id: 'orders',       label: 'Orders & Deliveries', icon: ShoppingBag },
+      { id: 'catalog',      label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'protocols',    label: 'Clinical Protocols',  icon: FileText, disabled: false },
+      { id: 'shared-info',  label: 'Shared with Me',      icon: Share2 },
+      { id: 'messages',     label: 'Messages',            icon: MessageSquare, disabled: false }
     ],
   },
   {
@@ -151,7 +158,7 @@ const DOCTOR_NAV_GROUPS = [
 // ── Main ───────────────────────────────────────────────────────────────────────
 import PanelShell from '../components/shell/PanelShell';
 import IndividualDoctorSimulationBanner from '../components/doctor/IndividualDoctorSimulationBanner';
-import { LayoutDashboard, Users, UserCheck, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker } from '@/lib/icons';
+import { LayoutDashboard, Users, UserCheck, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker, Share2 } from '@/lib/icons';
 
 export const DoctorContext = React.createContext({});
 
@@ -288,71 +295,7 @@ export default function DoctorDashboard({ children }) {
         roleContext="doctor"
         pageContext={{ activeTab }}
       >
-      {isSimulatingDrErdmann ? (
-        <IndividualDoctorSimulationBanner
-          doctor={DR_HANIEH_ERDMANN_PROFILE}
-          patientCount={1}
-          prescriptionCount={1}
-          onExit={handleExitSimulation}
-        />
-      ) : isAdmin ? (
-        <div style={{
-          background: '#fff7e6',
-          borderBottom: '1px solid #ffe7ba',
-          padding: '8px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: '13px',
-          color: '#d46b08',
-          gap: '12px',
-          flexWrap: 'wrap'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <Laptop size={16} />
-            <span><strong>Admin Impersonation Mode:</strong> Viewing portal as doctor:</span>
-            <select
-              value={selectedDoctorId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedDoctorId(id);
-                if (id === 'dr-hanieh-erdmann') {
-                  sessionStorage.setItem('impersonatedDoctorId', id);
-                  setSelectedDoctorProfile(DR_HANIEH_ERDMANN_PROFILE);
-                } else if (id) {
-                  sessionStorage.setItem('impersonatedDoctorId', id);
-                  const profile = doctorsList.find(d => d.id === id);
-                  setSelectedDoctorProfile(profile || null);
-                } else {
-                  sessionStorage.removeItem('impersonatedDoctorId');
-                  setSelectedDoctorProfile(null);
-                }
-              }}
-              style={{
-                padding: '4px 8px',
-                fontSize: '12px',
-                border: '1px solid #ffd591',
-                borderRadius: '4px',
-                background: 'var(--color-bg-surface)',
-                color: '#202124',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="">— Select Doctor (Viewing as Self) —</option>
-              <option value="dr-hanieh-erdmann" style={{ fontWeight: 'bold', color: '#003666' }}>
-                🇩🇪 Dr. Hanieh Erdmann (German Specialist • DHA-00013060-006 • Bedaya Polyclinic)
-              </option>
-              {doctorsList.filter(d => d.id !== 'dr-hanieh-erdmann').map(docItem => (
-                <option key={docItem.id} value={docItem.id}>
-                  Dr. {docItem.firstName || ''} {docItem.lastName || ''} ({docItem.email || 'No email'})
-                </option>
-              ))}
-            </select>
-          </div>
-          <span style={{ fontSize: '11px', color: '#8c8c8c', fontWeight: 600 }}>Developer Tool</span>
-        </div>
-      ) : null}
+
 
       <div style={{ padding: '1.5rem' }}>
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>

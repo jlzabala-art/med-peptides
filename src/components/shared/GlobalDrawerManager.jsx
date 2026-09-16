@@ -167,6 +167,7 @@ function PatientDrawerContent({ id, data: drawerData, onClose }) {
     <PatientProfileWorkspace 
       patient={{ ...patient, id: patient.id || id }} 
       initialTab={drawerData?.initialTab || 'overview'}
+      readOnly={drawerData?.readOnly || false}
       onClose={onClose} 
     />
   );

@@ -9,6 +9,7 @@ import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Briefcase from "lucide-react/dist/esm/icons/briefcase";
 import Pill from "lucide-react/dist/esm/icons/pill";
+import Share2 from "lucide-react/dist/esm/icons/share-2";
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -21,6 +22,7 @@ import { toast } from 'react-hot-toast';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { useDrawer } from '../../context/DrawerContext';
 import notifier from '../../services/NotificationService';
+import DoctorSharedInfoWidget from './DoctorSharedInfoWidget';
 
 export default function DoctorProtocolsTab({ doctorId }) {
   const [activeTab, setActiveTab] = useState('public');
@@ -33,6 +35,7 @@ export default function DoctorProtocolsTab({ doctorId }) {
   const { openDrawer } = useDrawer();
 
   const fetchProts = async (type) => {
+    if (type === 'shared') return;
     setLoading(true);
     try {
       const options = type === 'public' ? { visibility: 'public' } : { authorId: doctorId };
@@ -144,6 +147,23 @@ export default function DoctorProtocolsTab({ doctorId }) {
           >
             My Custom Protocols
           </button>
+          <button 
+            onClick={() => setActiveTab('shared')}
+            className="btn"
+            style={{ 
+              padding: '0.5rem 1rem', borderRadius: '8px', fontWeight: 800, fontSize: '0.85rem',
+              backgroundColor: activeTab === 'shared' ? '#003666' : 'white',
+              color: activeTab === 'shared' ? 'white' : '#475569',
+              border: '1px solid #cbd5e1',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Share2 size={15} color={activeTab === 'shared' ? '#93c5fd' : '#0284c7'} />
+            Shared with Me (Share Info)
+          </button>
         </div>
 
         <button 
@@ -154,7 +174,14 @@ export default function DoctorProtocolsTab({ doctorId }) {
         </button>
       </div>
 
-      {loading ? (
+      {activeTab === 'shared' ? (
+        <DoctorSharedInfoWidget
+          compact={false}
+          doctorId={doctorId}
+          initialTab="protocols"
+          onNavigate={() => {}}
+        />
+      ) : loading ? (
         <Spinner text="Loading protocols..." />
       ) : protocols.length === 0 ? (
         <Card>

@@ -118,9 +118,15 @@ export default function AppSidebar({
     }
   }, [isMobile, isOpen]);
 
-  // Auto-expand ONLY the group that contains the current active route (single-open accordion)
+  // Auto-expand groups: in doctor portal, expand all groups so options are immediately clear; elsewhere single-open
   useEffect(() => {
     if (!pathname) return;
+    if (pathname.startsWith('/doctor') && !isMobile) {
+      const allIds = filteredGroups.map(g => g.id);
+      setExpandedGroups(allIds);
+      return;
+    }
+
     const parts = pathname.split('/').filter(Boolean);
     const currentSlug = parts.length > 1 ? parts.slice(1).join('/') : '';
     let activeGroupId = null;
@@ -146,6 +152,10 @@ export default function AppSidebar({
   // Local visual expand/collapse with persistence and compact-laptop intelligence
   const [expanded, setExpanded] = React.useState(() => {
     if (typeof window !== 'undefined') {
+      // In doctor mode, keep sidebar ALWAYS expanded by default for maximum usability and clarity
+      if (window.location.pathname.startsWith('/doctor')) {
+        return true;
+      }
       const saved = localStorage.getItem('atlas_sidebar_expanded');
       if (saved !== null) return saved === 'true';
       // Auto-collapse on compact laptop screens (1024px to 1280px) to maximize table working area
@@ -153,6 +163,13 @@ export default function AppSidebar({
     }
     return true;
   });
+
+  // Whenever entering /doctor, ensure the sidebar is expanded
+  useEffect(() => {
+    if (pathname && pathname.startsWith('/doctor')) {
+      setExpanded(true);
+    }
+  }, [pathname]);
 
   const handleToggleExpanded = () => {
     setExpanded((prev) => {
