@@ -255,7 +255,13 @@ export function useClinicalAI({
       const detail = e.detail;
       setDynamicPageContext(detail);
       if (detail?.quickActions && detail.quickActions.length > 0) {
-        const prompts = detail.quickActions.map(a => a.prompt || a.label || a);
+        const prompts = detail.quickActions.map(a => {
+          if (typeof a === 'string') return { label: a, prompt: a };
+          return {
+            label: a.label || a.prompt || 'Action',
+            prompt: a.prompt || a.label || ''
+          };
+        });
         setSuggestions(prompts);
       }
     };
@@ -594,7 +600,10 @@ export function useClinicalAI({
     let displayText = null;
     
     if (suggestion && typeof suggestion === 'object' && !suggestion.nativeEvent) {
-      if (suggestion.message) {
+      if (suggestion.prompt) {
+        messageText = suggestion.prompt;
+        displayText = suggestion.displayText || suggestion.label;
+      } else if (suggestion.message) {
         messageText = suggestion.message;
         displayText = suggestion.displayText;
       } else if (suggestion.action === 'NAVIGATE') {

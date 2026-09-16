@@ -1067,6 +1067,14 @@ button:focus-visible, a:focus-visible {
   opacity: 0.95;
 }
 
+.clinical-assistant-container .quick-prompts-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.clinical-assistant-container .quick-prompts-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Brave */
+}
+
 /* ── Mobile Compact Spacing & Grid Reductions ── */
 @media (max-width: 768px) {
   .ca-message-list {

@@ -34,7 +34,7 @@ import ChatSuggestions from './components/ChatSuggestions';
 import ContextActionCards from './components/ContextActionCards';
 import SessionHistoryDrawer from './components/SessionHistoryDrawer';
 import ResearchDetailDrawer from './components/ResearchDetailDrawer';
-import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen, X } from '@/lib/icons';
+import { Scale, PanelLeft, Plus, Trash2, History, Sparkles, BookOpen, X, ChevronDown, ChevronUp, RefreshCw } from '@/lib/icons';
 
 export default function ClinicalAssistant({ 
   isOpen: externalIsOpen, 
@@ -92,6 +92,7 @@ export default function ClinicalAssistant({
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [comparisonSelection, setComparisonSelection] = useState([]);
   const [isPulsing, setIsPulsing] = useState(false);
+  const [isContextDetailsOpen, setIsContextDetailsOpen] = useState(false);
 
   const [mounted, setMounted] = useState(false);
 
@@ -689,164 +690,162 @@ export default function ClinicalAssistant({
           return (
             <div style={{
               backgroundColor: isPatientContext ? 'rgba(13, 148, 136, 0.05)' : isVariantContext ? 'rgba(194, 65, 12, 0.04)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.04)' : 'var(--surface-raised, #f8fafc)',
-              borderBottom: `1px solid ${isPatientContext ? 'rgba(13, 148, 136, 0.18)' : isVariantContext ? 'rgba(194, 65, 12, 0.18)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.15)' : 'var(--border-light, #e2e8f0)'}`,
-              padding: '0.45rem 1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.35rem'
+              borderBottom: `1px solid ${isPatientContext ? 'rgba(13, 148, 136, 0.15)' : isVariantContext ? 'rgba(194, 65, 12, 0.15)' : (isProductContext || isCatalogContext) ? 'rgba(124, 58, 237, 0.12)' : 'var(--border-light, #e2e8f0)'}`,
+              padding: '6px 14px',
+              transition: 'all 0.2s ease'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.5rem',
-                fontSize: '0.76rem',
-                color: isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : (isProductContext || isCatalogContext) ? '#7c3aed' : 'var(--text-muted, #64748b)',
-                fontWeight: 600
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '0.9rem' }}>
+              {/* Compact Breadcrumb Row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, overflow: 'hidden' }}>
+                  <span style={{ fontSize: '0.85rem', flexShrink: 0 }}>
                     {isPatientContext ? '🩺' : isVariantContext ? '🏷️' : isProductContext ? '🧬' : '📊'}
                   </span>
                   
-                  {/* Level pill badge */}
+                  {/* Level Tag */}
                   {(isCatalogContext || isProductContext || isVariantContext) && (
                     <span style={{
                       fontSize: '0.62rem',
                       fontWeight: 800,
-                      padding: '1px 5px',
+                      padding: '1px 6px',
                       borderRadius: '4px',
                       backgroundColor: levelBadgeBg,
                       color: levelBadgeColor,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase'
+                      flexShrink: 0,
+                      letterSpacing: '0.02em',
                     }}>
-                      {isVariantContext ? 'Tier 3 · Variant' : isProductContext ? 'Tier 2 · Product' : 'Tier 1 · Catalog'}
+                      {isVariantContext ? 'SKU' : isProductContext ? 'Product' : 'Catalog'}
                     </span>
                   )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    <span>{isPatientContext ? 'Active Patient:' : isVariantContext ? 'SKU Focus:' : isProductContext ? 'Active Focus:' : isCatalogContext ? 'Scope:' : 'Context:'}</span>
-                    <strong style={{ color: isPatientContext ? '#0f766e' : isVariantContext ? '#9a3412' : (isProductContext || isCatalogContext) ? '#5b21b6' : '#0f172a' }}>
-                      {entityTitle}
-                    </strong>
-
-                    {isVariantContext && effectiveContext.pricing?.marginPct != null && (
-                      <span style={{
-                        fontSize: '0.66rem',
-                        padding: '1px 6px',
-                        borderRadius: '6px',
-                        backgroundColor: '#ecfdf5',
-                        color: '#047857',
-                        fontWeight: 700
-                      }}>
-                        Margin: {effectiveContext.pricing.marginPct}%
-                      </span>
-                    )}
-
-                    {isProductContext && variantCount > 0 && (
-                      <span style={{
-                        fontSize: '0.66rem',
-                        padding: '1px 6px',
-                        borderRadius: '6px',
-                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
-                        color: '#6d28d9',
-                        fontWeight: 700
-                      }}>
-                        {variantCount} {variantCount === 1 ? 'format' : 'formats'}
-                      </span>
-                    )}
-
-                    {isCatalogContext && totalProductsCount > 0 && (
-                      <span style={{
-                        fontSize: '0.66rem',
-                        padding: '1px 6px',
-                        borderRadius: '6px',
-                        backgroundColor: 'rgba(0, 54, 102, 0.08)',
-                        color: '#003666',
-                        fontWeight: 700
-                      }}>
-                        {totalProductsCount} products {lowStockCount > 0 ? `· ${lowStockCount} low stock` : ''}
-                      </span>
-                    )}
-
-                    {category && (
-                      <span style={{ fontSize: '0.66rem', opacity: 0.85 }}>· {category}</span>
+                  {/* Breadcrumb Hierarchy */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.74rem', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {isVariantContext ? (
+                      <>
+                        <span style={{ color: '#64748b' }}>Catalog ›</span>
+                        <span style={{ color: '#64748b' }}>{effectiveContext.productName || 'Product'} ›</span>
+                        <strong style={{ color: '#9a3412' }}>{entityTitle}</strong>
+                      </>
+                    ) : isProductContext ? (
+                      <>
+                        <span style={{ color: '#64748b' }}>Catalog ›</span>
+                        <strong style={{ color: '#6d28d9' }}>{entityTitle}</strong>
+                      </>
+                    ) : isPatientContext ? (
+                      <>
+                        <span style={{ color: '#64748b' }}>Patient:</span>
+                        <strong style={{ color: '#0f766e' }}>{entityTitle}</strong>
+                      </>
+                    ) : (
+                      <>
+                        <strong style={{ color: '#0f172a' }}>{entityTitle}</strong>
+                        {totalProductsCount > 0 && (
+                          <span style={{ color: '#64748b', fontWeight: 600 }}>({totalProductsCount} items{lowStockCount > 0 ? ` · ${lowStockCount} low stock` : ''})</span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
 
-                {(isPatientContext || isProductContext || isVariantContext || dynamicPageContext) && (
+                {/* Right Controls: Details Toggle & Reset */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
                   <button
-                    onClick={clearActiveContext}
-                    title="Reset context to full catalog"
+                    type="button"
+                    onClick={() => setIsContextDetailsOpen(prev => !prev)}
                     style={{
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
-                      color: isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : '#8b5cf6',
-                      display: 'flex',
+                      color: '#64748b',
+                      display: 'inline-flex',
                       alignItems: 'center',
+                      gap: '3px',
                       padding: '2px 6px',
-                      borderRadius: '6px',
+                      borderRadius: '4px',
                       fontSize: '0.68rem',
-                      fontWeight: 700,
-                      gap: '4px',
-                      transition: 'all 0.2s',
-                      backgroundColor: 'rgba(0,0,0,0.03)'
+                      fontWeight: 600
                     }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.color = '#ef4444';
-                      e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.color = isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : '#8b5cf6';
-                      e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)';
-                    }}
+                    title="Toggle context details"
                   >
-                    <span>Reset Focus</span>
-                    <X size={11} />
+                    <span>{isContextDetailsOpen ? 'Hide' : 'Details'}</span>
+                    {isContextDetailsOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                   </button>
-                )}
-              </div>
 
-              {/* Quick Action Interactive Chips */}
-              {quickActions.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', overflowX: 'auto', paddingBottom: '2px' }}>
-                  {quickActions.map((qa, qi) => (
+                  {(isPatientContext || isProductContext || isVariantContext || dynamicPageContext) && (
                     <button
-                      key={qi}
-                      onClick={() => handleSend(qa.prompt)}
+                      type="button"
+                      onClick={clearActiveContext}
+                      title="Reset context to full catalog"
                       style={{
-                        padding: '2px 8px',
-                        borderRadius: '999px',
-                        backgroundColor: '#ffffff',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                        color: '#334155',
-                        fontSize: '0.68rem',
-                        fontWeight: 650,
+                        background: 'none',
+                        border: 'none',
                         cursor: 'pointer',
-                        whiteSpace: 'nowrap',
-                        display: 'flex',
+                        color: isPatientContext ? '#0d9488' : isVariantContext ? '#c2410c' : '#8b5cf6',
+                        display: 'inline-flex',
                         alignItems: 'center',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
                         gap: '3px',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-                        transition: 'all 0.15s'
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = levelBadgeBg;
-                        e.currentTarget.style.color = levelBadgeColor;
-                        e.currentTarget.style.borderColor = levelBadgeColor;
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.backgroundColor = '#ffffff';
-                        e.currentTarget.style.color = '#334155';
-                        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
+                        backgroundColor: 'rgba(0,0,0,0.03)'
                       }}
                     >
-                      {qa.label}
+                      <RefreshCw size={10} />
+                      <span>Reset</span>
                     </button>
-                  ))}
+                  )}
+                </div>
+              </div>
+
+              {/* Collapsible Progressive Disclosure Details */}
+              {isContextDetailsOpen && (
+                <div style={{
+                  marginTop: '8px',
+                  paddingTop: '8px',
+                  borderTop: '1px dashed rgba(0,0,0,0.08)',
+                  fontSize: '0.72rem',
+                  color: '#475569',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  alignItems: 'center'
+                }}>
+                  {isCatalogContext && (
+                    <>
+                      <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#ffffff', border: '1px solid #e2e8f0', fontWeight: 600 }}>
+                        📦 Total: <strong>{totalProductsCount} products</strong>
+                      </span>
+                      {lowStockCount > 0 && (
+                        <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontWeight: 700 }}>
+                          ⚠️ Low Stock: <strong>{lowStockCount} items</strong>
+                        </span>
+                      )}
+                      {category && (
+                        <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                          Category: <strong>{category}</strong>
+                        </span>
+                      )}
+                    </>
+                  )}
+                  {isProductContext && (
+                    <>
+                      {variantCount > 0 && (
+                        <span style={{ padding: '2px 8px', borderRadius: '6px', background: 'rgba(124,58,237,0.08)', color: '#6d28d9', fontWeight: 700 }}>
+                          {variantCount} Presentations Available
+                        </span>
+                      )}
+                      {category && (
+                        <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                          Therapeutic Area: <strong>{category}</strong>
+                        </span>
+                      )}
+                    </>
+                  )}
+                  {isVariantContext && effectiveContext.pricing?.marginPct != null && (
+                    <span style={{ padding: '2px 8px', borderRadius: '6px', background: '#ecfdf5', border: '1px solid #a7f3d0', color: '#047857', fontWeight: 700 }}>
+                      Commercial Margin: <strong>{effectiveContext.pricing.marginPct}%</strong>
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -867,8 +866,13 @@ export default function ClinicalAssistant({
           />
         )}
 
-        {/* Role-specific starter prompts (shown only when chat is empty) */}
-        {messages.length === 0 && !isLoading && (() => {
+        {/* Context Quick Actions (shown only on empty state when available) */}
+        {messages.length === 0 && !isLoading && contextActions && contextActions.length > 0 && (
+          <ContextActionCards cards={contextActions} onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
+        )}
+
+        {/* Role-specific starter prompts (shown only when chat is empty and no context actions are present) */}
+        {messages.length === 0 && !isLoading && (!contextActions || contextActions.length === 0) && (() => {
           const isProductContext = pageContext?.isProductPage || 
             Boolean(pageContext?.name || pageContext?.productName || pageContext?.entityName) ||
             (typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) ||
@@ -884,17 +888,27 @@ export default function ClinicalAssistant({
           if (!displayPrompts || displayPrompts.length === 0) return null;
 
           return (
-            <div style={{ padding: '1rem 1.25rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem', opacity: 0.7 }}>
+            <div style={{ padding: '0.75rem 1rem 0.5rem', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem', opacity: 0.7 }}>
                 {isProductContext ? 'Product Inquiry Starters' : 'Suggested Actions'}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <div 
+                className="quick-prompts-scroll"
+                style={{ 
+                  display: 'flex', 
+                  flexWrap: 'nowrap', 
+                  overflowX: 'auto', 
+                  gap: '0.4rem', 
+                  paddingBottom: '0.3rem',
+                  WebkitOverflowScrolling: 'touch'
+                }}
+              >
                 {displayPrompts.map((p, i) => (
                   <button
                     key={i}
                     onClick={() => handleSend(p.prompt || p.label)}
                     style={{
-                      padding: '0.4rem 0.8rem',
+                      padding: '0.4rem 0.75rem',
                       borderRadius: '999px',
                       backgroundColor: 'rgba(0,0,0,0.03)',
                       border: `1.5px solid ${themeAccent}33`,
@@ -904,7 +918,8 @@ export default function ClinicalAssistant({
                       cursor: 'pointer',
                       transition: 'all 0.18s',
                       whiteSpace: 'nowrap',
-                      lineHeight: 1.3
+                      lineHeight: 1.3,
+                      flexShrink: 0
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.backgroundColor = `${themeAccent}15`;
@@ -922,10 +937,6 @@ export default function ClinicalAssistant({
             </div>
           );
         })()}
-
-        {messages.length <= 1 && !pageContext?.isProductPage && !(pageContext?.name || pageContext?.productName || pageContext?.entityName) && !(typeof window !== 'undefined' && (window.location.pathname.startsWith('/product/') || window.location.pathname.startsWith('/supplements/'))) && !messages.some(m => m.content && /\b(retatrutide|tirzepatide|semaglutide|bpc-157|tb-500|cjc-1295|ipamorelin|aod-9604|epithalon|semax|selank|nad\+|motc-c|dosage|mechanism|peptide|protocol|vial|reconstitution)\b/i.test(m.content)) && (
-          <ContextActionCards cards={contextActions} onActionClick={(id, label, prompt) => handleSend(prompt || label)} />
-        )}
 
         <ChatMessageList 
           messages={messages}

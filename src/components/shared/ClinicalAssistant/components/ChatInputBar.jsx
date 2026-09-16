@@ -993,16 +993,19 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
       </AnimatePresence>
       {/* Smart Quick Prompts / Contextual Suggestions Bar */}
       {!showAutocomplete && !fileName && !(isLoading || isTyping) && (
-        <div style={{ position: 'relative', width: '100%' }}>
+        <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
           <div className="quick-prompts-fade-left" />
           <div className="quick-prompts-fade-right" />
           <div 
             className="quick-prompts-scroll"
             style={{ 
               display: 'flex', 
-              flexWrap: 'wrap',
-              gap: '0.5rem', 
-              paddingBottom: '0.75rem'
+              flexWrap: 'nowrap',
+              overflowX: 'auto',
+              gap: '0.45rem', 
+              padding: '0.35rem 0.6rem 0.65rem',
+              WebkitOverflowScrolling: 'touch',
+              alignItems: 'center'
             }}
           >
             {suggestions && suggestions.length > 0 ? (
@@ -1010,27 +1013,31 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                 const rawLabel = typeof s === 'string' ? s : (s.label || s.displayText || s.payload || s.name || s.title || '');
                 const cleanLabel = String(rawLabel).replace(/\bundefined\b/gi, '').trim();
                 if (!cleanLabel) return null;
+                const displayLabel = cleanLabel.length > 42 ? cleanLabel.slice(0, 40) + '…' : cleanLabel;
                 return (
                   <button
                     key={index}
                     onClick={() => onSend(s)}
+                    title={cleanLabel}
                     style={{
                       border: '1.5px solid #e2e8f0',
-                      backgroundColor: 'var(--color-bg-surface)',
-                      color: 'var(--color-text-secondary)',
+                      backgroundColor: 'var(--color-bg-surface, #ffffff)',
+                      color: 'var(--color-text-secondary, #475569)',
                       borderRadius: '20px',
                       padding: '0.45rem 0.85rem',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
+                      fontSize: '0.73rem',
+                      fontWeight: 600,
                       whiteSpace: 'nowrap',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
                       gap: '5px',
                       outline: 'none',
                       flexShrink: 0,
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                      minHeight: '38px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                      touchAction: 'manipulation'
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.backgroundColor = `${themeAccent}0D`;
@@ -1039,18 +1046,29 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       e.currentTarget.style.transform = 'translateY(-1px)';
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)';
-                      e.currentTarget.style.borderColor = 'var(--color-border)';
-                      e.currentTarget.style.color = 'var(--color-text-secondary)';
+                      e.currentTarget.style.backgroundColor = 'var(--color-bg-surface, #ffffff)';
+                      e.currentTarget.style.borderColor = '#e2e8f0';
+                      e.currentTarget.style.color = 'var(--color-text-secondary, #475569)';
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >
-                    {cleanLabel}
+                    {displayLabel}
                   </button>
                 );
               })
             ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', justifyContent: 'center' }}>
+              <div 
+                className="quick-prompts-scroll"
+                style={{ 
+                  display: 'flex', 
+                  flexWrap: 'nowrap', 
+                  overflowX: 'auto',
+                  gap: '0.45rem', 
+                  alignItems: 'center',
+                  width: '100%',
+                  WebkitOverflowScrolling: 'touch'
+                }}
+              >
               {(() => {
                 const isPatientContext = contextMode === 'patient' || pageContext?.mode === 'patient' || Boolean(pageContext?.patientId);
                 const patientName = pageContext?.name || 'this patient';
@@ -1096,7 +1114,6 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                   (contextMode === 'doctor' || contextMode === 'medical_director') ? CLINICAL_DOCTOR_QUICK_PROMPTS : 
                   RESEARCH_QUICK_PROMPTS);
 
-
                 return promptList.map((p, index) => (
                   <button
                     key={`quick-${index}`}
@@ -1108,21 +1125,23 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       }
                     }}
                     style={{
-                      border: `1px solid ${themeAccent}1C`,
-                      backgroundColor: 'var(--color-bg-app)',
-                      color: 'var(--color-text-primary)',
+                      border: `1px solid ${themeAccent}26`,
+                      backgroundColor: 'var(--color-bg-app, #f8fafc)',
+                      color: 'var(--color-text-primary, #0f172a)',
                       borderRadius: '20px',
                       padding: '0.45rem 0.85rem',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
+                      fontSize: '0.73rem',
+                      fontWeight: 600,
                       whiteSpace: 'nowrap',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      display: 'flex',
+                      display: 'inline-flex',
                       alignItems: 'center',
                       gap: '5px',
                       outline: 'none',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      minHeight: '38px',
+                      touchAction: 'manipulation'
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.backgroundColor = `${themeAccent}0F`;
@@ -1130,8 +1149,8 @@ Please perform a thorough clinical and research analysis of these compounds. Foc
                       e.currentTarget.style.transform = 'translateY(-1px)';
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = 'var(--color-bg-app)';
-                      e.currentTarget.style.borderColor = `${themeAccent}1C`;
+                      e.currentTarget.style.backgroundColor = 'var(--color-bg-app, #f8fafc)';
+                      e.currentTarget.style.borderColor = `${themeAccent}26`;
                       e.currentTarget.style.transform = 'translateY(0)';
                     }}
                   >

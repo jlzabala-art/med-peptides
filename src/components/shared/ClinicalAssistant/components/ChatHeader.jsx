@@ -190,15 +190,13 @@ export default function ChatHeader({
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
-              backgroundColor: 'rgba(124, 58, 237, 0.1)',
-              border: '1px solid rgba(124, 58, 237, 0.25)',
+              backgroundColor: 'rgba(124, 58, 237, 0.08)',
+              border: '1px solid rgba(124, 58, 237, 0.2)',
               padding: '2px 8px',
               borderRadius: '20px',
               fontSize: '0.62rem',
-              fontWeight: 850,
+              fontWeight: 700,
               color: '#7c3aed',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em',
               flexShrink: 0
             }} title="Product Catalog Intelligence active">
               <span>🔬</span>
@@ -215,55 +213,45 @@ export default function ChatHeader({
               padding: '2px 8px',
               borderRadius: '20px',
               fontSize: '0.62rem',
-              fontWeight: 850,
+              fontWeight: 700,
               color: '#1967d2',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em',
               flexShrink: 0
             }} title="Prescription scan is available in this session.">
               <span style={{ fontSize: '0.72rem' }}>📋</span>
-              <span>Prescription Scan Ready</span>
+              <span>Prescription Ready</span>
             </div>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: contextMode === 'admin' ? '0' : '0.1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '2px' }}>
           <div style={{ 
-            width: '5px',
-            height: '5px',
+            width: '6px',
+            height: '6px',
             borderRadius: '50%',
-            backgroundColor: themeAccent,
-            boxShadow: `0 0 6px ${themeAccent}`,
+            backgroundColor: '#10b981',
+            boxShadow: '0 0 6px rgba(16, 185, 129, 0.6)',
             animation: 'pulse 2s infinite',
             flexShrink: 0
           }} />
           <span style={{ 
-            fontSize: '0.62rem',
-            opacity: 0.9,
-            fontWeight: 800,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: '#5f6368',
+            fontSize: '0.66rem',
+            fontWeight: 600,
+            color: '#64748b',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
-          }} title={`Connection status: ${statusLabel}`}>
-            {statusLabel}
+          }} title={`Status: Live assistant connected`}>
+            {isProductContext && activeProductName ? `Live Focus: ${activeProductName}` : isCatalogContext ? 'Catalog Knowledge Active' : 'Assistant Connected'}
           </span>
-          {/* Quota pill — show for all users with correct limit */}
-          <>
-            <span style={{ fontSize: '0.5rem', color: '#dadce0', margin: '0 0.2rem' }}>|</span>
-            <span style={{ 
-              fontSize: '0.62rem',
-              fontWeight: 700,
-              color: queriesToday >= maxFreeQueries ? '#d93025' : isRegistered ? '#188038' : '#5f6368',
-              backgroundColor: queriesToday >= maxFreeQueries ? '#fce8e6' : isRegistered ? '#e6f4ea' : '#f1f3f4',
-              padding: '2px 6px',
-              borderRadius: '8px',
-              whiteSpace: 'nowrap'
-            }} title={`Used ${queriesToday} of ${maxFreeQueries} ${isRegistered ? 'registered' : 'free'} queries today.`}>
-              Quota: {queriesToday}/{maxFreeQueries} {isRegistered ? '✓' : ''}
-            </span>
-          </>
+          {/* Subtle quota indicator */}
+          <span style={{ fontSize: '0.55rem', color: '#cbd5e1', margin: '0 0.15rem' }}>•</span>
+          <span style={{ 
+            fontSize: '0.64rem',
+            fontWeight: 600,
+            color: queriesToday >= maxFreeQueries ? '#dc2626' : '#64748b',
+            whiteSpace: 'nowrap'
+          }} title={`Used ${queriesToday} of ${maxFreeQueries} queries today.`}>
+            {maxFreeQueries - queriesToday > 0 ? `${maxFreeQueries - queriesToday} queries remaining` : 'Daily quota reached'}
+          </span>
         </div>
       </div>
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
