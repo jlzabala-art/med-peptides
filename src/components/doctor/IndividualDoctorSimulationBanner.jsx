@@ -107,7 +107,7 @@ export default function IndividualDoctorSimulationBanner({
             }}
           >
             <Users size={12} color="#7dd3fc" />
-            <span>Strict Scope: <strong>{patientCount} Assigned Patients</strong></span>
+            <span>Strict Scope: <strong>{patientCount} Assigned {patientCount === 1 ? 'Patient' : 'Patients'}</strong></span>
           </span>
           <span
             style={{
@@ -121,7 +121,7 @@ export default function IndividualDoctorSimulationBanner({
             }}
           >
             <Pill size={12} color="#a7f3d0" />
-            <span><strong>{prescriptionCount} Prescriptions</strong></span>
+            <span><strong>{prescriptionCount} Active {prescriptionCount === 1 ? 'Prescription' : 'Prescriptions'}</strong></span>
           </span>
         </div>
 

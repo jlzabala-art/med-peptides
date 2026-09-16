@@ -122,19 +122,12 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
 
   const recent = prescriptions.slice(0, 5);
   
-  const drafts = isSimulatingDrErdmann ? 3 : (kpis?.pendingPrescriptions ?? prescriptions.filter(r => r.status === 'draft').length);
-  const active = isSimulatingDrErdmann ? 15 : (kpis?.activePrescriptions ?? prescriptions.filter(r => ['sent', 'viewed_by_patient', 'assigned_to_wholesaler', 'added_to_bulk'].includes(r.status)).length);
-  const fulfilled = isSimulatingDrErdmann ? 18 : (kpis?.activeOrders ?? prescriptions.filter(r => r.status === 'fulfilled').length);
-  const totalPatients = isSimulatingDrErdmann ? 12 : (kpis?.activePatients ?? patientCount);
+  const drafts = prescriptions.filter(r => r.status === 'draft').length;
+  const active = prescriptions.filter(r => ['sent', 'ordered', 'in_transit', 'assigned_to_wholesaler', 'added_to_bulk', 'active'].includes(r.status)).length || (isSimulatingDrErdmann ? 1 : 0);
+  const fulfilled = prescriptions.filter(r => ['fulfilled', 'delivered'].includes(r.status)).length || (isSimulatingDrErdmann ? 1 : 0);
+  const totalPatients = patients.length || (isSimulatingDrErdmann ? 1 : (kpis?.activePatients ?? patientCount));
   
   const isLoading = isLoadingPrescriptions || isLoadingKPIs;
-
-  const initialWidgetLayout = [
-    { id: 'widget-1', type: 'PatientRoster', props: { role: 'doctor' } },
-    { id: 'widget-2', type: 'ClinicalHistory', props: { role: 'doctor' } },
-    { id: 'widget-3', type: 'OrderTracking', props: { role: 'doctor', userId: doctorId } },
-    { id: 'widget-4', type: 'BillingInvoices', props: { role: 'doctor' } }
-  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2.5rem' }}>
@@ -357,8 +350,10 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
         </div>
       </div>
 
-      {/* 📊 CLINICAL COMMAND HUB WIDGET */}
-      <ClinicalCommandHub role="doctor" metrics={{ pendingPrescriptions: drafts, activePatients: totalPatients }} />
+      {/* 📊 CLINICAL COMMAND HUB WIDGET (Medical Director only, hidden in Dr. Erdmann simulation to avoid mock triage) */}
+      {!isSimulatingDrErdmann && (
+        <ClinicalCommandHub role="doctor" metrics={{ pendingPrescriptions: drafts, activePatients: totalPatients }} />
+      )}
 
       {/* ⚠️ PENDING DRAFTS ALERT BANNER */}
       {drafts > 0 && (
@@ -474,8 +469,8 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <ClipboardList size={22} color="#003666" />
               <div>
-                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a' }}>{t('doctor.overview.builder_form')}</div>
-                <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{t('doctor.overview.builder_form_desc')}</div>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a' }}>{t('doctor.overview.builder_form', 'New Clinical Prescription')}</div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{t('doctor.overview.builder_form_desc', 'Generate patient-tailored peptide compound orders')}</div>
               </div>
             </div>
             <button onClick={() => setShowBuilder(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '1.1rem', fontWeight: 800 }}>✕</button>
@@ -484,21 +479,51 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
         </Card>
       )}
 
-      {/* 📋 DYNAMIC DRAGGABLE DASHBOARD WIDGETS */}
-      <div style={{ marginTop: '0.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ClipboardList size={18} style={{ color: '#003666' }} />
-            Dynamic Clinical Dashboard
-          </h3>
-          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Customizable Widgets</span>
+      {/* 👥 VERIFIED ACTIVE PATIENT DOSSIER & PRESCRIPTION SUMMARY */}
+      {isSimulatingDrErdmann && (
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          padding: '1.25rem 1.5rem',
+          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Users size={18} color="#003666" />
+              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                Assigned Patient Clinical Record
+              </h3>
+            </div>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1e40af', padding: '3px 8px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+              Verified In Bedaya Polyclinic
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Patient Name</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Matin Rahim Delavar Rafiei</div>
+              <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>Female • DOB: 1984-06-15 (42 yrs)</div>
+            </div>
+
+            <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Medical File & Clinic</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666', marginTop: '2px' }}>PIN: 11774</div>
+              <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>Bedaya Polyclinic L.L.C. (Dubai)</div>
+            </div>
+
+            <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Active Prescription</div>
+              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>RX-BEDAYA-260915-11774</div>
+              <div style={{ fontSize: '0.76rem', color: '#16a34a', fontWeight: 700, marginTop: '2px' }}>Latanoprost + 17-α-Estradiol + IGrantine-F1</div>
+            </div>
+          </div>
         </div>
-        <DraggableDashboard 
-          availableWidgets={AVAILABLE_WIDGETS}
-          initialLayout={initialWidgetLayout}
-          onLayoutChange={(layout) => console.log('New layout saved:', layout)}
-        />
-      </div>
+      )}
 
     </div>
   );

@@ -70,11 +70,15 @@ export const DR_HANIEH_ERDMANN_PROFILE = {
   specialty: 'German Board Certified Specialist Dermatologist & Trichologist',
   license: 'DHA-00013060-006',
   clinicName: 'Bedaya Polyclinic L.L.C.',
-  clinicAddress: 'Al Razi Bldg 64, Block B, Dubai Healthcare City',
-  email: 'dr.erdmann@bedayaclinic.ae',
-  phone: '+971 4 333 3955',
-  patientCount: 12,
-  prescriptionCount: 18,
+  clinicAddress: 'Villa 2, Street 49th, Al Wasl, Dubai',
+  email: 'hanieh.erdmann@me.com',
+  phone: '+971 50 36123',
+  clinicPhone: '+971 4 333 3955',
+  germanMedicalId: '802790100115715',
+  medicalChamber: 'Ärztekammer Schleswig-Holstein',
+  clinic: 'Bedaya Polyclinic L.L.C.',
+  patientCount: 1,
+  prescriptionCount: 1,
   role: 'doctor',
   isIndividualDoctor: true
 };
@@ -287,8 +291,8 @@ export default function DoctorDashboard({ children }) {
       {isSimulatingDrErdmann ? (
         <IndividualDoctorSimulationBanner
           doctor={DR_HANIEH_ERDMANN_PROFILE}
-          patientCount={12}
-          prescriptionCount={18}
+          patientCount={1}
+          prescriptionCount={1}
           onExit={handleExitSimulation}
         />
       ) : isAdmin ? (
