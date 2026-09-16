@@ -177,6 +177,39 @@ export default function SharedCatalogClientView({
     }
   };
 
+  // ── Telemetry: Page-view beacon — fires once on mount, non-blocking ─────────
+  React.useEffect(() => {
+    if (!catalogMeta?.catalogId) return;
+    const payload = JSON.stringify({
+      event: 'view',
+      id: catalogMeta.catalogId,
+      viewedAt: new Date().toISOString(),
+      referrer: (typeof document !== 'undefined' ? document.referrer : '') || '',
+      screen: typeof window !== 'undefined'
+        ? `${window.innerWidth}x${window.innerHeight}`
+        : null,
+      userAgent: typeof navigator !== 'undefined'
+        ? navigator.userAgent.slice(0, 150)
+        : '',
+    });
+    // sendBeacon is fire-and-forget, won't block navigation or main thread
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      navigator.sendBeacon(
+        '/api/catalog/tracking-logs',
+        new Blob([payload], { type: 'application/json' })
+      );
+    } else {
+      // Fallback for environments that don't support sendBeacon
+      fetch('/api/catalog/tracking-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount only — intentionally omitting catalogMeta to fire once
+
   // ── Telemetry: Report cart interactions to backend for engagement tracking ──
   React.useEffect(() => {
     if (!catalogMeta?.catalogId || !cartItems || cartItems.length === 0) return;

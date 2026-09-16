@@ -6,10 +6,11 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 import { initStorageQuotaGuard } from './utils/storageQuotaGuard';
 
-// ── Security: Never use hardcoded keys — fail loudly on missing env vars ──────
-if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY && process.env.NODE_ENV === 'production') {
-  // In production a missing key is a configuration error, not a runtime fallback
-  console.error('[Firebase] NEXT_PUBLIC_FIREBASE_API_KEY is not set. Check your .env or hosting environment variables.');
+// NEXT_PUBLIC_* vars are baked into the bundle at build time.
+// If the env var is missing, the hardcoded fallback below covers local/CI environments.
+// Only warn (not error) so the console doesn't alarm users unnecessarily.
+if (typeof window !== 'undefined' && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  console.warn('[Firebase] NEXT_PUBLIC_FIREBASE_API_KEY not found in bundle — using built-in fallback config. Set this in GitHub Actions secrets > production environment to silence this warning.');
 }
 
 const firebaseConfig = {

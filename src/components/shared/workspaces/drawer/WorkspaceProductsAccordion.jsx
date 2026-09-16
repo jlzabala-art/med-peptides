@@ -50,14 +50,17 @@ export default function WorkspaceProductsAccordion({
     }));
   };
 
-  const filteredProtocols = (protocols || []).filter(p => {
+  // Defensive guards: use Array.isArray() instead of `|| []`
+  // because `|| []` only activates for falsy values — a truthy non-array object
+  // (e.g. a Firestore snapshot or paginated hook result) bypasses it and crashes .filter()
+  const filteredProtocols = (Array.isArray(protocols) ? protocols : []).filter(p => {
     if (!pickerSearch.trim()) return true;
     const q = pickerSearch.toLowerCase();
     return (p.name || p.title || '').toLowerCase().includes(q) ||
       (p.primary_goal || p.category || '').toLowerCase().includes(q);
   });
 
-  const filteredProducts = (availableProducts || []).filter(p => {
+  const filteredProducts = (Array.isArray(availableProducts) ? availableProducts : []).filter(p => {
     if (!pickerSearch.trim()) return true;
     const q = pickerSearch.toLowerCase();
     return (p.canonicalName || p.name || '').toLowerCase().includes(q) ||

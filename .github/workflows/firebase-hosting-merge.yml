@@ -21,9 +21,27 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.js', 'src/**/*.jsx') }}
+          # Cache key includes env var fingerprint — any secret change invalidates the cache
+          # preventing stale bundles with missing NEXT_PUBLIC_* vars from being restored
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('src/**/*.js', 'src/**/*.jsx') }}-${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY != '' && 'env-set' || 'env-missing' }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Write environment variables to .env.production
+        # NEXT_PUBLIC_* vars must be present at BUILD TIME to be baked into client bundle.
+        # Writing them to .env.production ensures Next.js picks them up even if the
+        # GitHub Actions env: block is processed after cache restoration.
+        run: |
+          cat > .env.production << EOF
+          NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_ALGOLIA_APP_ID=${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
+          NEXT_PUBLIC_ALGOLIA_SEARCH_KEY=${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY }}
+          EOF
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps

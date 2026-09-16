@@ -1,9 +1,32 @@
 'use client';
 
 import React from 'react';
-import { Download, ClipboardList } from 'lucide-react';
+import { Download, ClipboardList, Clock } from 'lucide-react';
 import Interactive3DScanCard from '@/components/catalog/Interactive3DScanCard';
 import PharmaBarcodeStamp from '@/components/catalog/PharmaBarcodeStamp';
+
+/** Returns { daysLeft, urgency } where urgency is 'ok' | 'warning' | 'critical' | 'expired' */
+function useValidityCountdown(catalogMeta) {
+  return React.useMemo(() => {
+    const validityDays = Number(catalogMeta?.validityDays) || 0;
+    if (!validityDays || (!catalogMeta?.issuedAt && !catalogMeta?.iat)) return null;
+    const issuedAt = new Date(catalogMeta.issuedAt || catalogMeta.iat);
+    const expiresAt = new Date(issuedAt.getTime() + validityDays * 24 * 60 * 60 * 1000);
+    const daysLeft = Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000));
+    let urgency = 'ok';
+    if (daysLeft <= 0)  urgency = 'expired';
+    else if (daysLeft <= 3)  urgency = 'critical';
+    else if (daysLeft <= 10) urgency = 'warning';
+    return { daysLeft, urgency, expiresAt };
+  }, [catalogMeta]);
+}
+
+const URGENCY_STYLES = {
+  ok:       { bg: 'rgba(34,197,94,0.18)',  border: '#4ade80', color: '#bbf7d0' },
+  warning:  { bg: 'rgba(234,179,8,0.22)',  border: '#fde047', color: '#fef08a' },
+  critical: { bg: 'rgba(239,68,68,0.22)',  border: '#f87171', color: '#fecaca' },
+  expired:  { bg: 'rgba(100,116,139,0.2)', border: '#94a3b8', color: '#cbd5e1' },
+};
 
 /**
  * SharedCatalogHeader — Executive header card with dynamic pharma margin theme,
@@ -27,6 +50,7 @@ export default function SharedCatalogHeader({
   setShowProtocolsUnderProducts,
   setActiveTab,
 }) {
+  const validity = useValidityCountdown(catalogMeta);
   return (
     <>
       {/* Executive Header Card with Dynamic Pharma Margin Theme & Optimized Laptop Layout */}
@@ -70,6 +94,29 @@ export default function SharedCatalogHeader({
               <span className="header-meta-pill" style={{ borderColor: pharmaMarginTheme.borderColor, color: pharmaMarginTheme.accentColor }}>
                 🏷️ {priceTierLabel} ({pharmaMarginTheme.tierCode})
               </span>
+              {/* Validity countdown pill */}
+              {validity && (
+                <span
+                  className="header-meta-pill"
+                  title={`Prices valid until ${validity.expiresAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`}
+                  style={{
+                    backgroundColor: URGENCY_STYLES[validity.urgency].bg,
+                    borderColor: URGENCY_STYLES[validity.urgency].border,
+                    color: URGENCY_STYLES[validity.urgency].color,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    animation: validity.urgency === 'critical' ? 'pulse 2s infinite' : 'none',
+                  }}
+                >
+                  <Clock size={11} />
+                  {validity.urgency === 'expired'
+                    ? 'Prices Expired'
+                    : validity.daysLeft === 1
+                    ? 'Prices valid for 1 day'
+                    : `Prices valid for ${validity.daysLeft} days`}
+                </span>
+              )}
               <span className="header-meta-pill pill-full">
                 {isProtocolCatalog
                   ? `📋 ${protocols.length} Clinical Protocols`

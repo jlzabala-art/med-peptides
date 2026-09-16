@@ -15,10 +15,39 @@
  */
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { sortVariantsAscending } from '@/utils/variantSorter';
 import { GOAL_TYPES, VALID_GOALS, GOAL_LABELS } from '@/constants/goalTypes';
 import { searchAlgolia } from '@/services/algoliaSearch';
+
+/**
+ * Reads a URL search param safely (client-side only, SSR returns default).
+ */
+function getUrlParam(key, fallback = '') {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    return new URLSearchParams(window.location.search).get(key) || fallback;
+  } catch { return fallback; }
+}
+
+/**
+ * Writes filter state back to the URL using replaceState (no re-render/router hop).
+ * Keys with default values are removed from the URL to keep links clean.
+ */
+function syncFiltersToUrl(filters) {
+  if (typeof window === 'undefined') return;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const set = (k, v, def) => v && v !== def ? params.set(k, v) : params.delete(k);
+    set('q',     filters.searchQuery,  '');
+    set('goals', filters.selectedGoals.join(','), '');
+    set('fmt',   filters.packagingMode, 'all');
+    set('dose',  filters.dosageFilter,  'all');
+    const qs = params.toString();
+    const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, '', newUrl);
+  } catch { /* non-blocking */ }
+}
 
 // ── Shipping destinations ─────────────────────────────────────────────────────
 export const SHIPPING_DESTINATIONS = [
@@ -125,13 +154,27 @@ export function useSharedCatalogState({
 
   const catalogId = catalogMeta?.catalogId || 'default';
 
-  // ── Filters ────────────────────────────────────────────────────────────────
-  const [activeTab,          setActiveTab]          = useState(isProtocolCatalog ? 'protocols' : 'products');
-  const [searchQuery,        setSearchQuery]        = useState('');
-  const [selectedGoals,      setSelectedGoals]      = useState([]); // array of goal ids, empty = all
-  const [dosageFilter,       setDosageFilter]       = useState('all');
-  const [routeFilter,        setRouteFilter]        = useState('all');
-  const [packagingMode,      setPackagingMode]      = useState('all'); // 'all' | 'kits' | 'units'
+  // ── Filters — initialized from URL params if present ──────────────────────
+  const [activeTab,     setActiveTab]     = useState(isProtocolCatalog ? 'protocols' : 'products');
+  const [searchQuery,   setSearchQuery]   = useState(() => getUrlParam('q', ''));
+  const [selectedGoals, setSelectedGoals] = useState(() => {
+    const raw = getUrlParam('goals', '');
+    if (!raw) return [];
+    return raw.split(',').filter(g => VALID_GOALS.has(g));
+  });
+  const [dosageFilter,  setDosageFilter]  = useState(() => getUrlParam('dose', 'all'));
+  const [routeFilter,   setRouteFilter]   = useState('all');
+  const [packagingMode, setPackagingMode] = useState(() => getUrlParam('fmt', 'all'));
+
+  // ── Sync filter changes back to URL (debounced, non-blocking) ─────────────
+  const syncTimerRef = useRef(null);
+  useEffect(() => {
+    clearTimeout(syncTimerRef.current);
+    syncTimerRef.current = setTimeout(() => {
+      syncFiltersToUrl({ searchQuery, selectedGoals, packagingMode, dosageFilter });
+    }, 400);
+    return () => clearTimeout(syncTimerRef.current);
+  }, [searchQuery, selectedGoals, packagingMode, dosageFilter]);
 
   // Algolia Instant Search integration with typo-tolerance & clinical synonyms
   const [algoliaMatchProductIds, setAlgoliaMatchProductIds] = useState(null);
