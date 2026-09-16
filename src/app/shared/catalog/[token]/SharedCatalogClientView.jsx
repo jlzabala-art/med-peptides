@@ -138,6 +138,7 @@ export default function SharedCatalogClientView({
     selectedCategory, setSelectedCategory,
     dosageFilter, setDosageFilter,
     packagingMode, setPackagingMode,
+    routeFilter, setRouteFilter,
     currentCurrency, setCurrentCurrency,
     selectedShipping, setSelectedShipping,
     activeShipping,
@@ -742,6 +743,8 @@ export default function SharedCatalogClientView({
           setPackagingMode={setPackagingMode}
           dosageFilter={dosageFilter}
           setDosageFilter={setDosageFilter}
+          routeFilter={routeFilter}
+          setRouteFilter={setRouteFilter}
           protocols={protocols}
           productsWithProtocolsCount={productsWithProtocolsCount}
           onlyWithProtocols={onlyWithProtocols}

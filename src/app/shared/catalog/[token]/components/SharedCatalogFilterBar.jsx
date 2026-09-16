@@ -25,6 +25,8 @@ export default function SharedCatalogFilterBar({
   setPackagingMode,
   dosageFilter,
   setDosageFilter,
+  routeFilter = 'all',
+  setRouteFilter,
   // Protocol chips
   protocols,
   productsWithProtocolsCount,
@@ -35,8 +37,55 @@ export default function SharedCatalogFilterBar({
   // Result count
   displayedProducts,
 }) {
+  const ROUTE_LABELS = {
+    injectable: { label: 'Injectable / SubQ', icon: '💉' },
+    nasal:      { label: 'Nasal Spray', icon: '👃' },
+    oral:       { label: 'Oral / Capsules', icon: '💊' },
+    topical:    { label: 'Topical / Hair', icon: '💧' },
+  };
+
+  const hasActiveFilters = Boolean(
+    searchQuery ||
+    (selectedGoals && selectedGoals.length > 0) ||
+    packagingMode !== 'all' ||
+    dosageFilter !== 'all' ||
+    (routeFilter && routeFilter !== 'all') ||
+    onlyWithProtocols
+  );
+
+  const handleClearAll = () => {
+    if (setSearchQuery) setSearchQuery('');
+    if (clearGoals) clearGoals();
+    if (setPackagingMode) setPackagingMode('all');
+    if (setDosageFilter) setDosageFilter('all');
+    if (setRouteFilter) setRouteFilter('all');
+    if (setOnlyWithProtocols) setOnlyWithProtocols(false);
+  };
+
+  const formatButtonLabel = () => {
+    if (dosageFilter === 'high_dose') return 'High Dose (≥10mg)';
+    if (packagingMode === 'kits') return '10-Vial Kits';
+    if (packagingMode === 'units') return 'Single Vials (1–9)';
+    if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
+      return ROUTE_LABELS[routeFilter].label;
+    }
+    return 'All Formats & Kits';
+  };
+
+  const formatButtonIcon = () => {
+    if (dosageFilter === 'high_dose') return '💪';
+    if (packagingMode === 'kits') return '📦';
+    if (packagingMode === 'units') return '🧪';
+    if (routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter]) {
+      return ROUTE_LABELS[routeFilter].icon;
+    }
+    return '✨';
+  };
+
+  const isFormatActive = packagingMode !== 'all' || dosageFilter === 'high_dose' || (routeFilter && routeFilter !== 'all');
+
   return (
-    <div className="filter-bar" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="filter-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div className="catalog-filter-row">
         {/* Search Input */}
         <div className="catalog-search-box" style={{ flex: '1 1 260px' }}>
@@ -134,7 +183,7 @@ export default function SharedCatalogFilterBar({
                 <div style={{
                   position: 'absolute',
                   top: '46px',
-                  right: 0,
+                  left: 0,
                   width: '320px',
                   maxWidth: '92vw',
                   backgroundColor: '#ffffff',
@@ -142,29 +191,27 @@ export default function SharedCatalogFilterBar({
                   boxShadow: '0 12px 30px -4px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08)',
                   border: '1px solid #e2e8f0',
                   zIndex: 1000,
-                  padding: '10px',
+                  padding: '8px',
                   maxHeight: '380px',
                   overflowY: 'auto'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 6px 8px', borderBottom: '1px solid #f1f5f9', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 8px', borderBottom: '1px solid #f1f5f9' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Clinical Goals (Multi-Select)
+                      Filter by Clinical Goal
                     </span>
-                    {selectedGoals.length > 0 ? (
+                    {selectedGoals.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => clearGoals()}
-                        style={{ border: 'none', background: 'transparent', color: '#dc2626', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                        onClick={clearGoals}
+                        style={{ border: 'none', background: 'none', color: '#2563eb', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                       >
-                        Reset All
+                        Clear all
                       </button>
-                    ) : (
-                      <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Select one or more</span>
                     )}
                   </div>
 
                   <div
-                    onClick={() => clearGoals()}
+                    onClick={() => { clearGoals(); setIsGoalDropdownOpen(false); }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -172,14 +219,27 @@ export default function SharedCatalogFilterBar({
                       padding: '8px 10px',
                       borderRadius: '8px',
                       cursor: 'pointer',
-                      backgroundColor: selectedGoals.length === 0 ? '#f0fdf4' : 'transparent',
-                      marginBottom: '4px'
+                      backgroundColor: selectedGoals.length === 0 ? '#eff6ff' : 'transparent',
+                      transition: 'background 0.12s ease',
+                      marginTop: '4px'
                     }}
                   >
-                    <span style={{ fontSize: '0.82rem', fontWeight: selectedGoals.length === 0 ? 800 : 600, color: selectedGoals.length === 0 ? '#15803d' : '#1e293b' }}>
-                      ✨ All Clinical Goals
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1rem' }}>🌐</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: selectedGoals.length === 0 ? 800 : 500, color: selectedGoals.length === 0 ? '#1d4ed8' : '#334155' }}>
+                        All Clinical Goals
+                      </span>
+                    </div>
+                    <span style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      color: selectedGoals.length === 0 ? '#2563eb' : '#64748b',
+                      backgroundColor: selectedGoals.length === 0 ? '#dbeafe' : '#f1f5f9',
+                      padding: '2px 6px',
+                      borderRadius: '6px'
+                    }}>
+                      {products.length}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>({products.length})</span>
                   </div>
 
                   {availableGoals?.map(goal => {
@@ -196,23 +256,23 @@ export default function SharedCatalogFilterBar({
                           borderRadius: '8px',
                           cursor: 'pointer',
                           backgroundColor: isChecked ? '#eff6ff' : 'transparent',
-                          transition: 'background 0.12s ease',
-                          gap: '10px'
+                          transition: 'background 0.12s ease'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => {}}
-                            style={{ accentColor: '#003666', width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+                            style={{ cursor: 'pointer', accentColor: '#2563eb' }}
                           />
                           <span style={{
                             fontSize: '0.82rem',
                             fontWeight: isChecked ? 700 : 500,
                             color: isChecked ? '#1e40af' : '#1e293b',
-                            lineHeight: 1.3,
-                            wordBreak: 'break-word'
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
                           }}>
                             {goal.label}
                           </span>
@@ -236,7 +296,7 @@ export default function SharedCatalogFilterBar({
             )}
           </div>
 
-          {/* Format & Packaging Dropdown */}
+          {/* Format, Packaging & Route Dropdown */}
           <div className="format-dropdown-container" style={{ position: 'relative', flex: '0 1 240px', minWidth: '200px', boxSizing: 'border-box' }}>
             <button
               type="button"
@@ -248,8 +308,8 @@ export default function SharedCatalogFilterBar({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: '8px',
-                backgroundColor: (packagingMode !== 'all' || dosageFilter === 'high_dose') ? '#f0fdf4' : '#ffffff',
-                border: (packagingMode !== 'all' || dosageFilter === 'high_dose') ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
+                backgroundColor: isFormatActive ? '#f0fdf4' : '#ffffff',
+                border: isFormatActive ? '1.5px solid #16a34a' : '1px solid #cbd5e1',
                 borderRadius: '8px',
                 padding: '0 12px',
                 cursor: 'pointer',
@@ -259,23 +319,17 @@ export default function SharedCatalogFilterBar({
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                 <span style={{ fontSize: '1rem', flexShrink: 0 }}>
-                  {dosageFilter === 'high_dose' ? '💪' : packagingMode === 'kits' ? '📦' : packagingMode === 'units' ? '🧪' : '✨'}
+                  {formatButtonIcon()}
                 </span>
                 <span style={{
                   fontSize: '0.82rem',
                   fontWeight: 700,
-                  color: (packagingMode !== 'all' || dosageFilter === 'high_dose') ? '#15803d' : '#0f172a',
+                  color: isFormatActive ? '#15803d' : '#0f172a',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }}>
-                  {dosageFilter === 'high_dose'
-                    ? 'High Dose (≥10mg)'
-                    : packagingMode === 'kits'
-                    ? '10-Vial Kits'
-                    : packagingMode === 'units'
-                    ? 'Single Vials (1–9)'
-                    : 'All Formats & Kits'}
+                  {formatButtonLabel()}
                 </span>
               </div>
               <ChevronDown size={14} color="#64748b" style={{ transform: isFormatDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
@@ -291,7 +345,7 @@ export default function SharedCatalogFilterBar({
                   position: 'absolute',
                   top: '46px',
                   right: 0,
-                  width: '270px',
+                  width: '275px',
                   maxWidth: '92vw',
                   backgroundColor: '#ffffff',
                   borderRadius: '12px',
@@ -302,7 +356,7 @@ export default function SharedCatalogFilterBar({
                 }}>
                   <div style={{ padding: '4px 8px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Format & Presentation
+                      Format & Packaging
                     </span>
                   </div>
 
@@ -314,7 +368,7 @@ export default function SharedCatalogFilterBar({
                   ].map(opt => {
                     const isSelected = opt.id === 'high_dose'
                       ? dosageFilter === 'high_dose'
-                      : (packagingMode === opt.id && dosageFilter !== 'high_dose');
+                      : (packagingMode === opt.id && dosageFilter !== 'high_dose' && (!routeFilter || routeFilter === 'all'));
                     return (
                       <div
                         key={opt.id}
@@ -322,9 +376,11 @@ export default function SharedCatalogFilterBar({
                           if (opt.id === 'high_dose') {
                             setDosageFilter('high_dose');
                             setPackagingMode('all');
+                            if (setRouteFilter) setRouteFilter('all');
                           } else {
                             setDosageFilter('all');
                             setPackagingMode(opt.id);
+                            if (setRouteFilter) setRouteFilter('all');
                           }
                           setIsFormatDropdownOpen(false);
                         }}
@@ -355,12 +411,262 @@ export default function SharedCatalogFilterBar({
                       </div>
                     );
                   })}
+
+                  {/* Route of Administration Section */}
+                  {setRouteFilter && (
+                    <>
+                      <div style={{ padding: '6px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: '4px', marginBottom: '2px' }}>
+                        <span style={{ fontSize: '0.70rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Administration Route
+                        </span>
+                      </div>
+                      {[
+                        { id: 'injectable', label: 'Injectable / SubQ', icon: '💉', desc: 'Vials, pens & ampoules' },
+                        { id: 'nasal',      label: 'Nasal Spray',     icon: '👃', desc: 'Intranasal delivery' },
+                        { id: 'oral',       label: 'Oral / Capsules', icon: '💊', desc: 'Oral peptide tablets' },
+                        { id: 'topical',    label: 'Topical / Hair',  icon: '💧', desc: 'Scalp & skin solutions' },
+                      ].map(r => {
+                        const isSelected = routeFilter === r.id;
+                        return (
+                          <div
+                            key={r.id}
+                            onClick={() => {
+                              setRouteFilter(isSelected ? 'all' : r.id);
+                              setIsFormatDropdownOpen(false);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '7px 10px',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              backgroundColor: isSelected ? '#eff6ff' : 'transparent',
+                              transition: 'background 0.12s ease',
+                              marginBottom: '2px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '0.92rem' }}>{r.icon}</span>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: '0.80rem', fontWeight: isSelected ? 800 : 600, color: isSelected ? '#1d4ed8' : '#1e293b' }}>
+                                  {r.label}
+                                </span>
+                                <span style={{ fontSize: '0.66rem', color: '#64748b' }}>
+                                  {r.desc}
+                                </span>
+                              </div>
+                            </div>
+                            {isSelected && <span style={{ color: '#2563eb', fontWeight: 800, fontSize: '0.82rem' }}>✓</span>}
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* ── Active Filters Chips Bar ── */}
+      {hasActiveFilters && (
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '4px 0',
+          fontSize: '0.78rem'
+        }}>
+          <span style={{ color: '#64748b', fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.03em', marginRight: '2px' }}>
+            Active:
+          </span>
+
+          {searchQuery && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#f1f5f9',
+              color: '#334155',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #cbd5e1',
+              fontWeight: 600
+            }}>
+              🔍 &ldquo;{searchQuery}&rdquo;
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#64748b', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          {selectedGoals && selectedGoals.map(gId => {
+            const label = availableGoals.find(g => g.id === gId)?.label || gId;
+            return (
+              <span key={gId} style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                backgroundColor: '#eff6ff',
+                color: '#1d4ed8',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                border: '1px solid #bfdbfe',
+                fontWeight: 600
+              }}>
+                🎯 {label}
+                <button
+                  type="button"
+                  onClick={() => toggleGoal(gId)}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+                >
+                  ×
+                </button>
+              </span>
+            );
+          })}
+
+          {dosageFilter === 'high_dose' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#f0fdf4',
+              color: '#15803d',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #bbf7d0',
+              fontWeight: 600
+            }}>
+              💪 High Dose (≥10mg)
+              <button
+                type="button"
+                onClick={() => setDosageFilter('all')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#15803d', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          {packagingMode === 'kits' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#f0fdf4',
+              color: '#15803d',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #bbf7d0',
+              fontWeight: 600
+            }}>
+              📦 10-Vial Kits
+              <button
+                type="button"
+                onClick={() => setPackagingMode('all')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#15803d', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          {packagingMode === 'units' && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#f0fdf4',
+              color: '#15803d',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #bbf7d0',
+              fontWeight: 600
+            }}>
+              🧪 Single Vials
+              <button
+                type="button"
+                onClick={() => setPackagingMode('all')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#15803d', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          {routeFilter && routeFilter !== 'all' && ROUTE_LABELS[routeFilter] && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#eff6ff',
+              color: '#1d4ed8',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #bfdbfe',
+              fontWeight: 600
+            }}>
+              {ROUTE_LABELS[routeFilter].icon} {ROUTE_LABELS[routeFilter].label}
+              <button
+                type="button"
+                onClick={() => setRouteFilter('all')}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#1d4ed8', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          {onlyWithProtocols && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: '#fef3c7',
+              color: '#b45309',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              border: '1px solid #fde68a',
+              fontWeight: 600
+            }}>
+              📋 Has Protocols
+              <button
+                type="button"
+                onClick={() => setOnlyWithProtocols(false)}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#b45309', fontSize: '0.85rem', padding: '0 2px', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={handleClearAll}
+            style={{
+              border: 'none',
+              background: 'none',
+              color: '#dc2626',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+              marginLeft: '4px',
+              padding: '2px 4px',
+              textDecoration: 'underline'
+            }}
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       {/* Formulations count indicator */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingTop: '2px' }}>

@@ -28,6 +28,7 @@ import { RX_STATUS_META } from '../../config/prescriptionConfig';
 import UniversalOrderBuilder from '../shared/order-builder/UniversalOrderBuilder';
 import PatientAdherenceWidget from './PatientAdherenceWidget';
 import ClinicalCommandHub from '../admin/widgets/ClinicalCommandHub';
+import ClinicalDispensingLifecycleHub from './ClinicalDispensingLifecycleHub';
 import { Card, MetricCard } from '../ui';
 import Spinner from '../ui/Spinner';
 import { useTranslation } from 'react-i18next';
@@ -384,6 +385,12 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
         <MetricCard title={t('doctor.overview.stats_fulfilled')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub')} icon={CheckCircle2} color="#16a34a" onClick={() => onNavigate?.('prescriptions')} />
         <MetricCard title={t('doctor.overview.stats_patients')} value={isLoading ? '…' : (totalPatients || '—')} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#7c3aed" onClick={() => onNavigate?.('patients')} />
       </div>
+
+      {/* 🧬 UNIFIED CLINICAL & DISPENSING LIFECYCLE HUB */}
+      <ClinicalDispensingLifecycleHub
+        doctorId={doctorId || 'dr-hanieh-erdmann'}
+        currentDoctor={doctorMeta}
+      />
 
       {/* 🧬 PATIENT ADHERENCE WIDGET */}
       <PatientAdherenceWidget doctorId={doctorId} />

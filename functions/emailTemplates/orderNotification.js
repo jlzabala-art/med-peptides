@@ -43,9 +43,27 @@ function buildOrderNotificationHtml(order) {
   } else if (['po_created', 'synced', 'converted'].includes(s)) {
     statusBg = '#eff6ff';
     statusColor = '#2563eb';
+  } else if (['en tránsito', 'in_transit'].includes(s)) {
+    statusBg = '#eff6ff';
+    statusColor = '#2563eb';
   }
   
-  const statusLabel = s.charAt(0).toUpperCase() + s.slice(1);
+  const statusLabelMap = {
+    'en tránsito': 'In Transit',
+    'in_transit': 'In Transit',
+    'awaiting payment': 'Awaiting Payment',
+    'awaiting_payment': 'Awaiting Payment',
+    'po_created': 'PO Created',
+    'delivered': 'Delivered',
+    'disputed': 'Disputed',
+    'processing': 'Processing',
+    'draft': 'Draft',
+    'completed': 'Completed',
+    'cancelled': 'Cancelled',
+    'active': 'Active',
+    'approved': 'Approved'
+  };
+  const statusLabel = statusLabelMap[s] || (s.charAt(0).toUpperCase() + s.slice(1));
 
   const resolvedShipping = shipping || order.shippingFee || order.shippingCost || 0;
   const custName = customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || order.customerName || order.patientName || '—';

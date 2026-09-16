@@ -22,7 +22,9 @@ import {
   MapPin,
   Clock,
   ExternalLink,
-  FileText
+  FileText,
+  MessageSquare,
+  Download
 } from 'lucide-react';
 
 /**
@@ -35,6 +37,7 @@ export default function IncomingOrderAcknowledgmentModal() {
   const { user, activeRole } = useAuth();
   const [unacknowledgedOrders, setUnacknowledgedOrders] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [receptionNotes, setReceptionNotes] = useState('');
   const [submitError, setSubmitError] = useState('');
 
@@ -127,6 +130,133 @@ export default function IncomingOrderAcknowledgmentModal() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDownloadProFormaPdf = async (order) => {
+    setIsGeneratingPdf(true);
+    try {
+      const { jsPDF } = await import('jspdf');
+      await import('jspdf-autotable');
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Header Banner
+      doc.setFillColor(0, 54, 102);
+      doc.rect(0, 0, 210, 32, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('REGENPEPT PEPTIDE THERAPEUTICS', 14, 13);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(210, 230, 255);
+      doc.text('Advanced Clinical Solutions • Global Logistics & Distribution', 14, 19);
+      doc.text('PRO-FORMA INVOICE', 196, 13, { align: 'right' });
+      doc.text(`Order Ref: #${order.orderCode || order.id}`, 196, 19, { align: 'right' });
+      doc.text(`Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`, 196, 25, { align: 'right' });
+
+      // Bill To & Terms
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(15, 23, 42);
+      doc.text('BILL TO & RECIPIENT CLINIC:', 14, 44);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Clinic / Doctor: ${order.customerName || 'Direct Clinical Account'}`, 14, 50);
+      if (order.customerEmail) doc.text(`Email: ${order.customerEmail}`, 14, 55);
+      if (order.customerPhone) doc.text(`Phone: ${order.customerPhone}`, 14, 60);
+      if (order.customerAddress) doc.text(`Delivery: ${order.customerAddress}`, 14, 65);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(15, 23, 42);
+      doc.text('COMMERCIAL & DISPATCH TERMS:', 118, 44);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Pricing Tier: ${order.priceTierLabel || 'Institutional Direct (+30% Margin)'}`, 118, 50);
+      doc.text(`Destination: ${order.shippingDestination || 'Standard Dispatch'}`, 118, 55);
+      doc.text(`Source Catalog: ${order.catalogCode || order.catalogTitle || 'Standard Catalog'}`, 118, 60);
+      doc.text(`Status: Official Draft Order Review`, 118, 65);
+
+      const items = Array.isArray(order.items) ? order.items : [];
+      const tableRows = items.map((item, idx) => {
+        const qty = item.quantity || 1;
+        const unit = item.unitPrice ?? item.price ?? 0;
+        const total = item.totalPrice ?? (qty * unit);
+        return [
+          idx + 1,
+          item.productName || item.name || 'Product',
+          item.dosage || 'Standard',
+          qty,
+          `$${Number(unit).toFixed(2)}`,
+          `$${Number(total).toFixed(2)}`
+        ];
+      });
+
+      doc.autoTable({
+        startY: 74,
+        head: [['#', 'Item Formulation', 'Dosage / Spec', 'Qty', 'Unit Price', 'Total Amount']],
+        body: tableRows,
+        theme: 'grid',
+        headStyles: { fillColor: [0, 54, 102], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8.5 },
+        bodyStyles: { fontSize: 8, textColor: [15, 23, 42] },
+        columnStyles: {
+          0: { cellWidth: 10, halign: 'center' },
+          1: { cellWidth: 70, fontStyle: 'bold' },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 18, halign: 'center' },
+          4: { cellWidth: 25, halign: 'right' },
+          5: { cellWidth: 26, halign: 'right', fontStyle: 'bold' }
+        },
+        margin: { left: 14, right: 14 }
+      });
+
+      const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 8 : 140;
+
+      // Summary Box
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(120, finalY, 76, 28, 2, 2, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(120, finalY, 76, 28, 2, 2, 'S');
+
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(71, 85, 105);
+      doc.text('Subtotal:', 124, finalY + 7);
+      doc.text(`$${Number(order.subtotal || 0).toFixed(2)}`, 192, finalY + 7, { align: 'right' });
+
+      doc.text('Freight / Shipping:', 124, finalY + 13);
+      doc.text(`+$${Number(order.shippingCost || 0).toFixed(2)}`, 192, finalY + 13, { align: 'right' });
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(0, 54, 102);
+      doc.text('Grand Total:', 124, finalY + 22);
+      doc.text(`$${Number(order.grandTotal ?? order.total ?? 0).toFixed(2)} USD`, 192, finalY + 22, { align: 'right' });
+
+      doc.save(`ProForma_${order.orderCode || order.id}.pdf`);
+    } catch (err) {
+      console.error('Failed to generate Pro-Forma PDF:', err);
+      alert('Failed to generate Pro-Forma PDF.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const getWhatsAppHref = (order) => {
+    const rawPhone = order.customerPhone || '';
+    const cleanPhone = rawPhone.replace(/[^\d+]/g, '').replace('+', '');
+    const clientName = order.customerName || 'Doctor';
+    const code = order.orderCode || order.id;
+    const total = order.currencySymbol ? `${order.currencySymbol}${Number(order.grandTotal || 0).toFixed(2)}` : `$${Number(order.grandTotal || 0).toFixed(2)} USD`;
+    const message = `Hello ${clientName}, this is RegenPept Clinical Operations. We have received your order inquiry (#${code}) totaling ${total}. Our dispatch team is reviewing delivery lead times for ${order.shippingDestination || 'your destination'}. Thank you!`;
+    const encoded = encodeURIComponent(message);
+    return cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
   };
 
   const currencyCode = currentOrder.currency || 'AED';
@@ -485,6 +615,57 @@ export default function IncomingOrderAcknowledgmentModal() {
             boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.05)'
           }}
         >
+          {/* Quick Actions: WhatsApp Client & Pro-Forma PDF */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', marginBottom: '8px' }}>
+            <a
+              href={getWhatsAppHref(currentOrder)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                backgroundColor: '#25D366',
+                color: '#ffffff',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                textDecoration: 'none',
+                boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)',
+                transition: 'opacity 0.15s ease'
+              }}
+            >
+              <MessageSquare size={16} />
+              <span>WhatsApp Reply</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={() => handleDownloadProFormaPdf(currentOrder)}
+              disabled={isGeneratingPdf}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                color: '#0f172a',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.82rem',
+                cursor: isGeneratingPdf ? 'not-allowed' : 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Download size={16} color="#0284c7" />
+              <span>{isGeneratingPdf ? 'Generating...' : 'Pro-Forma PDF'}</span>
+            </button>
+          </div>
+
           <button
             type="button"
             onClick={handleAcknowledge}

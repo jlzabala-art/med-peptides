@@ -564,6 +564,18 @@ export function useSharedCatalogState({
           activeVariants = activeVariants.filter(v => v.kitPrice && v.kitPrice > 0);
         }
 
+        // When route filter is active, only show variants matching the administration route
+        if (routeFilter !== 'all' && ROUTE_MAP[routeFilter]) {
+          const keywords = ROUTE_MAP[routeFilter];
+          activeVariants = activeVariants.filter(v => {
+            const pres = (v.presentation || '').toLowerCase();
+            const vName = (v.name || '').toLowerCase();
+            const desc = (p.description  || '').toLowerCase();
+            const cat  = (p.category     || '').toLowerCase();
+            return keywords.some(k => pres.includes(k) || vName.includes(k) || desc.includes(k) || cat.includes(k));
+          });
+        }
+
         const sortedVariants = sortVariantsAscending(activeVariants);
         const validPrices = sortedVariants.map(v => v.price > 0 ? v.price : null).filter(Boolean);
         const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : p.minPrice;

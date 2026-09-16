@@ -28,17 +28,17 @@ function buildDoctorCheckoutEmail({ doctorEmail, doctorName, patientName, rxId, 
   const html = `
     <div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f8fafc;border-radius:16px;">
       <div style="background:#003666;color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:24px;">
-        <h2 style="margin:0;font-size:18px;font-weight:900;">✅ Paciente completó el checkout</h2>
-        <p style="margin:6px 0 0;opacity:0.75;font-size:14px;">Atlas Health · Sistema de Prescripciones</p>
+        <h2 style="margin:0;font-size:18px;font-weight:900;">✅ Patient Completed Checkout</h2>
+        <p style="margin:6px 0 0;opacity:0.75;font-size:14px;">Atlas Health · Clinical Prescription System</p>
       </div>
-      <p style="font-size:15px;color:#1e293b;">Hola <strong>${doctorName || 'Doctor'}</strong>,</p>
+      <p style="font-size:15px;color:#1e293b;">Dear <strong>${doctorName || 'Doctor'}</strong>,</p>
       <p style="font-size:14px;color:#475569;line-height:1.6;">
-        Tu paciente <strong>${patientName || 'un paciente'}</strong> ha añadido al carrito 
-        los productos de tu prescripción y ha completado el proceso de pago.
+        Your patient <strong>${patientName || 'a patient'}</strong> has completed checkout 
+        for your issued prescription and payment has been received.
       </p>
       <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin:16px 0;">
         <div style="font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
-          Productos prescritos
+          Prescribed Medications & Formulations
         </div>
         <ul style="margin:0;padding:0 0 0 18px;font-size:14px;color:#1e293b;">${itemList}</ul>
         ${total ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f1f5f9;font-weight:800;font-size:15px;color:#003666;">
@@ -46,16 +46,16 @@ function buildDoctorCheckoutEmail({ doctorEmail, doctorName, patientName, rxId, 
         </div>` : ''}
       </div>
       <p style="font-size:12px;color:#94a3b8;">
-        Rx ID: <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">${rxId}</code><br>
-        Puedes ver el estado completo en tu Portal Médico.
+        Prescription ID: <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">${rxId}</code><br>
+        You can track preparation, compounding, and delivery live in your Physician Portal.
       </p>
       <p style="font-size:13px;color:#94a3b8;margin-top:24px;">
-        Próximamente también recibirás notificación de pago confirmado cuando el sistema de facturación lo registre.
+        Cold-chain dispatch and courier tracking numbers will be automatically attached once dispatched.
       </p>
     </div>
   `;
   return {
-    subject: `✅ ${patientName || 'Tu paciente'} completó el checkout de tu prescripción`,
+    subject: `✅ ${patientName || 'Your patient'} completed checkout for your prescription`,
     html,
   };
 }
@@ -103,7 +103,7 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
               event:     'ordered',
               actorId:   orderData.uid || orderData.customer?.uid || 'system',
               actorRole: 'patient',
-              note:      `Pedido ${orderId} creado desde prescripción`,
+              note:      `Order ${orderId} created from prescription`,
               timestamp: new Date().toISOString(),
             }),
           });
@@ -116,8 +116,8 @@ module.exports.onOrderCreatedForRx = onDocumentCreated(
               recipientId:   doctorId,
               recipientRole: 'doctor',
               type:          'patient_checkout',
-              title:         '✅ Paciente completó el checkout',
-              body:          `${rxData.patient?.name || 'Tu paciente'} ha añadido al carrito los productos de tu prescripción.`,
+              title:         '✅ Patient completed checkout',
+              body:          `${rxData.patient?.name || 'Your patient'} has completed checkout for prescription ${prescriptionId}.`,
               rxId:          prescriptionId,
               orderId,
               patientName:   rxData.patient?.name || rxData.patient?.email || null,
