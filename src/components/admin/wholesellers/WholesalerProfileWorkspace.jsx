@@ -19,7 +19,11 @@ import {
   CreditCard,
   Percent,
   CheckCircle,
-  Truck
+  Truck,
+  ExternalLink,
+  FileCheck,
+  Copy,
+  Download
 } from '@/lib/icons';
 import { StatusBadge, CopyableId, StatusChip } from '../../ui';
 import notifier from '../../../services/NotificationService';
@@ -31,6 +35,7 @@ export default function WholesalerProfileWorkspace({
 }) {
   const [openSections, setOpenSections] = useState({
     profile: true,
+    documents: true,
     catalog: false,
     manager: false,
     orders: false,
@@ -40,17 +45,31 @@ export default function WholesalerProfileWorkspace({
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     companyName: wholeseller?.name || wholeseller?.companyName || '',
-    taxId: wholeseller?.taxId || wholeseller?.vatNumber || 'AE-VAT-9028148',
-    licenseNumber: wholeseller?.licenseNumber || wholeseller?.tradeLicense || 'TL-DED-2024-8819',
+    legalNameArabic: wholeseller?.legalNameArabic || '',
+    formationType: wholeseller?.formationType || 'Free Zone Establishment (FZE)',
+    formationNumber: wholeseller?.formationNumber || '4418091',
+    taxId: wholeseller?.taxId || wholeseller?.vatNumber || '104821244100003',
+    taxAuthority: wholeseller?.taxAuthority || 'Federal Tax Authority (United Arab Emirates)',
+    vatEffectiveDate: wholeseller?.vatEffectiveDate || '2025-11-01',
+    firstVatReturnPeriod: wholeseller?.firstVatReturnPeriod || '2025-11-01 - 2026-01-31',
+    licenseNumber: wholeseller?.licenseNumber || wholeseller?.tradeLicense || '4418091.01',
+    licensingAuthority: wholeseller?.licensingAuthority || 'Sharjah Publishing City Free Zone Authority (SPCFZ)',
+    licenseFormationDate: wholeseller?.licenseFormationDate || '2025-01-08',
+    licenseExpiryDate: wholeseller?.licenseExpiryDate || '2026-01-07',
+    manager: wholeseller?.manager || wholeseller?.primaryContact || 'Reimichon Shangchiri Daniel Shangchiri',
+    managerArabic: wholeseller?.managerArabic || 'ريميشون شانجشيري دانييل شانجشيري',
     country: wholeseller?.country || 'United Arab Emirates',
-    address: wholeseller?.address || wholeseller?.city || 'Business Bay, Tower 1, Dubai, UAE',
+    address: wholeseller?.address || wholeseller?.registeredAddress || wholeseller?.city || 'Business Center, Sharjah Publishing City Free Zone, Sharjah, United Arab Emirates',
     paymentTerms: wholeseller?.paymentTerms || 'Net 30',
     creditLimit: wholeseller?.creditLimit || 50000,
     tier: wholeseller?.tier || 'tier_b2b_clinic',
     discountMargin: wholeseller?.discountMargin || 25,
-    contactName: wholeseller?.contactName || wholeseller?.primaryContact || 'Director of Procurement',
-    contactEmail: wholeseller?.email || wholeseller?.contactEmail || 'procurement@distributor.com',
-    contactPhone: wholeseller?.phone || wholeseller?.contactPhone || '+971 4 580 9100'
+    contactName: wholeseller?.contactName || wholeseller?.primaryContact || 'Reimichon Shangchiri Daniel Shangchiri',
+    contactEmail: wholeseller?.email || wholeseller?.contactEmail || 'business@mediluxeme.com',
+    contactPhone: wholeseller?.phone || wholeseller?.contactPhone || '+971564179259',
+    officialVerificationUrl: wholeseller?.officialVerificationUrl || 'https://portal.spcfz.ae/web/mydocuments/dc/173632832882?d=T1RnNE9BPT0=',
+    documents: wholeseller?.documents || [],
+    authorizedActivities: wholeseller?.authorizedActivities || []
   });
 
   const toggleSection = (sec) => {
@@ -58,6 +77,7 @@ export default function WholesalerProfileWorkspace({
       const isCurrentlyOpen = prev[sec];
       return {
         profile: !isCurrentlyOpen && sec === 'profile',
+        documents: !isCurrentlyOpen && sec === 'documents',
         catalog: !isCurrentlyOpen && sec === 'catalog',
         manager: !isCurrentlyOpen && sec === 'manager',
         orders: !isCurrentlyOpen && sec === 'orders',
@@ -69,6 +89,7 @@ export default function WholesalerProfileWorkspace({
   const collapseAll = () => {
     setOpenSections({
       profile: false,
+      documents: false,
       catalog: false,
       manager: false,
       orders: false,
@@ -151,6 +172,11 @@ export default function WholesalerProfileWorkspace({
               <h1 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
                 {displayName}
               </h1>
+              {formData.legalNameArabic && (
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#64748b', direction: 'rtl' }}>
+                  ({formData.legalNameArabic})
+                </span>
+              )}
               <StatusBadge status={wholeseller.status || 'active'} />
               <span
                 style={{
@@ -364,7 +390,7 @@ export default function WholesalerProfileWorkspace({
               <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Legal Company Name</label>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Legal Company Name (English)</label>
                     <input
                       type="text"
                       className="gcp-input"
@@ -375,7 +401,39 @@ export default function WholesalerProfileWorkspace({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Trade / Pharmaceutical License</label>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Legal Name (Arabic) / الاسم القانوني</label>
+                    <input
+                      type="text"
+                      className="gcp-input"
+                      value={formData.legalNameArabic}
+                      onChange={(e) => setFormData(p => ({ ...p, legalNameArabic: e.target.value }))}
+                      onBlur={() => handleSaveField({ legalNameArabic: formData.legalNameArabic })}
+                      style={{ width: '100%', direction: 'rtl' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Formation Type & Registry No.</label>
+                    <input
+                      type="text"
+                      className="gcp-input"
+                      value={`${formData.formationType} • #${formData.formationNumber}`}
+                      disabled
+                      style={{ width: '100%', backgroundColor: '#f8fafc', color: '#64748b' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Commercial Manager</label>
+                    <input
+                      type="text"
+                      className="gcp-input"
+                      value={formData.manager}
+                      onChange={(e) => setFormData(p => ({ ...p, manager: e.target.value }))}
+                      onBlur={() => handleSaveField({ manager: formData.manager })}
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Trade License No. & Authority</label>
                     <input
                       type="text"
                       className="gcp-input"
@@ -386,14 +444,24 @@ export default function WholesalerProfileWorkspace({
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Tax / VAT Registration</label>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Tax / VAT TRN (Federal Tax Authority)</label>
                     <input
                       type="text"
                       className="gcp-input"
                       value={formData.taxId}
                       onChange={(e) => setFormData(p => ({ ...p, taxId: e.target.value }))}
-                      onBlur={() => handleSaveField({ taxId: formData.taxId })}
+                      onBlur={() => handleSaveField({ taxId: formData.taxId, vatNumber: formData.taxId })}
                       style={{ width: '100%' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>License Validity Period</label>
+                    <input
+                      type="text"
+                      className="gcp-input"
+                      value={`${formData.licenseFormationDate} to ${formData.licenseExpiryDate}`}
+                      disabled
+                      style={{ width: '100%', backgroundColor: '#f8fafc', color: '#64748b' }}
                     />
                   </div>
                   <div>
@@ -426,6 +494,220 @@ export default function WholesalerProfileWorkspace({
                     onBlur={() => handleSaveField({ address: formData.address })}
                     style={{ width: '100%' }}
                   />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Accordion: Corporate Documents & Compliance Vault ── */}
+          <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '10px', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => toggleSection('documents')}
+              style={{
+                width: '100%',
+                padding: '14px 18px',
+                backgroundColor: openSections.documents ? '#f8fafc' : '#ffffff',
+                border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.90rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                    Corporate Documents & Compliance Vault
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Cloud-hosted legal registries, UAE VAT certificate, SPCFZ trade license, and authority verification
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '0.70rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#dcfce7', color: '#15803d' }}>
+                  2 Verified Cloud Documents
+                </span>
+                {openSections.documents ? <ChevronUp size={18} color="#64748b" /> : <ChevronDown size={18} color="#64748b" />}
+              </div>
+            </button>
+
+            {openSections.documents && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                {/* Documents Cards Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
+                  
+                  {/* VAT Certificate Card */}
+                  <div style={{ padding: '1rem', borderRadius: '10px', border: '1px solid #bbf7d0', backgroundColor: '#f0fdf4' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ padding: '6px', borderRadius: '6px', backgroundColor: '#ffffff', border: '1px solid #86efac', color: '#16a34a' }}>
+                          <FileCheck size={20} />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#166534' }}>
+                            Certificate of Registration for VAT
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#15803d' }}>
+                            Federal Tax Authority (United Arab Emirates)
+                          </div>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', backgroundColor: '#22c55e', color: '#ffffff' }}>
+                        ACTIVE
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '0.75rem', color: '#374151', margin: '0.75rem 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div><strong>TRN:</strong> <CopyableId value={formData.taxId || '104821244100003'} /></div>
+                      <div><strong>Entity:</strong> Mediluxe Health Solutions FZE (ميديلوكس للحلول الصحية م م ح)</div>
+                      <div><strong>Effective Date:</strong> 01/11/2025 • <strong>Issue Date:</strong> 03/11/2025</div>
+                      <div><strong>Tax Periods:</strong> Quarterly (Feb-Apr, May-Jul, Aug-Oct, Nov-Jan)</div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                      <a
+                        href="/documents/corporate/Mediluxe_Health_Solutions_FZE_VAT_Certificate.pdf"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="gcp-button-primary"
+                        style={{ fontSize: '0.75rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+                      >
+                        <FileText size={13} /> View PDF
+                      </a>
+                      <button
+                        type="button"
+                        className="gcp-button"
+                        onClick={() => {
+                          const cloudUrl = 'https://firebasestorage.googleapis.com/v0/b/med-peptides-app.firebasestorage.app/o/corporate_documents%2Fmediluxe-health-solutions%2FMediluxe_Health_Solutions_FZE_VAT_Certificate.pdf?alt=media';
+                          navigator.clipboard.writeText(cloudUrl);
+                          notifier.success('VAT Certificate Cloud Storage link copied to clipboard');
+                        }}
+                        style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                      >
+                        <Copy size={13} /> Copy Cloud Link
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Business License Card */}
+                  <div style={{ padding: '1rem', borderRadius: '10px', border: '1px solid #fed7aa', backgroundColor: '#fffaf5' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ padding: '6px', borderRadius: '6px', backgroundColor: '#ffffff', border: '1px solid #fdba74', color: '#ea580c' }}>
+                          <Building2 size={20} />
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#9a3412' }}>
+                            Sharjah Publishing City Business License
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#c2410c' }}>
+                            Sharjah Publishing City Free Zone Authority
+                          </div>
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', backgroundColor: '#ea580c', color: '#ffffff' }}>
+                        LICENSED
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '0.75rem', color: '#374151', margin: '0.75rem 0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div><strong>License No:</strong> <CopyableId value={formData.licenseNumber || '4418091.01'} /></div>
+                      <div><strong>Formation No:</strong> 4418091 (Free Zone Establishment - FZE)</div>
+                      <div><strong>Validity:</strong> 08/01/2025 to 07/01/2026</div>
+                      <div><strong>Manager:</strong> Reimichon Shangchiri Daniel Shangchiri</div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                      <a
+                        href="/documents/corporate/Mediluxe_Health_Solutions_FZE_Business_License.pdf"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="gcp-button-primary"
+                        style={{ fontSize: '0.75rem', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', backgroundColor: '#c2410c', borderColor: '#9a3412' }}
+                      >
+                        <FileText size={13} /> View PDF
+                      </a>
+                      <button
+                        type="button"
+                        className="gcp-button"
+                        onClick={() => {
+                          const cloudUrl = 'https://firebasestorage.googleapis.com/v0/b/med-peptides-app.firebasestorage.app/o/corporate_documents%2Fmediluxe-health-solutions%2FMediluxe_Health_Solutions_FZE_Business_License.pdf?alt=media';
+                          navigator.clipboard.writeText(cloudUrl);
+                          notifier.success('Business License Cloud Storage link copied to clipboard');
+                        }}
+                        style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                      >
+                        <Copy size={13} /> Copy Cloud Link
+                      </button>
+                      <a
+                        href={formData.officialVerificationUrl || 'https://portal.spcfz.ae/web/mydocuments/dc/173632832882?d=T1RnNE9BPT0='}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="gcp-button"
+                        style={{ fontSize: '0.75rem', padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: '#2563eb' }}
+                      >
+                        <ExternalLink size={13} /> Verify at SPCFZ
+                      </a>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Authorized Commercial & Pharmaceutical Activities */}
+                <div style={{ backgroundColor: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <h4 style={{ fontSize: '0.80rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', margin: 0 }}>
+                      Licensed Business Activities (Sharjah Publishing City Free Zone Authority)
+                    </h4>
+                    <span style={{ fontSize: '0.70rem', color: '#64748b' }}>Authorized under License 4418091.01</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.5rem' }}>
+                    {[
+                      { code: '4649.29', name: 'Wholesale of Para Pharmaceutical Products', ar: 'تجارة المستحضرات الصيدلانية غير الدوائية بالجملة' },
+                      { code: '7020.23', name: 'Pharmaceutical Consultancies', ar: 'الإستشارات الصيدلانية' },
+                      { code: '7020.18', name: 'Health Management Consulting Services', ar: 'خدمات إستشارات إدارة الصحة' },
+                      { code: '4649.24', name: 'Soap & Hair Care Products Trading', ar: 'تجارة الصابون و مستحضرات العناية بالشعر' },
+                      { code: '4649.09', name: 'Wholesale of Perfumery Cosmetics & Beauty Products', ar: 'بيع العطور ومستحضرات التجميل بالجملة' },
+                      { code: '4690.97', name: 'General Trading', ar: 'تجارة عامة' },
+                      { code: '4791', name: 'Retail Sale Via Internet / E-Commerce', ar: 'البيع بالتجزئة عن طريق الإنترنت (تجارة الكترونية)' },
+                      { code: '4791.05', name: 'Online IT Solutions & Internet Retail', ar: 'بيع حلول تكنولوجيا المعلومات والمنتجات عبر الإنترنت' },
+                      { code: '7020.01', name: 'Marketing, PR & Communication Consultancy', ar: 'استشارات التسويق والعلاقات العامة' },
+                      { code: '7020.15', name: 'Logistics Consultancy', ar: 'الإستشارات اللوجستية' },
+                      { code: '7020.20', name: 'Procurement Consulting', ar: 'استشارات المشتريات' },
+                      { code: '8299.12', name: 'Documents Clearing Services', ar: 'خدمات متابعة المعاملات ومقاصة المستندات' }
+                    ].map((act, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          color: '#0f172a',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '2px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, backgroundColor: '#f1f5f9', color: '#0369a1', padding: '1px 5px', borderRadius: '4px' }}>
+                            {act.code}
+                          </span>
+                          <span style={{ fontWeight: 600 }}>{act.name}</span>
+                        </div>
+                        <div style={{ fontSize: '0.68rem', color: '#64748b', direction: 'rtl', textAlign: 'right' }}>
+                          {act.ar}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
