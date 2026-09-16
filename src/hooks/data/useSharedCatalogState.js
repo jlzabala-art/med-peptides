@@ -528,7 +528,8 @@ export function useSharedCatalogState({
         let matchDosage = true;
         if (dosageFilter === 'high_dose') {
           matchDosage = p.variants.some(v => {
-            const doseMatch = v.dosage?.match(/(\d+(\.\d+)?)\s*mg/i);
+            const textToMatch = `${v.dosage || ''} ${v.name || ''}`;
+            const doseMatch = textToMatch.match(/(\d+(\.\d+)?)\s*mg/i);
             return doseMatch && parseFloat(doseMatch[1]) >= 10;
           });
         }
@@ -547,7 +548,23 @@ export function useSharedCatalogState({
         return matchGoal && matchQuery && matchPackaging && matchDosage && matchRoute;
       })
       .map(p => {
-        const sortedVariants = sortVariantsAscending(p.variants);
+        let activeVariants = p.variants || [];
+
+        // When High Dose filter is active, only show variants >= 10mg
+        if (dosageFilter === 'high_dose') {
+          activeVariants = activeVariants.filter(v => {
+            const textToMatch = `${v.dosage || ''} ${v.name || ''}`;
+            const doseMatch = textToMatch.match(/(\d+(\.\d+)?)\s*mg/i);
+            return doseMatch && parseFloat(doseMatch[1]) >= 10;
+          });
+        }
+
+        // When kits packaging mode is selected, only show variants with kit pricing
+        if (packagingMode === 'kits' || dosageFilter === 'kits') {
+          activeVariants = activeVariants.filter(v => v.kitPrice && v.kitPrice > 0);
+        }
+
+        const sortedVariants = sortVariantsAscending(activeVariants);
         const validPrices = sortedVariants.map(v => v.price > 0 ? v.price : null).filter(Boolean);
         const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : p.minPrice;
         return {
@@ -555,7 +572,8 @@ export function useSharedCatalogState({
           minPrice: minPrice > 0 ? minPrice : p.minPrice,
           variants: sortedVariants
         };
-      });
+      })
+      .filter(p => (p.variants && p.variants.length > 0));
   }, [enrichedProducts, selectedGoals, searchQuery, dosageFilter, packagingMode, routeFilter, algoliaMatchProductIds]);
 
   const filteredProtocols = useMemo(() => {
