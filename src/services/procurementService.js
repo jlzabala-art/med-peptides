@@ -238,6 +238,10 @@ export const fetchRecentShipments = async (maxCount = 5) => {
     const snap = await getDocs(q);
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
+    if (err?.code === 'permission-denied') {
+      logger.warn('[procurementService] fetchRecentShipments not permitted for current credentials');
+      return [];
+    }
     logger.error('[procurementService] fetchRecentShipments failed', { error: err.message });
     throw err;
   }

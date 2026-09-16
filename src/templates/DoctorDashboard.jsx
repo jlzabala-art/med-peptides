@@ -216,7 +216,11 @@ export default function DoctorDashboard({ children }) {
           if (profile) setSelectedDoctorProfile(profile);
         }
       } catch (err) {
-        console.error('Error fetching doctors for admin impersonation:', err);
+        if (err?.code === 'permission-denied') {
+          console.warn('[DoctorDashboard] Doctors list query not permitted for current user.');
+        } else {
+          console.error('Error fetching doctors for admin impersonation:', err);
+        }
       }
     };
     fetchDoctors();

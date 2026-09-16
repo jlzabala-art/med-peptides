@@ -53,7 +53,11 @@ export default function PatientAdherenceWidget({ doctorId }) {
           setData(atRisk);
         }
       } catch (err) {
-        console.error('Error loading patient adherence:', err);
+        if (err?.code === 'permission-denied') {
+          console.warn('[PatientAdherenceWidget] Adherence query not permitted for current credentials.');
+        } else {
+          console.error('Error loading patient adherence:', err);
+        }
         if (isMounted) setData([]);
       } finally {
         if (isMounted) setLoading(false);

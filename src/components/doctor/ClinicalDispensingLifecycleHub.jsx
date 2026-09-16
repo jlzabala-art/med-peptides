@@ -133,12 +133,20 @@ export default function ClinicalDispensingLifecycleHub({
             setLoading(false);
           },
           (err) => {
-            console.error('[ClinicalLifecycleHub] Firestore snapshot error:', err);
+            if (err?.code === 'permission-denied') {
+              console.warn('[ClinicalLifecycleHub] Prescriptions query not permitted for current credentials.');
+            } else {
+              console.error('[ClinicalLifecycleHub] Firestore snapshot error:', err);
+            }
             setLoading(false);
           }
         );
       } catch (err) {
-        console.error('[ClinicalLifecycleHub] Initialization error:', err);
+        if (err?.code === 'permission-denied') {
+          console.warn('[ClinicalLifecycleHub] Initialization not permitted for current credentials.');
+        } else {
+          console.error('[ClinicalLifecycleHub] Initialization error:', err);
+        }
         setLoading(false);
       }
     };
