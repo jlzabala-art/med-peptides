@@ -3,6 +3,7 @@ const stringSimilarity = require("string-similarity");
 const geminiService = require("./gemini.service");
 
 const DEFAULT_COMPETITORS = [
+  { name: "RegenPept", url: "https://regenpept.com/" },
   { name: "Peptide Sciences", url: "https://www.peptidesciences.com/peptides" },
   { name: "Limitless Life Nootropics", url: "https://limitlesslifenootropics.com/product-category/peptides/" },
   { name: "DN Lab Research", url: "https://dnlabresearch.com/product-category/peptides/" },

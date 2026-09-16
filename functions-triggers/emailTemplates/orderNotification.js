@@ -27,11 +27,11 @@ function buildOrderNotificationHtml(order) {
     status = 'pending',
   } = order;
 
-  const s = (status || 'pending').toLowerCase();
+  const s = (status || order.shippingStatus || order.finalStatus || 'pending').toLowerCase();
   let statusBg = '#fffbeb'; // Yellow/Orange default (pending, draft, awaiting, processing)
   let statusColor = '#d97706';
   
-  if (['active', 'approved', 'reconciled', 'published', 'delivered', 'completed'].includes(s)) {
+  if (['active', 'approved', 'reconciled', 'published', 'delivered', 'completed', 'shipped'].includes(s)) {
     statusBg = '#f0fdf4';
     statusColor = '#16a34a';
   } else if (['error', 'rejected', 'disputed', 'failed', 'cancelled'].includes(s)) {
@@ -47,21 +47,39 @@ function buildOrderNotificationHtml(order) {
   
   const statusLabel = s.charAt(0).toUpperCase() + s.slice(1);
 
-  const resolvedShipping = shipping || order.shippingFee || 0;
-  const custName = customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || order.customerName || '—';
-  const custEmail = customer.email || order.customerEmail || '—';
+  const resolvedShipping = shipping || order.shippingFee || order.shippingCost || 0;
+  const custName = customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || order.customerName || order.patientName || '—';
+  const custEmail = customer.email || order.customerEmail || order.patientEmail || '—';
   const custPhone = customer.phone || order.customerPhone || shippingAddress.phone || '';
-  const custInst = customer.institution || order.customerInstitution || '';
+  const custInst = customer.institution || order.customerInstitution || order.clinicName || '';
 
   // Resolve payment method to a human-readable label
+  const effPaymentMethod = (paymentMethod || order.paymentMethod || order.paymentTerms || '').toLowerCase();
   const paymentLabel =
-    paymentMethod === 'bank_transfer' ? '🏦 Bank Transfer'
-    : paymentMethod === 'credit_card'  ? '💳 Credit / Debit Card'
-    : paymentMethod ? paymentMethod
-    : '—';
+    effPaymentMethod === 'bank_transfer' || effPaymentMethod === 'institutional_invoice' ? '🏦 Bank Transfer / Pro-Forma'
+    : effPaymentMethod === 'credit_card'  ? '💳 Credit / Debit Card'
+    : effPaymentMethod ? effPaymentMethod
+    : '🏦 Institutional Terms / Pro-Forma';
 
-  const fmt = (amount) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  const fmt = (amount) => {
+    // If it's already a formatted string from CSV (like "219.00€" or "100$"), just return it.
+    if (typeof amount === 'string') return amount;
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
+  };
+
+  const resolvedTotal = Number(order.grandTotal ?? order.totalAmount ?? order.total ?? order.price ?? total ?? subtotal ?? 0);
+  const resolvedSubtotal = Number(order.subtotal ?? subtotal ?? resolvedTotal);
+
+  // Address line resolution (supports direct customerAddress and shippingAddress object)
+  const addressLine = order.customerAddress || order.deliveryAddress || [
+    shippingAddress.street,
+    shippingAddress.city,
+    shippingAddress.state,
+    shippingAddress.zip,
+    shippingAddress.country,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   // createdAt can be a Firestore Timestamp, a JS Date, or an ISO string
   let dateObj;
@@ -76,53 +94,54 @@ function buildOrderNotificationHtml(order) {
     ? new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
     : dateObj.toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
 
-  const formatItem = (item) => {
-    let name = item.name || item.productName || item.itemKey || '—';
-    let variant = item.variant || item.dosage || '';
-    const isProtocol = item.isProtocol || name.toLowerCase().includes('protocol') || (item.category && item.category.toLowerCase() === 'protocol') || name.includes('-protocol-bundle');
-
-    if (name.includes('::')) {
-      const [prod, varId] = name.split('::');
-      name = prod.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      if (!variant && varId) {
-        variant = varId.replace(/_/g, ' ').replace(prod.replace(/-/g, '_'), '').trim();
-        if (variant) variant = variant.replace(/\b\w/g, c => c.toUpperCase());
-      }
-    } else if (name.includes('-protocol-bundle')) {
-      name = name.replace('-protocol-bundle', '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' (Protocol Bundle)';
-    }
-
-    // Strip supplier references from variant if present
-    variant = variant.replace(/\s*·\s*(Lotusland|Bioniq|Fusion|BioTech|PeptideLab|GlobalRx)\b/gi, '').trim();
-
-    if (isProtocol) {
-      if (!variant.toLowerCase().includes('protocol')) {
-        variant = variant ? `Protocol · ${variant}` : 'Protocol · Full Cycle Supply';
-      }
-    } else if (item.category && !variant.toLowerCase().includes(item.category.toLowerCase())) {
-      variant = variant ? `${variant} · ${item.category}` : item.category;
-    }
-
-    return { name, variant };
-  };
-
   const itemsRows = items
     .map(
       (item) => {
-        const { name: displayName, variant: displayVariant } = formatItem(item);
+        const prodName = item.productName || item.name || item.title || '—';
+        const variantText = item.variant || [item.dosage, item.presentation].filter(Boolean).join(' • ');
+        const itemQty = item.quantity || 1;
+        const itemUnitPrice = Number(item.unitPrice || item.price || 0);
+        const itemTotal = Number(item.totalPrice ?? item.total ?? item.lineTotal ?? (itemUnitPrice * itemQty));
+
         return `
-      <tr>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b;">
-          ${displayName}
-          ${displayVariant ? `<br><span style="font-size:12px;color:#64748b;">${displayVariant}</span>` : ''}
-        </td>
-        <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${item.quantity || 1}</td>
-        <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(item.unitPrice || item.price || 0)}</td>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(item.lineTotal || (item.unitPrice || item.price || 0) * (item.quantity || 1))}</td>
-      </tr>`;
+        <tr>
+          <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b;">
+            <strong>${prodName}</strong>
+            ${variantText ? `<br><span style="font-size:12px;color:#64748b;">${variantText}</span>` : ''}
+          </td>
+          <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${itemQty}</td>
+          <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(itemUnitPrice)}</td>
+          <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(itemTotal)}</td>
+        </tr>`;
       }
     )
     .join('');
+
+  const productsSection = items.length > 0 
+    ? `
+      <!-- Products table -->
+      <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Products</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:24px;">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th class="col-product" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:left;font-weight:600;">Product</th>
+            <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:center;font-weight:600;">Qty.</th>
+            <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Unit Price</th>
+            <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsRows}
+        </tbody>
+      </table>
+    ` 
+    : order.itemCount ? `
+      <!-- Imported Order Fallback -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Imported Order Summary</p>
+        <p style="margin:0;font-size:14px;color:#475569;">This order contains <strong>${order.itemCount} items</strong>. Details are available in the attached prescription or admin panel.</p>
+      </div>
+    ` : '';
 
   const addressLine = [
     shippingAddress.street,
@@ -186,16 +205,48 @@ function buildOrderNotificationHtml(order) {
               <!-- Meta row -->
               <table width="100%" cellpadding="0" cellspacing="0" class="meta-row" style="margin-bottom:28px;">
                 <tr>
-                  <td style="width:50%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
+                  <td style="width:33%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
                     <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Date</p>
                     <p style="margin:0;font-size:14px;color:#1e293b;font-weight:500;">${dateStr}</p>
                   </td>
-                  <td style="width:50%;vertical-align:top;padding-left:12px;padding-bottom:8px;">
+                  <td style="width:33%;vertical-align:top;padding-right:12px;padding-bottom:8px;">
                     <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Status</p>
                     <span style="display:inline-block;background:${statusBg};color:${statusColor};font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">${statusLabel}</span>
                   </td>
+                  ${order.supplier ? `
+                  <td style="width:33%;vertical-align:top;padding-left:12px;padding-bottom:8px;">
+                    <p style="margin:0 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;">Supplier</p>
+                    <span style="display:inline-block;background:#f8fafc;color:#475569;border:1px solid #cbd5e1;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;">${order.supplier}</span>
+                  </td>
+                  ` : ''}
                 </tr>
               </table>
+
+              <!-- Origin Catalog & Applied Price Tier -->
+              ${(order.catalogCode || order.catalogId || order.priceTierLabel || order.priceTier) ? `
+              <div style="background:#eff6ff;border-radius:10px;padding:16px 20px;margin-bottom:24px;border:1px solid #bfdbfe;">
+                <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:1px;">
+                  📁 Origin Shared Catalog & Applied Pricing Tier
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#1e3a8a;line-height:1.6;">
+                  ${order.catalogTitle ? `<tr><td style="font-weight:600;padding-bottom:4px;width:140px;">Catalog Name:</td><td><strong>${order.catalogTitle}</strong></td></tr>` : ''}
+                  ${(order.catalogCode || order.catalogId) ? `<tr><td style="font-weight:600;padding-bottom:4px;width:140px;">Catalog Code:</td><td><code style="background:#ffffff;padding:2px 6px;border-radius:4px;border:1px solid #cbd5e1;font-size:12px;">${order.catalogCode || order.catalogId}</code></td></tr>` : ''}
+                  <tr>
+                    <td style="font-weight:600;padding-bottom:4px;width:140px;">Pricing Tier:</td>
+                    <td>
+                      <span style="background:#dbeafe;color:#1e40af;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid #93c5fd;font-size:12px;">
+                        🛡️ ${order.priceTierLabel || (order.priceTier ? order.priceTier.toUpperCase() : 'Institutional Direct')} ${order.priceMarkupPercent ? `(+${order.priceMarkupPercent}% Margin)` : ''}
+                      </span>
+                    </td>
+                  </tr>
+                  ${(order.catalogToken || order.catalogId) ? `
+                  <tr>
+                    <td style="font-weight:600;padding-top:4px;width:140px;">Shared Link:</td>
+                    <td style="padding-top:4px;"><a href="https://med-peptides.com/shared/catalog/${order.catalogToken || order.catalogId}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:underline;">View Shared Catalog & Pricing Sheet &rarr;</a></td>
+                  </tr>` : ''}
+                </table>
+              </div>
+              ` : ''}
 
               <!-- Customer info -->
               <div style="background:#f8fafc;border-radius:10px;padding:20px 24px;margin-bottom:28px;border:1px solid #e2e8f0;">
@@ -217,33 +268,21 @@ function buildOrderNotificationHtml(order) {
                 </table>
               </div>
 
-              <!-- Products table -->
-              <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">📦 Products</p>
-              <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;margin-bottom:24px;">
-                <thead>
-                  <tr style="background:#f1f5f9;">
-                    <th class="col-product" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:left;font-weight:600;">Product</th>
-                    <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:center;font-weight:600;">Qty.</th>
-                    <th class="hide-mobile" style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Unit Price</th>
-                    <th style="padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#64748b;text-align:right;font-weight:600;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsRows}
-                </tbody>
-              </table>
+              ${productsSection}
 
+              ${paymentLabel !== '—' ? `
               <!-- Payment Method -->
               <div class="pay-row" style="background:#f0f7ff;border-radius:10px;padding:16px 24px;margin-bottom:24px;border:1px solid #bfdbfe;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                 <span style="font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">💳 Payment Method</span>
                 <span style="margin-left:auto;font-size:14px;font-weight:600;color:#1e3a5f;background:#dbeafe;padding:4px 14px;border-radius:20px;">${paymentLabel}</span>
               </div>
+              ` : ''}
 
               <!-- Totals -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
                   <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Subtotal</p></td>
-                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${fmt(subtotal)}</p></td>
+                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${fmt(resolvedSubtotal)}</p></td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Shipping</p></td>
@@ -254,16 +293,26 @@ function buildOrderNotificationHtml(order) {
                     <p style="margin:0;font-size:16px;font-weight:700;color:#003666;">TOTAL</p>
                   </td>
                   <td style="padding:14px 0 6px;border-top:2px solid #003666;text-align:right;">
-                    <p style="margin:0;font-size:20px;font-weight:700;color:#003666;">${fmt(total)}</p>
+                    <p style="margin:0;font-size:20px;font-weight:700;color:#003666;">${fmt(resolvedTotal)}</p>
                   </td>
                 </tr>
               </table>
 
-              ${notes ? `
+              ${(order.customerNotes || order.deliveryNotes || notes) ? `
               <!-- Notes -->
               <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
-                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Notas del cliente</p>
-                <p style="margin:0;font-size:13px;color:#78350f;">${notes}</p>
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Customer Notes / Instructions</p>
+                <p style="margin:0;font-size:13px;color:#78350f;">${order.customerNotes || order.deliveryNotes || notes}</p>
+              </div>` : ''}
+
+              ${order.prescriptionDocLink ? `
+              <!-- Prescription Link -->
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;margin-bottom:24px;text-align:center;">
+                <p style="margin:0 0 10px;font-size:13px;color:#475569;">This order includes a prescription document.</p>
+                <a href="${order.prescriptionDocLink}" target="_blank"
+                   style="display:inline-block;background:#f1f5f9;color:#0f172a;text-decoration:none;font-size:14px;font-weight:600;padding:10px 20px;border-radius:6px;border:1px solid #cbd5e1;">
+                  📄 View Prescription Document
+                </a>
               </div>` : ''}
 
               <!-- CTA button -->

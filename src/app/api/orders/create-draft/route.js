@@ -55,14 +55,19 @@ export async function POST(request) {
       const totalPrice = Number((item.quantity * unitPrice).toFixed(2));
       return {
         id: item.id || '',
+        name: String(item.productName || item.name || '').trim(),
         productName: String(item.productName || item.name || '').trim(),
         dosage: String(item.dosage || '').trim(),
         presentation: String(item.presentation || 'vial').trim(),
+        variant: [item.dosage, item.presentation].filter(Boolean).join(' • '),
         quantity: Number(item.quantity) || 0,
         kits: Math.floor((item.quantity || 0) / 10),
         singleUnits: (item.quantity || 0) % 10,
         unitPrice: Number(unitPrice) || 0,
+        price: Number(unitPrice) || 0,
         totalPrice,
+        total: totalPrice,
+        lineTotal: totalPrice,
         isBulk
       };
     });
@@ -75,10 +80,21 @@ export async function POST(request) {
       status: 'draft', // Regla #28 Taxonomía Unificada de Estados
       source,
       catalogId: String(catalogId || '').trim(),
+      catalogCode: String(catalogCode || '').trim(),
+      catalogToken: String(catalogToken || '').trim(),
+      catalogTitle: String(catalogTitle || '').trim(),
+      priceTier: String(priceTier || '').trim(),
+      priceTierLabel: String(priceTierLabel || 'Institutional Direct').trim(),
+      priceTierCode: String(priceTierCode || '').trim(),
+      priceMarkupPercent: Number(priceMarkupPercent || 0),
+      priceSource: String(priceSource || 'wholesale').trim(),
+      supplierFilter: String(supplierFilter || '').trim(),
+      categoryFilter: String(categoryFilter || '').trim(),
       customerName: clientDisplayName,
       customerEmail: String(customerEmail || '').trim(),
       customerPhone: String(customerPhone || '').trim(),
       customerAddress: String(customerAddress || '').trim(),
+      deliveryAddress: String(customerAddress || '').trim(),
       customerVat: String(customerVat || '').trim(),
       customerNotes: String(customerNotes || '').trim(),
       items: formattedItems,
@@ -88,6 +104,9 @@ export async function POST(request) {
       shippingDestination: String(shippingDestination || 'Standard Dispatch').trim(),
       shippingCode: String(shippingCode || 'EU').trim(),
       grandTotal: Number(grandTotal) || 0,
+      total: Number(grandTotal || 0),
+      totalAmount: Number(grandTotal || 0),
+      paymentMethod: 'bank_transfer', // Default institutional billing
       currency: String(currency || 'USD').toUpperCase(),
       currencySymbol: String(currencySymbol || '$'),
       accountManagerName: String(accountManagerName || '').trim(),

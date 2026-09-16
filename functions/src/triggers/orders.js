@@ -3,6 +3,21 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { buildOrderEmail } = require("../../emailTemplates/orderNotification");
 const { buildClientConfirmationEmail } = require("../../emailTemplates/clientConfirmation");
 
+const isDeliverableEmail = (email) => {
+  if (!email || typeof email !== "string") return false;
+  const normalized = email.trim().toLowerCase();
+  if (
+    normalized.endsWith(".test") ||
+    normalized.endsWith(".example") ||
+    normalized.endsWith(".invalid") ||
+    normalized.endsWith(".localhost") ||
+    normalized.endsWith("@example.com")
+  ) {
+    return false;
+  }
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+};
+
 module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
   {
     document: "orders/{orderId}",
@@ -39,30 +54,34 @@ module.exports = (gmailUser, gmailAppPass) => onDocumentCreated(
     const fromAddress = `"Atlas Health" <${gmailUser.value()}>`;
     const sendPromises = [];
 
+    let adminEmails = [];
     if (!adminSnap.empty) {
-      const adminEmails = adminSnap.docs
+      adminEmails = adminSnap.docs
         .map((doc) => doc.data().email)
-        .filter(Boolean);
-
-      if (adminEmails.length > 0) {
-        const { subject, html } = buildOrderEmail(orderData);
-        adminEmails.forEach((to) => {
-          sendPromises.push(
-            transporter.sendMail({ from: fromAddress, to, subject, html })
-          );
-        });
-      }
+        .filter(isDeliverableEmail);
     }
 
-    const customerEmail = orderData.customer?.email;
-    if (customerEmail) {
-      const { subject, html } = buildClientConfirmationEmail(orderData);
+    // Default to primary administrator if no deliverable admins found
+    if (adminEmails.length === 0) {
+      adminEmails = ["jose@mediluxeme.com"];
+    }
+
+    const { subject, html } = buildOrderEmail(orderData);
+    adminEmails.forEach((to) => {
       sendPromises.push(
-        transporter.sendMail({ from: fromAddress, to: customerEmail, subject, html })
+        transporter.sendMail({ from: fromAddress, to, subject, html })
+      );
+    });
+
+    const customerEmail = orderData.customer?.email;
+    if (customerEmail && isDeliverableEmail(customerEmail)) {
+      const { subject: clientSubject, html: clientHtml } = buildClientConfirmationEmail(orderData);
+      sendPromises.push(
+        transporter.sendMail({ from: fromAddress, to: customerEmail, subject: clientSubject, html: clientHtml })
       );
     }
 
     await Promise.all(sendPromises);
-    console.log(`✅ All emails sent for order ${orderId}`);
+    console.log(`✅ All deliverable emails sent for order ${orderId} (Admins: ${adminEmails.join(', ')})`);
   }
 );

@@ -376,8 +376,8 @@ You must output ONLY a valid JSON object matching this schema (do NOT wrap it in
         /\b(sleep|sueño|dormir|insom\w*|circadian)\b/i.test(query)
       );
 
-      // Only fetch Firestore for actual peptide/protocol search queries
-      const _needsFirestore = !isAdminUser && !_isPricing && !_isShipping && !_isContact && !_isLifestyle;
+      // Fetch Firestore for peptide, protocol, and pricing intelligence
+      const _needsFirestore = !_isShipping && !_isContact && !_isLifestyle;
 
       let allPeptides = [];
       let activePeptides = [];
@@ -1320,7 +1320,8 @@ If the user asks about these metrics, provide the exact numbers above.
 3. Formatting: Use bullet points and clear professional structure. Do not use clinical widgets.
 
 PRICING, USERS & ROLES — You have access to tools via Function Calling:
-- Call get_product_pricing(product_id) to get full price breakdown.
+- Call get_product_pricing(product_id) to get full price breakdown across all verified suppliers (POD Poland, NP Labs, LotusLand, Magenta, etc.), dosages, and formats.
+- Call compare_supplier_pricing(compound_name) to compare unit costs, wholesale rates, clinic prices, and retail margins across verified suppliers.
 - Call list_products_by_margin(order) to rank products by margin.
 - Call update_product_price / update_product_cost to PROPOSE a price change (always requires admin confirmation).
 - Call list_users(role, limit, search) to search or filter users.
@@ -1337,11 +1338,42 @@ Suggestions Action Chips:
           ? `\nPubMed Scientific Literature for matched compound:\n${pubmedLiterature.map(a => `- Title: "${a.title}" (Journal: ${a.journal}, Year: ${a.year}) [PMID: ${a.pmid}]`).join('\n')}\n`
           : '';
 
+        // Hydrate subcollection variants for top matched products if not already embedded
+        await Promise.all(top3Products.map(async p => {
+          if (!p.variants || p.variants.length === 0) {
+            try {
+              const vSnap = await db.collection("products").doc(p.id).collection("variants").get();
+              if (!vSnap.empty) {
+                p.variants = vSnap.docs.map(vd => ({ id: vd.id, ...vd.data() }));
+              }
+            } catch (err) {
+              structuredLogger.warn(`[ai.js] Could not hydrate variants for ${p.id}:`, err.message);
+            }
+          }
+        }));
+
         const catalogContext = `
 ${activeViewingContextMarkdown}
 Catalog Context:
 Matched Products:
-${top3Products.map(p => `- Name: ${p.displayName || p.name}
+${top3Products.map(p => {
+  const variantLines = (p.variants || []).map(v => {
+    const s = v.supplierName || v.supplier || v.supplierId || 'Atlas Verified';
+    const d = v.dosage || v.dose || 'Standard';
+    const f = v.presentationName || v.presentation || v.format || 'Vial';
+    const cur = v.currency || 'USD';
+    const c = v.cost ?? v.unit_cost ?? v.pricing?.master?.perUnit ?? v.pricing?.masterPrice?.base ?? v.costPrice ?? null;
+    const w = v.wholesalePrice ?? v.wholesale_price ?? v.pricing?.wholesale?.perUnit ?? v.pricing?.wholesalePrice?.base ?? null;
+    const cl = v.clinicPrice ?? v.clinic_price ?? v.pricing?.clinic?.perUnit ?? v.pricing?.clinicPrice?.base ?? null;
+    const r = v.retailPrice ?? v.unit_price ?? v.price ?? v.pricing?.retail?.perUnit ?? v.pricing?.retailPrice?.base ?? null;
+    const costStr = c != null ? `${cur} ${Number(c).toFixed(2)}` : 'N/A';
+    const wsStr = w != null ? `${cur} ${Number(w).toFixed(2)}` : 'N/A';
+    const clinicStr = cl != null ? `${cur} ${Number(cl).toFixed(2)}` : 'N/A';
+    const retailStr = r != null ? `${cur} ${Number(r).toFixed(2)}` : 'N/A';
+    return `    - [${s}] ${d} (${f}) | Cost: ${costStr} | Wholesale: ${wsStr} | Clinic: ${clinicStr} | Retail: ${retailStr}`;
+  }).join('\n');
+
+  return `- Name: ${p.displayName || p.name}
   Slug: ${p.slug || p.id}
   Scientific Name: ${p.scientificName || 'N/A'}
   Description: ${p.desc || p.description || ''}
@@ -1356,7 +1388,9 @@ ${top3Products.map(p => `- Name: ${p.displayName || p.name}
   Clinical References (PubMed PMIDs): ${JSON.stringify(p.typeData?.references || [])}
   Synergies: ${JSON.stringify(p.typeData?.synergies || [])}
   Contraindications: ${JSON.stringify(p.typeData?.contraindications || [])}
-  Storage: ${JSON.stringify(p.storage_conditions || {})}`).join('\n\n')}
+  Storage: ${JSON.stringify(p.storage_conditions || {})}
+  ${variantLines ? `Verified Supplier Variants & Pricing:\n${variantLines}` : ''}`;
+}).join('\n\n')}
 
 Matched Protocols:
 ${top2Protocols.map(proto => `- Title: ${proto.protocol_title || proto.title}
@@ -1384,7 +1418,7 @@ ${JSON.stringify(clinicalRules || {})}
               
               if (contents.length > 0 && contents[contents.length - 1].role === geminiRole) {
                 // Merge consecutive same roles to prevent Gemini API 400 Bad Request
-                contents[contents.length - 1].parts[0].text += `\\n\\n${turn.content}`;
+                contents[contents.length - 1].parts[0].text += `\n\n${turn.content}`;
               } else {
                 contents.push({
                   role: geminiRole,
@@ -1398,9 +1432,9 @@ ${JSON.stringify(clinicalRules || {})}
         // Add final user prompt containing the RAG context
         let finalPromptText = "";
         if (isAdminMode) {
-          finalPromptText = `User Query: "${message}"`;
+          finalPromptText = `${catalogContext ? catalogContext + '\n\n' : ''}User Query: "${message}"`;
         } else {
-          finalPromptText = `${catalogContext}\\nUser Query: "${message}"`;
+          finalPromptText = `${catalogContext}\nUser Query: "${message}"`;
         }
 
         if (contents.length > 0 && contents[contents.length - 1].role === 'user') {

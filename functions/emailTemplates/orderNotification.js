@@ -47,26 +47,39 @@ function buildOrderNotificationHtml(order) {
   
   const statusLabel = s.charAt(0).toUpperCase() + s.slice(1);
 
-  const resolvedShipping = shipping || order.shippingFee || 0;
+  const resolvedShipping = shipping || order.shippingFee || order.shippingCost || 0;
   const custName = customer.fullName || customer.name || [customer.firstName, customer.lastName].filter(Boolean).join(' ') || order.customerName || order.patientName || '—';
   const custEmail = customer.email || order.customerEmail || order.patientEmail || '—';
   const custPhone = customer.phone || order.customerPhone || shippingAddress.phone || '';
-  const custInst = customer.institution || order.customerInstitution || '';
+  const custInst = customer.institution || order.customerInstitution || order.clinicName || '';
 
   // Resolve payment method to a human-readable label
+  const effPaymentMethod = (paymentMethod || order.paymentMethod || order.paymentTerms || '').toLowerCase();
   const paymentLabel =
-    paymentMethod === 'bank_transfer' ? '🏦 Bank Transfer'
-    : paymentMethod === 'credit_card'  ? '💳 Credit / Debit Card'
-    : paymentMethod ? paymentMethod
-    : '—';
+    effPaymentMethod === 'bank_transfer' || effPaymentMethod === 'institutional_invoice' ? '🏦 Bank Transfer / Pro-Forma'
+    : effPaymentMethod === 'credit_card'  ? '💳 Credit / Debit Card'
+    : effPaymentMethod ? effPaymentMethod
+    : '🏦 Institutional Terms / Pro-Forma';
 
   const fmt = (amount) => {
     // If it's already a formatted string from CSV (like "219.00€" or "100$"), just return it.
     if (typeof amount === 'string') return amount;
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
   };
 
-  const resolvedTotal = total || order.price || 0;
+  const resolvedTotal = Number(order.grandTotal ?? order.totalAmount ?? order.total ?? order.price ?? total ?? subtotal ?? 0);
+  const resolvedSubtotal = Number(order.subtotal ?? subtotal ?? resolvedTotal);
+
+  // Address line resolution (supports direct customerAddress and shippingAddress object)
+  const addressLine = order.customerAddress || order.deliveryAddress || [
+    shippingAddress.street,
+    shippingAddress.city,
+    shippingAddress.state,
+    shippingAddress.zip,
+    shippingAddress.country,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   // createdAt can be a Firestore Timestamp, a JS Date, or an ISO string
   let dateObj;
@@ -83,16 +96,24 @@ function buildOrderNotificationHtml(order) {
 
   const itemsRows = items
     .map(
-      (item) => `
-      <tr>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b;">
-          ${item.name || '—'}
-          ${item.variant ? `<br><span style="font-size:12px;color:#64748b;">${item.variant}</span>` : ''}
-        </td>
-        <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${item.quantity || 1}</td>
-        <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(item.unitPrice || item.price || 0)}</td>
-        <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(item.lineTotal || (item.unitPrice || item.price || 0) * (item.quantity || 1))}</td>
-      </tr>`
+      (item) => {
+        const prodName = item.productName || item.name || item.title || '—';
+        const variantText = item.variant || [item.dosage, item.presentation].filter(Boolean).join(' • ');
+        const itemQty = item.quantity || 1;
+        const itemUnitPrice = Number(item.unitPrice || item.price || 0);
+        const itemTotal = Number(item.totalPrice ?? item.total ?? item.lineTotal ?? (itemUnitPrice * itemQty));
+
+        return `
+        <tr>
+          <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b;">
+            <strong>${prodName}</strong>
+            ${variantText ? `<br><span style="font-size:12px;color:#64748b;">${variantText}</span>` : ''}
+          </td>
+          <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${itemQty}</td>
+          <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(itemUnitPrice)}</td>
+          <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(itemTotal)}</td>
+        </tr>`;
+      }
     )
     .join('');
 
@@ -201,6 +222,32 @@ function buildOrderNotificationHtml(order) {
                 </tr>
               </table>
 
+              <!-- Origin Catalog & Applied Price Tier -->
+              ${(order.catalogCode || order.catalogId || order.priceTierLabel || order.priceTier) ? `
+              <div style="background:#eff6ff;border-radius:10px;padding:16px 20px;margin-bottom:24px;border:1px solid #bfdbfe;">
+                <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:1px;">
+                  📁 Origin Shared Catalog & Applied Pricing Tier
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;color:#1e3a8a;line-height:1.6;">
+                  ${order.catalogTitle ? `<tr><td style="font-weight:600;padding-bottom:4px;width:140px;">Catalog Name:</td><td><strong>${order.catalogTitle}</strong></td></tr>` : ''}
+                  ${(order.catalogCode || order.catalogId) ? `<tr><td style="font-weight:600;padding-bottom:4px;width:140px;">Catalog Code:</td><td><code style="background:#ffffff;padding:2px 6px;border-radius:4px;border:1px solid #cbd5e1;font-size:12px;">${order.catalogCode || order.catalogId}</code></td></tr>` : ''}
+                  <tr>
+                    <td style="font-weight:600;padding-bottom:4px;width:140px;">Pricing Tier:</td>
+                    <td>
+                      <span style="background:#dbeafe;color:#1e40af;font-weight:700;padding:2px 8px;border-radius:4px;border:1px solid #93c5fd;font-size:12px;">
+                        🛡️ ${order.priceTierLabel || (order.priceTier ? order.priceTier.toUpperCase() : 'Institutional Direct')} ${order.priceMarkupPercent ? `(+${order.priceMarkupPercent}% Margin)` : ''}
+                      </span>
+                    </td>
+                  </tr>
+                  ${(order.catalogToken || order.catalogId) ? `
+                  <tr>
+                    <td style="font-weight:600;padding-top:4px;width:140px;">Shared Link:</td>
+                    <td style="padding-top:4px;"><a href="https://med-peptides.com/shared/catalog/${order.catalogToken || order.catalogId}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:underline;">View Shared Catalog & Pricing Sheet &rarr;</a></td>
+                  </tr>` : ''}
+                </table>
+              </div>
+              ` : ''}
+
               <!-- Customer info -->
               <div style="background:#f8fafc;border-radius:10px;padding:20px 24px;margin-bottom:28px;border:1px solid #e2e8f0;">
                 <p style="margin:0 0 14px;font-size:13px;font-weight:700;color:#003666;text-transform:uppercase;letter-spacing:1px;">👤 Customer</p>
@@ -235,7 +282,7 @@ function buildOrderNotificationHtml(order) {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                 <tr>
                   <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Subtotal</p></td>
-                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${fmt(subtotal)}</p></td>
+                  <td style="padding:6px 0;text-align:right;"><p style="margin:0;font-size:14px;color:#1e293b;">${fmt(resolvedSubtotal)}</p></td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0;"><p style="margin:0;font-size:14px;color:#64748b;">Shipping</p></td>
@@ -251,11 +298,11 @@ function buildOrderNotificationHtml(order) {
                 </tr>
               </table>
 
-              ${notes ? `
+              ${(order.customerNotes || order.deliveryNotes || notes) ? `
               <!-- Notes -->
               <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
-                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Notas del cliente</p>
-                <p style="margin:0;font-size:13px;color:#78350f;">${notes}</p>
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;">Customer Notes / Instructions</p>
+                <p style="margin:0;font-size:13px;color:#78350f;">${order.customerNotes || order.deliveryNotes || notes}</p>
               </div>` : ''}
 
               ${order.prescriptionDocLink ? `
