@@ -162,18 +162,24 @@ export async function POST(request) {
       type: targetType || 'custom',
     };
 
+    const isInfoRequest = (docType === 'info_request');
+    const internalAccountManager = isInfoRequest
+      ? { name: 'Operations Desk', email: 'jose@mediluxeme.com' }
+      : (accountManager || {
+          name: 'Atlas Commercial Desk',
+          email: 'orders@atlas-solutions.com',
+        });
+
     const newLog = {
       docType: docType || 'product_datasheet',
       productSlug: productSlug || null,
       productName: productName || (productSlug ? productSlug.replace(/-/g, ' ').toUpperCase() : null),
       productSummary: productName || productSlug || 'Precision Clinical Product',
       recipient: recipientData,
-      accountManager: accountManager || {
-        name: 'Atlas Commercial Desk',
-        email: 'orders@atlas-solutions.com',
-      },
+      accountManager: internalAccountManager,
       shareUrl: shareUrl || null,
       status: 'sent',
+      items: items || null,
       itemCount: items ? items.length : 1,
       generatedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -183,10 +189,85 @@ export async function POST(request) {
 
     const docRef = await adminDb.collection('catalog_generation_logs').add(newLog);
 
+    // Attempt direct SMTP alert to jose@mediluxeme.com if credentials are available
+    if (isInfoRequest) {
+      try {
+        const gmailUser = process.env.GMAIL_USER || process.env.SMTP_USER;
+        const gmailPass = process.env.GMAIL_PASS || process.env.SMTP_PASS;
+        if (gmailUser && gmailPass) {
+          const nodemailer = await import('nodemailer');
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: gmailUser, pass: gmailPass },
+          });
+
+          const topic = items?.[0]?.topic || 'Clinical Details';
+          const notes = items?.[0]?.notes || 'No additional notes provided.';
+
+          await transporter.sendMail({
+            from: `"Atlas Clinical System" <${gmailUser}>`,
+            to: 'jose@mediluxeme.com',
+            subject: `📬 New Clinical Info Request: ${newLog.productName} — Dr. ${recipientData.name}`,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                  <span style="font-size: 20px;">🔬</span>
+                  <h2 style="margin: 0; font-size: 18px; color: #0f172a;">New Clinical Information Request</h2>
+                </div>
+                <p style="color: #475569; font-size: 14px; margin-top: 0;">A practitioner requested clinical literature on a shared catalog product.</p>
+                <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 16px 0;" />
+                
+                <table style="width: 100%; font-size: 13px; color: #334155; line-height: 1.6;">
+                  <tr>
+                    <td style="font-weight: 700; width: 120px; padding: 4px 0;">Compound:</td>
+                    <td style="color: #2563eb; font-weight: 800;">${newLog.productName}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 700; padding: 4px 0;">Practitioner:</td>
+                    <td>${recipientData.name}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 700; padding: 4px 0;">Email:</td>
+                    <td><a href="mailto:${recipientData.email}" style="color: #2563eb;">${recipientData.email}</a></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 700; padding: 4px 0;">Requested Topic:</td>
+                    <td><strong>${topic}</strong></td>
+                  </tr>
+                </table>
+
+                ${notes ? `
+                  <div style="margin-top: 16px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="font-weight: 700; font-size: 12px; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Clinical Context / Notes:</div>
+                    <div style="font-size: 13px; color: #1e293b;">${notes}</div>
+                  </div>
+                ` : ''}
+
+                <div style="margin-top: 24px; text-align: center;">
+                  <a href="mailto:${recipientData.email}?subject=Clinical%20Documentation:%20${encodeURIComponent(newLog.productName)}&body=Dear%20${encodeURIComponent(recipientData.name)},%0A%0AThank%20you%20for%20requesting%20clinical%20information%20on%20${encodeURIComponent(newLog.productName)}.%0A%0A" 
+                     style="display: inline-block; background: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none;">
+                    Reply to Practitioner
+                  </a>
+                </div>
+              </div>
+            `,
+          });
+        }
+      } catch (mailErr) {
+        console.warn('[/api/catalog/tracking-logs] Direct email dispatch warning (non-fatal):', mailErr.message);
+      }
+    }
+
+    // Sanitize response to never leak internal email to the client browser
+    const clientSafeLog = { ...newLog };
+    if (isInfoRequest) {
+      clientSafeLog.accountManager = { name: 'Clinical Operations Desk' };
+    }
+
     return NextResponse.json({
       success: true,
       id: docRef.id,
-      item: { id: docRef.id, ...newLog },
+      item: { id: docRef.id, ...clientSafeLog },
     });
   } catch (err) {
     console.error('[/api/catalog/tracking-logs] POST Error:', err);

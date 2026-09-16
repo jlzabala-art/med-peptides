@@ -59,14 +59,6 @@ export default function ClinicalInfoRequestPanel({ product, catalogMeta }) {
             email,
             type: 'info_request',
           },
-          accountManager: {
-            name: catalogMeta?.accountManagerName && catalogMeta.accountManagerName !== 'Atlas Commercial Desk'
-              ? catalogMeta.accountManagerName
-              : 'Clinical Information Desk',
-            email: catalogMeta?.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com'
-              ? catalogMeta.accountManagerEmail
-              : 'clinical@atlashealth.com',
-          },
           shareUrl: typeof window !== 'undefined' ? window.location.href : '',
           items: [{ topic, notes: notes.trim().slice(0, 500) }],
         }),

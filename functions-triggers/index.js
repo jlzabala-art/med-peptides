@@ -22,6 +22,7 @@ exports.onOrderCreatedForRx   = prescriptionTriggers.onOrderCreatedForRx;
 exports.onPrescriptionCreated = prescriptionTriggers.onPrescriptionCreated; 
 
 exports.onOrderDeliveredRefill = require("./src/triggers/refillReminder");
+exports.onClinicalInfoRequest  = require("./src/triggers/onClinicalInfoRequest")(gmailUser, gmailAppPass);
 
 // ── Physician Denormalized Stats Triggers ────────────────────────────────────
 // Maintains patientCount, orderCount, totalRevenue, prescriptionCount directly

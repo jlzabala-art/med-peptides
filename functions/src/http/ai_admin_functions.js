@@ -15,16 +15,30 @@ const ADMIN_TOOLS = [
     functionDeclarations: [
       {
         name: "get_product_pricing",
-        description: "Returns the full pricing breakdown for a specific product: costPrice, retail, wholesale, clinic, and master/distributor tiers, plus computed margins.",
+        description: "Returns the full pricing breakdown for a specific product across all verified suppliers (POD Poland, NP Labs, LotusLand, Magenta, etc.), dosages, and formats. Includes unit cost, wholesale price, clinic price, retail PVP price, margin %, and stock.",
         parameters: {
           type: "OBJECT",
           properties: {
             product_id: {
               type: "STRING",
-              description: "The Firestore document ID or slug of the product to query."
+              description: "The Firestore document ID, slug, or compound name of the product to query (e.g. 'retatrutide', 'tirzepatide', 'bpc-157')."
             }
           },
           required: ["product_id"]
+        }
+      },
+      {
+        name: "compare_supplier_pricing",
+        description: "Compares supplier pricing, unit costs, wholesale rates, clinic prices, and retail margins across all verified suppliers (POD Poland, NP Labs, LotusLand, Magenta, etc.) for a specific compound or all catalog products.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            compound_name: {
+              type: "STRING",
+              description: "The name or slug of the compound to compare (e.g. 'Retatrutide', 'Tirzepatide', 'BPC-157') or 'all'."
+            }
+          },
+          required: ["compound_name"]
         }
       },
       {
@@ -418,37 +432,164 @@ async function executeReadOnlyFunction(fn, args, db) {
   switch (fn) {
     case "get_product_pricing": {
       const { product_id } = args;
-      // Try by doc ID first, then by slug field
-      let snap = await db.collection("products").doc(product_id).get();
+      const cleanId = (product_id || "").trim();
+      const lowerId = cleanId.toLowerCase();
+
+      // Try by exact doc ID first, then lowercase doc ID, then slug, then canonicalName/name
+      let snap = await db.collection("products").doc(cleanId).get();
+      if (!snap.exists && cleanId !== lowerId) {
+        snap = await db.collection("products").doc(lowerId).get();
+      }
       if (!snap.exists) {
         const bySlug = await db.collection("products")
-          .where("slug", "==", product_id)
+          .where("slug", "==", lowerId)
           .limit(1)
           .get();
-        if (bySlug.empty) {
-          return `Product "${product_id}" not found in Firestore.`;
+        if (!bySlug.empty) {
+          snap = bySlug.docs[0];
+        } else {
+          // Search by name
+          const byName = await db.collection("products")
+            .where("name", ">=", cleanId)
+            .where("name", "<=", cleanId + "\uf8ff")
+            .limit(1)
+            .get();
+          if (!byName.empty) {
+            snap = byName.docs[0];
+          } else {
+            // Broad search fallback
+            const allSnap = await db.collection("products").limit(100).get();
+            const found = allSnap.docs.find(d => {
+              const data = d.data();
+              const name = (data.name || data.displayName || data.canonicalName || "").toLowerCase();
+              return name.includes(lowerId) || d.id.toLowerCase().includes(lowerId);
+            });
+            if (found) {
+              snap = found;
+            } else {
+              return `Product "${product_id}" not found in Firestore.`;
+            }
+          }
         }
-        snap = bySlug.docs[0];
       }
-      const p = snap.data();
-      const costPrice = p.costPrice || p.cost_price || 0;
-      const variant   = (p.variants || [])[0] || {};
-      const pricing   = variant.pricing || p.pricing || {};
-      const retail    = pricing.retail?.basePrice ?? pricing.retail ?? 0;
-      const wholesale = pricing.wholesale?.basePrice ?? pricing.wholesale ?? 0;
-      const clinic    = pricing.clinic?.basePrice ?? pricing.clinic ?? 0;
-      const master    = pricing.master?.basePrice ?? pricing.master ?? pricing.distributor?.basePrice ?? 0;
 
-      const marginPct = (base, cost) =>
-        cost > 0 ? (((base - cost) / base) * 100).toFixed(1) + "%" : "N/A";
+      const p = snap.data();
+      const docId = snap.id;
+      const prodTitle = p.displayName || p.name || p.canonicalName || docId;
+
+      // Query subcollection variants
+      let variantsList = [];
+      try {
+        const vSnap = await db.collection("products").doc(docId).collection("variants").get();
+        if (!vSnap.empty) {
+          variantsList = vSnap.docs.map(vd => ({ id: vd.id, ...vd.data() }));
+        }
+      } catch (err) {
+        console.warn(`[get_product_pricing] Error fetching variants subcol for ${docId}:`, err.message);
+      }
+
+      // Fallback to embedded variants
+      if (variantsList.length === 0 && Array.isArray(p.variants) && p.variants.length > 0) {
+        variantsList = p.variants;
+      }
+
+      if (variantsList.length === 0) {
+        const costPrice = p.costPrice || p.cost_price || 0;
+        return `**Pricing for: ${prodTitle} (Single Document)**\n- Base Cost: $${Number(costPrice).toFixed(2)}\nNo separate supplier variants found in catalog.`;
+      }
+
+      const rows = variantsList.map(v => {
+        const supplier = v.supplierName || v.supplier || v.supplierId || "Atlas Verified";
+        const dosage = v.dosage || v.dose || "Standard";
+        const presentation = v.presentationName || v.presentation || v.format || "Vial";
+        const cur = v.currency || "USD";
+
+        const cost = v.cost ?? v.unit_cost ?? v.pricing?.master?.perUnit ?? v.pricing?.masterPrice?.base ?? v.costPrice ?? null;
+        const wholesale = v.wholesalePrice ?? v.wholesale_price ?? v.pricing?.wholesale?.perUnit ?? v.pricing?.wholesalePrice?.base ?? null;
+        const clinic = v.clinicPrice ?? v.clinic_price ?? v.pricing?.clinic?.perUnit ?? v.pricing?.clinicPrice?.base ?? null;
+        const retail = v.retailPrice ?? v.unit_price ?? v.price ?? v.pricing?.retail?.perUnit ?? v.pricing?.retailPrice?.base ?? null;
+
+        const costStr = cost != null ? `${cur} ${Number(cost).toFixed(2)}` : "N/A";
+        const wsStr = wholesale != null ? `${cur} ${Number(wholesale).toFixed(2)}` : "N/A";
+        const clinicStr = clinic != null ? `${cur} ${Number(clinic).toFixed(2)}` : "N/A";
+        const retailStr = retail != null ? `${cur} ${Number(retail).toFixed(2)}` : "N/A";
+
+        const marginPct = (retail && cost && Number(retail) > 0)
+          ? `${(((Number(retail) - Number(cost)) / Number(retail)) * 100).toFixed(1)}%`
+          : "N/A";
+
+        const stockStr = v.stock != null ? `${v.stock} units` : (v.inStock ? "In Stock" : "On Demand");
+
+        return `| **${supplier}** | ${dosage} | ${presentation} | ${costStr} | ${wsStr} | ${clinicStr} | ${retailStr} | ${marginPct} | ${stockStr} |`;
+      });
 
       return [
-        `**Pricing for: ${p.displayName || p.name || product_id}**`,
-        `- Cost Price: $${costPrice.toFixed(2)}`,
-        `- Retail: $${retail.toFixed ? retail.toFixed(2) : retail} (margin: ${marginPct(retail, costPrice)})`,
-        `- Wholesale: $${wholesale.toFixed ? wholesale.toFixed(2) : wholesale} (margin: ${marginPct(wholesale, costPrice)})`,
-        `- Clinic: $${clinic.toFixed ? clinic.toFixed(2) : clinic} (margin: ${marginPct(clinic, costPrice)})`,
-        `- Master/Distributor: $${master.toFixed ? master.toFixed(2) : master} (margin: ${marginPct(master, costPrice)})`,
+        `### 💰 Multi-Supplier Pricing & Format Matrix for **${prodTitle}**`,
+        `Found **${variantsList.length} verified supplier formats** in Firestore:`,
+        "",
+        `| Supplier | Dosage | Format | Unit Cost | Wholesale | Clinic | Retail (PVP) | Margin % | Availability |`,
+        `| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |`,
+        ...rows
+      ].join("\n");
+    }
+
+    case "compare_supplier_pricing": {
+      const { compound_name } = args;
+      const cleanCompound = (compound_name || "").trim().toLowerCase();
+
+      // Find matching products
+      const pSnap = await db.collection("products").where("status", "in", ["active", "published"]).get();
+      const matchedDocs = pSnap.docs.filter(d => {
+        if (!cleanCompound || cleanCompound === "all") return true;
+        const data = d.data();
+        const name = (data.name || data.displayName || data.canonicalName || "").toLowerCase();
+        return name.includes(cleanCompound) || d.id.toLowerCase().includes(cleanCompound);
+      }).slice(0, 5);
+
+      if (matchedDocs.length === 0) {
+        return `No active products found matching "${compound_name}".`;
+      }
+
+      const results = [];
+      for (const doc of matchedDocs) {
+        const p = doc.data();
+        const prodTitle = p.displayName || p.name || doc.id;
+        const vSnap = await db.collection("products").doc(doc.id).collection("variants").get();
+        let vars = [];
+        if (!vSnap.empty) {
+          vars = vSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } else if (Array.isArray(p.variants)) {
+          vars = p.variants;
+        }
+
+        if (vars.length > 0) {
+          const rows = vars.map(v => {
+            const supplier = v.supplierName || v.supplier || v.supplierId || "Atlas";
+            const dosage = v.dosage || v.dose || "Standard";
+            const format = v.presentationName || v.presentation || v.format || "Vial";
+            const cur = v.currency || "USD";
+            const cost = v.cost ?? v.unit_cost ?? v.pricing?.master?.perUnit ?? null;
+            const wholesale = v.wholesalePrice ?? v.wholesale_price ?? v.pricing?.wholesale?.perUnit ?? null;
+            const retail = v.retailPrice ?? v.unit_price ?? v.price ?? v.pricing?.retail?.perUnit ?? null;
+            const costStr = cost != null ? `${cur} ${Number(cost).toFixed(2)}` : "N/A";
+            const wsStr = wholesale != null ? `${cur} ${Number(wholesale).toFixed(2)}` : "N/A";
+            const retailStr = retail != null ? `${cur} ${Number(retail).toFixed(2)}` : "N/A";
+            return `| **${supplier}** | ${prodTitle} | ${dosage} (${format}) | ${costStr} | ${wsStr} | ${retailStr} |`;
+          });
+          results.push(...rows);
+        }
+      }
+
+      if (results.length === 0) {
+        return `No supplier variant pricing found for "${compound_name}".`;
+      }
+
+      return [
+        `### 📊 Supplier Pricing Comparison Matrix`,
+        "",
+        `| Supplier | Compound | Dosage / Format | Unit Cost | Wholesale | Retail (PVP) |`,
+        `| :--- | :--- | :--- | :--- | :--- | :--- |`,
+        ...results
       ].join("\n");
     }
 

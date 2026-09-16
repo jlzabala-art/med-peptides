@@ -482,7 +482,10 @@ export default function SharedCatalogClientView({
       doc.setFontSize(8.5);
       doc.setTextColor(224, 242, 254);
       doc.text('Official Clinical Formulations & Specialty Quotation', 14, 22);
-      const validContactEmail = catalogMeta?.accountManagerEmail && catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' && catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com'
+      const validContactEmail = catalogMeta?.accountManagerEmail &&
+        catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' &&
+        catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com' &&
+        catalogMeta.accountManagerEmail !== 'jose@mediluxeme.com'
         ? catalogMeta.accountManagerEmail
         : null;
       if (validContactEmail) {

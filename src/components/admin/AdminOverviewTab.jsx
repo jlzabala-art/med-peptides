@@ -12,6 +12,7 @@ import ShoppingBag from "lucide-react/dist/esm/icons/shopping-bag";
 import ShieldCheck from "lucide-react/dist/esm/icons/shield-check";
 import Layers from "lucide-react/dist/esm/icons/layers";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
+import Mail from "lucide-react/dist/esm/icons/mail";
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -78,6 +79,28 @@ export default function AdminOverviewTab({
       } catch (err) {}
     };
     fetchAgents();
+  }, []);
+
+  const [clinicalInquiries, setClinicalInquiries] = useState([]);
+
+  useEffect(() => {
+    async function fetchClinicalInquiries() {
+      try {
+        const { collection, query, where, getDocs, limit: firestoreLimit } = await import('firebase/firestore');
+        const q = query(
+          collection(db, 'catalog_generation_logs'),
+          where('docType', '==', 'info_request'),
+          firestoreLimit(15)
+        );
+        const snap = await getDocs(q);
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) => new Date(b.generatedAt || 0) - new Date(a.generatedAt || 0));
+        setClinicalInquiries(items);
+      } catch (err) {
+        console.warn('Error fetching clinical inquiries for overview:', err);
+      }
+    }
+    fetchClinicalInquiries();
   }, []);
 
   const agentsList = agents ? Object.values(agents) : [];
@@ -517,7 +540,8 @@ export default function AdminOverviewTab({
         {pendingUsers === 0 &&
         lowStockItems === 0 &&
         !ratesNeedSync &&
-        pendingPhysiciansCount === 0 ? (
+        pendingPhysiciansCount === 0 &&
+        clinicalInquiries.length === 0 ? (
           <div
             style={{
               backgroundColor: 'rgba(5, 150, 105, 0.05)',
@@ -916,6 +940,127 @@ export default function AdminOverviewTab({
                       >
                         Assign
                       </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            {/* Tarjeta 4: Solicitudes de Información Clínica */}
+            {clinicalInquiries.length > 0 && (
+              <div
+                style={{
+                  border: '1px solid #c7d2fe',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.25rem',
+                  background: 'var(--color-bg-surface)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <h4
+                    style={{
+                      fontSize: '0.95rem',
+                      fontWeight: 800,
+                      color: 'var(--text-main)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      margin: 0,
+                    }}
+                  >
+                    <Mail size={18} style={{ color: '#4f46e5' }} /> Clinical Documentation Requests
+                  </h4>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '99px',
+                      backgroundColor: '#e0e7ff',
+                      color: '#4338ca',
+                    }}
+                  >
+                    {clinicalInquiries.length} inquiry{clinicalInquiries.length > 1 ? 'ies' : ''}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
+                  {clinicalInquiries.slice(0, 4).map((item) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        background: 'rgba(79, 70, 229, 0.03)',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid rgba(79, 70, 229, 0.08)',
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0, marginRight: '0.5rem' }}>
+                        <div
+                          style={{
+                            fontWeight: 750,
+                            fontSize: '0.85rem',
+                            color: 'var(--text-main)',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {item.recipient?.name || 'Practitioner / Clinic'}
+                          <span
+                            style={{
+                              marginLeft: '0.4rem',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              color: '#4f46e5',
+                              backgroundColor: '#eef2ff',
+                              padding: '1px 6px',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            {item.productName || item.productSlug || 'Peptide'}
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '0.72rem',
+                            color: 'var(--text-muted)',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            marginTop: '2px',
+                          }}
+                        >
+                          {item.recipient?.email || ''} {item.items?.[0]?.topic ? `• Topic: ${item.items[0].topic}` : ''}
+                        </div>
+                      </div>
+                      <a
+                        href={`mailto:${item.recipient?.email || ''}?subject=Clinical%20Documentation:%20${encodeURIComponent(item.productName || 'Compound')}&body=Dear%20${encodeURIComponent(item.recipient?.name || 'Doctor')},%0A%0AIn%20response%20to%20your%20request%20for%20clinical%20information%20on%20${encodeURIComponent(item.productName || 'this%20compound')}:%0A%0A`}
+                        style={{
+                          padding: '0.35rem 0.65rem',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          borderRadius: 'var(--radius-sm)',
+                          background: '#4f46e5',
+                          color: 'white',
+                          textDecoration: 'none',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          flexShrink: 0,
+                        }}
+                      >
+                        Reply
+                      </a>
                     </div>
                   ))}
                 </div>

@@ -58,7 +58,8 @@ export default function SharedCatalogFloatingDock({
             <strong>{catalogMeta.accountManagerName}</strong>
             {catalogMeta.accountManagerEmail &&
               catalogMeta.accountManagerEmail !== 'orders@atlas-solutions.com' &&
-              catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com' && (
+              catalogMeta.accountManagerEmail !== 'commercial@atlashealth.com' &&
+              catalogMeta.accountManagerEmail !== 'jose@mediluxeme.com' && (
                 <span> • {catalogMeta.accountManagerEmail}</span>
               )}
           </div>
