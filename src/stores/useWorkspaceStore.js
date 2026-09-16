@@ -476,6 +476,97 @@ const createWorkspaceItemsSlice = (set, get) => ({
       presentation: '30ml multi-dose vial'
     }, wsId);
   },
+
+  moveItemBetweenWorkspaces: (itemId, fromWsId, toWsId) => {
+    const { workspaces, createWorkspace } = get();
+    const sourceWs = workspaces[fromWsId];
+    if (!sourceWs) return;
+
+    const itemToMove = sourceWs.items.find((it) => it.id === itemId);
+    if (!itemToMove) return;
+
+    let targetId = toWsId;
+    if (toWsId === 'new') {
+      targetId = createWorkspace(`Workspace ${Object.keys(workspaces).length + 1}`);
+    }
+
+    const targetWs = get().workspaces[targetId];
+    if (!targetWs) return;
+
+    const nextSourceItems = sourceWs.items.filter((it) => it.id !== itemId);
+    const nextTargetItems = [
+      ...targetWs.items,
+      { ...itemToMove, id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 4)}` }
+    ];
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [fromWsId]: { ...sourceWs, items: nextSourceItems, updatedAt: Date.now() },
+        [targetId]: { ...targetWs, items: nextTargetItems, updatedAt: Date.now() },
+      },
+    }));
+  },
+
+  copyItemBetweenWorkspaces: (itemId, fromWsId, toWsId) => {
+    const { workspaces, createWorkspace } = get();
+    const sourceWs = workspaces[fromWsId];
+    if (!sourceWs) return;
+
+    const itemToCopy = sourceWs.items.find((it) => it.id === itemId);
+    if (!itemToCopy) return;
+
+    let targetId = toWsId;
+    if (toWsId === 'new') {
+      targetId = createWorkspace(`Workspace ${Object.keys(workspaces).length + 1}`);
+    }
+
+    const targetWs = get().workspaces[targetId];
+    if (!targetWs) return;
+
+    const nextTargetItems = [
+      ...targetWs.items,
+      { ...itemToCopy, id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 4)}` }
+    ];
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        [targetId]: { ...targetWs, items: nextTargetItems, updatedAt: Date.now() },
+      },
+    }));
+  },
+
+  transferAllItems: (fromWsId, toWsId, mode = 'move') => {
+    const { workspaces, createWorkspace } = get();
+    const sourceWs = workspaces[fromWsId];
+    if (!sourceWs || !sourceWs.items.length) return;
+
+    let targetId = toWsId;
+    if (toWsId === 'new') {
+      targetId = createWorkspace(`Workspace ${Object.keys(workspaces).length + 1}`);
+    }
+
+    const targetWs = get().workspaces[targetId];
+    if (!targetWs) return;
+
+    const copiedItems = sourceWs.items.map((it) => ({
+      ...it,
+      id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    }));
+
+    const nextTargetItems = [...targetWs.items, ...copiedItems];
+
+    set((s) => ({
+      workspaces: {
+        ...s.workspaces,
+        ...(mode === 'move'
+          ? { [fromWsId]: { ...sourceWs, items: [], updatedAt: Date.now() } }
+          : {}),
+        [targetId]: { ...targetWs, items: nextTargetItems, updatedAt: Date.now() },
+      },
+    }));
+  },
 });
 
 // ─── 3. Operational Intent & Target Entity Slice ──────────────────────────────

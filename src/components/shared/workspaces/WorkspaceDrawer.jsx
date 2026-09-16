@@ -582,7 +582,7 @@ export default function WorkspaceDrawer() {
               <span>💡 Add compounds above to unlock actions</span>
             </div>
           ) : isDoctor ? (
-            /* ── Doctor Actions (Clinical Focus) ── */
+            /* ── Doctor Actions (Clinical Focus: Prescribing & Protocols Only - NO LABELS) ── */
             <>
               <button
                 type="button"
@@ -612,30 +612,6 @@ export default function WorkspaceDrawer() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 <button
                   type="button"
-                  onClick={() => setIsStickerModalOpen(true)}
-                  style={{
-                    minHeight: '40px',
-                    padding: '8px 10px',
-                    backgroundColor: '#f0fdfa',
-                    color: '#0f766e',
-                    borderRadius: '8px',
-                    border: '1.5px solid #99f6e4',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    touchAction: 'manipulation',
-                  }}
-                  title="Print Pharmapolis A4 Stickers (7.5x4.5cm) for all staged compounds"
-                >
-                  <Tag size={15} /> Pharmapolis Stickers
-                </button>
-
-                <button
-                  type="button"
                   onClick={handleSaveAsProtocol}
                   style={{
                     minHeight: '40px',
@@ -657,30 +633,30 @@ export default function WorkspaceDrawer() {
                 >
                   <Layers size={15} /> Save as Protocol
                 </button>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setShowPdfPreview(true)}
-                style={{
-                  width: '100%',
-                  padding: '7px',
-                  backgroundColor: '#f8fafc',
-                  color: '#475569',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.76rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  touchAction: 'manipulation',
-                }}
-              >
-                <FileText size={13} /> 👁️ Quick Live Document Summary
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPdfPreview(true)}
+                  style={{
+                    minHeight: '40px',
+                    padding: '8px 10px',
+                    backgroundColor: '#f8fafc',
+                    color: '#475569',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    touchAction: 'manipulation',
+                  }}
+                >
+                  <FileText size={15} /> Clinical Summary
+                </button>
+              </div>
             </>
           ) : (
             /* ── Admin / Commercial Actions ── */

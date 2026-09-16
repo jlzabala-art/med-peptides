@@ -440,24 +440,26 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
             </button>
           )}
 
-          <button
-            onClick={() => setIsLabelModalOpen(true)}
-            className="gcp-btn-secondary"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              backgroundColor: '#f0fdfa',
-              color: '#0f766e',
-              borderColor: '#99f6e4',
-              fontSize: '0.8125rem',
-              padding: '0.4rem 0.8rem',
-              fontWeight: 600,
-            }}
-            title="Generate Pharmapolis A4 Stickers (7.5 × 4.5 cm) in PDF & PNG"
-          >
-            <Tag size={14} /> Stickers (7.5x4.5cm)
-          </button>
+          {!is('doctor') && role !== 'doctor' && (
+            <button
+              onClick={() => setIsLabelModalOpen(true)}
+              className="gcp-btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                backgroundColor: '#f0fdfa',
+                color: '#0f766e',
+                borderColor: '#99f6e4',
+                fontSize: '0.8125rem',
+                padding: '0.4rem 0.8rem',
+                fontWeight: 600,
+              }}
+              title="Generate Pharmapolis A4 Stickers (7.5 × 4.5 cm) in PDF & PNG"
+            >
+              <Tag size={14} /> Stickers (7.5x4.5cm)
+            </button>
+          )}
 
           <button
             onClick={onClose}

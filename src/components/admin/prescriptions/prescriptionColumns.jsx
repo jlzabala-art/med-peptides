@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag } from '@/lib/icons';
+import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag, Package } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
@@ -10,6 +10,7 @@ import InlineEditableCell from '../../ui/InlineEditableCell';
 import AppActionGroup from '../../ui/AppActionGroup';
 import { prescriptionRepository } from '../../../repositories/prescriptionRepository';
 import notifier from '../../../services/NotificationService';
+import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 
 
 // ── Patient Avatar ────────────────────────────────────────────────────────────
@@ -96,7 +97,8 @@ function RenewButton({ rx, onRefresh, onRefill }) {
 
 // ── Columns Definition ────────────────────────────────────────────────────────
 export const getPrescriptionColumns = (options = {}) => {
-  const { onEdit, onRefresh, onRefill } = options;
+  const { onEdit, onRefresh, onRefill, isDoctor, role } = options;
+  const canGenerateLabels = !isDoctor && role !== 'doctor';
   return [
     {
       key: 'patient',
@@ -342,6 +344,58 @@ export const getPrescriptionColumns = (options = {}) => {
               }
             },
             {
+              type: 'action',
+              label: 'Send Items to Active Workspace',
+              icon: Package,
+              onClick: () => {
+                const rawItems = rx.items || rx.compounds || rx.products || [];
+                const patientName = rx.patient?.name || rx.patientName || 'Patient';
+                const patientId = rx.patientId || rx.patient?.id || '';
+
+                if (!rawItems.length) {
+                  toast.error('This prescription has no items to send');
+                  return;
+                }
+
+                const itemsToAdd = rawItems.map((i, idx) => ({
+                  id: i.id || i.variantId || i.productId || `rx_item_${Date.now()}_${idx}`,
+                  productId: i.productId || i.id,
+                  variantId: i.variantId || i.id,
+                  canonicalName: i.name || i.productName || i.product_title || 'Medication',
+                  sku: i.sku || '',
+                  dosage: i.dosage || i.dose || '',
+                  format: i.format || i.dosage_form || 'Vial',
+                  quantity: parseInt(i.quantity, 10) || 1,
+                  unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  supplierCost: parseFloat(i.supplierCost || 0),
+                  supplierName: rx.supplierName || 'Pharmapolis Ltd',
+                  category: i.category || 'Prescription Biologics',
+                  prescriptionId: rx.id,
+                  prescriptionCode: rx.prescriptionCode || rx.id,
+                  patientName,
+                  patientId,
+                }));
+
+                const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+
+                addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
+                setTargetEntity({
+                  type: 'patient',
+                  id: patientId,
+                  name: patientName,
+                  email: rx.patient?.email || rx.patientEmail || '',
+                  phone: rx.patient?.phone || rx.patientPhone || '',
+                  fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
+                }, activeWorkspaceId);
+                setOperationType('sell_prescription', activeWorkspaceId);
+                setWorkspaceIntent('sell', activeWorkspaceId);
+                setDrawerOpen(true);
+                toast.success(`${itemsToAdd.length} compounds sent to workspace (${patientName})`);
+              }
+            },
+            {
               type: 'create_quote',
               label: 'Create Quotation from Prescription',
               icon: FileText,
@@ -405,55 +459,57 @@ export const getPrescriptionColumns = (options = {}) => {
                 }
               }
             },
-            {
-              type: 'action',
-              label: 'Pharmapolis A4 Stickers (PDF)',
-              icon: Tag,
-              onClick: async () => {
-                const toastId = toast.loading('Generating Pharmapolis A4 Stickers…');
-                try {
-                  const { generatePharmapolisStickersPDF } = await import('../../../services/pharmapolisLabelService');
-                  const patientObj = rx.patient || {
-                    name: rx.patientName || 'Patient',
-                    dob: rx.patientDob || rx.dob || '—',
-                    fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
-                  };
-                  await generatePharmapolisStickersPDF(patientObj, [rx]);
-                  toast.success('Pharmapolis A4 Stickers downloaded!', { id: toastId });
-                } catch (err) {
-                  console.error('Sticker export error:', err);
-                  toast.error('Failed to generate stickers: ' + err.message, { id: toastId });
+            ...(canGenerateLabels ? [
+              {
+                type: 'action',
+                label: 'Pharmapolis A4 Stickers (PDF)',
+                icon: Tag,
+                onClick: async () => {
+                  const toastId = toast.loading('Generating Pharmapolis A4 Stickers…');
+                  try {
+                    const { generatePharmapolisStickersPDF } = await import('../../../services/pharmapolisLabelService');
+                    const patientObj = rx.patient || {
+                      name: rx.patientName || 'Patient',
+                      dob: rx.patientDob || rx.dob || '—',
+                      fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
+                    };
+                    await generatePharmapolisStickersPDF(patientObj, [rx]);
+                    toast.success('Pharmapolis A4 Stickers downloaded!', { id: toastId });
+                  } catch (err) {
+                    console.error('Sticker export error:', err);
+                    toast.error('Failed to generate stickers: ' + err.message, { id: toastId });
+                  }
+                }
+              },
+              {
+                type: 'action',
+                label: 'Pharmapolis Sticker (PNG)',
+                icon: Download,
+                onClick: async () => {
+                  const toastId = toast.loading('Generating Sticker PNG…');
+                  try {
+                    const { generatePharmapolisStickerPNG } = await import('../../../services/pharmapolisLabelService');
+                    const patientObj = rx.patient || {
+                      name: rx.patientName || 'Patient',
+                      dob: rx.patientDob || rx.dob || '—',
+                      fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
+                    };
+                    const dataUrl = await generatePharmapolisStickerPNG(patientObj, rx);
+                    const link = document.createElement('a');
+                    link.href = dataUrl;
+                    const slug = (patientObj.name || 'patient').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                    link.download = `pharmapolis_sticker_${slug}_${rx.id?.slice(0, 6)}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    toast.success('Sticker PNG downloaded!', { id: toastId });
+                  } catch (err) {
+                    console.error('PNG export error:', err);
+                    toast.error('Failed to generate PNG: ' + err.message, { id: toastId });
+                  }
                 }
               }
-            },
-            {
-              type: 'action',
-              label: 'Pharmapolis Sticker (PNG)',
-              icon: Download,
-              onClick: async () => {
-                const toastId = toast.loading('Generating Sticker PNG…');
-                try {
-                  const { generatePharmapolisStickerPNG } = await import('../../../services/pharmapolisLabelService');
-                  const patientObj = rx.patient || {
-                    name: rx.patientName || 'Patient',
-                    dob: rx.patientDob || rx.dob || '—',
-                    fileNumber: rx.fileNumber || rx.patientId || rx.id?.slice(0, 8),
-                  };
-                  const dataUrl = await generatePharmapolisStickerPNG(patientObj, rx);
-                  const link = document.createElement('a');
-                  link.href = dataUrl;
-                  const slug = (patientObj.name || 'patient').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                  link.download = `pharmapolis_sticker_${slug}_${rx.id?.slice(0, 6)}.png`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  toast.success('Sticker PNG downloaded!', { id: toastId });
-                } catch (err) {
-                  console.error('PNG export error:', err);
-                  toast.error('Failed to generate PNG: ' + err.message, { id: toastId });
-                }
-              }
-            },
+            ] : []),
             {
               type: 'delete',
               label: 'Delete Prescription',

@@ -673,8 +673,9 @@ export default function UniversalProtocolsTable({ role = 'admin', isSubTab = fal
                     format: 'Kit'
                   }];
 
-                  const { addItems, activeWorkspaceId } = useWorkspaceStore.getState();
-                  addItems(itemsToLoad, activeWorkspaceId);
+                  const { addItems, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+                  addItems(itemsToLoad, activeWorkspaceId, { openDrawer: true });
+                  setDrawerOpen(true);
                   notifier.success(`Loaded ${itemsToLoad.length} compound(s) from "${p.name || p.title}" into Workspace!`);
                 }
               },
