@@ -9,7 +9,6 @@ export default function OrderTrackingWidget(props) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // role determines what to fetch (e.g., 'admin' fetches all, 'patient' fetches their own, 'doctor' fetches clinic's)
   const { role = 'admin', userId } = props;
 
   useEffect(() => {
@@ -19,7 +18,7 @@ export default function OrderTrackingWidget(props) {
         const list = await fetchRecentShipments(5);
         setOrders(list);
       } catch (err) {
-        // logged in service
+        // handled
       }
       setLoading(false);
     };
@@ -29,37 +28,54 @@ export default function OrderTrackingWidget(props) {
 
   return (
     <BaseWidget 
-      title={role === 'patient' ? "Mis Pedidos" : "Rastreo de Logística"} 
+      title={role === 'patient' ? "My Orders" : "Logistics & Dispensing Tracking"} 
       icon={Truck} 
       {...props}
     >
       {loading ? (
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '120px' }}>
+          <div style={{ width: '24px', height: '24px', border: '2px solid #003666', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
         </div>
       ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-          <Package className="w-8 h-8 mb-2 opacity-50" />
-          <p>No hay pedidos recientes</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', color: '#64748b' }}>
+          <Package size={32} style={{ opacity: 0.5, marginBottom: '8px', color: '#94a3b8' }} />
+          <p style={{ margin: 0, fontSize: '0.85rem' }}>No active shipments in transit</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {orders.map(order => (
-            <div key={order.id} className="p-3 bg-white/5 rounded-xl border border-white/10 flex justify-between items-center hover:bg-white/10 transition-colors">
+            <div 
+              key={order.id} 
+              style={{
+                padding: '10px 12px',
+                backgroundColor: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
               <div>
-                <p className="text-white font-medium text-sm">
-                  {order.supplierName || 'Pedido #'+order.id.slice(0, 6)}
+                <p style={{ margin: 0, color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>
+                  {order.supplierName || 'Order #' + order.id.slice(0, 6)}
                 </p>
-                <p className="text-gray-400 text-xs mt-1">
-                  {order.trackingNumber ? `Guía: ${order.trackingNumber}` : 'Sin guía asignada'}
+                <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.74rem' }}>
+                  {order.trackingNumber ? `Tracking: ${order.trackingNumber}` : 'Standard Medical Courier'}
                 </p>
               </div>
-              <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
-                order.status === 'DELIVERED' ? 'bg-green-500/20 text-green-400' :
-                order.status === 'SHIPPED' ? 'bg-blue-500/20 text-blue-400' :
-                'bg-yellow-500/20 text-yellow-400'
-              }`}>
-                {order.status || 'PENDIENTE'}
+              <span 
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  backgroundColor: order.status === 'DELIVERED' ? '#dcfce7' : order.status === 'SHIPPED' ? '#dbeafe' : '#fef9c3',
+                  color: order.status === 'DELIVERED' ? '#166534' : order.status === 'SHIPPED' ? '#1e40af' : '#854d0e'
+                }}
+              >
+                {order.status || 'PENDING'}
               </span>
             </div>
           ))}

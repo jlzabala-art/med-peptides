@@ -184,6 +184,21 @@ export default function DoctorDashboard({ children }) {
   });
 
   const isSimulatingDrErdmann = selectedDoctorId === 'dr-hanieh-erdmann';
+
+  // Reactively sync simulation state from URL or storage on route changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const simParam = urlParams.get('simulate');
+    const storedId = sessionStorage.getItem('impersonatedDoctorId') || localStorage.getItem('impersonatedDoctorId');
+    if (simParam === 'dr-hanieh-erdmann' || storedId === 'dr-hanieh-erdmann') {
+      setSelectedDoctorId('dr-hanieh-erdmann');
+      setSelectedDoctorProfile(DR_HANIEH_ERDMANN_PROFILE);
+      sessionStorage.setItem('impersonatedDoctorId', 'dr-hanieh-erdmann');
+      localStorage.setItem('impersonatedDoctorId', 'dr-hanieh-erdmann');
+    }
+  }, [pathname]);
+
   // Staff doctor profile fetching
   const [staffDoctorProfile, setStaffDoctorProfile] = useState(null);
   const isStaffUser = baseRole === 'staff';
@@ -250,6 +265,7 @@ export default function DoctorDashboard({ children }) {
     setSelectedDoctorProfile(null);
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('impersonatedDoctorId');
+      localStorage.removeItem('impersonatedDoctorId');
     }
     router.push('/admin');
   };

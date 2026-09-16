@@ -6,35 +6,35 @@ export default function ClinicalHistoryWidget(props) {
   const { role = 'doctor' } = props;
 
   const logs = [
-    { id: '1', date: '12 May, 2026', time: '10:30 AM', action: 'Nueva Prescripción', detail: 'BPC-157 / TB-500 Añadido al carrito', user: 'Dr. Smith' },
-    { id: '2', date: '05 May, 2026', time: '14:15 PM', action: 'Nota SOAP', detail: 'Paciente reporta mejoría en articulaciones', user: 'Dr. Smith' },
-    { id: '3', date: '28 Apr, 2026', time: '09:00 AM', action: 'Análisis de Sangre', detail: 'Niveles hormonales subidos al sistema', user: 'Admin' },
+    { id: '1', date: '12 May, 2026', time: '10:30 AM', action: 'Prescription Signed', detail: 'BPC-157 / TB-500 Compound transmitted to pharmacy', user: 'Dr. Hanieh Erdmann' },
+    { id: '2', date: '05 May, 2026', time: '14:15 PM', action: 'SOAP Consultation', detail: 'Patient reported joint mobility improvement and hair density increase', user: 'Dr. Hanieh Erdmann' },
+    { id: '3', date: '28 Apr, 2026', time: '09:00 AM', action: 'Lab Panel Reviewed', detail: 'IGF-1 & hormonal baseline confirmed within clinical target range', user: 'Dr. Hanieh Erdmann' },
   ];
 
   return (
     <BaseWidget 
-      title={role === 'patient' ? "Mi Historial Clínico" : "Registro de Actividad Clínica"} 
+      title={role === 'patient' ? "My Clinical History" : "Clinical Activity Log"} 
       icon={Activity} 
       {...props}
     >
-      <div className="relative pl-6 border-l border-white/10 space-y-6 mt-2">
-        {logs.map((log, index) => (
-          <div key={log.id} className="relative">
+      <div style={{ position: 'relative', paddingLeft: '1.5rem', borderLeft: '2px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '0.5rem' }}>
+        {logs.map((log) => (
+          <div key={log.id} style={{ position: 'relative' }}>
             {/* Timeline Dot */}
-            <div className="absolute -left-[30px] top-1 w-3 h-3 rounded-full bg-[#C0A062] border-[3px] border-[#1a1a1a]" />
+            <div style={{ position: 'absolute', left: '-31px', top: '2px', width: '10px', height: '10px', borderRadius: '50%', background: '#003666', border: '3px solid #ffffff', boxShadow: '0 0 0 2px #bfdbfe' }} />
             
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="text-white text-sm font-medium">{log.action}</h4>
-              <div className="flex items-center text-xs text-gray-500 gap-1">
-                <Clock className="w-3 h-3" />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2px' }}>
+              <h4 style={{ margin: 0, color: '#0f172a', fontSize: '0.85rem', fontWeight: 800 }}>{log.action}</h4>
+              <div style={{ display: 'flex', alignItems: 'center', fontSize: '0.74rem', color: '#64748b', gap: '4px' }}>
+                <Clock size={12} />
                 <span>{log.date}</span>
               </div>
             </div>
             
-            <p className="text-sm text-gray-400">{log.detail}</p>
+            <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#475569', lineHeight: 1.4 }}>{log.detail}</p>
             
             {role !== 'patient' && (
-              <p className="text-xs text-blue-400 mt-2 font-medium">Por: {log.user}</p>
+              <p style={{ margin: '4px 0 0', fontSize: '0.72rem', color: '#0284c7', fontWeight: 700 }}>By: {log.user}</p>
             )}
           </div>
         ))}

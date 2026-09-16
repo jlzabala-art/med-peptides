@@ -41,7 +41,7 @@ export default function IndividualDoctorSimulationBanner({
         boxShadow: '0 2px 10px rgba(0, 54, 102, 0.15)',
         position: 'sticky',
         top: 0,
-        zIndex: 50
+        zIndex: 1000
       }}
     >
       {/* Left: Physician Persona & Credentials */}

@@ -34,11 +34,21 @@ const PORTALS = [
     isSimulatedRole: true,
   },
   {
+    id: 'dr_hanieh_erdmann',
+    label: '🇩🇪 Dr. Hanieh Erdmann (DHA Simulation)',
+    description: 'DHA-00013060-006 • Bedaya Polyclinic • 12 Patients / 18 Rxs',
+    icon: Stethoscope,
+    route: '/doctor?simulate=dr-hanieh-erdmann',
+    color: '#0d9488',
+    group: 'Clinical',
+    isSimulatedRole: true,
+  },
+  {
     id: 'doctor',
     label: 'Physician / Prescriber',
-    description: 'Clinical prescriptions & patient protocols',
+    description: 'Clinical prescriptions & patient protocols (Dr. Erdmann)',
     icon: Stethoscope,
-    route: '/doctor',
+    route: '/doctor?simulate=dr-hanieh-erdmann',
     color: '#0d9488',
     group: 'Clinical',
     isSimulatedRole: true,
@@ -202,6 +212,13 @@ export default function AdminPortalSwitcher() {
   }, [isOpen, isMobile]);
 
   const currentPortal = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isSim = urlParams.get('simulate') === 'dr-hanieh-erdmann' || sessionStorage.getItem('impersonatedDoctorId') === 'dr-hanieh-erdmann';
+      if (isSim && window.location.pathname.startsWith('/doctor')) {
+        return PORTALS.find((p) => p.id === 'dr_hanieh_erdmann') || PORTALS.find((p) => p.id === 'doctor');
+      }
+    }
     // Check if we are simulating a role first
     if (simulatedRole && simulatedRole !== 'admin') {
       const sim = PORTALS.find((p) => p.id === simulatedRole || p.alias === simulatedRole);
@@ -228,7 +245,27 @@ export default function AdminPortalSwitcher() {
     addRecentPortal(currentPortal.id);
     const targetRoleId = portal.id;
 
+    if (portal.id === 'dr_hanieh_erdmann' || portal.route?.includes('simulate=dr-hanieh-erdmann')) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('impersonatedDoctorId', 'dr-hanieh-erdmann');
+        localStorage.setItem('impersonatedDoctorId', 'dr-hanieh-erdmann');
+      }
+      setSimulatedRole('doctor');
+      if (switchActiveRole) {
+        switchActiveRole('doctor');
+      }
+      router.push(portal.route);
+      setIsOpen(false);
+      return;
+    }
+
     if (portal.isSimulatedRole || isAdmin) {
+      if (targetRoleId === 'admin') {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('impersonatedDoctorId');
+          localStorage.removeItem('impersonatedDoctorId');
+        }
+      }
       setSimulatedRole(targetRoleId === 'admin' ? 'admin' : targetRoleId);
       if (switchActiveRole) {
         switchActiveRole(targetRoleId);

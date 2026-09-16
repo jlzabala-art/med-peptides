@@ -7,48 +7,100 @@ export default function PatientRosterWidget(props) {
 
   // Mock data for UI preview
   const patients = [
-    { id: '1', name: 'Ana García', lastVisit: 'Hace 2 días', status: 'Activo' },
-    { id: '2', name: 'Carlos López', lastVisit: 'Hace 1 semana', status: 'En Tratamiento' },
-    { id: '3', name: 'Marta Díaz', lastVisit: 'Hace 1 mes', status: 'Seguimiento' },
+    { id: '1', name: 'Sarah Al-Maktoum', lastVisit: '2 days ago', status: 'Active Protocol' },
+    { id: '2', name: 'Dr. Alexander Klein', lastVisit: '1 week ago', status: 'Under Review' },
+    { id: '3', name: 'Fatima Zahra', lastVisit: '3 weeks ago', status: 'Active Protocol' },
   ];
 
   return (
     <BaseWidget 
-      title={role === 'admin' ? "Directorio Global de Pacientes" : "Mis Pacientes Activos"} 
+      title={role === 'admin' ? "Global Patient Directory" : "Active Patient Roster"} 
       icon={Users} 
       {...props}
     >
-      <div className="flex justify-between items-center mb-4">
-        <div className="relative flex-1 mr-4">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '8px' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
           <input 
             type="text" 
             placeholder="Search patient..." 
-            className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+            style={{
+              width: '100%',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              padding: '8px 12px',
+              fontSize: '0.82rem',
+              color: '#0f172a',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
           />
         </div>
-        <button className="flex items-center gap-2 px-3 py-2 bg-[#C0A062] hover:bg-[#a68850] text-black rounded-lg text-sm font-bold transition-colors">
-          <UserPlus className="w-4 h-4" />
+        <button
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 12px',
+            backgroundColor: '#003666',
+            color: '#ffffff',
+            borderRadius: '8px',
+            border: 'none',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+        >
+          <UserPlus size={14} />
           <span>Add</span>
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {patients.map(patient => (
-          <div key={patient.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group border border-transparent hover:border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-white/10 flex items-center justify-center text-white font-medium">
+          <div 
+            key={patient.id} 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div 
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  background: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#1e40af',
+                  fontWeight: 800,
+                  fontSize: '0.85rem'
+                }}
+              >
                 {patient.name.charAt(0)}
               </div>
               <div>
-                <p className="text-white font-medium text-sm">{patient.name}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-gray-400">{patient.lastVisit}</span>
-                  <span className="w-1 h-1 rounded-full bg-gray-500"></span>
-                  <span className="text-xs text-blue-400">{patient.status}</span>
+                <p style={{ margin: 0, color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>{patient.name}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                  <span style={{ fontSize: '0.74rem', color: '#64748b' }}>{patient.lastVisit}</span>
+                  <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#94a3b8' }}></span>
+                  <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 700 }}>{patient.status}</span>
                 </div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors" />
+            <ChevronRight size={16} color="#94a3b8" />
           </div>
         ))}
       </div>

@@ -443,6 +443,13 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: 'auto', flexShrink: 0 }}>
             <a
               href={`/doctor?simulate=${currentDoctor.id === 'dr-hanieh-erdmann' || currentDoctor.lastName?.includes('Erdmann') ? 'dr-hanieh-erdmann' : currentDoctor.id}`}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  const targetId = currentDoctor.id === 'dr-hanieh-erdmann' || currentDoctor.lastName?.includes('Erdmann') ? 'dr-hanieh-erdmann' : currentDoctor.id;
+                  sessionStorage.setItem('impersonatedDoctorId', targetId);
+                  localStorage.setItem('impersonatedDoctorId', targetId);
+                }
+              }}
               target="_blank"
               rel="noopener noreferrer"
               className="gcp-btn-secondary"

@@ -16,42 +16,58 @@ export default function BaseWidget({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden flex flex-col ${className}`}
-      style={{ minHeight: '300px' }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '280px',
+      }}
     >
       {/* Header del Widget */}
-      <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/20">
-        <div className="flex items-center gap-3">
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0.85rem 1.15rem',
+        borderBottom: '1px solid #f1f5f9',
+        backgroundColor: '#f8fafc',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isDraggable && (
             <button 
               {...dragListeners} 
               {...dragAttributes}
-              className="cursor-grab active:cursor-grabbing text-gray-500 hover:text-white transition-colors"
+              style={{ cursor: 'grab', background: 'none', border: 'none', color: '#94a3b8', display: 'flex', alignItems: 'center', padding: '2px' }}
+              title="Drag to reorder"
             >
-              <GripHorizontal className="w-5 h-5" />
+              <GripHorizontal size={16} />
             </button>
           )}
           
-          {Icon && <Icon className="w-5 h-5 text-[#C0A062]" />}
-          <h3 className="text-white font-medium tracking-wide">{title}</h3>
+          {Icon && <Icon size={17} style={{ color: '#003666' }} />}
+          <h3 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#0f172a' }}>{title}</h3>
         </div>
 
         {onRemove && (
           <button 
             onClick={() => onRemove(id)}
-            className="p-1 hover:bg-white/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
-            title="Remover widget"
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', borderRadius: '4px' }}
+            title="Remove widget"
           >
-            <X className="w-4 h-4" />
+            <X size={15} />
           </button>
         )}
       </div>
 
       {/* Contenido del Widget */}
-      <div className="flex-1 p-5 overflow-y-auto custom-scrollbar">
+      <div style={{ flex: 1, padding: '1rem 1.15rem', overflowY: 'auto' }}>
         {children}
       </div>
     </motion.div>

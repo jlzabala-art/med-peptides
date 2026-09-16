@@ -294,6 +294,36 @@
     },
     "common": {
       "loading": "Loading Atlas App..."
+    },
+    "doctor": {
+      "prescriptions_list": {
+        "clinic_supply": "Clinic Supply Order",
+        "patient": "Patient Prescription",
+        "items": "items"
+      },
+      "overview": {
+        "drafts_banner": "You have {{count}} draft prescription awaiting signature",
+        "drafts_banner_plural": "You have {{count}} draft prescriptions awaiting signature",
+        "drafts_banner_desc": "Review and sign to transmit to compounding pharmacy.",
+        "complete": "Review Drafts",
+        "stats_active": "Active Prescriptions",
+        "stats_active_sub": "Currently in dispensing",
+        "stats_drafts": "Draft Prescriptions",
+        "stats_drafts_sub": "Awaiting signature",
+        "stats_fulfilled": "Fulfilled Orders",
+        "stats_fulfilled_sub": "Delivered to patients",
+        "stats_patients": "Assigned Patients",
+        "stats_patients_sub": "Under active care",
+        "new_rx": "New Prescription",
+        "new_rx_desc": "Create custom magistral compound prescriptions and clinical protocols.",
+        "create_rx": "Create Prescription",
+        "close_form": "Close Form",
+        "catalogs": "Lotusland Formulary",
+        "catalogs_desc": "Browse approved Lotusland peptide preparations, dosages and compounds.",
+        "open_generator": "View Catalog",
+        "builder_form": "New Clinical Prescription",
+        "builder_form_desc": "Generate patient-tailored peptide compound orders"
+      }
     }
   }
 }

@@ -294,6 +294,36 @@
     },
     "common": {
       "loading": "Cargando Atlas App..."
+    },
+    "doctor": {
+      "prescriptions_list": {
+        "clinic_supply": "Pedido de Suministro Clínico",
+        "patient": "Receta de Paciente",
+        "items": "ítems"
+      },
+      "overview": {
+        "drafts_banner": "Tienes {{count}} borrador de receta pendiente de firma",
+        "drafts_banner_plural": "Tienes {{count}} borradores de receta pendientes de firma",
+        "drafts_banner_desc": "Revisa y firma para transmitir a la farmacia magistral.",
+        "complete": "Revisar Borradores",
+        "stats_active": "Recetas Activas",
+        "stats_active_sub": "En dispensación clínica",
+        "stats_drafts": "Borradores de Receta",
+        "stats_drafts_sub": "Pendientes de firma",
+        "stats_fulfilled": "Órdenes Completadas",
+        "stats_fulfilled_sub": "Entregadas a pacientes",
+        "stats_patients": "Pacientes Asignados",
+        "stats_patients_sub": "Bajo atención activa",
+        "new_rx": "Nueva Receta",
+        "new_rx_desc": "Crear prescripciones magistrales personalizadas y protocolos clínicos.",
+        "create_rx": "Crear Receta",
+        "close_form": "Cerrar Formulario",
+        "catalogs": "Formulario Lotusland",
+        "catalogs_desc": "Explorar preparados y dosis de péptidos aprobados de Lotusland.",
+        "open_generator": "Ver Catálogo",
+        "builder_form": "Nueva Receta Clínica",
+        "builder_form_desc": "Generar órdenes de compuestos peptídicos a medida"
+      }
     }
   }
 }

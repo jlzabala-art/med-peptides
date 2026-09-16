@@ -84,8 +84,15 @@ function RxRow({ rx }) {
   );
 }
 
-export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [], onNavigate }) {
+import { DoctorContext } from '../../templates/DoctorDashboard';
+
+export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: propDoctorMeta, patients = [], onNavigate }) {
   const { t } = useTranslation();
+  const context = React.useContext(DoctorContext) || {};
+  const isSimulatingDrErdmann = context.isSimulatingDrErdmann || propDoctorId === 'dr-hanieh-erdmann';
+  const doctorId = propDoctorId || context.doctorId || (isSimulatingDrErdmann ? 'dr-hanieh-erdmann' : '');
+  const doctorMeta = propDoctorMeta || context.doctorMeta;
+
   const [showBuilder, setShowBuilder] = useState(false);
   const [patientCount, setPatientCount] = useState(0);
 
@@ -115,10 +122,10 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
 
   const recent = prescriptions.slice(0, 5);
   
-  const drafts = kpis?.pendingPrescriptions ?? prescriptions.filter(r => r.status === 'draft').length;
-  const active = kpis?.activePrescriptions ?? prescriptions.filter(r => ['sent', 'viewed_by_patient', 'assigned_to_wholesaler', 'added_to_bulk'].includes(r.status)).length;
-  const fulfilled = kpis?.activeOrders ?? prescriptions.filter(r => r.status === 'fulfilled').length;
-  const totalPatients = kpis?.activePatients ?? patientCount;
+  const drafts = isSimulatingDrErdmann ? 3 : (kpis?.pendingPrescriptions ?? prescriptions.filter(r => r.status === 'draft').length);
+  const active = isSimulatingDrErdmann ? 15 : (kpis?.activePrescriptions ?? prescriptions.filter(r => ['sent', 'viewed_by_patient', 'assigned_to_wholesaler', 'added_to_bulk'].includes(r.status)).length);
+  const fulfilled = isSimulatingDrErdmann ? 18 : (kpis?.activeOrders ?? prescriptions.filter(r => r.status === 'fulfilled').length);
+  const totalPatients = isSimulatingDrErdmann ? 12 : (kpis?.activePatients ?? patientCount);
   
   const isLoading = isLoadingPrescriptions || isLoadingKPIs;
 
@@ -170,10 +177,10 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
             </div>
             <div>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, letterSpacing: '-0.01em', color: '#ffffff' }}>
-                Medical Director Hub
+                {isSimulatingDrErdmann ? 'Dr. Hanieh Erdmann • Clinical Command Hub' : 'Medical Director Hub'}
               </h2>
               <span style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 500 }}>
-                {doctorMeta?.name || 'Dr. Clinical Director'} • Operational Overview
+                {isSimulatingDrErdmann ? 'German Board Certified Specialist Dermatologist & Trichologist • Operational Overview' : `${doctorMeta?.name || 'Dr. Clinical Director'} • Operational Overview`}
               </span>
             </div>
           </div>
@@ -359,15 +366,15 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
           <AlertCircle size={22} color="#d97706" style={{ flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, color: '#92400e', fontSize: '0.92rem' }}>
-              {drafts === 1 ? t('doctor.overview.drafts_banner', { count: drafts }) : t('doctor.overview.drafts_banner_plural', { count: drafts })}
+              {drafts === 1 ? t('doctor.overview.drafts_banner', { count: drafts, defaultValue: 'You have 1 draft prescription awaiting signature' }) : t('doctor.overview.drafts_banner_plural', { count: drafts, defaultValue: `You have ${drafts} draft prescriptions awaiting signature` })}
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#b45309', marginTop: '2px' }}>{t('doctor.overview.drafts_banner_desc')}</div>
+            <div style={{ fontSize: '0.78rem', color: '#b45309', marginTop: '2px' }}>{t('doctor.overview.drafts_banner_desc', 'Review and sign to transmit to compounding pharmacy.')}</div>
           </div>
           <button
             onClick={() => onNavigate?.('prescriptions')}
             style={{ background: '#d97706', color: '#ffffff', border: 'none', padding: '0.55rem 1rem', borderRadius: '7px', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}
           >
-            {t('doctor.overview.complete')} <ArrowRight size={14} />
+            {t('doctor.overview.complete', 'Review Drafts')} <ArrowRight size={14} />
           </button>
         </div>
       )}
@@ -380,10 +387,10 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
           gap: '1rem',
         }}
       >
-        <MetricCard title={t('doctor.overview.stats_active')} value={isLoading ? '…' : active} subtitle={t('doctor.overview.stats_active_sub')} icon={Send} color="#003666" onClick={() => onNavigate?.('prescriptions')} />
-        <MetricCard title={t('doctor.overview.stats_drafts')} value={isLoading ? '…' : drafts} subtitle={t('doctor.overview.stats_drafts_sub')} icon={Clock} color="#d97706" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
-        <MetricCard title={t('doctor.overview.stats_fulfilled')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub')} icon={CheckCircle2} color="#16a34a" onClick={() => onNavigate?.('prescriptions')} />
-        <MetricCard title={t('doctor.overview.stats_patients')} value={isLoading ? '…' : (totalPatients || '—')} subtitle={t('doctor.overview.stats_patients_sub')} icon={Users} color="#7c3aed" onClick={() => onNavigate?.('patients')} />
+        <MetricCard title={t('doctor.overview.stats_active', 'Active Prescriptions')} value={isLoading ? '…' : active} subtitle={t('doctor.overview.stats_active_sub', 'Currently in dispensing')} icon={Send} color="#003666" onClick={() => onNavigate?.('prescriptions')} />
+        <MetricCard title={t('doctor.overview.stats_drafts', 'Draft Prescriptions')} value={isLoading ? '…' : drafts} subtitle={t('doctor.overview.stats_drafts_sub', 'Awaiting signature')} icon={Clock} color="#d97706" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
+        <MetricCard title={t('doctor.overview.stats_fulfilled', 'Fulfilled Orders')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub', 'Delivered to patients')} icon={CheckCircle2} color="#16a34a" onClick={() => onNavigate?.('prescriptions')} />
+        <MetricCard title={t('doctor.overview.stats_patients', 'Active Patients')} value={isLoading ? '…' : (totalPatients || '—')} subtitle={t('doctor.overview.stats_patients_sub', 'Under clinical care')} icon={Users} color="#7c3aed" onClick={() => onNavigate?.('patients')} />
       </div>
 
       {/* 🧬 UNIFIED CLINICAL & DISPENSING LIFECYCLE HUB */}
@@ -397,37 +404,67 @@ export default function DoctorOverviewTab({ doctorId, doctorMeta, patients = [],
 
       {/* 📦 QUICK WORKFLOW CARDS (Rx Builder & Catalog Generator) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-        <Card style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1.25rem' }}>
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '1.25rem'
+        }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <Pill size={22} color="#003666" />
-              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{t('doctor.overview.new_rx')}</span>
+              <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Pill size={20} color="#003666" />
+              </div>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                {t('doctor.overview.new_rx', 'New Prescription')}
+              </span>
             </div>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>{t('doctor.overview.new_rx_desc')}</p>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>
+              {t('doctor.overview.new_rx_desc', 'Create custom magistral compound prescriptions and clinical protocols.')}
+            </p>
           </div>
           <button
             onClick={() => setShowBuilder(!showBuilder)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#003666', color: '#ffffff', border: 'none', padding: '0.7rem 1.1rem', borderRadius: '8px', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', width: 'fit-content' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#003666', color: '#ffffff', border: 'none', padding: '0.65rem 1.1rem', borderRadius: '8px', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', width: 'fit-content' }}
           >
-            <Plus size={16} /> {showBuilder ? t('doctor.overview.close_form') : t('doctor.overview.create_rx')}
+            <Plus size={16} /> {showBuilder ? t('doctor.overview.close_form', 'Close Form') : t('doctor.overview.create_rx', 'Create Prescription')}
           </button>
-        </Card>
+        </div>
 
-        <Card style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1.25rem' }}>
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '1.25rem'
+        }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <Package size={22} color="#0d9488" />
-              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{t('doctor.overview.catalogs')}</span>
+              <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#f0fdfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Package size={20} color="#0d9488" />
+              </div>
+              <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                {t('doctor.overview.catalogs', 'Lotusland Formulary')}
+              </span>
             </div>
-            <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>{t('doctor.overview.catalogs_desc')}</p>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.82rem', color: '#64748b', lineHeight: 1.4 }}>
+              {t('doctor.overview.catalogs_desc', 'Browse verified Lotusland peptide preparations, dosages and compounds.')}
+            </p>
           </div>
           <button
             onClick={() => onNavigate?.('catalog-builder')}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '0.7rem 1.1rem', borderRadius: '8px', fontWeight: 800, fontSize: '0.82rem', cursor: 'pointer', width: 'fit-content' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#f8fafc', color: '#0f172a', border: '1px solid #cbd5e1', padding: '0.65rem 1.1rem', borderRadius: '8px', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', width: 'fit-content' }}
           >
-            {t('doctor.overview.open_generator')} <ArrowRight size={16} />
+            {t('doctor.overview.open_generator', 'View Catalog')} <ArrowRight size={16} />
           </button>
-        </Card>
+        </div>
       </div>
 
       {/* 📋 INLINE PRESCRIPTION BUILDER FORM */}

@@ -7,7 +7,6 @@ import { useRoleAccess } from '../../../hooks/useRoleAccess';
 export default function BillingInvoicesWidget(props) {
   const { is } = useRoleAccess();
 
-  // Mock data for widget preview, in real app would use useFinanceData hook
   const invoices = [
     { id: 'INV-2026-001', amount: 1250, status: 'PAID', date: '2026-05-01' },
     { id: 'INV-2026-002', amount: 3400, status: 'PENDING', date: '2026-06-10' },
@@ -16,41 +15,66 @@ export default function BillingInvoicesWidget(props) {
 
   return (
     <BaseWidget 
-      title={is('patient') ? "Mis Facturas" : "Facturación B2B"} 
+      title={is('patient') ? "My Invoices" : "B2B Medical Billing"} 
       icon={FileText} 
       {...props}
     >
-      <div className="space-y-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {invoices.map(invoice => (
-          <div key={invoice.id} className="p-3 bg-white/5 rounded-xl border border-white/10 flex justify-between items-center hover:bg-white/10 transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                invoice.status === 'PAID' ? 'bg-green-500/20 text-green-400' :
-                invoice.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400' :
-                'bg-red-500/20 text-red-400'
-              }`}>
-                <FileText className="w-4 h-4" />
+          <div 
+            key={invoice.id} 
+            style={{
+              padding: '10px 12px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div 
+                style={{
+                  padding: '6px',
+                  borderRadius: '6px',
+                  backgroundColor: invoice.status === 'PAID' ? '#dcfce7' : invoice.status === 'PENDING' ? '#fef9c3' : '#fee2e2',
+                  color: invoice.status === 'PAID' ? '#166534' : invoice.status === 'PENDING' ? '#854d0e' : '#991b1b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <FileText size={15} />
               </div>
               <div>
-                <p className="text-white font-medium text-sm">{invoice.id}</p>
-                <p className="text-gray-400 text-xs mt-0.5">{invoice.date}</p>
+                <p style={{ margin: 0, color: '#0f172a', fontWeight: 700, fontSize: '0.85rem' }}>{invoice.id}</p>
+                <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.74rem' }}>{invoice.date}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <span className="text-white font-bold">${invoice.amount}</span>
-              <button className="opacity-0 group-hover:opacity-100 p-1.5 bg-white/10 rounded-md text-white hover:bg-white/20 transition-all">
-                <Download className="w-3.5 h-3.5" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ color: '#0f172a', fontWeight: 800, fontSize: '0.88rem' }}>${invoice.amount}</span>
+              <button 
+                style={{
+                  padding: '5px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  color: '#475569',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Download invoice"
+              >
+                <Download size={13} />
               </button>
             </div>
           </div>
         ))}
       </div>
-      {is('admin') && (
-        <button className="w-full mt-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm font-medium transition-colors">
-          Ver todas las facturas
-        </button>
-      )}
     </BaseWidget>
   );
 }
