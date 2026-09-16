@@ -68,7 +68,9 @@ export async function POST(request) {
         totalPrice,
         total: totalPrice,
         lineTotal: totalPrice,
-        isBulk
+        isBulk,
+        apiItems: item.apiItems || item.apis || item.constituents || null,
+        posology: item.posology || null
       };
     });
 

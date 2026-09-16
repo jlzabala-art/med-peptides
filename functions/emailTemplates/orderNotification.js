@@ -85,8 +85,9 @@ function buildOrderNotificationHtml(order) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount || 0);
   };
 
-  const resolvedTotal = Number(order.grandTotal ?? order.totalAmount ?? order.total ?? order.price ?? total ?? subtotal ?? 0);
-  const resolvedSubtotal = Number(order.subtotal ?? subtotal ?? resolvedTotal);
+  const numTotal = Number(order.grandTotal || order.totalAmount || order.total || order.price || total || 0);
+  const resolvedSubtotal = Number(order.subtotal || subtotal || (numTotal > 0 ? numTotal : 0));
+  const resolvedTotal = numTotal > 0 ? numTotal : (resolvedSubtotal + Number(resolvedShipping));
 
   // Address line resolution (supports direct customerAddress and shippingAddress object)
   const addressLine = order.customerAddress || order.deliveryAddress || [
@@ -112,6 +113,103 @@ function buildOrderNotificationHtml(order) {
     ? new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })
     : dateObj.toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
 
+  // Resolve API constituents for magistral formulations or structured prescription items
+  function resolveConstituents(item, orderDoc) {
+    if (Array.isArray(item.apiItems) && item.apiItems.length > 0) return item.apiItems;
+    if (Array.isArray(item.apis) && item.apis.length > 0) return item.apis;
+    if (Array.isArray(item.constituents) && item.constituents.length > 0) return item.constituents;
+    if (Array.isArray(orderDoc.apiItems) && orderDoc.apiItems.length > 0) return orderDoc.apiItems;
+
+    const fullStr = `${item.productName || ''} ${item.name || ''} ${item.title || ''} ${item.description || ''} ${item.variant || ''}`.toLowerCase();
+    const isCompounded = /magistral|formula|compounding|latanoprost|estradiol|alfatradiol|igrantine|trichosol|minoxidil|finasteride|dutasteride|spironolactone|bpc-157|ghk-cu/i.test(fullStr);
+    if (!isCompounded) return null;
+
+    const list = [];
+    const qty = Number(item.quantity || 1);
+    const isMultiPack = /3x|n3|3-month|3 bottles/i.test(fullStr);
+    const packFactor = isMultiPack ? 3 : 1;
+
+    if (/latanoprost/i.test(fullStr)) {
+      list.push({
+        name: 'Latanoprost Fagron',
+        genericName: 'Latanoprost Pure API',
+        concentration: '0.005% (50 mcg/ml)',
+        role: 'Prostaglandin F2α Analogue (Anagen Phase Induction)',
+        unitMass: '5 mg/bottle',
+        totalBatchMass: `${5 * packFactor * qty} mg`,
+        grade: 'Ph.Eur / USP Micronized',
+        category: 'Active Pharmaceutical Ingredient (API)'
+      });
+    }
+
+    if (/estradiol|alfatradiol/i.test(fullStr)) {
+      list.push({
+        name: '17-α-Estradiol',
+        genericName: 'Alfatradiol (Fagron)',
+        concentration: '0.05% (500 mcg/ml)',
+        role: 'Estrogen Receptor Modulator (Aromatase Activator & 5AR Inhibition)',
+        unitMass: '50 mg/bottle',
+        totalBatchMass: `${50 * packFactor * qty} mg`,
+        grade: 'Ph.Eur Micronized',
+        category: 'Active Pharmaceutical Ingredient (API)'
+      });
+    }
+
+    if (/igrantine/i.test(fullStr)) {
+      list.push({
+        name: 'IGrantine-F1™',
+        genericName: 'Bioactive Decapeptide Complex',
+        concentration: '0.50% (5 mg/ml)',
+        role: 'Wnt/β-Catenin Signaling & Dermal Papilla Proliferation',
+        unitMass: '500 mg/bottle',
+        totalBatchMass: `${(500 * packFactor * qty).toLocaleString()} mg`,
+        grade: 'Biotech Synthetic >98%',
+        category: 'Biostimulant Peptide'
+      });
+    }
+
+    if (/minoxidil/i.test(fullStr)) {
+      list.push({
+        name: 'Minoxidil Fagron',
+        genericName: 'Minoxidil Micronized',
+        concentration: '5.0% (50 mg/ml)',
+        role: 'Vasodilator & Follicular Microcirculation',
+        unitMass: '5,000 mg/bottle',
+        totalBatchMass: `${5 * packFactor * qty} g`,
+        grade: 'USP Micronized',
+        category: 'Active Pharmaceutical Ingredient (API)'
+      });
+    }
+
+    if (/finasteride/i.test(fullStr)) {
+      list.push({
+        name: 'Finasteride Fagron',
+        genericName: 'Finasteride USP',
+        concentration: '0.10% (1 mg/ml)',
+        role: 'Type II 5α-Reductase Inhibitor',
+        unitMass: '100 mg/bottle',
+        totalBatchMass: `${100 * packFactor * qty} mg`,
+        grade: 'USP Micronized',
+        category: 'Active Pharmaceutical Ingredient (API)'
+      });
+    }
+
+    if (/trichosol|vehicle/i.test(fullStr) || list.length > 0) {
+      list.push({
+        name: 'TrichoSol™ Scalp Carrier',
+        genericName: 'TrichoSol Compounding Solution',
+        concentration: 'q.s. 100 ml',
+        role: 'Patented Phyto-Lipidic Scalp Vehicle (Ethanol & PPG-free)',
+        unitMass: '100 ml/bottle',
+        totalBatchMass: `${100 * packFactor * qty} ml (${packFactor * qty}x 100ml)`,
+        grade: 'Fagron TrichoTech Standard',
+        category: 'Compounding Vehicle Base'
+      });
+    }
+
+    return list.length > 0 ? list : null;
+  }
+
   const itemsRows = items
     .map(
       (item) => {
@@ -120,16 +218,64 @@ function buildOrderNotificationHtml(order) {
         const itemQty = item.quantity || 1;
         const itemUnitPrice = Number(item.unitPrice || item.price || 0);
         const itemTotal = Number(item.totalPrice ?? item.total ?? item.lineTotal ?? (itemUnitPrice * itemQty));
+        const constituents = resolveConstituents(item, order);
 
         return `
         <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b;">
-            <strong>${prodName}</strong>
-            ${variantText ? `<br><span style="font-size:12px;color:#64748b;">${variantText}</span>` : ''}
+          <td style="padding:14px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#1e293b; vertical-align:top;">
+            <strong style="color:#003666; font-size:14.5px;">${prodName}</strong>
+            ${variantText ? `<br><span style="font-size:12px;color:#64748b;font-weight:500;">${variantText}</span>` : ''}
+
+            ${constituents && constituents.length > 0 ? `
+            <!-- Structured APIs & Constituents Breakdown (Drawer Parity) -->
+            <div style="margin-top:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+                <span style="font-size:11px; font-weight:800; color:#003666; text-transform:uppercase; letter-spacing:0.5px;">
+                  🧪 Active Ingredients & Formulation Breakdown (${constituents.length} Components)
+                </span>
+                <span style="font-size:10px; font-weight:700; color:#0284c7; background:#e0f2fe; padding:2px 8px; border-radius:10px;">
+                  Magistral Prescription
+                </span>
+              </div>
+              <table width="100%" cellpadding="0" cellspacing="0" style="font-size:11.5px; line-height:1.45; border-collapse:collapse;">
+                <thead>
+                  <tr style="color:#64748b; font-size:10px; text-transform:uppercase; border-bottom:1px solid #e2e8f0;">
+                    <th align="left" style="padding:4px 4px; font-weight:700;">Constituent / API</th>
+                    <th align="left" style="padding:4px 6px; font-weight:700;">Role / Mechanism</th>
+                    <th align="center" style="padding:4px 6px; font-weight:700;">Conc.</th>
+                    <th align="right" style="padding:4px 4px; font-weight:700;">Batch Mass</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${constituents.map(c => `
+                  <tr style="border-bottom:1px dashed #e2e8f0;">
+                    <td style="padding:5px 4px; vertical-align:top; color:#0f172a;">
+                      <strong style="color:#003666;">• ${c.name || c.compound}</strong>
+                      ${c.genericName ? `<br><span style="font-size:10px;color:#64748b;">${c.genericName} (${c.grade || 'Pharma Grade'})</span>` : ''}
+                    </td>
+                    <td style="padding:5px 6px; vertical-align:top; color:#475569; font-size:11px;">
+                      ${c.role || 'Active Component'}
+                    </td>
+                    <td align="center" style="padding:5px 6px; vertical-align:top; white-space:nowrap; color:#0369a1; font-weight:700;">
+                      ${c.concentration || c.dose || '—'}
+                    </td>
+                    <td align="right" style="padding:5px 4px; vertical-align:top; white-space:nowrap; color:#1e293b; font-weight:700;">
+                      ${c.totalBatchMass || c.totalMass || c.unitMass || '—'}
+                    </td>
+                  </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <div style="margin-top:6px; padding-top:6px; border-top:1px dashed #cbd5e1; font-size:10.5px; color:#475569; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+                <span><strong>Posology:</strong> 1.0 ml once daily topical application to dry scalp</span>
+                <span><strong>Standard:</strong> Ph.Eur / Fagron Compounding</span>
+              </div>
+            </div>
+            ` : ''}
           </td>
-          <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center;">${itemQty}</td>
-          <td class="hide-mobile" style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right;">${fmt(itemUnitPrice)}</td>
-          <td style="padding:10px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right;">${fmt(itemTotal)}</td>
+          <td class="hide-mobile" style="padding:14px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:center; vertical-align:top;">${itemQty}</td>
+          <td class="hide-mobile" style="padding:14px 12px; border-bottom:1px solid #e8edf5; font-size:14px; color:#475569; text-align:right; vertical-align:top;">${fmt(itemUnitPrice)}</td>
+          <td style="padding:14px 12px; border-bottom:1px solid #e8edf5; font-size:14px; font-weight:600; color:#003666; text-align:right; vertical-align:top;">${fmt(itemTotal)}</td>
         </tr>`;
       }
     )
@@ -160,16 +306,6 @@ function buildOrderNotificationHtml(order) {
         <p style="margin:0;font-size:14px;color:#475569;">This order contains <strong>${order.itemCount} items</strong>. Details are available in the attached prescription or admin panel.</p>
       </div>
     ` : '';
-
-  const addressLine = [
-    shippingAddress.street,
-    shippingAddress.city,
-    shippingAddress.state,
-    shippingAddress.zip,
-    shippingAddress.country,
-  ]
-    .filter(Boolean)
-    .join(', ');
 
   return `<!DOCTYPE html>
 <html lang="en">

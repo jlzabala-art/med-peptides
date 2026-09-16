@@ -359,7 +359,42 @@ export default function ClinicProfileWorkspace({ clinic, onClose }) {
               presentation: 'Amber Glass Bottle 100ml',
               quantity: 1,
               price: 285.0,
-              tier10UnitPrice: 240.0
+              tier10UnitPrice: 240.0,
+              posology: '1.0 ml once daily application to dry scalp at bedtime',
+              apiItems: rx.apiItems || rx.items || [
+                {
+                  name: 'Latanoprost Fagron',
+                  genericName: 'Latanoprost Pure API',
+                  role: 'Prostaglandin F2α Analogue (Anagen Phase Induction)',
+                  concentration: '0.005% (50 mcg/ml)',
+                  totalBatchMass: '15 mg (3x 100ml)',
+                  grade: 'Ph.Eur / USP Micronized'
+                },
+                {
+                  name: '17-α-Estradiol',
+                  genericName: 'Alfatradiol (Fagron)',
+                  role: 'Estrogen Receptor Modulator (Aromatase Activator & 5AR Inhibition)',
+                  concentration: '0.05% (500 mcg/ml)',
+                  totalBatchMass: '150 mg (3x 100ml)',
+                  grade: 'Ph.Eur Micronized'
+                },
+                {
+                  name: 'IGrantine-F1™',
+                  genericName: 'Bioactive Decapeptide Complex',
+                  role: 'Wnt/β-Catenin Signaling & Dermal Papilla Proliferation',
+                  concentration: '0.50% (5 mg/ml)',
+                  totalBatchMass: '1,500 mg (3x 100ml)',
+                  grade: 'Biotech Synthetic >98%'
+                },
+                {
+                  name: 'TrichoSol™ Scalp Carrier',
+                  genericName: 'TrichoSol Compounding Solution',
+                  role: 'Patented Phyto-Lipidic Scalp Vehicle (Ethanol & PPG-free)',
+                  concentration: 'q.s. 100 ml',
+                  totalBatchMass: '300 ml (3x 100ml)',
+                  grade: 'Fagron TrichoTech Standard'
+                }
+              ]
             }
           ],
           subtotal: 285.0,
