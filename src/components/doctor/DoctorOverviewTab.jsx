@@ -39,6 +39,7 @@ import { useTranslation } from 'react-i18next';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import notifier from '../../services/NotificationService';
 import DoctorSharedInfoWidget from './DoctorSharedInfoWidget';
+import { DoctorCockpitHeader, DoctorKpiMetricsGrid, DoctorRecentActivityFeed } from './overview';
 
 // Dynamic Widgets
 import DraggableDashboard from '../widgets/core/DraggableDashboard';
@@ -137,242 +138,21 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2.5rem' }}>
-      <style>{`
-        @keyframes gcpPulseBeaconOverview {
-          0% { transform: scale(0.95); opacity: 0.9; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
-          70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
-          100% { transform: scale(0.95); opacity: 0.9; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-      `}</style>
-      
       {/* 🚀 GCP MEDICAL DIRECTOR COCKPIT & OPERATIONS HEADER */}
-      <div
-        style={{
-          position: 'relative',
-          background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
-          borderRadius: '14px',
-          padding: '1.25rem 1.4rem',
-          color: '#ffffff',
-          boxShadow: '0 4px 20px rgba(0, 54, 102, 0.22)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
-            <div
-              style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                backdropFilter: 'blur(6px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#38bdf8',
-                flexShrink: 0,
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              <Stethoscope size={26} />
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0, letterSpacing: '-0.01em', color: '#ffffff' }}>
-                  {isSimulatingDrErdmann 
-                    ? 'Dr. Hanieh Erdmann • Practice Cockpit' 
-                    : (doctorMeta?.name ? `${doctorMeta.name} • Practice Cockpit` : 'Clinical Practice Cockpit')}
-                </h2>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'rgba(34, 197, 94, 0.16)', border: '1px solid rgba(34, 197, 94, 0.35)', fontSize: '0.72rem', color: '#4ade80', fontWeight: 700 }}>
-                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'gcpPulseBeaconOverview 2s infinite' }} />
-                  <span>Realtime Sync ✓</span>
-                </div>
-              </div>
-
-              {/* Physician Credential & Facility Badges (Inspirado en GCP Project & Resource Labels) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '0.35rem' }}>
-                <span style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  Lic: <CopyableId value={isSimulatingDrErdmann ? 'DHA-00013060-006' : (doctorId || 'DOC-ACTIVE')} />
-                </span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
-                <span style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic L.L.C.' : 'Specialist Clinical Practice'}
-                </span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
-                <span style={{ fontSize: '0.70rem', color: '#86efac', backgroundColor: 'rgba(34, 197, 94, 0.15)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                  🟢 DHA Regulated Practice (UAE)
-                </span>
-                <span style={{ fontSize: '0.70rem', color: '#cbd5e1', backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                  Latency 14ms
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Primary CTA: New Prescription (GCP Primary Action) */}
-          <button
-            type="button"
-            onClick={() => setShowBuilder(!showBuilder)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 20px',
-              minHeight: '44px',
-              borderRadius: '8px',
-              backgroundColor: showBuilder ? '#ffffff' : '#0d9488',
-              color: showBuilder ? '#003666' : '#ffffff',
-              border: 'none',
-              fontSize: '0.85rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-              transition: 'all 0.15s ease',
-              flexShrink: 0,
-            }}
-          >
-            <Plus size={16} />
-            <span>{showBuilder ? 'Close Rx Form' : 'New Prescription'}</span>
-          </button>
-        </div>
-
-        {/* Quick Launch Clinical Action Chips (Horizontal Touch Scroll) */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            overflowX: 'auto',
-            paddingBottom: '2px',
-            scrollbarWidth: 'none',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('open-quick-create', { detail: { type: 'new-patient' } }));
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              minHeight: '40px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              border: '1px solid rgba(255, 255, 255, 0.22)',
-              color: '#ffffff',
-              fontSize: '0.8125rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <UserPlus size={15} />
-            <span>Intake Patient</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigate?.('catalog')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.14)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              color: '#ffffff',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <Pill size={15} />
-            <span>Lotusland Formulary</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigate?.('protocols')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.14)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              color: '#ffffff',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <FlaskConical size={15} />
-            <span>Clinical Protocols</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigate?.('messages')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.14)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              color: '#ffffff',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <MessageSquare size={15} />
-            <span>Patient Inquiries</span>
-          </button>
-        </div>
-      </div>
+      <DoctorCockpitHeader
+        doctorMeta={doctorMeta}
+        isSimulatingDrErdmann={isSimulatingDrErdmann}
+        doctorId={doctorId}
+        showBuilder={showBuilder}
+        setShowBuilder={setShowBuilder}
+        onNavigate={onNavigate}
+      />
 
       {/* 📊 CLINICAL COMMAND HUB WIDGET (Medical Director only, hidden in Dr. Erdmann simulation to avoid mock triage) */}
       {!isSimulatingDrErdmann && (
         <ClinicalCommandHub role="doctor" metrics={{ pendingPrescriptions: drafts, activePatients: totalPatients }} />
       )}
 
-      {/* ⚠️ PENDING DRAFTS ALERT BANNER */}
-      {drafts > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', borderRadius: '10px', background: '#fffbeb', border: '1px solid #fde68a', boxShadow: '0 2px 6px rgba(245, 158, 11, 0.08)' }}>
-          <AlertCircle size={22} color="#d97706" style={{ flexShrink: 0 }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, color: '#92400e', fontSize: '0.92rem' }}>
-              {drafts === 1 ? t('doctor.overview.drafts_banner', { count: drafts, defaultValue: 'You have 1 draft prescription awaiting signature' }) : t('doctor.overview.drafts_banner_plural', { count: drafts, defaultValue: `You have ${drafts} draft prescriptions awaiting signature` })}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#b45309', marginTop: '2px' }}>{t('doctor.overview.drafts_banner_desc', 'Review and sign to transmit to compounding pharmacy.')}</div>
-          </div>
-          <button
-            onClick={() => onNavigate?.('prescriptions')}
-            style={{ background: '#d97706', color: '#ffffff', border: 'none', padding: '0.55rem 1rem', borderRadius: '7px', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}
-          >
-            {t('doctor.overview.complete', 'Review Drafts')} <ArrowRight size={14} />
-          </button>
-        </div>
-      )}
 
       {/* 💎 EVOLUCIONA AL NIVEL AVANZADO PRO BANNER */}
       {!context.isProDoctor && (
@@ -456,70 +236,17 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
         </div>
       )}
 
-      {/* 🧭 GCP SCOPE INDICATOR & PRESET VIEW FILTER BAR */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '8px',
-          padding: '8px 12px',
-          backgroundColor: '#ffffff',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Active Clinical Scope:
-          </span>
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#003666', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
-            🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic (Isolated Practice)' : 'Assigned Practice Cohort'}
-          </span>
-          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
-            {totalPatients} patient under care • {active} in dispensing
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <button
-            type="button"
-            onClick={() => onNavigate?.('prescriptions')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            <span>View Prescriptions →</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 📈 RESPONSIVE KPI METRIC CARDS GRID (2x2 on Mobile, 4x1 on Desktop) */}
-      <div
-        className="dashboard-kpi-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '1rem',
-        }}
-      >
-        <MetricCard title={t('doctor.overview.stats_active', 'Active Prescriptions')} value={isLoading ? '…' : active} subtitle={t('doctor.overview.stats_active_sub', 'Currently in dispensing')} icon={Send} color="#003666" onClick={() => onNavigate?.('prescriptions')} />
-        <MetricCard title={t('doctor.overview.stats_drafts', 'Draft Prescriptions')} value={isLoading ? '…' : drafts} subtitle={t('doctor.overview.stats_drafts_sub', 'Awaiting signature')} icon={Clock} color="#d97706" alert={drafts > 0} onClick={() => onNavigate?.('prescriptions')} />
-        <MetricCard title={t('doctor.overview.stats_fulfilled', 'Fulfilled Orders')} value={isLoading ? '…' : fulfilled} subtitle={t('doctor.overview.stats_fulfilled_sub', 'Delivered to patients')} icon={CheckCircle2} color="#16a34a" onClick={() => onNavigate?.('prescriptions')} />
-        <MetricCard title={t('doctor.overview.stats_patients', 'Active Patients')} value={isLoading ? '…' : (totalPatients || '—')} subtitle={t('doctor.overview.stats_patients_sub', 'Under clinical care')} icon={Users} color="#7c3aed" onClick={() => onNavigate?.('patients')} />
-      </div>
+      {/* 📈 RESPONSIVE KPI METRICS GRID & SCOPE INDICATOR */}
+      <DoctorKpiMetricsGrid
+        isLoading={isLoading}
+        active={active}
+        drafts={drafts}
+        fulfilled={fulfilled}
+        totalPatients={totalPatients}
+        isSimulatingDrErdmann={isSimulatingDrErdmann}
+        onNavigate={onNavigate}
+        t={t}
+      />
 
       {/* 🧬 UNIFIED CLINICAL & DISPENSING LIFECYCLE HUB */}
       <ClinicalDispensingLifecycleHub
@@ -621,123 +348,10 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
       />
 
       {/* ⚡ GCP CLINICAL AUDIT TRAIL & RECENT OPERATIONS FEED */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          padding: '1.25rem',
-          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.85rem',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem', flexWrap: 'wrap', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={18} color="#003666" />
-            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-              Real-time Clinical Operations & Audit Feed
-            </h3>
-          </div>
-          <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700, backgroundColor: '#f0fdf4', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
-            ● Telemetry Live
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '4px' }}>
-                RX ISSUED
-              </span>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-                Prescription <CopyableId value={isSimulatingDrErdmann ? 'RX-BEDAYA-260915-11774' : 'RX-RECENT-01'} />
-              </span>
-              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                for {isSimulatingDrErdmann ? 'Matin Rahim Delavar Rafiei' : 'Patient'}
-              </span>
-            </div>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Today, 10:15 AM</span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#ede9fe', color: '#6d28d9', padding: '2px 6px', borderRadius: '4px' }}>
-                FORMULARY SYNC
-              </span>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-                Lotusland Compounding Formulary v2026.9
-              </span>
-              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                Verified by Medical Director
-              </span>
-            </div>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Yesterday</span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px' }}>
-                COLD CHAIN
-              </span>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
-                Temperature Log 3.8°C (Compliant: 2-8°C)
-              </span>
-              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                Insulated Express Delivery
-              </span>
-            </div>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>14 Sep 2026</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 👥 VERIFIED ACTIVE PATIENT DOSSIER & PRESCRIPTION SUMMARY */}
-      {isSimulatingDrErdmann && (
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          padding: '1.25rem 1.5rem',
-          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Users size={18} color="#003666" />
-              <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-                Assigned Patient Clinical Record
-              </h3>
-            </div>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1e40af', padding: '3px 8px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
-              Verified In Bedaya Polyclinic
-            </span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Patient Name</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Matin Rahim Delavar Rafiei</div>
-              <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>Female • DOB: 1984-06-15 (42 yrs)</div>
-            </div>
-
-            <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Medical File & Clinic</div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#003666', marginTop: '2px' }}>PIN: 11774</div>
-              <div style={{ fontSize: '0.76rem', color: '#64748b', marginTop: '2px' }}>Bedaya Polyclinic L.L.C. (Dubai)</div>
-            </div>
-
-            <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700 }}>Active Prescription</div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>RX-BEDAYA-260915-11774</div>
-              <div style={{ fontSize: '0.76rem', color: '#16a34a', fontWeight: 700, marginTop: '2px' }}>Latanoprost + 17-α-Estradiol + IGrantine-F1</div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DoctorRecentActivityFeed
+        isSimulatingDrErdmann={isSimulatingDrErdmann}
+        prescriptions={prescriptions}
+      />
 
     </div>
   );
