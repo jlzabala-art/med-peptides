@@ -187,6 +187,8 @@ const DOCTOR_NAV_GROUPS = [
 import PanelShell from '../components/shell/PanelShell';
 import IndividualDoctorSimulationBanner from '../components/doctor/IndividualDoctorSimulationBanner';
 import DoctorUpgradePlanModal from '../components/doctor/DoctorUpgradePlanModal';
+import { useDoctorAiQuota } from '../hooks/useDoctorAiQuota';
+import DoctorAiQuotaPill from '../components/doctor/DoctorAiQuotaPill';
 
 export const DoctorContext = React.createContext({});
 
@@ -318,6 +320,8 @@ export default function DoctorDashboard({ children }) {
     : (activeDoctorProfile?.subscriptionTier || 'basic');
   const isProDoctor = subscriptionTier === 'advanced' || subscriptionTier === 'pro';
 
+  const doctorQuota = useDoctorAiQuota(effectiveDoctorId, subscriptionTier);
+
   return (
     <PullToRefreshWrapper onRefresh={handleRefresh}>
       <PanelShell 
@@ -331,8 +335,9 @@ export default function DoctorDashboard({ children }) {
       >
 
       <div style={{ padding: '1.5rem' }}>
-        {/* Doctor Subscription Tier Status Pill */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '0.85rem' }}>
+        {/* Doctor Subscription Tier & AI Quota Status Pills */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
+          <DoctorAiQuotaPill quota={doctorQuota} onOpenUpgrade={() => setIsUpgradeModalOpen(true)} />
           <button
             type="button"
             onClick={() => setIsUpgradeModalOpen(true)}
@@ -369,6 +374,7 @@ export default function DoctorDashboard({ children }) {
             isIndividualDoctor: isSimulatingDrErdmann,
             subscriptionTier,
             isProDoctor,
+            doctorQuota,
             openUpgradeModal: () => setIsUpgradeModalOpen(true),
             sharedPatients,
             setSharedPatients

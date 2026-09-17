@@ -431,9 +431,10 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
 
       {/* 📈 RESPONSIVE KPI METRIC CARDS GRID (2x2 on Mobile, 4x1 on Desktop) */}
       <div
+        className="dashboard-kpi-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '1rem',
         }}
       >

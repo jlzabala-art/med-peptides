@@ -3,11 +3,20 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { checkRateLimit, rateLimitExceededResponse, applyRateLimitHeaders } from '@/utils/rateLimiter';
 import { sanitizeText } from '@/utils/apiValidator';
 import { logger } from '@/utils/logger';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
 // Clinical scribe is the most sensitive endpoint: 10 requests per minute per IP
 const RATE_LIMIT_OPTIONS = { limit: 10, windowMs: 60 * 1000, tier: 'ai-clinical-scribe' };
+const BASIC_AI_MONTHLY_LIMIT = 5;
+
+function getCurrentMonthKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
 
 export async function POST(request) {
   // Rate limiting — clinical scribe is high-cost endpoint
@@ -29,6 +38,34 @@ export async function POST(request) {
     const body = await request.json();
     const rawNotes = body?.clinicalNotes;
     const patientProfile = body?.patientProfile || {};
+    const doctorId = body?.doctorId;
+    const subscriptionTier = body?.subscriptionTier || 'basic';
+    const isPro = subscriptionTier === 'advanced' || subscriptionTier === 'pro';
+
+    // Enforce quota if basic tier doctor provided
+    const monthKey = getCurrentMonthKey();
+    if (doctorId && !isPro && adminDb) {
+      try {
+        const userDoc = await adminDb.collection('users').doc(doctorId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const usedCount = userData?.aiMonthlyUsage?.[monthKey] || 0;
+          if (usedCount >= BASIC_AI_MONTHLY_LIMIT) {
+            return NextResponse.json(
+              {
+                error: 'Monthly free AI consultation quota reached (5/5 consultations used). Please upgrade to Advanced Pro for unlimited access.',
+                quotaExceeded: true,
+                used: usedCount,
+                limit: BASIC_AI_MONTHLY_LIMIT
+              },
+              { status: 403 }
+            );
+          }
+        }
+      } catch (quotaErr) {
+        logger.warn('[AI Clinical Scribe] Quota check warning:', quotaErr);
+      }
+    }
 
     // Sanitize: strip null bytes, scripts, truncate to 8 000 chars
     const clinicalNotes = sanitizeText(rawNotes, 8000);
@@ -154,6 +191,22 @@ Rules:
     }
 
     const structuredPrescription = JSON.parse(text);
+
+    // Increment doctor usage record asynchronously
+    if (doctorId && !isPro && adminDb) {
+      try {
+        const userDocRef = adminDb.collection('users').doc(doctorId);
+        const userSnap = await userDocRef.get();
+        const currentCount = (userSnap.data()?.aiMonthlyUsage?.[monthKey] || 0) + 1;
+        await userDocRef.set({
+          aiMonthlyUsage: { [monthKey]: currentCount },
+          lastAiUsageAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (incErr) {
+        logger.warn('[AI Clinical Scribe] Quota increment warning:', incErr);
+      }
+    }
+
     const jsonResponse = NextResponse.json({ success: true, data: structuredPrescription });
     return applyRateLimitHeaders(jsonResponse, rateInfo);
   } catch (error) {

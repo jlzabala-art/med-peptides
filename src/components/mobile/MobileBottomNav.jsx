@@ -32,16 +32,16 @@ const ROLE_BOTTOM_ITEMS = {
   doctor: [
     { id: 'home', label: 'Home', path: '/doctor', icon: Home },
     { id: 'patients', label: 'Patients', path: '/doctor/patients', icon: Users },
-    { id: 'prescriptions', label: 'Prescriptions', path: '/admin/prescriptions', icon: FileText },
-    { id: 'orders', label: 'Orders', path: '/doctor/orders', icon: Package },
+    { id: 'prescriptions', label: 'Prescriptions', path: '/doctor/prescriptions-history', icon: FileText },
     { id: 'ai', label: 'Clinical AI', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   medical_director: [
     { id: 'home', label: 'Home', path: '/doctor', icon: Home },
     { id: 'patients', label: 'Patients', path: '/doctor/patients', icon: Users },
-    { id: 'prescriptions', label: 'Prescriptions', path: '/admin/prescriptions', icon: FileText },
-    { id: 'orders', label: 'Orders', path: '/doctor/orders', icon: Package },
+    { id: 'prescriptions', label: 'Prescriptions', path: '/doctor/prescriptions-history', icon: FileText },
     { id: 'ai', label: 'Clinical AI', action: 'open_ai', icon: Sparkles, isAi: true },
+    { id: 'menu', label: 'Menu', action: 'open_sidebar', icon: Menu },
   ],
   clinic: [
     { id: 'home', label: 'Clinic Hub', path: '/clinic', icon: Home },

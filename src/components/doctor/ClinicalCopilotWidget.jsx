@@ -1,24 +1,34 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrainCircuit, Sparkles, AlertTriangle, Send, Loader2, CheckCircle2, FileSignature } from '@/lib/icons';
 import toast from 'react-hot-toast';
+import { useDoctorAiQuota } from '@/hooks/useDoctorAiQuota';
+import DoctorAiQuotaPill from '@/components/doctor/DoctorAiQuotaPill';
+import DoctorAiQuotaExceededModal from '@/components/doctor/DoctorAiQuotaExceededModal';
 
 const ClinicalCopilotWidget = ({ onDraftGenerated }) => {
   const [query, setQuery] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [draft, setDraft] = useState(null);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
 
-  const handleGenerate = (e) => {
+  const quota = useDoctorAiQuota();
+
+  const handleGenerate = async (e) => {
     e.preventDefault();
+    if (!quota.canUse) {
+      setIsQuotaModalOpen(true);
+      return;
+    }
     if (!query.trim()) return;
 
     setIsGenerating(true);
     setDraft(null);
 
     // Simulate Atlas AI clinical drafting
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsGenerating(false);
       setDraft({
         patientProfile: "Adult Male (approx. 45-50) / Accelerated Healing requested",
@@ -33,6 +43,7 @@ const ClinicalCopilotWidget = ({ onDraftGenerated }) => {
           "Contraindicación: Evitar en caso de historial de neoplasias activas (factores de crecimiento angiogénicos)."
         ]
       });
+      await quota.consume();
       toast.success('Borrador clínico generado por Atlas AI.');
     }, 2500);
   };
@@ -45,19 +56,22 @@ const ClinicalCopilotWidget = ({ onDraftGenerated }) => {
       boxShadow: '0 10px 40px rgba(0,0,0,0.04)',
       overflow: 'hidden'
     }}>
-      <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: '1rem', background: '#f8fafc' }}>
-        <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '0.6rem', borderRadius: '12px', color: 'white', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>
-          <BrainCircuit size={20} />
+      <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#f8fafc', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '0.6rem', borderRadius: '12px', color: 'white', boxShadow: '0 4px 12px rgba(16,185,129,0.3)' }}>
+            <BrainCircuit size={20} />
+          </div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Clinical Copilot (Atlas AI)</h2>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Autocompletado de protocolos basado en lenguaje natural.</p>
+          </div>
         </div>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Clinical Copilot (Atlas AI)</h2>
-          <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Autocompletado de protocolos basado en lenguaje natural.</p>
-        </div>
+        <DoctorAiQuotaPill quota={quota} onOpenUpgrade={() => setIsQuotaModalOpen(true)} />
       </div>
 
       <div style={{ padding: '1.5rem' }}>
-        <form onSubmit={handleGenerate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-          <div style={{ flex: 1, position: 'relative' }}>
+        <form onSubmit={handleGenerate} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 280px', position: 'relative' }}>
             <input
               type="text"
               value={query}
@@ -78,24 +92,32 @@ const ClinicalCopilotWidget = ({ onDraftGenerated }) => {
           </div>
           <button
             type="submit"
-            disabled={isGenerating || !query.trim()}
+            disabled={isGenerating || (!quota.canUse && !isGenerating)}
+            onClick={(e) => {
+              if (!quota.canUse) {
+                e.preventDefault();
+                setIsQuotaModalOpen(true);
+              }
+            }}
             style={{
               padding: '0 1.5rem',
+              minHeight: '48px',
               borderRadius: '16px',
               border: 'none',
-              background: 'var(--primary)',
+              background: quota.isExceeded ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'var(--primary)',
               color: 'white',
               fontWeight: 800,
-              cursor: (isGenerating || !query.trim()) ? 'not-allowed' : 'pointer',
-              opacity: (isGenerating || !query.trim()) ? 0.6 : 1,
+              cursor: (isGenerating || !query.trim()) && quota.canUse ? 'not-allowed' : 'pointer',
+              opacity: (isGenerating || (!query.trim() && quota.canUse)) ? 0.6 : 1,
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              boxShadow: quota.isExceeded ? '0 4px 12px rgba(220, 38, 38, 0.25)' : 'none'
             }}
           >
             {isGenerating ? <Loader2 size={18} className="spin" /> : <Send size={18} />}
-            Generar
+            {quota.isExceeded ? 'Límite de IA Alcanzado ⚡' : 'Generar'}
           </button>
         </form>
 
@@ -156,6 +178,13 @@ const ClinicalCopilotWidget = ({ onDraftGenerated }) => {
           )}
         </AnimatePresence>
       </div>
+
+      <DoctorAiQuotaExceededModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        doctorId={quota.doctorId}
+        doctorName="Doctor"
+      />
 
       <style>{`
         @keyframes spin { 100% { transform: rotate(360deg); } }

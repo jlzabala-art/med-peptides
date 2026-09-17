@@ -903,14 +903,14 @@
     gap: 0.2rem !important;
     border-radius: 10px !important;
   }
-  .dashboard-kpi-grid .metric-card > div:first-child > div:first-child {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 7px !important;
+  .dashboard-kpi-grid .metric-card .metric-card-icon-wrapper {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
   }
-  .dashboard-kpi-grid .metric-card > div:first-child svg {
-    width: 15px !important;
-    height: 15px !important;
+  .dashboard-kpi-grid .metric-card .metric-card-icon-wrapper svg {
+    width: 16px !important;
+    height: 16px !important;
   }
   .dashboard-kpi-grid .metric-card [style*="font-size: 1.5rem"],
   .dashboard-kpi-grid .metric-card [style*="1.5rem"] {

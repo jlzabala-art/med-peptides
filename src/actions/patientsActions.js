@@ -456,4 +456,92 @@ export async function unlinkPatientFromUserAction({ patientId, userId }) {
   }
 }
 
+/**
+ * Server Action: Reassigns one or more patients to a new physician and clinic,
+ * optionally transferring associated prescriptions atomically.
+ */
+export async function reassignPatientsPhysicianAction({
+  patientIds = [],
+  physicianId,
+  physicianName,
+  clinicId,
+  clinicName,
+  updatePrescriptions = true,
+}) {
+  try {
+    if (!adminDb) throw new Error("adminDb is not initialized.");
+    if (!patientIds || patientIds.length === 0) throw new Error("At least one patientId is required.");
+    if (!physicianId && !clinicId) throw new Error("Physician or clinic is required.");
+
+    const serverTimestamp = new Date();
+    const batch = adminDb.batch();
+
+    for (const pid of patientIds) {
+      const patientRef = adminDb.collection('patients').doc(pid);
+      const updateData = {
+        updatedAt: serverTimestamp,
+      };
+      if (physicianId !== undefined) {
+        updateData.physicianId = physicianId;
+        updateData.assignedDoctorId = physicianId;
+        updateData.doctorId = physicianId;
+        updateData.doctorIds = [physicianId];
+      }
+      if (physicianName !== undefined) {
+        updateData.physician = physicianName;
+        updateData.physicianName = physicianName;
+        updateData.doctorName = physicianName;
+        updateData.prescribingDoctor = physicianName;
+      }
+      if (clinicId !== undefined) {
+        updateData.clinicId = clinicId;
+      }
+      if (clinicName !== undefined) {
+        updateData.clinic = clinicName;
+        updateData.clinicName = clinicName;
+      }
+      batch.set(patientRef, updateData, { merge: true });
+
+      // Update prescriptions if requested
+      if (updatePrescriptions) {
+        const rxSnap = await adminDb.collection('prescriptions')
+          .where('patientId', '==', pid)
+          .get();
+
+        rxSnap.docs.forEach((doc) => {
+          const rxUpdate = {
+            updatedAt: serverTimestamp,
+          };
+          if (physicianId !== undefined) {
+            rxUpdate.doctorId = physicianId;
+            rxUpdate.physicianId = physicianId;
+          }
+          if (physicianName !== undefined) {
+            rxUpdate.doctorName = physicianName;
+            rxUpdate.prescribingDoctor = physicianName;
+          }
+          if (clinicId !== undefined) {
+            rxUpdate.clinicId = clinicId;
+          }
+          if (clinicName !== undefined) {
+            rxUpdate.clinicName = clinicName;
+          }
+          batch.set(doc.ref, rxUpdate, { merge: true });
+        });
+      }
+    }
+
+    await withRetry(
+      () => batch.commit(),
+      { entityName: 'Patients:reassignPhysician' }
+    );
+
+    return { success: true, count: patientIds.length };
+  } catch (error) {
+    logger.error('[reassignPatientsPhysicianAction] Error', error);
+    return { success: false, error: error.message };
+  }
+}
+
+
 

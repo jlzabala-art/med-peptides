@@ -175,7 +175,7 @@ export default function PhysicianLayout({
           <div style={{ paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--color-text-tertiary)',
               textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
-              🤖 Agentes AI activos
+              🤖 Active AI Agents
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {DOCTOR_AGENTS.map(a => (
@@ -183,6 +183,18 @@ export default function PhysicianLayout({
                   onClick={() => { openClinicalAI('', a.label); setMobileMenuOpen(false); }} />
               ))}
             </div>
+          </div>
+
+          {/* Mobile Sign Out */}
+          <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
+            <button onClick={onLogout} style={{
+              width: '100%', textAlign: 'left', border: '1px solid #e2e8f0', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '0.6rem',
+              padding: '0.65rem 0.85rem', borderRadius: '9px', background: 'white',
+              color: 'var(--color-text-tertiary)', fontSize: '0.82rem', fontWeight: 700,
+            }}>
+              <ArrowLeft size={15} /> Sign Out
+            </button>
           </div>
         </div>
       )}
@@ -302,7 +314,7 @@ export default function PhysicianLayout({
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(139,92,246,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(139,92,246,0.3)'; }}
             >
-              <Bot size={14} /> Consultar AI Clínico
+              <Bot size={14} /> Consult Clinical AI
             </button>
           </div>
 
@@ -317,7 +329,7 @@ export default function PhysicianLayout({
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.color = 'var(--color-danger)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-tertiary)'; }}
             >
-              <ArrowLeft size={14} /> Cerrar sesión
+              <ArrowLeft size={14} /> Sign Out
             </button>
           </div>
         </aside>

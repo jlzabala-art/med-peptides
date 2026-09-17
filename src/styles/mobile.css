@@ -672,10 +672,15 @@
     padding: 0.75rem !important;
     gap: 0.4rem !important;
   }
-  /* Icon container: smaller on mobile */
-  .metric-card > div > div:first-child > div:first-child {
-    width: 36px !important;
-    height: 36px !important;
+  /* Icon container: cleanly sized on mobile */
+  .metric-card-icon-wrapper {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+  .metric-card-icon-wrapper svg {
+    width: 16px !important;
+    height: 16px !important;
   }
   /* Value text: smaller */
   .metric-card [style*="1.5rem"],

@@ -78,7 +78,7 @@ export default function InlineEditableCell({
     if (type === 'email' && valToSave) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(valToSave)) {
-        notifier.error('Formato de email inválido');
+        notifier.error('Invalid email format');
         return;
       }
     }
@@ -87,7 +87,7 @@ export default function InlineEditableCell({
       const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]*$/;
       const digitsOnly = valToSave.replace(/\D/g, '');
       if (!phoneRegex.test(valToSave) || digitsOnly.length < 6) {
-        notifier.error('Formato de teléfono inválido');
+        notifier.error('Invalid phone number format');
         return;
       }
     }

@@ -5,11 +5,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FileSignature, Sparkles, Loader2, CheckCircle2, Copy, RefreshCw } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import AIContextBadge from '@/components/ui/AIContextBadge';
+import { useDoctorAiQuota } from '@/hooks/useDoctorAiQuota';
+import DoctorAiQuotaPill from '@/components/doctor/DoctorAiQuotaPill';
+import DoctorAiQuotaExceededModal from '@/components/doctor/DoctorAiQuotaExceededModal';
 
 const AISoapGeneratorWidget = ({ patientName = "Paciente", patient = null }) => {
   const [rawNotes, setRawNotes] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [soapNote, setSoapNote] = useState(null);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+
+  const quota = useDoctorAiQuota();
 
   const activePatientName = patient?.name || patient?.displayName || patientName || 'Paciente';
   const allergies = patient?.allergies || 'Ninguna reportada';
@@ -17,6 +23,10 @@ const AISoapGeneratorWidget = ({ patientName = "Paciente", patient = null }) => 
 
   const generateSoap = async (e) => {
     e.preventDefault();
+    if (!quota.canUse) {
+      setIsQuotaModalOpen(true);
+      return;
+    }
     if (!rawNotes.trim()) {
       notifier.warning('Por favor ingrese el dictado o notas de la consulta.');
       return;
@@ -86,6 +96,7 @@ Responde estrictamente en formato JSON con estas 4 claves:
         });
       }
 
+      await quota.consume();
       notifier.success('Nota clínica estructurada por Atlas AI');
     } catch (err) {
       console.error('[AISoapGeneratorWidget] Error:', err);
@@ -153,32 +164,42 @@ Responde estrictamente en formato JSON con estas 4 claves:
               }}
               disabled={isGenerating}
             />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <DoctorAiQuotaPill quota={quota} onOpenUpgrade={() => setIsQuotaModalOpen(true)} />
+            </div>
+
             <button
               type="submit"
-              disabled={isGenerating || !rawNotes.trim()}
+              disabled={isGenerating || (!quota.canUse && !isGenerating)}
+              onClick={(e) => {
+                if (!quota.canUse) {
+                  e.preventDefault();
+                  setIsQuotaModalOpen(true);
+                }
+              }}
               style={{
-                marginTop: '1rem',
+                marginTop: '0.75rem',
                 width: '100%',
                 minHeight: '44px',
                 padding: '0.75rem 1.25rem',
                 borderRadius: '10px',
                 border: 'none',
-                background: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
+                background: quota.isExceeded ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' : 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
                 color: '#ffffff',
                 fontWeight: 800,
                 fontSize: '0.88rem',
-                cursor: (isGenerating || !rawNotes.trim()) ? 'not-allowed' : 'pointer',
-                opacity: (isGenerating || !rawNotes.trim()) ? 0.65 : 1,
+                cursor: (isGenerating || !rawNotes.trim()) && quota.canUse ? 'not-allowed' : 'pointer',
+                opacity: (isGenerating || (!rawNotes.trim() && quota.canUse)) ? 0.65 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '0.5rem',
                 transition: 'all 0.2s ease',
-                boxShadow: '0 2px 8px rgba(13, 148, 136, 0.25)'
+                boxShadow: quota.isExceeded ? '0 2px 8px rgba(220, 38, 38, 0.25)' : '0 2px 8px rgba(13, 148, 136, 0.25)'
               }}
             >
               {isGenerating ? <Loader2 size={18} className="spin" /> : <Sparkles size={18} />}
-              {isGenerating ? 'Estructurando con Gemini 2.5 Flash...' : 'Generar Nota SOAP con IA'}
+              {isGenerating ? 'Estructurando con Gemini 2.5 Flash...' : (quota.isExceeded ? 'Límite Mensual de IA Alcanzado (5/5) • Upgrade ⚡' : 'Generar Nota SOAP con IA')}
             </button>
           </form>
         ) : (
@@ -245,6 +266,13 @@ Responde estrictamente en formato JSON con estas 4 claves:
           </AnimatePresence>
         )}
       </div>
+
+      <DoctorAiQuotaExceededModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        doctorId={quota.doctorId}
+        doctorName="Doctor"
+      />
 
       <style>{`
         @keyframes spin { 100% { transform: rotate(360deg); } }

@@ -63,27 +63,23 @@ export default function MetricCard({
       {/* Top Row: Icon + Trend */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
         {Icon ? (
-          <div style={{ position: 'relative', width: '44px', height: '44px' }}>
-            {/* Background with opacity */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
+          <div 
+            className="metric-card-icon-wrapper"
+            style={{ 
+              position: 'relative', 
+              width: '40px', 
+              height: '40px',
               borderRadius: '10px',
-              backgroundColor: color,
-              opacity: 0.1,
-            }} />
-            {/* Icon */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
+              backgroundColor: `${color}18`,
               color: color,
-              zIndex: 1
-            }}>
-              <Icon size={20} />
-            </div>
+              overflow: 'hidden'
+            }}
+          >
+            <Icon size={20} style={{ flexShrink: 0, zIndex: 1 }} />
           </div>
         ) : <div />}
 

@@ -43,6 +43,7 @@ import AIUserIntelligenceModal from '../../../components/admin/users/AIUserIntel
 import { EMAILJS_CONFIG } from '@/config/emailjs';
 import { approveUserRoleAction } from '../../../actions/adminActions';
 import { normalizeRole, CANONICAL_ROLES, ROLE_METADATA } from '../../../constants/roles';
+import ReassignPhysicianModal from '../../../components/admin/patients/ReassignPhysicianModal';
 
 const EMAILJS_TEMPLATE_ID = EMAILJS_CONFIG.TEMPLATES.USER_WELCOME; 
 
@@ -64,6 +65,7 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
   const [financialWholesaler, setFinancialWholesaler] = useState(null);
   const [emailPreview, setEmailPreview] = useState(null);
   const [aiTargetUser, setAiTargetUser] = useState(null);
+  const [reassignModal, setReassignModal] = useState({ isOpen: false, patients: [] });
   
   const [allDoctors, setAllDoctors] = useState([]);
   const [allWholesalers, setAllWholesalers] = useState([]);
@@ -702,6 +704,24 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
             }
           });
         }
+
+        if (u.roles?.includes('patient') || u.role === 'patient' || u.linkedPatientId) {
+          actions.push({
+            label: 'Reassign Doctor',
+            icon: Stethoscope,
+            onClick: (e) => {
+              e.stopPropagation();
+              setReassignModal({
+                isOpen: true,
+                patients: [{
+                  id: u.linkedPatientId || u.id,
+                  name: getUserFullName(u),
+                  physician: u.physician || u.doctorName || 'Direct Desk',
+                }],
+              });
+            }
+          });
+        }
         
         actions.push({
           type: 'edit',
@@ -1136,6 +1156,21 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           selectedCount={selectedCount}
           onClear={clearSelection}
           actions={[
+            {
+              label: 'Reassign Doctor',
+              icon: <Stethoscope size={14} />,
+              onClick: () => {
+                const selectedList = (selectedItems.length > 0 ? selectedItems : filteredUsers.filter(u => selectedIds.has(u.id)));
+                setReassignModal({
+                  isOpen: true,
+                  patients: selectedList.map(u => ({
+                    id: u.linkedPatientId || u.id,
+                    name: getUserFullName(u),
+                    physician: u.physician || u.doctorName || 'Direct Desk',
+                  })),
+                });
+              }
+            },
             { label: 'Export CSV', icon: <Archive size={14} />, onClick: handleBulkExportCSV },
             { label: 'Approve', icon: <CheckCircle2 size={14} />, onClick: () => handleBulkAction('approve') },
             { label: 'Revoke', icon: <XCircle size={14} />, onClick: () => handleBulkAction('revoke'), variant: 'danger' },
@@ -1144,6 +1179,16 @@ export default function UsersTable({ initialUsers = null, kpisData = null, isSub
           ]}
         />
       )}
+
+      <ReassignPhysicianModal
+        isOpen={reassignModal.isOpen}
+        onClose={() => setReassignModal({ isOpen: false, patients: [] })}
+        patients={reassignModal.patients}
+        onSuccess={() => {
+          clearSelection();
+          refetch();
+        }}
+      />
 
       {emailPreview && (
         <div id="email-preview-container" className="card" style={{ padding: '2rem', marginTop: '2rem', border: '2px solid var(--primary-light)' }}>

@@ -21,6 +21,8 @@ import { patientRepository } from '../../../repositories/patientRepository';
 import { UniversalForm } from '../../shared/UniversalFormDrawer';
 import notifier from '../../../services/NotificationService';
 import { logger } from '../../../utils/logger';
+import PatientDemographicsCard from './PatientDemographicsCard';
+import ReassignPhysicianModal from './ReassignPhysicianModal';
 
 import EntityLink from '../../ui/EntityLink';
 import ClinicPicker from './ClinicPicker';
@@ -181,6 +183,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
   const [isEditingCareTeam, setIsEditingCareTeam] = useState(false);
   const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
   const [showMobileActions, setShowMobileActions] = useState(false);
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
 
   useEffect(() => {
     if (initialPatient) {
@@ -795,32 +798,14 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                  {/* Left Column: Demographics Form */}
-                  <div className={styles.infoCard}>
-                    <UniversalForm
-                      schema={patientSchema}
-                      initialData={patient}
-                      initialMode="view"
-                      onSubmit={handleUpdatePatient}
-                      submitLabel="Save Changes"
-                      customHeader={
-                        <h3
-                          style={{
-                            fontSize: '0.85rem',
-                            fontWeight: 800,
-                            color: 'var(--text-muted)',
-                            textTransform: 'uppercase',
-                            marginBottom: '1rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                          }}
-                        >
-                          <User size={16} /> Demographics & Identity
-                        </h3>
-                      }
-                    />
-                  </div>
+                  {/* Left Column: Demographics Card with Inline Editing */}
+                  <PatientDemographicsCard
+                    patient={patient}
+                    onPatientUpdated={(updated) => {
+                      setPatient(updated);
+                    }}
+                    onOpenReassignDoctor={() => setIsReassignModalOpen(true)}
+                  />
 
                   {/* Right Column: Portal Link & AI Summary */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1332,6 +1317,15 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
         onClose={() => setIsLabelModalOpen(false)}
         patient={patient}
         prescriptions={clientPrescriptions || []}
+      />
+
+      <ReassignPhysicianModal
+        isOpen={isReassignModalOpen}
+        onClose={() => setIsReassignModalOpen(false)}
+        patients={[patient]}
+        onSuccess={() => {
+          router.refresh();
+        }}
       />
     </div>
   );

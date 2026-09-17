@@ -33,8 +33,9 @@ import BulkActionsBar from '../ui/BulkActionsBar';
 import InlineEditableCell from '../ui/InlineEditableCell';
 import { usePatientActions } from '../../hooks/usePatientActions';
 import { usePatientExport } from '../../hooks/usePatientExport';
-import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign } from '@/lib/icons';
+import { Archive, Trash2, Activity, ShieldCheck, ShieldAlert, Clock, DollarSign, Stethoscope } from '@/lib/icons';
 import EntityLink from '../ui/EntityLink';
+import ReassignPhysicianModal from '../admin/patients/ReassignPhysicianModal';
 
 function capitalizeName(name) {
   if (!name) return name;
@@ -53,6 +54,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [mobileActionPatient, setMobileActionPatient] = useState(null);
+  const [reassignModal, setReassignModal] = useState({ isOpen: false, patients: [] });
 
   const { is, role } = useRoleAccess();
   const isMedicalDirector = (is('medical_director') || role === 'medical_director') && viewMode !== 'doctor';
@@ -212,8 +214,27 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       list = list.filter(p => (p.status || '').toLowerCase() === filters.status.toLowerCase());
     }
 
+    // Filter by physician if selected
+    if (filters.physicianId) {
+      const selectedDoc = (doctors || []).find(d => d.id === filters.physicianId);
+      const docNameClean = cleanStr(selectedDoc?.name || selectedDoc?.displayName || '');
+      list = list.filter(p => {
+        if (filters.physicianId === 'dr-hanieh-erdmann') {
+          const docStr = `${p.doctorName || ''} ${p.physicianName || ''} ${p.prescribingDoctor || ''} ${p.clinicName || ''} ${p.clinic || ''}`.toLowerCase();
+          if (docStr.includes('erdmann') || docStr.includes('bedaya')) return true;
+        }
+        return (
+          p.physicianId === filters.physicianId ||
+          p.assignedDoctorId === filters.physicianId ||
+          p.doctorId === filters.physicianId ||
+          (Array.isArray(p.doctorIds) && p.doctorIds.includes(filters.physicianId)) ||
+          (docNameClean && cleanStr(p.physician || p.doctorName || '').includes(docNameClean))
+        );
+      });
+    }
+
     return list;
-  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status]);
+  }, [algoliaHits, initialData, firestorePatients, effectiveDoctorId, searchTerm, filters.status, filters.physicianId, doctors]);
 
   // Smart Auto-open Patient Detail Drawer if 1 match or openDetail=true
   const autoOpenedRef = React.useRef(false);
@@ -534,6 +555,15 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       }
       bulkActions={[
         {
+          label: 'Reassign Doctor',
+          icon: Stethoscope,
+          onClick: () => {
+            const selectedList = finalFiltered.filter(p => selectedIds.has(p.id));
+            if (selectedList.length === 0) return;
+            setReassignModal({ isOpen: true, patients: selectedList });
+          }
+        },
+        {
           label: 'Create Multi-Rx',
           icon: FileText,
           onClick: () => {
@@ -620,7 +650,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
           render: (row) => (
             <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
               <AppActionGroup
-                maxVisible={2}
+                maxVisible={3}
                 actions={[
                   {
                     type: 'view',
@@ -642,6 +672,14 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                         initialPatient: { id: row.id, name: row.name, email: row.email },
                         sourceModule: 'patients-table',
                       });
+                    }
+                  },
+                  {
+                    label: 'Reassign Doctor',
+                    icon: Stethoscope,
+                    tooltip: 'Reassign Doctor & Clinic',
+                    onClick: () => {
+                      setReassignModal({ isOpen: true, patients: [row] });
                     }
                   }
                 ]}
@@ -690,7 +728,23 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
               router.push(`/${basePanel}/orders/new?patientId=${mobileActionPatient.id}`);
             },
           },
+          {
+            label: 'Reassign Doctor',
+            icon: Stethoscope,
+            onClick: () => {
+              setReassignModal({ isOpen: true, patients: [mobileActionPatient] });
+            },
+          },
         ]}
+      />
+      <ReassignPhysicianModal
+        isOpen={reassignModal.isOpen}
+        onClose={() => setReassignModal({ isOpen: false, patients: [] })}
+        patients={reassignModal.patients}
+        onSuccess={() => {
+          clearSelection();
+          router.refresh();
+        }}
       />
     </DataModule>
   );

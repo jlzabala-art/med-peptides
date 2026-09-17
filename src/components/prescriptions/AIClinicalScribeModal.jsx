@@ -17,6 +17,9 @@ import {
 import notifier from '@/services/NotificationService';
 
 import AIContextBadge from '@/components/ui/AIContextBadge';
+import { useDoctorAiQuota } from '@/hooks/useDoctorAiQuota';
+import DoctorAiQuotaPill from '@/components/doctor/DoctorAiQuotaPill';
+import DoctorAiQuotaExceededModal from '@/components/doctor/DoctorAiQuotaExceededModal';
 
 /**
  * AIClinicalScribeModal
@@ -34,6 +37,9 @@ export default function AIClinicalScribeModal({
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [parsedResult, setParsedResult] = useState(null);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+
+  const quota = useDoctorAiQuota();
 
   if (!isOpen) return null;
 
@@ -43,6 +49,11 @@ export default function AIClinicalScribeModal({
     : 'General Doctor Dictation • Open Consultation';
 
   const handleGenerate = async () => {
+    if (!quota.canUse) {
+      setIsQuotaModalOpen(true);
+      return;
+    }
+
     if (!notes.trim()) {
       notifier.error('Please enter clinical consultation notes or doctor dictation.');
       return;
@@ -54,6 +65,8 @@ export default function AIClinicalScribeModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          doctorId: quota.doctorId,
+          subscriptionTier: quota.tier,
           clinicalNotes: notes,
           patientProfile: patient ? {
             name: patient.name || patient.displayName,
@@ -66,9 +79,15 @@ export default function AIClinicalScribeModal({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to process notes.');
+      if (!res.ok) {
+        if (res.status === 403 && data?.quotaExceeded) {
+          setIsQuotaModalOpen(true);
+        }
+        throw new Error(data.error || 'Failed to process notes.');
+      }
 
       setParsedResult(data.data);
+      await quota.consume();
       notifier.success('Clinical prescription structured successfully with Gemini!');
     } catch (err) {
       console.error('[AIClinicalScribeModal] Error:', err);
@@ -190,29 +209,33 @@ export default function AIClinicalScribeModal({
                   Nootropic Stack
                 </button>
               </div>
-              <button
-                onClick={handleGenerate}
-                disabled={isLoading || !notes.trim()}
-                style={{
-                  backgroundColor: '#0d9488',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  minHeight: '44px',
-                  padding: '0.65rem 1.25rem',
-                  fontSize: '0.86rem',
-                  fontWeight: 700,
-                  cursor: isLoading || !notes.trim() ? 'not-allowed' : 'pointer',
-                  opacity: isLoading || !notes.trim() ? 0.6 : 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  boxShadow: '0 2px 6px rgba(13, 148, 136, 0.2)'
-                }}
-              >
-                <Sparkles size={16} />
-                {isLoading ? 'Structuring Rx with Gemini...' : 'Structure Prescription'}
-              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <DoctorAiQuotaPill quota={quota} onOpenUpgrade={() => setIsQuotaModalOpen(true)} />
+                <button
+                  onClick={handleGenerate}
+                  disabled={isLoading || !notes.trim()}
+                  style={{
+                    backgroundColor: quota.isExceeded ? '#dc2626' : '#0d9488',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    minHeight: '44px',
+                    padding: '0.65rem 1.25rem',
+                    fontSize: '0.86rem',
+                    fontWeight: 700,
+                    cursor: isLoading || !notes.trim() ? 'not-allowed' : 'pointer',
+                    opacity: isLoading || !notes.trim() ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    boxShadow: quota.isExceeded ? '0 2px 6px rgba(220, 38, 38, 0.2)' : '0 2px 6px rgba(13, 148, 136, 0.2)'
+                  }}
+                >
+                  <Sparkles size={16} />
+                  {isLoading ? 'Structuring Rx with Gemini...' : (quota.isExceeded ? 'AI Limit Reached ⚡' : 'Structure Prescription')}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -396,6 +419,13 @@ export default function AIClinicalScribeModal({
           </button>
         </div>
       </div>
+
+      <DoctorAiQuotaExceededModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        doctorId={quota.doctorId}
+        doctorName="Doctor"
+      />
     </div>
   );
 }
