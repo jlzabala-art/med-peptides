@@ -442,7 +442,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'physician',
       header: 'Physician',
-      width: '36%',
+      width: '28%',
       render: (d) => {
         const name = getDoctorName(d);
         const clinicInfo = [d.specialty || 'General', d.clinicName].filter(Boolean).join(' • ');
@@ -465,16 +465,63 @@ export default function AdminPhysiciansTab() {
     {
       key: 'status',
       header: 'Status',
-      width: '14%',
+      width: '12%',
       render: (d) => {
         const statusStr = d.isArchived ? 'archived' : (d.status || 'active');
         return <StatusChip status={statusStr} />;
       }
     },
     {
+      key: 'subscriptionTier',
+      header: 'Plan / Tier',
+      width: '18%',
+      align: 'center',
+      render: (d) => {
+        const isPro = d.subscriptionTier === 'advanced' || d.subscriptionTier === 'pro';
+        return (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={async (e) => {
+                e.stopPropagation();
+                const nextTier = isPro ? 'basic' : 'advanced';
+                try {
+                  await updateDoc(doc(db, 'users', d.id), {
+                    subscriptionTier: nextTier,
+                    planUpdatedAt: new Date()
+                  });
+                  notifier.success(`Doctor ${d.firstName || d.displayName || 'Médico'} actualizado a ${nextTier === 'advanced' ? 'Avanzado Pro 💎' : 'Básico 🟢'}`);
+                  refresh();
+                } catch (err) {
+                  notifier.error('Error al actualizar plan: ' + err.message);
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '0.25rem 0.65rem',
+                borderRadius: '16px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                border: isPro ? '1px solid #99f6e4' : '1px solid #cbd5e1',
+                backgroundColor: isPro ? '#f0fdfa' : '#f8fafc',
+                color: isPro ? '#0f766e' : '#475569',
+                transition: 'all 0.15s ease',
+              }}
+              title="Haz clic para cambiar entre Plan Básico y Avanzado Pro"
+            >
+              {isPro ? '💎 Avanzado Pro' : '🟢 Básico (Free)'}
+            </button>
+          </div>
+        );
+      }
+    },
+    {
       key: 'patients',
       header: 'Patients',
-      width: '15%',
+      width: '12%',
       align: 'center',
       render: (d) => {
         const pts = getPatientsCount(d);
@@ -514,7 +561,7 @@ export default function AdminPhysiciansTab() {
     {
       key: 'prescriptions',
       header: 'Rx Count',
-      width: '15%',
+      width: '12%',
       align: 'center',
       render: (d) => {
         const count = d.prescriptionCount ?? 0;
@@ -555,10 +602,28 @@ export default function AdminPhysiciansTab() {
     {
       key: 'actions',
       header: 'Actions',
-      width: '20%',
+      width: '18%',
       align: 'right',
       render: (d) => {
+        const isPro = d.subscriptionTier === 'advanced' || d.subscriptionTier === 'pro';
         const actions = [
+          {
+            type: 'toggle_plan',
+            label: isPro ? 'Cambiar a Básico 🟢' : 'Promocionar a Avanzado Pro 💎',
+            onClick: async () => {
+              const nextTier = isPro ? 'basic' : 'advanced';
+              try {
+                await updateDoc(doc(db, 'users', d.id), {
+                  subscriptionTier: nextTier,
+                  planUpdatedAt: new Date()
+                });
+                notifier.success(`Doctor actualizado a ${nextTier === 'advanced' ? 'Avanzado Pro' : 'Básico'}`);
+                refresh();
+              } catch (err) {
+                notifier.error('Error al actualizar plan: ' + err.message);
+              }
+            }
+          },
           {
             type: 'view_patients',
             label: 'View Patients',

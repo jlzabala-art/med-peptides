@@ -28,7 +28,8 @@ import {
   FileText,
   Calendar,
   Beaker,
-  Share2
+  Share2,
+  Award
 } from '@/lib/icons';
 
 
@@ -80,6 +81,7 @@ const ALL_TABS = [
   { id: 'shared-info',           label: 'Shared with Me',        icon: Share2,          alwaysOn: true },
   { id: 'messages',              label: 'Messages',              icon: MessageSquare,   alwaysOn: true },
   { id: 'assistants',            label: 'Staff & Assistants',    icon: Users,           perm: 'manageStaff' },
+  { id: 'membership',            label: 'Plan & Suscripción 💎', icon: Award,           alwaysOn: true },
   { id: 'settings',              label: 'Settings',              icon: Settings,        alwaysOn: true },
 ];
 
@@ -102,7 +104,10 @@ export const DR_HANIEH_ERDMANN_PROFILE = {
   patientCount: 1,
   prescriptionCount: 1,
   role: 'doctor',
-  isIndividualDoctor: true
+  isIndividualDoctor: true,
+  subscriptionTier: 'basic',
+  subscriptionStatus: 'active',
+  subscriptionPlanName: 'Clinical Starter',
 };
 
 const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
@@ -130,7 +135,8 @@ const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
   {
     id: 'account', label: 'Doctor Credentials', emoji: '🛡️',
     items: [
-      { id: 'settings', label: 'DHA License & Profile', icon: Settings }
+      { id: 'settings', label: 'DHA License & Profile', icon: Settings },
+      { id: 'membership', label: 'Plan & Suscripción 💎', icon: Award }
     ],
   },
 ];
@@ -172,14 +178,15 @@ const DOCTOR_NAV_GROUPS = [
     id: 'account', label: 'Account', emoji: '⚙️',
     items: [
       { id: 'assistants', label: 'Staff & Assistants', icon: Users },
-      { id: 'settings',   label: 'Settings',           icon: Settings }
+      { id: 'settings',   label: 'Settings',           icon: Settings },
+      { id: 'membership', label: 'Plan & Suscripción 💎', icon: Award }
     ],
   },
 ];
 
-// ── Main ───────────────────────────────────────────────────────────────────────
 import PanelShell from '../components/shell/PanelShell';
 import IndividualDoctorSimulationBanner from '../components/doctor/IndividualDoctorSimulationBanner';
+import DoctorUpgradePlanModal from '../components/doctor/DoctorUpgradePlanModal';
 
 export const DoctorContext = React.createContext({});
 
@@ -189,6 +196,7 @@ export default function DoctorDashboard({ children }) {
   const isAdmin = is('admin');
   const pathname = usePathname();
   const router = useRouter();
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   // Derive active tab from URL (e.g. /doctor/patients -> patients)
   const pathParts = pathname.split('/').filter(Boolean);
   // Default to 'overview' if exactly /doctor
@@ -305,6 +313,11 @@ export default function DoctorDashboard({ children }) {
   const effectiveDoctorId = isSimulatingDrErdmann ? 'dr-hanieh-erdmann' : doctorId;
   const effectiveDoctorMeta = isSimulatingDrErdmann ? DR_HANIEH_ERDMANN_PROFILE : doctorMeta;
 
+  const subscriptionTier = isSimulatingDrErdmann 
+    ? (selectedDoctorProfile?.subscriptionTier || 'basic') 
+    : (activeDoctorProfile?.subscriptionTier || 'basic');
+  const isProDoctor = subscriptionTier === 'advanced' || subscriptionTier === 'pro';
+
   return (
     <PullToRefreshWrapper onRefresh={handleRefresh}>
       <PanelShell 
@@ -317,18 +330,63 @@ export default function DoctorDashboard({ children }) {
         pageContext={{ activeTab }}
       >
 
-
       <div style={{ padding: '1.5rem' }}>
+        {/* Doctor Subscription Tier Status Pill */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '0.85rem' }}>
+          <button
+            type="button"
+            onClick={() => setIsUpgradeModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '0.35rem 0.85rem',
+              borderRadius: '20px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              border: isProDoctor ? '1px solid #99f6e4' : '1px solid #fed7aa',
+              backgroundColor: isProDoctor ? '#f0fdfa' : '#fff7ed',
+              color: isProDoctor ? '#0f766e' : '#c2410c',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              transition: 'transform 0.15s ease',
+            }}
+            title="Haz clic para ver las características de tu suscripción o solicitar Upgrade a Pro"
+          >
+            {isProDoctor ? (
+              <>💎 Plan Avanzado Pro • Activo</>
+            ) : (
+              <>🟢 Plan Básico (Free) • Upgrade a Pro ⚡</>
+            )}
+          </button>
+        </div>
+
         <AdminTabErrorBoundary tabId={activeTab} tabLabel={currentTab?.label || activeTab}>
           <DoctorContext.Provider value={{
             doctorId: effectiveDoctorId,
             doctorMeta: effectiveDoctorMeta,
             isSimulatingDrErdmann,
             isIndividualDoctor: isSimulatingDrErdmann,
+            subscriptionTier,
+            isProDoctor,
+            openUpgradeModal: () => setIsUpgradeModalOpen(true),
             sharedPatients,
             setSharedPatients
           }}>
             {children}
+
+            <DoctorUpgradePlanModal
+              isOpen={isUpgradeModalOpen}
+              onClose={() => setIsUpgradeModalOpen(false)}
+              currentTier={subscriptionTier}
+              doctorName={doctorName}
+              doctorId={effectiveDoctorId}
+              onUpgradeSuccess={() => {
+                if (isSimulatingDrErdmann) {
+                  setSelectedDoctorProfile(prev => ({ ...prev, subscriptionTier: 'advanced' }));
+                }
+              }}
+            />
           </DoctorContext.Provider>
         </AdminTabErrorBoundary>
       </div>

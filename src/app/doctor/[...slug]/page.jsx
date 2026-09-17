@@ -30,6 +30,7 @@ const CatalogCreatorFlow = dynamic(() => import('../../../components/wholesaler/
 const UserProfileTab = dynamic(() => import('../../../components/shared/UserProfileTab'), { ssr: false });
 const AdminCatalogTabClient = dynamic(() => import('../../../components/admin/AdminCatalogTabClient'), { ssr: false });
 const DoctorSharedInfoWidget = dynamic(() => import('../../../components/doctor/DoctorSharedInfoWidget'), { ssr: false });
+const DoctorMembershipTab = dynamic(() => import('../../../components/doctor/DoctorMembershipTab'), { ssr: false });
 
 // ── Bridge wrappers ──────────────────────────────────────────────────────────
 function OverviewWrapper() {
@@ -205,6 +206,10 @@ function SharedInfoWrapper() {
   );
 }
 
+function MembershipWrapper() {
+  return <DoctorMembershipTab />;
+}
+
 // ── Main Dynamic Router ──────────────────────────────────────────────────────
 export default function DynamicRoute({ params }) {
   const resolvedParams = React.use(params);
@@ -214,6 +219,9 @@ export default function DynamicRoute({ params }) {
   switch (path) {
     case '':
     case 'overview': return <OverviewWrapper />;
+    case 'membership':
+    case 'subscription':
+    case 'plans': return <MembershipWrapper />;
     case 'shared':
     case 'shared-info': return <SharedInfoWrapper />;
     case 'catalog':

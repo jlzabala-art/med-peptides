@@ -22,6 +22,8 @@ import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
+import Zap from "lucide-react/dist/esm/icons/zap";
+import Award from "lucide-react/dist/esm/icons/award";
 
 import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActions';
 import { fetchKPIsAction } from '../../actions/kpiActions';
@@ -338,6 +340,88 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
           >
             {t('doctor.overview.complete', 'Review Drafts')} <ArrowRight size={14} />
           </button>
+        </div>
+      )}
+
+      {/* 💎 EVOLUCIONA AL NIVEL AVANZADO PRO BANNER */}
+      {!context.isProDoctor && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%)',
+            border: '1px solid #99f6e4',
+            borderRadius: '14px',
+            padding: '1.15rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1.25rem',
+            flexWrap: 'wrap',
+            boxShadow: '0 2px 8px rgba(13, 148, 136, 0.08)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '280px', flex: 1 }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: '#0d9488', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 10px rgba(13, 148, 136, 0.3)' }}>
+              <Sparkles size={22} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 800, color: '#0f766e', fontSize: '0.95rem' }}>
+                  Nivel Actual: 🟢 Plan Básico (Clinical Starter)
+                </span>
+                <span style={{ fontSize: '0.72rem', background: '#ccfbf1', color: '#042f2e', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>
+                  Dr. Hanieh Erdmann
+                </span>
+              </div>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.4 }}>
+                ¿Deseas evolucionar a <strong>Avanzado Pro</strong>? Desbloquea Atlas AI Scribe ilimitado, guías personalizadas con el logo de tu clínica y recordatorios automáticos de refill por WhatsApp para tus pacientes.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => onNavigate?.('membership')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '9px',
+                border: '1px solid #0d9488',
+                background: '#ffffff',
+                color: '#0f766e',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              <FileText size={15} />
+              <span>Ver Hoja Comparativa</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => context.openUpgradeModal?.()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                borderRadius: '9px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #0d9488 0%, #0284c7 100%)',
+                color: '#ffffff',
+                fontSize: '0.84rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(13, 148, 136, 0.3)'
+              }}
+            >
+              <Zap size={15} />
+              <span>Upgrade a Pro ⚡</span>
+            </button>
+          </div>
         </div>
       )}
 
