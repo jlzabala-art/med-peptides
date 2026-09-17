@@ -1,20 +1,29 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
-import { Briefcase, ArrowRight, Trash2, ChevronUp, ChevronDown, CheckCircle2, Plus } from 'lucide-react';
+import { useRoleAccess } from '../../../hooks/useRoleAccess';
+import { Briefcase, ArrowRight, Trash2, ChevronUp, ChevronDown } from '@/lib/icons';
 
 export default function WorkspaceFloatingDock() {
   const {
     workspaces,
     activeWorkspaceId,
     setActiveWorkspace,
-    createWorkspace,
+    isDrawerOpen,
     setDrawerOpen,
-    clearWorkspaceItems
   } = useWorkspaceStore();
 
+  const { is } = useRoleAccess();
+  const isDoctor = is('doctor') || is('medical_director');
+
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const wsList = Object.values(workspaces || {});
   const activeWs = workspaces[activeWorkspaceId] || wsList[0] || null;
@@ -24,8 +33,10 @@ export default function WorkspaceFloatingDock() {
     0
   );
 
-  // If all workspaces are empty, hide the dock
-  if (!activeWs || totalAllItems === 0) return null;
+  // If SSR, drawer is open, or all workspaces empty: hide dock
+  if (!mounted || typeof document === 'undefined' || isDrawerOpen || !activeWs || totalAllItems === 0) {
+    return null;
+  }
 
   const items = activeWs.items || [];
   const currentTotalAmount = items.reduce((sum, it) => {
@@ -34,23 +45,27 @@ export default function WorkspaceFloatingDock() {
     return sum + (qty * rate);
   }, 0);
 
-  return (
+  const primaryColor = isDoctor ? '#0d9488' : '#003666';
+  const buttonColor = isDoctor ? '#0f766e' : '#2563eb';
+  const accentBorder = isDoctor ? '#99f6e4' : '#93c5fd';
+
+  return createPortal(
     <div
       className="workspace-floating-dock-container"
       style={{
         position: 'fixed',
-        zIndex: 1005,
+        zIndex: 9990,
         backgroundColor: '#ffffff',
         borderRadius: '14px',
-        border: '1.5px solid #93c5fd',
+        border: `1.5px solid ${accentBorder}`,
         boxShadow: '0 12px 30px -4px rgba(0, 54, 102, 0.22), 0 8px 12px -6px rgba(0, 0, 0, 0.12)',
         overflow: 'hidden',
-        animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+        animation: 'slideUpDock 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         fontFamily: 'system-ui, -apple-system, sans-serif',
       }}
     >
       <style>{`
-        @keyframes slideUp {
+        @keyframes slideUpDock {
           from { transform: translateY(100%); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
@@ -62,7 +77,7 @@ export default function WorkspaceFloatingDock() {
         }
         @media (max-width: 768px) {
           .workspace-floating-dock-container {
-            bottom: calc(64px + env(safe-area-inset-bottom, 10px)) !important;
+            bottom: calc(68px + env(safe-area-inset-bottom, 10px)) !important;
             left: 12px !important;
             right: 12px !important;
             width: auto !important;
@@ -77,7 +92,7 @@ export default function WorkspaceFloatingDock() {
         <div
           style={{
             padding: '6px 12px',
-            backgroundColor: '#00284d',
+            backgroundColor: isDoctor ? '#042f2e' : '#00284d',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
@@ -100,7 +115,7 @@ export default function WorkspaceFloatingDock() {
                   padding: '2px 8px',
                   borderRadius: '4px',
                   border: 'none',
-                  backgroundColor: isActive ? '#003666' : 'rgba(255,255,255,0.1)',
+                  backgroundColor: isActive ? primaryColor : 'rgba(255,255,255,0.1)',
                   color: isActive ? '#ffffff' : '#cbd5e1',
                   fontSize: '0.72rem',
                   fontWeight: isActive ? 700 : 500,
@@ -123,7 +138,7 @@ export default function WorkspaceFloatingDock() {
       <div
         style={{
           padding: '10px 14px',
-          backgroundColor: '#003666',
+          backgroundColor: primaryColor,
           color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
@@ -152,8 +167,10 @@ export default function WorkspaceFloatingDock() {
             <div style={{ fontSize: '0.85rem', fontWeight: 800, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
               {activeWs.name} ({items.length} {items.length === 1 ? 'item' : 'items'})
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#93c5fd' }}>
-              {activeWs.intent === 'buy' ? '🏭 Buy Operation' : '💼 Sell Operation'} • ${currentTotalAmount.toLocaleString()} USD
+            <div style={{ fontSize: '0.7rem', color: isDoctor ? '#ccfbf1' : '#93c5fd' }}>
+              {isDoctor
+                ? '🩺 Clinical Staging'
+                : (activeWs.intent === 'buy' ? '🏭 Buy Operation' : '💼 Sell Operation')} • ${currentTotalAmount.toLocaleString()} USD
             </div>
           </div>
         </div>
@@ -168,7 +185,7 @@ export default function WorkspaceFloatingDock() {
             style={{
               padding: '7px 12px',
               minHeight: '36px',
-              backgroundColor: '#2563eb',
+              backgroundColor: buttonColor,
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -179,12 +196,12 @@ export default function WorkspaceFloatingDock() {
               alignItems: 'center',
               gap: '4px',
               touchAction: 'manipulation',
-              boxShadow: '0 2px 6px rgba(37, 99, 235, 0.3)'
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)'
             }}
           >
             Manage <ArrowRight size={13} />
           </button>
-          <div style={{ color: '#93c5fd', display: 'flex', alignItems: 'center' }}>
+          <div style={{ color: isDoctor ? '#ccfbf1' : '#93c5fd', display: 'flex', alignItems: 'center' }}>
             {isExpanded ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
           </div>
         </div>
@@ -221,6 +238,7 @@ export default function WorkspaceFloatingDock() {
           ))}
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

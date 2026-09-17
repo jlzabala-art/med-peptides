@@ -20,6 +20,7 @@ export default function WorkspaceShippingAccordion({
   onToggleExpand,
   activeWs,
   onUpdateShipping,
+  stepperMode = false,
 }) {
   const selectedMethod = activeWs?.shippingMethod || 'cold_chain';
   const shippingAddress = activeWs?.shippingAddress || '';
@@ -30,43 +31,56 @@ export default function WorkspaceShippingAccordion({
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+        backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+        border: stepperMode ? 'none' : '1px solid #cbd5e1',
+        borderRadius: stepperMode ? '0' : '12px',
+        overflow: stepperMode ? 'visible' : 'hidden',
+        boxShadow: stepperMode ? 'none' : '0 2px 6px rgba(0,0,0,0.02)',
         transition: 'all 0.2s ease',
+        flex: stepperMode ? 1 : 'none',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Header */}
-      <div
-        onClick={onToggleExpand}
-        style={{
-          padding: '0.85rem 1.1rem',
-          backgroundColor: '#ffffff',
-          borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          userSelect: 'none',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isExpanded ? <ChevronDown size={18} style={{ color: '#003666' }} /> : <ChevronRight size={18} style={{ color: '#64748b' }} />}
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Truck size={17} /> Cold-Chain & Logistics
+      {/* Header (Hidden in Stepper Mode) */}
+      {!stepperMode && (
+        <div
+          onClick={onToggleExpand}
+          style={{
+            padding: '0.85rem 1.1rem',
+            backgroundColor: '#ffffff',
+            borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+            {isExpanded ? <ChevronDown size={18} style={{ color: '#003666', flexShrink: 0 }} /> : <ChevronRight size={18} style={{ color: '#64748b', flexShrink: 0 }} />}
+            <Truck size={17} style={{ flexShrink: 0, color: '#003666' }} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#003666', lineHeight: 1 }}>
+              Cold-Chain & Logistics
+            </span>
+          </div>
+
+          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0284c7', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: '3px 8px', borderRadius: '99px' }}>
+            {activeOpt.icon} {activeOpt.cost === 0 ? 'Free' : `$${activeOpt.cost}`}
           </span>
         </div>
-
-        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0284c7', backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', padding: '3px 8px', borderRadius: '99px' }}>
-          {activeOpt.icon} {activeOpt.cost === 0 ? 'Free' : `$${activeOpt.cost}`}
-        </span>
-      </div>
+      )}
 
       {/* Body Content */}
-      {isExpanded && (
-        <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#ffffff' }}>
+      {(isExpanded || stepperMode) && (
+        <div style={{
+          padding: stepperMode ? '0.25rem 0' : '0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+          flex: stepperMode ? 1 : 'none',
+        }}>
           {/* Shipping Option Pills */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {SHIPPING_OPTIONS.map(opt => {

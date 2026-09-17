@@ -37,6 +37,11 @@ const WorkspaceDrawer = dynamic(
   { ssr: false }
 );
 
+const WorkspaceFloatingDock = dynamic(
+  () => import('./workspaces/WorkspaceFloatingDock'),
+  { ssr: false }
+);
+
 const ProductDatasheetDrawer = dynamic(
   () => import('../admin/catalog/components/ProductDatasheetDrawer'),
   { ssr: false }
@@ -404,6 +409,7 @@ export default function GlobalDrawerManager() {
       <QuotationBuilderWizard />
       <QuotationDetailDrawer />
       <WorkspaceDrawer />
+      <WorkspaceFloatingDock />
       {isScribeOpen && (
         <AIClinicalScribeModal 
           isOpen={isScribeOpen} 

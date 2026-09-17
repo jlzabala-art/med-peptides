@@ -44,6 +44,7 @@ export default function WorkspaceProductsAccordion({
   onSearchCatalogFast,
   isDoctor = false,
   onAddClinicalRegimen,
+  stepperMode = false,
 }) {
   const [expandedItemIds, setExpandedItemIds] = useState({});
   const [activePicker, setActivePicker] = useState(null); // 'products' | 'protocols' | 'kits' | null
@@ -484,62 +485,76 @@ export default function WorkspaceProductsAccordion({
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+        backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+        border: stepperMode ? 'none' : '1px solid #cbd5e1',
+        borderRadius: stepperMode ? '0' : '12px',
+        overflow: stepperMode ? 'visible' : 'hidden',
+        boxShadow: stepperMode ? 'none' : '0 2px 6px rgba(0,0,0,0.02)',
         transition: 'all 0.2s ease',
+        flex: stepperMode ? 1 : 'none',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Accordion Header Bar */}
-      <div
-        onClick={onToggleExpand}
-        style={{
-          padding: '0.85rem 1.1rem',
-          backgroundColor: '#ffffff',
-          borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          userSelect: 'none',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isExpanded ? <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666' }} /> : <ChevronRight size={18} style={{ color: '#64748b' }} />}
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0d9488' : '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Package size={17} /> Staged Products
-          </span>
-          <span
-            style={{
-              fontSize: '0.72rem',
-              padding: '2px 8px',
-              borderRadius: '99px',
-              backgroundColor: items.length > 0 ? (isDoctor ? '#0d9488' : '#003666') : '#e2e8f0',
-              color: items.length > 0 ? '#ffffff' : '#475569',
-              fontWeight: 800,
-            }}
-          >
-            {items.length}
-          </span>
-          {items.length >= 10 && (
-            <span style={{ fontSize: '0.68rem', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 6px', borderRadius: '4px', fontWeight: 800 }}>
-              High-Volume
+      {/* Accordion Header Bar (Hidden in Stepper Mode) */}
+      {!stepperMode && (
+        <div
+          onClick={onToggleExpand}
+          style={{
+            padding: '0.85rem 1.1rem',
+            backgroundColor: '#ffffff',
+            borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+            {isExpanded ? <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666', flexShrink: 0 }} /> : <ChevronRight size={18} style={{ color: '#64748b', flexShrink: 0 }} />}
+            <Package size={17} style={{ flexShrink: 0, color: isDoctor ? '#0d9488' : '#003666' }} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0d9488' : '#003666', lineHeight: 1 }}>
+              Staged Products
+            </span>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                padding: '2px 8px',
+                borderRadius: '99px',
+                backgroundColor: items.length > 0 ? (isDoctor ? '#0d9488' : '#003666') : '#e2e8f0',
+                color: items.length > 0 ? '#ffffff' : '#475569',
+                fontWeight: 800,
+                lineHeight: 1.4,
+              }}
+            >
+              {items.length}
+            </span>
+            {items.length >= 10 && (
+              <span style={{ fontSize: '0.68rem', backgroundColor: '#fef3c7', color: '#b45309', padding: '1px 6px', borderRadius: '4px', fontWeight: 800, lineHeight: 1.4 }}>
+                High-Volume
+              </span>
+            )}
+          </div>
+
+          {items.length > 0 && (
+            <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
+              ${subtotalSaleAmount.toFixed(2)}
             </span>
           )}
         </div>
-
-        {items.length > 0 && (
-          <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#0f172a' }}>
-            ${subtotalSaleAmount.toFixed(2)}
-          </span>
-        )}
-      </div>
+      )}
 
       {/* Accordion Body Content */}
-      {isExpanded && (
-        <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#f8fafc' }}>
+      {(isExpanded || stepperMode) && (
+        <div style={{
+          padding: stepperMode ? '0.25rem 0' : '0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          backgroundColor: stepperMode ? 'transparent' : '#f8fafc',
+          flex: stepperMode ? 1 : 'none',
+        }}>
           {items.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {/* Doctor 1-Tap Clinical Regimens */}

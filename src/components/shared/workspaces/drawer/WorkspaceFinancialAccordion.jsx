@@ -23,53 +23,67 @@ export default function WorkspaceFinancialAccordion({
   marginPercent,
   onSetDiscountPercent,
   isDoctor = false,
+  stepperMode = false,
 }) {
   const isBuy = activeWs?.intent === 'buy';
 
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
-        border: `1px solid ${isDoctor ? '#99f6e4' : '#cbd5e1'}`,
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+        backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+        border: stepperMode ? 'none' : `1px solid ${isDoctor ? '#99f6e4' : '#cbd5e1'}`,
+        borderRadius: stepperMode ? '0' : '12px',
+        overflow: stepperMode ? 'visible' : 'hidden',
+        boxShadow: stepperMode ? 'none' : '0 2px 6px rgba(0,0,0,0.02)',
         transition: 'all 0.2s ease',
+        flex: stepperMode ? 1 : 'none',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Header */}
-      <div
-        onClick={onToggleExpand}
-        style={{
-          padding: '0.85rem 1.1rem',
-          backgroundColor: '#ffffff',
-          borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          userSelect: 'none',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isExpanded ? (
-            <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666' }} />
-          ) : (
-            <ChevronRight size={18} style={{ color: '#64748b' }} />
-          )}
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <DollarSign size={17} /> {isDoctor ? 'Prescription Total (Clinic Price)' : 'Commercial Financials & Margins'}
+      {/* Header (Hidden in Stepper Mode) */}
+      {!stepperMode && (
+        <div
+          onClick={onToggleExpand}
+          style={{
+            padding: '0.85rem 1.1rem',
+            backgroundColor: '#ffffff',
+            borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+            {isExpanded ? (
+              <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666', flexShrink: 0 }} />
+            ) : (
+              <ChevronRight size={18} style={{ color: '#64748b', flexShrink: 0 }} />
+            )}
+            <DollarSign size={17} style={{ flexShrink: 0, color: isDoctor ? '#0f766e' : '#003666' }} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', lineHeight: 1 }}>
+              {isDoctor ? 'Prescription Total (Clinic Price)' : 'Commercial Financials & Margins'}
+            </span>
+          </div>
+
+          <span style={{ fontSize: '0.94rem', fontWeight: 900, color: isDoctor ? '#0f766e' : '#003666' }}>
+            ${grandTotal.toFixed(2)}
           </span>
         </div>
-
-        <span style={{ fontSize: '0.94rem', fontWeight: 900, color: isDoctor ? '#0f766e' : '#003666' }}>
-          ${grandTotal.toFixed(2)}
-        </span>
-      </div>
+      )}
 
       {/* Body Content */}
-      {isExpanded && (
-        <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#ffffff' }}>
+      {(isExpanded || stepperMode) && (
+        <div style={{
+          padding: stepperMode ? '0.25rem 0' : '0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+          flex: stepperMode ? 1 : 'none',
+        }}>
           {/* Detailed Financial Breakdown */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem', color: '#475569' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>

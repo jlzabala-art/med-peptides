@@ -21,6 +21,7 @@ export default function WorkspaceRecipientAccordion({
   onSetTargetEntity,
   onSetSelectedTargetType,
   isDoctor = false,
+  stepperMode = false,
 }) {
   const selectedTargetType = isDoctor ? 'patient' : (activeWs?.selectedTargetType || 'clinic');
   const targetEntity = activeWs?.targetEntity || null;
@@ -60,63 +61,76 @@ export default function WorkspaceRecipientAccordion({
   return (
     <div
       style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #cbd5e1',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+        backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+        border: stepperMode ? 'none' : '1px solid #cbd5e1',
+        borderRadius: stepperMode ? '0' : '12px',
+        overflow: stepperMode ? 'visible' : 'hidden',
+        boxShadow: stepperMode ? 'none' : '0 2px 6px rgba(0,0,0,0.02)',
         transition: 'all 0.2s ease',
+        flex: stepperMode ? 1 : 'none',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      {/* Header */}
-      <div
-        onClick={onToggleExpand}
-        style={{
-          padding: '0.85rem 1.1rem',
-          backgroundColor: '#ffffff',
-          borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          userSelect: 'none',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isExpanded ? (
-            <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666' }} />
-          ) : (
-            <ChevronRight size={18} style={{ color: '#64748b' }} />
-          )}
-          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Users size={17} /> {isDoctor ? 'Target Patient' : 'Operational Routing & Recipient'}
-          </span>
-        </div>
+      {/* Header (Hidden in Stepper Mode) */}
+      {!stepperMode && (
+        <div
+          onClick={onToggleExpand}
+          style={{
+            padding: '0.85rem 1.1rem',
+            backgroundColor: '#ffffff',
+            borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+            {isExpanded ? (
+              <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666', flexShrink: 0 }} />
+            ) : (
+              <ChevronRight size={18} style={{ color: '#64748b', flexShrink: 0 }} />
+            )}
+            <Users size={17} style={{ flexShrink: 0, color: isDoctor ? '#0f766e' : '#003666' }} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', lineHeight: 1 }}>
+              {isDoctor ? 'Target Patient' : 'Operational Routing & Recipient'}
+            </span>
+          </div>
 
-        {targetEntity ? (
-          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#16a34a', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: '99px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            ✓ {targetEntity.name}
-          </span>
-        ) : (
-          <span
-            style={{
-              fontSize: '0.74rem',
-              fontWeight: 800,
-              color: '#d97706',
-              backgroundColor: '#fffbeb',
-              border: '1px solid #fde68a',
-              padding: '3px 8px',
-              borderRadius: '99px',
-            }}
-          >
-            + Assign {isDoctor ? 'Patient' : ''}
-          </span>
-        )}
-      </div>
+          {targetEntity ? (
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#16a34a', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: '99px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              ✓ {targetEntity.name}
+            </span>
+          ) : (
+            <span
+              style={{
+                fontSize: '0.74rem',
+                fontWeight: 800,
+                color: '#d97706',
+                backgroundColor: '#fffbeb',
+                border: '1px solid #fde68a',
+                padding: '3px 8px',
+                borderRadius: '99px',
+              }}
+            >
+              + Assign {isDoctor ? 'Patient' : ''}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Body Content */}
-      {isExpanded && (
-        <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#ffffff' }}>
+      {(isExpanded || stepperMode) && (
+        <div style={{
+          padding: stepperMode ? '0.25rem 0' : '0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          backgroundColor: stepperMode ? 'transparent' : '#ffffff',
+          flex: stepperMode ? 1 : 'none',
+        }}>
           {/* Intent Toggle (Only in Admin/Commercial mode) */}
           {!isDoctor && (
             <div style={{ display: 'flex', gap: '6px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '9px' }}>

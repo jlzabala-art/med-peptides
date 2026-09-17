@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useWorkspaceStore, useShallow } from '../../../stores/useWorkspaceStore';
 import { useDrawer } from '../../../context/DrawerContext';
@@ -11,7 +11,10 @@ import {
   Tag,
   Layers,
   Sparkles,
-  Stethoscope
+  Stethoscope,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight
 } from '@/lib/icons';
 import notifier from '../../../services/NotificationService';
 import { searchCatalogFast } from '../../../repositories/workspaceSearchRepository';
@@ -22,6 +25,8 @@ import PatientLabelSheetModal from '../../admin/prescriptions/PatientLabelSheetM
 // Modular Subcomponents
 import SaveKitModal from './drawer/SaveKitModal';
 import WorkspaceDrawerHeader from './drawer/WorkspaceDrawerHeader';
+import WorkspaceStepperBar from './drawer/WorkspaceStepperBar';
+import WorkspaceMiniSummaryStrip from './drawer/WorkspaceMiniSummaryStrip';
 import WorkspaceProductsAccordion from './drawer/WorkspaceProductsAccordion';
 import WorkspaceRecipientAccordion from './drawer/WorkspaceRecipientAccordion';
 import WorkspaceShippingAccordion from './drawer/WorkspaceShippingAccordion';
@@ -92,13 +97,8 @@ export default function WorkspaceDrawer() {
   const { openDrawer } = useDrawer();
   const [mounted, setMounted] = useState(false);
 
-  // Accordion Section Expansion States: Products ALWAYS expanded by default
-  const [sectionExpanded, setSectionExpanded] = useState({
-    products: true,
-    recipient: false,
-    shipping: false,
-    financial: false
-  });
+  // Stepper State: 0=Products, 1=Recipient, 2=Logistics (Admin), 3=Review
+  const [activeStep, setActiveStep] = useState(0);
 
   const [isSaveKitModalOpen, setIsSaveKitModalOpen] = useState(false);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
@@ -152,6 +152,39 @@ export default function WorkspaceDrawer() {
   const shippingAddress = activeWs?.shippingAddress || '';
   const shippingNotes = activeWs?.shippingNotes || '';
   const discountPercent = activeWs?.discountPercent || 0;
+
+  const steps = useMemo(() => {
+    if (isDoctor) {
+      return [
+        { key: 'products', label: 'Products', isComplete: items.length > 0 },
+        { key: 'recipient', label: 'Patient', isComplete: !!activeWs?.targetEntity },
+        { key: 'review', label: 'Review & Prescribe', isComplete: items.length > 0 && !!activeWs?.targetEntity },
+      ];
+    }
+    return [
+      { key: 'products', label: 'Products', isComplete: items.length > 0 },
+      { key: 'recipient', label: 'Recipient', isComplete: !!activeWs?.targetEntity },
+      { key: 'shipping', label: 'Logistics', isComplete: true },
+      { key: 'review', label: 'Review & Margins', isComplete: items.length > 0 && !!activeWs?.targetEntity },
+    ];
+  }, [isDoctor, items.length, activeWs?.targetEntity]);
+
+  const safeActiveStep = Math.min(activeStep, steps.length - 1);
+
+  // Keyboard shortcut navigation (Left / Right Arrow)
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    const handleKeyNav = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName)) return;
+      if (e.key === 'ArrowRight') {
+        setActiveStep((s) => Math.min(steps.length - 1, s + 1));
+      } else if (e.key === 'ArrowLeft') {
+        setActiveStep((s) => Math.max(0, s - 1));
+      }
+    };
+    window.addEventListener('keydown', handleKeyNav);
+    return () => window.removeEventListener('keydown', handleKeyNav);
+  }, [isDrawerOpen, steps.length]);
 
   const getItemUnitPrice = (it) => {
     if (it.customPrice != null && !isDoctor) return Number(it.customPrice);
@@ -378,117 +411,100 @@ export default function WorkspaceDrawer() {
           onToggleWideDrawer={toggleWideDrawer}
         />
 
-        {/* GCP 3-Stage Readiness Stepper */}
-        <div
-          style={{
-            padding: '7px 14px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #e2e8f0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            flexShrink: 0,
-          }}
-        >
-          {/* Step 1: Compounds */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: items.length > 0 ? '#16a34a' : '#d97706' }}>
-            <span style={{ width: '17px', height: '17px', borderRadius: '50%', backgroundColor: items.length > 0 ? '#dcfce7' : '#fef3c7', color: items.length > 0 ? '#15803d' : '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
-              {items.length > 0 ? '✓' : '1'}
-            </span>
-            <span>{items.length} {items.length === 1 ? 'Compound' : 'Compounds'}</span>
-          </div>
+        {/* Interactive Stepper Navigation Bar */}
+        <WorkspaceStepperBar
+          steps={steps}
+          activeStep={safeActiveStep}
+          onGoToStep={setActiveStep}
+        />
 
-          <span style={{ color: '#cbd5e1' }}>➔</span>
-
-          {/* Step 2: Recipient */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: activeWs?.targetEntity ? '#16a34a' : '#64748b' }}>
-            <span style={{ width: '17px', height: '17px', borderRadius: '50%', backgroundColor: activeWs?.targetEntity ? '#dcfce7' : '#f1f5f9', color: activeWs?.targetEntity ? '#15803d' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
-              {activeWs?.targetEntity ? '✓' : '2'}
-            </span>
-            <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {activeWs?.targetEntity?.name ? activeWs.targetEntity.name : 'Select Recipient'}
-            </span>
-          </div>
-
-          <span style={{ color: '#cbd5e1' }}>➔</span>
-
-          {/* Step 3: Action Ready */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: items.length > 0 ? '#0284c7' : '#94a3b8' }}>
-            <span style={{ width: '17px', height: '17px', borderRadius: '50%', backgroundColor: items.length > 0 ? '#e0f2fe' : '#f1f5f9', color: items.length > 0 ? '#0284c7' : '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
-              3
-            </span>
-            <span>{isDoctor ? 'Ready to Prescribe' : 'Ready to Submit'}</span>
-          </div>
-        </div>
-
-        {/* Scrollable Body: Accordion Sections */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {/* Section 1: Staged Products */}
-          <WorkspaceProductsAccordion
-            isExpanded={sectionExpanded.products}
-            onToggleExpand={() => toggleSection('products')}
-            items={items}
-            activeWs={activeWs}
-            subtotalSaleAmount={subtotalSaleAmount}
-            getItemUnitPrice={getItemUnitPrice}
-            onUpdateItemQuantity={(itemId, qty) => updateItemQuantity(itemId, qty, activeWs.id)}
-            onUpdateItemPrice={(itemId, price) => updateItemPrice(itemId, price, activeWs.id)}
-            onUpdateItemFormat={(itemId, format) => updateItemFormat(itemId, format, activeWs.id)}
-            onRemoveItem={(itemId) => removeItem(itemId, activeWs.id)}
-            onAddBacteriostaticWater={() => addReconstitutionBacteriostaticWater(activeWs.id)}
-            protocols={protocols}
-            availableProducts={availableProducts}
-            savedKits={savedKits}
-            onLoadProtocol={handleLoadProtocol}
-            onAddProduct={handleAddProduct}
-            onLoadKit={(kitId) => loadKitIntoWorkspace(kitId, activeWs.id)}
-            onDeleteKit={deleteSavedKit}
-            searchingCatalog={searchingCatalog}
-            isDoctor={isDoctor}
-            onAddClinicalRegimen={handleAddClinicalRegimen}
-          />
-
-          {/* Section 2: Recipient & Operational Intent */}
-          <WorkspaceRecipientAccordion
-            isExpanded={sectionExpanded.recipient}
-            onToggleExpand={() => toggleSection('recipient')}
-            activeWs={activeWs}
-            onSetIntent={(intent) => setWorkspaceIntent(intent, activeWs.id)}
-            onSetTargetEntity={(ent) => setTargetEntity(ent, activeWs.id)}
-            onSetSelectedTargetType={(type) => setSelectedTargetType(type, activeWs.id)}
-            isDoctor={isDoctor}
-          />
-
-          {/* Section 3: Cold-Chain & Shipping Logistics (Only in commercial mode or if expanded) */}
-          {!isDoctor && (
-            <WorkspaceShippingAccordion
-              isExpanded={sectionExpanded.shipping}
-              onToggleExpand={() => toggleSection('shipping')}
+        {/* Step Views Container: 100% full height for the active step */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column' }}>
+          {/* Step 0: Staged Products */}
+          <div style={{ display: safeActiveStep === 0 ? 'flex' : 'none', flexDirection: 'column', flex: 1 }}>
+            <WorkspaceProductsAccordion
+              stepperMode={true}
+              isExpanded={true}
+              onToggleExpand={() => {}}
+              items={items}
               activeWs={activeWs}
-              onUpdateShipping={(details) => setShippingDetails(details, activeWs.id)}
+              subtotalSaleAmount={subtotalSaleAmount}
+              getItemUnitPrice={getItemUnitPrice}
+              onUpdateItemQuantity={(itemId, qty) => updateItemQuantity(itemId, qty, activeWs.id)}
+              onUpdateItemPrice={(itemId, price) => updateItemPrice(itemId, price, activeWs.id)}
+              onUpdateItemFormat={(itemId, format) => updateItemFormat(itemId, format, activeWs.id)}
+              onRemoveItem={(itemId) => removeItem(itemId, activeWs.id)}
+              onAddBacteriostaticWater={() => addReconstitutionBacteriostaticWater(activeWs.id)}
+              protocols={protocols}
+              availableProducts={availableProducts}
+              savedKits={savedKits}
+              onLoadProtocol={handleLoadProtocol}
+              onAddProduct={handleAddProduct}
+              onLoadKit={(kitId) => loadKitIntoWorkspace(kitId, activeWs.id)}
+              onDeleteKit={deleteSavedKit}
+              searchingCatalog={searchingCatalog}
+              isDoctor={isDoctor}
+              onAddClinicalRegimen={handleAddClinicalRegimen}
             />
+          </div>
+
+          {/* Step 1: Recipient & Routing */}
+          <div style={{ display: safeActiveStep === 1 ? 'flex' : 'none', flexDirection: 'column', flex: 1 }}>
+            <WorkspaceRecipientAccordion
+              stepperMode={true}
+              isExpanded={true}
+              onToggleExpand={() => {}}
+              activeWs={activeWs}
+              onSetIntent={(intent) => setWorkspaceIntent(intent, activeWs.id)}
+              onSetTargetEntity={(ent) => setTargetEntity(ent, activeWs.id)}
+              onSetSelectedTargetType={(type) => setSelectedTargetType(type, activeWs.id)}
+              isDoctor={isDoctor}
+            />
+          </div>
+
+          {/* Step 2 (Admin): Logistics */}
+          {!isDoctor && (
+            <div style={{ display: safeActiveStep === 2 ? 'flex' : 'none', flexDirection: 'column', flex: 1 }}>
+              <WorkspaceShippingAccordion
+                stepperMode={true}
+                isExpanded={true}
+                onToggleExpand={() => {}}
+                activeWs={activeWs}
+                onUpdateShipping={(details) => setShippingDetails(details, activeWs.id)}
+              />
+            </div>
           )}
 
-          {/* Section 4: Commercial Financials & Margins */}
-          <WorkspaceFinancialAccordion
-            isExpanded={sectionExpanded.financial}
-            onToggleExpand={() => toggleSection('financial')}
-            activeWs={activeWs}
-            subtotalSaleAmount={subtotalSaleAmount}
-            totalSupplierCost={totalSupplierCost}
-            shippingCost={shippingCost}
-            discountPercent={discountPercent}
-            discountAmount={discountAmount}
-            grandTotal={grandTotal}
-            grossMarginAmount={grossMarginAmount}
-            marginPercent={marginPercent}
-            onSetDiscountPercent={(pct) => setDiscountPercent(pct, activeWs.id)}
-            isDoctor={isDoctor}
-          />
+          {/* Step 2 (Doctor) or Step 3 (Admin): Review & Financials */}
+          <div style={{ display: safeActiveStep === (isDoctor ? 2 : 3) ? 'flex' : 'none', flexDirection: 'column', flex: 1 }}>
+            <WorkspaceFinancialAccordion
+              stepperMode={true}
+              isExpanded={true}
+              onToggleExpand={() => {}}
+              activeWs={activeWs}
+              subtotalSaleAmount={subtotalSaleAmount}
+              totalSupplierCost={totalSupplierCost}
+              shippingCost={shippingCost}
+              discountPercent={discountPercent}
+              discountAmount={discountAmount}
+              grandTotal={grandTotal}
+              grossMarginAmount={grossMarginAmount}
+              marginPercent={marginPercent}
+              onSetDiscountPercent={(pct) => setDiscountPercent(pct, activeWs.id)}
+              isDoctor={isDoctor}
+            />
+          </div>
         </div>
+
+        {/* Always-visible Mini-Summary Strip */}
+        <WorkspaceMiniSummaryStrip
+          itemsCount={items.length}
+          activeWs={activeWs}
+          grandTotal={grandTotal}
+          isDoctor={isDoctor}
+          activeStep={safeActiveStep}
+          onGoToStep={setActiveStep}
+        />
 
         {/* Sticky Footer Action Bar with iOS Safe-Area Padding */}
         <div
@@ -524,169 +540,244 @@ export default function WorkspaceDrawer() {
             >
               <span>💡 Add compounds above to unlock actions</span>
             </div>
-          ) : isDoctor ? (
-            /* ── Doctor Actions (Clinical Focus: Prescribing & Protocols Only - NO LABELS) ── */
-            <>
-              <button
-                type="button"
-                onClick={handleExecutePrescription}
-                style={{
-                  width: '100%',
-                  minHeight: '46px',
-                  padding: '12px',
-                  backgroundColor: '#0d9488',
-                  color: 'white',
-                  borderRadius: '10px',
-                  border: 'none',
-                  fontSize: '0.92rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 8px rgba(13, 148, 136, 0.25)',
-                  touchAction: 'manipulation',
-                }}
-              >
-                <ShieldCheck size={18} /> Prescribe All in Rx Builder (${grandTotal.toFixed(2)})
-              </button>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={handleSaveAsProtocol}
-                  disabled={isSavingProtocol}
-                  style={{
-                    minHeight: '40px',
-                    padding: '8px 10px',
-                    backgroundColor: isSavingProtocol ? '#f1f5f9' : '#eff6ff',
-                    color: isSavingProtocol ? '#94a3b8' : '#1d4ed8',
-                    borderRadius: '8px',
-                    border: '1.5px solid #bfdbfe',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: isSavingProtocol ? 'not-allowed' : 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    touchAction: 'manipulation',
-                  }}
-                  title="Save staged compounds as a new clinical protocol"
-                >
-                  <Layers size={15} /> {isSavingProtocol ? 'Saving Protocol...' : 'Save as Protocol'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowPdfPreview(true)}
-                  style={{
-                    minHeight: '40px',
-                    padding: '8px 10px',
-                    backgroundColor: '#f8fafc',
-                    color: '#475569',
-                    borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    touchAction: 'manipulation',
-                  }}
-                >
-                  <FileText size={15} /> Clinical Summary
-                </button>
-              </div>
-            </>
           ) : (
-            /* ── Admin / Commercial Actions ── */
             <>
-              {activeWs.intent === 'buy' ? (
-                <button
-                  type="button"
-                  onClick={handleExecutePO}
-                  style={{
-                    width: '100%',
-                    minHeight: '46px',
-                    padding: '12px',
-                    backgroundColor: '#c2410c',
-                    color: 'white',
-                    borderRadius: '10px',
-                    border: 'none',
-                    fontSize: '0.92rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 2px 8px rgba(194, 65, 12, 0.25)',
-                    touchAction: 'manipulation',
-                  }}
-                >
-                  <Truck size={17} /> Generate Purchase Order (${grandTotal.toFixed(2)})
-                </button>
-              ) : (
-                <>
+              {/* Stepper Navigation Controls (When not on the final step) */}
+              {safeActiveStep < steps.length - 1 ? (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <button
                     type="button"
-                    onClick={handleExecuteQuotation}
+                    onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
+                    disabled={safeActiveStep === 0}
                     style={{
-                      width: '100%',
-                      minHeight: '46px',
-                      padding: '12px',
-                      backgroundColor: '#003666',
-                      color: 'white',
-                      borderRadius: '10px',
+                      padding: '10px 14px',
+                      minHeight: '44px',
+                      backgroundColor: safeActiveStep === 0 ? '#f1f5f9' : '#ffffff',
+                      color: safeActiveStep === 0 ? '#cbd5e1' : '#475569',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      cursor: safeActiveStep === 0 ? 'not-allowed' : 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      touchAction: 'manipulation',
+                    }}
+                  >
+                    <ChevronLeft size={16} /> Back
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveStep((prev) => Math.min(steps.length - 1, prev + 1))}
+                    style={{
+                      flex: 1,
+                      padding: '10px 14px',
+                      minHeight: '44px',
+                      backgroundColor: isDoctor ? '#0d9488' : '#003666',
+                      color: '#ffffff',
+                      borderRadius: '8px',
                       border: 'none',
-                      fontSize: '0.92rem',
+                      fontSize: '0.88rem',
                       fontWeight: 800,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)',
+                      gap: '6px',
+                      boxShadow: isDoctor ? '0 2px 8px rgba(13, 148, 136, 0.25)' : '0 2px 8px rgba(0, 54, 102, 0.25)',
                       touchAction: 'manipulation',
                     }}
                   >
-                    <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
+                    Next: {steps[safeActiveStep + 1]?.label} <ChevronRight size={16} />
                   </button>
-                  <div style={{ display: 'grid', gridTemplateColumns: isDoctor ? '1fr' : '1fr 1fr', gap: '8px' }}>
+                </div>
+              ) : (
+                /* ── Final Review Step Actions ── */
+                <>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button
                       type="button"
-                      onClick={handleExecutePrescription}
+                      onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
                       style={{
-                        minHeight: '40px',
-                        padding: '8px',
-                        backgroundColor: '#0d9488',
-                        color: 'white',
+                        padding: '10px 12px',
+                        minHeight: '44px',
+                        backgroundColor: '#ffffff',
+                        color: '#475569',
                         borderRadius: '8px',
-                        border: 'none',
-                        fontSize: '0.8rem',
-                        fontWeight: 800,
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
+                        gap: '4px',
                         touchAction: 'manipulation',
                       }}
+                      title="Back to previous step"
                     >
-                      <ShieldCheck size={15} /> Create Rx
+                      <ChevronLeft size={16} />
                     </button>
-                    {!isDoctor && (
+
+                    {isDoctor ? (
+                      <button
+                        type="button"
+                        onClick={handleExecutePrescription}
+                        style={{
+                          flex: 1,
+                          minHeight: '46px',
+                          padding: '12px',
+                          backgroundColor: '#0d9488',
+                          color: 'white',
+                          borderRadius: '10px',
+                          border: 'none',
+                          fontSize: '0.92rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 8px rgba(13, 148, 136, 0.25)',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <ShieldCheck size={18} /> Prescribe All in Rx Builder (${grandTotal.toFixed(2)})
+                      </button>
+                    ) : activeWs.intent === 'buy' ? (
+                      <button
+                        type="button"
+                        onClick={handleExecutePO}
+                        style={{
+                          flex: 1,
+                          minHeight: '46px',
+                          padding: '12px',
+                          backgroundColor: '#c2410c',
+                          color: 'white',
+                          borderRadius: '10px',
+                          border: 'none',
+                          fontSize: '0.92rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 8px rgba(194, 65, 12, 0.25)',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <Truck size={17} /> Generate Purchase Order (${grandTotal.toFixed(2)})
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleExecuteQuotation}
+                        style={{
+                          flex: 1,
+                          minHeight: '46px',
+                          padding: '12px',
+                          backgroundColor: '#003666',
+                          color: 'white',
+                          borderRadius: '10px',
+                          border: 'none',
+                          fontSize: '0.92rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 8px rgba(0, 54, 102, 0.25)',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <FileText size={17} /> Generate B2B Quotation (${grandTotal.toFixed(2)})
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Secondary Action Grid */}
+                  {isDoctor ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={handleSaveAsProtocol}
+                        disabled={isSavingProtocol}
+                        style={{
+                          minHeight: '38px',
+                          padding: '6px 10px',
+                          backgroundColor: isSavingProtocol ? '#f1f5f9' : '#eff6ff',
+                          color: isSavingProtocol ? '#94a3b8' : '#1d4ed8',
+                          borderRadius: '8px',
+                          border: '1.5px solid #bfdbfe',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          cursor: isSavingProtocol ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <Layers size={14} /> {isSavingProtocol ? 'Saving...' : 'Save as Protocol'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowPdfPreview(true)}
+                        style={{
+                          minHeight: '38px',
+                          padding: '6px 10px',
+                          backgroundColor: '#f8fafc',
+                          color: '#475569',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '0.8rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <FileText size={14} /> Clinical Summary
+                      </button>
+                    </div>
+                  ) : activeWs.intent !== 'buy' ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={handleExecutePrescription}
+                        style={{
+                          minHeight: '38px',
+                          padding: '6px 8px',
+                          backgroundColor: '#0d9488',
+                          color: 'white',
+                          borderRadius: '8px',
+                          border: 'none',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
+                          touchAction: 'manipulation',
+                        }}
+                      >
+                        <ShieldCheck size={14} /> Create Rx
+                      </button>
                       <button
                         type="button"
                         onClick={() => setIsStickerModalOpen(true)}
                         style={{
-                          minHeight: '40px',
-                          padding: '8px',
+                          minHeight: '38px',
+                          padding: '6px 8px',
                           backgroundColor: '#f0fdfa',
                           color: '#0f766e',
                           borderRadius: '8px',
@@ -701,36 +792,36 @@ export default function WorkspaceDrawer() {
                           touchAction: 'manipulation',
                         }}
                       >
-                        <Tag size={15} /> Pharmapolis Stickers
+                        <Tag size={14} /> Stickers
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  ) : null}
+
+                  {/* Document Summary Quick View */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPdfPreview(true)}
+                    style={{
+                      width: '100%',
+                      padding: '6px',
+                      backgroundColor: '#f8fafc',
+                      color: '#475569',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      touchAction: 'manipulation',
+                    }}
+                  >
+                    <FileText size={13} /> 👁️ Quick Document Preview
+                  </button>
                 </>
               )}
-
-              {/* Live PDF Quick Preview Shortcut */}
-              <button
-                type="button"
-                onClick={() => setShowPdfPreview(true)}
-                style={{
-                  width: '100%',
-                  padding: '7px',
-                  backgroundColor: '#f8fafc',
-                  color: '#475569',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.76rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  touchAction: 'manipulation',
-                }}
-              >
-                <FileText size={13} /> 👁️ Quick Live Document Summary
-              </button>
             </>
           )}
         </div>

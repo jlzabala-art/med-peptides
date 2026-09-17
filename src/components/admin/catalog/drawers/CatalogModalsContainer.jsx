@@ -1,7 +1,6 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import StandardDrawer from '../../../ui/StandardDrawer';
-import WorkspaceFloatingDock from '../../../shared/workspaces/WorkspaceFloatingDock';
 import GoalsCoverageWidget from '../GoalsCoverageWidget';
 import UniversalProductQuickView from '../../../shared/UniversalProductQuickView';
 
@@ -220,8 +219,6 @@ export default function CatalogModalsContainer({
         isOpen={activeDrawer === 'datasheet'}
         onClose={() => setActiveDrawer(null)}
       />
-
-      <WorkspaceFloatingDock />
     </>
   );
 }
