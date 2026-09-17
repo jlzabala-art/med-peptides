@@ -26,14 +26,31 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // ⌘ + K -> Focus Global Search Bar
+      // ⌘ + K / Ctrl + K -> Focus Global Search Bar / Omnibar
       if (isCmdOrCtrl && (e.key === 'k' || e.key === 'K')) {
-        const searchInput = document.querySelector('input[type="search"], input[placeholder*="Search"]');
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('focus-global-search'));
+        const searchInput = document.querySelector(
+          'input[data-global-search], .global-search-input, #header-global-search, input[type="search"], input[placeholder*="Search"]'
+        );
         if (searchInput) {
-          e.preventDefault();
           searchInput.focus();
           searchInput.select?.();
         }
+        return;
+      }
+
+      // ⌘ + / or Ctrl + / -> Help Drawer (GCP standard)
+      if (isCmdOrCtrl && (e.key === '/' || e.key === '?')) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('toggle-help-drawer'));
+        return;
+      }
+
+      // ⌘ + B or Ctrl + B -> Toggle Navigation Sidebar
+      if (isCmdOrCtrl && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('toggle-app-sidebar'));
         return;
       }
     };

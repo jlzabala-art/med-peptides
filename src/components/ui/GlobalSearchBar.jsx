@@ -195,17 +195,26 @@ export default function GlobalSearchBar({
     return placeholder;
   }, [isMobile, placeholder]);
 
-  // ⌘K / Ctrl+K global shortcut to focus search
+  // ⌘K / Ctrl+K global shortcut & focus-global-search event listener
   useEffect(() => {
-    const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    const keyHandler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
         inputRef.current?.focus();
         inputRef.current?.select();
       }
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    const focusHandler = () => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    };
+
+    document.addEventListener('keydown', keyHandler);
+    window.addEventListener('focus-global-search', focusHandler);
+    return () => {
+      document.removeEventListener('keydown', keyHandler);
+      window.removeEventListener('focus-global-search', focusHandler);
+    };
   }, []);
 
   // Close filter dropdowns on outside click

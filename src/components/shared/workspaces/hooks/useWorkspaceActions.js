@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import notifier from '@/services/NotificationService';
 import { normalizeWorkspaceItem, normalizeWorkspaceItemList } from '@/utils/clinicalItemNormalizer';
 
@@ -31,6 +31,7 @@ export function useWorkspaceActions({
   role = 'doctor',
 }) {
   const wsId = activeWs?.id;
+  const [isSavingProtocol, setIsSavingProtocol] = useState(false);
 
   // 1. Execute Clinical Prescription (Rx-Builder)
   const handleExecutePrescription = useCallback(() => {
@@ -150,13 +151,16 @@ export function useWorkspaceActions({
     notifier.success(`Opening Purchase Order form with ${items.length} line items.`);
   }, [isDoctor, items, setDrawerOpen, activeWs, selectedShippingMethod, shippingCost]);
 
-  // 4. Save Workspace Staged Items as a Clinical Protocol
+  // 4. Save Workspace Staged Items as a Clinical Protocol (Idempotent non-blocking)
   const handleSaveAsProtocol = useCallback(async () => {
     if (!items || items.length === 0) {
       notifier.warning('Please add compounds to workspace before creating a protocol.');
       return;
     }
 
+    if (isSavingProtocol) return; // Prevent concurrent requests
+
+    setIsSavingProtocol(true);
     try {
       const { createProtocol } = await import('@/repositories/protocolRepository');
       const protocolName = activeWs?.name || 'Custom Clinical Protocol';
@@ -187,8 +191,10 @@ export function useWorkspaceActions({
     } catch (err) {
       console.error('Save protocol error:', err);
       notifier.error('Failed to save protocol: ' + err.message);
+    } finally {
+      setIsSavingProtocol(false);
     }
-  }, [items, activeWs]);
+  }, [items, activeWs, isSavingProtocol]);
 
   // 5. Load Clinical Protocol into Workspace
   const handleLoadProtocol = useCallback(
@@ -238,6 +244,7 @@ export function useWorkspaceActions({
   );
 
   return {
+    isSavingProtocol,
     handleExecutePrescription,
     handleExecuteQuotation,
     handleExecutePO,

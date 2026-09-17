@@ -195,6 +195,7 @@ export default function WorkspaceDrawer() {
 
   // Modular Workspace Actions (Prescriptions, Quotes, POs, Protocols, 1-Tap Regimens)
   const {
+    isSavingProtocol,
     handleExecutePrescription,
     handleExecuteQuotation,
     handleExecutePO,
@@ -555,16 +556,17 @@ export default function WorkspaceDrawer() {
                 <button
                   type="button"
                   onClick={handleSaveAsProtocol}
+                  disabled={isSavingProtocol}
                   style={{
                     minHeight: '40px',
                     padding: '8px 10px',
-                    backgroundColor: '#eff6ff',
-                    color: '#1d4ed8',
+                    backgroundColor: isSavingProtocol ? '#f1f5f9' : '#eff6ff',
+                    color: isSavingProtocol ? '#94a3b8' : '#1d4ed8',
                     borderRadius: '8px',
                     border: '1.5px solid #bfdbfe',
                     fontSize: '0.8rem',
                     fontWeight: 700,
-                    cursor: 'pointer',
+                    cursor: isSavingProtocol ? 'not-allowed' : 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -573,7 +575,7 @@ export default function WorkspaceDrawer() {
                   }}
                   title="Save staged compounds as a new clinical protocol"
                 >
-                  <Layers size={15} /> Save as Protocol
+                  <Layers size={15} /> {isSavingProtocol ? 'Saving Protocol...' : 'Save as Protocol'}
                 </button>
 
                 <button
