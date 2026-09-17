@@ -12,6 +12,7 @@ import { PRESENTATION_LABELS } from '../../../../constants/presentationTypes';
 import { getGoalLabel } from '../../../../config/goals';
 import { useWorkspaceStore } from '../../../../stores/useWorkspaceStore';
 import notifier from '../../../../services/NotificationService';
+import { resolveItemSku } from '../../../../utils/skuResolver';
 import { updateProduct } from '../../../../repositories/productRepository';
 import {
   PackageCheck,
@@ -651,7 +652,7 @@ export function useMasterCatalogColumns({
                 productId: row.id,
                 variantId: row.variants?.[0]?.id || row.id,
                 canonicalName: row.canonicalName || row.displayName || row.name || 'Compound',
-                sku: row.variants?.[0]?.sku || '',
+                sku: resolveItemSku({ ...row, ...row.variants?.[0] }),
                 dosage: row.variants?.[0]?.dosage || row.dosage || '',
                 format: row.variants?.[0]?.format || row.format || 'Vial',
                 quantity: 1,

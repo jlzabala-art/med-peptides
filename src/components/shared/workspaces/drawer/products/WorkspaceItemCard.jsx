@@ -1,6 +1,8 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Copy, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, X, Package } from 'lucide-react';
 import WorkspaceTransferPopover from './WorkspaceTransferPopover';
+import CopyableId from '@/components/ui/CopyableId';
+import { resolveItemSku } from '@/utils/skuResolver';
 
 /**
  * WorkspaceItemCard
@@ -9,7 +11,10 @@ import WorkspaceTransferPopover from './WorkspaceTransferPopover';
  */
 export default function WorkspaceItemCard({
   item,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   isExpanded = false,
   onToggleExpand,
   getItemUnitPrice,
@@ -25,6 +30,7 @@ export default function WorkspaceItemCard({
 }) {
   const unitRate = getItemUnitPrice ? getItemUnitPrice(item) : (item.price || 0);
   const lineTotal = (item.quantity || 1) * unitRate;
+  const resolvedSku = resolveItemSku(item);
 
   return (
     <div
@@ -108,6 +114,35 @@ export default function WorkspaceItemCard({
                 >
                   ${unitRate.toFixed(2)} / u (Clinic Price)
                 </span>
+              ) : isWholesaler ? (
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    color: '#c2410c',
+                    backgroundColor: '#fff7ed',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    border: '1px solid #fed7aa',
+                  }}
+                  title="Wholesale Price"
+                >
+                  ${unitRate.toFixed(2)} / u (Wholesale Price)
+                </span>
+              ) : isPatient || !isAdmin ? (
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    color: '#0369a1',
+                    backgroundColor: '#f0f9ff',
+                    padding: '1px 5px',
+                    borderRadius: '4px',
+                    border: '1px solid #bae6fd',
+                  }}
+                >
+                  ${unitRate.toFixed(2)} / u
+                </span>
               ) : (
                 <div
                   style={{
@@ -149,6 +184,23 @@ export default function WorkspaceItemCard({
                   />
                   <span style={{ fontSize: '0.68rem', fontWeight: 700, color: unitRate > 0 ? '#0284c7' : '#d97706' }}>/u</span>
                 </div>
+              )}
+              {isAdmin && item.supplierCost > 0 && unitRate > 0 && (
+                <span
+                  style={{
+                    fontSize: '0.66rem',
+                    fontWeight: 800,
+                    padding: '1.5px 5px',
+                    borderRadius: '4px',
+                    backgroundColor: '#ecfdf5',
+                    color: '#047857',
+                    border: '1px solid #a7f3d0',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={`Cost: $${Number(item.supplierCost).toFixed(2)} | Markup: +${(((unitRate - item.supplierCost) / item.supplierCost) * 100).toFixed(1)}%`}
+                >
+                  +{(((unitRate - item.supplierCost) / item.supplierCost) * 100).toFixed(0)}%
+                </span>
               )}
             </div>
           </div>
@@ -292,56 +344,52 @@ export default function WorkspaceItemCard({
             </div>
             <div>
               <span style={{ color: '#64748b', fontWeight: 600 }}>SKU Code:</span>
-              <div style={{ fontWeight: 800, color: '#0f172a' }}>{item.sku || 'N/A'}</div>
+              <div style={{ marginTop: '2px' }}>
+                <CopyableId value={resolvedSku} displayValue={resolvedSku} />
+              </div>
             </div>
             <div>
               <span style={{ color: '#64748b', fontWeight: 600 }}>Category:</span>
-              <div style={{ fontWeight: 700, color: '#0369a1' }}>{item.category || 'Biologics / Peptides'}</div>
+              <div style={{ fontWeight: 700, color: '#0369a1', marginTop: '2px' }}>{item.category || 'Biologics / Peptides'}</div>
             </div>
-            <div>
-              <span style={{ color: '#64748b', fontWeight: 600 }}>Supplier:</span>
-              <div style={{ fontWeight: 700, color: '#475569' }}>{item.supplierName || 'Partner Compounder'}</div>
-            </div>
+            {isAdmin && (
+              <div>
+                <span style={{ color: '#64748b', fontWeight: 600 }}>Supplier:</span>
+                <div style={{ fontWeight: 700, color: '#475569', marginTop: '2px' }}>{item.supplierName || 'Verified Partner'}</div>
+              </div>
+            )}
           </div>
 
-          {/* Quick Format Switcher */}
+          {/* Immutable Format & Presentation Info (Quick Switcher prohibited) */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              gap: '5px',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               backgroundColor: '#f8fafc',
-              padding: '8px 10px',
+              padding: '8px 12px',
               borderRadius: '8px',
               border: '1px solid #e2e8f0',
+              fontSize: '0.74rem',
             }}
           >
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#475569' }}>Quick Format Switcher:</span>
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-              {['Vial', 'Single Cartridge', 'Double Cartridge', 'Sublingual', 'Oral Drops'].map((fmtOption) => {
-                const isCurrent = (item.format || 'Vial').toLowerCase() === fmtOption.toLowerCase();
-                return (
-                  <button
-                    key={fmtOption}
-                    type="button"
-                    onClick={() => onUpdateItemFormat && onUpdateItemFormat(item.id, fmtOption)}
-                    style={{
-                      padding: '4px 9px',
-                      borderRadius: '6px',
-                      border: `1.5px solid ${isCurrent ? (isDoctor ? '#0d9488' : '#003666') : '#cbd5e1'}`,
-                      backgroundColor: isCurrent ? (isDoctor ? '#0d9488' : '#003666') : '#ffffff',
-                      color: isCurrent ? '#ffffff' : '#334155',
-                      fontSize: '0.72rem',
-                      fontWeight: isCurrent ? 800 : 600,
-                      cursor: 'pointer',
-                      touchAction: 'manipulation',
-                    }}
-                  >
-                    {fmtOption}
-                  </button>
-                );
-              })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Package size={15} color={isDoctor ? '#0d9488' : '#003666'} />
+              <div>
+                <span style={{ fontWeight: 700, color: '#1e293b' }}>Format: </span>
+                <span style={{ fontWeight: 800, color: isDoctor ? '#0d9488' : '#003666' }}>
+                  {item.format || 'Vial'}
+                </span>
+                {((item.presentation && item.presentation.toLowerCase().includes('kit')) || (item.format && item.format.toLowerCase().includes('kit'))) && (
+                  <span style={{ marginLeft: '6px', fontSize: '0.68rem', backgroundColor: '#e0e7ff', color: '#3730a3', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                    Pack / Kit
+                  </span>
+                )}
+              </div>
             </div>
+            <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontStyle: 'italic' }}>
+              Variant-locked presentation
+            </span>
           </div>
         </div>
       )}

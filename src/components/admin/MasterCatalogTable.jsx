@@ -19,6 +19,7 @@ import { calculateProductCompleteness } from '../../utils/calculateProductComple
 import { inferProductSubcategory, getProductAvailableTypes } from '../../utils/productNormalizer';
 import { CLINICAL_GOALS } from '../../config/goals';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { resolveItemSku } from '../../utils/skuResolver';
 
 // ── Modular Catalog Components & Hooks ─────────────────────────────────────────
 import { useCatalogUrlFilters } from './catalog/hooks/useCatalogUrlFilters';
@@ -1102,6 +1103,7 @@ export default function MasterCatalogTable({
                   id: prod.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
                   productId: prod.id,
                   canonicalName: prod.canonicalName || prod.name || prod.product_title || 'Catalog Item',
+                  sku: resolveItemSku({ ...prod, ...v0 }),
                   dosage: prod.dosage || v0.dosage || 'Standard',
                   format: prod.format || v0.format || 'Vial',
                   unitPrice: resolvedUnitPrice,

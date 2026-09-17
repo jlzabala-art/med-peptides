@@ -39,7 +39,10 @@ export default function WorkspaceProductsAccordion({
   onDeleteKit,
   searchingCatalog,
   onSearchCatalogFast,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   onAddClinicalRegimen,
   stepperMode = false,
 }) {
@@ -221,8 +224,11 @@ export default function WorkspaceProductsAccordion({
         >
           {items.length === 0 ? (
             <WorkspaceCatalogPickers
-              itemsCount={0}
+              itemsCount={items.length}
+              isAdmin={isAdmin}
               isDoctor={isDoctor}
+              isWholesaler={isWholesaler}
+              isPatient={isPatient}
               activePicker={activePicker}
               setActivePicker={setActivePicker}
               pickerSearch={pickerSearch}
@@ -476,7 +482,9 @@ export default function WorkspaceProductsAccordion({
                   >
                     <span>Product & Dosage</span>
                     <span style={{ textAlign: 'center', minWidth: '70px' }}>Qty</span>
-                    <span style={{ textAlign: 'right', minWidth: '55px' }}>{isDoctor ? 'Clinic Price' : 'Price'}</span>
+                    <span style={{ textAlign: 'right', minWidth: '55px' }}>
+                      {isDoctor ? 'Clinic Price' : isWholesaler ? 'Wholesale Price' : isPatient ? 'Retail Price' : 'Price'}
+                    </span>
                     <span style={{ textAlign: 'right', minWidth: '52px' }}>Total</span>
                     <span style={{ width: '24px' }}></span>
                   </div>
@@ -515,7 +523,13 @@ export default function WorkspaceProductsAccordion({
                               <WorkspaceCompactRow
                                 key={it.id || idx}
                                 item={it}
+                                it={it}
+                                idx={idx}
+                                unitRate={getItemUnitPrice ? getItemUnitPrice(it) : (it.unitPrice || it.price || 0)}
+                                isAdmin={isAdmin}
                                 isDoctor={isDoctor}
+                                isWholesaler={isWholesaler}
+                                isPatient={isPatient}
                                 getItemUnitPrice={getItemUnitPrice}
                                 onUpdateItemPrice={onUpdateItemPrice}
                                 onUpdateItemQuantity={onUpdateItemQuantity}
@@ -535,7 +549,13 @@ export default function WorkspaceProductsAccordion({
                       <WorkspaceCompactRow
                         key={it.id || idx}
                         item={it}
+                        it={it}
+                        idx={idx}
+                        unitRate={getItemUnitPrice ? getItemUnitPrice(it) : (it.unitPrice || it.price || 0)}
+                        isAdmin={isAdmin}
                         isDoctor={isDoctor}
+                        isWholesaler={isWholesaler}
+                        isPatient={isPatient}
                         getItemUnitPrice={getItemUnitPrice}
                         onUpdateItemPrice={onUpdateItemPrice}
                         onUpdateItemQuantity={onUpdateItemQuantity}
@@ -556,7 +576,10 @@ export default function WorkspaceProductsAccordion({
                     <WorkspaceItemCard
                       key={it.id || idx}
                       item={it}
+                      isAdmin={isAdmin}
                       isDoctor={isDoctor}
+                      isWholesaler={isWholesaler}
+                      isPatient={isPatient}
                       isExpanded={!!expandedItemIds[it.id]}
                       onToggleExpand={toggleItemExpanded}
                       getItemUnitPrice={getItemUnitPrice}
@@ -579,7 +602,10 @@ export default function WorkspaceProductsAccordion({
           {/* Catalog / Protocols / Saved Kits Inline Modals */}
           <WorkspaceCatalogPickers
             itemsCount={items.length}
+            isAdmin={isAdmin}
             isDoctor={isDoctor}
+            isWholesaler={isWholesaler}
+            isPatient={isPatient}
             activePicker={activePicker}
             setActivePicker={setActivePicker}
             pickerSearch={pickerSearch}

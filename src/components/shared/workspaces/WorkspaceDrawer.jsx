@@ -110,7 +110,10 @@ export default function WorkspaceDrawer() {
   const activeWs = workspaces[activeWorkspaceId] || wsList[0] || null;
 
   const { is, can, role } = useRoleAccess();
-  const isDoctor = role === 'doctor' || is('doctor') || !can('manage:suppliers');
+  const isAdmin = role === 'admin' || is('admin') || can('view:cost_pricing');
+  const isDoctor = !isAdmin && (role === 'doctor' || is('doctor') || role === 'medical_director' || role === 'clinic');
+  const isWholesaler = !isAdmin && (role === 'wholesaler' || role === 'wholeseller' || is('wholesaler') || is('wholeseller'));
+  const isPatient = !isAdmin && (role === 'patient' || is('patient'));
   const [isStickerModalOpen, setIsStickerModalOpen] = useState(false);
 
   useEffect(() => {
@@ -163,11 +166,11 @@ export default function WorkspaceDrawer() {
     }
     return [
       { key: 'products', label: 'Products', isComplete: items.length > 0 },
-      { key: 'recipient', label: 'Recipient', isComplete: !!activeWs?.targetEntity },
+      { key: 'recipient', label: isWholesaler ? 'Client' : 'Recipient', isComplete: !!activeWs?.targetEntity },
       { key: 'shipping', label: 'Logistics', isComplete: true },
-      { key: 'review', label: 'Review & Margins', isComplete: items.length > 0 && !!activeWs?.targetEntity },
+      { key: 'review', label: isAdmin ? 'Review & Margins' : 'Review & Order', isComplete: items.length > 0 && !!activeWs?.targetEntity },
     ];
-  }, [isDoctor, items.length, activeWs?.targetEntity]);
+  }, [isAdmin, isDoctor, isWholesaler, items.length, activeWs?.targetEntity]);
 
   const safeActiveStep = Math.min(activeStep, steps.length - 1);
 
@@ -187,12 +190,32 @@ export default function WorkspaceDrawer() {
   }, [isDrawerOpen, steps.length]);
 
   const getItemUnitPrice = (it) => {
-    if (it.customPrice != null && !isDoctor) return Number(it.customPrice);
+    // Admin with manual price override
+    if (isAdmin && it.customPrice != null) return Number(it.customPrice);
+
+    // Doctor / Clinic role: strictly clinic price
     if (isDoctor) {
       const resolved = resolveVariantPrice(it, { tier: 'clinic' });
-      const amount = resolved?.amount ?? Number(it.unitPrice || it.price || it.unitRate || 0);
+      const amount = resolved?.perUnit ?? Number(it.priceClinic || it.unitPrice || it.price || it.unitRate || 0);
       return isNaN(amount) ? 0 : amount;
     }
+
+    // Wholesaler role: strictly wholesale price
+    if (isWholesaler) {
+      const resolved = resolveVariantPrice(it, { tier: 'wholesale' });
+      const amount = resolved?.perUnit ?? Number(it.wholesalePrice || it.unitPrice || it.price || it.unitRate || 0);
+      return isNaN(amount) ? 0 : amount;
+    }
+
+    // Patient role: strictly retail price
+    if (isPatient) {
+      const resolved = resolveVariantPrice(it, { tier: 'retail' });
+      const amount = resolved?.perUnit ?? Number(it.retailPrice || it.unitPrice || it.price || it.unitRate || 0);
+      return isNaN(amount) ? 0 : amount;
+    }
+
+    // Admin / Standard fallback
+    if (it.customPrice != null) return Number(it.customPrice);
     const p = Number(it.unitPrice || it.price || it.unitRate || 0);
     return isNaN(p) ? 0 : p;
   };
@@ -250,7 +273,10 @@ export default function WorkspaceDrawer() {
     openDrawer,
     addItems,
     addItem,
+    isAdmin,
     isDoctor,
+    isWholesaler,
+    isPatient,
     role,
   });
 
@@ -431,7 +457,9 @@ export default function WorkspaceDrawer() {
               subtotalSaleAmount={subtotalSaleAmount}
               getItemUnitPrice={getItemUnitPrice}
               onUpdateItemQuantity={(itemId, qty) => updateItemQuantity(itemId, qty, activeWs.id)}
-              onUpdateItemPrice={(itemId, price) => updateItemPrice(itemId, price, activeWs.id)}
+              onUpdateItemPrice={(itemId, price) => {
+                if (isAdmin) updateItemPrice(itemId, price, activeWs.id);
+              }}
               onUpdateItemFormat={(itemId, format) => updateItemFormat(itemId, format, activeWs.id)}
               onRemoveItem={(itemId) => removeItem(itemId, activeWs.id)}
               onAddBacteriostaticWater={() => addReconstitutionBacteriostaticWater(activeWs.id)}
@@ -443,7 +471,10 @@ export default function WorkspaceDrawer() {
               onLoadKit={(kitId) => loadKitIntoWorkspace(kitId, activeWs.id)}
               onDeleteKit={deleteSavedKit}
               searchingCatalog={searchingCatalog}
+              isAdmin={isAdmin}
               isDoctor={isDoctor}
+              isWholesaler={isWholesaler}
+              isPatient={isPatient}
               onAddClinicalRegimen={handleAddClinicalRegimen}
             />
           </div>
@@ -458,11 +489,14 @@ export default function WorkspaceDrawer() {
               onSetIntent={(intent) => setWorkspaceIntent(intent, activeWs.id)}
               onSetTargetEntity={(ent) => setTargetEntity(ent, activeWs.id)}
               onSetSelectedTargetType={(type) => setSelectedTargetType(type, activeWs.id)}
+              isAdmin={isAdmin}
               isDoctor={isDoctor}
+              isWholesaler={isWholesaler}
+              isPatient={isPatient}
             />
           </div>
 
-          {/* Step 2 (Admin): Logistics */}
+          {/* Step 2 (Admin/Wholesaler): Logistics */}
           {!isDoctor && (
             <div style={{ display: safeActiveStep === 2 ? 'flex' : 'none', flexDirection: 'column', flex: 1 }}>
               <WorkspaceShippingAccordion
@@ -475,7 +509,7 @@ export default function WorkspaceDrawer() {
             </div>
           )}
 
-          {/* Step 2 (Doctor) or Step 3 (Admin): Review & Financials */}
+          {/* Step 2 (Doctor) or Step 3 (Non-Doctor): Review & Financials */}
           <div style={{ display: safeActiveStep === (isDoctor ? 2 : 3) ? 'flex' : 'none', flexDirection: 'column', flex: 1 }}>
             <WorkspaceFinancialAccordion
               stepperMode={true}
@@ -490,8 +524,13 @@ export default function WorkspaceDrawer() {
               grandTotal={grandTotal}
               grossMarginAmount={grossMarginAmount}
               marginPercent={marginPercent}
-              onSetDiscountPercent={(pct) => setDiscountPercent(pct, activeWs.id)}
+              onSetDiscountPercent={(pct) => {
+                if (isAdmin) setDiscountPercent(pct, activeWs.id);
+              }}
+              isAdmin={isAdmin}
               isDoctor={isDoctor}
+              isWholesaler={isWholesaler}
+              isPatient={isPatient}
             />
           </div>
         </div>
@@ -501,7 +540,10 @@ export default function WorkspaceDrawer() {
           itemsCount={items.length}
           activeWs={activeWs}
           grandTotal={grandTotal}
+          isAdmin={isAdmin}
           isDoctor={isDoctor}
+          isWholesaler={isWholesaler}
+          isPatient={isPatient}
           activeStep={safeActiveStep}
           onGoToStep={setActiveStep}
         />

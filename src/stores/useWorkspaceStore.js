@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
+import { resolveItemSku } from '@/utils/skuResolver';
 
 function generateWorkspaceId() {
   return `ws_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -21,6 +22,7 @@ const DEFAULT_WORKSPACE = {
   shippingNotes: '',
   discountPercent: 0,
   pricingTier: 'clinic', // 'cost' | 'wholesale' | 'clinic' | 'retail'
+  appliedMarkupPercent: null, // Custom markup applied to this workspace (e.g. 30)
   currency: 'USD',
   notes: '',
 };
@@ -63,6 +65,7 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
       shippingNotes: '',
       discountPercent: 0,
       pricingTier: initialIntent === 'buy' ? 'cost' : 'clinic',
+      appliedMarkupPercent: null,
       currency: 'USD',
       notes: '',
     };
@@ -223,7 +226,32 @@ const createWorkspaceItemsSlice = (set, get) => ({
       (it) => (it.id && it.id === canonicalId) || (it.variantId && it.variantId === item.variantId)
     );
 
-    const resolvedPrice = extractItemPrice(item);
+    const supplierCost = Number(item.supplierCost || item.costPrice || item.pricing?.supplierCost || 0);
+    const targetEntity = ws.targetEntity;
+    const effectiveMarkup = ws.appliedMarkupPercent ?? targetEntity?.priceMarkupPercent ?? targetEntity?.markupPercent ?? null;
+    let resolvedPrice = extractItemPrice(item);
+
+    // Apply recipient/workspace active markup over cost
+    if (effectiveMarkup != null && !isNaN(effectiveMarkup) && supplierCost > 0) {
+      resolvedPrice = Number((supplierCost * (1 + Number(effectiveMarkup) / 100)).toFixed(2));
+    } else if (ws.pricingTier === 'wholesale' && (!resolvedPrice || resolvedPrice === item.pricing?.clinic?.perUnit)) {
+      if (item.pricing?.wholesale?.perUnit) {
+        resolvedPrice = item.pricing.wholesale.perUnit;
+      } else if (supplierCost > 0) {
+        resolvedPrice = Number((supplierCost * 1.25).toFixed(2));
+      }
+    } else if (ws.pricingTier === 'retail' && (!resolvedPrice || resolvedPrice === item.pricing?.clinic?.perUnit)) {
+      if (item.pricing?.retail?.perUnit) {
+        resolvedPrice = item.pricing.retail.perUnit;
+      } else if (supplierCost > 0) {
+        resolvedPrice = Number((supplierCost * 2.00).toFixed(2));
+      }
+    }
+
+    // Fail-Safe: Never leave product with 0 or negative price if supplierCost > 0
+    if ((!resolvedPrice || resolvedPrice <= 0) && supplierCost > 0) {
+      resolvedPrice = Number((supplierCost * 1.25).toFixed(2));
+    }
 
     let nextItems = [...ws.items];
     if (existingIndex >= 0) {
@@ -241,19 +269,20 @@ const createWorkspaceItemsSlice = (set, get) => ({
         productId: item.productId || item.id,
         variantId: item.variantId || item.id,
         canonicalName: item.canonicalName || item.displayName || item.name || 'Custom Compound',
-        sku: item.sku || '',
+        sku: resolveItemSku(item),
         dosage: item.dosage || item.unit || '',
         format: item.format || item.dosage_form || 'Vial',
         quantity: item.quantity || 1,
         unitPrice: resolvedPrice,
         price: resolvedPrice,
         unitRate: resolvedPrice,
-        supplierCost: Number(item.supplierCost || item.costPrice || item.pricing?.supplierCost || 0),
+        supplierCost: supplierCost,
         supplierId: item.supplierId || item.supplier || '',
         supplierName: item.supplierName || '',
         category: item.category || '',
         presentation: item.presentation || '',
         targetTier: ws.pricingTier || 'clinic',
+        appliedMarkup: effectiveMarkup != null ? Number(effectiveMarkup) : (ws.pricingTier === 'wholesale' ? 25 : ws.pricingTier === 'retail' ? 100 : 50),
       });
     }
 
@@ -273,6 +302,9 @@ const createWorkspaceItemsSlice = (set, get) => ({
     const ws = workspaces[wsId] || Object.values(workspaces)[0];
     if (!ws || !Array.isArray(itemsToAdd) || itemsToAdd.length === 0) return;
 
+    const targetEntity = ws.targetEntity;
+    const effectiveMarkup = ws.appliedMarkupPercent ?? targetEntity?.priceMarkupPercent ?? targetEntity?.markupPercent ?? null;
+
     let nextItems = [...ws.items];
     itemsToAdd.forEach((item) => {
       const canonicalId = item.id || item.variantId || item.productId || `item_${Date.now()}_${Math.random()}`;
@@ -280,7 +312,28 @@ const createWorkspaceItemsSlice = (set, get) => ({
         (it) => (it.id && it.id === canonicalId) || (it.variantId && it.variantId === item.variantId)
       );
 
-      const resolvedPrice = extractItemPrice(item);
+      const supplierCost = Number(item.supplierCost || item.costPrice || item.pricing?.supplierCost || 0);
+      let resolvedPrice = extractItemPrice(item);
+
+      if (effectiveMarkup != null && !isNaN(effectiveMarkup) && supplierCost > 0) {
+        resolvedPrice = Number((supplierCost * (1 + Number(effectiveMarkup) / 100)).toFixed(2));
+      } else if (ws.pricingTier === 'wholesale' && (!resolvedPrice || resolvedPrice === item.pricing?.clinic?.perUnit)) {
+        if (item.pricing?.wholesale?.perUnit) {
+          resolvedPrice = item.pricing.wholesale.perUnit;
+        } else if (supplierCost > 0) {
+          resolvedPrice = Number((supplierCost * 1.25).toFixed(2));
+        }
+      } else if (ws.pricingTier === 'retail' && (!resolvedPrice || resolvedPrice === item.pricing?.clinic?.perUnit)) {
+        if (item.pricing?.retail?.perUnit) {
+          resolvedPrice = item.pricing.retail.perUnit;
+        } else if (supplierCost > 0) {
+          resolvedPrice = Number((supplierCost * 2.00).toFixed(2));
+        }
+      }
+
+      if ((!resolvedPrice || resolvedPrice <= 0) && supplierCost > 0) {
+        resolvedPrice = Number((supplierCost * 1.25).toFixed(2));
+      }
 
       if (existingIndex >= 0) {
         nextItems[existingIndex] = {
@@ -607,12 +660,105 @@ const createWorkspaceIntentSlice = (set, get) => ({
     const ws = get().workspaces[wsId];
     if (!ws) return;
 
+    const defaultMarkup = targetEntity?.priceMarkupPercent ?? targetEntity?.markupPercent ?? null;
+    const defaultTier = targetEntity?.pricingTier || (targetEntity?.type === 'wholeseller' ? 'wholesale' : targetEntity?.type === 'patient' ? 'retail' : ws.pricingTier || 'clinic');
+
+    // Auto-fill shipping address/notes if empty in workspace
+    const shippingAddress = ws.shippingAddress || targetEntity?.shippingAddress || targetEntity?.address || '';
+    const shippingNotes = ws.shippingNotes || targetEntity?.shippingNotes || targetEntity?.deliveryNotes || '';
+
     set((s) => ({
       workspaces: {
         ...s.workspaces,
-        [wsId]: { ...ws, targetEntity, updatedAt: Date.now() },
+        [wsId]: {
+          ...ws,
+          targetEntity,
+          shippingAddress,
+          shippingNotes,
+          pricingTier: defaultTier,
+          appliedMarkupPercent: defaultMarkup != null ? Number(defaultMarkup) : ws.appliedMarkupPercent,
+          updatedAt: Date.now(),
+        },
       },
     }));
+  },
+
+  recalculateWorkspacePrices: (targetWorkspaceId = null, options = {}) => {
+    const { workspaces, activeWorkspaceId } = get();
+    const wsId = targetWorkspaceId || activeWorkspaceId;
+    const ws = workspaces[wsId];
+    if (!ws || !ws.items?.length) return 0;
+
+    const targetEntity = options.targetEntity !== undefined ? options.targetEntity : ws.targetEntity;
+    const customMarkup = options.targetMarkup !== undefined 
+      ? options.targetMarkup 
+      : (options.appliedMarkupPercent ?? ws.appliedMarkupPercent ?? targetEntity?.priceMarkupPercent ?? targetEntity?.markupPercent ?? null);
+
+    const targetTier = options.targetTier || ws.pricingTier || targetEntity?.pricingTier || (targetEntity?.type === 'wholeseller' ? 'wholesale' : targetEntity?.type === 'patient' ? 'retail' : 'clinic');
+
+    const nextItems = ws.items.map(it => {
+      const cost = Number(it.supplierCost || it.pricing?.supplierCost || 0);
+      let newUnitPrice = it.unitPrice;
+
+      if (customMarkup != null && !isNaN(customMarkup) && cost > 0) {
+        newUnitPrice = Number((cost * (1 + Number(customMarkup) / 100)).toFixed(2));
+      } else if (cost > 0) {
+        const mult = targetTier === 'wholesale' ? 1.25 : targetTier === 'retail' ? 2.00 : targetTier === 'cost' ? 1.00 : 1.50;
+        newUnitPrice = Number((cost * mult).toFixed(2));
+      }
+
+      if ((!newUnitPrice || newUnitPrice <= 0) && cost > 0) {
+        newUnitPrice = Number((cost * 1.25).toFixed(2));
+      }
+
+      const activeEffectiveMarkup = customMarkup != null ? Number(customMarkup) : (targetTier === 'wholesale' ? 25 : targetTier === 'retail' ? 100 : 50);
+
+      return {
+        ...it,
+        unitPrice: newUnitPrice,
+        price: newUnitPrice,
+        unitRate: newUnitPrice,
+        appliedTier: targetTier,
+        appliedMarkup: activeEffectiveMarkup,
+      };
+    });
+
+    set(s => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: {
+          ...ws,
+          pricingTier: targetTier,
+          appliedMarkupPercent: customMarkup != null ? Number(customMarkup) : ws.appliedMarkupPercent,
+          items: nextItems,
+          updatedAt: Date.now()
+        }
+      }
+    }));
+
+    return nextItems.length;
+  },
+
+  setWorkspaceMarkup: (markup, targetWorkspaceId = null, recalculate = true) => {
+    const wsId = targetWorkspaceId || get().activeWorkspaceId;
+    const ws = get().workspaces[wsId];
+    if (!ws) return;
+    const num = markup != null && !isNaN(markup) ? Number(markup) : null;
+
+    set(s => ({
+      workspaces: {
+        ...s.workspaces,
+        [wsId]: {
+          ...ws,
+          appliedMarkupPercent: num,
+          updatedAt: Date.now()
+        }
+      }
+    }));
+
+    if (recalculate && ws.items?.length > 0) {
+      get().recalculateWorkspacePrices(wsId, { targetMarkup: num });
+    }
   },
 
   setPricingTier: (tier, targetWorkspaceId = null) => {

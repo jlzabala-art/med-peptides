@@ -13,7 +13,10 @@ export default function WorkspaceMiniSummaryStrip({
   itemsCount = 0,
   activeWs = null,
   grandTotal = 0,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   activeStep = 0,
   onGoToStep = () => {},
 }) {

@@ -89,7 +89,8 @@ async function fetchFromFirestore(type, cacheKey) {
         id: d.id,
         name: d.data().companyName || d.data().name || d.id.replace(/^supplier-/, '').replace(/-/g, ' '),
         type: 'supplier',
-        ...d.data()
+        ...d.data(),
+        priceMarkupPercent: 0,
       }));
     } else if (type === 'clinic') {
       const snap = await getDocs(query(collection(db, 'clinics'), limit(25)));
@@ -97,16 +98,77 @@ async function fetchFromFirestore(type, cacheKey) {
         id: d.id,
         name: d.data().name || d.data().legalName || d.id,
         type: 'clinic',
+        priceMarkupPercent: d.data().priceMarkupPercent ?? d.data().markupPercent ?? 50,
+        pricingTier: 'clinic',
         ...d.data()
       }));
     } else if (type === 'wholeseller') {
-      const snap = await getDocs(query(collection(db, 'wholesellers'), limit(25)));
-      docs = snap.docs.map(d => ({
-        id: d.id,
-        name: d.data().name || d.data().companyName || d.id,
+      const [snapWs, snapUsers] = await Promise.all([
+        getDocs(query(collection(db, 'wholesellers'), limit(25))).catch(() => ({ docs: [] })),
+        getDocs(query(collection(db, 'users'), limit(50))).catch(() => ({ docs: [] }))
+      ]);
+
+      const wsMap = new Map();
+
+      // Seed/Default for Ruben Ruano with exact Zoho Bigin data
+      wsMap.set('ruben-ruano', {
+        id: 'ruben-ruano',
+        name: 'Ruben Ruano',
+        companyName: 'Ruben Ruano (Wholesale)',
+        fullName: 'Ruben Ruano',
+        displayName: 'Ruben Ruano',
+        email: 'Ruben@rubenruano.com',
+        phone: '+34 637316102',
         type: 'wholeseller',
-        ...d.data()
-      }));
+        role: 'wholeseller',
+        priceMarkupPercent: 30,
+        markupPercent: 30,
+        marginOnCost: 30,
+        pricingTier: 'wholesale',
+        address: 'CEI el atelier, Calle Félix Esteban guerrero 8 bajo',
+        shippingAddress: 'CEI el atelier, Calle Félix Esteban guerrero 8 bajo, 30007 Murcia, Spain',
+        city: 'Murcia',
+        state: 'Murcia',
+        zip: '30007',
+        country: 'Spain',
+        deliveryNotes: 'Horario de recepción: 7.30 a 15.00. Persona de mensajería: Teresa. Teléfono: 695262424',
+        shippingNotes: 'Horario de recepción: 7.30 a 15.00. Persona de mensajería: Teresa. Teléfono: 695262424',
+        zohoContactId: '7006116000001550028',
+        biginContactId: '7006116000001550028',
+      });
+
+      snapWs.docs.forEach(d => {
+        const data = d.data();
+        wsMap.set(d.id, {
+          id: d.id,
+          name: data.name || data.companyName || d.id,
+          type: 'wholeseller',
+          priceMarkupPercent: data.priceMarkupPercent ?? data.markupPercent ?? 25,
+          pricingTier: 'wholesale',
+          ...data,
+        });
+      });
+
+      snapUsers.docs.forEach(d => {
+        const data = d.data();
+        const r = data.role;
+        const rs = data.roles || [];
+        const isWholesale = r === 'wholeseller' || r === 'wholesaler' || rs.includes('wholeseller') || rs.includes('wholesaler') || d.id === 'ruben-ruano';
+        if (isWholesale) {
+          const existing = wsMap.get(d.id) || {};
+          wsMap.set(d.id, {
+            ...existing,
+            id: d.id,
+            name: data.name || data.fullName || data.displayName || existing.name || d.id,
+            type: 'wholeseller',
+            priceMarkupPercent: data.priceMarkupPercent ?? data.markupPercent ?? existing.priceMarkupPercent ?? 30,
+            pricingTier: 'wholesale',
+            ...data,
+          });
+        }
+      });
+
+      docs = Array.from(wsMap.values());
     } else if (type === 'patient') {
       const snap = await getDocs(query(collection(db, 'users'), limit(30)));
       docs = snap.docs
@@ -116,6 +178,8 @@ async function fetchFromFirestore(type, cacheKey) {
           name: d.data().fullName || d.data().displayName || d.data().email || d.id,
           email: d.data().email,
           type: 'patient',
+          priceMarkupPercent: d.data().priceMarkupPercent ?? d.data().markupPercent ?? 100,
+          pricingTier: 'retail',
           ...d.data()
         }));
     } else if (type === 'doctor') {
@@ -126,6 +190,8 @@ async function fetchFromFirestore(type, cacheKey) {
           id: d.id,
           name: d.data().fullName || d.data().displayName || d.data().email || d.id,
           type: 'doctor',
+          priceMarkupPercent: d.data().priceMarkupPercent ?? d.data().markupPercent ?? 50,
+          pricingTier: 'clinic',
           ...d.data()
         }));
     }
@@ -136,6 +202,63 @@ async function fetchFromFirestore(type, cacheKey) {
   RAM_CACHE.set(cacheKey, { data: docs, ts: Date.now() });
   saveToStorage(cacheKey, docs);
   return docs;
+}
+
+/**
+ * Persists a new default markup for an entity (Client/Wholesaler/Clinic) across Firestore and caches
+ */
+export async function updateRecipientDefaultMarkup(recipientId, recipientType, newMarkupPercent) {
+  if (!recipientId || newMarkupPercent == null || isNaN(newMarkupPercent)) return false;
+  const numMarkup = Number(newMarkupPercent);
+
+  try {
+    const { doc, setDoc, updateDoc } = await import('firebase/firestore');
+    
+    // 1. Update in 'users' collection if applicable
+    try {
+      await updateDoc(doc(db, 'users', recipientId), {
+        priceMarkupPercent: numMarkup,
+        marginOnCost: numMarkup,
+        updatedAt: new Date().toISOString()
+      });
+    } catch {
+      await setDoc(doc(db, 'users', recipientId), {
+        priceMarkupPercent: numMarkup,
+        marginOnCost: numMarkup,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+
+    // 2. If wholeseller, also update in 'wholesellers' collection
+    if (recipientType === 'wholeseller') {
+      try {
+        await updateDoc(doc(db, 'wholesellers', recipientId), {
+          markupPercent: numMarkup,
+          priceMarkupPercent: numMarkup,
+          marginOnCost: numMarkup,
+          updatedAt: new Date().toISOString()
+        });
+      } catch {
+        await setDoc(doc(db, 'wholesellers', recipientId), {
+          markupPercent: numMarkup,
+          priceMarkupPercent: numMarkup,
+          marginOnCost: numMarkup,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }
+    }
+
+    // 3. Clear local caches so subsequent searches get the new default
+    RAM_CACHE.delete(`recent_${recipientType}`);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(`${STORAGE_PREFIX}recent_${recipientType}`);
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Failed to update recipient default markup:', err);
+    return false;
+  }
 }
 
 /**

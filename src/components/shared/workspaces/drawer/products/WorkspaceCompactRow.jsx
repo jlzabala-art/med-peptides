@@ -12,7 +12,10 @@ export default function WorkspaceCompactRow({
   it,
   idx,
   unitRate = 0,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   transferItemId,
   setTransferItemId,
   activeWs,
@@ -152,7 +155,7 @@ export default function WorkspaceCompactRow({
         </button>
       </div>
 
-      {/* Col 3: Price / Clinic Price */}
+      {/* Col 3: Price / Clinic Price / Wholesale Price */}
       <div style={{ textAlign: 'right', minWidth: '55px' }}>
         {isDoctor ? (
           <span
@@ -167,6 +170,37 @@ export default function WorkspaceCompactRow({
               whiteSpace: 'nowrap',
             }}
             title="Clinic Prescribing Price"
+          >
+            ${unitRate.toFixed(2)}
+          </span>
+        ) : isWholesaler ? (
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              color: '#c2410c',
+              backgroundColor: '#fff7ed',
+              padding: '2px 5px',
+              borderRadius: '5px',
+              border: '1px solid #fed7aa',
+              whiteSpace: 'nowrap',
+            }}
+            title="Wholesale Price"
+          >
+            ${unitRate.toFixed(2)}
+          </span>
+        ) : isPatient || !isAdmin ? (
+          <span
+            style={{
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              color: '#0369a1',
+              backgroundColor: '#f0f9ff',
+              padding: '2px 5px',
+              borderRadius: '5px',
+              border: '1px solid #bae6fd',
+              whiteSpace: 'nowrap',
+            }}
           >
             ${unitRate.toFixed(2)}
           </span>
@@ -206,6 +240,24 @@ export default function WorkspaceCompactRow({
               }}
             />
           </div>
+        )}
+        {isAdmin && it.supplierCost > 0 && unitRate > 0 && (
+          <span
+            style={{
+              fontSize: '0.62rem',
+              fontWeight: 800,
+              padding: '1px 4px',
+              borderRadius: '3px',
+              backgroundColor: '#ecfdf5',
+              color: '#047857',
+              border: '1px solid #a7f3d0',
+              display: 'inline-block',
+              marginTop: '2px',
+            }}
+            title={`Cost: $${Number(it.supplierCost).toFixed(2)} | Markup: +${(((unitRate - it.supplierCost) / it.supplierCost) * 100).toFixed(0)}%`}
+          >
+            +{(((unitRate - it.supplierCost) / it.supplierCost) * 100).toFixed(0)}%
+          </span>
         )}
       </div>
 

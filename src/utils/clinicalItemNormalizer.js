@@ -6,6 +6,8 @@
  * garantizando integridad tipológica y protegiendo datos financieros según el rol.
  */
 
+import { resolveItemSku } from './skuResolver';
+
 /**
  * Normaliza cualquier ítem o compuesto para ser añadido al Workspace.
  * 
@@ -45,7 +47,7 @@ export function normalizeWorkspaceItem(rawItem = {}, sourceType = 'catalog', opt
     productId,
     variantId,
     canonicalName,
-    sku: rawItem.sku || v0.sku || '',
+    sku: resolveItemSku({ ...rawItem, ...v0, canonicalName, dosage, format }),
     dosage,
     format,
     quantity: Math.max(1, parseInt(rawItem.quantity || defaultQuantity, 10) || 1),

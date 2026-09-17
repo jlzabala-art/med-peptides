@@ -27,7 +27,10 @@ export function useWorkspaceActions({
   openDrawer,
   addItems,
   addItem,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   role = 'doctor',
 }) {
   const wsId = activeWs?.id;
@@ -100,9 +103,9 @@ export function useWorkspaceActions({
             format: it.format,
             quantity: it.quantity,
             unitRate: getItemUnitPrice ? getItemUnitPrice(it) : it.unitPrice,
-            // Supplier cost only passed if not a doctor
-            supplierCost: isDoctor ? 0 : it.supplierCost,
-            supplierName: isDoctor ? '' : it.supplierName,
+            // Supplier cost ONLY passed if admin
+            supplierCost: isAdmin ? Number(it.supplierCost || 0) : 0,
+            supplierName: isAdmin ? (it.supplierName || '') : '',
             totalPrice: (it.quantity || 1) * (getItemUnitPrice ? getItemUnitPrice(it) : it.unitPrice),
           })),
         },
@@ -110,11 +113,11 @@ export function useWorkspaceActions({
     );
 
     notifier.info(`Launching B2B Quotation Wizard with ${items.length} items (${selectedShippingMethod.toUpperCase()} shipping).`);
-  }, [items, setDrawerOpen, isDoctor, role, activeWs, selectedShippingMethod, shippingCost, shippingAddress, shippingNotes, discountPercent, grandTotal, getItemUnitPrice]);
+  }, [items, setDrawerOpen, isAdmin, isDoctor, role, activeWs, selectedShippingMethod, shippingCost, shippingAddress, shippingNotes, discountPercent, grandTotal, getItemUnitPrice]);
 
   // 3. Execute Purchase Order (Suppliers/Admin only)
   const handleExecutePO = useCallback(() => {
-    if (isDoctor) {
+    if (!isAdmin) {
       notifier.warning('Purchase orders are restricted to administrative personnel.');
       return;
     }
@@ -203,7 +206,7 @@ export function useWorkspaceActions({
       const rawList = peptides.length > 0 ? peptides : [{ id: proto.id, canonicalName: proto.name || proto.title }];
 
       const itemsToAdd = rawList.map((pep) =>
-        normalizeWorkspaceItem(pep, { role: isDoctor ? 'doctor' : role })
+        normalizeWorkspaceItem(pep, 'protocol', { role: isDoctor ? 'doctor' : role, isDoctor })
       );
 
       if (addItems && wsId) {
@@ -217,7 +220,7 @@ export function useWorkspaceActions({
   // 6. Add Single Product from Catalog
   const handleAddProduct = useCallback(
     (prod) => {
-      const normalized = normalizeWorkspaceItem(prod, { role: isDoctor ? 'doctor' : role });
+      const normalized = normalizeWorkspaceItem(prod, 'catalog', { role: isDoctor ? 'doctor' : role, isDoctor });
       if (addItem && wsId) {
         addItem(normalized, wsId, { openDrawer: true });
         notifier.success(`Added "${normalized.canonicalName}" to workspace!`);
@@ -232,7 +235,7 @@ export function useWorkspaceActions({
       if (!regimen?.compounds || regimen.compounds.length === 0) return;
 
       const normalizedList = regimen.compounds.map((cmp) =>
-        normalizeWorkspaceItem(cmp, { role: isDoctor ? 'doctor' : role })
+        normalizeWorkspaceItem(cmp, 'regimen', { role: isDoctor ? 'doctor' : role, isDoctor })
       );
 
       if (addItems && wsId) {

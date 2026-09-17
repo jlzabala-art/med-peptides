@@ -22,16 +22,29 @@ export default function WorkspaceFinancialAccordion({
   grossMarginAmount,
   marginPercent,
   onSetDiscountPercent,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   stepperMode = false,
 }) {
   const isBuy = activeWs?.intent === 'buy';
+
+  const headerTitle = isDoctor
+    ? 'Prescription Total (Clinic Price)'
+    : isWholesaler
+    ? 'Order Total (Wholesale Price)'
+    : isPatient
+    ? 'Order Total (Retail Price)'
+    : isAdmin
+    ? 'Commercial Financials & Margins'
+    : 'Order Summary';
 
   return (
     <div
       style={{
         backgroundColor: stepperMode ? 'transparent' : '#ffffff',
-        border: stepperMode ? 'none' : `1px solid ${isDoctor ? '#99f6e4' : '#cbd5e1'}`,
+        border: stepperMode ? 'none' : `1px solid ${isDoctor ? '#99f6e4' : isWholesaler ? '#fed7aa' : '#cbd5e1'}`,
         borderRadius: stepperMode ? '0' : '12px',
         overflow: stepperMode ? 'visible' : 'hidden',
         boxShadow: stepperMode ? 'none' : '0 2px 6px rgba(0,0,0,0.02)',
@@ -58,17 +71,17 @@ export default function WorkspaceFinancialAccordion({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
             {isExpanded ? (
-              <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : '#003666', flexShrink: 0 }} />
+              <ChevronDown size={18} style={{ color: isDoctor ? '#0d9488' : isWholesaler ? '#c2410c' : '#003666', flexShrink: 0 }} />
             ) : (
               <ChevronRight size={18} style={{ color: '#64748b', flexShrink: 0 }} />
             )}
-            <DollarSign size={17} style={{ flexShrink: 0, color: isDoctor ? '#0f766e' : '#003666' }} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : '#003666', lineHeight: 1 }}>
-              {isDoctor ? 'Prescription Total (Clinic Price)' : 'Commercial Financials & Margins'}
+            <DollarSign size={17} style={{ flexShrink: 0, color: isDoctor ? '#0f766e' : isWholesaler ? '#c2410c' : '#003666' }} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: isDoctor ? '#0f766e' : isWholesaler ? '#c2410c' : '#003666', lineHeight: 1 }}>
+              {headerTitle}
             </span>
           </div>
 
-          <span style={{ fontSize: '0.94rem', fontWeight: 900, color: isDoctor ? '#0f766e' : '#003666' }}>
+          <span style={{ fontSize: '0.94rem', fontWeight: 900, color: isDoctor ? '#0f766e' : isWholesaler ? '#c2410c' : '#003666' }}>
             ${grandTotal.toFixed(2)}
           </span>
         </div>
@@ -111,8 +124,8 @@ export default function WorkspaceFinancialAccordion({
             </div>
           </div>
 
-          {/* Quick Discount Selector Pills */}
-          {!isBuy && (
+          {/* Quick Discount Selector Pills (Admin only) */}
+          {isAdmin && !isBuy && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', paddingTop: '4px', borderTop: '1px solid #f1f5f9' }}>
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b' }}>Apply Quick Tier Discount:</span>
               <div style={{ display: 'flex', gap: '5px' }}>
@@ -144,8 +157,8 @@ export default function WorkspaceFinancialAccordion({
             </div>
           )}
 
-          {/* Commercial Margins Bar (Only in SELL intent) */}
-          {!isBuy && subtotalSaleAmount > 0 && (
+          {/* Commercial Margins Bar (Admin only) */}
+          {isAdmin && !isBuy && subtotalSaleAmount > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: '#f8fafc', padding: '10px', borderRadius: '9px', border: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem' }}>
                 <span style={{ fontWeight: 700, color: '#475569' }}>Estimated Gross Margin:</span>

@@ -1,14 +1,25 @@
-import React from 'react';
-import { FileText, Package, Layers, X, Trash2 } from 'lucide-react';
+"use client";
+
+import React, { useState, useEffect, useMemo } from 'react';
+import { FileText, Package, Layers, X, Trash2, ChevronDown, ChevronUp, Loader2, Sparkles, Check } from 'lucide-react';
 import QuickClinicalRegimens from '../QuickClinicalRegimens';
+import CopyableId from '@/components/ui/CopyableId';
+import { resolveItemSku } from '@/utils/skuResolver';
+import { resolveVariantPrice } from '@/utils/resolvePrice';
 
 /**
  * WorkspaceCatalogPickers
- * Empty state triggers and inline search popovers for Protocols, Catalog Products, and Saved Kits.
+ * Algolia-powered inline search and multi-variant selector for:
+ * 1. Clinical Protocols (with live Algolia search)
+ * 2. Master Catalog Products (with expandable multi-variant selection: dose, format, supplier, SKU, role price)
+ * 3. Saved Reusable Kit Templates
  */
 export default function WorkspaceCatalogPickers({
   itemsCount = 0,
+  isAdmin = false,
   isDoctor = false,
+  isWholesaler = false,
+  isPatient = false,
   activePicker = null,
   setActivePicker,
   pickerSearch = '',
@@ -22,23 +33,135 @@ export default function WorkspaceCatalogPickers({
   onLoadKit,
   onDeleteKit,
 }) {
-  const filteredProtocols = (Array.isArray(protocols) ? protocols : []).filter((p) => {
-    if (!pickerSearch.trim()) return true;
-    const q = pickerSearch.toLowerCase();
-    return (
-      (p.name || p.title || '').toLowerCase().includes(q) ||
-      (p.primary_goal || p.category || '').toLowerCase().includes(q)
-    );
-  });
+  const [liveProducts, setLiveProducts] = useState([]);
+  const [liveProtocols, setLiveProtocols] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [expandedProductIds, setExpandedProductIds] = useState(new Set());
+  const [addedVariantId, setAddedVariantId] = useState(null);
 
-  const filteredProducts = (Array.isArray(availableProducts) ? availableProducts : []).filter((p) => {
-    if (!pickerSearch.trim()) return true;
-    const q = pickerSearch.toLowerCase();
-    return (
-      (p.canonicalName || p.name || '').toLowerCase().includes(q) ||
-      (p.sku || p.category || '').toLowerCase().includes(q)
-    );
-  });
+  const effectiveTier = useMemo(() => {
+    if (isDoctor) return 'clinic';
+    if (isWholesaler) return 'wholesale';
+    if (isPatient) return 'retail';
+    return 'clinic';
+  }, [isDoctor, isWholesaler, isPatient]);
+
+  // Reactive Debounced Algolia / Catalog Search (<250ms)
+  useEffect(() => {
+    if (!activePicker) {
+      setLiveProducts([]);
+      setLiveProtocols([]);
+      return;
+    }
+
+    const cleanQ = pickerSearch.trim();
+    if (cleanQ.length < 2) {
+      setLiveProducts([]);
+      setLiveProtocols([]);
+      setIsSearching(false);
+      return;
+    }
+
+    let isCancelled = false;
+    setIsSearching(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        if (activePicker === 'products') {
+          // Query catalog summary API which handles Algolia search + embedded variants
+          const res = await fetch(`/api/catalog/summary?limit=12&q=${encodeURIComponent(cleanQ)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (!isCancelled) {
+              const list = Array.isArray(data.items) ? data.items : (Array.isArray(data.data) ? data.data : (Array.isArray(data.products) ? data.products : []));
+              setLiveProducts(list);
+              // Auto-expand if only 1 or 2 products match
+              if (list.length <= 2) {
+                setExpandedProductIds(new Set(list.map(p => p.id)));
+              }
+            }
+          }
+        } else if (activePicker === 'protocols') {
+          // Query Algolia federated protocols via repository
+          const { searchCatalogFast } = await import('@/repositories/workspaceSearchRepository');
+          const fastRes = await searchCatalogFast(cleanQ);
+          if (!isCancelled && fastRes?.protocols) {
+            setLiveProtocols(fastRes.protocols);
+          }
+        }
+      } catch (err) {
+        console.warn('[WorkspaceCatalogPickers] Search error:', err);
+      } finally {
+        if (!isCancelled) setIsSearching(false);
+      }
+    }, 250);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
+  }, [pickerSearch, activePicker]);
+
+  const toggleProductExpand = (prodId) => {
+    setExpandedProductIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(prodId)) next.delete(prodId);
+      else next.add(prodId);
+      return next;
+    });
+  };
+
+  // Handler to add an exact variant with all immutable properties
+  const handleAddExactVariant = (prod, variant, idx) => {
+    const v = variant || {};
+    const resolved = resolveVariantPrice(v, { tier: effectiveTier });
+    const rawPrice = resolved?.perUnit ?? Number(v.price || v.unit_price || v.unitPrice || 0);
+
+    const variantSku = resolveItemSku({ ...prod, ...v });
+    const doseLabel = v.dosage || v.size || (v.dosage_unit ? `${v.dosage || ''} ${v.dosage_unit}`.trim() : 'Standard');
+    const formatLabel = v.format || v.presentation || 'Vial';
+
+    const itemToAdd = {
+      id: `ws_${prod.id}_${v.id || v.sku || idx}_${Date.now()}`,
+      productId: prod.id,
+      variantId: v.id || `${prod.id}_var_${idx}`,
+      canonicalName: `${prod.canonicalName || prod.name || 'Compound'} · ${doseLabel}`,
+      sku: variantSku,
+      dosage: doseLabel,
+      format: formatLabel,
+      quantity: 1,
+      unitPrice: rawPrice,
+      price: rawPrice,
+      unitRate: rawPrice,
+      supplierCost: isDoctor ? 0 : Number(v.supplierCost || v.cost || v.pricing?.supplierCost || 0),
+      supplierName: isDoctor ? '' : (v.supplierName || v.supplier || prod.supplierName || 'Lotusland Limited'),
+      supplierId: isDoctor ? '' : (v.supplierId || v.supplier || ''),
+      category: prod.category || prod.categoryId || 'Peptides',
+      presentation: v.presentation || formatLabel,
+      targetTier: effectiveTier,
+    };
+
+    if (onAddProduct) onAddProduct(itemToAdd);
+    setAddedVariantId(v.id || idx);
+    setTimeout(() => setAddedVariantId(null), 1500);
+  };
+
+  // Protocols to display: live Algolia protocols when searching, or local protocols
+  const displayProtocols = pickerSearch.trim().length >= 2 && liveProtocols.length > 0
+    ? liveProtocols
+    : (Array.isArray(protocols) ? protocols : []).filter((p) => {
+        if (!pickerSearch.trim()) return true;
+        const q = pickerSearch.toLowerCase();
+        return (
+          (p.name || p.title || '').toLowerCase().includes(q) ||
+          (p.primary_goal || p.category || '').toLowerCase().includes(q)
+        );
+      });
+
+  // Products to display: live Algolia products when searching, or local available products
+  const displayProducts = pickerSearch.trim().length >= 2
+    ? liveProducts
+    : (Array.isArray(availableProducts) ? availableProducts : []).slice(0, 15);
 
   return (
     <>
@@ -145,7 +268,7 @@ export default function WorkspaceCatalogPickers({
                   borderRadius: '10px',
                   backgroundColor: '#f0fdf4',
                   border: '1px solid #bbf7d0',
-                  color: '#15803d',
+                  color: '#16a34a',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -159,7 +282,7 @@ export default function WorkspaceCatalogPickers({
                   Add from Master Catalog
                 </h4>
                 <p style={{ margin: '3px 0 0', fontSize: '0.76rem', color: '#16a34a', fontWeight: 600 }}>
-                  Search individual peptides, vials & dosages
+                  Browse single compounds and specific presentations
                 </p>
               </div>
             </div>
@@ -167,7 +290,7 @@ export default function WorkspaceCatalogPickers({
               type="button"
               style={{
                 border: 'none',
-                backgroundColor: '#15803d',
+                backgroundColor: '#16a34a',
                 color: '#ffffff',
                 padding: '8px 14px',
                 borderRadius: '8px',
@@ -181,18 +304,18 @@ export default function WorkspaceCatalogPickers({
             </button>
           </div>
 
-          {/* Card 3: Saved Kits (if available) */}
-          {(savedKits || []).length > 0 && (
+          {/* Card 3: Load Saved Kit */}
+          {savedKits && savedKits.length > 0 && (
             <div
               onClick={() => {
                 setActivePicker(activePicker === 'kits' ? null : 'kits');
                 setPickerSearch('');
               }}
               style={{
-                backgroundColor: activePicker === 'kits' ? '#fdf4ff' : '#ffffff',
-                border: `1.5px solid ${activePicker === 'kits' ? '#a855f7' : '#e9d5ff'}`,
+                backgroundColor: activePicker === 'kits' ? '#faf5ff' : '#ffffff',
+                border: `1.5px solid ${activePicker === 'kits' ? '#9333ea' : '#e9d5ff'}`,
                 borderRadius: '12px',
-                padding: '1rem',
+                padding: '1rem 1.1rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -247,7 +370,7 @@ export default function WorkspaceCatalogPickers({
         </div>
       )}
 
-      {/* Inline Picker Overlay for Protocols */}
+      {/* Inline Picker Overlay for Protocols (Algolia Connected) */}
       {activePicker === 'protocols' && (
         <div
           style={{
@@ -262,7 +385,9 @@ export default function WorkspaceCatalogPickers({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>Select Clinical Protocol</span>
+            <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+              Select Clinical Protocol
+            </span>
             <button
               type="button"
               onClick={() => setActivePicker(null)}
@@ -271,20 +396,42 @@ export default function WorkspaceCatalogPickers({
               <X size={16} />
             </button>
           </div>
-          <input
-            type="text"
-            placeholder="Search protocols by name or goal..."
-            value={pickerSearch}
-            onChange={(e) => setPickerSearch(e.target.value)}
-            style={{ padding: '7px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', fontSize: '0.78rem', outline: 'none' }}
-          />
-          <div style={{ maxHeight: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {filteredProtocols.map((p) => (
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search protocols by name, goal, or compound (Algolia)..."
+              value={pickerSearch}
+              onChange={(e) => setPickerSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '7px 30px 7px 10px',
+                borderRadius: '7px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.78rem',
+                outline: 'none',
+              }}
+            />
+            {isSearching && (
+              <Loader2
+                size={14}
+                className="animate-spin"
+                style={{ position: 'absolute', right: '9px', top: '9px', color: '#0284c7' }}
+              />
+            )}
+          </div>
+          <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            {displayProtocols.length === 0 && !isSearching && (
+              <div style={{ padding: '15px', textAlign: 'center', fontSize: '0.78rem', color: '#94a3b8' }}>
+                No clinical protocols found matching &quot;{pickerSearch}&quot;.
+              </div>
+            )}
+            {displayProtocols.map((p) => (
               <div
-                key={p.id}
+                key={p.id || p.objectID}
                 onClick={() => {
                   if (onLoadProtocol) onLoadProtocol(p);
                   setActivePicker(null);
+                  setPickerSearch('');
                 }}
                 style={{
                   padding: '8px 10px',
@@ -296,7 +443,10 @@ export default function WorkspaceCatalogPickers({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   touchAction: 'manipulation',
+                  transition: 'background-color 0.15s',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#eff6ff')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
               >
                 <div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#003666' }}>{p.name || p.title}</div>
@@ -311,7 +461,7 @@ export default function WorkspaceCatalogPickers({
         </div>
       )}
 
-      {/* Inline Picker Overlay for Master Catalog */}
+      {/* Inline Picker Overlay for Master Catalog (Algolia + Multi-Variant Selector) */}
       {activePicker === 'products' && (
         <div
           style={{
@@ -326,7 +476,14 @@ export default function WorkspaceCatalogPickers({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>Select Product from Catalog</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+                Select Product & Variant
+              </span>
+              <span style={{ fontSize: '0.7rem', backgroundColor: '#dcfce7', color: '#15803d', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                Algolia Live
+              </span>
+            </div>
             <button
               type="button"
               onClick={() => setActivePicker(null)}
@@ -335,44 +492,193 @@ export default function WorkspaceCatalogPickers({
               <X size={16} />
             </button>
           </div>
-          <input
-            type="text"
-            placeholder="Search by peptide name, SKU, or category..."
-            value={pickerSearch}
-            onChange={(e) => setPickerSearch(e.target.value)}
-            style={{ padding: '7px 10px', borderRadius: '7px', border: '1px solid #cbd5e1', fontSize: '0.78rem', outline: 'none' }}
-          />
-          <div style={{ maxHeight: '220px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {filteredProducts.slice(0, 30).map((prod) => (
-              <div
-                key={prod.id}
-                onClick={() => {
-                  if (onAddProduct) onAddProduct(prod);
-                  setActivePicker(null);
-                }}
-                style={{
-                  padding: '8px 10px',
-                  borderRadius: '7px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#f8fafc',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  touchAction: 'manipulation',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#15803d' }}>
-                    {prod.canonicalName || prod.name}
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                    {prod.dosage || prod.unit || 'Standard'} • {prod.category || 'Peptides'}
-                  </div>
-                </div>
-                <span style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 700 }}>+ Add</span>
+
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search by peptide name, brand synonym, or SKU (e.g. tirze, sema)..."
+              value={pickerSearch}
+              onChange={(e) => setPickerSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '7px 30px 7px 10px',
+                borderRadius: '7px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.78rem',
+                outline: 'none',
+              }}
+            />
+            {isSearching && (
+              <Loader2
+                size={14}
+                className="animate-spin"
+                style={{ position: 'absolute', right: '9px', top: '9px', color: '#16a34a' }}
+              />
+            )}
+          </div>
+
+          <div style={{ maxHeight: '320px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {displayProducts.length === 0 && !isSearching && pickerSearch.trim().length >= 2 && (
+              <div style={{ padding: '20px', textAlign: 'center', fontSize: '0.78rem', color: '#94a3b8' }}>
+                No products found matching &quot;{pickerSearch}&quot;.
               </div>
-            ))}
+            )}
+
+            {displayProducts.map((prod) => {
+              const variants = Array.isArray(prod.variants) && prod.variants.length > 0
+                ? prod.variants
+                : [
+                    {
+                      id: prod.id,
+                      dosage: prod.dosage || prod.size || 'Standard',
+                      format: prod.format || prod.presentation || 'Vial',
+                      supplierName: prod.supplierName || (Array.isArray(prod.suppliers) ? prod.suppliers[0] : 'Lotusland Limited'),
+                      supplierId: prod.supplierId || '',
+                      sku: prod.sku || '',
+                      price: prod.price || prod.unitPrice || 0,
+                    },
+                  ];
+
+              const isExpanded = expandedProductIds.has(prod.id);
+
+              return (
+                <div
+                  key={prod.id || prod.objectID}
+                  style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    backgroundColor: '#ffffff',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Product Header Row */}
+                  <div
+                    onClick={() => toggleProductExpand(prod.id)}
+                    style={{
+                      padding: '8px 10px',
+                      backgroundColor: isExpanded ? '#f0fdf4' : '#f8fafc',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderBottom: isExpanded ? '1px solid #bbf7d0' : 'none',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+                        {prod.canonicalName || prod.name}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                        {prod.category || 'Peptide'} • {variants.length} presentation{variants.length > 1 ? 's' : ''} available
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                        {isExpanded ? 'Hide Options' : 'Select Variant'}
+                      </span>
+                      {isExpanded ? <ChevronUp size={14} color="#16a34a" /> : <ChevronDown size={14} color="#16a34a" />}
+                    </div>
+                  </div>
+
+                  {/* Variants List Accordion */}
+                  {isExpanded && (
+                    <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: '#fafafa' }}>
+                      {variants.map((v, vIdx) => {
+                        const resolved = resolveVariantPrice(v, { tier: effectiveTier });
+                        const displayPrice = resolved?.perUnit ?? Number(v.price || v.unit_price || v.unitPrice || 0);
+                        const variantSku = resolveItemSku({ ...prod, ...v });
+                        const isAdded = addedVariantId === (v.id || vIdx);
+
+                        return (
+                          <div
+                            key={v.id || vIdx}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '6px',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '8px',
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                <span style={{ fontWeight: 800, fontSize: '0.8rem', color: '#0f172a' }}>
+                                  {v.dosage || v.size || 'Standard'}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    backgroundColor: '#f1f5f9',
+                                    color: '#475569',
+                                    padding: '1px 5px',
+                                    borderRadius: '4px',
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {v.format || v.presentation || 'Vial'}
+                                </span>
+                                {isAdmin && (v.supplierName || v.supplier) && (
+                                  <span style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                                    • {v.supplierName || v.supplier}
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                <span style={{ fontSize: '0.68rem', color: '#64748b' }}>SKU:</span>
+                                <CopyableId value={variantSku} displayValue={variantSku} />
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>
+                                  ${displayPrice.toFixed(2)}
+                                </div>
+                                <div style={{ fontSize: '0.64rem', color: '#94a3b8' }}>
+                                  {effectiveTier} rate
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleAddExactVariant(prod, v, vIdx)}
+                                style={{
+                                  border: 'none',
+                                  backgroundColor: isAdded ? '#10b981' : '#16a34a',
+                                  color: '#ffffff',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.74rem',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  touchAction: 'manipulation',
+                                  transition: 'all 0.15s',
+                                }}
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <Check size={12} /> Added
+                                  </>
+                                ) : (
+                                  '+ Add'
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -425,6 +731,7 @@ export default function WorkspaceCatalogPickers({
                     onClick={() => {
                       if (onLoadKit) onLoadKit(kit.id);
                       setActivePicker(null);
+                      setPickerSearch('');
                     }}
                     style={{
                       padding: '5px 10px',
