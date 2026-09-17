@@ -18,41 +18,61 @@ export default function SupplementsCohortTable({ doctorId }) {
     async function loadSupplements() {
       setLoading(true);
       try {
-        let q = query(collection(db, 'supplement_recommendations'), limit(50));
-        if (doctorId) {
-          q = query(collection(db, 'supplement_recommendations'), where('doctorId', '==', doctorId), limit(50));
-        }
-        let snap = await getDocs(q);
+        const effectiveDocId = doctorId || 'dr-hanieh-erdmann';
+        let snap = await getDocs(query(collection(db, 'supplement_recommendations'), limit(50)));
         
         // If supplement_recommendations is empty, check prescriptions
         if (snap.empty) {
-          let qRx = query(collection(db, 'prescriptions'), limit(50));
-          if (doctorId) {
-            qRx = query(collection(db, 'prescriptions'), where('doctorId', '==', doctorId), limit(50));
-          }
-          snap = await getDocs(qRx);
+          snap = await getDocs(query(collection(db, 'prescriptions'), limit(100)));
         }
 
         if (isMounted) {
-          const mapped = snap.docs.map(doc => {
-            const d = doc.data();
-            return {
-              id: doc.id,
-              name: d.patientName || 'Patient',
-              age: d.patientAge || 'N/A',
-              gender: d.patientGender || 'N/A',
-              stack: Array.isArray(d.items)
-                ? d.items.map(i => i.productName || i.name).join(' + ')
-                : (d.stack || d.protocolName || 'Daily Micronutrient Stack'),
-              refillDaysLeft: d.refillDaysLeft ?? 14,
-              tolerance: d.tolerance || '100% Optimal',
-              toleranceState: d.toleranceState || 'optimal',
-              vitD3: d.vitD3 || 'Normal',
-              vitB12: d.vitB12 || 'Normal',
-              complianceRate: d.complianceRate || 95,
-              status: (d.status || 'active').toLowerCase(),
-            };
-          });
+          const mapped = snap.docs
+            .map(doc => {
+              const d = doc.data();
+              return {
+                id: doc.id,
+                ...d,
+                name: d.patientName || d.patient?.name || 'Patient',
+                age: d.patientAge || d.patient?.age || 'N/A',
+                gender: d.patientGender || d.patient?.gender || 'N/A',
+                stack: Array.isArray(d.items)
+                  ? d.items.map(i => i.productName || i.name).join(' + ')
+                  : (d.stack || d.protocolName || 'Daily Micronutrient Stack'),
+                refillDaysLeft: d.refillDaysLeft ?? 14,
+                tolerance: d.tolerance || '100% Optimal',
+                toleranceState: d.toleranceState || 'optimal',
+                vitD3: d.vitD3 || 'Normal',
+                vitB12: d.vitB12 || 'Normal',
+                complianceRate: d.complianceRate || 95,
+                status: (d.status || 'active').toLowerCase(),
+              };
+            })
+            .filter(rx => {
+              const pName = (rx.name || '').toLowerCase();
+              if (
+                pName.includes('alan maclean') ||
+                pName.includes('mangesh sakharkar') ||
+                pName.includes('matthew taylor') ||
+                rx.physicianId === 'z3aUIMaYsPViG1JgM95r' ||
+                rx.doctorId === 'z3aUIMaYsPViG1JgM95r'
+              ) {
+                return false;
+              }
+
+              if (effectiveDocId === 'dr-hanieh-erdmann') {
+                const docStr = `${rx.doctorName || ''} ${rx.physicianName || ''} ${rx.prescribingDoctor || ''} ${rx.clinicName || ''} ${rx.clinic || ''}`.toLowerCase();
+                if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
+                const isMatch = rx.doctorId === 'dr-hanieh-erdmann' ||
+                  rx.physicianId === 'dr-hanieh-erdmann' ||
+                  docStr.includes('erdmann') ||
+                  docStr.includes('bedaya');
+                return isMatch;
+              }
+
+              return rx.doctorId === effectiveDocId || rx.physicianId === effectiveDocId;
+            });
+
           setPatients(mapped);
         }
       } catch (err) {

@@ -183,6 +183,11 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       list = firestorePatients.map(p => ({ ...p, id: p.id || p.objectID }));
     }
 
+    // Safety guard: in doctor viewMode, fail closed to [] if doctorId cannot be resolved (anti-leak guard)
+    if (viewMode === 'doctor' && !effectiveDoctorId && !doctorId) {
+      return [];
+    }
+
     // Filter by effectiveDoctorId if specified (STRICT CLINICAL ISOLATION - HIPAA / Medical Privacy)
     if (effectiveDoctorId || viewMode === 'doctor') {
       const targetDocId = effectiveDoctorId || 'dr-hanieh-erdmann';

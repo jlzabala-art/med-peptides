@@ -18,34 +18,59 @@ export default function PeptideCohortTable({ doctorId }) {
     async function loadPeptidePatients() {
       setLoading(true);
       try {
-        let q = query(collection(db, 'prescriptions'), limit(50));
-        if (doctorId) {
-          q = query(collection(db, 'prescriptions'), where('doctorId', '==', doctorId), limit(50));
-        }
-        const snap = await getDocs(q);
+        const effectiveDocId = doctorId || 'dr-hanieh-erdmann';
+        const snap = await getDocs(query(collection(db, 'prescriptions'), limit(100)));
         if (isMounted) {
-          const mapped = snap.docs.map(doc => {
-            const d = doc.data();
-            return {
-              id: doc.id,
-              name: d.patientName || 'Patient',
-              age: d.patientAge || 'N/A',
-              gender: d.patientGender || 'N/A',
-              regimen: Array.isArray(d.items) 
-                ? d.items.map(i => i.productName || i.name).join(' + ') 
-                : (d.protocolName || d.peptideName || 'Active Protocol'),
-              cycleCurrentWeek: d.cycleCurrentWeek || 1,
-              cycleTotalWeeks: d.cycleTotalWeeks || 8,
-              washoutStatus: d.washoutStatus || 'Active Cycle',
-              washoutState: d.washoutState || 'active',
-              reconstitution: d.reconstitution || 'Reconstituted Solution',
-              igf1: d.igf1 || 'Baseline',
-              hba1c: d.hba1c || 'N/A',
-              adherence: d.adherence || 100,
-              status: (d.status || 'active').toLowerCase(),
-              alert: d.notes || d.clinicalNotes || 'Monitoring active protocol',
-            };
-          });
+          const mapped = snap.docs
+            .map(doc => {
+              const d = doc.data();
+              return {
+                id: doc.id,
+                ...d,
+                name: d.patientName || d.patient?.name || 'Patient',
+                age: d.patientAge || d.patient?.age || 'N/A',
+                gender: d.patientGender || d.patient?.gender || 'N/A',
+                regimen: Array.isArray(d.items) 
+                  ? d.items.map(i => i.productName || i.name).join(' + ') 
+                  : (d.protocolName || d.peptideName || 'Active Protocol'),
+                cycleCurrentWeek: d.cycleCurrentWeek || 1,
+                cycleTotalWeeks: d.cycleTotalWeeks || 8,
+                washoutStatus: d.washoutStatus || 'Active Cycle',
+                washoutState: d.washoutState || 'active',
+                reconstitution: d.reconstitution || 'Reconstituted Solution',
+                igf1: d.igf1 || 'Baseline',
+                hba1c: d.hba1c || 'N/A',
+                adherence: d.adherence || 100,
+                status: (d.status || 'active').toLowerCase(),
+                alert: d.notes || d.clinicalNotes || 'Monitoring active protocol',
+              };
+            })
+            .filter(rx => {
+              const pName = (rx.name || '').toLowerCase();
+              // STRICT EXCLUSION: Never show Hortman Clinics / Dr. Sezgin Cagatay patients to Dr. Erdmann
+              if (
+                pName.includes('alan maclean') ||
+                pName.includes('mangesh sakharkar') ||
+                pName.includes('matthew taylor') ||
+                rx.physicianId === 'z3aUIMaYsPViG1JgM95r' ||
+                rx.doctorId === 'z3aUIMaYsPViG1JgM95r'
+              ) {
+                return false;
+              }
+
+              if (effectiveDocId === 'dr-hanieh-erdmann') {
+                const docStr = `${rx.doctorName || ''} ${rx.physicianName || ''} ${rx.prescribingDoctor || ''} ${rx.clinicName || ''} ${rx.clinic || ''}`.toLowerCase();
+                if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
+                const isMatch = rx.doctorId === 'dr-hanieh-erdmann' ||
+                  rx.physicianId === 'dr-hanieh-erdmann' ||
+                  docStr.includes('erdmann') ||
+                  docStr.includes('bedaya');
+                return isMatch;
+              }
+
+              return rx.doctorId === effectiveDocId || rx.physicianId === effectiveDocId;
+            });
+
           setPatients(mapped);
         }
       } catch (err) {

@@ -18,41 +18,61 @@ export default function GenomicsCohortTable({ doctorId }) {
     async function loadGenomics() {
       setLoading(true);
       try {
-        let q = query(collection(db, 'genomics_orders'), limit(50));
-        if (doctorId) {
-          q = query(collection(db, 'genomics_orders'), where('doctorId', '==', doctorId), limit(50));
-        }
-        let snap = await getDocs(q);
+        const effectiveDocId = doctorId || 'dr-hanieh-erdmann';
+        let snap = await getDocs(query(collection(db, 'genomics_orders'), limit(50)));
 
         // Fallback to clinical tests collection if empty
         if (snap.empty) {
-          let qTests = query(collection(db, 'clinical_tests'), limit(50));
-          if (doctorId) {
-            qTests = query(collection(db, 'clinical_tests'), where('doctorId', '==', doctorId), limit(50));
-          }
-          snap = await getDocs(qTests);
+          snap = await getDocs(query(collection(db, 'clinical_tests'), limit(50)));
         }
 
         if (isMounted) {
-          const mapped = snap.docs.map(doc => {
-            const d = doc.data();
-            const state = (d.status || d.testState || 'in_lab').toLowerCase();
-            return {
-              id: doc.id,
-              name: d.patientName || 'Patient',
-              age: d.patientAge || 'N/A',
-              gender: d.patientGender || 'N/A',
-              testType: d.testType || d.name || 'Fagron Precision Genomics',
-              kitId: d.kitId || `FAG-${doc.id.slice(0, 6).toUpperCase()}`,
-              testStatus: state === 'ready' || state === 'completed' ? 'Report Ready (PDF)' : 'Lab Processing',
-              testState: state === 'ready' || state === 'completed' ? 'ready' : 'in_lab',
-              snpProfile: Array.isArray(d.snpProfile) ? d.snpProfile : (d.snps ? [d.snps] : ['Profile Analyzed']),
-              compoundedRx: d.compoundedRx || 'Custom Formulation Under Review',
-              bioAgeDelta: d.bioAgeDelta || 'Computed on Release',
-              safetyIndex: d.safetyIndex || 'Optimal Compatibility',
-              status: (d.status || 'active').toLowerCase(),
-            };
-          });
+          const mapped = snap.docs
+            .map(doc => {
+              const d = doc.data();
+              const state = (d.status || d.testState || 'in_lab').toLowerCase();
+              return {
+                id: doc.id,
+                ...d,
+                name: d.patientName || d.patient?.name || 'Patient',
+                age: d.patientAge || d.patient?.age || 'N/A',
+                gender: d.patientGender || d.patient?.gender || 'N/A',
+                testType: d.testType || d.name || 'Fagron Precision Genomics',
+                kitId: d.kitId || `FAG-${doc.id.slice(0, 6).toUpperCase()}`,
+                testStatus: state === 'ready' || state === 'completed' ? 'Report Ready (PDF)' : 'Lab Processing',
+                testState: state === 'ready' || state === 'completed' ? 'ready' : 'in_lab',
+                snpProfile: Array.isArray(d.snpProfile) ? d.snpProfile : (d.snps ? [d.snps] : ['Profile Analyzed']),
+                compoundedRx: d.compoundedRx || 'Custom Formulation Under Review',
+                bioAgeDelta: d.bioAgeDelta || 'Computed on Release',
+                safetyIndex: d.safetyIndex || 'Optimal Compatibility',
+                status: (d.status || 'active').toLowerCase(),
+              };
+            })
+            .filter(item => {
+              const pName = (item.name || '').toLowerCase();
+              if (
+                pName.includes('alan maclean') ||
+                pName.includes('mangesh sakharkar') ||
+                pName.includes('matthew taylor') ||
+                item.physicianId === 'z3aUIMaYsPViG1JgM95r' ||
+                item.doctorId === 'z3aUIMaYsPViG1JgM95r'
+              ) {
+                return false;
+              }
+
+              if (effectiveDocId === 'dr-hanieh-erdmann') {
+                const docStr = `${item.doctorName || ''} ${item.physicianName || ''} ${item.prescribingDoctor || ''} ${item.clinicName || ''} ${item.clinic || ''}`.toLowerCase();
+                if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
+                const isMatch = item.doctorId === 'dr-hanieh-erdmann' ||
+                  item.physicianId === 'dr-hanieh-erdmann' ||
+                  docStr.includes('erdmann') ||
+                  docStr.includes('bedaya');
+                return isMatch;
+              }
+
+              return item.doctorId === effectiveDocId || item.physicianId === effectiveDocId;
+            });
+
           setPatients(mapped);
         }
       } catch (err) {
