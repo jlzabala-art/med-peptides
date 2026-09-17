@@ -13,7 +13,7 @@ import { usePrescriptions } from '../../../hooks/admin/usePrescriptions';
 import { useDrawer } from '../../../context/DrawerContext';
 import { useWorkspaceStore } from '../../../stores/useWorkspaceStore';
 import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollection';
-import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2, Tag } from '@/lib/icons';
+import { X, User, Phone, Mail, Activity, FileText, ShoppingCart, FilePlus, AlertCircle, Clock, Calendar as CalendarIcon, ClipboardList, FlaskConical, Edit2, Check, Briefcase, ChevronDown, ChevronUp, Stethoscope, Building2, Tag, MoreVertical, MessageCircle, Sparkles } from '@/lib/icons';
 import { linkPatientToUser, unlinkPatientFromUser, findLinkedUser } from '../../../services/patientLinkService';
 import PatientLabelSheetModal from '../prescriptions/PatientLabelSheetModal';
 
@@ -180,6 +180,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
   const [serverBundle, setServerBundle] = useState(null);
   const [isEditingCareTeam, setIsEditingCareTeam] = useState(false);
   const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
+  const [showMobileActions, setShowMobileActions] = useState(false);
 
   useEffect(() => {
     if (initialPatient) {
@@ -358,7 +359,8 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
           </div>
         </div>
 
-        <div className={styles.headerActions}>
+        {/* Desktop Action Buttons */}
+        <div className={styles.desktopActions}>
           <button
             onClick={() => {
               openDrawer('rx-builder', 'new', {
@@ -488,64 +490,185 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
             <X size={16} />
           </button>
         </div>
+
+        {/* Mobile Action Controls */}
+        <div className={styles.mobileActions}>
+          <button
+            onClick={() => {
+              openDrawer('rx-builder', 'new', {
+                initialPatient: { id: patient.id, name: displayName, email: patient.email },
+                sourceModule: 'patient-profile',
+              });
+            }}
+            className="gcp-btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: '#0d9488', borderColor: '#0d9488', fontSize: '0.76rem', padding: '0.4rem 0.65rem' }}
+          >
+            <FilePlus size={13} /> Rx
+          </button>
+
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowMobileActions(!showMobileActions)}
+              style={{
+                padding: '0.38rem 0.5rem',
+                background: showMobileActions ? '#f1f5f9' : '#ffffff',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                color: 'var(--text-main)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="More Actions"
+            >
+              <MoreVertical size={16} />
+            </button>
+
+            {showMobileActions && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '115%',
+                  right: 0,
+                  width: '200px',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  boxShadow: '0 10px 25px -5px rgba(0,0,0,0.18)',
+                  padding: '6px',
+                  zIndex: 100,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setShowMobileActions(false);
+                    window.dispatchEvent(new CustomEvent('open-ai-chat', { 
+                      detail: { 
+                        mode: 'patient', 
+                        moduleMode: 'patient', 
+                        clearHistory: true, 
+                        context: { patientId: patient.id, name: displayName, clinic: patient.clinic, physician: patient.physician } 
+                      } 
+                    }));
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '6px', fontSize: '0.80rem', color: '#0d9488', fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}
+                >
+                  <Activity size={14} /> Ask Patient AI
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMobileActions(false);
+                    const { setWorkspaceIntent, setTargetEntity, setDrawerOpen, activeWorkspaceId } = useWorkspaceStore.getState();
+                    setWorkspaceIntent('sell', activeWorkspaceId);
+                    setTargetEntity(activeWorkspaceId, { id: patient.id, name: displayName, email: patient.email || '', type: 'patient' });
+                    setDrawerOpen(true);
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '6px', fontSize: '0.80rem', color: '#1d4ed8', fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}
+                >
+                  <Briefcase size={14} /> Stage in Workspace
+                </button>
+                {isCommercial && (
+                  <button
+                    onClick={() => {
+                      setShowMobileActions(false);
+                      window.dispatchEvent(new CustomEvent('open-quotation-wizard', {
+                        detail: { type: 'patient', patientId: patient.id, patientName: displayName, clinicName: patient.clinic || '', doctorName: patient.physician || '' }
+                      }));
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '6px', fontSize: '0.80rem', color: 'var(--text-main)', fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}
+                  >
+                    <FileText size={14} /> Create Quote
+                  </button>
+                )}
+                {!is('doctor') && role !== 'doctor' && (
+                  <button
+                    onClick={() => {
+                      setShowMobileActions(false);
+                      setIsLabelModalOpen(true);
+                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '6px', fontSize: '0.80rem', color: '#0f766e', fontWeight: 600, textAlign: 'left', cursor: 'pointer' }}
+                  >
+                    <Tag size={14} /> Print Stickers
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={onClose}
+            title="Close patient chart"
+            style={{
+              padding: '0.38rem',
+              background: 'none',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              color: 'var(--text-muted)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Main Content Layout */}
       <div className={styles.mainLayout}>
         <div className={styles.contentArea} style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
           
-          {/* ── Compact Mini-Metrics Strip (Replaces bulky 2x2 grid, saving ~110px vertical space) ── */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '10px',
-              padding: '8px 12px',
-              backgroundColor: '#ffffff',
-              borderRadius: '10px',
-              border: '1px solid var(--border)',
-              marginBottom: '12px',
-              flexWrap: 'wrap',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FileText size={13} />
+          {/* ── Compact Metrics Strip (Desktop Row, Mobile 2x2 Grid) ── */}
+          <div className={styles.metricsStrip}>
+            <div className={styles.metricItem}>
+              <div className={styles.metricItemLabel}>
+                <div style={{ width: '22px', height: '22px', borderRadius: '5px', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileText size={12} />
+                </div>
+                <span>Prescriptions:</span>
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Active Prescriptions:</span>
               <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#1e40af', backgroundColor: '#eff6ff', padding: '1px 6px', borderRadius: '6px' }}>
                 {prescriptions.length} Protocol{prescriptions.length !== 1 ? 's' : ''}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShoppingCart size={13} />
+            <div className={styles.metricItem}>
+              <div className={styles.metricItemLabel}>
+                <div style={{ width: '22px', height: '22px', borderRadius: '5px', backgroundColor: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <ShoppingCart size={12} />
+                </div>
+                <span>Dispensations:</span>
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Dispensations & Orders:</span>
               <span style={{ fontSize: '0.80rem', fontWeight: 800, color: '#15803d', backgroundColor: '#f0fdf4', padding: '1px 6px', borderRadius: '6px' }}>
                 {orders.length} Order{orders.length !== 1 ? 's' : ''}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#ecfeff', color: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Stethoscope size={13} />
+            <div className={styles.metricItem}>
+              <div className={styles.metricItemLabel}>
+                <div style={{ width: '22px', height: '22px', borderRadius: '5px', backgroundColor: '#ecfeff', color: '#0891b2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Stethoscope size={12} />
+                </div>
+                <span>Attending:</span>
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Attending:</span>
-              <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#0e7490' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0e7490', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '140px' }}>
                 {patient.physician || 'Direct Medical Desk'}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: '#faf5ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Activity size={13} />
+            <div className={styles.metricItem}>
+              <div className={styles.metricItemLabel}>
+                <div style={{ width: '22px', height: '22px', borderRadius: '5px', backgroundColor: '#faf5ff', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Activity size={12} />
+                </div>
+                <span>Status:</span>
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Status:</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', backgroundColor: '#f3e8ff', color: '#7e22ce' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 7px', borderRadius: '6px', backgroundColor: '#f3e8ff', color: '#7e22ce' }}>
                 {patient.status || 'Active'} • Verified
               </span>
             </div>
@@ -618,7 +741,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Demographics, Contact & Portal Access
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <div className={styles.accordionSubtitle}>
                     Personal identification, residential address, emergency phone, and portal linking
                   </div>
                 </div>
@@ -633,6 +756,44 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
 
             {openSections.demographics && (
               <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', backgroundColor: '#ffffff' }}>
+                {/* ── Direct Patient Contact Shortcuts (Mobile-First) ── */}
+                <div className={styles.contactChipsBar}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Quick Contact:</span>
+                  {patient.phone ? (
+                    <>
+                      <a
+                        href={`tel:${patient.phone}`}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '20px', backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontSize: '0.74rem', fontWeight: 700, textDecoration: 'none' }}
+                        title="Direct telephone call"
+                      >
+                        <Phone size={12} /> Call: {patient.phone}
+                      </a>
+                      <a
+                        href={`https://wa.me/${patient.phone.replace(/[^0-9]/g, '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '20px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1px solid #86efac', fontSize: '0.74rem', fontWeight: 700, textDecoration: 'none' }}
+                        title="Chat on WhatsApp"
+                      >
+                        <MessageCircle size={12} /> WhatsApp
+                      </a>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontStyle: 'italic' }}>No phone logged</span>
+                  )}
+                  {patient.email ? (
+                    <a
+                      href={`mailto:${patient.email}`}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '20px', backgroundColor: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontSize: '0.74rem', fontWeight: 700, textDecoration: 'none' }}
+                      title="Send email"
+                    >
+                      <Mail size={12} /> {patient.email}
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontStyle: 'italic' }}>No email logged</span>
+                  )}
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
                   {/* Left Column: Demographics Form */}
                   <div className={styles.infoCard}>
@@ -748,7 +909,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Supervisory Doctor & Clinic Assignment
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <div className={styles.accordionSubtitle}>
                     Assigned clinical center, supervisory practitioner, and direct medical responsibilities
                   </div>
                 </div>
@@ -876,7 +1037,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Prescriptions & Magistral Formulations
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <div className={styles.accordionSubtitle}>
                     Active compound formulations, API dosages, posology schedules, and dispensing status
                   </div>
                 </div>
@@ -942,7 +1103,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Pharmacy Orders & Insulated Logistics
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <div className={styles.accordionSubtitle}>
                     Fulfilled pharmacy deliveries, cold-chain packaging (2-8°C), and tracking history
                   </div>
                 </div>
@@ -1012,7 +1173,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Laboratory Biomarkers & Clinical Diagnostics
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <div className={styles.accordionSubtitle}>
                     Chronological blood biomarkers, hormone profiles, and therapy progression analytics
                   </div>
                 </div>
@@ -1061,7 +1222,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-main)' }}>
                     Appointments & Clinical Action Items
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <div className={styles.accordionSubtitle}>
                     Scheduled follow-up consultations, calendar events, and operational reminders
                   </div>
                 </div>
@@ -1094,6 +1255,75 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
           </div>
 
         </div>
+      </div>
+
+      {/* ── Mobile Sticky Bottom Action Bar (Thumb-Zone Optimization) ── */}
+      <div className={styles.mobileBottomBar}>
+        <button
+          onClick={() => {
+            openDrawer('rx-builder', 'new', {
+              initialPatient: { id: patient.id, name: displayName, email: patient.email },
+              sourceModule: 'patient-profile',
+            });
+          }}
+          style={{
+            flex: '1 1 60%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            backgroundColor: '#0d9488',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '10px',
+            padding: '11px 14px',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(13, 148, 136, 0.3)'
+          }}
+        >
+          <FilePlus size={15} /> Prescribe Protocol
+        </button>
+
+        <button
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('open-ai-chat', { 
+              detail: { 
+                mode: 'patient', 
+                moduleMode: 'patient',
+                productMode: false,
+                clearHistory: true,
+                context: { 
+                  patientId: patient.id, 
+                  name: displayName,
+                  patientName: displayName,
+                  clinic: patient.clinic || '',
+                  physician: patient.physician || '',
+                  mode: 'patient',
+                  isPatientContext: true
+                } 
+              } 
+            }));
+          }}
+          style={{
+            flex: '1 1 40%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            backgroundColor: '#f0fdfa',
+            color: '#0f766e',
+            border: '1px solid #99f6e4',
+            borderRadius: '10px',
+            padding: '11px 12px',
+            fontSize: '0.82rem',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          <Sparkles size={14} /> Ask AI
+        </button>
       </div>
 
       {/* Pharmapolis A4 Stickers Modal (7.5 × 4.5 cm) */}

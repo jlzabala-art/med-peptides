@@ -77,23 +77,23 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
 
   // Generate plain-text summary for WhatsApp / SMS / Email
   const generateFormattedText = () => {
-    let text = `📋 *GUÍA DE ADMINISTRACIÓN CLÍNICA*\n`;
-    text += `*Paciente:* ${patientName}\n`;
-    text += `*Prescriptor:* ${doctorName}\n`;
-    text += `*Fecha de Emisión:* ${dateIssued}\n\n`;
+    let text = `📋 *PATIENT CLINICAL ADMINISTRATION GUIDE*\n`;
+    text += `*Patient:* ${patientName}\n`;
+    text += `*Prescribing Physician:* ${doctorName}\n`;
+    text += `*Date of Issue:* ${dateIssued}\n\n`;
     text += `────────────────────\n`;
 
     guidanceItems.forEach((g, idx) => {
       text += `*${idx + 1}. ${g.name}*\n`;
-      text += `• Reconstitución: Diluir con ${g.diluentMl} ml de Agua Bacteriostática (inyectar suavemente por la pared del vial, NO agitar).\n`;
-      text += `• Dosis Prescrita: ${g.doseStr}\n`;
-      text += `• Jeringa de Insulina U-100: Cargar exactamente *${g.syringeUnits} UNIDADES* (${g.mlPerDose} ml).\n`;
-      text += `• Vía y Frecuencia: ${g.route} • ${g.frequency}\n`;
-      text += `• Conservación: Guardar en frigorífico a 2°C – 8°C. Proteger de la luz.\n\n`;
+      text += `• Reconstitution: Dilute with ${g.diluentMl} ml Bacteriostatic Water (inject gently along the vial wall, DO NOT shake).\n`;
+      text += `• Prescribed Dose: ${g.doseStr}\n`;
+      text += `• U-100 Insulin Syringe: Draw exactly *${g.syringeUnits} UNITS* (${g.mlPerDose} ml).\n`;
+      text += `• Route & Frequency: ${g.route} • ${g.frequency}\n`;
+      text += `• Storage: Keep refrigerated at 2°C – 8°C. Protect from direct light.\n\n`;
     });
 
     text += `────────────────────\n`;
-    text += `ℹ️ Para cualquier consulta sobre su pauta, consulte con su clínica o médico prescriptor.`;
+    text += `ℹ️ For questions regarding your dosing regimen, contact your clinic or prescribing physician.`;
     return text;
   };
 
@@ -101,10 +101,10 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
     try {
       await navigator.clipboard.writeText(generateFormattedText());
       setCopied(true);
-      toast.success('Instrucciones copiadas al portapapeles');
+      toast.success('Instructions copied to clipboard');
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      toast.error('Error al copiar al portapapeles');
+      toast.error('Error copying to clipboard');
     }
   };
 
@@ -183,10 +183,10 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
-                Guía de Administración para el Paciente
+                Patient Administration & Reconstitution Guide
               </h3>
               <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
-                Reconstitución, calibración de jeringa U-100 y pauta posológica
+                Reconstitution volume, U-100 syringe calibration, and administration regimen
               </p>
             </div>
           </div>
@@ -219,17 +219,17 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <User size={15} color="#0d9488" />
-            <span style={{ color: '#64748b' }}>Paciente:</span>
+            <span style={{ color: '#64748b' }}>Patient:</span>
             <strong style={{ color: '#0f172a' }}>{patientName}</strong>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Stethoscope size={15} color="#0d9488" />
-            <span style={{ color: '#64748b' }}>Médico:</span>
+            <span style={{ color: '#64748b' }}>Physician:</span>
             <strong style={{ color: '#0f172a' }}>{doctorName}</strong>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Calendar size={15} color="#0d9488" />
-            <span style={{ color: '#64748b' }}>Fecha:</span>
+            <span style={{ color: '#64748b' }}>Date:</span>
             <span>{dateIssued}</span>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
                     letterSpacing: '0.05em',
                   }}
                 >
-                  Compuesto #{idx + 1}
+                  Compound #{idx + 1}
                 </span>
                 <span
                   style={{
@@ -296,13 +296,13 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
                   }}
                 >
                   <div style={{ fontSize: '0.75rem', color: '#0f766e', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Droplet size={14} /> Jeringa U-100
+                    <Droplet size={14} /> U-100 Syringe
                   </div>
                   <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#115e59', marginTop: '2px' }}>
-                    {item.syringeUnits} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Unidades</span>
+                    {item.syringeUnits} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Units</span>
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    Volumen exacto: {item.mlPerDose} ml
+                    Exact volume: {item.mlPerDose} ml
                   </div>
                 </div>
 
@@ -315,13 +315,13 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
                   }}
                 >
                   <div style={{ fontSize: '0.75rem', color: '#475569', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Droplet size={14} /> Diluyente Requerido
+                    <Droplet size={14} /> Required Diluent
                   </div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#334155', marginTop: '2px' }}>
                     {item.diluentMl} ml
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    Agua Bacteriostática estéril
+                    Sterile Bacteriostatic Water
                   </div>
                 </div>
 
@@ -334,20 +334,20 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
                   }}
                 >
                   <div style={{ fontSize: '0.75rem', color: '#1d4ed8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Thermometer size={14} /> Conservación
+                    <Thermometer size={14} /> Storage
                   </div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1e40af', marginTop: '2px' }}>
                     2°C – 8°C
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                    Refrigerado • No congelar
+                    Refrigerate • Do not freeze
                   </div>
                 </div>
               </div>
 
               {/* Instructions text */}
               <div style={{ fontSize: '0.85rem', lineHeight: '1.5', color: '#334155' }}>
-                <strong>Instrucciones:</strong> {item.instructions}
+                <strong>Instructions:</strong> {item.instructions}
               </div>
             </div>
           ))}
@@ -367,7 +367,7 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
           >
             <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
             <div>
-              <strong>Recomendación para el paciente:</strong> Limpiar el tapón del vial con una toallita de alcohol antes de cada uso. Desechar la aguja en un contenedor de bioseguridad homologado tras cada inyección. Mantener fuera del alcance de los niños.
+              <strong>Patient Advisory:</strong> Swab the vial rubber stopper with an alcohol wipe before each draw. Dispose of the needle in a certified sharps container after each injection. Keep out of reach of children.
             </div>
           </div>
         </div>
@@ -403,7 +403,7 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
               }}
             >
               {copied ? <Check size={16} color="#16a34a" /> : <Copy size={16} />}
-              {copied ? 'Copiado ✓' : 'Copiar Texto'}
+              {copied ? 'Copied ✓' : 'Copy Text'}
             </button>
 
             <button
@@ -423,7 +423,7 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
               }}
             >
               <MessageCircle size={16} />
-              Enviar por WhatsApp
+              Send via WhatsApp
             </button>
           </div>
 
@@ -445,7 +445,7 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
               }}
             >
               <Printer size={16} />
-              Imprimir / PDF
+              Print / PDF
             </button>
             <button
               onClick={onClose}
@@ -460,7 +460,7 @@ export default function PatientAdministrationGuideModal({ isOpen, onClose, rx, i
                 cursor: 'pointer',
               }}
             >
-              Cerrar
+              Close
             </button>
           </div>
         </div>

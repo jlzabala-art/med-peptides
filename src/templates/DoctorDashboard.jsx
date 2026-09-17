@@ -81,7 +81,7 @@ const ALL_TABS = [
   { id: 'shared-info',           label: 'Shared with Me',        icon: Share2,          alwaysOn: true },
   { id: 'messages',              label: 'Messages',              icon: MessageSquare,   alwaysOn: true },
   { id: 'assistants',            label: 'Staff & Assistants',    icon: Users,           perm: 'manageStaff' },
-  { id: 'membership',            label: 'Plan & Suscripción 💎', icon: Award,           alwaysOn: true },
+  { id: 'membership',            label: 'Plan & Membership 💎',  icon: Award,           alwaysOn: true },
   { id: 'settings',              label: 'Settings',              icon: Settings,        alwaysOn: true },
 ];
 
@@ -136,7 +136,7 @@ const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
     id: 'account', label: 'Doctor Credentials', emoji: '🛡️',
     items: [
       { id: 'settings', label: 'DHA License & Profile', icon: Settings },
-      { id: 'membership', label: 'Plan & Suscripción 💎', icon: Award }
+      { id: 'membership', label: 'Plan & Membership 💎', icon: Award }
     ],
   },
 ];
@@ -351,12 +351,12 @@ export default function DoctorDashboard({ children }) {
               boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
               transition: 'transform 0.15s ease',
             }}
-            title="Haz clic para ver las características de tu suscripción o solicitar Upgrade a Pro"
+            title="Click to view subscription details or request Pro upgrade"
           >
             {isProDoctor ? (
-              <>💎 Plan Avanzado Pro • Activo</>
+              <>💎 Advanced Pro Plan • Active</>
             ) : (
-              <>🟢 Plan Básico (Free) • Upgrade a Pro ⚡</>
+              <>🟢 Basic Plan (Free) • Upgrade to Pro ⚡</>
             )}
           </button>
         </div>

@@ -490,10 +490,10 @@ export default function AdminPhysiciansTab() {
                     subscriptionTier: nextTier,
                     planUpdatedAt: new Date()
                   });
-                  notifier.success(`Doctor ${d.firstName || d.displayName || 'Médico'} actualizado a ${nextTier === 'advanced' ? 'Avanzado Pro 💎' : 'Básico 🟢'}`);
+                  notifier.success(`Dr. ${d.firstName || d.displayName || 'Physician'} updated to ${nextTier === 'advanced' ? 'Advanced Pro 💎' : 'Basic (Free) 🟢'}`);
                   refresh();
                 } catch (err) {
-                  notifier.error('Error al actualizar plan: ' + err.message);
+                  notifier.error('Error updating plan: ' + err.message);
                 }
               }}
               style={{
@@ -510,9 +510,9 @@ export default function AdminPhysiciansTab() {
                 color: isPro ? '#0f766e' : '#475569',
                 transition: 'all 0.15s ease',
               }}
-              title="Haz clic para cambiar entre Plan Básico y Avanzado Pro"
+              title="Click to toggle between Basic and Advanced Pro Plan"
             >
-              {isPro ? '💎 Avanzado Pro' : '🟢 Básico (Free)'}
+              {isPro ? '💎 Advanced Pro' : '🟢 Basic (Free)'}
             </button>
           </div>
         );

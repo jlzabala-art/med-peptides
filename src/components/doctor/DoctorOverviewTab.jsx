@@ -139,14 +139,12 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
       {/* 🚀 MEDICAL DIRECTOR COMMAND CENTER HEADER & QUICK LAUNCH BAR */}
       <div
         style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 30,
+          position: 'relative',
           background: 'linear-gradient(135deg, rgba(0, 54, 102, 0.95) 0%, rgba(0, 34, 68, 0.95) 100%)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderRadius: '16px',
-          padding: '1rem 1.25rem',
+          padding: '1.15rem 1.25rem',
           color: '#ffffff',
           boxShadow: '0 4px 20px rgba(0, 54, 102, 0.25)',
           display: 'flex',
@@ -168,6 +166,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#38bdf8',
+                flexShrink: 0,
               }}
             >
               <Stethoscope size={24} />
@@ -205,6 +204,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
               transition: 'all 0.15s ease',
+              flexShrink: 0,
             }}
           >
             <Plus size={16} />
@@ -242,6 +242,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             <UserPlus size={15} />
@@ -265,6 +266,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             <Pill size={15} />
@@ -288,6 +290,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             <FlaskConical size={15} />
@@ -311,6 +314,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              flexShrink: 0,
             }}
           >
             <MessageSquare size={15} />
@@ -366,14 +370,14 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontWeight: 800, color: '#0f766e', fontSize: '0.95rem' }}>
-                  Nivel Actual: 🟢 Plan Básico (Clinical Starter)
+                  Current Tier: 🟢 Basic Plan (Clinical Starter)
                 </span>
                 <span style={{ fontSize: '0.72rem', background: '#ccfbf1', color: '#042f2e', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>
                   Dr. Hanieh Erdmann
                 </span>
               </div>
               <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: '#334155', lineHeight: 1.4 }}>
-                ¿Deseas evolucionar a <strong>Avanzado Pro</strong>? Desbloquea Atlas AI Scribe ilimitado, guías personalizadas con el logo de tu clínica y recordatorios automáticos de refill por WhatsApp para tus pacientes.
+                Looking to upgrade to <strong>Advanced Pro</strong>? Unlock unlimited Atlas AI Clinical Scribe, white-label patient guides with your clinic branding, and automated WhatsApp refill alerts.
               </p>
             </div>
           </div>
@@ -397,7 +401,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               }}
             >
               <FileText size={15} />
-              <span>Ver Hoja Comparativa</span>
+              <span>View Membership Sheet</span>
             </button>
 
             <button
@@ -419,7 +423,7 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               }}
             >
               <Zap size={15} />
-              <span>Upgrade a Pro ⚡</span>
+              <span>Upgrade to Pro ⚡</span>
             </button>
           </div>
         </div>

@@ -27,10 +27,10 @@ import { db } from '../../firebase';
 
 // ── Agents visible to the doctor (clinical subset) ─────────────────────────
 const DOCTOR_AGENTS = [
-  { key: 'rag',           label: 'Research AI',    emoji: '🧠', color: '#8b5cf6', desc: 'Literatura clínica y RAG',  queryType: 'rag'           },
-  { key: 'prescription',  label: 'Rx Analyzer',    emoji: '📋', color: 'var(--color-primary)', desc: 'Prescripciones y catálogo', queryType: 'prescription'  },
-  { key: 'clinical_data', label: 'Clinical Data',  emoji: '🔬', color: 'var(--color-success)', desc: 'Labs y biomarcadores',       queryType: 'clinical_data' },
-  { key: 'logistics',     label: 'Logistics',      emoji: '📦', color: '#f59e0b', desc: 'Stock y pedidos',            queryType: 'logistics'     },
+  { key: 'rag',           label: 'Research AI',    emoji: '🧠', color: '#8b5cf6', desc: 'Clinical Literature & RAG',  queryType: 'rag'           },
+  { key: 'prescription',  label: 'Rx Analyzer',    emoji: '📋', color: 'var(--color-primary)', desc: 'Prescriptions & Formulary', queryType: 'prescription'  },
+  { key: 'clinical_data', label: 'Clinical Data',  emoji: '🔬', color: 'var(--color-success)', desc: 'Labs & Biomarkers',         queryType: 'clinical_data' },
+  { key: 'logistics',     label: 'Logistics',      emoji: '📦', color: '#f59e0b', desc: 'Inventory & Deliveries',     queryType: 'logistics'     },
 ];
 
 function openClinicalAI(query = '', displayText = '') {
@@ -45,7 +45,7 @@ function AgentPill({ agent, status, onClick }) {
   return (
     <button
       onClick={onClick}
-      title={`Activar ${agent.label}`}
+      title={`Activate ${agent.label}`}
       style={{
         width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: '0.6rem',
@@ -228,7 +228,7 @@ export default function PhysicianLayout({
           <nav style={{ padding: '1rem 0.75rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--color-border)',
               textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 0.5rem', marginBottom: '0.5rem' }}>
-              Navegación
+              Navigation
             </div>
             {tabs.map(tab => {
               const isActive = activeTab === tab.id;
@@ -268,13 +268,13 @@ export default function PhysicianLayout({
             >
               <div style={{ fontSize: '0.62rem', fontWeight: 800, color: 'var(--color-text-tertiary)',
                 textTransform: 'uppercase', letterSpacing: '0.08em', flex: 1 }}>
-                🤖 Agentes AI
+                🤖 AI Agents
               </div>
               <span style={{
                 fontSize: '0.62rem', fontWeight: 800, padding: '0.15rem 0.45rem',
                 borderRadius: '999px', background: 'rgba(16,185,129,0.12)', color: 'var(--color-success)',
               }}>
-                {activeAgents}/{DOCTOR_AGENTS.length} activos
+                {activeAgents}/{DOCTOR_AGENTS.length} active
               </span>
               <ChevronRight size={12} color="var(--color-text-tertiary)"
                 style={{ transform: agentsExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />

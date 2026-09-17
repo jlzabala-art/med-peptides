@@ -33,22 +33,22 @@ export default function DoctorUpgradePlanModal({
 
   const handleRequestUpgrade = async () => {
     setLoading(true);
-    const toastId = toast.loading('Procesando solicitud de actualización…');
+    const toastId = toast.loading('Processing upgrade request…');
     try {
       // 1. Send notification to admin
       await notifier.send({
         to: ['admin'],
         type: 'user',
-        title: '💎 Solicitud de Upgrade a Plan Pro',
-        message: `El ${doctorName} (ID: ${doctorId || 'doctor'}) ha solicitado ascender al Plan Avanzado Pro.`,
+        title: '💎 Pro Plan Upgrade Request',
+        message: `Dr. ${doctorName} (ID: ${doctorId || 'doctor'}) has requested an upgrade to Advanced Pro Plan.`,
         data: { doctorId, doctorName, requestedTier: 'advanced' }
       });
 
       // 2. Open WhatsApp direct channel to admin / conciergerie
-      const text = encodeURIComponent(`Hola, soy el ${doctorName}. Deseo activar el Plan Avanzado Pro para mi consulta médica en Med-Peptides / Atlas Health. Por favor, coordinen la activación.`);
+      const text = encodeURIComponent(`Hello, I am Dr. ${doctorName}. I would like to activate the Advanced Pro Plan for my clinical practice on Med-Peptides / Atlas Health. Please coordinate the activation.`);
       const waUrl = `https://wa.me/34600000000?text=${text}`; // Support line
       
-      toast.success('¡Solicitud enviada! Nuestro equipo clínico contactará contigo de inmediato.', { id: toastId });
+      toast.success('Upgrade request submitted! Our clinical team will reach out immediately.', { id: toastId });
       
       // Notify parent if simulation callback passed
       if (onUpgradeSuccess) onUpgradeSuccess();
@@ -59,7 +59,7 @@ export default function DoctorUpgradePlanModal({
       }, 1200);
     } catch (err) {
       console.error(err);
-      toast.error('Error al procesar la solicitud: ' + err.message, { id: toastId });
+      toast.error('Error processing request: ' + err.message, { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -67,51 +67,51 @@ export default function DoctorUpgradePlanModal({
 
   const COMPARISON_FEATURES = [
     {
-      feature: 'Emisión de Prescripciones',
-      basic: 'Manual (producto por producto)',
-      pro: 'Ilimitada + Regímenes 1-Tap propios',
+      feature: 'Clinical Prescription Issuance',
+      basic: 'Manual (product by product)',
+      pro: 'Unlimited + Custom 1-Tap Regimens',
       highlight: true
     },
     {
-      feature: 'Atlas AI Clinical Scribe',
-      basic: '5 consultas / mes',
-      pro: 'Ilimitado (lectura de analíticas y genética)',
+      feature: 'Atlas AI Clinical Scribe & Copilot',
+      basic: '5 queries / month',
+      pro: 'Unlimited (blood panel & genetics interpretation)',
       highlight: true
     },
     {
-      feature: 'Guía del Paciente y Jeringa U-100',
-      basic: 'Formato estándar Lotusland',
-      pro: 'White-Label (Logotipo y marca de tu clínica)',
+      feature: 'Patient Admin Guide & U-100 Syringe Units',
+      basic: 'Standard Lotusland format',
+      pro: '100% White-Label (Clinic logo & branding)',
       highlight: true
     },
     {
-      feature: 'Directorio de Pacientes',
-      basic: 'Hasta 30 pacientes activos',
-      pro: 'Pacientes Ilimitados + Notas SOAP',
+      feature: 'Active Patients Directory',
+      basic: 'Up to 30 active patients',
+      pro: 'Unlimited Patients + SOAP Clinical Notes',
       highlight: false
     },
     {
-      feature: 'Alertas de Refill por WhatsApp',
-      basic: 'Aviso manual',
-      pro: 'Alertas predictivas antes de fin de vial',
+      feature: 'WhatsApp Predictive Refill Alerts',
+      basic: 'Manual follow-up',
+      pro: 'Automated predictive alerts before vial completion',
       highlight: true
     },
     {
-      feature: 'Vademécum Lotusland Precios Clínicos',
-      basic: 'Incluido',
-      pro: 'Incluido + Comparador de bio-equivalencia',
+      feature: 'Lotusland Formulary Clinical Pricing',
+      basic: 'Included',
+      pro: 'Included + Bioequivalence comparator',
       highlight: false
     },
     {
-      feature: 'Teleconsulta y Calendario Médico',
-      basic: 'No disponible',
-      pro: 'Gestión integrada de citas clínicas',
+      feature: 'Telehealth & Consultation Calendar',
+      basic: 'Not available',
+      pro: 'Integrated appointments & video consults',
       highlight: false
     },
     {
-      feature: 'Canal de Soporte Clínico',
-      basic: 'Estándar (Email / Ticket)',
-      pro: 'Prioritario VIP (WhatsApp Directo 24/7)',
+      feature: 'Clinical Support Channel',
+      basic: 'Standard (Email / Ticket)',
+      pro: 'Priority VIP (Direct 24/7 WhatsApp)',
       highlight: true
     }
   ];
@@ -182,14 +182,14 @@ export default function DoctorUpgradePlanModal({
           </button>
 
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.2)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-            <Award size={14} /> Membresía Médica Lotusland & Atlas Health
+            <Award size={14} /> Lotusland & Atlas Health Medical Membership
           </div>
 
           <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>
-            Eleva tu Práctica Clínica al Nivel Avanzado Pro
+            Elevate Your Practice to Advanced Pro
           </h2>
           <p style={{ margin: 0, fontSize: '0.95rem', color: '#ccfbf1', maxWidth: '650px', lineHeight: 1.5 }}>
-            Potencia tu consulta de longevidad y dermatología con inteligencia clínica Atlas AI, personalización de marca para tus pacientes y fidelización recurrente automatizada.
+            Empower your longevity and regenerative practice with Atlas AI clinical intelligence, bespoke patient branding, and automated recurring retention.
           </p>
         </div>
 
@@ -206,7 +206,7 @@ export default function DoctorUpgradePlanModal({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: '#64748b' }}>Tu Nivel Actual:</span>
+            <span style={{ color: '#64748b' }}>Your Current Tier:</span>
             <span
               style={{
                 display: 'inline-flex',
@@ -221,30 +221,59 @@ export default function DoctorUpgradePlanModal({
                 border: isPro ? '1px solid #99f6e4' : '1px solid #cbd5e1',
               }}
             >
-              {isPro ? '💎 Avanzado Pro (Activo)' : '🟢 Plan Básico (Clinical Starter)'}
+              {isPro ? '💎 Advanced Pro (Active)' : '🟢 Basic Plan (Clinical Starter)'}
             </span>
           </div>
           <div style={{ color: '#0d9488', fontWeight: 600, fontSize: '0.82rem' }}>
-            Doctor: {doctorName}
+            Physician: {doctorName}
           </div>
         </div>
 
+        {/* Responsive styles for modal */}
+        <style>{`
+          @media (max-width: 768px) {
+            .modal-matrix-desktop {
+              display: none !important;
+            }
+            .modal-matrix-mobile {
+              display: flex !important;
+              flex-direction: column !important;
+              gap: 0.75rem !important;
+            }
+            .modal-header-hero {
+              padding: 1.25rem 1rem !important;
+            }
+            .modal-body-container {
+              padding: 1rem !important;
+            }
+          }
+          @media (min-width: 769px) {
+            .modal-matrix-desktop {
+              display: block !important;
+            }
+            .modal-matrix-mobile {
+              display: none !important;
+            }
+          }
+        `}</style>
+
         {/* Comparison Table Content */}
-        <div style={{ padding: '1.5rem 2rem', overflowY: 'auto', flex: 1 }}>
-          <div style={{ border: '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className="modal-body-container" style={{ padding: '1.5rem 2rem', overflowY: 'auto', flex: 1 }}>
+          {/* Desktop Matrix View */}
+          <div className="modal-matrix-desktop" style={{ border: '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                  <th style={{ padding: '1rem', width: '38%', fontWeight: 700, color: '#475569' }}>Funcionalidad Clínica</th>
+                  <th style={{ padding: '1rem', width: '38%', fontWeight: 700, color: '#475569' }}>Clinical Capability</th>
                   <th style={{ padding: '1rem', width: '28%', fontWeight: 700, color: '#64748b', textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>🟢 Plan Básico</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>Gratuito • Acceso Esencial</div>
+                    <div style={{ fontSize: '0.9rem', color: '#334155' }}>🟢 Basic Plan</div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>Free • Essential Access</div>
                   </th>
                   <th style={{ padding: '1rem', width: '34%', fontWeight: 800, color: '#0d9488', textAlign: 'center', background: 'rgba(13, 148, 136, 0.06)' }}>
                     <div style={{ fontSize: '0.95rem', color: '#0f766e', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                      <Sparkles size={16} /> 💎 Avanzado Pro
+                      <Sparkles size={16} /> 💎 Advanced Pro
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 600 }}>Suscripción Mensual Pro</div>
+                    <div style={{ fontSize: '0.72rem', color: '#0d9488', fontWeight: 600 }}>Monthly Clinical Subscription</div>
                   </th>
                 </tr>
               </thead>
@@ -275,32 +304,84 @@ export default function DoctorUpgradePlanModal({
             </table>
           </div>
 
+          {/* Mobile Native Feature Cards (<= 768px) */}
+          <div className="modal-matrix-mobile" style={{ display: 'none' }}>
+            {COMPARISON_FEATURES.map((row, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: '#ffffff',
+                  border: row.highlight ? '1px solid #99f6e4' : '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  boxShadow: row.highlight ? '0 2px 8px rgba(13, 148, 136, 0.08)' : '0 1px 3px rgba(0,0,0,0.03)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                    {row.feature}
+                  </h4>
+                  {row.highlight && (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, background: '#f0fdfa', color: '#0f766e', border: '1px solid #99f6e4', padding: '2px 6px', borderRadius: '10px' }}>
+                      ⚡ PRO
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginTop: '0.5rem' }}>
+                  {/* Pro Container */}
+                  <div style={{ padding: '0.65rem 0.8rem', borderRadius: '8px', background: 'rgba(13, 148, 136, 0.06)', border: '1px solid #99f6e4' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0f766e' }}>
+                        💎 Advanced Pro
+                      </span>
+                      <Check size={14} color="#0d9488" strokeWidth={3} />
+                    </div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f766e' }}>
+                      {row.pro}
+                    </div>
+                  </div>
+
+                  {/* Basic Container */}
+                  <div style={{ padding: '0.55rem 0.8rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', marginBottom: '1px' }}>
+                      🟢 Basic Plan
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#475569' }}>
+                      {row.basic}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Value Prop Callouts */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#f0fdfa', border: '1px solid #ccfbf1' }}>
               <div style={{ color: '#0f766e', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <TrendingUp size={16} /> +40% Retención de Pacientes
+                <TrendingUp size={16} /> +40% Patient Retention
               </div>
               <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: '#334155', lineHeight: 1.4 }}>
-                Los recordatorios inteligentes de refill aseguran que los tratamientos de péptidos se completen sin abandonos.
+                Smart refill reminders ensure peptide therapies are completed with continuous patient adherence.
               </p>
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
               <div style={{ color: '#1d4ed8', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ShieldCheck size={16} /> Marca Propia (White-Label)
+                <ShieldCheck size={16} /> White-Label Clinic Prestige
               </div>
               <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: '#334155', lineHeight: 1.4 }}>
-                Entrega pautas de dosificación con el prestigio y logotipo de tu propia clínica privada.
+                Deliver dosing schedules and administration instructions featuring your private clinic branding.
               </p>
             </div>
 
             <div style={{ padding: '1rem', borderRadius: '12px', background: '#faf5ff', border: '1px solid #e9d5ff' }}>
               <div style={{ color: '#7e22ce', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={16} /> Copiloto Médico Atlas AI
+                <Sparkles size={16} /> Atlas AI Clinical Copilot
               </div>
               <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: '#334155', lineHeight: 1.4 }}>
-                Sintetiza biomarcadores y formula dosis exactas de jeringa U-100 en un abrir y cerrar de ojos.
+                Synthesize blood markers, detect contraindications, and compute exact U-100 syringe units in seconds.
               </p>
             </div>
           </div>
@@ -321,7 +402,7 @@ export default function DoctorUpgradePlanModal({
         >
           <div>
             <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              Sin permanencia obligatoria • Activación inmediata desde soporte o administración
+              No long-term commitment • Instant activation via clinical support or administration
             </span>
           </div>
 
@@ -340,7 +421,7 @@ export default function DoctorUpgradePlanModal({
                 cursor: 'pointer',
               }}
             >
-              Cerrar
+              Close
             </button>
 
             {!isPro ? (
@@ -366,7 +447,7 @@ export default function DoctorUpgradePlanModal({
                 }}
               >
                 <Sparkles size={18} />
-                Solicitar Upgrade a Plan Pro 💎
+                Request Pro Plan Upgrade 💎
               </button>
             ) : (
               <div
@@ -383,7 +464,7 @@ export default function DoctorUpgradePlanModal({
                   border: '1px solid #99f6e4',
                 }}
               >
-                <Check size={18} /> Ya disfrutas del Plan Avanzado Pro
+                <Check size={18} /> Already enjoying Advanced Pro Plan
               </div>
             )}
           </div>
