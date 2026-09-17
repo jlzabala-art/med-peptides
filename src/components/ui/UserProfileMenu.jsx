@@ -19,10 +19,12 @@ import {
   Sparkles
 } from '@/lib/icons';
 import UserProfileDrawer from '../shared/UserProfileDrawer';
+import LogoutConfirmationModal from './LogoutConfirmationModal';
 
 export default function UserProfileMenu({ roleContext = 'patient', isMobile = false, portalTitle = '' }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const menuRef = useRef(null);
 
@@ -71,13 +73,18 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
     router.push(path);
   };
 
-  const handleLogoutClick = async () => {
+  const handleLogoutClick = () => {
     setIsOpen(false);
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
     try {
       await logout();
     } catch (e) {
       console.warn('Logout error:', e);
     }
+    setIsLogoutConfirmOpen(false);
     router.push('/login');
   };
 
@@ -507,6 +514,16 @@ export default function UserProfileMenu({ roleContext = 'patient', isMobile = fa
       <UserProfileDrawer
         isOpen={isProfileDrawerOpen}
         onClose={() => setIsProfileDrawerOpen(false)}
+      />
+
+      {/* Google Cloud Standard Logout Confirmation Dialog */}
+      <LogoutConfirmationModal
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={handleConfirmLogout}
+        userProfile={userProfile}
+        user={user}
+        currentRole={currentRole}
       />
     </div>
   );

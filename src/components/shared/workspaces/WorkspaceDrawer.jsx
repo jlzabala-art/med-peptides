@@ -34,6 +34,7 @@ import WorkspaceFinancialAccordion from './drawer/WorkspaceFinancialAccordion';
 import WorkspacePdfPreviewSheet from './drawer/WorkspacePdfPreviewSheet';
 import { useWorkspaceActions } from './hooks/useWorkspaceActions';
 import { useContextualBinding } from './hooks/useContextualBinding';
+import { estimateWorkspaceLogistics } from '@/utils/logisticsEstimator';
 
 export default function WorkspaceDrawer() {
   const {
@@ -232,7 +233,20 @@ export default function WorkspaceDrawer() {
     return sum + (qty * cost);
   }, 0);
 
-  const shippingCost = selectedShippingMethod === 'cold_chain' ? 35 : selectedShippingMethod === 'express' ? 15 : 0;
+  // ── Dynamic Logistics Cost from Predictive Engine ─────────────────────
+  const logisticsEstimate = useMemo(() => {
+    return estimateWorkspaceLogistics(activeWs, items);
+  }, [
+    activeWs?.targetEntity,
+    activeWs?.shippingAddress,
+    activeWs?.selectedShippingOptionId,
+    activeWs?.selectedWarehouseId,
+    activeWs?.shippingCostOverride,
+    items.length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    items.map((it) => it.supplierName || it.supplier).join(','),
+  ]);
+  const shippingCost = logisticsEstimate.estimatedCost;
   const discountAmount = discountPercent > 0 ? (subtotalSaleAmount * discountPercent) / 100 : 0;
   const grandTotal = Math.max(0, subtotalSaleAmount + shippingCost - discountAmount);
 

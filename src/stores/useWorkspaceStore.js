@@ -20,6 +20,9 @@ const DEFAULT_WORKSPACE = {
   shippingMethod: 'cold_chain', // 'cold_chain' | 'express' | 'pickup'
   shippingAddress: '',
   shippingNotes: '',
+  selectedShippingOptionId: null, // Logistics estimator option ID
+  selectedWarehouseId: null,      // Supplier warehouse ID (e.g. 'poland', 'hongkong')
+  shippingCostOverride: null,     // Manual cost override (null = auto-calculated)
   discountPercent: 0,
   pricingTier: 'clinic', // 'cost' | 'wholesale' | 'clinic' | 'retail'
   appliedMarkupPercent: null, // Custom markup applied to this workspace (e.g. 30)
@@ -63,6 +66,9 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
       shippingMethod: 'cold_chain',
       shippingAddress: '',
       shippingNotes: '',
+      selectedShippingOptionId: null,
+      selectedWarehouseId: null,
+      shippingCostOverride: null,
       discountPercent: 0,
       pricingTier: initialIntent === 'buy' ? 'cost' : 'clinic',
       appliedMarkupPercent: null,
@@ -826,6 +832,9 @@ const createWorkspaceIntentSlice = (set, get) => ({
           shippingMethod: shippingData?.shippingMethod ?? ws.shippingMethod ?? 'cold_chain',
           shippingAddress: shippingData?.shippingAddress ?? ws.shippingAddress ?? '',
           shippingNotes: shippingData?.shippingNotes ?? ws.shippingNotes ?? '',
+          selectedShippingOptionId: shippingData?.selectedShippingOptionId !== undefined ? shippingData.selectedShippingOptionId : ws.selectedShippingOptionId,
+          selectedWarehouseId: shippingData?.selectedWarehouseId !== undefined ? shippingData.selectedWarehouseId : ws.selectedWarehouseId,
+          shippingCostOverride: shippingData?.shippingCostOverride !== undefined ? shippingData.shippingCostOverride : ws.shippingCostOverride,
           updatedAt: Date.now(),
         },
       },
