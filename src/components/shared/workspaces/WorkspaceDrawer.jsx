@@ -220,6 +220,41 @@ export default function WorkspaceDrawer() {
     role,
   });
 
+  const [isWideDrawer, setIsWideDrawer] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem('atlas_ws_wide') === 'true';
+      } catch (e) {}
+    }
+    return false;
+  });
+
+  const toggleWideDrawer = () => {
+    setIsWideDrawer(prev => {
+      const next = !prev;
+      try { localStorage.setItem('atlas_ws_wide', String(next)); } catch (e) {}
+      return next;
+    });
+  };
+
+  // GCP Keyboard Shortcuts: Esc to close, Cmd+Enter to execute primary
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setDrawerOpen(false);
+      } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (items.length > 0) {
+          if (isDoctor) handleExecutePrescription();
+          else if (activeWs?.intent === 'buy') handleExecutePO();
+          else handleExecuteQuotation();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDrawerOpen, items.length, isDoctor, activeWs?.intent]);
+
   if (!mounted || !isDrawerOpen || !activeWs) return null;
 
   const workspacePrescriptions = items.map((it, idx) => ({
@@ -294,10 +329,11 @@ export default function WorkspaceDrawer() {
           .workspace-responsive-panel {
             top: 0;
             right: 0;
-            width: min(480px, 100vw);
+            width: ${isWideDrawer ? 'min(720px, 95vw)' : 'min(480px, 100vw)'};
             height: 100dvh;
             max-height: 100vh;
             animation: slideLeft 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1);
           }
 
           @media (max-width: 768px) {
@@ -307,8 +343,8 @@ export default function WorkspaceDrawer() {
               left: 0 !important;
               right: 0 !important;
               width: 100vw !important;
-              height: calc(100dvh - 24px) !important;
-              max-height: 94vh !important;
+              height: calc(100dvh - 20px) !important;
+              max-height: 95vh !important;
               border-radius: 20px 20px 0 0 !important;
               animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
             }
@@ -337,7 +373,55 @@ export default function WorkspaceDrawer() {
             setIsSaveKitModalOpen(true);
           }}
           isDoctor={isDoctor}
+          isWideDrawer={isWideDrawer}
+          onToggleWideDrawer={toggleWideDrawer}
         />
+
+        {/* GCP 3-Stage Readiness Stepper */}
+        <div
+          style={{
+            padding: '7px 14px',
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e2e8f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            flexShrink: 0,
+          }}
+        >
+          {/* Step 1: Compounds */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: items.length > 0 ? '#16a34a' : '#d97706' }}>
+            <span style={{ width: '17px', height: '17px', borderRadius: '50%', backgroundColor: items.length > 0 ? '#dcfce7' : '#fef3c7', color: items.length > 0 ? '#15803d' : '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
+              {items.length > 0 ? '✓' : '1'}
+            </span>
+            <span>{items.length} {items.length === 1 ? 'Compound' : 'Compounds'}</span>
+          </div>
+
+          <span style={{ color: '#cbd5e1' }}>➔</span>
+
+          {/* Step 2: Recipient */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: activeWs?.targetEntity ? '#16a34a' : '#64748b' }}>
+            <span style={{ width: '17px', height: '17px', borderRadius: '50%', backgroundColor: activeWs?.targetEntity ? '#dcfce7' : '#f1f5f9', color: activeWs?.targetEntity ? '#15803d' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
+              {activeWs?.targetEntity ? '✓' : '2'}
+            </span>
+            <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {activeWs?.targetEntity?.name ? activeWs.targetEntity.name : 'Select Recipient'}
+            </span>
+          </div>
+
+          <span style={{ color: '#cbd5e1' }}>➔</span>
+
+          {/* Step 3: Action Ready */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: items.length > 0 ? '#0284c7' : '#94a3b8' }}>
+            <span style={{ width: '17px', height: '17px', borderRadius: '50%', backgroundColor: items.length > 0 ? '#e0f2fe' : '#f1f5f9', color: items.length > 0 ? '#0284c7' : '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800 }}>
+              3
+            </span>
+            <span>{isDoctor ? 'Ready to Prescribe' : 'Ready to Submit'}</span>
+          </div>
+        </div>
 
         {/* Scrollable Body: Accordion Sections */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>

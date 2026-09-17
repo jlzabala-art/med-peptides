@@ -17,6 +17,7 @@ import MobileSortSheet from './MobileSortSheet';
 import MobilePageActions from './MobilePageActions';
 import MobileGoalChipsBar from './MobileGoalChipsBar';
 import { CheckSquare } from 'lucide-react';
+import GcpTableToolbar from './GcpTableToolbar';
 
 
 export default function DataModule({
@@ -88,6 +89,62 @@ export default function DataModule({
     Array.isArray(fo.values) ? fo.values.length > 0
     : fo.values && fo.values !== 'all' && fo.values !== ''
   ).length;
+
+  // GCP Table Columns Customizer persistence (Golden Rule GCP standard)
+  const colStorageKey = namespace ? `atlas_cols_${namespace}` : (title ? `atlas_cols_${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}` : null);
+  const [activeVisibleColumns, setActiveVisibleColumns] = useState(() => {
+    if (typeof window !== 'undefined' && colStorageKey) {
+      try {
+        const saved = localStorage.getItem(colStorageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return (columns || []).map(c => c.key || c.header || c.label).filter(Boolean);
+  });
+
+  useEffect(() => {
+    if (!columns || columns.length === 0) return;
+    if (typeof window !== 'undefined' && colStorageKey) {
+      try {
+        const saved = localStorage.getItem(colStorageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setActiveVisibleColumns(parsed);
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+    setActiveVisibleColumns(columns.map(c => c.key || c.header || c.label).filter(Boolean));
+  }, [columns, colStorageKey]);
+
+  const handleToggleColumn = (colKey) => {
+    setActiveVisibleColumns(prev => {
+      let next;
+      if (prev.includes(colKey)) {
+        if (prev.length <= 1) return prev;
+        next = prev.filter(k => k !== colKey);
+      } else {
+        next = [...prev, colKey];
+      }
+      if (typeof window !== 'undefined' && colStorageKey) {
+        try { localStorage.setItem(colStorageKey, JSON.stringify(next)); } catch (e) {}
+      }
+      return next;
+    });
+  };
+
+  const handleResetColumns = () => {
+    const allCols = (columns || []).map(c => c.key || c.header || c.label).filter(Boolean);
+    setActiveVisibleColumns(allCols);
+    if (typeof window !== 'undefined' && colStorageKey) {
+      try { localStorage.removeItem(colStorageKey); } catch (e) {}
+    }
+  };
 
   // Phase 2: Hotkeys (Cmd+A, Esc)
   useEffect(() => {
@@ -328,9 +385,28 @@ export default function DataModule({
         <div className="data-module-content">
           {columns && columns.length > 0 ? (
             <>
+              <GcpTableToolbar
+                totalCount={totalItems || totalCount || (data ? data.length : 0)}
+                itemNoun={
+                  namespace?.includes('patient') ? 'patients' :
+                  namespace?.includes('prescription') ? 'prescriptions' :
+                  namespace?.includes('catalog') ? 'products' :
+                  'records'
+                }
+                isLoading={loading || searchLoading}
+                onRefresh={onRefresh}
+                lastUpdated={lastUpdated}
+                columns={columns}
+                visibleColumns={activeVisibleColumns}
+                onToggleColumn={handleToggleColumn}
+                onResetColumns={handleResetColumns}
+                onExportCsv={enableExport ? handleGenericExport : null}
+                enableExport={enableExport}
+              />
               <DataTable 
                 data={data}
                 columns={columns}
+                visibleColumns={activeVisibleColumns}
                 selectedIds={selectedIds}
                 onSelectionChange={onSelectionChange}
                 enableExport={false}

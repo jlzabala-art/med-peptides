@@ -48,4 +48,5 @@ export { default as UnifiedFiltersDrawer } from './UnifiedFiltersDrawer';
 export { default as ComponentErrorBoundary } from './ComponentErrorBoundary';
 export { default as UniversalShareDrawer } from './UniversalShareDrawer';
 export { default as AIContextBadge } from './AIContextBadge';
+export { default as GcpTableToolbar } from './GcpTableToolbar';
 

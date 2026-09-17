@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Briefcase, X, Plus, Edit2, Check, Copy, Trash2, Layers, Stethoscope } from '@/lib/icons';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 export default function WorkspaceDrawerHeader({
   activeWs,
@@ -15,6 +16,8 @@ export default function WorkspaceDrawerHeader({
   onDeleteWorkspace,
   onOpenSaveKitModal,
   isDoctor = false,
+  isWideDrawer = false,
+  onToggleWideDrawer,
 }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -96,28 +99,56 @@ export default function WorkspaceDrawerHeader({
           </div>
         </div>
 
-        {/* Close Button with generous 44px touch target */}
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '9px',
-            border: '1px solid #e2e8f0',
-            backgroundColor: '#f8fafc',
-            color: '#64748b',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            flexShrink: 0,
-            touchAction: 'manipulation',
-          }}
-          title="Close workspace"
-        >
-          <X size={18} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {/* Laptop Expand/Collapse Width Toggle (GCP Console Style) */}
+          {onToggleWideDrawer && (
+            <button
+              type="button"
+              className="workspace-laptop-expand-btn"
+              onClick={onToggleWideDrawer}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '9px',
+                border: '1px solid #e2e8f0',
+                backgroundColor: isWideDrawer ? '#eff6ff' : '#f8fafc',
+                color: isWideDrawer ? '#1d4ed8' : '#64748b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                touchAction: 'manipulation',
+              }}
+              title={isWideDrawer ? 'Collapse width to 480px' : 'Expand width to 720px for dual-pane view'}
+            >
+              {isWideDrawer ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+          )}
+
+          {/* Close Button with generous 44px touch target */}
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '9px',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#f8fafc',
+              color: '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+              touchAction: 'manipulation',
+            }}
+            title="Close workspace"
+          >
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Multi-Workspace Horizontal Tab Switcher */}

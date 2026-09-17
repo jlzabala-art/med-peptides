@@ -16,6 +16,7 @@ import SwipeableCard from './SwipeableCard';
 import DataTableContextualHeader from './DataTableContextualHeader';
 import StickyBulkActionBar from './StickyBulkActionBar';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
+import { usePreferences } from '../../context/PreferencesContext';
 
 export default function DataTable({
   columns,
@@ -121,6 +122,9 @@ export default function DataTable({
   const [hoveredRowId, setHoveredRowId] = useState(null);
   const [focusedRowIndex, setFocusedRowIndex] = useState(-1);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const { density = 'comfortable' } = usePreferences?.() || {};
+  const isCompact = density === 'compact';
+
   const [showColMenu, setShowColMenu] = useState(false);
   const [internalAllMatching, setInternalAllMatching] = useState(false);
   const isAllMatchingSelected = propIsAllMatchingSelected !== undefined ? propIsAllMatchingSelected : internalAllMatching;
@@ -976,9 +980,9 @@ export default function DataTable({
                     className={col.hideOnMobile ? 'hide-on-mobile' : ''}
                     onClick={() => isSortable && requestSort(col.key)}
                     style={{
-                      height: '36px',
-                      padding: '0 16px',
-                      fontSize: 'clamp(0.6rem, 0.8vw, 0.75rem)',
+                      height: isCompact ? '30px' : '36px',
+                      padding: isCompact ? '0 10px' : '0 16px',
+                      fontSize: isCompact ? '0.70rem' : 'clamp(0.6rem, 0.8vw, 0.75rem)',
                       fontWeight: 600,
                       color:
                         sortConfig.key === col.key
@@ -1063,17 +1067,17 @@ export default function DataTable({
                   }}
                 >
                   {onSelectionChange && (
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <td style={{ padding: isCompact ? '6px 8px' : '12px', textAlign: 'center' }}>
                       <Skeleton width="16px" height="16px" borderRadius="4px" />
                     </td>
                   )}
                   {expandableRender && (
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <td style={{ padding: isCompact ? '6px 8px' : '12px', textAlign: 'center' }}>
                       <Skeleton width="16px" height="16px" borderRadius="50%" />
                     </td>
                   )}
                   {columns.map((col, colIndex) => (
-                    <td key={`skel-col-${colIndex}`} style={{ padding: '12px 16px' }}>
+                    <td key={`skel-col-${colIndex}`} style={{ padding: isCompact ? '6px 10px' : '12px 16px' }}>
                       <Skeleton width={colIndex === 0 ? '80%' : '60%'} height="16px" />
                     </td>
                   ))}
@@ -1241,8 +1245,10 @@ export default function DataTable({
                             col.label === 'Product Name';
                           const isActionColumn = col.key === 'actions' || col.isAction;
                           const cellStyle = {
-                            padding: isActionColumn ? '12px 12px 12px 6px' : '12px 16px',
-                            fontSize: '13px',
+                            padding: isActionColumn
+                              ? (isCompact ? '6px 8px 6px 4px' : '12px 12px 12px 6px')
+                              : (isCompact ? '6px 10px' : '12px 16px'),
+                            fontSize: isCompact ? '12px' : '13px',
                             color: 'var(--text-main)',
                             textAlign: effectiveAlign,
                             verticalAlign: 'middle',

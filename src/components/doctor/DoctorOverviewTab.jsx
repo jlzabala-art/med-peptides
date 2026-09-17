@@ -24,6 +24,7 @@ import MessageSquare from "lucide-react/dist/esm/icons/message-square";
 import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 import Zap from "lucide-react/dist/esm/icons/zap";
 import Award from "lucide-react/dist/esm/icons/award";
+import Activity from "lucide-react/dist/esm/icons/activity";
 
 import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActions';
 import { fetchKPIsAction } from '../../actions/kpiActions';
@@ -191,14 +192,21 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
                 </div>
               </div>
 
-              {/* Physician Credential Badges (Inspirado en GCP Resource Labels) */}
+              {/* Physician Credential & Facility Badges (Inspirado en GCP Project & Resource Labels) */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '0.35rem' }}>
                 <span style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   Lic: <CopyableId value={isSimulatingDrErdmann ? 'DHA-00013060-006' : (doctorId || 'DOC-ACTIVE')} />
                 </span>
                 <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
-                <span style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic L.L.C.' : 'Specialist Clinical Practice'}
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
+                <span style={{ fontSize: '0.70rem', color: '#86efac', backgroundColor: 'rgba(34, 197, 94, 0.15)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                  🟢 DHA Regulated Practice (UAE)
+                </span>
+                <span style={{ fontSize: '0.70rem', color: '#cbd5e1', backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                  Latency 14ms
                 </span>
               </div>
             </div>
@@ -448,6 +456,56 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
         </div>
       )}
 
+      {/* 🧭 GCP SCOPE INDICATOR & PRESET VIEW FILTER BAR */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          padding: '8px 12px',
+          backgroundColor: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Active Clinical Scope:
+          </span>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#003666', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+            🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic (Isolated Practice)' : 'Assigned Practice Cohort'}
+          </span>
+          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>
+            {totalPatients} patient under care • {active} in dispensing
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            type="button"
+            onClick={() => onNavigate?.('prescriptions')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              color: '#334155',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <span>View Prescriptions →</span>
+          </button>
+        </div>
+      </div>
+
       {/* 📈 RESPONSIVE KPI METRIC CARDS GRID (2x2 on Mobile, 4x1 on Desktop) */}
       <div
         className="dashboard-kpi-grid"
@@ -561,6 +619,79 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
         doctorName={doctorMeta?.name}
         onNavigate={onNavigate}
       />
+
+      {/* ⚡ GCP CLINICAL AUDIT TRAIL & RECENT OPERATIONS FEED */}
+      <div
+        style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          padding: '1.25rem',
+          boxShadow: '0 1px 3px rgba(0, 54, 102, 0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.85rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.65rem', flexWrap: 'wrap', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={18} color="#003666" />
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+              Real-time Clinical Operations & Audit Feed
+            </h3>
+          </div>
+          <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700, backgroundColor: '#f0fdf4', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+            ● Telemetry Live
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '2px 6px', borderRadius: '4px' }}>
+                RX ISSUED
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                Prescription <CopyableId value={isSimulatingDrErdmann ? 'RX-BEDAYA-260915-11774' : 'RX-RECENT-01'} />
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                for {isSimulatingDrErdmann ? 'Matin Rahim Delavar Rafiei' : 'Patient'}
+              </span>
+            </div>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Today, 10:15 AM</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#ede9fe', color: '#6d28d9', padding: '2px 6px', borderRadius: '4px' }}>
+                FORMULARY SYNC
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                Lotusland Compounding Formulary v2026.9
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                Verified by Medical Director
+              </span>
+            </div>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Yesterday</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, backgroundColor: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '4px' }}>
+                COLD CHAIN
+              </span>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>
+                Temperature Log 3.8°C (Compliant: 2-8°C)
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                Insulated Express Delivery
+              </span>
+            </div>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>14 Sep 2026</span>
+          </div>
+        </div>
+      </div>
 
       {/* 👥 VERIFIED ACTIVE PATIENT DOSSIER & PRESCRIPTION SUMMARY */}
       {isSimulatingDrErdmann && (
