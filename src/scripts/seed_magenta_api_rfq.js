@@ -9,11 +9,9 @@
  *   5. Sodium Selenite (10g pack x 1 = 10g)
  *   6. Selenious acid (5g pack x 1 = 5g)
  *
- * Actions performed:
- *   - Onboards the 6 raw API products into `products` collection with CAS numbers.
- *   - Registers Inbound RFQ `RFQ-2026-MAGENTA-API-001` in `rfqs` collection.
- *   - Creates Draft Client Quotation `QT-2026-MAGENTA-002` in `quotations` (+8% margin).
- *   - Creates Outbound Supplier Sourcing RFQ `SRFQ-2026-LOTUS-API-001` in `supplier_rfqs`.
+ * NOTE: All prices are strictly initialized to $0.00 / Pending Supplier Quote
+ * to avoid any confusion or unverified estimates until official supplier
+ * proformas are received.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -54,8 +52,9 @@ export const MAGENTA_API_ITEMS = [
     grade: 'Ph.Eur / USP (≥95.0% Curcuminoids)',
     purity: '≥95.0%',
     storageCondition: 'Protect from light and moisture, 15-25°C',
-    estimatedSupplierUnitCost: 40.0, // USD per 100g pack
-    targetClientUnitPrice: 43.20,    // USD (+8% margin)
+    supplierUnitCost: 0.0, // Pending supplier quote from Lotusland/lab
+    targetClientUnitPrice: 0.0,
+    pricingStatus: 'awaiting_supplier_quote',
     hsnCode: '29072990',
   },
   {
@@ -76,8 +75,9 @@ export const MAGENTA_API_ITEMS = [
     grade: 'USP / EP (Chelating Agent / Buffer Grade)',
     purity: '99.0% - 101.0%',
     storageCondition: 'Store at 20-25°C in tightly sealed containers',
-    estimatedSupplierUnitCost: 65.0, // USD per 1kg pack
-    targetClientUnitPrice: 70.20,    // USD (+8% margin)
+    supplierUnitCost: 0.0,
+    targetClientUnitPrice: 0.0,
+    pricingStatus: 'awaiting_supplier_quote',
     hsnCode: '29224985',
   },
   {
@@ -98,8 +98,9 @@ export const MAGENTA_API_ITEMS = [
     grade: 'USP / FCC (≥99.0% Neurotransmitter API)',
     purity: '≥99.0%',
     storageCondition: 'Store in airtight container at 15-30°C',
-    estimatedSupplierUnitCost: 52.0, // USD per 500g pack
-    targetClientUnitPrice: 56.16,    // USD (+8% margin)
+    supplierUnitCost: 0.0,
+    targetClientUnitPrice: 0.0,
+    pricingStatus: 'awaiting_supplier_quote',
     hsnCode: '29224985',
   },
   {
@@ -120,8 +121,9 @@ export const MAGENTA_API_ITEMS = [
     grade: 'High Purity β-NAD+ (≥98.0% Enzymatic Assay)',
     purity: '≥98.0%',
     storageCondition: 'Keep desiccated at -20°C (Cold-Chain Transportation Required)',
-    estimatedSupplierUnitCost: 1350.0, // USD per 1kg pack
-    targetClientUnitPrice: 1458.00,    // USD (+8% margin)
+    supplierUnitCost: 0.0,
+    targetClientUnitPrice: 0.0,
+    pricingStatus: 'awaiting_supplier_quote',
     hsnCode: '29349990',
   },
   {
@@ -142,8 +144,9 @@ export const MAGENTA_API_ITEMS = [
     grade: 'USP Grade (Essential Trace Element)',
     purity: '≥98.0%',
     storageCondition: 'Toxic / Corrosive standard storage, 15-25°C',
-    estimatedSupplierUnitCost: 35.0, // USD per 10g pack
-    targetClientUnitPrice: 37.80,    // USD (+8% margin)
+    supplierUnitCost: 0.0,
+    targetClientUnitPrice: 0.0,
+    pricingStatus: 'awaiting_supplier_quote',
     hsnCode: '28429090',
   },
   {
@@ -164,15 +167,16 @@ export const MAGENTA_API_ITEMS = [
     grade: 'USP Injectable Trace Element Grade',
     purity: '≥98.0%',
     storageCondition: 'Store in tight, light-resistant container at 15-25°C',
-    estimatedSupplierUnitCost: 28.0, // USD per 5g pack
-    targetClientUnitPrice: 30.24,    // USD (+8% margin)
+    supplierUnitCost: 0.0,
+    targetClientUnitPrice: 0.0,
+    pricingStatus: 'awaiting_supplier_quote',
     hsnCode: '28111980',
   },
 ];
 
 async function seedMagentaApiRfq() {
   console.log(`\n================================================================`);
-  console.log(`🧪 ONBOARDING MAGENTA HEALTH RFQ: 6 BULK APIs (CAS & QUOTATIONS)`);
+  console.log(`🧪 UPDATING MAGENTA HEALTH RFQ: 6 BULK APIs (PRICING: $0.00 / TBD)`);
   console.log(`================================================================\n`);
 
   const nowIso = new Date().toISOString();
@@ -190,9 +194,9 @@ async function seedMagentaApiRfq() {
   };
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 1. ONBOARD 6 PRODUCTS INTO `products` COLLECTION
+  // 1. UPDATE 6 PRODUCTS IN `products` COLLECTION
   // ───────────────────────────────────────────────────────────────────────────
-  console.log(`📦 Phase 1: Upserting 6 Raw API Products into Master Catalog...`);
+  console.log(`📦 Phase 1: Updating 6 Raw API Products into Master Catalog ($0.00 / TBD)...`);
   for (const item of MAGENTA_API_ITEMS) {
     const productDoc = {
       id: item.id,
@@ -205,6 +209,7 @@ async function seedMagentaApiRfq() {
       type: 'raw_api',
       status: 'active',
       isActive: true,
+      pricingStatus: 'awaiting_supplier_quote',
       casNumber: item.casNumber,
       molecularFormula: item.molecularFormula,
       packSize: item.packSize,
@@ -214,26 +219,26 @@ async function seedMagentaApiRfq() {
       purity: item.purity,
       storageCondition: item.storageCondition,
       hsnCode: item.hsnCode,
-      description: `${item.displayName}. Pharma grade bulk raw material with full COA and HPLC assay documentation.`,
+      description: `${item.displayName}. Pharma grade bulk raw material with full COA and HPLC assay documentation. Pricing is pending supplier confirmation.`,
       supplier: 'Lotusland Limited / Chemical Synthesis Labs',
       supplierIds: ['supplier-lotusland'],
       pricing: {
-        masterPrice: { base: item.targetClientUnitPrice, currency: 'USD' },
-        wholesalePrice: { base: item.targetClientUnitPrice, currency: 'USD' },
-        costPrice: { base: item.estimatedSupplierUnitCost, currency: 'USD' },
+        masterPrice: { base: 0.0, currency: 'USD' },
+        wholesalePrice: { base: 0.0, currency: 'USD' },
+        costPrice: { base: 0.0, currency: 'USD' },
       },
       updatedAt: nowIso,
       createdAt: nowIso,
     };
 
     await db.collection('products').doc(item.id).set(productDoc, { merge: true });
-    console.log(`   ✓ Registered Product: ${item.name} (CAS ${item.casNumber}) [${item.packSize}]`);
+    console.log(`   ✓ Updated Product: ${item.name} (CAS ${item.casNumber}) [${item.packSize}] -> Price: $0.00 (Pending Quote)`);
   }
 
   // ───────────────────────────────────────────────────────────────────────────
   // 2. REGISTER INBOUND CLIENT RFQ (`rfqs` COLLECTION)
   // ───────────────────────────────────────────────────────────────────────────
-  console.log(`\n📋 Phase 2: Ingesting Inbound RFQ into 'rfqs' Collection...`);
+  console.log(`\n📋 Phase 2: Updating Inbound RFQ in 'rfqs' Collection...`);
   const rfqId = `RFQ-${year}-MAGENTA-API-001`;
 
   const rfqLineItems = MAGENTA_API_ITEMS.map((item, idx) => ({
@@ -247,8 +252,9 @@ async function seedMagentaApiRfq() {
     grade: item.grade,
     purity: item.purity,
     storageCondition: item.storageCondition,
-    targetUnitCost: item.estimatedSupplierUnitCost,
-    targetUnitPrice: item.targetClientUnitPrice,
+    targetUnitCost: 0.0,
+    targetUnitPrice: 0.0,
+    status: 'awaiting_supplier_quote',
   }));
 
   const rfqDoc = {
@@ -257,7 +263,8 @@ async function seedMagentaApiRfq() {
     rfqNumber: rfqId,
     docType: 'client_rfq',
     category: 'api_raw_materials',
-    status: 'pending_supplier_quote', // 'pending_supplier_quote' | 'quoted' | 'converted_to_po'
+    status: 'pending_supplier_quote',
+    pricingStatus: 'awaiting_supplier_pricing',
     currency: 'USD',
     
     // Client Meta
@@ -279,35 +286,22 @@ async function seedMagentaApiRfq() {
 
     items: rfqLineItems,
     itemsCount: rfqLineItems.length,
-    notes: 'Inbound RFQ from Magenta Health for 6 bulk APIs. Special attention to cold-chain for 4kg NAD+ (freeze transport -20°C).',
+    notes: 'Inbound RFQ from Magenta Health for 6 bulk APIs. Prices set to $0.00 awaiting formal proforma from supplier (Lotusland / API laboratory).',
     priority: 'high',
     createdAt: nowIso,
     updatedAt: nowIso,
   };
 
   await db.collection('rfqs').doc(rfqId).set(rfqDoc);
-  console.log(`   ✓ Registered Inbound RFQ: '${rfqId}' for Magenta Health`);
+  console.log(`   ✓ Updated Inbound RFQ: '${rfqId}' for Magenta Health (Status: pending_supplier_quote)`);
 
   // ───────────────────────────────────────────────────────────────────────────
   // 3. GENERATE DRAFT CLIENT QUOTATION (`quotations` COLLECTION)
   // ───────────────────────────────────────────────────────────────────────────
-  console.log(`\n📄 Phase 3: Generating Draft Client Quotation in 'quotations'...`);
+  console.log(`\n📄 Phase 3: Updating Draft Client Quotation in 'quotations' with $0.00...`);
   const quoteNumber = `QT-${year}-MAGENTA-002`;
-  const marginPercent = 8.0; // 8% commercial margin for bulk APIs
-
-  let totalSupplierCost = 0;
-  let subtotal = 0;
 
   const quoteItems = MAGENTA_API_ITEMS.map((item, idx) => {
-    const unitCost = item.estimatedSupplierUnitCost;
-    const unitPrice = parseFloat((unitCost * (1 + marginPercent / 100)).toFixed(2));
-    const qty = item.requestedQuantity;
-    const lineSupplierCost = parseFloat((unitCost * qty).toFixed(2));
-    const lineTotal = parseFloat((unitPrice * qty).toFixed(2));
-
-    totalSupplierCost += lineSupplierCost;
-    subtotal += lineTotal;
-
     return {
       lineIndex: idx + 1,
       productId: item.id,
@@ -315,21 +309,18 @@ async function seedMagentaApiRfq() {
       description: `${item.displayName} - ${item.grade} (CAS: ${item.casNumber})`,
       casNumber: item.casNumber,
       packSize: item.packSize,
-      quantity: qty,
+      quantity: item.requestedQuantity,
       totalVolume: item.totalRequestedVolume,
-      supplierCost: unitCost,
+      supplierCost: 0.0,
       supplierName: 'Lotusland Limited',
-      unitRate: unitPrice,
-      unitPrice,
-      totalPrice: lineTotal,
-      marginPercent,
+      unitRate: 0.0,
+      unitPrice: 0.0,
+      totalPrice: 0.0,
+      marginPercent: 0.0,
+      pricingStatus: 'awaiting_supplier_quote',
       storageCondition: item.storageCondition,
     };
   });
-
-  const coldChainShippingCost = 280.0; // Isothermal shipper + datalogger for NAD+
-  const grandTotal = parseFloat((subtotal + coldChainShippingCost).toFixed(2));
-  const marginTotal = parseFloat((subtotal - totalSupplierCost).toFixed(2));
 
   const clientQuotationDoc = {
     id: quoteNumber,
@@ -352,17 +343,18 @@ async function seedMagentaApiRfq() {
     zohoContactId: magentaData.zohoContactId || '7006116000000593278',
 
     // Commercial Terms
-    status: 'draft', // DRAFT - Awaiting admin review and supplier rate confirmation
+    status: 'draft',
+    pricingStatus: 'awaiting_supplier_pricing',
     currency: 'USD',
     pricingTier: 'wholesale_bulk_api',
-    marginPercent,
-    totalSupplierCost,
-    marginTotal,
-    subtotal: parseFloat(subtotal.toFixed(2)),
-    shippingCost: coldChainShippingCost,
-    shippingType: 'Air Express Cold-Chain (-20°C to +4°C)',
-    taxTotal: 0,
-    grandTotal,
+    marginPercent: 0.0,
+    totalSupplierCost: 0.0,
+    marginTotal: 0.0,
+    subtotal: 0.0,
+    shippingCost: 0.0,
+    shippingType: 'Air Express Cold-Chain (-20°C to +4°C) - TBD',
+    taxTotal: 0.0,
+    grandTotal: 0.0,
     paymentTerms: 'due_on_receipt',
     validityDays: 30,
     docType: 'quotation',
@@ -370,22 +362,20 @@ async function seedMagentaApiRfq() {
     itemsCount: quoteItems.length,
     publicToken: `token_magenta_api_${Date.now()}_draft`,
     dispatchPolicy: 'manual_only',
-    notes: 'Draft quotation for 6 bulk APIs based on indicative wholesale pricing. Final supplier proforma from Lotusland pending verification.',
+    notes: 'Draft quotation for 6 bulk APIs. All items initialized at $0.00 pending formal proforma quotation from supplier (Lotusland / API lab).',
     createdAt: nowIso,
     updatedAt: nowIso,
   };
 
   await db.collection('quotations').doc(quoteNumber).set(clientQuotationDoc);
-  console.log(`   ✓ Created Client Quotation: '${quoteNumber}'`);
-  console.log(`     - Subtotal (APIs)  : $${subtotal.toFixed(2)} USD`);
-  console.log(`     - Gross Margin (+8%): +$${marginTotal.toFixed(2)} USD`);
-  console.log(`     - Cold-Chain Freight: $${coldChainShippingCost.toFixed(2)} USD`);
-  console.log(`     - Grand Total      : $${grandTotal.toFixed(2)} USD`);
+  console.log(`   ✓ Updated Client Quotation: '${quoteNumber}'`);
+  console.log(`     - Subtotal (APIs)  : $0.00 USD (Awaiting Supplier Pricing)`);
+  console.log(`     - Grand Total      : $0.00 USD`);
 
   // ───────────────────────────────────────────────────────────────────────────
   // 4. GENERATE OUTBOUND SUPPLIER RFQ (`supplier_rfqs` COLLECTION)
   // ───────────────────────────────────────────────────────────────────────────
-  console.log(`\n🚢 Phase 4: Sourcing Outbound Supplier RFQ in 'supplier_rfqs'...`);
+  console.log(`\n🚢 Phase 4: Updating Outbound Supplier RFQ in 'supplier_rfqs'...`);
   const srfqId = `SRFQ-${year}-LOTUS-API-001`;
 
   const supplierRfqDoc = {
@@ -398,7 +388,8 @@ async function seedMagentaApiRfq() {
     linkedClientRfqId: rfqId,
     linkedClientQuotationId: quoteNumber,
     category: 'api_synthesis',
-    status: 'draft_sourcing', // 'draft_sourcing' | 'dispatched' | 'quote_received'
+    status: 'draft_sourcing',
+    pricingStatus: 'awaiting_supplier_quote',
     items: MAGENTA_API_ITEMS.map((item, idx) => ({
       lineIndex: idx + 1,
       productId: item.id,
@@ -409,7 +400,8 @@ async function seedMagentaApiRfq() {
       totalVolume: item.totalRequestedVolume,
       requiredGrade: item.grade,
       requiredPurity: item.purity,
-      targetCostPerUnit: item.estimatedSupplierUnitCost,
+      targetCostPerUnit: 0.0,
+      pricingStatus: 'pending_quote',
     })),
     incoterm: 'CIP Dubai Airport',
     leadTimeRequested: '10-14 business days',
@@ -419,12 +411,12 @@ async function seedMagentaApiRfq() {
   };
 
   await db.collection('supplier_rfqs').doc(srfqId).set(supplierRfqDoc);
-  console.log(`   ✓ Created Outbound Supplier RFQ: '${srfqId}' to Lotusland Limited`);
+  console.log(`   ✓ Updated Outbound Supplier RFQ: '${srfqId}' to Lotusland Limited`);
 
   console.log(`\n================================================================`);
-  console.log(`🎉 SUCCESS: Magenta Health API RFQ successfully recorded!`);
+  console.log(`🎉 SUCCESS: All items updated to $0.00 (Pending Supplier Pricing)`);
   console.log(`   - Client RFQ ID : ${rfqId}`);
-  console.log(`   - Client Quote  : ${quoteNumber} (Status: DRAFT)`);
+  console.log(`   - Client Quote  : ${quoteNumber} ($0.00 USD - Status: DRAFT)`);
   console.log(`   - Supplier RFQ  : ${srfqId}`);
   console.log(`================================================================\n`);
 }
