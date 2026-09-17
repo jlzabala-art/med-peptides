@@ -98,8 +98,21 @@ export default function ClinicalDispensingLifecycleHub({
               ...doc.data()
             }));
 
+            // Strict doctor isolation
+            let scopedList = rxList;
+            if (doctorId && doctorId !== 'all') {
+              scopedList = rxList.filter(r => {
+                if (doctorId === 'dr-hanieh-erdmann') {
+                  const dName = (r.doctorName || r.prescribingDoctor || '').toLowerCase();
+                  const cName = (r.clinic || r.clinicName || '').toLowerCase();
+                  return r.doctorId === 'dr-hanieh-erdmann' || dName.includes('erdmann') || cName.includes('bedaya') || r.id === 'RX-BEDAYA-260915-11774';
+                }
+                return r.doctorId === doctorId;
+              });
+            }
+
             // Prioritize Bedaya & recent approved prescriptions
-            rxList.sort((a, b) => {
+            scopedList.sort((a, b) => {
               if (a.id === 'RX-BEDAYA-260915-11774') return -1;
               if (b.id === 'RX-BEDAYA-260915-11774') return 1;
               const dateA = a.createdAt?.seconds || 0;
@@ -107,7 +120,7 @@ export default function ClinicalDispensingLifecycleHub({
               return dateB - dateA;
             });
 
-            setPrescriptions(rxList);
+            setPrescriptions(scopedList);
 
             // Fetch linked orders for real-time payment and tracking
             const orderIds = rxList.map(r => r.orderId).filter(Boolean);
@@ -251,12 +264,15 @@ export default function ClinicalDispensingLifecycleHub({
     });
   }, [enrichedCases, searchQuery, stageFilter]);
 
-  // ── 4. KPI Calculations ────────────────────────────────────────────────────
+  const [kpiScope, setKpiScope] = useState('filtered'); // 'filtered' | 'global'
+
+  // ── 4. KPI Calculations (Scope-Aware, Regla #22 Golden Rule) ────────────────
   const kpis = useMemo(() => {
-    const total = enrichedCases.length;
-    const paidCount = enrichedCases.filter(c => c.isPaid).length;
-    const transitCount = enrichedCases.filter(c => c.fulfillmentStatus === 'in_transit').length;
-    const totalVolume = enrichedCases
+    const targetSet = kpiScope === 'filtered' ? filteredCases : enrichedCases;
+    const total = targetSet.length;
+    const paidCount = targetSet.filter(c => c.isPaid).length;
+    const transitCount = targetSet.filter(c => c.fulfillmentStatus === 'in_transit').length;
+    const totalVolume = targetSet
       .filter(c => c.isPaid)
       .reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
 
@@ -264,11 +280,13 @@ export default function ClinicalDispensingLifecycleHub({
       totalCases: total,
       paidCount,
       transitCount,
-      totalVolume
+      totalVolume,
+      globalTotal: enrichedCases.length,
+      filteredTotal: filteredCases.length
     };
-  }, [enrichedCases]);
+  }, [enrichedCases, filteredCases, kpiScope]);
 
-  // ── 5. PDF Generator Helper ────────────────────────────────────────────────
+  // ── 5. PDF Generator Helper (Dynamic Import) ───────────────────────────────
   const handleDownloadCompoundingPdf = async (rx) => {
     setGeneratingPdfId(rx.id);
     try {
@@ -511,88 +529,94 @@ export default function ClinicalDispensingLifecycleHub({
     }
   ], []);
 
-  // ── 8. Master-Detail Expanded Panel (Regla #4 Golden Rule) ──────────────────
+  // ── 8. Master-Detail Expanded Panel (GCP Cloud Pipeline Style) ──────────────
   const renderMasterDetail = (row) => {
     return (
-      <div style={{
+      <div className="gcp-master-detail-card" style={{
         backgroundColor: '#ffffff',
         border: '1.5px solid #bfdbfe',
         borderRadius: '12px',
         padding: '16px 18px',
-        margin: '6px 12px 14px',
+        margin: '6px 8px 14px',
         boxShadow: '0 4px 14px rgba(0, 54, 102, 0.08)',
         display: 'flex',
         flexDirection: 'column',
         gap: '16px'
       }}>
-        {/* ── Visual 5-Stage Stepper ── */}
+        {/* ── Visual 5-Stage Stepper (Google Cloud Pipeline) ── */}
         <div>
-          <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '10px' }}>
-            End-to-End Clinical & Commercial Treatment Stepper
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#003666', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>🚀</span> End-to-End Clinical & Commercial Treatment Stepper
+            </span>
+            <span style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 700, backgroundColor: '#f0fdf4', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+              Stage 5 of 5 • Active
+            </span>
           </div>
 
-          <div style={{
+          {/* Stepper Container */}
+          <div className="gcp-stepper-track-container" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '8px',
             backgroundColor: '#f8fafc',
-            padding: '12px',
+            padding: '12px 14px',
             borderRadius: '10px',
             border: '1px solid #e2e8f0'
           }}>
             {/* Step 1: Recommendation */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#16a34a', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>1. Recommendation</span>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: '#16a34a', color: '#fff', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>1. Recommendation</span>
               </div>
-              <span style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600, paddingLeft: '26px' }}>
+              <span style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600, paddingLeft: '28px' }}>
                 {row.sourceLabel}
               </span>
             </div>
 
             {/* Step 2: Prescription Formulated */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#16a34a', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>2. Prescribed</span>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: '#16a34a', color: '#fff', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>2. Prescribed</span>
               </div>
-              <span style={{ fontSize: '0.70rem', color: '#64748b', paddingLeft: '26px' }}>
+              <span style={{ fontSize: '0.70rem', color: '#64748b', paddingLeft: '28px' }}>
                 Dr. Hanieh Erdmann
               </span>
             </div>
 
             {/* Step 3: Patient Invoice */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#16a34a', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>3. Invoiced</span>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: '#16a34a', color: '#fff', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>3. Invoiced</span>
               </div>
-              <span style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, paddingLeft: '26px' }}>
+              <span style={{ fontSize: '0.70rem', color: '#0284c7', fontWeight: 600, paddingLeft: '28px' }}>
                 {row.invoiceId}
               </span>
             </div>
 
             {/* Step 4: Patient Payment */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: row.isPaid ? '#16a34a' : '#d97706', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: row.isPaid ? '#16a34a' : '#d97706', color: '#fff', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {row.isPaid ? '✓' : '•'}
                 </span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>4. Payment</span>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>4. Payment</span>
               </div>
-              <span style={{ fontSize: '0.70rem', color: row.isPaid ? '#15803d' : '#d97706', fontWeight: 700, paddingLeft: '26px' }}>
+              <span style={{ fontSize: '0.70rem', color: row.isPaid ? '#15803d' : '#d97706', fontWeight: 700, paddingLeft: '28px' }}>
                 {row.isPaid ? `$${row.amount} Paid (Stripe)` : 'Awaiting Patient'}
               </span>
             </div>
 
-            {/* Step 5: Courier Delivery */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {/* Step 5: Courier Delivery (Active Beacon) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: '#2563eb', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚚</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f172a' }}>5. Courier Delivery</span>
+                <span className="gcp-beacon-node" style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: '#2563eb', color: '#fff', fontSize: '0.72rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚚</span>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a' }}>5. Courier Delivery</span>
               </div>
-              <span style={{ fontSize: '0.70rem', color: '#2563eb', fontWeight: 700, paddingLeft: '26px' }}>
+              <span style={{ fontSize: '0.70rem', color: '#2563eb', fontWeight: 700, paddingLeft: '28px' }}>
                 {row.fulfillmentStatus === 'delivered' ? 'Delivered' : 'In Transit (DHL)'}
               </span>
             </div>
@@ -600,33 +624,39 @@ export default function ClinicalDispensingLifecycleHub({
         </div>
 
         {/* ── 3-Column Inspection Details ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+        <div className="gcp-inspection-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
           {/* Column A: Magistral Formulation */}
-          <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#7e22ce', fontWeight: 800, fontSize: '0.82rem' }}>
+          <div style={{ backgroundColor: '#f8fafc', padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', color: '#7e22ce', fontWeight: 800, fontSize: '0.84rem' }}>
               <span>💊</span>
               <span>Magistral Formula & Dosage</span>
             </div>
-            <div style={{ fontSize: '0.76rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ fontSize: '0.78rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '5px' }}>
               <div>• <strong>Latanoprost Fagron:</strong> 0.005% (50 mcg/ml)</div>
               <div>• <strong>17-α-Estradiol:</strong> 0.05% (500 mcg/ml)</div>
               <div>• <strong>IGrantine-F1 TM:</strong> 0.50% (5 mg/ml)</div>
               <div>• <strong>Vehicle Base:</strong> TrichoSol Scalp Carrier (3x 100ml)</div>
-              <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px dashed #cbd5e1', color: '#64748b' }}>
+              <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px dashed #cbd5e1', color: '#64748b', fontSize: '0.75rem' }}>
                 <strong>Posology:</strong> 1ml once daily application to dry scalp.
               </div>
             </div>
           </div>
 
           {/* Column B: Commercial & Delivery Status */}
-          <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#003666', fontWeight: 800, fontSize: '0.82rem' }}>
+          <div style={{ backgroundColor: '#f8fafc', padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', color: '#003666', fontWeight: 800, fontSize: '0.84rem' }}>
               <span>🧾</span>
               <span>Billing & Dispatch Details</span>
             </div>
-            <div style={{ fontSize: '0.76rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <div>• <strong>Invoice Ref:</strong> <code>{row.invoiceId}</code></div>
-              <div>• <strong>Order Code:</strong> <code>{row.orderId || 'PO-BEDAYA-260915-11774'}</code></div>
+            <div style={{ fontSize: '0.78rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>• <strong>Invoice Ref:</strong></span>
+                <CopyableId value={row.invoiceId} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>• <strong>Order Code:</strong></span>
+                <CopyableId value={row.orderId || 'PO-BEDAYA-260915-11774'} />
+              </div>
               <div>• <strong>Payment Settled:</strong> ${row.amount} USD ({row.isPaid ? 'Credit Card • Stripe' : 'Pending'})</div>
               <div>• <strong>Courier:</strong> {row.courier}</div>
               <div>• <strong>Destination:</strong> {row.deliveryAddress}</div>
@@ -634,62 +664,75 @@ export default function ClinicalDispensingLifecycleHub({
           </div>
 
           {/* Column C: Refill Adherence & Quick Actions */}
-          <div style={{ backgroundColor: '#f0fdf4', padding: '12px 14px', borderRadius: '10px', border: '1px solid #bbf7d0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ backgroundColor: '#f0fdf4', padding: '14px 16px', borderRadius: '10px', border: '1px solid #bbf7d0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', color: '#15803d', fontWeight: 800, fontSize: '0.82rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', color: '#15803d', fontWeight: 800, fontSize: '0.84rem' }}>
                 <span>🛡️</span>
                 <span>Treatment Adherence & Refill</span>
               </div>
-              <div style={{ fontSize: '0.76rem', color: '#166534', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#166534', display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div>• <strong>Course Duration:</strong> 90 Days (N3 continuous)</div>
-                <div>• <strong>Course Progress:</strong> Day 2 of 90</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>• <strong>Course Progress:</strong> Day 2 of 90</span>
+                  <div style={{ flex: 1, backgroundColor: '#dcfce7', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: '2.2%', backgroundColor: '#16a34a', height: '100%' }} />
+                  </div>
+                </div>
                 <div>• <strong>Estimated Refill Date:</strong> November 28, 2026</div>
                 <div>• <strong>Patient WhatsApp:</strong> {row.patientPhone || '+971544060080'}</div>
               </div>
             </div>
 
-            {/* Row Action Buttons */}
-            <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
+            {/* Row Action Buttons (Min 44px tap target height for mobile) */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={() => handleDownloadCompoundingPdf(row)}
                 disabled={generatingPdfId === row.id}
+                className="gcp-btn-touch"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  justifyContent: 'center',
+                  gap: '6px',
                   backgroundColor: '#ffffff',
                   border: '1px solid #15803d',
                   color: '#15803d',
-                  borderRadius: '6px',
-                  padding: '5px 9px',
-                  fontSize: '0.72rem',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  fontSize: '0.76rem',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  minHeight: '40px',
+                  flex: '1 1 auto'
                 }}
               >
-                <Download size={13} />
+                <Download size={14} />
                 <span>{generatingPdfId === row.id ? 'Generating...' : 'Compounding Protocol PDF'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleOpenWhatsApp(row)}
+                className="gcp-btn-touch"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  justifyContent: 'center',
+                  gap: '6px',
                   backgroundColor: '#25D366',
                   border: 'none',
                   color: '#ffffff',
-                  borderRadius: '6px',
-                  padding: '5px 9px',
-                  fontSize: '0.72rem',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  fontSize: '0.76rem',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  minHeight: '40px',
+                  flex: '1 1 auto'
                 }}
               >
-                <MessageSquare size={13} />
+                <MessageSquare size={14} />
                 <span>WhatsApp Patient</span>
               </button>
             </div>
@@ -710,10 +753,54 @@ export default function ClinicalDispensingLifecycleHub({
       flexDirection: 'column',
       gap: '14px'
     }}>
-      {/* ── Header ── */}
+      <style>{`
+        @keyframes gcpPulseBeacon {
+          0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+          70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .gcp-beacon-node {
+          animation: gcpPulseBeacon 2s infinite ease-in-out;
+        }
+        .gcp-lifecycle-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+        }
+        .gcp-filter-chips-row {
+          display: flex;
+          gap: 6px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          padding: 2px 0;
+        }
+        .gcp-filter-chips-row::-webkit-scrollbar {
+          display: none;
+        }
+        @media (max-width: 768px) {
+          .gcp-lifecycle-kpi-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+          }
+          .gcp-inspection-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .gcp-stepper-track-container {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+          .gcp-btn-touch {
+            width: 100% !important;
+            min-height: 44px !important;
+          }
+        }
+      `}</style>
+
+      {/* ── GCP Page Header Banner ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '1.2rem' }}>🧬</span>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#003666' }}>
               {title}
@@ -727,7 +814,7 @@ export default function ClinicalDispensingLifecycleHub({
               borderRadius: '99px',
               border: '1px solid #bfdbfe'
             }}>
-              Unified Lifecycle
+              GCP Live Workflow
             </span>
           </div>
           <p style={{ margin: '3px 0 0', fontSize: '0.80rem', color: '#64748b' }}>
@@ -735,7 +822,7 @@ export default function ClinicalDispensingLifecycleHub({
           </p>
         </div>
 
-        {/* Doctor Credential Badge */}
+        {/* Doctor Credential Chips */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <span style={{
             display: 'inline-flex',
@@ -770,13 +857,71 @@ export default function ClinicalDispensingLifecycleHub({
         </div>
       </div>
 
-      {/* ── 4 KPI Metric Summary Cards (Regla #22 Golden Rule) ── */}
+      {/* ── Scope Switcher Bar (Regla #22 Golden Rule) ── */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-        gap: '10px'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '8px',
+        backgroundColor: '#f8fafc',
+        padding: '6px 12px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0'
       }}>
-        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '10px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#475569' }}>
+          <span style={{ fontWeight: 700 }}>Scope:</span>
+          <span style={{
+            backgroundColor: kpiScope === 'filtered' ? '#eff6ff' : '#f1f5f9',
+            color: kpiScope === 'filtered' ? '#1d4ed8' : '#64748b',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            fontWeight: 700,
+            border: kpiScope === 'filtered' ? '1px solid #bfdbfe' : '1px solid #cbd5e1'
+          }}>
+            {kpiScope === 'filtered' ? `Active Filter View (${kpis.filteredTotal} items)` : `Global Database View (${kpis.globalTotal} items)`}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            onClick={() => setKpiScope('filtered')}
+            style={{
+              border: kpiScope === 'filtered' ? '1px solid #2563eb' : '1px solid transparent',
+              backgroundColor: kpiScope === 'filtered' ? '#ffffff' : 'transparent',
+              color: kpiScope === 'filtered' ? '#2563eb' : '#64748b',
+              padding: '3px 8px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Filtered ({kpis.filteredTotal})
+          </button>
+          <button
+            type="button"
+            onClick={() => setKpiScope('global')}
+            style={{
+              border: kpiScope === 'global' ? '1px solid #2563eb' : '1px solid transparent',
+              backgroundColor: kpiScope === 'global' ? '#ffffff' : 'transparent',
+              color: kpiScope === 'global' ? '#2563eb' : '#64748b',
+              padding: '3px 8px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Database Total ({kpis.globalTotal})
+          </button>
+        </div>
+      </div>
+
+      {/* ── 4 KPI Metric Summary Cards (Responsive 4x1 on Laptop, 2x2 on Mobile) ── */}
+      <div className="gcp-lifecycle-kpi-grid">
+        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '12px 14px' }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#1e40af', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Active Clinical Cases
           </div>
@@ -788,7 +933,7 @@ export default function ClinicalDispensingLifecycleHub({
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 14px' }}>
+        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px' }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Patient Invoices Paid
           </div>
@@ -800,7 +945,7 @@ export default function ClinicalDispensingLifecycleHub({
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '10px', padding: '10px 14px' }}>
+        <div style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '10px', padding: '12px 14px' }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             In Transit (Courier)
           </div>
@@ -808,11 +953,11 @@ export default function ClinicalDispensingLifecycleHub({
             {kpis.transitCount}
           </div>
           <div style={{ fontSize: '0.70rem', color: '#9333ea', marginTop: '2px' }}>
-            DHL Express Dispatch
+            DHL Express Medical Dispatch
           </div>
         </div>
 
-        <div style={{ backgroundColor: '#fefce8', border: '1px solid #fef08a', borderRadius: '10px', padding: '10px 14px' }}>
+        <div style={{ backgroundColor: '#fefce8', border: '1px solid #fef08a', borderRadius: '10px', padding: '12px 14px' }}>
           <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#854d0e', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Treatment Course (N3)
           </div>
@@ -825,9 +970,9 @@ export default function ClinicalDispensingLifecycleHub({
         </div>
       </div>
 
-      {/* ── Search & Stage Filter Bar ── */}
+      {/* ── Search & Stage Filter Bar (Google Cloud Style) ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        {/* Search Box */}
+        {/* Search Box with ⌘K */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -837,7 +982,7 @@ export default function ClinicalDispensingLifecycleHub({
           borderRadius: '8px',
           padding: '6px 12px',
           flex: '1 1 260px',
-          maxWidth: '380px'
+          maxWidth: '400px'
         }}>
           <Search size={15} color="#64748b" />
           <input
@@ -854,19 +999,23 @@ export default function ClinicalDispensingLifecycleHub({
               width: '100%'
             }}
           />
-          {searchQuery && (
+          {searchQuery ? (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0 }}
+              style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0, fontSize: '1rem' }}
             >
               ×
             </button>
+          ) : (
+            <span style={{ fontSize: '0.68rem', backgroundColor: '#e2e8f0', color: '#64748b', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+              ⌘K
+            </span>
           )}
         </div>
 
-        {/* Filter Chips */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {/* Filter Chips (Mobile-Scrollable) */}
+        <div className="gcp-filter-chips-row">
           {[
             { id: 'all', label: 'All Cases' },
             { id: 'paid_transit', label: 'Paid & In Transit 🚚' },
@@ -885,10 +1034,12 @@ export default function ClinicalDispensingLifecycleHub({
                   backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
                   color: isSelected ? '#1d4ed8' : '#475569',
                   borderRadius: '99px',
-                  padding: '4px 10px',
+                  padding: '5px 12px',
                   fontSize: '0.74rem',
                   fontWeight: isSelected ? 800 : 600,
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                   transition: 'all 0.12s ease'
                 }}
               >

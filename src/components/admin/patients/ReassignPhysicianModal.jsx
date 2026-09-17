@@ -6,12 +6,17 @@ import { useFirestoreCollection } from '../../../hooks/data/useFirestoreCollecti
 import { reassignPatientsPhysicianAction } from '../../../actions/patientsActions';
 import notifier from '../../../services/NotificationService';
 
+import { useRoleAccess } from '../../../hooks/useRoleAccess';
+
 export default function ReassignPhysicianModal({
   isOpen,
   onClose,
   patients = [],
   onSuccess,
 }) {
+  const { is, role } = useRoleAccess();
+  const isAdmin = is('admin') || role === 'admin';
+
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [selectedClinicId, setSelectedClinicId] = useState('');
   const [updatePrescriptions, setUpdatePrescriptions] = useState(true);
@@ -53,7 +58,8 @@ export default function ReassignPhysicianModal({
     }
   };
 
-  if (!isOpen) return null;
+  // Reassignment is strictly restricted to Administrators
+  if (!isOpen || !isAdmin) return null;
 
   const targetDoctor = doctors.find(d => d.id === selectedDoctorId);
   const targetClinic = clinics.find(c => c.id === selectedClinicId);
@@ -111,19 +117,33 @@ export default function ReassignPhysicianModal({
       backdropFilter: 'blur(4px)',
       padding: '1rem',
     }}>
+      <style>{`
+        .gcp-reassign-modal {
+          width: 100%;
+          max-width: 560px;
+          background-color: #ffffff;
+          border-radius: 14px;
+          border: 1px solid #dadce0;
+          box-shadow: 0 12px 32px rgba(60, 64, 67, 0.28), 0 4px 8px rgba(60, 64, 67, 0.15);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          max-height: 90vh;
+        }
+        @media (max-width: 768px) {
+          .gcp-reassign-modal {
+            max-width: 100% !important;
+            border-radius: 16px 16px 0 0 !important;
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            max-height: 92vh !important;
+          }
+        }
+      `}</style>
       <div 
-        className="modal-container"
-        style={{
-          width: '100%',
-          maxWidth: '540px',
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '90vh',
-        }}
+        className="gcp-reassign-modal"
       >
         {/* Header */}
         <div style={{

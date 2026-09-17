@@ -211,9 +211,10 @@ export default function DoctorDashboard({ children }) {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('simulate') === 'dr-hanieh-erdmann') return 'dr-hanieh-erdmann';
-      return sessionStorage.getItem('impersonatedDoctorId') || '';
+      const stored = sessionStorage.getItem('impersonatedDoctorId') || localStorage.getItem('impersonatedDoctorId');
+      if (stored) return stored;
     }
-    return '';
+    return 'dr-hanieh-erdmann';
   });
   const [selectedDoctorProfile, setSelectedDoctorProfile] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -222,7 +223,7 @@ export default function DoctorDashboard({ children }) {
         return DR_HANIEH_ERDMANN_PROFILE;
       }
     }
-    return null;
+    return DR_HANIEH_ERDMANN_PROFILE;
   });
 
   const isSimulatingDrErdmann = selectedDoctorId === 'dr-hanieh-erdmann';
@@ -233,7 +234,8 @@ export default function DoctorDashboard({ children }) {
     const urlParams = new URLSearchParams(window.location.search);
     const simParam = urlParams.get('simulate');
     const storedId = sessionStorage.getItem('impersonatedDoctorId') || localStorage.getItem('impersonatedDoctorId');
-    if (simParam === 'dr-hanieh-erdmann' || storedId === 'dr-hanieh-erdmann') {
+    const targetId = simParam || storedId || 'dr-hanieh-erdmann';
+    if (targetId === 'dr-hanieh-erdmann') {
       setSelectedDoctorId('dr-hanieh-erdmann');
       setSelectedDoctorProfile(DR_HANIEH_ERDMANN_PROFILE);
       sessionStorage.setItem('impersonatedDoctorId', 'dr-hanieh-erdmann');

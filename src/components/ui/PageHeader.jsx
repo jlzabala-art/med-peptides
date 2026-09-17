@@ -203,8 +203,16 @@ export default function PageHeader({
           box-sizing: border-box;
         }
 
-        .page-header-actions-row > * {
-          width: 100%;
+        .page-header-actions-desktop {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+
+        .page-header-actions-mobile {
+          display: none;
         }
 
         .page-header-quick-btn-label {
@@ -241,13 +249,18 @@ export default function PageHeader({
           .page-header-quick-btn-label {
             display: none !important;
           }
-          .page-header-actions-row {
+          .page-header-actions-desktop {
+            display: none !important;
+          }
+          .page-header-actions-mobile {
+            display: flex !important;
             margin-top: 0.45rem;
             width: 100% !important;
-            justify-content: stretch !important;
-            align-items: stretch !important;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: stretch;
           }
-          .page-header-actions-row > * {
+          .page-header-actions-mobile > * {
             width: 100% !important;
             flex: 1 1 100% !important;
           }
@@ -280,60 +293,68 @@ export default function PageHeader({
             </div>
           </div>
 
-          {(helpTopic || showAiAssistant || (showDashboardBack && !isDashboardRoot)) && (
-            <div className="page-header-quick-actions">
-              {showDashboardBack && !isDashboardRoot && (
-                <button
-                  type="button"
-                  onClick={() => router.push(dashboardRoute)}
-                  className="page-header-quick-btn"
-                  title={`Return to ${dashboardLabel}`}
-                >
-                  <ArrowLeft size={16} style={{ color: finalIconColor }} />
-                  <span className="page-header-quick-btn-label">Dashboard</span>
-                </button>
-              )}
-              {showAiAssistant && (
-                <button
-                  type="button"
-                  className="page-header-quick-btn page-header-ai-btn"
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('open-ai-chat', {
-                      detail: {
-                        title,
-                        context: { screenTitle: title, helpTopic }
-                      }
-                    }));
-                  }}
-                  title={`Ask AI Assistant for ${title}`}
-                >
-                  <Sparkles size={15} style={{ color: finalIconColor }} />
-                  <span className="page-header-quick-btn-label">Ask AI</span>
-                </button>
-              )}
-              {helpTopic && (
-                <button
-                  type="button"
-                  className="page-header-quick-btn page-header-help"
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('open-atlas-copilot', {
-                      detail: {
-                        query: `Quiero aprender a usar este módulo (${helpTopic}). ¿Me das un resumen de qué puedo hacer y mejores prácticas?`,
-                        context: { module: helpTopic }
-                      }
-                    }));
-                  }}
-                  title="Module Help & Documentation"
-                >
-                  <HelpCircle size={18} />
-                </button>
-              )}
-            </div>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            {actions && (
+              <div className="page-header-actions-desktop">
+                {actions}
+              </div>
+            )}
+
+            {(helpTopic || showAiAssistant || (showDashboardBack && !isDashboardRoot)) && (
+              <div className="page-header-quick-actions">
+                {showDashboardBack && !isDashboardRoot && (
+                  <button
+                    type="button"
+                    onClick={() => router.push(dashboardRoute)}
+                    className="page-header-quick-btn"
+                    title={`Return to ${dashboardLabel}`}
+                  >
+                    <ArrowLeft size={16} style={{ color: finalIconColor }} />
+                    <span className="page-header-quick-btn-label">Dashboard</span>
+                  </button>
+                )}
+                {showAiAssistant && (
+                  <button
+                    type="button"
+                    className="page-header-quick-btn page-header-ai-btn"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('open-ai-chat', {
+                        detail: {
+                          title,
+                          context: { screenTitle: title, helpTopic }
+                        }
+                      }));
+                    }}
+                    title={`Ask AI Assistant for ${title}`}
+                  >
+                    <Sparkles size={15} style={{ color: finalIconColor }} />
+                    <span className="page-header-quick-btn-label">Ask AI</span>
+                  </button>
+                )}
+                {helpTopic && (
+                  <button
+                    type="button"
+                    className="page-header-quick-btn page-header-help"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('open-atlas-copilot', {
+                        detail: {
+                          query: `Quiero aprender a usar este módulo (${helpTopic}). ¿Me das un resumen de qué puedo hacer y mejores prácticas?`,
+                          context: { module: helpTopic }
+                        }
+                      }));
+                    }}
+                    title="Module Help & Documentation"
+                  >
+                    <HelpCircle size={18} />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {actions && (
-          <div className="page-header-actions-row">
+          <div className="page-header-actions-mobile">
             {actions}
           </div>
         )}

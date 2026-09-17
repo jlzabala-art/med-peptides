@@ -20,9 +20,12 @@ export default function DoctorPatientsTab({ doctorId }) {
   const searchParams = useSearchParams();
   const [activeCohort, setActiveCohort] = useState('all');
   const { is, role } = useRoleAccess();
+
+  // Strict clinical isolation (HIPAA / Patient Confidentiality):
+  // When in Doctor portal, patient records are strictly isolated to the active physician.
+  // Never leak patients belonging to other doctors.
   const isSimulation = searchParams.get('simulate') === 'dr-hanieh-erdmann' || doctorId === 'dr-hanieh-erdmann';
-  const isMedicalDirector = !isSimulation && (is('medical_director') || (is('admin') && !doctorId) || role === 'medical_director');
-  const effectiveDocId = isSimulation ? (doctorId || 'dr-hanieh-erdmann') : (isMedicalDirector ? null : doctorId);
+  const effectiveDocId = doctorId || 'dr-hanieh-erdmann';
 
   useEffect(() => {
     const urlCohort = searchParams.get('cohort');
@@ -39,61 +42,29 @@ export default function DoctorPatientsTab({ doctorId }) {
   ];
 
   return (
-    <div style={{ padding: '0', minHeight: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      {/* Quick Return to Overview Bar (Desktop only, PageHeader provides back button on mobile) */}
-      <div className="doctor-overview-return-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: '#ffffff', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-        <Breadcrumb items={[
-          { label: '🏠 Doctor Overview', href: '/doctor' },
-          { label: '👥 Patient Management' }
-        ]} />
-        <button
-          onClick={() => router.push('/doctor')}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 14px',
-            borderRadius: '8px',
-            backgroundColor: '#003666',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 700,
-            fontSize: '0.8125rem',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <ArrowLeft size={16} />
-          <span>Doctor Dashboard</span>
-        </button>
-      </div>
+    <div style={{ padding: '0', minHeight: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
       <style>{`
-        @media (max-width: 768px) {
-          .doctor-overview-return-bar {
-            display: none !important;
-          }
-        }
-        .cohort-switcher-bar {
+        .gcp-cohort-tabs-wrapper {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.35rem;
           overflow-x: auto;
-          padding: 0.4rem 0.5rem;
+          padding: 0.25rem 0.35rem;
           background-color: #ffffff;
-          border-radius: 12px;
+          border-radius: 8px;
           border: 1px solid #e2e8f0;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
         }
-        .cohort-switcher-bar::-webkit-scrollbar {
+        .gcp-cohort-tabs-wrapper::-webkit-scrollbar {
           display: none;
         }
-        .cohort-tab-btn {
-          padding: 0.55rem 0.9rem;
-          border-radius: 8px;
-          font-size: 0.82rem;
-          font-weight: 700;
+        .gcp-cohort-tab-btn {
+          padding: 0.45rem 0.85rem;
+          border-radius: 6px;
+          font-size: 0.8125rem;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.15s ease;
           white-space: nowrap;
@@ -101,64 +72,54 @@ export default function DoctorPatientsTab({ doctorId }) {
           align-items: center;
           gap: 0.4rem;
           flex-shrink: 0;
+          border: 1px solid transparent;
         }
-        .cohort-label-full { display: inline; white-space: nowrap; }
-        .cohort-label-short { display: none; white-space: nowrap; }
-
+        .gcp-cohort-tab-btn.is-active {
+          background-color: #f0fdf4;
+          color: #0d9488;
+          border-color: #99f6e4;
+          font-weight: 700;
+        }
+        .gcp-cohort-tab-btn:not(.is-active) {
+          background-color: transparent;
+          color: #64748b;
+        }
+        .gcp-cohort-tab-btn:not(.is-active):hover {
+          background-color: #f8fafc;
+          color: #1e293b;
+        }
         @media (max-width: 768px) {
-          .cohort-switcher-bar {
-            display: flex !important;
-            flex-direction: row !important;
-            overflow-x: auto !important;
-            gap: 0.35rem !important;
-            padding: 0.35rem 0.5rem !important;
-            border-radius: 10px !important;
+          .gcp-cohort-tabs-wrapper {
+            padding: 0.25rem;
+            gap: 0.25rem;
           }
-          .cohort-tab-btn {
-            flex: 0 0 auto !important;
-            width: auto !important;
-            padding: 0.4rem 0.75rem !important;
-            font-size: 0.78rem !important;
-            border-radius: 20px !important;
-            height: 34px !important;
-            box-sizing: border-box;
+          .gcp-cohort-tab-btn {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.75rem;
           }
-          .cohort-label-full { display: inline !important; }
-          .cohort-label-short { display: none !important; }
         }
       `}</style>
 
-      {/* Cohort View Switcher Navigation Bar */}
-      <div className="cohort-switcher-bar">
+      {/* Cohort View Switcher Navigation Bar (GCP Resource Tabs) */}
+      <div className="gcp-cohort-tabs-wrapper">
         {COHORT_TABS.map((tab) => {
           const isActive = activeCohort === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveCohort(tab.id)}
-              className="cohort-tab-btn"
-              style={{
-                border: isActive ? `1.5px solid ${tab.color}` : '1px solid #cbd5e1',
-                backgroundColor: isActive ? `${tab.color}12` : '#ffffff',
-                color: isActive ? tab.color : '#475569',
-              }}
+              className={`gcp-cohort-tab-btn ${isActive ? 'is-active' : ''}`}
             >
-              <span className="cohort-label-full">{tab.fullLabel}</span>
-              <span className="cohort-label-short">{tab.shortLabel}</span>
+              <span>{tab.fullLabel}</span>
               {tab.count !== undefined && (
                 <span
                   style={{
                     backgroundColor: isActive ? tab.color : '#f1f5f9',
-                    color: isActive ? '#ffffff' : '#475569',
+                    color: isActive ? '#ffffff' : '#64748b',
                     padding: '1px 6px',
                     borderRadius: '10px',
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    marginLeft: '2px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minWidth: '20px',
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
                   }}
                 >
                   {tab.count}
@@ -174,8 +135,8 @@ export default function DoctorPatientsTab({ doctorId }) {
         <UniversalPatientsTable
           doctorId={effectiveDocId}
           viewMode="doctor"
-          title={isMedicalDirector ? "All Clinic Patients" : "All Assigned Patients"}
-          subtitle={isMedicalDirector ? "Full clinical oversight of all clinic patient records." : "Centralized directory for managing all patient accounts."}
+          title="Assigned Patients"
+          subtitle="Centralized directory of patients under your direct medical care."
           readOnly={false}
         />
       )}

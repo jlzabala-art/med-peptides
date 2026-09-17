@@ -57,8 +57,13 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
   const [reassignModal, setReassignModal] = useState({ isOpen: false, patients: [] });
 
   const { is, role } = useRoleAccess();
+  const isAdmin = is('admin') || role === 'admin';
+  // Reassignment is exclusively permitted for Super Administrators in the Admin Console, never for physicians
+  const canReassignDoctor = isAdmin && viewMode === 'admin';
   const isMedicalDirector = (is('medical_director') || role === 'medical_director') && viewMode !== 'doctor';
-  const effectiveDoctorId = (viewMode === 'doctor' && doctorId) ? doctorId : (isMedicalDirector ? null : doctorId);
+  const effectiveDoctorId = viewMode === 'doctor'
+    ? (doctorId || 'dr-hanieh-erdmann')
+    : (isMedicalDirector ? null : doctorId);
 
   const handleMobileQuickAction = useCallback((action, patient) => {
     if (action === 'menu') { setMobileActionPatient(patient); }
@@ -178,18 +183,44 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       list = firestorePatients.map(p => ({ ...p, id: p.id || p.objectID }));
     }
 
-    // Filter by effectiveDoctorId if specified (Medical Director has null effectiveDoctorId)
-    if (effectiveDoctorId) {
+    // Filter by effectiveDoctorId if specified (STRICT CLINICAL ISOLATION - HIPAA / Medical Privacy)
+    if (effectiveDoctorId || viewMode === 'doctor') {
+      const targetDocId = effectiveDoctorId || 'dr-hanieh-erdmann';
       list = list.filter(p => {
-        if (effectiveDoctorId === 'dr-hanieh-erdmann') {
-          const docStr = `${p.doctorName || ''} ${p.physicianName || ''} ${p.prescribingDoctor || ''} ${p.clinicName || ''} ${p.clinic || ''}`.toLowerCase();
-          if (docStr.includes('erdmann') || docStr.includes('bedaya')) return true;
+        const pId = String(p.id || p.objectID || '').toLowerCase();
+        const pName = cleanStr(p.name || `${p.firstName || ''} ${p.lastName || ''}`);
+
+        if (targetDocId === 'dr-hanieh-erdmann') {
+          // EXPLICIT BLOCKLIST: Under NO circumstance can Hortman Clinics / Dr. Sezgin Cagatay patients leak to Dr. Erdmann
+          if (
+            pId === 'alan-maclean-rutledge' || 
+            pId === 'ke8uxxn1sumgpabnvt32' || 
+            pId === 'matthew-taylor' ||
+            pName.includes('alan maclean') ||
+            pName.includes('mangesh sakharkar') ||
+            pName.includes('matthew taylor') ||
+            p.physicianId === 'z3aUIMaYsPViG1JgM95r'
+          ) {
+            return false;
+          }
+
+          const docStr = `${p.doctorName || ''} ${p.physicianName || ''} ${p.prescribingDoctor || ''} ${p.clinicName || ''} ${p.clinic || ''} ${p.physician || ''}`.toLowerCase();
+          
+          // Strict segregation: explicitly exclude any patient belonging to other clinics or doctors
+          if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
+
+          const isDirectMatch = p.physicianId === 'dr-hanieh-erdmann' ||
+            p.assignedDoctorId === 'dr-hanieh-erdmann' ||
+            p.doctorId === 'dr-hanieh-erdmann' ||
+            (Array.isArray(p.doctorIds) && p.doctorIds.includes('dr-hanieh-erdmann'));
+
+          return isDirectMatch || docStr.includes('erdmann') || docStr.includes('bedaya');
         }
         return (
-          p.physicianId === effectiveDoctorId ||
-          p.assignedDoctorId === effectiveDoctorId ||
-          p.doctorId === effectiveDoctorId ||
-          (Array.isArray(p.doctorIds) && p.doctorIds.includes(effectiveDoctorId))
+          p.physicianId === targetDocId ||
+          p.assignedDoctorId === targetDocId ||
+          p.doctorId === targetDocId ||
+          (Array.isArray(p.doctorIds) && p.doctorIds.includes(targetDocId))
         );
       });
     }
@@ -275,6 +306,11 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
 
 
 
+  const doctorBreadcrumbs = useMemo(() => [
+    { label: '🏠 Doctor Overview', href: '/doctor' },
+    { label: '👥 Patients' }
+  ], []);
+
   return (
     <DataModule
       title={title}
@@ -282,7 +318,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       icon={Users}
       hideHeader={hideHeader}
       panel={viewMode === 'doctor' || effectiveDoctorId ? 'doctor' : 'admin'}
-      breadcrumbs={viewMode === 'doctor' || effectiveDoctorId ? false : undefined}
+      breadcrumbs={viewMode === 'doctor' || effectiveDoctorId ? doctorBreadcrumbs : undefined}
       actions={!readOnly ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <AIQuickActionButton
@@ -303,11 +339,12 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
               borderRadius: '8px',
               fontWeight: 700,
               fontSize: '0.8125rem',
-              backgroundColor: 'var(--color-primary, #003666)',
+              backgroundColor: 'var(--color-primary, #0d9488)',
               color: '#ffffff',
               border: 'none',
               cursor: 'pointer',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.06)'
             }}
           >
             <UserPlus size={16} />
@@ -554,7 +591,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             }
       }
       bulkActions={[
-        {
+        ...(canReassignDoctor ? [{
           label: 'Reassign Doctor',
           icon: Stethoscope,
           onClick: () => {
@@ -562,7 +599,7 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
             if (selectedList.length === 0) return;
             setReassignModal({ isOpen: true, patients: selectedList });
           }
-        },
+        }] : []),
         {
           label: 'Create Multi-Rx',
           icon: FileText,
@@ -674,14 +711,14 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
                       });
                     }
                   },
-                  {
+                  ...(canReassignDoctor ? [{
                     label: 'Reassign Doctor',
                     icon: Stethoscope,
-                    tooltip: 'Reassign Doctor & Clinic',
+                    tooltip: 'Reassign Doctor & Clinic (Admin Only)',
                     onClick: () => {
                       setReassignModal({ isOpen: true, patients: [row] });
                     }
-                  }
+                  }] : [])
                 ]}
               />
             </div>
