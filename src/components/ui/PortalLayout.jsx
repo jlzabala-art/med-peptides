@@ -1000,117 +1000,54 @@ export default function PortalLayout({
             }}
             style={{
               ...iconBtnStyle,
-              padding: isMobile ? '0.35rem 0.75rem' : '0.42rem 1.05rem',
-              borderRadius: '24px',
+              height: '28px',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '14px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              background: `linear-gradient(135deg, rgba(255,255,255,0.98) 0%, ${screenAI.accentColor || '#0d9488'}15 50%, ${screenAI.accentColor || '#0d9488'}28 100%)`,
-              border: `1.5px solid ${screenAI.accentColor || '#0d9488'}66`,
-              animation: 'gcpGeminiGlow 2.8s infinite ease-in-out',
+              gap: '6px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
               cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'all 0.15s ease',
             }}
-            title={`Open AI Copilot (${screenAI.agentName}) - Press ⌘J`}
+            title="Open AI Copilot - Press ⌘J"
             aria-label="Open AI Copilot"
           >
-            {/* Live Pulsing Beacon Dot */}
-            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span
-                style={{
-                  position: 'absolute',
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '50%',
-                  backgroundColor: screenAI.contextAnchor ? 'rgba(34, 197, 94, 0.4)' : `${screenAI.accentColor || '#0d9488'}40`,
-                  animation: 'geminiPulseRing 2s infinite ease-in-out',
-                }}
-              />
-              <span
-                style={{
-                  position: 'relative',
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: screenAI.contextAnchor ? '#22c55e' : (screenAI.accentColor || '#0d9488'),
-                  boxShadow: `0 0 0 2px ${screenAI.contextAnchor ? 'rgba(34, 197, 94, 0.4)' : `${screenAI.accentColor || '#0d9488'}40`}`,
-                  flexShrink: 0,
-                }}
-              />
-            </span>
-
             <Sparkles
-              size={15}
-              color={screenAI.accentColor || '#0d9488'}
-              style={{ flexShrink: 0, filter: `drop-shadow(0 0 3px ${screenAI.accentColor || '#0d9488'}55)` }}
+              size={13}
+              color="#0284c7"
+              style={{ flexShrink: 0 }}
             />
 
             <span
               style={{
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                color: 'var(--text-main, #0f172a)',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                color: '#0f172a',
                 letterSpacing: '-0.01em',
                 whiteSpace: 'nowrap',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
               }}
             >
-              {isMobile ? (
-                'AI Copilot'
-              ) : screenAI.contextAnchor ? (
-                <>
-                  <span>AI Copilot</span>
-                  <span style={{
-                    color: screenAI.accentColor || '#0d9488',
-                    maxWidth: '120px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}>
-                    • {screenAI.contextAnchor.name}
-                  </span>
-                </>
-              ) : (
-                screenAI.agentName || 'AI Copilot'
-              )}
+              AI Copilot
             </span>
 
-            {/* Desktop Pill / Shortcut or Live indicator */}
             {!isMobile && (
-              screenAI.contextAnchor ? (
-                <span
-                  style={{
-                    fontSize: '0.62rem',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    padding: '1px 5px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(34, 197, 94, 0.15)',
-                    color: '#16a34a',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  Live
-                </span>
-              ) : (
-                <kbd
-                  style={{
-                    fontSize: '0.65rem',
-                    fontFamily: 'inherit',
-                    fontWeight: 700,
-                    color: 'var(--color-text-secondary, #64748b)',
-                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                    padding: '1px 5px',
-                    borderRadius: '5px',
-                    border: '1px solid rgba(0, 0, 0, 0.08)',
-                    marginLeft: '2px',
-                  }}
-                >
-                  ⌘J
-                </kbd>
-              )
+              <kbd
+                style={{
+                  fontSize: '0.62rem',
+                  fontFamily: 'inherit',
+                  fontWeight: 700,
+                  color: '#64748b',
+                  backgroundColor: '#f1f5f9',
+                  padding: '1px 4px',
+                  borderRadius: '4px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                ⌘J
+              </kbd>
             )}
           </button>
 

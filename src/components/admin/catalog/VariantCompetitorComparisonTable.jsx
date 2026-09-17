@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { TrendingUp, TrendingDown, ExternalLink, Sliders } from 'lucide-react';
+import { TrendingUp, ExternalLink, Sliders, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getProductVariantsCompetitorReport, isFinishedPeptide } from '../../../services/algoliaCompetitorService';
 import DataTable from '../../ui/DataTable';
 
@@ -10,11 +10,17 @@ import DataTable from '../../ui/DataTable';
  * ─────────────────────────────────────────────────────────────────────────────
  * Renders a variant-level market price comparison table for finished peptides
  * (vials, lyophilized injectable formulations) against top industry competitors.
+ * 
+ * Supports two modes:
+ * - 'summary' (default): Ultra-clean 3-column view for catalog expander with
+ *   immediate "Cheaper / Higher / In-Line" signal and direct drawer CTA.
+ * - 'full': 5-column deep-dive for the dedicated Pricing Drawer.
  */
 export default function VariantCompetitorComparisonTable({
   product = {},
   variants = [],
   channel = 'retail',
+  mode = 'summary',
   onOpenPricingDrawer,
 }) {
   const [report, setReport] = useState(null);
@@ -54,6 +60,8 @@ export default function VariantCompetitorComparisonTable({
     return null; // Only render for finished peptide products
   }
 
+  const isSummary = mode === 'summary';
+
   return (
     <div style={{
       marginTop: '0.5rem',
@@ -65,7 +73,7 @@ export default function VariantCompetitorComparisonTable({
     }}>
       {/* Header Bar */}
       <div style={{
-        padding: '0.75rem 1rem',
+        padding: '0.65rem 1rem',
         backgroundColor: '#f8fafc',
         borderBottom: '1px solid #e2e8f0',
         display: 'flex',
@@ -89,7 +97,7 @@ export default function VariantCompetitorComparisonTable({
           </div>
           <div>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>
-              Competitor & Market Benchmark (Variant Level)
+              Market Benchmark & Position
             </span>
             <span style={{ fontSize: '0.7rem', color: '#64748b', marginLeft: '6px' }}>
               · Finished Vials vs US/EU Market
@@ -147,160 +155,323 @@ export default function VariantCompetitorComparisonTable({
         <DataTable
           data={report.variants}
           keyField="variantId"
-          columns={[
-            {
-              id: 'variantLabel',
-              header: 'Variant & Dosage',
-              width: '24%',
-              render: (vReport) => {
-                const isCheaper = vReport.status === 'cheaper';
-                const isHigher = vReport.status === 'higher';
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{
-                        display: 'inline-block',
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        backgroundColor: isCheaper ? '#10b981' : isHigher ? '#f59e0b' : '#64748b',
-                      }} />
-                      <span style={{ fontWeight: 700, color: '#0f172a' }}>{vReport.variantLabel}</span>
-                      <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500 }}>
-                        ({vReport.format})
-                      </span>
-                    </div>
-                    {vReport.supplierName && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', paddingLeft: '12px' }}>
-                        <span style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 600,
-                          color: '#0369a1',
-                          backgroundColor: '#f0f9ff',
-                          border: '1px solid #bae6fd',
-                          padding: '1px 5px',
-                          borderRadius: '4px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}>
-                          🏷️ {vReport.supplierName}
-                        </span>
+          columns={
+            isSummary
+              ? [
+                  {
+                    id: 'variantLabel',
+                    header: 'Variant & Dosage',
+                    width: '30%',
+                    render: (vReport) => {
+                      const isCheaper = vReport.status === 'cheaper';
+                      const isHigher = vReport.status === 'higher';
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              width: '7px',
+                              height: '7px',
+                              borderRadius: '50%',
+                              backgroundColor: isCheaper ? '#10b981' : isHigher ? '#ef4444' : '#f59e0b',
+                              flexShrink: 0,
+                            }} />
+                            <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
+                              {vReport.variantLabel}
+                            </span>
+                            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500 }}>
+                              ({vReport.format})
+                            </span>
+                          </div>
+                          {vReport.supplierName && (
+                            <div style={{ paddingLeft: '13px' }}>
+                              <span style={{
+                                fontSize: '0.65rem',
+                                fontWeight: 600,
+                                color: '#0369a1',
+                                backgroundColor: '#f0f9ff',
+                                border: '1px solid #bae6fd',
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}>
+                                🏷️ {vReport.supplierName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    id: 'pricingComparison',
+                    header: 'Target Retail vs Market Avg',
+                    width: '35%',
+                    render: (vReport) => {
+                      const retail = vReport.targetRetailPrice || 0;
+                      const retailPpm = vReport.targetRetailPpm || 0;
+                      const avgPrice = vReport.avgPrice || 0;
+                      const avgPpm = vReport.avgPpm || 0;
+                      const cost = vReport.supplierCost || 0;
+
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: 700, color: '#003666', fontSize: '0.84rem' }}>
+                              ${retail.toFixed(2)}
+                            </span>
+                            {retailPpm > 0 && (
+                              <span style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 600 }}>
+                                (${retailPpm.toFixed(2)}/mg)
+                              </span>
+                            )}
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>vs</span>
+                            <span style={{ fontWeight: 600, color: '#475569', fontSize: '0.8rem' }}>
+                              ${avgPrice.toFixed(2)}
+                            </span>
+                            {avgPpm > 0 && (
+                              <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                                (${avgPpm.toFixed(2)}/mg)
+                              </span>
+                            )}
+                          </div>
+                          {cost > 0 && (
+                            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              Cost: ${cost.toFixed(2)} (+50% target markup)
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    id: 'marketPosition',
+                    header: 'Market Position & Benchmark',
+                    width: '35%',
+                    render: (vReport) => {
+                      const isCheaper = vReport.status === 'cheaper';
+                      const isHigher = vReport.status === 'higher';
+                      const delta = Math.abs(vReport.priceDeltaPercent || 0);
+                      const profit = vReport.grossProfit || 0;
+
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                backgroundColor: isCheaper ? '#dcfce7' : isHigher ? '#fee2e2' : '#fef3c7',
+                                color: isCheaper ? '#15803d' : isHigher ? '#b91c1c' : '#b45309',
+                                border: `1px solid ${isCheaper ? '#bbf7d0' : isHigher ? '#fecaca' : '#fde68a'}`,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}>
+                                {isCheaper ? '🟢' : isHigher ? '🔴' : '🟡'}
+                                {isCheaper
+                                  ? `${delta}% CHEAPER`
+                                  : isHigher
+                                  ? `${delta}% HIGHER`
+                                  : 'IN LINE (PARITY)'}
+                              </span>
+                            </div>
+                            {profit > 0 && (
+                              <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600 }}>
+                                Margin: +${profit.toFixed(2)} / unit
+                              </span>
+                            )}
+                          </div>
+
+                          {onOpenPricingDrawer && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenPricingDrawer(product)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '3px 8px',
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                color: '#0369a1',
+                                backgroundColor: '#f0f9ff',
+                                border: '1px solid #bae6fd',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                whiteSpace: 'nowrap',
+                              }}
+                              title="Inspect full competitor breakdown and margin curves in drawer"
+                            >
+                              <span>Details</span>
+                              <ArrowUpRight size={11} />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                ]
+              : [
+                  {
+                    id: 'variantLabel',
+                    header: 'Variant & Dosage',
+                    width: '24%',
+                    render: (vReport) => {
+                      const isCheaper = vReport.status === 'cheaper';
+                      const isHigher = vReport.status === 'higher';
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              backgroundColor: isCheaper ? '#10b981' : isHigher ? '#f59e0b' : '#64748b',
+                            }} />
+                            <span style={{ fontWeight: 700, color: '#0f172a' }}>{vReport.variantLabel}</span>
+                            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 500 }}>
+                              ({vReport.format})
+                            </span>
+                          </div>
+                          {vReport.supplierName && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', paddingLeft: '12px' }}>
+                              <span style={{
+                                fontSize: '0.65rem',
+                                fontWeight: 600,
+                                color: '#0369a1',
+                                backgroundColor: '#f0f9ff',
+                                border: '1px solid #bae6fd',
+                                padding: '1px 5px',
+                                borderRadius: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}>
+                                🏷️ {vReport.supplierName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    id: 'supplierCost',
+                    header: 'Supplier Cost / mg',
+                    width: '16%',
+                    render: (vReport) => {
+                      const cost = vReport.supplierCost || 0;
+                      return (
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#334155', fontSize: '0.82rem' }}>
+                            {vReport.costPpm > 0 ? `$${vReport.costPpm.toFixed(2)}/mg` : (cost > 0 ? `$${cost.toFixed(2)}` : '—')}
+                          </div>
+                          {cost > 0 && (
+                            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              ${cost.toFixed(2)} / unit
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    id: 'targetRetail',
+                    header: 'Target Retail / mg (+50%)',
+                    width: '18%',
+                    render: (vReport) => {
+                      const cost = vReport.supplierCost || 0;
+                      const retail = vReport.targetRetailPrice || (cost > 0 ? cost * 1.5 : 0);
+                      const profit = vReport.grossProfit || (retail - cost);
+                      return (
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                            <span style={{ fontWeight: 700, color: '#003666', fontSize: '0.84rem' }}>
+                              {vReport.targetRetailPpm > 0 ? `$${vReport.targetRetailPpm.toFixed(2)}/mg` : (retail > 0 ? `$${retail.toFixed(2)}` : '—')}
+                            </span>
+                            {profit > 0 && (
+                              <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600, backgroundColor: '#f0fdf4', padding: '1px 4px', borderRadius: '4px' }}>
+                                +${profit.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          {retail > 0 && (
+                            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                              ${retail.toFixed(2)} / unit (+50%)
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    id: 'marketAvg',
+                    header: 'Market Avg / mg',
+                    width: '16%',
+                    render: (vReport) => {
+                      const dosageMg = vReport.dosageMg || 1;
+                      const minPpm = dosageMg > 0 && vReport.minPrice ? Number((vReport.minPrice / dosageMg).toFixed(2)) : 0;
+                      const maxPpm = dosageMg > 0 && vReport.maxPrice ? Number((vReport.maxPrice / dosageMg).toFixed(2)) : 0;
+                      return (
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
+                            {vReport.avgPpm > 0 ? `$${vReport.avgPpm.toFixed(2)}/mg` : `Avg: $${vReport.avgPrice.toFixed(2)}`}
+                          </div>
+                          <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
+                            {minPpm > 0 && maxPpm > 0 ? `Range: $${minPpm}–$${maxPpm}/mg` : `Unit Avg: $${vReport.avgPrice.toFixed(2)}`}
+                          </div>
+                        </div>
+                      );
+                    },
+                  },
+                  {
+                    id: 'competitors',
+                    header: 'Key Competitors ($/mg)',
+                    width: '26%',
+                    render: (vReport) => (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {vReport.competitors.map((comp, cIdx) => (
+                          <a
+                            key={cIdx}
+                            href={comp.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              backgroundColor: '#f1f5f9',
+                              border: '1px solid #e2e8f0',
+                              color: '#334155',
+                              fontSize: '0.68rem',
+                              textDecoration: 'none',
+                            }}
+                            title={`Inspect ${comp.name}: $${comp.ppm ? comp.ppm.toFixed(2) + '/mg' : ''} ($${comp.price.toFixed(2)} unit)`}
+                          >
+                            <span style={{ fontWeight: 500 }}>{comp.name}:</span>
+                            <strong style={{ color: '#0369a1' }}>
+                              {comp.ppm > 0 ? `$${comp.ppm.toFixed(2)}/mg` : `$${comp.price.toFixed(2)}`}
+                            </strong>
+                            <span style={{ fontSize: '0.62rem', color: '#64748b' }}>
+                              (${comp.price.toFixed(2)})
+                            </span>
+                            <ExternalLink size={9} style={{ opacity: 0.5 }} />
+                          </a>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                );
-              },
-            },
-            {
-              id: 'supplierCost',
-              header: 'Supplier Cost / mg',
-              width: '16%',
-              render: (vReport) => {
-                const cost = vReport.supplierCost || 0;
-                return (
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#334155', fontSize: '0.82rem' }}>
-                      {vReport.costPpm > 0 ? `$${vReport.costPpm.toFixed(2)}/mg` : (cost > 0 ? `$${cost.toFixed(2)}` : '—')}
-                    </div>
-                    {cost > 0 && (
-                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                        ${cost.toFixed(2)} / unit
-                      </div>
-                    )}
-                  </div>
-                );
-              },
-            },
-            {
-              id: 'targetRetail',
-              header: 'Target Retail / mg (+50%)',
-              width: '18%',
-              render: (vReport) => {
-                const cost = vReport.supplierCost || 0;
-                const retail = vReport.targetRetailPrice || (cost > 0 ? cost * 1.5 : 0);
-                const profit = vReport.grossProfit || (retail - cost);
-                return (
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                      <span style={{ fontWeight: 700, color: '#003666', fontSize: '0.84rem' }}>
-                        {vReport.targetRetailPpm > 0 ? `$${vReport.targetRetailPpm.toFixed(2)}/mg` : (retail > 0 ? `$${retail.toFixed(2)}` : '—')}
-                      </span>
-                      {profit > 0 && (
-                        <span style={{ fontSize: '0.68rem', color: '#16a34a', fontWeight: 600, backgroundColor: '#f0fdf4', padding: '1px 4px', borderRadius: '4px' }}>
-                          +${profit.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                    {retail > 0 && (
-                      <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                        ${retail.toFixed(2)} / unit (+50%)
-                      </div>
-                    )}
-                  </div>
-                );
-              },
-            },
-            {
-              id: 'marketAvg',
-              header: 'Market Avg / mg',
-              width: '16%',
-              render: (vReport) => {
-                const dosageMg = vReport.dosageMg || 1;
-                const minPpm = dosageMg > 0 && vReport.minPrice ? Number((vReport.minPrice / dosageMg).toFixed(2)) : 0;
-                const maxPpm = dosageMg > 0 && vReport.maxPrice ? Number((vReport.maxPrice / dosageMg).toFixed(2)) : 0;
-                return (
-                  <div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.82rem' }}>
-                      {vReport.avgPpm > 0 ? `$${vReport.avgPpm.toFixed(2)}/mg` : `Avg: $${vReport.avgPrice.toFixed(2)}`}
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-                      {minPpm > 0 && maxPpm > 0 ? `Range: $${minPpm}–$${maxPpm}/mg` : `Unit Avg: $${vReport.avgPrice.toFixed(2)}`}
-                    </div>
-                  </div>
-                );
-              },
-            },
-            {
-              id: 'competitors',
-              header: 'Key Competitors ($/mg)',
-              width: '26%',
-              render: (vReport) => (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                  {vReport.competitors.map((comp, cIdx) => (
-                    <a
-                      key={cIdx}
-                      href={comp.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        backgroundColor: '#f1f5f9',
-                        border: '1px solid #e2e8f0',
-                        color: '#334155',
-                        fontSize: '0.68rem',
-                        textDecoration: 'none',
-                      }}
-                      title={`Inspect ${comp.name}: $${comp.ppm ? comp.ppm.toFixed(2) + '/mg' : ''} ($${comp.price.toFixed(2)} unit)`}
-                    >
-                      <span style={{ fontWeight: 500 }}>{comp.name}:</span>
-                      <strong style={{ color: '#0369a1' }}>
-                        {comp.ppm > 0 ? `$${comp.ppm.toFixed(2)}/mg` : `$${comp.price.toFixed(2)}`}
-                      </strong>
-                      <span style={{ fontSize: '0.62rem', color: '#64748b' }}>
-                        (${comp.price.toFixed(2)})
-                      </span>
-                      <ExternalLink size={9} style={{ opacity: 0.5 }} />
-                    </a>
-                  ))}
-                </div>
-              ),
-            },
-          ]}
+                    ),
+                  },
+                ]
+          }
         />
       ) : (
         <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>

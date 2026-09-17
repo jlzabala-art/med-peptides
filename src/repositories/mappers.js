@@ -246,6 +246,84 @@ export function normalizeProduct(data, id = null) {
     // ── Rich content (nullable objects) ──
     aiContent:    data.aiContent   || null,
     pharmacology: data.pharmacology || null,
+
+    // ── Guaranteed Canonical Variants with Homogeneous Tier 10 ──
+    variants: Array.isArray(data.variants)
+      ? data.variants.map(v => normalizeVariant(v, data))
+      : (data.variants || []),
+  };
+}
+
+/**
+ * Normalizes a product variant to guarantee a strict, homogeneous structure across the platform.
+ * Homogenizes Tier 10 bulk pricing at the data boundary so frontend components never perform
+ * scattered fallback lookups or mappings.
+ */
+export function normalizeVariant(v, parentProduct = null) {
+  if (!v || typeof v !== 'object') return v;
+
+  const baseCost = Number(v.supplierCost || v.cost || v.unit_price || v.cost_tiers?.cost_1 || 0);
+
+  // ── Canonical Tier 10 Resolution (Once at data ingestion, never in UI) ──
+  let tier10Unit = null;
+  let tier10Kit = null;
+
+  if (v.tier_10 && typeof v.tier_10 === 'object' && v.tier_10.unit_price > 0) {
+    tier10Unit = Number(v.tier_10.unit_price);
+    tier10Kit = Number(v.tier_10.kit_price || (tier10Unit * 10));
+  } else if (v.tier_10_price && Number(v.tier_10_price) > 0) {
+    tier10Unit = Number(v.tier_10_price);
+    tier10Kit = Number(tier10Unit * 10);
+  } else {
+    // Ingest legacy shapes once into the canonical standard
+    const raw10 = v.cost_tiers?.cost_10 
+      ?? v.cost_10 
+      ?? v.price_per_kit_10 
+      ?? v.kit_price 
+      ?? v.kitPrice 
+      ?? v.kitCost 
+      ?? v.pricing?.wholesale?.kit 
+      ?? v.pricing?.acquisition?.kit;
+
+    if (raw10 != null && Number(raw10) > 0) {
+      const num10 = Number(raw10);
+      if (baseCost > 0) {
+        if (num10 > baseCost * 2) {
+          tier10Kit = num10;
+          tier10Unit = Number((num10 / 10).toFixed(2));
+        } else {
+          tier10Unit = num10;
+          tier10Kit = Number((num10 * 10).toFixed(2));
+        }
+      } else {
+        tier10Kit = num10;
+        tier10Unit = Number((num10 / 10).toFixed(2));
+      }
+    }
+  }
+
+  let tier10Obj = null;
+  if (tier10Unit && tier10Unit > 0) {
+    const discountPct = (baseCost > 0 && tier10Unit < baseCost)
+      ? Math.round(((baseCost - tier10Unit) / baseCost) * 100)
+      : 0;
+
+    tier10Obj = {
+      unit_price: tier10Unit,
+      kit_price: tier10Kit || Number((tier10Unit * 10).toFixed(2)),
+      discount_pct: discountPct
+    };
+  }
+
+  return {
+    ...v,
+    id: v.id || `var_${Math.random().toString(36).slice(2, 9)}`,
+    dosage: safeString(v.dosage || v.dose || v.strength, 'Standard'),
+    presentation: safeString(v.presentation || v.format || 'vial'),
+    supplierCost: baseCost,
+    // ── Guaranteed Canonical Tier 10 (Zero Mappings in UI) ──
+    tier_10: tier10Obj,
+    tier_10_price: tier10Obj ? tier10Obj.unit_price : null,
   };
 }
 

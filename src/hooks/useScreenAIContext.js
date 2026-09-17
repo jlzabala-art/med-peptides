@@ -84,16 +84,8 @@ export function useScreenAIContext(customPathname, customEntity = null, customUs
         fileNumber: activePatient.id,
       };
     }
-    if (activeWs?.targetEntity?.name) {
-      return {
-        type: activeWs.targetEntity.type || 'workspace_target',
-        id: activeWs.targetEntity.id,
-        name: activeWs.targetEntity.name,
-        itemsCount: activeWs.items?.length || 0,
-      };
-    }
     return null;
-  }, [customEntity, activePatient, activeWs?.targetEntity, activeWs?.items?.length]);
+  }, [customEntity, activePatient]);
 
   return useMemo(() => {
     return resolveScreenAIContext(path, resolvedEntity, resolvedUser);

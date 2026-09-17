@@ -860,6 +860,7 @@ export default function CatalogOffersPricingDrawer({
               product={selectedProduct}
               variants={sortedVariants}
               channel={commercialChannel}
+              mode="full"
             />
           </div>
         )}

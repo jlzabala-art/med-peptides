@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { resolveItemSku } from '@/utils/skuResolver';
+import { normalizeVariant } from '../repositories/mappers';
 
 function generateWorkspaceId() {
   return `ws_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -270,6 +271,10 @@ const createWorkspaceItemsSlice = (set, get) => ({
         unitRate: existing.unitRate || resolvedPrice,
       };
     } else {
+      const norm = normalizeVariant(item);
+      const tier10Obj = norm.tier_10 || null;
+      const tier10Price = norm.tier_10_price || null;
+
       nextItems.push({
         id: canonicalId,
         productId: item.productId || item.id,
@@ -289,12 +294,11 @@ const createWorkspaceItemsSlice = (set, get) => ({
         presentation: item.presentation || '',
         targetTier: ws.pricingTier || 'clinic',
         appliedMarkup: effectiveMarkup != null ? Number(effectiveMarkup) : (ws.pricingTier === 'wholesale' ? 25 : ws.pricingTier === 'retail' ? 100 : 50),
-        cost_tiers: item.cost_tiers || (item.cost_10 ? { cost_10: item.cost_10, cost_50: item.cost_50, cost_100: item.cost_100 } : null),
-        pricing: item.pricing || null,
-        cost_10: item.cost_10 ?? item.cost_tiers?.cost_10 ?? null,
-        price_per_kit_10: item.price_per_kit_10 ?? null,
-        kit_price: item.kit_price ?? item.kitPrice ?? null,
-        kitCost: item.kitCost ?? null,
+        // ── Canonical Homogeneous Tier 10 (Zero Mappings) ──
+        tier_10: tier10Obj,
+        tier_10_price: tier10Price,
+        cost_tiers: item.cost_tiers || null,
+        cost_10: tier10Price,
       });
     }
 
@@ -356,31 +360,33 @@ const createWorkspaceItemsSlice = (set, get) => ({
           unitRate: nextItems[existingIndex].unitRate || resolvedPrice,
         };
       } else {
+        const norm = normalizeVariant(item);
+        const tier10Obj = norm.tier_10 || null;
+        const tier10Price = norm.tier_10_price || null;
+
         nextItems.push({
           id: canonicalId,
           productId: item.productId || item.id,
           variantId: item.variantId || item.id,
           canonicalName: item.canonicalName || item.displayName || item.name || 'Custom Compound',
-          sku: item.sku || '',
+          sku: item.sku || resolveItemSku(item),
           dosage: item.dosage || item.unit || '',
           format: item.format || item.dosage_form || 'Vial',
           quantity: item.quantity || 1,
           unitPrice: resolvedPrice,
           price: resolvedPrice,
           unitRate: resolvedPrice,
-          supplierCost: Number(item.supplierCost || item.costPrice || item.pricing?.supplierCost || 0),
+          supplierCost: supplierCost,
           supplierId: item.supplierId || item.supplier || '',
           supplierName: item.supplierName || '',
           category: item.category || '',
           presentation: item.presentation || '',
           targetTier: ws.pricingTier || 'clinic',
           appliedMarkup: effectiveMarkup != null ? Number(effectiveMarkup) : (ws.pricingTier === 'wholesale' ? 25 : ws.pricingTier === 'retail' ? 100 : 50),
-          cost_tiers: item.cost_tiers || (item.cost_10 ? { cost_10: item.cost_10, cost_50: item.cost_50, cost_100: item.cost_100 } : null),
-          pricing: item.pricing || null,
-          cost_10: item.cost_10 ?? item.cost_tiers?.cost_10 ?? null,
-          price_per_kit_10: item.price_per_kit_10 ?? null,
-          kit_price: item.kit_price ?? item.kitPrice ?? null,
-          kitCost: item.kitCost ?? null,
+          tier_10: tier10Obj,
+          tier_10_price: tier10Price,
+          cost_tiers: item.cost_tiers || null,
+          cost_10: tier10Price,
         });
       }
     });

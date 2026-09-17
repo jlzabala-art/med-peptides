@@ -135,10 +135,24 @@ export function resolveItemTierPricing(item, options = {}) {
     ? 1 + (Number(effectiveMarkup) / 100)
     : 1;
 
-  // Source 1: item.cost_tiers?.cost_10
-  if (item?.cost_tiers?.cost_10 != null && Number(item.cost_tiers.cost_10) > 0) {
+  // ── Primary: Canonical Homogeneous Tier 10 (Zero Mapping) ──
+  const canonicalTier10 = item?.tier_10?.unit_price ?? item?.tier_10_price ?? null;
+  if (canonicalTier10 != null && Number(canonicalTier10) > 0) {
+    const raw10 = Number(canonicalTier10);
+    const baseCost10 = raw10 > (item.supplierCost || standardUnitPrice) * 1.5 ? raw10 / 10 : raw10;
+    const computedPrice = (item.supplierCost > 0 && effectiveMarkup != null)
+      ? Number((baseCost10 * markupMultiplier).toFixed(2))
+      : Number(baseCost10.toFixed(2));
+    if (computedPrice < standardUnitPrice) {
+      hasTier10 = true;
+      tier10UnitPrice = computedPrice;
+      tierSource = 'tier_10';
+    }
+  }
+
+  // Fallback: Legacy shapes if item has not been through normalizeVariant yet
+  if (!hasTier10 && item?.cost_tiers?.cost_10 != null && Number(item.cost_tiers.cost_10) > 0) {
     const raw10 = Number(item.cost_tiers.cost_10);
-    // If raw10 > standardUnitPrice * 1.5, it is total 10-pack price
     const baseCost10 = raw10 > (item.supplierCost || standardUnitPrice) * 1.5 ? raw10 / 10 : raw10;
     const computedPrice = Number((baseCost10 * markupMultiplier).toFixed(2));
     if (computedPrice < standardUnitPrice) {

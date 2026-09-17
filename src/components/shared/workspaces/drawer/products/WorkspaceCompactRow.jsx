@@ -172,9 +172,9 @@ export default function WorkspaceCompactRow({
                 borderRadius: '3px',
                 display: 'inline-block',
               }}
-              title={`Tier 10 bulk rate active (${tierInfo.discountPercent}% off)`}
+              title={`Tier 10 bulk rate active (${tierInfo.savingsPercent || tierInfo.discountPercent || it.tier_10?.discount_pct || 15}% off)`}
             >
-              ⚡ T10 (-{tierInfo.discountPercent}%)
+              ⚡ T10 (-{tierInfo.savingsPercent || tierInfo.discountPercent || it.tier_10?.discount_pct || 15}%)
             </span>
           </div>
         )}

@@ -546,19 +546,19 @@ function Header(props) {
                   }}
                 />
               </span>
-              <Sparkles size={15} color={screenAI.accentColor || '#2563eb'} style={{ filter: `drop-shadow(0 0 3px ${screenAI.accentColor || '#2563eb'}55)` }} />
-              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-main, #0f172a)', letterSpacing: '-0.01em' }}>
-                {screenAI.contextAnchor ? `AI • ${screenAI.contextAnchor.name}` : (screenAI.agentName || 'Atlas AI')}
+              <Sparkles size={13} color={screenAI.accentColor || '#0284c7'} />
+              <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-main, #0f172a)', letterSpacing: '-0.01em' }}>
+                {screenAI.agentName || 'Atlas AI'}
               </span>
               <kbd
                 style={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.62rem',
                   fontFamily: 'inherit',
                   fontWeight: 700,
                   color: 'var(--color-text-secondary, #64748b)',
                   backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                  padding: '1px 5px',
-                  borderRadius: '5px',
+                  padding: '1px 4px',
+                  borderRadius: '4px',
                   border: '1px solid rgba(0, 0, 0, 0.08)',
                   marginLeft: '2px',
                 }}
