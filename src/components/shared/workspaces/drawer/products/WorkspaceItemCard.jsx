@@ -1,12 +1,13 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Copy, X, Package } from 'lucide-react';
+import { ChevronDown, ChevronUp, Copy, X, Package, Zap, Sparkles } from 'lucide-react';
 import WorkspaceTransferPopover from './WorkspaceTransferPopover';
 import CopyableId from '@/components/ui/CopyableId';
 import { resolveItemSku } from '@/utils/skuResolver';
+import { resolveItemTierPricing } from '@/utils/tierPricingResolver';
 
 /**
  * WorkspaceItemCard
- * Detailed card view for an item in the workspace drawer with touch targets >= 38px,
+ * Detailed card view for an item in the workspace drawer with touch targets >= 40px,
  * expandable dosage/SKU info, format switcher, and pricing/quantity controls.
  */
 export default function WorkspaceItemCard({
@@ -18,6 +19,7 @@ export default function WorkspaceItemCard({
   isExpanded = false,
   onToggleExpand,
   getItemUnitPrice,
+  getItemTierInfo,
   onUpdateItemPrice,
   onUpdateItemQuantity,
   onUpdateItemFormat,
@@ -28,7 +30,11 @@ export default function WorkspaceItemCard({
   currentWorkspaceId,
   onTransferItem,
 }) {
-  const unitRate = getItemUnitPrice ? getItemUnitPrice(item) : (item.price || 0);
+  const tierInfo = getItemTierInfo
+    ? getItemTierInfo(item)
+    : resolveItemTierPricing(item, { isAdmin, isDoctor, isWholesaler, isPatient });
+
+  const unitRate = getItemUnitPrice ? getItemUnitPrice(item) : (tierInfo.effectiveUnitPrice || item.price || 0);
   const lineTotal = (item.quantity || 1) * unitRate;
   const resolvedSku = resolveItemSku(item);
 
@@ -112,7 +118,12 @@ export default function WorkspaceItemCard({
                   }}
                   title="Clinic Prescribing Price"
                 >
-                  ${unitRate.toFixed(2)} / u (Clinic Price)
+                  {tierInfo.isTier10Applied && tierInfo.standardUnitPrice > unitRate && (
+                    <span style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '4px' }}>
+                      ${tierInfo.standardUnitPrice.toFixed(2)}
+                    </span>
+                  )}
+                  ${unitRate.toFixed(2)} / u {tierInfo.isTier10Applied ? '(Tier 10)' : '(Clinic Price)'}
                 </span>
               ) : isWholesaler ? (
                 <span
@@ -127,7 +138,12 @@ export default function WorkspaceItemCard({
                   }}
                   title="Wholesale Price"
                 >
-                  ${unitRate.toFixed(2)} / u (Wholesale Price)
+                  {tierInfo.isTier10Applied && tierInfo.standardUnitPrice > unitRate && (
+                    <span style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '4px' }}>
+                      ${tierInfo.standardUnitPrice.toFixed(2)}
+                    </span>
+                  )}
+                  ${unitRate.toFixed(2)} / u {tierInfo.isTier10Applied ? '(Tier 10)' : '(Wholesale Price)'}
                 </span>
               ) : isPatient || !isAdmin ? (
                 <span
@@ -141,6 +157,11 @@ export default function WorkspaceItemCard({
                     border: '1px solid #bae6fd',
                   }}
                 >
+                  {tierInfo.isTier10Applied && tierInfo.standardUnitPrice > unitRate && (
+                    <span style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '4px' }}>
+                      ${tierInfo.standardUnitPrice.toFixed(2)}
+                    </span>
+                  )}
                   ${unitRate.toFixed(2)} / u
                 </span>
               ) : (
@@ -149,14 +170,19 @@ export default function WorkspaceItemCard({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '3px',
-                    backgroundColor: unitRate > 0 ? '#f0f9ff' : '#fffbeb',
+                    backgroundColor: tierInfo.isTier10Applied ? '#ecfdf5' : (unitRate > 0 ? '#f0f9ff' : '#fffbeb'),
                     padding: '2px 6px',
                     borderRadius: '6px',
-                    border: `1px solid ${unitRate > 0 ? '#bae6fd' : '#fde68a'}`,
+                    border: `1px solid ${tierInfo.isTier10Applied ? '#a7f3d0' : (unitRate > 0 ? '#bae6fd' : '#fde68a')}`,
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: unitRate > 0 ? '#0284c7' : '#d97706' }}>$</span>
+                  {tierInfo.isTier10Applied && tierInfo.standardUnitPrice > unitRate && (
+                    <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.68rem', marginRight: '2px' }}>
+                      ${tierInfo.standardUnitPrice.toFixed(2)}
+                    </span>
+                  )}
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: tierInfo.isTier10Applied ? '#047857' : (unitRate > 0 ? '#0284c7' : '#d97706') }}>$</span>
                   <input
                     type="text"
                     inputMode="decimal"
@@ -173,17 +199,53 @@ export default function WorkspaceItemCard({
                       width: '60px',
                       fontSize: '0.76rem',
                       fontWeight: 800,
-                      color: unitRate > 0 ? '#0369a1' : '#b45309',
+                      color: tierInfo.isTier10Applied ? '#047857' : (unitRate > 0 ? '#0369a1' : '#b45309'),
                       backgroundColor: '#ffffff',
-                      border: `1px solid ${unitRate > 0 ? '#38bdf8' : '#f59e0b'}`,
+                      border: `1px solid ${tierInfo.isTier10Applied ? '#10b981' : (unitRate > 0 ? '#38bdf8' : '#f59e0b')}`,
                       borderRadius: '4px',
                       padding: '2px 4px',
                       outline: 'none',
                       textAlign: 'right',
                     }}
                   />
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: unitRate > 0 ? '#0284c7' : '#d97706' }}>/u</span>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: tierInfo.isTier10Applied ? '#047857' : (unitRate > 0 ? '#0284c7' : '#d97706') }}>/u</span>
                 </div>
+              )}
+              {tierInfo.isTier10Applied && (
+                <span
+                  style={{
+                    fontSize: '0.66rem',
+                    fontWeight: 800,
+                    padding: '1.5px 6px',
+                    borderRadius: '4px',
+                    backgroundColor: '#ecfdf5',
+                    color: '#047857',
+                    border: '1px solid #a7f3d0',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '2px',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={`10+ Bulk Tier Pricing Active: saving ${tierInfo.savingsPercent}% ($${tierInfo.savingsPerUnit.toFixed(2)}/u off)`}
+                >
+                  ⚡ Tier 10 Applied (-{tierInfo.savingsPercent}%)
+                </span>
+              )}
+              {tierInfo.hasTier10 && !tierInfo.isTier10Applied && item.quantity >= 7 && (
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    padding: '1.5px 5px',
+                    borderRadius: '4px',
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    border: '1px solid #bfdbfe',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  💡 Add {tierInfo.qtyNeededForTier10} more for Tier 10 (${tierInfo.tier10UnitPrice.toFixed(2)}/u)
+                </span>
               )}
               {isAdmin && item.supplierCost > 0 && unitRate > 0 && (
                 <span
@@ -206,21 +268,23 @@ export default function WorkspaceItemCard({
           </div>
         </div>
 
-        {/* Controls: Quantity Buttons with Touch Target >= 38px */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+        {/* Controls: Quantity Buttons with Touch Target >= 40px */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: 'auto' }} onClick={(e) => e.stopPropagation()}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '2px', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '2px' }}>
             <button
               type="button"
               onClick={() => onUpdateItemQuantity && onUpdateItemQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
               style={{
-                width: '38px',
-                height: '38px',
+                width: '40px',
+                height: '40px',
+                minWidth: '40px',
+                minHeight: '40px',
                 border: '1px solid #cbd5e1',
                 borderRadius: '6px',
                 background: '#ffffff',
                 cursor: 'pointer',
                 fontWeight: 900,
-                fontSize: '1rem',
+                fontSize: '1.05rem',
                 color: '#334155',
                 display: 'flex',
                 alignItems: 'center',
@@ -231,21 +295,23 @@ export default function WorkspaceItemCard({
             >
               -
             </button>
-            <span style={{ fontSize: '0.86rem', fontWeight: 800, minWidth: '24px', textAlign: 'center' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, minWidth: '26px', textAlign: 'center' }}>
               {item.quantity || 1}
             </span>
             <button
               type="button"
               onClick={() => onUpdateItemQuantity && onUpdateItemQuantity(item.id, (item.quantity || 1) + 1)}
               style={{
-                width: '38px',
-                height: '38px',
+                width: '40px',
+                height: '40px',
+                minWidth: '40px',
+                minHeight: '40px',
                 border: '1px solid #cbd5e1',
                 borderRadius: '6px',
                 background: '#ffffff',
                 cursor: 'pointer',
                 fontWeight: 900,
-                fontSize: '1rem',
+                fontSize: '1.05rem',
                 color: '#334155',
                 display: 'flex',
                 alignItems: 'center',

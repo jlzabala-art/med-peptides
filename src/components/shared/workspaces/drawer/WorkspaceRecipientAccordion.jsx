@@ -125,7 +125,7 @@ export default function WorkspaceRecipientAccordion({
     if (val == null || isNaN(val)) return;
     const num = Number(val);
     setWorkspaceMarkup(num, activeWs.id, true);
-    notifier.success(`✓ Precios de los productos recalculados con margen del +${num}% sobre coste`);
+    notifier.success(`✓ Product prices recalculated with +${num}% markup on cost`);
   };
 
   const handleSaveAsNewDefault = async () => {
@@ -139,12 +139,12 @@ export default function WorkspaceRecipientAccordion({
           priceMarkupPercent: activeMarkupInput,
           markupPercent: activeMarkupInput,
         });
-        notifier.success(`✓ Margen del +${activeMarkupInput}% guardado como nuevo valor por defecto para ${targetEntity.name}`);
+        notifier.success(`✓ Margin of +${activeMarkupInput}% saved as default for ${targetEntity.name}`);
       } else {
-        notifier.error('No se pudo guardar el nuevo margen por defecto');
+        notifier.error('Could not save the new default margin');
       }
     } catch (e) {
-      notifier.error('Error al guardar: ' + e.message);
+      notifier.error('Error saving: ' + e.message);
     } finally {
       setIsSavingDefault(false);
     }
@@ -242,7 +242,7 @@ export default function WorkspaceRecipientAccordion({
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Percent size={14} style={{ color: '#0369a1' }} />
                 <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#334155' }}>
-                  Margen actual en Workspace:
+                  Current Workspace Markup:
                 </span>
                 <span
                   style={{
@@ -255,7 +255,7 @@ export default function WorkspaceRecipientAccordion({
                     border: '1px solid #bae6fd',
                   }}
                 >
-                  +{workspaceProductsMargin}% sobre coste
+                  +{workspaceProductsMargin}% on cost
                 </span>
               </div>
               <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>
@@ -465,10 +465,10 @@ export default function WorkspaceRecipientAccordion({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0369a1' }}>
-                      Margen Comercial para este Workspace
+                      Commercial Markup for this Workspace
                     </div>
                     <div style={{ fontSize: '0.71rem', color: '#64748b' }}>
-                      Por defecto del cliente: <strong>+{targetEntityDefaultMarkup}% sobre coste</strong>
+                      Client default: <strong>+{targetEntityDefaultMarkup}% on cost</strong>
                     </div>
                   </div>
 
@@ -513,9 +513,9 @@ export default function WorkspaceRecipientAccordion({
                         alignItems: 'center',
                         gap: '3px',
                       }}
-                      title="Recalcular precios con este margen"
+                      title="Recalculate prices with this margin"
                     >
-                      <RefreshCw size={11} /> Aplicar
+                      <RefreshCw size={11} /> Apply
                     </button>
                   </div>
                 </div>
@@ -537,7 +537,7 @@ export default function WorkspaceRecipientAccordion({
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#92400e', fontWeight: 700 }}>
                       <AlertCircle size={14} style={{ color: '#d97706', flexShrink: 0 }} />
-                      <span>Los productos tienen tarifa previa (+{workspaceProductsMargin}%). ¿Deseas recalcularlos al +{activeMarkupInput}%?</span>
+                      <span>Staged products have previous markup (+{workspaceProductsMargin}%). Recalculate to +{activeMarkupInput}%?</span>
                     </div>
 
                     <button
@@ -555,7 +555,7 @@ export default function WorkspaceRecipientAccordion({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      ⚡ Recalcular productos (+{activeMarkupInput}%)
+                      ⚡ Recalculate products (+{activeMarkupInput}%)
                     </button>
                   </div>
                 )}
@@ -576,7 +576,7 @@ export default function WorkspaceRecipientAccordion({
                     }}
                   >
                     <div style={{ fontSize: '0.73rem', color: '#166534', fontWeight: 600 }}>
-                      Has ajustado el margen a <strong>+{activeMarkupInput}%</strong> (antes +{targetEntityDefaultMarkup}%).
+                      You adjusted markup to <strong>+{activeMarkupInput}%</strong> (previously +{targetEntityDefaultMarkup}%).
                     </div>
 
                     <button
@@ -597,7 +597,7 @@ export default function WorkspaceRecipientAccordion({
                         gap: '4px',
                       }}
                     >
-                      <Save size={11} /> {isSavingDefault ? 'Guardando...' : `Guardar por defecto`}
+                      <Save size={11} /> {isSavingDefault ? 'Saving...' : `Save as Default`}
                     </button>
                   </div>
                 )}
@@ -710,7 +710,7 @@ export default function WorkspaceRecipientAccordion({
                               }}
                             >
                               {isAdmin ? (
-                                <>🏷️ Margen por defecto: +{entDefaultMarkup}% sobre coste</>
+                                <>🏷️ Default markup: +{entDefaultMarkup}% on cost</>
                               ) : (
                                 <>{ent.type === 'wholeseller' ? 'Wholesaler' : ent.type === 'patient' ? 'Patient' : 'Clinic'}</>
                               )}

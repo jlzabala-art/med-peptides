@@ -105,7 +105,7 @@ const createWorkspaceLifecycleSlice = (set, get) => ({
     const dup = {
       ...source,
       id: newId,
-      name: `${source.name} (Copia)`,
+      name: `${source.name} (Copy)`,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       items: source.items.map((it) => ({ ...it })),
@@ -289,6 +289,12 @@ const createWorkspaceItemsSlice = (set, get) => ({
         presentation: item.presentation || '',
         targetTier: ws.pricingTier || 'clinic',
         appliedMarkup: effectiveMarkup != null ? Number(effectiveMarkup) : (ws.pricingTier === 'wholesale' ? 25 : ws.pricingTier === 'retail' ? 100 : 50),
+        cost_tiers: item.cost_tiers || (item.cost_10 ? { cost_10: item.cost_10, cost_50: item.cost_50, cost_100: item.cost_100 } : null),
+        pricing: item.pricing || null,
+        cost_10: item.cost_10 ?? item.cost_tiers?.cost_10 ?? null,
+        price_per_kit_10: item.price_per_kit_10 ?? null,
+        kit_price: item.kit_price ?? item.kitPrice ?? null,
+        kitCost: item.kitCost ?? null,
       });
     }
 
@@ -368,6 +374,13 @@ const createWorkspaceItemsSlice = (set, get) => ({
           category: item.category || '',
           presentation: item.presentation || '',
           targetTier: ws.pricingTier || 'clinic',
+          appliedMarkup: effectiveMarkup != null ? Number(effectiveMarkup) : (ws.pricingTier === 'wholesale' ? 25 : ws.pricingTier === 'retail' ? 100 : 50),
+          cost_tiers: item.cost_tiers || (item.cost_10 ? { cost_10: item.cost_10, cost_50: item.cost_50, cost_100: item.cost_100 } : null),
+          pricing: item.pricing || null,
+          cost_10: item.cost_10 ?? item.cost_tiers?.cost_10 ?? null,
+          price_per_kit_10: item.price_per_kit_10 ?? null,
+          kit_price: item.kit_price ?? item.kitPrice ?? null,
+          kitCost: item.kitCost ?? null,
         });
       }
     });

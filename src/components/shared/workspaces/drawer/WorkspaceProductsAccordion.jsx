@@ -25,6 +25,7 @@ export default function WorkspaceProductsAccordion({
   activeWs,
   subtotalSaleAmount = 0,
   getItemUnitPrice,
+  getItemTierInfo = null,
   onUpdateItemQuantity,
   onUpdateItemPrice,
   onUpdateItemFormat,
@@ -531,6 +532,7 @@ export default function WorkspaceProductsAccordion({
                                 isWholesaler={isWholesaler}
                                 isPatient={isPatient}
                                 getItemUnitPrice={getItemUnitPrice}
+                                getItemTierInfo={getItemTierInfo}
                                 onUpdateItemPrice={onUpdateItemPrice}
                                 onUpdateItemQuantity={onUpdateItemQuantity}
                                 onRemoveItem={onRemoveItem}
@@ -557,6 +559,7 @@ export default function WorkspaceProductsAccordion({
                         isWholesaler={isWholesaler}
                         isPatient={isPatient}
                         getItemUnitPrice={getItemUnitPrice}
+                        getItemTierInfo={getItemTierInfo}
                         onUpdateItemPrice={onUpdateItemPrice}
                         onUpdateItemQuantity={onUpdateItemQuantity}
                         onRemoveItem={onRemoveItem}
@@ -583,6 +586,7 @@ export default function WorkspaceProductsAccordion({
                       isExpanded={!!expandedItemIds[it.id]}
                       onToggleExpand={toggleItemExpanded}
                       getItemUnitPrice={getItemUnitPrice}
+                      getItemTierInfo={getItemTierInfo}
                       onUpdateItemPrice={onUpdateItemPrice}
                       onUpdateItemQuantity={onUpdateItemQuantity}
                       onUpdateItemFormat={onUpdateItemFormat}

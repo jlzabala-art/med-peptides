@@ -25,8 +25,10 @@ export default function WorkspaceCompactRow({
   onUpdateItemQuantity,
   onUpdateItemPrice,
   onRemoveItem,
+  getItemTierInfo,
 }) {
   const lineTotal = (it.quantity || 1) * unitRate;
+  const tierInfo = getItemTierInfo ? getItemTierInfo(it) : null;
 
   return (
     <div
@@ -157,6 +159,25 @@ export default function WorkspaceCompactRow({
 
       {/* Col 3: Price / Clinic Price / Wholesale Price */}
       <div style={{ textAlign: 'right', minWidth: '55px' }}>
+        {tierInfo?.isTier10Applied && (
+          <div style={{ marginBottom: '2px' }}>
+            <span
+              style={{
+                fontSize: '0.60rem',
+                fontWeight: 800,
+                color: '#15803d',
+                backgroundColor: '#dcfce7',
+                border: '1px solid #86efac',
+                padding: '0 4px',
+                borderRadius: '3px',
+                display: 'inline-block',
+              }}
+              title={`Tier 10 bulk rate active (${tierInfo.discountPercent}% off)`}
+            >
+              ⚡ T10 (-{tierInfo.discountPercent}%)
+            </span>
+          </div>
+        )}
         {isDoctor ? (
           <span
             style={{

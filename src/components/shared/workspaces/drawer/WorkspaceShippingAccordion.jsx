@@ -352,7 +352,7 @@ export default function WorkspaceShippingAccordion({
                     touchAction: 'manipulation',
                   }}
                 >
-                  🎁 Free (Cortesía)
+                  🎁 Complimentary (Free)
                 </button>
                 {!isManualMode && !isManualOverride && (
                   <button

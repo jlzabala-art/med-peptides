@@ -225,13 +225,14 @@ export const NAVIGATION_REGISTRY = [
     icon: Mail,
     roles: ['admin', 'sales'],
     items: [
-      { id: 'email-campaigns',      label: 'Email Campaigns',      icon: Mail,          roles: ['admin', 'sales'] },
-      { id: 'newsletter',           label: 'Newsletter',           icon: Newspaper,     roles: ['admin', 'sales'] },
-      { id: 'social-media',         label: 'Social Media',         icon: Share2,        roles: ['admin', 'sales'] },
-      { id: 'templates',            label: 'Templates',            icon: LayoutTemplate,roles: ['admin'] },
-      { id: 'automation-campaigns', label: 'Automation Campaigns', icon: Bot,           roles: ['admin'] },
-      { id: 'coupons',              label: 'Coupons',              icon: Ticket,        roles: ['admin', 'sales'] },
-      { id: 'segmentation',         label: 'Segmentation',         icon: PieChart,      roles: ['admin', 'sales'] },
+      { id: 'marketing-intelligence', label: 'Marketing Intelligence', icon: TrendingUp,     roles: ['admin', 'sales', 'ceo'] },
+      { id: 'email-campaigns',        label: 'Email Campaigns',        icon: Mail,           roles: ['admin', 'sales'] },
+      { id: 'newsletter',             label: 'Newsletter',             icon: Newspaper,      roles: ['admin', 'sales'] },
+      { id: 'social-media',           label: 'Social Media',           icon: Share2,         roles: ['admin', 'sales'] },
+      { id: 'templates',              label: 'Templates',              icon: LayoutTemplate, roles: ['admin'] },
+      { id: 'automation-campaigns',   label: 'Automation Campaigns',   icon: Bot,            roles: ['admin'] },
+      { id: 'coupons',                label: 'Coupons',                icon: Ticket,         roles: ['admin', 'sales'] },
+      { id: 'segmentation',           label: 'Segmentation',           icon: PieChart,       roles: ['admin', 'sales'] },
     ]
   },
 

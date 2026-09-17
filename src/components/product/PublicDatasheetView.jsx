@@ -52,7 +52,8 @@ export default function PublicDatasheetView({
   initialSupplierFilter = null,
   initialFormat = null,
   initialStrength = null,
-  initialLang = null 
+  initialLang = null,
+  initialBatch = null
 }) {
   const [lang, setLang] = useState(() => {
     if (initialLang && SUPPORTED_LANGUAGES.some(l => l.code === initialLang)) {
@@ -377,9 +378,13 @@ export default function PublicDatasheetView({
     if (lang && lang !== 'en') {
       params.set('lang', lang);
     }
+    if (initialBatch) {
+      params.set('batch', initialBatch);
+      params.set('vialCode', initialBatch);
+    }
     const q = params.toString();
     return `${baseUrl}/p/${slug}${q ? `?${q}` : ''}`;
-  }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product]);
+  }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product, initialBatch]);
 
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
@@ -392,9 +397,13 @@ export default function PublicDatasheetView({
     if (targetDose && targetDose !== 'all') p.set('dose', targetDose);
     if (activeFormatId && activeFormatId !== 'all') p.set('presentation', activeFormatId);
     if (lang && lang !== 'en') p.set('lang', lang);
+    if (initialBatch) {
+      p.set('batch', initialBatch);
+      p.set('vialCode', initialBatch);
+    }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang]);
+  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang, initialBatch]);
 
   // ⚡ Non-blocking Access Telemetry Beacon for Tracked Client Links
   useEffect(() => {
@@ -602,6 +611,24 @@ export default function PublicDatasheetView({
               <span className="pds-cgmp-tag">
                 {isStrictlyLotusland ? t.lotuslandVerified : `${supplierName} Quality Verified`}
               </span>
+              {initialBatch && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  backgroundColor: '#ecfdf5',
+                  color: '#065f46',
+                  border: '1px solid #6ee7b7',
+                  borderRadius: '6px',
+                  padding: '2px 8px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700
+                }}>
+                  <ShieldCheck size={13} color="#059669" />
+                  <span>Batch Verified:</span>
+                  <code style={{ fontFamily: 'monospace', fontWeight: 800, color: '#047857' }}>{initialBatch}</code>
+                </span>
+              )}
             </div>
             <h1 className="pds-title">{name}</h1>
             <p className="pds-target">

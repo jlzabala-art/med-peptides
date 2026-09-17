@@ -95,6 +95,8 @@ const getTabComponent = async (tabId) => {
     case 'newsletter':
     case 'templates':          return (await import('../../../components/admin/AdminEmailTemplatesTab')).default;
     case 'social-media':       return (await import('../../../components/admin/AdminMarketingTab')).default;
+    case 'webshare-analytics':
+    case 'marketing-intelligence': return (await import('../../../components/admin/AdminMarketingIntelligencePanel')).default;
 
     // AI
     case 'atlas-ai':

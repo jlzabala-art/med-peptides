@@ -139,6 +139,12 @@ export default function WorkspaceCatalogPickers({
       category: prod.category || prod.categoryId || 'Peptides',
       presentation: v.presentation || formatLabel,
       targetTier: effectiveTier,
+      cost_tiers: v.cost_tiers || prod.cost_tiers || (v.cost_10 ? { cost_10: v.cost_10, cost_50: v.cost_50, cost_100: v.cost_100 } : null),
+      pricing: v.pricing || prod.pricing || null,
+      cost_10: v.cost_10 ?? v.cost_tiers?.cost_10 ?? prod.cost_10 ?? null,
+      price_per_kit_10: v.price_per_kit_10 ?? prod.price_per_kit_10 ?? null,
+      kit_price: v.kit_price ?? v.kitPrice ?? prod.kit_price ?? null,
+      kitCost: v.kitCost ?? prod.kitCost ?? null,
     };
 
     if (onAddProduct) onAddProduct(itemToAdd);

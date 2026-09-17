@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { 
   History, 
   DollarSign, 
@@ -24,7 +25,11 @@ import {
   Barcode,
   Copy,
   Check,
-  Share2
+  Share2,
+  QrCode,
+  FileText,
+  X,
+  Download
 } from 'lucide-react';
 import notifier from '@/services/NotificationService';
 import { formatTimelineValue } from '../../../utils/variantTimelineHelper';
@@ -39,15 +44,18 @@ import UniversalShareDrawer from '../../ui/UniversalShareDrawer';
  * VariantTimelinePanel
  * ─────────────────────────────────────────────────────────────────────────────
  * Expandable master-detail panel rendering:
- *  1. Supplier Pricing & Commercial Agreement Card (Quotation Date, Discounts, MOQ, Multi-currency)
- *  2. Bulk API Yield & Dilution Calculator (Raw Materials to Patient Vials Matrix)
- *  3. Zoho Books & Inventory Reconciler Card (SKU, Sync status, Create in Zoho)
- *  4. Chronological audit trail of changes made to the variant with quotation links.
+ *  1. Unified 3D Traceability Suite (Datasheet, Web Share, Shipping & Client Labels with shared 3D Matrix)
+ *  2. Supplier Pricing & Commercial Agreement Card (Quotation Date, Discounts, MOQ, Multi-currency)
+ *  3. Bulk API Yield & Dilution Calculator (Raw Materials to Patient Vials Matrix)
+ *  4. Zoho Books & Inventory Reconciler Card (SKU, Sync status, Create in Zoho)
+ *  5. Chronological audit trail of changes made to the variant with quotation links.
  */
 export default function VariantTimelinePanel({ variant, selectedProduct, onUpdateVariantField }) {
   const [activeQuotationId, setActiveQuotationId] = useState(null);
   const [copiedCode, setCopiedCode] = useState(false);
   const [shareDrawerOpen, setShareDrawerOpen] = useState(false);
+  const [is3DModalOpen, setIs3DModalOpen] = useState(false);
+  const [copied3DUrl, setCopied3DUrl] = useState(false);
 
   // Deterministic fallback unique code if not explicitly saved on the variant
   const defaultSuppCode = (variant?.supplierId || variant?.supplier || 'RP').replace(/[^a-zA-Z0-9]/g, '').slice(0, 5).toUpperCase();
@@ -70,14 +78,29 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
   const variantIdParam = encodeURIComponent(variant?.id || '');
   const suppParam = encodeURIComponent(variant?.supplierId || variant?.supplier || '');
   const doseParam = encodeURIComponent(variant?.dosage || variant?.dose || '');
-  const formatParam = encodeURIComponent(variant?.presentation || variant?.format || '');
+  const formatParam = encodeURIComponent(variant?.presentation || variant?.format || 'vial');
   const batchParam = encodeURIComponent(currentVialCode);
 
-  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}&vialCode=${batchParam}`;
+  const rawSlug = selectedProduct?.slug || selectedProduct?.id || '';
+  const canonicalMonographPath = `/p/${encodeURIComponent(rawSlug)}?dose=${doseParam}&presentation=${formatParam}&supplier=${suppParam}&batch=${batchParam}&vialCode=${batchParam}`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const absoluteMonographUrl = `${origin}${canonicalMonographPath}`;
+
+  const baseLabelQuery = `variantId=${variantIdParam}&supplier=${suppParam}&dose=${doseParam}&presentation=${formatParam}&batch=${batchParam}&vialCode=${batchParam}&url=${encodeURIComponent(canonicalMonographPath)}`;
 
   const shippingLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=shipping&${baseLabelQuery}&download=1`;
   const clientLabelUrl = `/api/vial-label/${productSlug}?format=38x90&type=client&${baseLabelQuery}&download=1`;
   const sheetLabelUrl = `/api/vial-label/${productSlug}?format=sheet_a4&type=full&${baseLabelQuery}&download=1`;
+
+  const handleCopy3DUrl = (url) => {
+    if (!url) return;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopied3DUrl(true);
+      notifier.success('3D Matrix Monograph URL copied to clipboard');
+      setTimeout(() => setCopied3DUrl(false), 2000);
+    }
+  };
 
   if (!variant) return null;
 
@@ -346,7 +369,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
         </div>
       </div>
 
-      {/* Unique Vial / Batch Code & Label Dispatch Bar */}
+      {/* ── Unified 3D Traceability & Technical Suite Bar ── */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -359,8 +382,8 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
         border: '1px solid #e2e8f0',
         boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
       }}>
-        {/* Left: Unique Editable Vial Code */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+        {/* Left: Unique Editable Vial Code & 3D Matrix Trigger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0369a1' }}>
             <Barcode size={15} />
             <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
@@ -397,6 +420,7 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
             )}
           </div>
 
+          {/* Copy Button */}
           <button
             type="button"
             onClick={() => handleCopyVialCode(currentVialCode)}
@@ -418,6 +442,30 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           >
             {copiedCode ? <Check size={12} /> : <Copy size={12} />}
             <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+          </button>
+
+          {/* Live 3D Matrix Trigger Button */}
+          <button
+            type="button"
+            onClick={() => setIs3DModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              fontSize: '0.70rem',
+              fontWeight: 700,
+              color: '#003666',
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title="Inspect unified 3D QR Matrix linking Monograph & Labels"
+          >
+            <QrCode size={13} color="#0284c7" />
+            <span>3D Matrix</span>
           </button>
 
           {variant?.vialCode ? (
@@ -447,117 +495,152 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           )}
         </div>
 
-        {/* Right: Quick Label Download Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.70rem', fontWeight: 600, color: '#64748b', marginRight: '2px' }}>
-            Print Labels:
-          </span>
+        {/* Right: Technical Datasheet, Web Share & Physical Labels */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          
+          {/* Documentation Suite (Web Monograph & Share) */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            {/* 1. Ficha Técnica Web Link */}
+            <a
+              href={canonicalMonographPath}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 9px',
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                color: '#0369a1',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                borderRadius: '5px',
+                textDecoration: 'none',
+                transition: 'all 0.15s ease'
+              }}
+              title={`Open Live Technical Datasheet for ${variant?.dosage || '10mg'} (Batch ${currentVialCode})`}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
+            >
+              <FileText size={12} />
+              <span>Datasheet ↗</span>
+            </a>
 
-          {/* 1. Shipping Label */}
-          <a
-            href={shippingLabelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={`shipping_label_${currentVialCode}_38x90.pdf`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '3px 8px',
-              fontSize: '0.70rem',
-              fontWeight: 600,
-              color: '#1e293b',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '5px',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease'
-            }}
-            title={`Download 38x90mm Shipping Barcode Label for batch ${currentVialCode}`}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-          >
-            <span>📦</span> Shipping (38×90)
-          </a>
+            {/* 2. Web Share Drawer */}
+            <button
+              type="button"
+              onClick={() => setShareDrawerOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 9px',
+                fontSize: '0.70rem',
+                fontWeight: 600,
+                color: '#0d9488',
+                backgroundColor: '#f0fdfa',
+                border: '1px solid #99f6e4',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              title={`Share Datasheet & Labels for ${selectedProduct?.name || 'Peptide'} (${currentVialCode})`}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#ccfbf1'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0fdfa'; }}
+            >
+              <Share2 size={12} />
+              <span>Share Web</span>
+            </button>
+          </div>
 
-          {/* 2. Client Vial Label */}
-          <a
-            href={clientLabelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={`client_label_${currentVialCode}_38x90.pdf`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '3px 8px',
-              fontSize: '0.70rem',
-              fontWeight: 600,
-              color: '#0369a1',
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              borderRadius: '5px',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease'
-            }}
-            title={`Download 38x90mm Client Vial Label with active supplier, dosage & batch ${currentVialCode}`}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
-          >
-            <span>🏷️</span> Client Vial (38×90)
-          </a>
+          {/* Physical Labels Suite */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.68rem', fontWeight: 600, color: '#64748b', marginRight: '2px' }}>
+              Labels:
+            </span>
 
-          {/* 3. A4 Sheet */}
-          <a
-            href={sheetLabelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download={`vial_labels_sheet_${currentVialCode}_a4.pdf`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '3px 8px',
-              fontSize: '0.70rem',
-              fontWeight: 600,
-              color: '#475569',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '5px',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease'
-            }}
-            title={`Download A4 Sheet (8 labels) for batch ${currentVialCode}`}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-          >
-            <span>📄</span> Sheet (×8)
-          </a>
+            {/* 3. Shipping Label */}
+            <a
+              href={shippingLabelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={`shipping_label_${currentVialCode}_38x90.pdf`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 8px',
+                fontSize: '0.70rem',
+                fontWeight: 600,
+                color: '#1e293b',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '5px',
+                textDecoration: 'none',
+                transition: 'all 0.15s ease'
+              }}
+              title={`Download 38x90mm Shipping Barcode Label for batch ${currentVialCode}`}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+            >
+              <span>📦</span> Shipping (38×90)
+            </a>
 
-          <button
-            type="button"
-            onClick={() => setShareDrawerOpen(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '3px 9px',
-              fontSize: '0.70rem',
-              fontWeight: 600,
-              color: '#0284c7',
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            title={`Share label for ${selectedProduct?.name || 'Peptide'} (${currentVialCode})`}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
-          >
-            <Share2 size={11} />
-            <span>Share Label</span>
-          </button>
+            {/* 4. Client Vial Label */}
+            <a
+              href={clientLabelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={`client_label_${currentVialCode}_38x90.pdf`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 8px',
+                fontSize: '0.70rem',
+                fontWeight: 600,
+                color: '#0369a1',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #bae6fd',
+                borderRadius: '5px',
+                textDecoration: 'none',
+                transition: 'all 0.15s ease'
+              }}
+              title={`Download 38x90mm Client Vial Label with active supplier, dosage & batch ${currentVialCode}`}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
+            >
+              <span>🏷️</span> Client Vial (38×90)
+            </a>
+
+            {/* 5. A4 Sheet */}
+            <a
+              href={sheetLabelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={`vial_labels_sheet_${currentVialCode}_a4.pdf`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 8px',
+                fontSize: '0.70rem',
+                fontWeight: 600,
+                color: '#475569',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #cbd5e1',
+                borderRadius: '5px',
+                textDecoration: 'none',
+                transition: 'all 0.15s ease'
+              }}
+              title={`Download A4 Sheet (8 labels) for batch ${currentVialCode}`}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+            >
+              <span>📄</span> Sheet (×8)
+            </a>
+          </div>
         </div>
       </div>
 
@@ -872,12 +955,12 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
         />
       )}
 
-      {/* Universal Share Drawer for Vial / Shipping Labels */}
+      {/* Universal Share Drawer for Monograph & Labels */}
       <UniversalShareDrawer
         isOpen={shareDrawerOpen}
         onClose={() => setShareDrawerOpen(false)}
-        docUrl={clientLabelUrl}
-        docType="label_vial"
+        docUrl={absoluteMonographUrl || canonicalMonographPath}
+        docType="monograph"
         itemName={`${selectedProduct?.name || 'Peptide'} - ${variant?.dosage || ''} (${currentVialCode})`}
         assetMeta={{
           vialCode: currentVialCode,
@@ -888,9 +971,236 @@ export default function VariantTimelinePanel({ variant, selectedProduct, onUpdat
           supplier: variant?.supplierId || variant?.supplier,
           clientLabelUrl,
           shippingLabelUrl,
-          sheetLabelUrl
+          sheetLabelUrl,
+          monographUrl: canonicalMonographPath
         }}
       />
+
+      {/* ── 3D Matrix / QR Code Traceability Modal ── */}
+      {is3DModalOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            animation: 'fadeIn 0.15s ease-out'
+          }}
+          onClick={() => setIs3DModalOpen(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '460px',
+              width: '100%',
+              padding: '1.5rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  padding: '8px',
+                  borderRadius: '10px',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  color: '#0284c7'
+                }}>
+                  <QrCode size={22} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                    3D Matrix Traceability
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.74rem', color: '#64748b' }}>
+                    Shared code across Monograph, Shipping & Client Labels
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIs3DModalOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '6px'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Batch Pill */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              padding: '8px 12px'
+            }}>
+              <div>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', display: 'block' }}>
+                  Active Batch / Vial Code
+                </span>
+                <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#003666', fontFamily: 'monospace' }}>
+                  {currentVialCode}
+                </span>
+              </div>
+              <span style={{
+                fontSize: '0.70rem',
+                fontWeight: 700,
+                color: '#0369a1',
+                backgroundColor: '#f0f9ff',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                border: '1px solid #bae6fd'
+              }}>
+                {variant?.dosage || '10mg'} · {variant?.presentation || 'vial'}
+              </span>
+            </div>
+
+            {/* QR / 3D Matrix Code Render */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.25rem',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              border: '2px dashed #cbd5e1'
+            }}>
+              <div style={{
+                padding: '12px',
+                backgroundColor: '#ffffff',
+                borderRadius: '10px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+              }}>
+                <QRCodeSVG
+                  value={absoluteMonographUrl}
+                  size={170}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+              <span style={{ fontSize: '0.70rem', color: '#64748b', marginTop: '10px', fontWeight: 600 }}>
+                Scan to open verified monograph on mobile device
+              </span>
+            </div>
+
+            {/* URL Display with Copy */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#f1f5f9',
+              borderRadius: '8px',
+              padding: '6px 10px',
+              border: '1px solid #cbd5e1'
+            }}>
+              <span style={{
+                flex: 1,
+                fontSize: '0.72rem',
+                color: '#334155',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontFamily: 'monospace'
+              }}>
+                {absoluteMonographUrl}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleCopy3DUrl(absoluteMonographUrl)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 8px',
+                  fontSize: '0.70rem',
+                  fontWeight: 700,
+                  color: copied3DUrl ? '#15803d' : '#0369a1',
+                  backgroundColor: copied3DUrl ? '#dcfce7' : '#ffffff',
+                  border: `1px solid ${copied3DUrl ? '#86efac' : '#cbd5e1'}`,
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                {copied3DUrl ? <Check size={12} /> : <Copy size={12} />}
+                <span>{copied3DUrl ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+              <a
+                href={canonicalMonographPath}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '8px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  backgroundColor: '#003666',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  textAlign: 'center'
+                }}
+              >
+                <FileText size={14} /> Open Datasheet ↗
+              </a>
+
+              <a
+                href={clientLabelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={`client_label_${currentVialCode}_38x90.pdf`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '8px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#0369a1',
+                  backgroundColor: '#f0f9ff',
+                  border: '1px solid #bae6fd',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  textAlign: 'center'
+                }}
+              >
+                <Download size={14} /> Client Label (PDF)
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import notifier from '../../../services/NotificationService';
 import { searchCatalogFast } from '../../../repositories/workspaceSearchRepository';
 import { useRoleAccess } from '../../../hooks/useRoleAccess';
 import { resolveVariantPrice } from '../../../utils/resolvePrice';
+import { resolveItemTierPricing } from '@/utils/tierPricingResolver';
 import PatientLabelSheetModal from '../../admin/prescriptions/PatientLabelSheetModal';
 
 // Modular Subcomponents
@@ -190,35 +191,22 @@ export default function WorkspaceDrawer() {
     return () => window.removeEventListener('keydown', handleKeyNav);
   }, [isDrawerOpen, steps.length]);
 
+  const getItemTierInfo = (it) => {
+    return resolveItemTierPricing(it, {
+      isAdmin,
+      isDoctor,
+      isWholesaler,
+      isPatient,
+      activeWs,
+    });
+  };
+
   const getItemUnitPrice = (it) => {
-    // Admin with manual price override
+    // Admin with explicit manual price override
     if (isAdmin && it.customPrice != null) return Number(it.customPrice);
 
-    // Doctor / Clinic role: strictly clinic price
-    if (isDoctor) {
-      const resolved = resolveVariantPrice(it, { tier: 'clinic' });
-      const amount = resolved?.perUnit ?? Number(it.priceClinic || it.unitPrice || it.price || it.unitRate || 0);
-      return isNaN(amount) ? 0 : amount;
-    }
-
-    // Wholesaler role: strictly wholesale price
-    if (isWholesaler) {
-      const resolved = resolveVariantPrice(it, { tier: 'wholesale' });
-      const amount = resolved?.perUnit ?? Number(it.wholesalePrice || it.unitPrice || it.price || it.unitRate || 0);
-      return isNaN(amount) ? 0 : amount;
-    }
-
-    // Patient role: strictly retail price
-    if (isPatient) {
-      const resolved = resolveVariantPrice(it, { tier: 'retail' });
-      const amount = resolved?.perUnit ?? Number(it.retailPrice || it.unitPrice || it.price || it.unitRate || 0);
-      return isNaN(amount) ? 0 : amount;
-    }
-
-    // Admin / Standard fallback
-    if (it.customPrice != null) return Number(it.customPrice);
-    const p = Number(it.unitPrice || it.price || it.unitRate || 0);
-    return isNaN(p) ? 0 : p;
+    const tierInfo = getItemTierInfo(it);
+    return tierInfo.effectiveUnitPrice;
   };
 
   const subtotalSaleAmount = items.reduce((sum, it) => {
@@ -470,6 +458,7 @@ export default function WorkspaceDrawer() {
               activeWs={activeWs}
               subtotalSaleAmount={subtotalSaleAmount}
               getItemUnitPrice={getItemUnitPrice}
+              getItemTierInfo={getItemTierInfo}
               onUpdateItemQuantity={(itemId, qty) => updateItemQuantity(itemId, qty, activeWs.id)}
               onUpdateItemPrice={(itemId, price) => {
                 if (isAdmin) updateItemPrice(itemId, price, activeWs.id);
