@@ -36,7 +36,7 @@ import AppHeader from './AppHeader/index';
 import RefillReminderBanner from './RefillReminderBanner';
 import AtlasAssistantDrawer from '../../layout/AtlasAssistantDrawer';
 import { useAuth } from '../../context/AuthContext';
-import { useSimulationStore } from '../../hooks/admin/useAdminRoleSimulation';
+import { useSimulationStore } from '../../stores/useSimulationStore';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 
 const PUBLIC_GROUPS = [
@@ -107,6 +107,7 @@ export default function GlobalAppLayout({
   headerProps = null
 }) {
   const { user, activeRole, baseRole, switchActiveRole, logout } = useAuth();
+  const exitStoreSimulation = useSimulationStore((s) => s.exitSimulation);
   const [isMobile, setIsMobile] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const pathname = usePathname();
@@ -145,7 +146,14 @@ export default function GlobalAppLayout({
   const bannerColor = simulatedRoleData?.color || '#f59e0b';
 
   const exitSimulation = () => {
+    // Reset BOTH the AuthContext role AND the Zustand simulation store to prevent desync
     if (switchActiveRole) switchActiveRole('admin');
+    exitStoreSimulation();
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('impersonatedDoctorId');
+      localStorage.removeItem('impersonatedDoctorId');
+      sessionStorage.setItem('activeRole', 'admin');
+    }
     router.push('/admin');
   };
 

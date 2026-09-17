@@ -12,7 +12,7 @@ import {
   buildServiceColumns,
   buildApiColumns 
 } from '../columns/catalogColumns';
-import { UploadCloud, FileText, Share2, Layers, TrendingUp, Copy, Star } from 'lucide-react';
+import { UploadCloud, FileText, Share2, Layers, TrendingUp, Copy, Star, ShoppingCart } from 'lucide-react';
 import { Maximize2, Minimize2 } from '@/lib/icons';
 import InlineEditableCell from '../../../ui/InlineEditableCell';
 import notifier from '../../../../services/NotificationService';
@@ -21,6 +21,7 @@ import { updateProduct, createVariant, updateVariant, getVariants } from '../../
 import { resolveChannelPrice, calculateMarginMetrics } from '../../../../utils/commercialPricingHelper';
 import { calculateTotalMg } from '../../../../utils/calculateTotalMg';
 import { PRESENTATION_LABELS } from '../../../../constants/presentationTypes';
+import { useWorkspaceStore } from '../../../../stores/useWorkspaceStore';
 
 /**
  * CatalogOffersPricingDrawer
@@ -49,6 +50,8 @@ export default function CatalogOffersPricingDrawer({
   refresh
 }) {
   const { settings } = useAppSettings();
+  const addItem = useWorkspaceStore((s) => s.addItem);
+  const setDrawerOpen = useWorkspaceStore((s) => s.setDrawerOpen);
   const [drawerTab, setDrawerTab] = React.useState('offers'); // 'offers' | 'competitors'
   const [loadingVariants, setLoadingVariants] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(false);
@@ -222,7 +225,33 @@ export default function CatalogOffersPricingDrawer({
     }
   };
 
-  // 4. Update variant fields inline
+  // 5. Add variant to Workspace
+  const handleAddToWorkspace = React.useCallback((variant) => {
+    if (!selectedProduct) return;
+    const resolvedPrice = resolveChannelPrice(variant, 'clinic', 'unit').price || 0;
+    addItem({
+      id: variant.id,
+      productId: selectedProduct.id,
+      variantId: variant.id,
+      canonicalName: selectedProduct.name || selectedProduct.displayName || 'Unknown Product',
+      sku: variant.sku || '',
+      dosage: variant.dosage || variant.dose || '',
+      format: variant.format || variant.dosage_form || 'Vial',
+      quantity: 1,
+      unitPrice: resolvedPrice,
+      price: resolvedPrice,
+      supplierCost: variant.unit_price || variant.cost_tiers?.cost_1 || 0,
+      supplierId: variant.supplierId || variant.supplier || '',
+      supplierName: variant.supplierName || '',
+      category: selectedProduct.category || '',
+      presentation: variant.presentation || '',
+      pricing: variant.pricing,
+    }, null, { openDrawer: true });
+    const variantLabel = variant.dosage || variant.dose || variant.sku || 'variant';
+    notifier.success(`✓ ${selectedProduct.name || 'Product'} (${variantLabel}) added to Workspace`);
+  }, [selectedProduct, addItem]);
+
+  // 6. Update variant fields inline
   const updateVariantField = async (variantId, field, value) => {
     if (!selectedProduct) return;
     let dbPayload = {};
@@ -515,96 +544,73 @@ export default function CatalogOffersPricingDrawer({
 
   const actionCol = useMemo(() => ({
     key: 'actions',
-    header: 'Quick Actions',
-    width: '85px',
+    header: 'Actions',
+    width: '120px',
     align: 'right',
     nowrap: true,
     render: (v) => {
       const isPref = v.isPreferred || v.isDefault;
       return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '5px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+          {/* Add to Workspace */}
           <button
             type="button"
-            data-tooltip="Clone variant"
+            title="Add to Workspace / Quotation"
+            aria-label="Add to Workspace"
+            onClick={(e) => { e.stopPropagation(); handleAddToWorkspace(v); }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '3px',
+              padding: '3px 7px', height: '28px',
+              background: '#dcfce7', border: '1px solid #86efac', borderRadius: '6px',
+              cursor: 'pointer', color: '#15803d', fontSize: '0.7rem', fontWeight: 700,
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'all 0.15s ease',
+              flexShrink: 0, whiteSpace: 'nowrap',
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#bbf7d0'; e.currentTarget.style.borderColor = '#4ade80'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#dcfce7'; e.currentTarget.style.borderColor = '#86efac'; }}
+          >
+            <ShoppingCart size={11} /> WS
+          </button>
+          {/* Clone */}
+          <button
+            type="button"
             title="Clone variant"
             aria-label="Clone variant"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCloneVariant(v);
-            }}
+            onClick={(e) => { e.stopPropagation(); handleCloneVariant(v); }}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '28px',
-              height: '28px',
-              background: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              color: '#0284c7',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
-              transition: 'all 0.15s ease',
-              flexShrink: 0
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '28px', height: '28px', background: '#f8fafc',
+              border: '1px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'all 0.15s ease', flexShrink: 0
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9';
-              e.currentTarget.style.borderColor = '#94a3b8';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.borderColor = '#cbd5e1';
-            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
           >
             <Copy size={13} style={{ color: '#0284c7' }} />
           </button>
+          {/* Set preferred */}
           <button
             type="button"
-            data-tooltip={isPref ? "Default variant (Active)" : "Set as default variant"}
-            title={isPref ? "Default variant (Active)" : "Set as default variant"}
-            aria-label={isPref ? "Default variant (Active)" : "Set as default variant"}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSetPreferredVariant(v.id);
-            }}
+            title={isPref ? 'Default variant (Active)' : 'Set as default variant'}
+            aria-label={isPref ? 'Default variant (Active)' : 'Set as default variant'}
+            onClick={(e) => { e.stopPropagation(); handleSetPreferredVariant(v.id); }}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '28px',
-              height: '28px',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '28px', height: '28px',
               background: isPref ? '#fef3c7' : '#ffffff',
               border: isPref ? '1px solid #fde68a' : '1px solid #e2e8f0',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              color: isPref ? '#d97706' : '#94a3b8',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
-              transition: 'all 0.15s ease',
-              flexShrink: 0
+              borderRadius: '6px', cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'all 0.15s ease', flexShrink: 0
             }}
-            onMouseOver={(e) => {
-              if (!isPref) {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.borderColor = '#cbd5e1';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!isPref) {
-                e.currentTarget.style.backgroundColor = '#ffffff';
-                e.currentTarget.style.borderColor = '#e2e8f0';
-              }
-            }}
+            onMouseOver={(e) => { if (!isPref) { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; } }}
+            onMouseOut={(e) => { if (!isPref) { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; } }}
           >
-            <Star
-              size={13}
-              fill={isPref ? "#f59e0b" : "none"}
-              color={isPref ? "#f59e0b" : "#94a3b8"}
-            />
+            <Star size={13} fill={isPref ? '#f59e0b' : 'none'} color={isPref ? '#f59e0b' : '#94a3b8'} />
           </button>
         </div>
       );
     }
-  }), [handleSetPreferredVariant, handleCloneVariant]);
+  }), [handleSetPreferredVariant, handleCloneVariant, handleAddToWorkspace]);
 
   const presentationOptions = useMemo(() => {
     return Object.entries(PRESENTATION_LABELS).map(([value, label]) => ({

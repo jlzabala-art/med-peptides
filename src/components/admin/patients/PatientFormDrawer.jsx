@@ -20,6 +20,8 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
     email: '',
     phone: '',
     country: 'AE',
+    idType: 'passport',
+    nationalId: '',
     dateOfBirth: '',
     gender: '',
     clinicId: '',
@@ -54,6 +56,8 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
         email: '',
         phone: '',
         country: 'AE',
+        idType: 'passport',
+        nationalId: '',
         dateOfBirth: '',
         gender: '',
         clinicId: '',
@@ -190,6 +194,8 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
         email: cleanEmail,
         phone: formData.phone.trim(),
         country: formData.country,
+        idType: formData.idType || (formData.country === 'AE' ? 'emirates_id' : 'passport'),
+        nationalId: formData.nationalId?.trim() || null,
         dateOfBirth: formData.dateOfBirth || null,
         gender: formData.gender || null,
         clinicId: formData.clinicId || null,
@@ -211,6 +217,9 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
         name: fullName,
         email: cleanEmail,
         phone: formData.phone,
+        country: formData.country,
+        idType: formData.idType || (formData.country === 'AE' ? 'emirates_id' : 'passport'),
+        nationalId: formData.nationalId?.trim() || null,
         clinic: formData.clinicName,
         physician: formData.physicianName,
         status: formData.status || 'active',
@@ -522,7 +531,14 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
               </label>
               <select
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                onChange={(e) => {
+                  const newCountry = e.target.value;
+                  setFormData({
+                    ...formData,
+                    country: newCountry,
+                    idType: newCountry === 'AE' ? 'emirates_id' : 'passport'
+                  });
+                }}
                 style={{
                   width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
                   border: '1px solid #cbd5e1', fontSize: '0.9rem', background: '#ffffff', boxSizing: 'border-box', outline: 'none',
@@ -542,6 +558,66 @@ export default function PatientFormDrawer({ isOpen, onClose, onComplete }) {
                 <option value="CO">🇨🇴 Colombia</option>
                 <option value="Other">🌐 Other Country</option>
               </select>
+            </div>
+
+            {/* Identity Document (Passport / Emirates ID) - 100% Optional */}
+            <div style={{ marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
+                  Identity Document <span style={{ fontWeight: 400, color: '#64748b' }}>(Optional)</span>
+                </label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, idType: 'passport' })}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid',
+                      borderColor: (formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'passport' ? '#0284c7' : '#cbd5e1',
+                      background: (formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'passport' ? '#e0f2fe' : '#ffffff',
+                      color: (formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'passport' ? '#0369a1' : '#64748b',
+                      cursor: 'pointer',
+                      fontWeight: 600
+                    }}
+                  >
+                    🛂 Passport (Tourist / Int)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, idType: 'emirates_id' })}
+                    style={{
+                      fontSize: '0.72rem',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid',
+                      borderColor: (formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'emirates_id' ? '#003666' : '#cbd5e1',
+                      background: (formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'emirates_id' ? '#f0f9ff' : '#ffffff',
+                      color: (formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'emirates_id' ? '#003666' : '#64748b',
+                      cursor: 'pointer',
+                      fontWeight: 600
+                    }}
+                  >
+                    🪪 Emirates ID
+                  </button>
+                </div>
+              </div>
+              <input
+                type="text"
+                value={formData.nationalId || ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const autoType = /^784-?\d{4}-?\d{7}-?\d?$/i.test(val.trim()) ? 'emirates_id' : formData.idType;
+                  setFormData({ ...formData, nationalId: val, ...(autoType ? { idType: autoType } : {}) });
+                }}
+                placeholder={(formData.idType || (formData.country !== 'AE' ? 'passport' : 'emirates_id')) === 'passport' ? 'Passport Number (e.g. A12345678)' : 'Emirates ID (784-XXXX-XXXXXXX-X)'}
+                style={{
+                  width: '100%', height: '42px', padding: '0 0.85rem', borderRadius: '8px',
+                  border: '1px solid #cbd5e1', fontSize: '0.88rem', boxSizing: 'border-box', outline: 'none', background: '#ffffff',
+                  color: '#0f172a'
+                }}
+              />
             </div>
 
             {/* Date of Birth & Gender - 2 balanced columns */}

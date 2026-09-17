@@ -4,6 +4,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Edit2, Check, X } from 'lucide-react';
 import notifier from '../../services/NotificationService';
 import SearchableSelect from './SearchableSelect';
+import CountrySelect from './CountrySelect';
+import CanonicalGoalSelect, { GOAL_ICONS } from './CanonicalGoalSelect';
+import CanonicalAllergySelect from './CanonicalAllergySelect';
+import { normalizeGoal, normalizeCountry, normalizeAllergies } from '../../services/clinicalTaxonomyNormalizer';
 import { DOSAGE_UNITS } from '../../constants/dosageUnits';
 
 /**
@@ -14,7 +18,7 @@ import { DOSAGE_UNITS } from '../../constants/dosageUnits';
  */
 export default function InlineEditableCell({
   value,
-  type = 'text', // 'text', 'number', 'select', 'dosage', 'email', 'tel'
+  type = 'text', // 'text', 'number', 'select', 'dosage', 'email', 'tel', 'country', 'goal', 'allergy'
   options = [], // [{ label, value }] for select type
   onSave, // async function(newValue)
   format, // function(value) => string | ReactNode
@@ -120,11 +124,76 @@ export default function InlineEditableCell({
     }
   };
 
-  const formattedDisplay = format && value != null && value !== ''
-    ? format(value)
-    : (type === 'select' && options
-        ? (options.find(o => o.value === value)?.label || value || <span style={{ opacity: 0.5 }}>{placeholder}</span>)
-        : (value != null && value !== '' ? String(value) : <span style={{ opacity: 0.5 }}>{placeholder}</span>));
+  const formattedDisplay = (() => {
+    if (format && value != null && value !== '') {
+      return format(value);
+    }
+    if (type === 'goal' && value) {
+      const g = normalizeGoal(value);
+      const icon = GOAL_ICONS[g.key] || '🎯';
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem' }}>
+          <span>{icon}</span>
+          <span style={{ fontWeight: 600 }}>{g.label || value}</span>
+          {g.isCustom && (
+            <span style={{ fontSize: '0.65rem', color: '#d97706', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', padding: '1px 5px', borderRadius: '4px' }}>
+              custom
+            </span>
+          )}
+        </span>
+      );
+    }
+    if (type === 'country' && value) {
+      const c = normalizeCountry(value);
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem' }}>
+          <span>{c.flag || '🌍'}</span>
+          <span>{c.name || value}</span>
+        </span>
+      );
+    }
+    if (type === 'allergy' && value) {
+      const a = normalizeAllergies(value);
+      if (a.isNKDA) {
+        return (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#15803d', fontWeight: 600, backgroundColor: '#f0fdf4', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', border: '1px solid #bbf7d0' }}>
+            ✓ NKDA
+          </span>
+        );
+      }
+      if (a.items.length === 0) {
+        return <span style={{ opacity: 0.5 }}>{placeholder}</span>;
+      }
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+          {a.items.map((it, idx) => (
+            <span
+              key={idx}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                fontWeight: it.category === 'excipient' ? 700 : 500,
+                backgroundColor: it.category === 'excipient' ? '#fef2f2' : '#f1f5f9',
+                color: it.category === 'excipient' ? '#991b1b' : '#334155',
+                border: `1px solid ${it.category === 'excipient' ? '#fecaca' : '#e2e8f0'}`,
+              }}
+            >
+              {it.category === 'excipient' && '⚠️ '}
+              {it.name}
+            </span>
+          ))}
+        </div>
+      );
+    }
+    if (type === 'select' && options) {
+      return (options.find(o => o.value === value)?.label || value || <span style={{ opacity: 0.5 }}>{placeholder}</span>);
+    }
+    return (value != null && value !== '' ? String(value) : <span style={{ opacity: 0.5 }}>{placeholder}</span>);
+  })();
 
   if (isEditing) {
     return (
@@ -151,7 +220,66 @@ export default function InlineEditableCell({
           }
         `}</style>
         
-        {type === 'select' ? (
+        {type === 'goal' ? (
+          <div style={{ minWidth: '220px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ flex: 1 }}>
+              <CanonicalGoalSelect
+                value={currentValue}
+                onChange={(val) => {
+                  setCurrentValue(val);
+                  handleSave(val);
+                }}
+              />
+            </div>
+            <button 
+              type="button"
+              className="inline-edit-pill-btn"
+              onMouseDown={(e) => { e.preventDefault(); setIsEditing(false); }} 
+              style={{ 
+                backgroundColor: '#fee2e2', border: 'none', borderRadius: '5px', padding: '0', cursor: 'pointer', 
+                color: '#b91c1c', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '24px', height: '24px', flexShrink: 0
+              }}
+              title="Cancel (Esc)"
+            >
+              <X size={13} strokeWidth={2.5} />
+            </button>
+          </div>
+        ) : type === 'country' ? (
+          <div style={{ minWidth: '220px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ flex: 1 }}>
+              <CountrySelect
+                value={currentValue}
+                onChange={(val) => {
+                  setCurrentValue(val);
+                  handleSave(val);
+                }}
+              />
+            </div>
+            <button 
+              type="button"
+              className="inline-edit-pill-btn"
+              onMouseDown={(e) => { e.preventDefault(); setIsEditing(false); }} 
+              style={{ 
+                backgroundColor: '#fee2e2', border: 'none', borderRadius: '5px', padding: '0', cursor: 'pointer', 
+                color: '#b91c1c', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '24px', height: '24px', flexShrink: 0
+              }}
+              title="Cancel (Esc)"
+            >
+              <X size={13} strokeWidth={2.5} />
+            </button>
+          </div>
+        ) : type === 'allergy' ? (
+          <CanonicalAllergySelect
+            value={currentValue}
+            onSave={(val) => {
+              setCurrentValue(val);
+              handleSave(val);
+            }}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : type === 'select' ? (
           <div style={{ minWidth: '160px', opacity: isSaving ? 0.7 : 1 }}>
             <SearchableSelect
               value={currentValue}
@@ -240,7 +368,7 @@ export default function InlineEditableCell({
                     color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: '24px', height: '24px'
                   }}
-                  title="Guardar (Enter)"
+                  title="Save (Enter)"
                 >
                   <Check size={13} strokeWidth={2.5} />
                 </button>
@@ -252,7 +380,7 @@ export default function InlineEditableCell({
                     color: '#b91c1c', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: '24px', height: '24px'
                   }}
-                  title="Cancelar (Esc)"
+                  title="Cancel (Esc)"
                 >
                   <X size={13} strokeWidth={2.5} />
                 </button>
@@ -311,7 +439,7 @@ export default function InlineEditableCell({
                     color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: '24px', height: '24px'
                   }}
-                  title="Guardar (Enter)"
+                  title="Save (Enter)"
                 >
                   <Check size={13} strokeWidth={2.5} />
                 </button>
@@ -323,7 +451,7 @@ export default function InlineEditableCell({
                     color: '#b91c1c', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     width: '24px', height: '24px'
                   }}
-                  title="Cancelar (Esc)"
+                  title="Cancel (Esc)"
                 >
                   <X size={13} strokeWidth={2.5} />
                 </button>

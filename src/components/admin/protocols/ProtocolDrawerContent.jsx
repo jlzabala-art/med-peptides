@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Clock, FlaskConical, ShieldCheck, Activity, Layers, BookOpen, AlertTriangle, CheckCircle, ChevronDown, ChevronUp, ExternalLink, Pill, Stethoscope, Target, BarChart2 } from '@/lib/icons';
 import StandardDrawerTabs from '../../common/StandardDrawerTabs';
+import { normalizeGoal } from '../../../services/clinicalTaxonomyNormalizer';
+import { GOAL_ICONS } from '../../ui/CanonicalGoalSelect';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -230,12 +232,24 @@ function OverviewTab({ protocol }) {
       </div>
 
       {/* Primary Goal */}
-      {primaryGoal && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <SectionTitle icon={Target}>Primary Goal</SectionTitle>
-          <p style={{ fontSize: '0.85rem', color: '#0f172a', margin: 0 }}>{primaryGoal}</p>
-        </div>
-      )}
+      {primaryGoal && (() => {
+        const norm = normalizeGoal(primaryGoal);
+        const icon = GOAL_ICONS[norm.key] || '🎯';
+        return (
+          <div style={{ marginBottom: '1.25rem' }}>
+            <SectionTitle icon={Target}>Primary Goal</SectionTitle>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: '#0f172a', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+              <span>{icon}</span>
+              <span>{norm.label || primaryGoal}</span>
+              {norm.isCustom && (
+                <span style={{ fontSize: '0.68rem', color: '#d97706', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', padding: '1px 5px', borderRadius: '4px' }}>
+                  custom
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Key Metrics */}
       <div style={{ marginBottom: '1.25rem' }}>

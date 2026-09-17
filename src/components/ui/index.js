@@ -27,6 +27,8 @@ export { default as Autocomplete } from './Autocomplete';
 export { default as SearchableSelect } from './SearchableSelect';
 export { default as AccountManagerSelect } from './AccountManagerSelect';
 export { default as CountrySelect } from './CountrySelect';
+export { default as CanonicalGoalSelect } from './CanonicalGoalSelect';
+export { default as CanonicalAllergySelect } from './CanonicalAllergySelect';
 export { default as UniversalForm } from '../shared/UniversalFormDrawer';
 export { default as AppActionGroup } from './AppActionGroup';
 export { default as KpiScopeBar } from './KpiScopeBar';

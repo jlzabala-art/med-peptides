@@ -255,6 +255,7 @@ export default function AdminPortalSwitcher() {
         switchActiveRole('doctor');
       }
       router.push(portal.route);
+      setTimeout(() => router.refresh(), 100);
       setIsOpen(false);
       return;
     }
@@ -264,6 +265,7 @@ export default function AdminPortalSwitcher() {
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem('impersonatedDoctorId');
           localStorage.removeItem('impersonatedDoctorId');
+          sessionStorage.setItem('activeRole', 'admin');
         }
       }
       setSimulatedRole(targetRoleId === 'admin' ? 'admin' : targetRoleId);
@@ -272,6 +274,11 @@ export default function AdminPortalSwitcher() {
       }
       if (portal.route && window.location.pathname !== portal.route) {
         router.push(portal.route);
+        // Force re-render of server components after navigation
+        setTimeout(() => router.refresh(), 150);
+      } else {
+        // Already on target page — force immediate re-render without full reload
+        router.refresh();
       }
     } else {
       setSimulatedRole('admin');
@@ -280,6 +287,7 @@ export default function AdminPortalSwitcher() {
       }
       if (portal.route) {
         router.push(portal.route);
+        setTimeout(() => router.refresh(), 150);
       }
     }
     setIsOpen(false);

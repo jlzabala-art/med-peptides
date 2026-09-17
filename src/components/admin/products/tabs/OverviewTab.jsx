@@ -1,5 +1,7 @@
 import React from 'react';
-import { Card, StatusChip, SearchableSelect, SupplierSelect } from '../../../ui';
+import { Card, StatusChip, SearchableSelect, SupplierSelect, CanonicalGoalSelect } from '../../../ui';
+import { GOAL_ICONS } from '../../../ui/CanonicalGoalSelect';
+import { normalizeGoal } from '../../../../services/clinicalTaxonomyNormalizer';
 import { Sparkles, Dna, Activity, FileText, Globe, ExternalLink, ShieldCheck } from '@/lib/icons';
 import RelatedProtocols from './RelatedProtocols';
 
@@ -157,12 +159,10 @@ export default function OverviewTab({ form = {}, setForm, triggerAiAction, onSup
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Primary Therapeutic Goal</label>
-              <input
-                type="text"
-                placeholder="e.g. Weight Loss / Obesity"
+              <CanonicalGoalSelect
                 value={form.primaryGoal || ''}
-                onChange={e => setForm({...form, primaryGoal: e.target.value})}
-                style={{ width: '100%', padding: '0.45rem 0.65rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem', backgroundColor: '#f8fafc', color: '#0f172a' }}
+                onChange={val => setForm({ ...form, primaryGoal: val })}
+                placeholder="Select canonical goal..."
               />
             </div>
           </div>
@@ -195,11 +195,16 @@ export default function OverviewTab({ form = {}, setForm, triggerAiAction, onSup
           {goalsList.length > 0 && (
             <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Therapeutic Goals:</span>
-              {goalsList.map((g, idx) => (
-                <span key={idx} style={{ fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bae6fd' }}>
-                  🎯 {g}
-                </span>
-              ))}
+              {goalsList.map((g, idx) => {
+                const norm = normalizeGoal(g);
+                const icon = GOAL_ICONS[norm.key] || '🎯';
+                return (
+                  <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: '#e0f2fe', color: '#0369a1', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bae6fd' }}>
+                    <span>{icon}</span>
+                    <span>{norm.label || g}</span>
+                  </span>
+                );
+              })}
             </div>
           )}
         </Card>

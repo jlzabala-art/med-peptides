@@ -16,22 +16,43 @@ import ImportPrescriptionModal from '../../../features/prescriptions/components/
 import DocumentPreviewModal from '../../ui/DocumentPreviewModal';
 import CatalogSharesHistoryTable from '../catalog/CatalogSharesHistoryTable';
 
+import { useSimulationStore } from '../../../stores/useSimulationStore';
+
 // ── Physician form schema ────────────────────────────────────────────────────
 export const physicianSchema = [
   { name: 'firstName',   label: 'First Name',     type: 'text',   required: true },
   { name: 'lastName',    label: 'Last Name',      type: 'text',   required: true },
   { name: 'email',       label: 'Email Address',  type: 'email',  required: true },
   { name: 'phone',       label: 'Phone Number',   type: 'text',   required: true },
-  { name: 'specialty',   label: 'Specialty',      type: 'select', required: true, options: [
-    { value: 'Functional Medicine', label: 'Functional Medicine' },
-    { value: 'Longevity',           label: 'Longevity'           },
-    { value: 'Anti-Aging',          label: 'Anti-Aging'          },
-    { value: 'Endocrinology',       label: 'Endocrinology'       },
-    { value: 'General Practice',    label: 'General Practice'    },
+  { name: 'country',     label: 'Country of Practice / Origin', type: 'select', required: false, options: [
+    { value: 'AE', label: '🇦🇪 United Arab Emirates' },
+    { value: 'DE', label: '🇩🇪 Germany' },
+    { value: 'ES', label: '🇪🇸 Spain' },
+    { value: 'GB', label: '🇬🇧 United Kingdom' },
+    { value: 'US', label: '🇺🇸 United States' },
+    { value: 'CH', label: '🇨🇭 Switzerland' },
+    { value: 'SA', label: '🇸🇦 Saudi Arabia' },
+    { value: 'Other', label: '🌐 Other Country' },
   ]},
-  { name: 'clinicName',    label: 'Clinic / Hospital', type: 'text', required: true  },
-  { name: 'licenseNumber', label: 'License Number',    type: 'text', required: false },
-  { name: 'roleTemplate',  label: 'Permissions Role',  type: 'select', required: true, options: [
+  { name: 'idType',      label: 'Document Type',  type: 'select', required: false, options: [
+    { value: 'passport',    label: '🛂 Passport (Visiting / International)' },
+    { value: 'emirates_id', label: '🪪 Emirates ID (UAE Resident)'          },
+    { value: 'national_id', label: '🆔 National ID'                         },
+  ]},
+  { name: 'nationalId',  label: 'Identity Document # (Passport / EID)', type: 'text', required: false },
+  { name: 'specialty',   label: 'Specialty',      type: 'select', required: true, options: [
+    { value: 'Dermatology & Hair Restoration', label: 'Dermatology & Hair Restoration' },
+    { value: 'Functional Medicine',            label: 'Functional Medicine' },
+    { value: 'Longevity',                      label: 'Longevity'           },
+    { value: 'Anti-Aging',                     label: 'Anti-Aging'          },
+    { value: 'Endocrinology',                  label: 'Endocrinology'       },
+    { value: 'General Practice',               label: 'General Practice'    },
+  ]},
+  { name: 'clinicName',      label: 'Clinic / Hospital', type: 'text', required: true  },
+  { name: 'licenseNumber',   label: 'Primary Medical License #', type: 'text', required: false },
+  { name: 'dhaLicense',      label: 'DHA License (Dubai)', type: 'text', required: false },
+  { name: 'germanMedicalId', label: 'German Medical ID / Arztausweis', type: 'text', required: false },
+  { name: 'roleTemplate',    label: 'Permissions Role',  type: 'select', required: true, options: [
     { value: 'basic',    label: 'Basic (Portal only)' },
     { value: 'standard', label: 'Standard (+ Catalog)' },
     { value: 'senior',   label: 'Senior (+ Prescribe)' },
@@ -264,8 +285,15 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
 
   const handleUpdateDoctor = async (formData) => {
     try {
-      await updateDoc(doc(db, 'users', currentDoctor.id), formData);
-      setCurrentDoctor(prev => ({ ...prev, ...formData }));
+      const payload = { ...formData };
+      if (payload.nationalId && typeof payload.nationalId === 'string') {
+        const trimmed = payload.nationalId.trim();
+        if (/^784-?\d{4}-?\d{7}-?\d?$/i.test(trimmed)) {
+          payload.idType = 'emirates_id';
+        }
+      }
+      await updateDoc(doc(db, 'users', currentDoctor.id), payload);
+      setCurrentDoctor(prev => ({ ...prev, ...payload }));
       notifier.success('Physician updated successfully');
     } catch (err) {
       console.error(err);
@@ -428,6 +456,11 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><ShieldCheck size={12} color="var(--primary)" />{currentDoctor.specialty || 'Dermatology & Hair Restoration'}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><MapPin size={12} />{currentDoctor.clinicName || 'Bedaya Polyclinic L.L.C.'}</span>
+              {currentDoctor.nationalId && (
+                <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.72rem' }}>
+                  {currentDoctor.idType === 'emirates_id' ? '🪪 EID' : '🛂 Passport'}: {currentDoctor.nationalId}
+                </span>
+              )}
               {currentDoctor.dhaLicense && (
                 <span style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', padding: '1px 6px', borderRadius: '4px', fontWeight: 600, fontSize: '0.72rem' }}>
                   DHA: {currentDoctor.dhaLicense}
@@ -448,6 +481,9 @@ export default function PhysicianProfileDrawer({ doctor, initialTab, onClose, se
                   const targetId = currentDoctor.id === 'dr-hanieh-erdmann' || currentDoctor.lastName?.includes('Erdmann') ? 'dr-hanieh-erdmann' : currentDoctor.id;
                   sessionStorage.setItem('impersonatedDoctorId', targetId);
                   localStorage.setItem('impersonatedDoctorId', targetId);
+                  try {
+                    useSimulationStore.getState().setSimulatedRole('doctor');
+                  } catch (_) {}
                 }
               }}
               target="_blank"

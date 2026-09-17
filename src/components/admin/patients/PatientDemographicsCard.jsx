@@ -10,6 +10,7 @@ import {
 } from '@/lib/icons';
 import notifier from '../../../services/NotificationService';
 import { patientRepository } from '../../../repositories/patientRepository';
+import { validateDemographics } from '../../../services/clinicalTaxonomyNormalizer';
 
 export default function PatientDemographicsCard({
   patient,
@@ -19,6 +20,8 @@ export default function PatientDemographicsCard({
   const [updatingField, setUpdatingField] = useState(null);
 
   if (!patient) return null;
+
+  const validation = validateDemographics(patient);
 
   const handleFieldSave = async (fieldKey, newValue) => {
     setUpdatingField(fieldKey);
@@ -30,6 +33,14 @@ export default function PatientDemographicsCard({
         const parts = newValue.trim().split(/\s+/);
         updatePayload.firstName = parts[0] || '';
         updatePayload.lastName = parts.slice(1).join(' ') || '';
+      }
+
+      // If entering an Emirates ID format (784-...), automatically set idType to emirates_id
+      if (fieldKey === 'nationalId' && typeof newValue === 'string') {
+        const trimmed = newValue.trim();
+        if (/^784-?\d{4}-?\d{7}-?\d?$/i.test(trimmed)) {
+          updatePayload.idType = 'emirates_id';
+        }
       }
 
       await patientRepository.updatePatient(patient.id, updatePayload);
@@ -104,36 +115,78 @@ export default function PatientDemographicsCard({
           </div>
         </div>
 
-        {onOpenReassignDoctor && (
-          <button
-            type="button"
-            onClick={onOpenReassignDoctor}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              backgroundColor: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              color: '#1d4ed8',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            title="Reassign to another physician or clinical center"
-          >
-            <Stethoscope size={13} /> Reassign Doctor
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {validation.isFullyCanonical ? (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: '#15803d',
+                backgroundColor: '#f0fdf4',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                border: '1px solid #bbf7d0',
+              }}
+              title="Patient goals, country, and clinical taxonomy conform to database standards."
+            >
+              <Check size={12} strokeWidth={2.5} /> Verified Taxonomy
+            </span>
+          ) : (
+            validation.warnings.length > 0 && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: '#b45309',
+                  backgroundColor: '#fffbeb',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid #fde68a',
+                }}
+                title={validation.warnings.join(' • ')}
+              >
+                <AlertTriangle size={12} /> {validation.warnings.length} Taxonomy Alert{validation.warnings.length > 1 ? 's' : ''}
+              </span>
+            )
+          )}
+
+          {onOpenReassignDoctor && (
+            <button
+              type="button"
+              onClick={onOpenReassignDoctor}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+              title="Reassign to another physician or clinical center"
+            >
+              <Stethoscope size={13} /> Reassign Doctor
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Structured 2-Column Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: '1rem'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '0.85rem'
       }}>
         {/* Full Name */}
         <div className="demographics-field" style={{
@@ -143,20 +196,24 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <User size={12} color="#64748b" /> Full Name
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', height: '20px' }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <User size={12} color="#64748b" /> Full Name
+            </span>
+          </div>
           <InlineEditableCell
             value={patient.name || `${patient.firstName || ''} ${patient.lastName || ''}`.trim()}
             placeholder="Click to add full name..."
@@ -173,17 +230,24 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em'
-          }}>
-            Gender
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', height: '20px' }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <Activity size={12} color="#64748b" /> Gender
+            </span>
+          </div>
           <InlineEditableCell
             value={patient.gender || ''}
             placeholder="Select gender..."
@@ -205,9 +269,11 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '20px' }}>
             <span style={{
               fontSize: '0.68rem',
               fontWeight: 700,
@@ -246,9 +312,11 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '20px' }}>
             <span style={{
               fontSize: '0.68rem',
               fontWeight: 700,
@@ -262,24 +330,15 @@ export default function PatientDemographicsCard({
               <Phone size={12} color="#64748b" /> Phone Number
             </span>
             {hasPhone && cleanPhone && (
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <a
-                  href={`tel:${patient.phone}`}
-                  style={{ fontSize: '0.70rem', color: '#16a34a', fontWeight: 600, textDecoration: 'none' }}
-                  title="Direct phone call"
-                >
-                  Call 📞
-                </a>
-                <a
-                  href={`https://wa.me/${cleanPhone}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600, textDecoration: 'none' }}
-                  title="WhatsApp"
-                >
-                  WhatsApp 💬
-                </a>
-              </div>
+              <a
+                href={`https://wa.me/${cleanPhone}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{ fontSize: '0.70rem', color: '#15803d', fontWeight: 600, textDecoration: 'none' }}
+                title="WhatsApp"
+              >
+                WhatsApp 💬
+              </a>
             )}
           </div>
           <InlineEditableCell
@@ -298,39 +357,11 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <Calendar size={12} color="#64748b" /> Age
-          </span>
-          <InlineEditableCell
-            value={patient.age && patient.age !== '-' ? String(patient.age) : ''}
-            placeholder="Click to set age..."
-            type="text"
-            onSave={(val) => handleFieldSave('age', val)}
-          />
-        </div>
-
-        {/* National ID / Emirates ID */}
-        <div className="demographics-field" style={{
-          backgroundColor: '#f8fafc',
-          padding: '0.65rem 0.85rem',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: '20px' }}>
             <span style={{
               fontSize: '0.68rem',
               fontWeight: 700,
@@ -341,17 +372,89 @@ export default function PatientDemographicsCard({
               alignItems: 'center',
               gap: '5px'
             }}>
-              <Shield size={12} color="#64748b" /> Emirates / National ID
+              <Calendar size={12} color="#64748b" /> Age
             </span>
-            {patient.nationalId && <CopyableId value={patient.nationalId} iconOnly={true} />}
           </div>
           <InlineEditableCell
-            value={patient.nationalId || ''}
-            placeholder="Click to add Emirates ID..."
+            value={patient.age && patient.age !== '-' ? String(patient.age) : ''}
+            placeholder="Click to set age..."
             type="text"
-            onSave={(val) => handleFieldSave('nationalId', val)}
+            onSave={(val) => handleFieldSave('age', val)}
           />
         </div>
+
+        {/* Identity Document (Passport / Emirates ID / National ID) */}
+        {(() => {
+          const effectiveIdType = patient.idType || (
+            (patient.country === 'United Arab Emirates' || patient.country === 'AE') ? 'emirates_id' : 'passport'
+          );
+          const isPassport = effectiveIdType === 'passport';
+          const isEmiratesId = effectiveIdType === 'emirates_id';
+
+          return (
+            <div className="demographics-field" style={{
+              backgroundColor: '#f8fafc',
+              padding: '0.65rem 0.85rem',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '66px',
+              gap: '4px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <Shield size={12} color="#64748b" /> ID Document
+                  </span>
+                  <select
+                    value={effectiveIdType}
+                    onChange={(e) => handleFieldSave('idType', e.target.value)}
+                    aria-label="Document Type"
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      color: isPassport ? '#0369a1' : isEmiratesId ? '#003666' : '#475569',
+                      background: isPassport ? '#e0f2fe' : isEmiratesId ? '#f0f9ff' : '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '4px',
+                      padding: '1px 5px',
+                      cursor: 'pointer',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="passport">🛂 Passport (Tourist / Int)</option>
+                    <option value="emirates_id">🪪 Emirates ID (UAE)</option>
+                    <option value="national_id">🆔 National ID</option>
+                  </select>
+                </div>
+                {patient.nationalId && <CopyableId value={patient.nationalId} iconOnly={true} />}
+              </div>
+              <InlineEditableCell
+                value={patient.nationalId || ''}
+                placeholder={
+                  isPassport
+                    ? "Click to add Passport # (Tourist / Visitor)..."
+                    : isEmiratesId
+                      ? "Click to add Emirates ID (784-XXXX-XXXXXXX-X)..."
+                      : "Click to add National ID..."
+                }
+                type="text"
+                onSave={(val) => handleFieldSave('nationalId', val)}
+              />
+            </div>
+          );
+        })()}
 
         {/* Country / City */}
         <div className="demographics-field" style={{
@@ -361,24 +464,28 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <MapPin size={12} color="#64748b" /> Country / Territory
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', height: '20px' }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <MapPin size={12} color="#64748b" /> Country / Territory
+            </span>
+          </div>
           <InlineEditableCell
             value={patient.country || ''}
-            placeholder="Click to add country or city..."
-            type="text"
+            placeholder="Click to select country..."
+            type="country"
             onSave={(val) => handleFieldSave('country', val)}
           />
         </div>
@@ -391,17 +498,24 @@ export default function PatientDemographicsCard({
           border: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: '66px',
           gap: '4px'
         }}>
-          <span style={{
-            fontSize: '0.68rem',
-            fontWeight: 700,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em'
-          }}>
-            Street Address
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', height: '20px' }}>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <Building2 size={12} color="#64748b" /> Street Address
+            </span>
+          </div>
           <InlineEditableCell
             value={patient.address || ''}
             placeholder="Click to add street address..."
@@ -442,9 +556,9 @@ export default function PatientDemographicsCard({
             <Activity size={12} color="#16a34a" /> Primary Health Goal
           </span>
           <InlineEditableCell
-            value={patient.primaryGoal || (Array.isArray(patient.healthGoals) ? patient.healthGoals.join(', ') : '')}
-            placeholder="e.g. Longevity, Hair Restoration, Metabolic Wellness"
-            type="text"
+            value={patient.primaryGoal || (Array.isArray(patient.healthGoals) ? patient.healthGoals[0] : '')}
+            placeholder="Select primary clinical goal..."
+            type="goal"
             onSave={(val) => handleFieldSave('primaryGoal', val)}
           />
         </div>
@@ -473,8 +587,8 @@ export default function PatientDemographicsCard({
           </span>
           <InlineEditableCell
             value={Array.isArray(patient.allergies) ? patient.allergies.join(', ') : (patient.allergies || '')}
-            placeholder="None logged (Click to add allergies)..."
-            type="text"
+            placeholder="None logged (Click to configure)..."
+            type="allergy"
             onSave={(val) => handleFieldSave('allergies', val)}
           />
         </div>

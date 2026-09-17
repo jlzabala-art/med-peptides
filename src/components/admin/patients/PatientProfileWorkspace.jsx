@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Tabs, StatusChip, CopyableId } from '../../ui';
+import AIQuickActionButton from '../../ui/AIQuickActionButton';
 import styles from './PatientProfileWorkspace.module.css';
 import UniversalPrescriptionsTable from '../../shared/UniversalPrescriptionsTable';
 import PatientCalendar from './PatientCalendar';
@@ -225,7 +226,12 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
     { name: 'age', label: 'Age', type: 'text', required: false },
     { name: 'gender', label: 'Gender', type: 'select', options: [{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Other', label: 'Other' }] },
     { name: 'country', label: 'Country / City', type: 'text', required: false },
-    { name: 'nationalId', label: 'National ID / Emirates ID', type: 'text', required: false },
+    { name: 'idType', label: 'Document Type', type: 'select', options: [
+      { value: 'passport', label: '🛂 Passport (Tourist / International)' },
+      { value: 'emirates_id', label: '🪪 Emirates ID (UAE Resident)' },
+      { value: 'national_id', label: '🆔 National ID' }
+    ], required: false },
+    { name: 'nationalId', label: 'Document Number (Passport / EID)', type: 'text', required: false },
     { name: 'address', label: 'Street Address', type: 'text', required: false },
     { name: 'notes', label: 'Clinical Intake Notes', type: 'textarea', required: false },
   ];
@@ -377,7 +383,8 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
             <FilePlus size={14} /> New Prescription
           </button>
 
-          <button
+          <AIQuickActionButton
+            label="Ask Patient AI"
             onClick={() => {
               window.dispatchEvent(new CustomEvent('open-ai-chat', { 
                 detail: { 
@@ -397,12 +404,8 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                 } 
               }));
             }}
-            className="gcp-btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', borderColor: '#0d9488', color: '#0d9488', fontSize: '0.8125rem', padding: '0.4rem 0.8rem' }}
             title="Ask Patient Copilot"
-          >
-            <Activity size={14} /> Ask Patient AI
-          </button>
+          />
 
           <button
             onClick={() => {
@@ -659,7 +662,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                 </div>
                 <span>Attending:</span>
               </div>
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0e7490', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '140px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0e7490', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                 {patient.physician || 'Direct Medical Desk'}
               </span>
             </div>
@@ -797,7 +800,7 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                   )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                <div className={styles.patientColumnsLayout}>
                   {/* Left Column: Demographics Card with Inline Editing */}
                   <PatientDemographicsCard
                     patient={patient}
@@ -807,13 +810,13 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                     onOpenReassignDoctor={() => setIsReassignModalOpen(true)}
                   />
 
-                  {/* Right Column: Portal Link & AI Summary */}
+                  {/* Right Column: Portal Link & Clinical Overview */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <PortalAccessPanel patient={patient} />
                     
                     <div className={styles.aiCard}>
                       <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Activity size={16} /> Clinical Prescription Overview
+                        <FileText size={16} /> Clinical Prescription Overview
                       </h3>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                         {prescriptions && prescriptions.length > 0 ? (
@@ -824,25 +827,22 @@ export default function PatientProfileWorkspace({ patient: initialPatient, initi
                                 {prescriptions.length} active prescription(s) registered. Latest status: <strong>{prescriptions[0]?.status || 'Active'}</strong>.
                               </span>
                             </div>
-                            <button
-                              style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 1rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}
-                              onClick={() => {
-                                window.dispatchEvent(new CustomEvent('open-ai-chat', { 
-                                  detail: { 
-                                    mode: 'patient', 
-                                    context: { 
-                                      patientId: patient.id, 
-                                      name: displayName,
-                                      clinic: patient.clinic,
-                                      prescriptionCount: prescriptions.length,
-                                      lastPrescriptionStatus: prescriptions[0]?.status
-                                    } 
-                                  } 
-                                }));
-                              }}
-                            >
-                              <Activity size={14} /> Open AI Clinical Analysis
-                            </button>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', background: '#0284c7', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.80rem', fontWeight: 700, cursor: 'pointer' }}
+                                onClick={() => setActiveTab('prescriptions')}
+                              >
+                                <FileText size={13} /> View Prescriptions ({prescriptions.length})
+                              </button>
+                              <button
+                                type="button"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', background: '#ffffff', color: '#0284c7', border: '1px solid #bae6fd', borderRadius: '6px', fontSize: '0.80rem', fontWeight: 700, cursor: 'pointer' }}
+                                onClick={() => openDrawer('rx-builder', 'new', { initialPatient: { id: patient.id, name: displayName, email: patient.email }, sourceModule: 'patient-profile' })}
+                              >
+                                <FilePlus size={13} /> New Rx
+                              </button>
+                            </div>
                           </>
                         ) : (
                           <>

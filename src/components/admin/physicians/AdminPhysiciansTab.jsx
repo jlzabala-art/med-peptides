@@ -170,7 +170,24 @@ export default function AdminPhysiciansTab() {
     { name: 'lastName', label: 'Last Name', type: 'text', required: true },
     { name: 'email', label: 'Email Address', type: 'email', required: true },
     { name: 'phone', label: 'Phone Number', type: 'text', required: true },
+    { name: 'country', label: 'Country of Practice / Origin', type: 'select', required: false, options: [
+        { value: 'AE', label: '🇦🇪 United Arab Emirates' },
+        { value: 'DE', label: '🇩🇪 Germany' },
+        { value: 'ES', label: '🇪🇸 Spain' },
+        { value: 'GB', label: '🇬🇧 United Kingdom' },
+        { value: 'US', label: '🇺🇸 United States' },
+        { value: 'CH', label: '🇨🇭 Switzerland' },
+        { value: 'SA', label: '🇸🇦 Saudi Arabia' },
+        { value: 'Other', label: '🌐 Other Country' },
+    ]},
+    { name: 'idType', label: 'Document Type', type: 'select', required: false, options: [
+        { value: 'passport', label: '🛂 Passport (Visiting / International)' },
+        { value: 'emirates_id', label: '🪪 Emirates ID (UAE Resident)' },
+        { value: 'national_id', label: '🆔 National ID' },
+    ]},
+    { name: 'nationalId', label: 'Identity Document # (Passport / EID)', type: 'text', required: false },
     { name: 'specialty', label: 'Specialty', type: 'select', required: true, options: [
+        { value: 'Dermatology & Hair Restoration', label: 'Dermatology & Hair Restoration' },
         { value: 'Functional Medicine', label: 'Functional Medicine' },
         { value: 'Longevity', label: 'Longevity' },
         { value: 'Anti-Aging', label: 'Anti-Aging' },
@@ -178,7 +195,9 @@ export default function AdminPhysiciansTab() {
         { value: 'General Practice', label: 'General Practice' }
     ]},
     { name: 'clinicName', label: 'Clinic / Hospital', type: 'text', required: true },
-    { name: 'licenseNumber', label: 'License Number', type: 'text', required: false },
+    { name: 'licenseNumber', label: 'Primary Medical License #', type: 'text', required: false },
+    { name: 'dhaLicense', label: 'DHA License (Dubai)', type: 'text', required: false },
+    { name: 'germanMedicalId', label: 'German Medical ID / Arztausweis', type: 'text', required: false },
     { name: 'roleTemplate', label: 'Permissions Role', type: 'select', required: true, options: [
         { value: 'basic', label: 'Basic (Portal only)' },
         { value: 'standard', label: 'Standard (+ Catalog)' },
