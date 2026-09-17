@@ -112,74 +112,88 @@ export const DR_HANIEH_ERDMANN_PROFILE = {
 
 const INDIVIDUAL_DOCTOR_NAV_GROUPS = [
   {
-    id: 'overview', label: 'Clinical Overview', emoji: '📊',
-    items: [{ id: 'overview', label: 'Dashboard', icon: LayoutDashboard }],
-  },
-  {
-    id: 'clinical', label: 'My Clinical Practice', emoji: '🩺',
+    id: 'clinical',
+    label: 'Clinical Practice',
+    emoji: '🩺',
     items: [
+      { id: 'overview', label: 'Overview Cockpit', icon: LayoutDashboard },
       { id: 'patients', label: 'My Patients', icon: Users },
       { id: 'prescriptions-history', label: 'Prescriptions & Lifecycle', icon: Pill },
-      { id: 'new-prescription', label: 'New Prescription', icon: Plus },
-      { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
-      { id: 'protocols', label: 'Clinical Protocols', icon: FlaskConical },
       { id: 'appointments', label: 'Consultations', icon: Calendar },
     ],
   },
   {
-    id: 'shared', label: 'Shared Info & Formularies', emoji: '🔗',
+    id: 'knowledge',
+    label: 'Formulary & Knowledge',
+    emoji: '🧬',
     items: [
+      { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'protocols', label: 'Clinical Protocols', icon: FlaskConical },
       { id: 'shared-info', label: 'Shared with Me', icon: Share2 },
     ],
   },
   {
-    id: 'account', label: 'Doctor Credentials', emoji: '🛡️',
+    id: 'operations',
+    label: 'Operations & Logistics',
+    emoji: '📦',
+    items: [
+      { id: 'orders', label: 'Orders & Deliveries', icon: ShoppingBag },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
+    ],
+  },
+  {
+    id: 'governance',
+    label: 'Governance & Credentials',
+    emoji: '🛡️',
     items: [
       { id: 'settings', label: 'DHA License & Profile', icon: Settings },
-      { id: 'membership', label: 'Plan & Membership 💎', icon: Award }
+      { id: 'membership', label: 'Plan & Membership 💎', icon: Award },
     ],
   },
 ];
 
 const DOCTOR_NAV_GROUPS = [
   {
-    id: 'overview', label: 'Overview', emoji: '📊',
-    items: [{ id: 'overview', label: 'Dashboard', icon: LayoutDashboard }],
-  },
-  {
-    id: 'prescriptions', label: 'Prescriptions', emoji: '💊',
+    id: 'clinical',
+    label: 'Clinical Practice',
+    emoji: '🩺',
     items: [
-      { id: 'new-prescription',      label: 'New Prescription',      icon: Plus },
-      { id: 'prescriptions-history', label: 'Prescriptions History', icon: History },
-    ],
-  },
-  {
-    id: 'clinical', label: 'Clinical Work', emoji: '🧬',
-    items: [
-      { id: 'patients',        label: 'My Patients',     icon: Users },
-      { id: 'leads',           label: 'Patient Leads',   icon: UserCheck },
-      { id: 'appointments',    label: 'Appointments',    icon: Calendar },
-      { id: 'lab-results',     label: 'Lab Results',     icon: Beaker },
+      { id: 'overview', label: 'Overview Cockpit', icon: LayoutDashboard },
+      { id: 'patients', label: 'My Patients', icon: Users },
+      { id: 'prescriptions-history', label: 'Prescriptions History', icon: Pill },
+      { id: 'appointments', label: 'Consultations', icon: Calendar },
+      { id: 'lab-results', label: 'Lab Results', icon: Beaker },
       { id: 'recommendations', label: 'Recommendations', icon: ClipboardList },
-      { id: 'research',        label: 'Research',        icon: FlaskConical },
     ],
   },
   {
-    id: 'orders', label: 'Orders & Protocols', emoji: '📦',
+    id: 'knowledge',
+    label: 'Formulary & Knowledge',
+    emoji: '🧬',
     items: [
-      { id: 'orders',       label: 'Orders & Deliveries', icon: ShoppingBag },
-      { id: 'catalog',      label: 'Lotusland Formulary', icon: ShoppingBag },
-      { id: 'protocols',    label: 'Clinical Protocols',  icon: FileText, disabled: false },
-      { id: 'shared-info',  label: 'Shared with Me',      icon: Share2 },
-      { id: 'messages',     label: 'Messages',            icon: MessageSquare, disabled: false }
+      { id: 'catalog', label: 'Lotusland Formulary', icon: ShoppingBag },
+      { id: 'protocols', label: 'Clinical Protocols', icon: FlaskConical },
+      { id: 'shared-info', label: 'Shared with Me', icon: Share2 },
+      { id: 'research', label: 'Research & Insights', icon: FlaskConical },
     ],
   },
   {
-    id: 'account', label: 'Account', emoji: '⚙️',
+    id: 'operations',
+    label: 'Operations & Logistics',
+    emoji: '📦',
     items: [
+      { id: 'orders', label: 'Orders & Deliveries', icon: ShoppingBag },
+      { id: 'messages', label: 'Messages', icon: MessageSquare },
       { id: 'assistants', label: 'Staff & Assistants', icon: Users },
-      { id: 'settings',   label: 'Settings',           icon: Settings },
-      { id: 'membership', label: 'Plan & Suscripción 💎', icon: Award }
+    ],
+  },
+  {
+    id: 'governance',
+    label: 'Governance & Credentials',
+    emoji: '🛡️',
+    items: [
+      { id: 'settings', label: 'Settings & Profile', icon: Settings },
+      { id: 'membership', label: 'Plan & Suscripción 💎', icon: Award },
     ],
   },
 ];
@@ -329,6 +343,9 @@ export default function DoctorDashboard({ children }) {
       <PanelShell 
         allowedRoles={['doctor', 'admin', 'staff']}
         sidebarNavGroups={isSimulatingDrErdmann ? INDIVIDUAL_DOCTOR_NAV_GROUPS : DOCTOR_NAV_GROUPS}
+        sidebarPinnedItems={[
+          { id: 'new-prescription', label: '+ New Prescription', icon: Plus, badge: 'Rx' }
+        ]}
         activeNavId={activeTab}
         onNavigate={(id) => router.push(`/doctor/${id}`)}
         portalTitle={isSimulatingDrErdmann ? 'Doctor Clinical Portal' : 'Clinical Portal'}
