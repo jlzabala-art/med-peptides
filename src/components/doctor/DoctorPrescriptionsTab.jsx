@@ -4,7 +4,8 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import UniversalPrescriptionsTable from '../shared/UniversalPrescriptionsTable';
 import UniversalOrderBuilder from '../shared/order-builder/UniversalOrderBuilder';
-import Breadcrumb from '../ui/Breadcrumb';
+import PageHeader from '../ui/PageHeader';
+import { Pill, FilePlus } from 'lucide-react';
 
 /**
  * DoctorPrescriptionsTab
@@ -27,30 +28,35 @@ export default function DoctorPrescriptionsTab({
   if (hideHistory || initialBuilderOpen) {
     return (
       <div style={{ padding: '0', minHeight: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ffffff', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-          <Breadcrumb items={[
+        <PageHeader
+          title="New Prescription Formulation"
+          subtitle="Compounding protocol formulation, magistral dosing, and direct pharmacy transmission."
+          icon={FilePlus}
+          panel="doctor"
+          breadcrumbs={[
             { label: '🏠 Doctor Overview', href: '/doctor' },
             { label: '💊 Prescriptions History', href: '/doctor/prescriptions-history' },
             { label: '✨ New Prescription' }
-          ]} />
-          <button
-            onClick={() => router.push('/doctor/prescriptions-history')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '8px',
-              backgroundColor: '#f1f5f9',
-              color: '#475569',
-              border: '1px solid #cbd5e1',
-              fontWeight: 700,
-              fontSize: '0.8rem',
-              cursor: 'pointer'
-            }}
-          >
-            Cancel & View History
-          </button>
-        </div>
+          ]}
+          actions={
+            <button
+              onClick={() => router.push('/doctor/prescriptions-history')}
+              className="gcp-btn-secondary"
+              style={{
+                padding: '0.45rem 0.95rem',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.8125rem',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Cancel & View History
+            </button>
+          }
+        />
 
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
           <UniversalOrderBuilder
             mode="prescription"
             sourceModule="doctor-portal"
@@ -77,6 +83,10 @@ export default function DoctorPrescriptionsTab({
         viewMode="doctor" 
         title="My Prescriptions"
         subtitle="Manage and track the prescriptions you have issued to your patients."
+        breadcrumbs={[
+          { label: '🏠 Doctor Overview', href: '/doctor' },
+          { label: '💊 Prescriptions' }
+        ]}
       />
     </div>
   );

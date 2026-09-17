@@ -88,6 +88,7 @@ function RxRow({ rx }) {
   );
 }
 
+import CopyableId from '../ui/CopyableId';
 import { DoctorContext } from '../../templates/DoctorDashboard';
 
 export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: propDoctorMeta, patients = [], onNavigate }) {
@@ -135,57 +136,75 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingBottom: '2.5rem' }}>
+      <style>{`
+        @keyframes gcpPulseBeaconOverview {
+          0% { transform: scale(0.95); opacity: 0.9; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+          70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+          100% { transform: scale(0.95); opacity: 0.9; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+      `}</style>
       
-      {/* 🚀 MEDICAL DIRECTOR COMMAND CENTER HEADER & QUICK LAUNCH BAR */}
+      {/* 🚀 GCP MEDICAL DIRECTOR COCKPIT & OPERATIONS HEADER */}
       <div
         style={{
           position: 'relative',
-          background: 'linear-gradient(135deg, rgba(0, 54, 102, 0.95) 0%, rgba(0, 34, 68, 0.95) 100%)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderRadius: '16px',
-          padding: '1.15rem 1.25rem',
+          background: 'linear-gradient(135deg, #003666 0%, #002244 100%)',
+          borderRadius: '14px',
+          padding: '1.25rem 1.4rem',
           color: '#ffffff',
-          boxShadow: '0 4px 20px rgba(0, 54, 102, 0.25)',
+          boxShadow: '0 4px 20px rgba(0, 54, 102, 0.22)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.85rem',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          gap: '1rem',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
             <div
               style={{
-                width: '42px',
-                height: '42px',
+                width: '46px',
+                height: '46px',
                 borderRadius: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(4px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                backdropFilter: 'blur(6px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#38bdf8',
                 flexShrink: 0,
+                border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              <Stethoscope size={24} />
+              <Stethoscope size={26} />
             </div>
-            <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, letterSpacing: '-0.01em', color: '#ffffff' }}>
-                {isSimulatingDrErdmann 
-                  ? 'Dr. Hanieh Erdmann • Clinical Practice Cockpit' 
-                  : (doctorMeta?.name ? `${doctorMeta.name} • Clinical Practice Cockpit` : 'Clinical Practice Cockpit')}
-              </h2>
-              <span style={{ fontSize: '0.78rem', color: '#93c5fd', fontWeight: 500 }}>
-                {isSimulatingDrErdmann 
-                  ? 'German Board Certified Specialist Dermatologist & Trichologist • Active Consultations' 
-                  : (doctorMeta?.specialty ? `${doctorMeta.specialty} • Active Consultations` : 'Specialist Consultation & Active Peptide Therapies')}
-              </span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0, letterSpacing: '-0.01em', color: '#ffffff' }}>
+                  {isSimulatingDrErdmann 
+                    ? 'Dr. Hanieh Erdmann • Practice Cockpit' 
+                    : (doctorMeta?.name ? `${doctorMeta.name} • Practice Cockpit` : 'Clinical Practice Cockpit')}
+                </h2>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '12px', backgroundColor: 'rgba(34, 197, 94, 0.16)', border: '1px solid rgba(34, 197, 94, 0.35)', fontSize: '0.72rem', color: '#4ade80', fontWeight: 700 }}>
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#22c55e', animation: 'gcpPulseBeaconOverview 2s infinite' }} />
+                  <span>Realtime Sync ✓</span>
+                </div>
+              </div>
+
+              {/* Physician Credential Badges (Inspirado en GCP Resource Labels) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                <span style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  Lic: <CopyableId value={isSimulatingDrErdmann ? 'DHA-00013060-006' : (doctorId || 'DOC-ACTIVE')} />
+                </span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>•</span>
+                <span style={{ fontSize: '0.75rem', color: '#93c5fd', fontWeight: 600 }}>
+                  🏥 {isSimulatingDrErdmann ? 'Bedaya Polyclinic L.L.C.' : 'Specialist Clinical Practice'}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Quick Action: New Clinical Prescription */}
+          {/* Primary CTA: New Prescription (GCP Primary Action) */}
           <button
             type="button"
             onClick={() => setShowBuilder(!showBuilder)}
@@ -193,16 +212,16 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '10px 18px',
+              padding: '10px 20px',
               minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: showBuilder ? '#ffffff' : '#38bdf8',
-              color: showBuilder ? '#003666' : '#0f172a',
+              borderRadius: '8px',
+              backgroundColor: showBuilder ? '#ffffff' : '#0d9488',
+              color: showBuilder ? '#003666' : '#ffffff',
               border: 'none',
-              fontSize: '0.84rem',
+              fontSize: '0.85rem',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
               transition: 'all 0.15s ease',
               flexShrink: 0,
             }}
@@ -212,13 +231,13 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
           </button>
         </div>
 
-        {/* Quick Launch Clinical Action Chips */}
+        {/* Quick Launch Clinical Action Chips (Horizontal Touch Scroll) */}
         <div
           style={{
             display: 'flex',
             gap: '8px',
             overflowX: 'auto',
-            paddingBottom: '4px',
+            paddingBottom: '2px',
             scrollbarWidth: 'none',
             WebkitOverflowScrolling: 'touch',
           }}
@@ -232,13 +251,13 @@ export default function DoctorOverviewTab({ doctorId: propDoctorId, doctorMeta: 
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '10px 16px',
-              minHeight: '44px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(255, 255, 255, 0.14)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
+              padding: '8px 14px',
+              minHeight: '40px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(255, 255, 255, 0.22)',
               color: '#ffffff',
-              fontSize: '0.82rem',
+              fontSize: '0.8125rem',
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
