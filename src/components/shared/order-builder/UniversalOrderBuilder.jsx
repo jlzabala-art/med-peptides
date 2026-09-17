@@ -147,6 +147,41 @@ export default function UniversalOrderBuilder({
   const [generateSupplierPO, setGenerateSupplierPO] = useState(true);
   const [splitPrescriptions, setSplitPrescriptions] = useState(false);
   const [itemTreatmentTypes, setItemTreatmentTypes] = useState({});
+  const [lastAutoSavedTime, setLastAutoSavedTime] = useState(null);
+
+  // Auto-sync notes to localStorage (Draft Auto-Save)
+  const draftNotesKey = `__atlas_rx_notes_${selectedDoctor?.id || 'doc'}_${selectedTarget?.id || 'target'}`;
+
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const savedNotes = localStorage.getItem(draftNotesKey);
+      if (savedNotes) {
+        const parsed = JSON.parse(savedNotes);
+        if (parsed.clinicalIndication && !clinicalIndication) setClinicalIndication(parsed.clinicalIndication);
+        if (parsed.treatmentGoal && !treatmentGoal) setTreatmentGoal(parsed.treatmentGoal);
+      }
+    } catch (e) {
+      console.warn('Error reading saved draft notes:', e);
+    }
+  }, [draftNotesKey]);
+
+  useEffect(() => {
+    if (!clinicalIndication && !treatmentGoal) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(draftNotesKey, JSON.stringify({
+          clinicalIndication,
+          treatmentGoal,
+          timestamp: Date.now(),
+        }));
+        setLastAutoSavedTime(new Date());
+      } catch (e) {
+        console.warn('Error saving draft notes:', e);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [clinicalIndication, treatmentGoal, draftNotesKey]);
 
   // ─── Initialize target from props ─────────────────────────────────────────
   useEffect(() => {
@@ -447,6 +482,12 @@ export default function UniversalOrderBuilder({
       }
 
       clear();
+      try {
+        localStorage.removeItem(draftNotesKey);
+        setClinicalIndication('');
+        setTreatmentGoal('');
+        setLastAutoSavedTime(null);
+      } catch (e) {}
       if (onSaved) onSaved();
     } catch (err) {
       console.error('Error saving prescription/order:', err);
@@ -543,13 +584,28 @@ export default function UniversalOrderBuilder({
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-warning, #d97706)' }}>
           <History size={14} />
-          <span><strong>Draft Recovered:</strong> You have an unsaved prescription for {selectedTarget?.name}. {lastMod && `(Last updated at ${lastMod})`}</span>
+          <span>
+            <strong>Borrador Activo:</strong> Prescripción en curso para {selectedTarget?.name}. {lastMod && `(Actualizado: ${lastMod})`}
+          </span>
+          {lastAutoSavedTime && (
+            <span style={{ fontSize: '0.72rem', color: '#16a34a', background: '#dcfce7', padding: '1px 6px', borderRadius: '10px', fontWeight: 600 }}>
+              ● Guardado aut.
+            </span>
+          )}
         </div>
         <button
           onClick={() => {
             notifier.confirmCritical(
-              `Are you sure you want to clear this draft for ${selectedTarget?.name}?`,
-              () => clear()
+              `¿Estás seguro de que deseas descartar este borrador para ${selectedTarget?.name}?`,
+              () => {
+                clear();
+                try {
+                  localStorage.removeItem(draftNotesKey);
+                  setClinicalIndication('');
+                  setTreatmentGoal('');
+                  setLastAutoSavedTime(null);
+                } catch (e) {}
+              }
             );
           }}
           style={{
@@ -557,7 +613,7 @@ export default function UniversalOrderBuilder({
             textDecoration: 'underline', cursor: 'pointer', fontSize: '0.8rem'
           }}
         >
-          Discard Draft
+          Descartar Borrador
         </button>
       </div>
     );

@@ -42,7 +42,9 @@ export async function searchFederatedEntities(q, portalType = 'admin', routePref
         id: `prod-${p.objectID || p.id}`,
         label: p.name || p.displayName,
         sublabel: p.category ? `Category: ${p.category}` : undefined,
-        path: `${routePrefix}/products?search=${encodeURIComponent(p.name || p.displayName)}`,
+        path: portalType === 'doctor'
+          ? `/doctor/catalog?search=${encodeURIComponent(p.name || p.displayName)}`
+          : `${routePrefix}/products?search=${encodeURIComponent(p.name || p.displayName)}`,
         type: 'Product',
         icon: Box
       });
@@ -80,7 +82,9 @@ export async function searchFederatedEntities(q, portalType = 'admin', routePref
         id: `rx-${rx.objectID || rx.id}`,
         label: `Rx: ${rx.patientName || rx.patient?.name || 'Patient'} (${rx.doctorName || 'Doctor'})`,
         sublabel: rx.fagron?.boxId ? `Box ID: ${rx.fagron.boxId}` : (rx.status ? `Status: ${rx.status}` : undefined),
-        path: `${routePrefix}/prescriptions?search=${encodeURIComponent(rx.patientName || rx.patient?.name || rx.fagron?.boxId || '')}`,
+        path: portalType === 'doctor'
+          ? `/doctor/prescriptions-history?search=${encodeURIComponent(rx.patientName || rx.patient?.name || rx.fagron?.boxId || '')}`
+          : `${routePrefix}/prescriptions?search=${encodeURIComponent(rx.patientName || rx.patient?.name || rx.fagron?.boxId || '')}`,
         type: 'Prescription',
         icon: FileText
       });

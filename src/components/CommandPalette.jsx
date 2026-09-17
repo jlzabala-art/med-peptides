@@ -12,6 +12,9 @@ import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
 import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import Briefcase from "lucide-react/dist/esm/icons/briefcase";
+import User from "lucide-react/dist/esm/icons/user";
+import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
+import FileText from "lucide-react/dist/esm/icons/file-text";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useDebounce } from '../hooks/useDebounce';
@@ -39,12 +42,16 @@ const PORTAL_CONFIGS = {
     ],
   },
   doctor: {
-    placeholder: 'Search patients, products, protocols, or commands...',
+    placeholder: 'Search patients, formulary peptides, protocols, or commands...',
     routePrefix: '/doctor',
     quickActions: [
-      { id: 'qa-workspace-toggle', label: 'Workspace: Open Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
-      { id: 'qa-ai', label: 'Ask Atlas AI', icon: Sparkles, type: 'Action', action: 'ask-ai' },
-      { id: 'qa-patient', label: 'Register New Patient', icon: Sparkles, type: 'Action', path: '/doctor/patients?new=true' },
+      { id: 'qa-new-rx',           label: '✨ New Prescription (Rx Builder)', icon: Stethoscope, type: 'Action', path: '/doctor/new-prescription' },
+      { id: 'qa-workspace-toggle', label: 'Workspace: Clinical Hub (Alt+W)', icon: Briefcase, type: 'Action', action: 'toggle-workspace' },
+      { id: 'qa-patient-new',      label: 'Intake New Patient',               icon: User,        type: 'Action', path: '/doctor/patients?new=true' },
+      { id: 'qa-formulary',        label: 'Lotusland Peptide Formulary',      icon: Box,         type: 'Action', path: '/doctor/catalog' },
+      { id: 'qa-protocols',        label: 'Clinical Protocols & Guidelines',  icon: Stethoscope, type: 'Action', path: '/doctor/protocols' },
+      { id: 'qa-history',          label: 'Prescriptions & Lifecycle',        icon: FileText,    type: 'Action', path: '/doctor/prescriptions-history' },
+      { id: 'qa-ai',               label: 'Ask Atlas AI (Clinical Scribe)',   icon: Sparkles,    type: 'Action', action: 'ask-ai' },
     ],
   },
   patient: {

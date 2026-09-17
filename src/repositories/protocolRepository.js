@@ -48,7 +48,38 @@ const protocolsCol        = ()  => collection(db, 'protocols');        // canoni
 // ── Protocol Cache (performance layer - Golden Rule #2) ────────────────────────
 const PROTOCOL_CACHE_KEY = 'regenpept_protocols_cache_v2';
 const PROTOCOL_CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
-const cache = createCacheManager(PROTOCOL_CACHE_KEY, PROTOCOL_CACHE_TTL_MS);
+const cache = createCacheManager(PROTOCOL_CACHE_KEY, PROTOCOL_CACHE_TTL_MS, {
+  transformForStorage: (protocols) => {
+    if (!Array.isArray(protocols)) return protocols;
+    return protocols.map((p) => ({
+      id: p.id,
+      name: p.name || p.title || '',
+      protocol_title: p.protocol_title || p.name || '',
+      category: p.category || p.therapeutic_category || '',
+      therapeutic_category: p.therapeutic_category || p.category || '',
+      goals: p.goals || [],
+      goal: p.goal || p.primary_goal || '',
+      status: p.status || 'approved',
+      duration_weeks: p.duration_weeks || 4,
+      peptides: (p.peptides || []).map((pep) => ({
+        id: pep.id,
+        name: pep.name || pep.product_title || '',
+        weekly_dose: pep.weekly_dose || pep.dosage || '',
+        format: pep.format || 'Vial',
+      })),
+      phases: (p.phases || []).map((ph) => ({
+        phase_title: ph.phase_title || 'Phase',
+        start_week: ph.start_week || 1,
+        end_week: ph.end_week || 4,
+        drugs_used: (ph.drugs_used || []).map((d) => ({
+          product_title: d.product_title || d.name || '',
+          weekly_dose: d.weekly_dose || '',
+          format: d.format || 'Vial',
+        })),
+      })),
+    }));
+  },
+});
 
 /** Force a cache invalidation (call after admin edits or AI version bump detected). */
 export function invalidateProtocolCache() {

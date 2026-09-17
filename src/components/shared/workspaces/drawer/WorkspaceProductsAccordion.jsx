@@ -18,6 +18,8 @@ import {
 } from '@/lib/icons';
 import notifier from '@/services/NotificationService';
 import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
+import QuickClinicalRegimens from './QuickClinicalRegimens';
+import ClinicalSyringeHelper from './ClinicalSyringeHelper';
 
 export default function WorkspaceProductsAccordion({
   isExpanded,
@@ -41,10 +43,12 @@ export default function WorkspaceProductsAccordion({
   searchingCatalog,
   onSearchCatalogFast,
   isDoctor = false,
+  onAddClinicalRegimen,
 }) {
   const [expandedItemIds, setExpandedItemIds] = useState({});
   const [activePicker, setActivePicker] = useState(null); // 'products' | 'protocols' | 'kits' | null
   const [pickerSearch, setPickerSearch] = useState('');
+  const [showSyringeHelper, setShowSyringeHelper] = useState(false);
   
   // High-capacity visualization state
   const [viewMode, setViewMode] = useState(items.length >= 6 ? 'compact' : 'cards'); // 'compact' | 'cards'
@@ -538,6 +542,14 @@ export default function WorkspaceProductsAccordion({
         <div style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#f8fafc' }}>
           {items.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* Doctor 1-Tap Clinical Regimens */}
+              {isDoctor && (
+                <QuickClinicalRegimens
+                  onApplyRegimen={onAddClinicalRegimen}
+                  isDoctor={isDoctor}
+                />
+              )}
+
               {/* Card 1: Load Clinical Protocol */}
               <div
                 onClick={() => {
@@ -818,8 +830,40 @@ export default function WorkspaceProductsAccordion({
                   >
                     <Droplet size={12} /> + Bac Water
                   </button>
+                  {isDoctor && (
+                    <button
+                      type="button"
+                      onClick={() => setShowSyringeHelper(!showSyringeHelper)}
+                      style={{
+                        padding: '4px 8px',
+                        backgroundColor: showSyringeHelper ? '#e0f2fe' : '#ffffff',
+                        border: `1px solid ${showSyringeHelper ? '#0284c7' : '#cbd5e1'}`,
+                        borderRadius: '7px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: showSyringeHelper ? '#0284c7' : '#0f172a',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}
+                      title="U-100 Syringe Units & Reconstitution Helper"
+                    >
+                      <Droplet size={12} color="#0284c7" /> Syringe Guide
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* Inline Syringe Calculator */}
+              {isDoctor && showSyringeHelper && (
+                <ClinicalSyringeHelper
+                  defaultVialMg={5}
+                  defaultDiluentMl={2}
+                  defaultDoseMg={0.25}
+                  compoundName={items[0]?.canonicalName || 'Compound'}
+                />
+              )}
 
               {/* High-Capacity Search Filter (Visible if 5 or more items) */}
               {items.length >= 5 && (

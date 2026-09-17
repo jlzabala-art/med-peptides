@@ -27,11 +27,13 @@ import { useDrawer } from '../../context/DrawerContext';
 import { PRESCRIPTION_SOURCES } from '../../schemas/prescriptionSchema';
 import BuilderProtocolSearch from './order-builder/BuilderProtocolSearch';
 import MobilePrescriptionCard from './mobile/MobilePrescriptionCard';
+import MobileActionSheet from '../ui/MobileActionSheet';
 import { Eye, Edit3, XCircle, Tag, Package } from '@/lib/icons';
 import notifier from '../../services/NotificationService';
 import { exportToCSV, triggerServerExport } from '../../utils/universalExporter';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import PatientAdministrationGuideModal from '../doctor/PatientAdministrationGuideModal';
 
 export default function UniversalPrescriptionsTable({ doctorId, patientId, readOnly = false, hideHeader = false, title = 'Prescriptions', subtitle = 'System of record for all patient prescriptions and recommendations.', serverKPIs, enableAskAtlas = false, initialData }) {
   const { openDrawer } = useDrawer();
@@ -56,6 +58,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
   const [isSourceSelectorOpen, setIsSourceSelectorOpen] = useState(false);
   const [isProtocolSearchOpen, setIsProtocolSearchOpen] = useState(false);
   const [initialBuilderItems, setInitialBuilderItems] = useState([]);
+  const [patientGuideRx, setPatientGuideRx] = useState(null);
   // Protocol context passed from BuilderProtocolSearch to the builder
   const [builderProtocolId, setBuilderProtocolId] = useState(null);
   const [builderProtocolName, setBuilderProtocolName] = useState(null);
@@ -339,6 +342,14 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     }
   }, [urlRxId, displayPrescriptions, selectedItem, loadingUrlItem, editingRx, updateUrlParam]);
 
+  useEffect(() => {
+    const handleOpenGuide = (e) => {
+      if (e.detail?.rx) setPatientGuideRx(e.detail.rx);
+    };
+    window.addEventListener('OPEN_PATIENT_GUIDE_MODAL', handleOpenGuide);
+    return () => window.removeEventListener('OPEN_PATIENT_GUIDE_MODAL', handleOpenGuide);
+  }, []);
+
   const handleRefill = useCallback((rx) => {
     if (!rx) return;
     openDrawer('rx-builder', 'new', {
@@ -359,6 +370,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
     onEdit: handleEdit,
     onRefresh: refresh,
     onRefill: handleRefill,
+    onOpenPatientGuide: (rx) => setPatientGuideRx(rx),
     isDoctor,
     role: effectiveRole
   }), [handleEdit, refresh, handleRefill, isDoctor, effectiveRole]);
@@ -634,6 +646,7 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
             serverKPIs={serverKPIs} 
             filteredCount={finalData.length} 
             isFiltered={isAlgoliaActive || (filterStatus && filterStatus.length > 0) || activeChips.length > 0} 
+            doctorId={effectiveDoctorId}
           />
         }
         filters={activeChips}
@@ -756,6 +769,15 @@ export default function UniversalPrescriptionsTable({ doctorId, patientId, readO
               setSelectedItem(updatedRx);
               refresh();
             }}
+          />
+        )}
+
+        {patientGuideRx && (
+          <PatientAdministrationGuideModal
+            isOpen={!!patientGuideRx}
+            onClose={() => setPatientGuideRx(null)}
+            rx={patientGuideRx}
+            isDoctor={isDoctor}
           />
         )}
 

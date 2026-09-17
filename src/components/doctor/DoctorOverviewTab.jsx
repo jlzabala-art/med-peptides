@@ -21,6 +21,7 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import UserPlus from "lucide-react/dist/esm/icons/user-plus";
 import Stethoscope from "lucide-react/dist/esm/icons/stethoscope";
 import MessageSquare from "lucide-react/dist/esm/icons/message-square";
+import FlaskConical from "lucide-react/dist/esm/icons/flask-conical";
 
 import { fetchDoctorPrescriptionsAction } from '../../actions/prescriptionsActions';
 import { fetchKPIsAction } from '../../actions/kpiActions';

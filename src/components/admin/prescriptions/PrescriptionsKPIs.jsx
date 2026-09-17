@@ -3,8 +3,8 @@ import { FileText, Clock, Activity, CheckCircle2 } from '@/lib/icons';
 import { usePrescriptionAggregates } from '../../../hooks/data/usePrescriptionAggregates';
 import { MetricCard, KpiScopeBar } from '../../ui';
 
-export default function PrescriptionsKPIs({ serverKPIs, filteredCount = null, isFiltered = false }) {
-  const { data: aggs, isLoading } = usePrescriptionAggregates({ enabled: !serverKPIs });
+export default function PrescriptionsKPIs({ serverKPIs, filteredCount = null, isFiltered = false, doctorId = null }) {
+  const { data: aggs, isLoading } = usePrescriptionAggregates({ doctorId, enabled: !serverKPIs });
   const [scope, setScope] = useState('filtered');
 
   const globalKpis = serverKPIs || aggs;

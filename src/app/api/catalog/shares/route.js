@@ -42,10 +42,34 @@ export async function GET(request) {
       }
     }
 
-    const snapshot = await query.get();
-    const allDocs  = snapshot.docs;
-    const hasMore  = allDocs.length > limit;
-    const docs     = hasMore ? allDocs.slice(0, limit) : allDocs;
+    let snapshot;
+    try {
+      snapshot = await query.get();
+    } catch (queryErr) {
+      if (queryErr.code === 9 || String(queryErr).includes('FAILED_PRECONDITION') || String(queryErr).includes('index')) {
+        console.warn('[catalog/shares GET] Missing index, falling back to in-memory sort');
+        let fallbackQuery = adminDb
+          .collection('shared_catalog_links')
+          .where('recipientUserId', '==', recipientId);
+        if (type === 'pdf' || type === 'web') {
+          fallbackQuery = fallbackQuery.where('sourceType', '==', type);
+        }
+        snapshot = await fallbackQuery.limit(limit + 10).get();
+      } else {
+        throw queryErr;
+      }
+    }
+
+    let allDocs = [...snapshot.docs];
+    // Sort in-memory by issuedAt desc
+    allDocs.sort((a, b) => {
+      const ta = a.data()?.issuedAt?.seconds || (a.data()?.issuedAt ? new Date(a.data().issuedAt).getTime() / 1000 : 0);
+      const tb = b.data()?.issuedAt?.seconds || (b.data()?.issuedAt ? new Date(b.data().issuedAt).getTime() / 1000 : 0);
+      return tb - ta;
+    });
+
+    const hasMore = allDocs.length > limit;
+    const docs = hasMore ? allDocs.slice(0, limit) : allDocs;
 
     const items = docs.map(doc => {
       const d = doc.data();

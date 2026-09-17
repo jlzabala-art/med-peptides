@@ -8,7 +8,7 @@
 
 import { createRepositoryCache } from '../lib/cache';
 
-export function createCacheManager(key, ttlMs) {
-  return createRepositoryCache(key, ttlMs);
+export function createCacheManager(key, ttlMs, options) {
+  return createRepositoryCache(key, ttlMs, options);
 }
 

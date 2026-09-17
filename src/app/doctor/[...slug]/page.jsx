@@ -212,6 +212,8 @@ export default function DynamicRoute({ params }) {
   const path = slug.join('/');
 
   switch (path) {
+    case '':
+    case 'overview': return <OverviewWrapper />;
     case 'shared':
     case 'shared-info': return <SharedInfoWrapper />;
     case 'catalog':

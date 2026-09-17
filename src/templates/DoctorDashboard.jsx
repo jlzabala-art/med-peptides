@@ -8,6 +8,28 @@ import { useRoleAccess } from '../hooks/useRoleAccess';
 import { triggerHaptic } from '../utils/haptics';
 import PullToRefreshWrapper from '../components/ui/PullToRefreshWrapper';
 import Skeleton from '../components/ui/Skeleton';
+import {
+  LayoutDashboard,
+  Users,
+  UserCheck,
+  ClipboardList,
+  FlaskConical,
+  Settings,
+  ShoppingBag,
+  Pill,
+  LogOut,
+  Bell,
+  ChevronRight,
+  Laptop,
+  History,
+  Plus,
+  MessageSquare,
+  Blocks,
+  FileText,
+  Calendar,
+  Beaker,
+  Share2
+} from '@/lib/icons';
 
 
 
@@ -158,7 +180,6 @@ const DOCTOR_NAV_GROUPS = [
 // ── Main ───────────────────────────────────────────────────────────────────────
 import PanelShell from '../components/shell/PanelShell';
 import IndividualDoctorSimulationBanner from '../components/doctor/IndividualDoctorSimulationBanner';
-import { LayoutDashboard, Users, UserCheck, ClipboardList, FlaskConical, Settings, ShoppingBag, Pill, LogOut, Bell, ChevronRight, Laptop, History, Plus, MessageSquare, Blocks, FileText, Calendar, Beaker, Share2 } from '@/lib/icons';
 
 export const DoctorContext = React.createContext({});
 

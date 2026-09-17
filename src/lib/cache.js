@@ -151,7 +151,8 @@ export function deleteFromLocalStorage(key) {
  * @param {string} key - Unique cache namespace (e.g. 'products_active_catalog')
  * @param {number} ttlMs - Time-to-live in ms (default 5 mins)
  */
-export function createRepositoryCache(key, ttlMs = DEFAULT_TTL_MS) {
+export function createRepositoryCache(key, ttlMs = DEFAULT_TTL_MS, options = {}) {
+  const { transformForStorage = null } = options;
   return {
     read: () => {
       // 1. RAM layer
@@ -169,7 +170,8 @@ export function createRepositoryCache(key, ttlMs = DEFAULT_TTL_MS) {
 
     write: (data) => {
       setCache(key, data, ttlMs);
-      setInLocalStorage(key, data, LS_TTL);
+      const storagePayload = typeof transformForStorage === 'function' ? transformForStorage(data) : data;
+      setInLocalStorage(key, storagePayload, LS_TTL);
     },
 
     invalidate: () => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag, Package } from '@/lib/icons';
+import { Stethoscope, Edit3, Download, Copy, Trash2, Loader2, Sparkles, FileText, Tag, Package, RotateCcw, MessageCircle } from '@/lib/icons';
 import { openPrescriptionAI } from '../../../utils/openModuleAI';
 import CopyableId from '../../ui/CopyableId';
 import StatusBadge from '../../ui/StatusBadge';
@@ -395,7 +395,102 @@ export const getPrescriptionColumns = (options = {}) => {
                 toast.success(`${itemsToAdd.length} compounds sent to workspace (${patientName})`);
               }
             },
+            // 🔁 Quick Refill / Repetir Prescripción
             {
+              type: 'action',
+              label: '🔁 Quick Refill (Renew Rx)',
+              icon: RotateCcw,
+              onClick: () => {
+                if (options.onRefill) {
+                  options.onRefill(rx);
+                  return;
+                }
+                const rawItems = rx.items || rx.compounds || rx.products || [];
+                const patientName = rx.patient?.name || rx.patientName || 'Patient';
+                const patientId = rx.patientId || rx.patient?.id || '';
+
+                if (!rawItems.length) {
+                  toast.error('This prescription has no items to refill');
+                  return;
+                }
+
+                const itemsToAdd = rawItems.map((i, idx) => ({
+                  id: i.id || i.variantId || i.productId || `rx_refill_${Date.now()}_${idx}`,
+                  productId: i.productId || i.id,
+                  variantId: i.variantId || i.id,
+                  canonicalName: i.name || i.productName || i.product_title || 'Medication',
+                  sku: i.sku || '',
+                  dosage: i.dosage || i.dose || '',
+                  format: i.format || i.dosage_form || 'Vial',
+                  quantity: parseInt(i.quantity, 10) || 1,
+                  unitPrice: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  price: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  unitRate: parseFloat(i.unitPrice || i.rate || i.price || 0),
+                  supplierCost: parseFloat(i.supplierCost || 0),
+                  supplierName: rx.supplierName || 'Pharmapolis Ltd',
+                  category: i.category || 'Prescription Biologics',
+                  prescriptionId: rx.id,
+                  prescriptionCode: rx.prescriptionCode || rx.id,
+                  patientName,
+                  patientId,
+                }));
+
+                const { addItems, setTargetEntity, setOperationType, setWorkspaceIntent, activeWorkspaceId, setDrawerOpen } = useWorkspaceStore.getState();
+
+                addItems(itemsToAdd, activeWorkspaceId, { openDrawer: true });
+                setTargetEntity({
+                  type: 'patient',
+                  id: patientId,
+                  name: patientName,
+                  email: rx.patient?.email || rx.patientEmail || '',
+                  phone: rx.patient?.phone || rx.patientPhone || '',
+                  fileNumber: rx.patient?.fileNumber || rx.patientFileNumber || rx.patient?.mrn || '',
+                }, activeWorkspaceId);
+                setOperationType('sell_prescription', activeWorkspaceId);
+                setWorkspaceIntent('prescribe', activeWorkspaceId);
+                setDrawerOpen(true);
+                toast.success(`Refill loaded into workspace for ${patientName}`);
+              }
+            },
+            // 📋 Guía de Administración para Paciente
+            {
+              type: 'action',
+              label: '📋 Patient Admin & Syringe Guide',
+              icon: FileText,
+              onClick: () => {
+                if (options.onOpenPatientGuide) {
+                  options.onOpenPatientGuide(rx);
+                } else {
+                  window.dispatchEvent(new CustomEvent('OPEN_PATIENT_GUIDE_MODAL', { detail: { rx } }));
+                }
+              }
+            },
+            // 📲 WhatsApp al Paciente
+            {
+              type: 'action',
+              label: '📲 Send to Patient via WhatsApp',
+              icon: MessageCircle,
+              onClick: () => {
+                const patientName = rx.patient?.name || rx.patientName || 'Patient';
+                const doctorName = rx.doctorName || rx.doctor?.name || 'Physician';
+                const patientPhone = (rx.patientPhone || rx.patient?.phone || '').replace(/[^0-9]/g, '');
+                const rawItems = rx.items || rx.compounds || rx.products || [];
+                const itemNames = rawItems.map(i => i.name || i.productName || 'Compuesto').join(', ');
+                
+                const origin = typeof window !== 'undefined' ? window.location.origin : 'https://med-peptides.com';
+                const message = `Estimado/a ${patientName}, el ${doctorName} ha emitido su prescripción personalizada para ${itemNames || 'su tratamiento'}. Puede acceder a los detalles y confirmar la entrega desde su portal: ${origin}/patient/prescriptions. Saludos cordiales.`;
+                
+                if (patientPhone) {
+                  const url = `https://wa.me/${patientPhone}?text=${encodeURIComponent(message)}`;
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                  toast.success(`Abriendo WhatsApp para ${patientName}…`);
+                } else {
+                  navigator.clipboard.writeText(message);
+                  toast.success('Mensaje copiado al portapapeles (paciente sin teléfono registrado)');
+                }
+              }
+            },
+            ...(!isDoctor ? [{
               type: 'create_quote',
               label: 'Create Quotation from Prescription',
               icon: FileText,
@@ -421,7 +516,7 @@ export const getPrescriptionColumns = (options = {}) => {
                   }
                 }));
               }
-            },
+            }] : []),
             {
               type: 'download',
               label: 'Download PDF',

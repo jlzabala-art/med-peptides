@@ -27,6 +27,8 @@ import WorkspaceRecipientAccordion from './drawer/WorkspaceRecipientAccordion';
 import WorkspaceShippingAccordion from './drawer/WorkspaceShippingAccordion';
 import WorkspaceFinancialAccordion from './drawer/WorkspaceFinancialAccordion';
 import WorkspacePdfPreviewSheet from './drawer/WorkspacePdfPreviewSheet';
+import { useWorkspaceActions } from './hooks/useWorkspaceActions';
+import { useContextualBinding } from './hooks/useContextualBinding';
 
 export default function WorkspaceDrawer() {
   const {
@@ -145,13 +147,11 @@ export default function WorkspaceDrawer() {
     return () => { isMounted = false; };
   }, [isDrawerOpen]);
 
-  if (!mounted || !isDrawerOpen || !activeWs) return null;
-
-  const items = activeWs.items || [];
-  const selectedShippingMethod = activeWs.shippingMethod || 'cold_chain';
-  const shippingAddress = activeWs.shippingAddress || '';
-  const shippingNotes = activeWs.shippingNotes || '';
-  const discountPercent = activeWs.discountPercent || 0;
+  const items = activeWs?.items || [];
+  const selectedShippingMethod = activeWs?.shippingMethod || 'cold_chain';
+  const shippingAddress = activeWs?.shippingAddress || '';
+  const shippingNotes = activeWs?.shippingNotes || '';
+  const discountPercent = activeWs?.discountPercent || 0;
 
   const getItemUnitPrice = (it) => {
     if (it.customPrice != null && !isDoctor) return Number(it.customPrice);
@@ -163,67 +163,6 @@ export default function WorkspaceDrawer() {
     const p = Number(it.unitPrice || it.price || it.unitRate || 0);
     return isNaN(p) ? 0 : p;
   };
-
-  const handleSaveAsProtocol = async () => {
-    if (items.length === 0) {
-      notifier.warning('Please add compounds to workspace before creating a protocol.');
-      return;
-    }
-    try {
-      const { createProtocol } = await import('../../../repositories/protocolRepository');
-      const protocolName = activeWs.name || 'Custom Clinical Protocol';
-      const newId = await createProtocol({
-        protocol_name: protocolName,
-        title: protocolName,
-        category: 'Doctor Prescribed Protocol',
-        visibility: 'private',
-        drugs_used: items.map(it => ({
-          product_title: it.canonicalName,
-          dosage: it.dosage,
-          format: it.format,
-          quantity: it.quantity,
-          route: it.route || 'Subcutaneous (SC)',
-        })),
-        phases: [{
-          phase_title: 'Primary Regimen',
-          duration_weeks: 4,
-          drugs_used: items.map(it => ({
-            product_title: it.canonicalName,
-            dosage: it.dosage,
-            format: it.format,
-            quantity: it.quantity,
-            route: it.route || 'Subcutaneous (SC)',
-          })),
-        }],
-      });
-      notifier.success(`Clinical Protocol "${protocolName}" saved (#${newId.slice(0, 6)})!`);
-    } catch (err) {
-      console.error('Save protocol error:', err);
-      notifier.error('Failed to save protocol: ' + err.message);
-    }
-  };
-
-  const workspacePrescriptions = items.map((it, idx) => ({
-    id: `WS-${(it.productId || it.id || idx).toString().slice(0, 8)}`,
-    name: it.canonicalName,
-    title: it.canonicalName,
-    volume: it.format || 'Standard Vial',
-    dosage: it.dosage || 'Standard',
-    instructions: it.instructions || `Administer ${it.dosage || 'prescribed dose'} as clinically directed by physician.`,
-    quantityBottles: it.quantity || 1,
-    items: [{
-      name: it.canonicalName,
-      strength: it.dosage || 'Standard',
-    }],
-  }));
-
-  const targetPatient = activeWs.targetEntity?.type === 'patient'
-    ? activeWs.targetEntity
-    : {
-        name: activeWs.targetEntity?.name || 'Patient Chart',
-        id: activeWs.targetEntity?.id || 'pat-workspace',
-        fileNumber: activeWs.targetEntity?.fileNumber || '50957',
-      };
 
   const subtotalSaleAmount = items.reduce((sum, it) => {
     const qty = Number(it.quantity || 1);
@@ -251,141 +190,59 @@ export default function WorkspaceDrawer() {
     }));
   };
 
-  // Execution Handlers
-  const handleExecuteQuotation = () => {
-    if (items.length === 0) {
-      notifier.warning('Please add products to the workspace before generating a quote.');
-      return;
-    }
-    setDrawerOpen(false);
-    window.dispatchEvent(new CustomEvent('open-quotation-wizard', {
-      detail: {
-        type: 'manual',
-        clientName: activeWs.targetEntity?.name || '',
-        clientId: activeWs.targetEntity?.id || '',
-        recipientType: activeWs.targetEntity?.type || 'clinic',
-        shippingMethod: selectedShippingMethod,
-        shippingCost,
-        shippingAddress,
-        shippingNotes,
-        discountPercentage: discountPercent,
-        grandTotal,
-        items: items.map(it => ({
-          compoundName: it.canonicalName,
-          dosage: it.dosage,
-          format: it.format,
-          quantity: it.quantity,
-          unitRate: getItemUnitPrice(it),
-          supplierCost: it.supplierCost,
-          supplierName: it.supplierName,
-          totalPrice: (it.quantity || 1) * getItemUnitPrice(it)
-        }))
-      }
-    }));
-    notifier.info(`Launching B2B Quotation Wizard with ${items.length} items (${selectedShippingMethod.toUpperCase()} shipping).`);
-  };
+  // Contextual Auto-Binding for Doctors & Routes
+  useContextualBinding({ isDoctor });
 
-  const handleExecutePrescription = () => {
-    if (items.length === 0) {
-      notifier.warning('Please add compounds before creating a prescription.');
-      return;
-    }
-    setDrawerOpen(false);
-    openDrawer('rx-builder', 'new', {
-      initialItems: items.map(it => ({
-        type: 'product',
-        id: it.id,
-        productId: it.productId,
-        name: it.canonicalName,
-        sku: it.sku,
-        price: getItemUnitPrice(it),
-        quantity: it.quantity,
-        dosage: it.dosage,
-        format: it.format
-      })),
-      patientId: activeWs.targetEntity?.type === 'patient' ? activeWs.targetEntity.id : null,
-      shippingMethod: selectedShippingMethod,
-      shippingAddress,
-      sourceModule: 'workspace'
-    });
-  };
+  // Modular Workspace Actions (Prescriptions, Quotes, POs, Protocols, 1-Tap Regimens)
+  const {
+    handleExecutePrescription,
+    handleExecuteQuotation,
+    handleExecutePO,
+    handleSaveAsProtocol,
+    handleLoadProtocol,
+    handleAddProduct,
+    handleAddClinicalRegimen,
+  } = useWorkspaceActions({
+    activeWs,
+    items,
+    selectedShippingMethod,
+    shippingCost,
+    shippingAddress,
+    shippingNotes,
+    discountPercent,
+    grandTotal,
+    getItemUnitPrice,
+    setDrawerOpen,
+    openDrawer,
+    addItems,
+    addItem,
+    isDoctor,
+    role,
+  });
 
-  const handleExecutePO = () => {
-    if (items.length === 0) {
-      notifier.warning('Please add items to workspace before generating a purchase order.');
-      return;
-    }
-    setDrawerOpen(false);
-    window.dispatchEvent(new CustomEvent('open-quick-create', {
-      detail: {
-        type: 'new-purchase-order',
-        payload: {
-          supplierId: activeWs.targetEntity?.type === 'supplier' ? activeWs.targetEntity.id : '',
-          supplierName: activeWs.targetEntity?.name || '',
-          shippingMethod: selectedShippingMethod,
-          shippingCost,
-          items: items.map(it => ({
-            productId: it.productId,
-            variantId: it.variantId,
-            name: it.canonicalName,
-            quantity: it.quantity,
-            unitCost: it.supplierCost,
-            sku: it.sku
-          }))
-        }
-      }
-    }));
-    notifier.success(`Opening Purchase Order form with ${items.length} line items.`);
-  };
+  if (!mounted || !isDrawerOpen || !activeWs) return null;
 
-  const handleLoadProtocol = (proto) => {
-    const peptides = proto.peptides || [];
-    const itemsToAdd = (peptides.length > 0 ? peptides : [{ id: proto.id, canonicalName: proto.name }]).map(pep => {
-      const v0 = pep.variants?.[0] || pep.variant || {};
-      const resolvedUnitPrice = Number(
-        pep.unitPrice || pep.price || pep.unitRate || pep.unit_price ||
-        v0.resolvedPrice?.perUnit || v0.unitPrice || v0.price || v0.tier1Price || v0.tier1_price || v0.retailPrice ||
-        pep.tier1Price || pep.tier1_price || pep.retailPrice || 0
-      );
-      const supplierCost = Number(pep.costPrice || pep.supplierCost || v0.supplierCost || 0);
+  const workspacePrescriptions = items.map((it, idx) => ({
+    id: `WS-${(it.productId || it.id || idx).toString().slice(0, 8)}`,
+    name: it.canonicalName,
+    title: it.canonicalName,
+    volume: it.format || 'Standard Vial',
+    dosage: it.dosage || 'Standard',
+    instructions: it.instructions || `Administer ${it.dosage || 'prescribed dose'} as clinically directed by physician.`,
+    quantityBottles: it.quantity || 1,
+    items: [{
+      name: it.canonicalName,
+      strength: it.dosage || 'Standard',
+    }],
+  }));
 
-      return {
-        id: pep.id || `pep_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-        productId: pep.productId || pep.id,
-        canonicalName: pep.name || pep.canonicalName || pep.title || 'Protocol Peptide',
-        dosage: pep.dosage || pep.dose || v0.dosage || 'Standard',
-        format: pep.format || v0.format || 'Vial',
-        quantity: 1,
-        unitPrice: resolvedUnitPrice,
-        supplierCost,
+  const targetPatient = activeWs.targetEntity?.type === 'patient'
+    ? activeWs.targetEntity
+    : {
+        name: activeWs.targetEntity?.name || 'Patient Chart',
+        id: activeWs.targetEntity?.id || 'pat-workspace',
+        fileNumber: activeWs.targetEntity?.fileNumber || '50957',
       };
-    });
-
-    addItems(itemsToAdd, activeWs.id, { openDrawer: true });
-    notifier.success(`Loaded ${itemsToAdd.length} peptide(s) from protocol "${proto.name || proto.title}"!`);
-  };
-
-  const handleAddProduct = (prod) => {
-    const v0 = prod.variants?.[0] || prod.variant || {};
-    const resolvedUnitPrice = Number(
-      prod.unitPrice || prod.price || prod.unitRate || prod.unit_price ||
-      v0.resolvedPrice?.perUnit || v0.unitPrice || v0.price || v0.tier1Price || v0.tier1_price || v0.retailPrice ||
-      prod.pricing?.retailPrice || prod.pricing?.tier1Price || prod.tier1_price || prod.tier1Price || prod.retailPrice || 0
-    );
-    const supplierCost = Number(prod.supplierCost || v0.supplierCost || prod.pricing?.supplierCost || 0);
-
-    addItem({
-      id: prod.id || `prod_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
-      productId: prod.id,
-      canonicalName: prod.canonicalName || prod.name || 'Catalog Item',
-      dosage: prod.dosage || v0.dosage || 'Standard',
-      format: prod.format || v0.format || 'Vial',
-      unitPrice: resolvedUnitPrice,
-      supplierCost,
-      quantity: 1,
-    }, activeWs.id, { openDrawer: true });
-    notifier.success(`Added "${prod.canonicalName || prod.name}" to workspace!`);
-  };
 
   return createPortal(
     <>
@@ -506,6 +363,7 @@ export default function WorkspaceDrawer() {
             onDeleteKit={deleteSavedKit}
             searchingCatalog={searchingCatalog}
             isDoctor={isDoctor}
+            onAddClinicalRegimen={handleAddClinicalRegimen}
           />
 
           {/* Section 2: Recipient & Operational Intent */}
