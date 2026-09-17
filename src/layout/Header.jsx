@@ -77,6 +77,7 @@ import { useTranslation } from 'react-i18next';
 import { useUIStore } from '../stores/uiStore';
 import { useShop } from '../context/ShopProvider';
 import { useCart } from '../context/CartProvider';
+import { useScreenAIContext } from '../hooks/useScreenAIContext';
 
 // ── Static style constants (allocated once, not per render) ──────────────────
 const S = {
@@ -158,6 +159,7 @@ function Header(props) {
   const router = useRouter();
   const isHome = pathname === '/';
   const [mounted, setMounted] = useState(false);
+  const screenAI = useScreenAIContext();
 
   useEffect(() => {
     setMounted(true);
@@ -479,35 +481,90 @@ function Header(props) {
 
 
             {/* Atlas AI Button (Desktop Only) */}
+            <style>{`
+              @keyframes gcpGeminiGlowStorefront {
+                0% { box-shadow: 0 0 0 0 ${screenAI.accentColor || '#2563eb'}66, 0 2px 10px ${screenAI.accentColor || '#2563eb'}20; }
+                50% { box-shadow: 0 0 0 7px rgba(0,0,0,0), 0 4px 16px ${screenAI.accentColor || '#2563eb'}35; }
+                100% { box-shadow: 0 0 0 0 ${screenAI.accentColor || '#2563eb'}66, 0 2px 10px ${screenAI.accentColor || '#2563eb'}20; }
+              }
+              @keyframes geminiPulseRingStorefront {
+                0% { transform: scale(0.95); opacity: 0.9; }
+                50% { transform: scale(1.15); opacity: 0.4; }
+                100% { transform: scale(0.95); opacity: 0.9; }
+              }
+              .site-header-sparkles-btn:hover {
+                transform: translateY(-1.5px) scale(1.02);
+                border-color: ${screenAI.accentColor || '#2563eb'}99 !important;
+                box-shadow: 0 6px 20px ${screenAI.accentColor || '#2563eb'}40 !important;
+              }
+            `}</style>
             <button 
-              className="desktop-only"
-              onClick={() => setActiveModal('ai')}
+              className="desktop-only site-header-sparkles-btn"
+              onClick={() => {
+                setActiveModal('ai');
+                window.dispatchEvent(new CustomEvent('open-atlas-ai'));
+              }}
               aria-label="Open Atlas AI"
               style={{
-                background: 'rgba(66, 133, 244, 0.1)',
-                border: '1px solid rgba(66, 133, 244, 0.3)',
-                borderRadius: '8px',
+                background: `linear-gradient(135deg, rgba(255,255,255,0.98) 0%, ${screenAI.accentColor || '#2563eb'}15 50%, ${screenAI.accentColor || '#2563eb'}28 100%)`,
+                border: `1.5px solid ${screenAI.accentColor || '#2563eb'}66`,
+                borderRadius: '24px',
                 cursor: 'pointer',
-                color: '#4285F4',
-                display: 'flex',
+                color: screenAI.accentColor || '#2563eb',
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '0.4rem 0.6rem',
-                marginRight: '0.25rem',
-                transition: 'all 0.2s ease',
-                gap: '0.35rem'
+                padding: '0.4rem 0.95rem',
+                marginRight: '0.35rem',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                animation: 'gcpGeminiGlowStorefront 2.8s infinite ease-in-out',
+                gap: '8px',
               }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(66, 133, 244, 0.2)';
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(66, 133, 244, 0.1)';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
+              title={`Consult ${screenAI.agentName} - Press ⌘J`}
             >
-              <Sparkles size={18} fill="#4285F4" />
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>{t('header.atlasAI', 'Atlas AI')}</span>
+              {/* Live Pulsing Beacon Dot */}
+              <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span
+                  style={{
+                    position: 'absolute',
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: screenAI.contextAnchor ? 'rgba(34, 197, 94, 0.4)' : `${screenAI.accentColor || '#2563eb'}40`,
+                    animation: 'geminiPulseRingStorefront 2s infinite ease-in-out',
+                  }}
+                />
+                <span
+                  style={{
+                    position: 'relative',
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: screenAI.contextAnchor ? '#22c55e' : (screenAI.accentColor || '#2563eb'),
+                    boxShadow: `0 0 0 2px ${screenAI.contextAnchor ? 'rgba(34, 197, 94, 0.4)' : `${screenAI.accentColor || '#2563eb'}40`}`,
+                    flexShrink: 0,
+                  }}
+                />
+              </span>
+              <Sparkles size={15} color={screenAI.accentColor || '#2563eb'} style={{ filter: `drop-shadow(0 0 3px ${screenAI.accentColor || '#2563eb'}55)` }} />
+              <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-main, #0f172a)', letterSpacing: '-0.01em' }}>
+                {screenAI.contextAnchor ? `AI • ${screenAI.contextAnchor.name}` : (screenAI.agentName || 'Atlas AI')}
+              </span>
+              <kbd
+                style={{
+                  fontSize: '0.65rem',
+                  fontFamily: 'inherit',
+                  fontWeight: 700,
+                  color: 'var(--color-text-secondary, #64748b)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                  padding: '1px 5px',
+                  borderRadius: '5px',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  marginLeft: '2px',
+                }}
+              >
+                ⌘J
+              </kbd>
             </button>
 
             {/* Search button — desktop header (mobile uses bottom bar) */}

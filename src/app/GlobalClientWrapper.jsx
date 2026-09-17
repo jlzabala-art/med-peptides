@@ -1,10 +1,9 @@
 "use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
 import Cart from '../snippets/Cart';
-import ClinicalAssistant from '../components/shared/ClinicalAssistant';
 import BackToTop from '../layout/BackToTop';
 import BottomTabBar from '../layout/BottomTabBar';
 import SearchModal from '../snippets/SearchModal';
@@ -26,6 +25,12 @@ function StorefrontShell({ children }) {
   const { catalogue: products, protocols, supplements } = useFirestoreData();
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleOpen = () => setActiveModal('ai');
+    window.addEventListener('open-atlas-ai', handleOpen);
+    return () => window.removeEventListener('open-atlas-ai', handleOpen);
+  }, [setActiveModal]);
 
   const handleCategorySelect = (cat) => {
     if (cat === 'Home') return router.push(activeRole === 'admin' ? '/admin' : '/');
@@ -90,7 +95,6 @@ function StorefrontShell({ children }) {
 
       {pathname === '/' && <Footer />}
       <Cart />
-      <ClinicalAssistant />
       <BackToTop />
       <BottomTabBar />
       <AtlasAIDrawer 

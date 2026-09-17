@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PortalLayout from '../ui/PortalLayout';
 import { useAuth, ADMIN_EMAILS } from '../../context/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
@@ -12,6 +12,7 @@ import IOSPushBanner from '../ui/IOSPushBanner';
 import OfflineSyncProvider from '../shared/OfflineSyncProvider';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import ProfessionalWelcomeOverlay from '../ui/ProfessionalWelcomeOverlay';
+import AtlasAIDrawer from '../shared/AtlasAIDrawer';
 
 const GlobalQuickCreateHandler = dynamic(() => import('../shared/GlobalQuickCreateHandler'), { ssr: false });
 const PushNotificationPrompt = dynamic(() => import('../ui/PushNotificationPrompt'), { ssr: false });
@@ -71,6 +72,14 @@ export default function PanelShell({
     };
   }, [themeRole]);
 
+  const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpen = () => setIsAiDrawerOpen(true);
+    window.addEventListener('open-atlas-ai', handleOpen);
+    return () => window.removeEventListener('open-atlas-ai', handleOpen);
+  }, []);
+
   useKeyboardShortcuts();
 
   if (loading || !user || (allowedRoles.length > 0 && !allowedRoles.includes(activeRole))) {
@@ -80,6 +89,10 @@ export default function PanelShell({
   return (
     <OfflineSyncProvider>
       <div className={`universal-layout-wrapper theme-${themeRole}`}>
+        <AtlasAIDrawer
+          isOpen={isAiDrawerOpen}
+          onClose={() => setIsAiDrawerOpen(false)}
+        />
         <style>{`
           /* 
             Ensure the PanelShell completely fills the viewport 

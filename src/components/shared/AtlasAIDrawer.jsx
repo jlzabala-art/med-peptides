@@ -7,6 +7,8 @@ import useGuestPreferences from '../../hooks/useGuestPreferences';
 import { useCart } from '../../context/CartProvider';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useScreenAIContext } from '../../hooks/useScreenAIContext';
+import { useWorkspaceStore } from '@/stores/useWorkspaceStore';
+import notifier from '@/services/NotificationService';
 
 function renderFormattedMessage(text, router, onClose) {
   if (!text) return null;
@@ -23,25 +25,95 @@ function renderFormattedMessage(text, router, onClose) {
       if (match[2] && match[3]) {
         const label = match[2];
         const href = match[3];
-        parts.push(
-          <a
-            key={`link-${lIdx}-${match.index}`}
-            href={href}
-            onClick={(e) => {
-              e.preventDefault();
-              if (onClose) onClose();
-              router.push(href);
-            }}
-            style={{
-              color: '#2563eb',
-              textDecoration: 'underline',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            {label}
-          </a>
-        );
+
+        // GCP Actionable AI Link: Add to Workspace
+        if (href.startsWith('action:workspace:') || href === 'action:workspace') {
+          const payload = href.replace('action:workspace:', '').replace('action:workspace', '');
+          const [compoundParam, dosageParam] = payload.split(':');
+          const compoundName = compoundParam || label.replace(/^\+?\s*(Add\s*)?/i, '').replace(/\s*(to\s*Workspace)?/i, '').trim() || 'Custom Compound';
+          const dosage = dosageParam || 'Standard Protocol';
+
+          parts.push(
+            <button
+              key={`action-ws-${lIdx}-${match.index}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const id = `cmp_${compoundName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+                useWorkspaceStore.getState().addItem({
+                  id,
+                  canonicalName: compoundName,
+                  name: compoundName,
+                  dosage,
+                  quantity: 1,
+                  unitPrice: 0,
+                });
+                notifier.success(`Added ${compoundName} to Clinical Workspace`);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                border: '1px solid rgba(37, 99, 235, 0.3)',
+                color: '#1d4ed8',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                margin: '2px 4px 2px 0',
+                verticalAlign: 'middle',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.18)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
+              }}
+            >
+              + {label}
+            </button>
+          );
+        } else if (href.startsWith('action:navigate:') || href.startsWith('/')) {
+          const targetUrl = href.startsWith('action:navigate:') ? href.replace('action:navigate:', '') : href;
+          parts.push(
+            <a
+              key={`link-${lIdx}-${match.index}`}
+              href={targetUrl}
+              onClick={(e) => {
+                e.preventDefault();
+                if (onClose) onClose();
+                router.push(targetUrl);
+              }}
+              style={{
+                color: '#2563eb',
+                textDecoration: 'underline',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              {label}
+            </a>
+          );
+        } else {
+          parts.push(
+            <a
+              key={`ext-${lIdx}-${match.index}`}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#2563eb',
+                textDecoration: 'underline',
+                fontWeight: 600,
+              }}
+            >
+              {label}
+            </a>
+          );
+        }
       } else if (match[4]) {
         parts.push(
           <strong key={`bold-${lIdx}-${match.index}`} style={{ fontWeight: 700 }}>
@@ -96,15 +168,14 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
     }
 
     // Default screen-tailored initial greeting
-    const activeGoal = goalMeta?.label || 'Longevity & Healthspan';
     const initialGreeting = {
       id: `initial-greeting-${screenAI.scopeKey}`,
       sender: 'ai',
-      text: `Hello! I am your **${screenAI.agentName}** for *${screenAI.roleLabel}*.\n\nI am tailored for this specific view (${pathname}).\n\nHow can I assist your workflow or answer questions for this section?`,
+      text: screenAI.initialGreeting || `Hello! I am your **${screenAI.agentName}** for *${screenAI.roleLabel}*.\n\nI am tailored for this specific view (${pathname}).\n\nHow can I assist your workflow or answer questions for this section?`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
     setMessages([initialGreeting]);
-  }, [isOpen, screenAI.scopeKey, pathname, storageKey, screenAI.agentName, screenAI.roleLabel, goalMeta?.label]);
+  }, [isOpen, screenAI.scopeKey, pathname, storageKey, screenAI.agentName, screenAI.roleLabel, screenAI.initialGreeting]);
 
   // Persist screen-scoped history
   useEffect(() => {
@@ -130,6 +201,25 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
     'How do I calculate reconstitution units for a 5mg vial?',
     'What synergistic supplements pair well with BPC-157?',
   ];
+
+  const handleSendMessageRef = useRef(null);
+
+  useEffect(() => {
+    const handleOpenAI = (e) => {
+      const q = e.detail?.query;
+      if (q && typeof q === 'string') {
+        setTimeout(() => {
+          handleSendMessageRef.current?.(q);
+        }, 120);
+      }
+    };
+    window.addEventListener('open-atlas-ai', handleOpenAI);
+    return () => window.removeEventListener('open-atlas-ai', handleOpenAI);
+  }, []);
+
+  useEffect(() => {
+    handleSendMessageRef.current = handleSendMessage;
+  });
 
   const handleSendMessage = async (textToSend) => {
     const text = (textToSend || input).trim();
@@ -166,6 +256,8 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
             systemPersona: screenAI.systemPersona,
             screenScope: screenAI.scopeKey,
             agentName: screenAI.agentName,
+            currentUser: screenAI.currentUser || null,
+            contextAnchor: screenAI.contextAnchor || null,
           },
           history: messages.slice(-4),
         }),
@@ -285,12 +377,12 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
                     width: 34,
                     height: 34,
                     borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                    background: `linear-gradient(135deg, ${screenAI.accentColor || '#2563eb'}, #1e40af)`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: 'white',
-                    boxShadow: '0 4px 12px rgba(37,99,235,0.25)',
+                    boxShadow: `0 4px 12px ${screenAI.accentColor ? `${screenAI.accentColor}40` : 'rgba(37,99,235,0.25)'}`,
                   }}>
                     <Sparkles size={18} />
                   </div>
@@ -395,6 +487,59 @@ export default function AtlasAIDrawer({ isOpen, onClose }) {
                   }}>
                     {levelMeta.label}
                   </span>
+                )}
+                {screenAI.currentUser?.name && (
+                  <span
+                    style={{
+                      fontSize: '0.70rem',
+                      fontWeight: 700,
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      color: 'var(--text-main, #334155)',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                    title={`Dedicated exclusively to: ${screenAI.currentUser.name} (${screenAI.roleLabel})`}
+                  >
+                    👤 {screenAI.currentUser.name}
+                  </span>
+                )}
+                {screenAI.contextAnchor && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: 'rgba(13, 148, 136, 0.12)',
+                      border: '1px solid rgba(13, 148, 136, 0.3)',
+                      color: '#0d9488',
+                      borderRadius: '12px',
+                      padding: '2px 8px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                    }}
+                    title={`Focused Entity: ${screenAI.contextAnchor.name} (${screenAI.contextAnchor.subtitle || screenAI.contextAnchor.type})`}
+                  >
+                    <span style={{ fontSize: '0.62rem', textTransform: 'uppercase', opacity: 0.85 }}>
+                      {screenAI.contextAnchor.type}:
+                    </span>
+                    <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {screenAI.contextAnchor.name}
+                    </span>
+                    {screenAI.contextAnchor.badge && (
+                      <span style={{
+                        fontSize: '0.62rem',
+                        padding: '1px 5px',
+                        borderRadius: '8px',
+                        backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                        color: '#0f766e',
+                      }}>
+                        {screenAI.contextAnchor.badge}
+                      </span>
+                    )}
+                  </div>
                 )}
                 <span style={{
                   fontSize: '0.72rem',

@@ -12,8 +12,7 @@ import { useRouter } from 'next/navigation';
 
 
 import React, { useState, useEffect } from 'react';
-
-import ClinicalAssistant from '../shared/ClinicalAssistant';
+import { useScreenAIContext } from '../../hooks/useScreenAIContext';
 import SidebarGadget from '../shared/AppSidebar/SidebarGadget';
 import { db } from '../../firebase';
 
@@ -196,16 +195,14 @@ export default function PortalLayout({
     typeof window !== 'undefined' ? window.innerWidth <= 768 : false
   );
 
+  const screenAI = useScreenAIContext();
   const { simulatedRole } = useSimulationStore();
   const effectiveAiRole = simulatedRole || roleContext;
   const normalizedAiRole = effectiveAiRole === 'medical_director' ? 'doctor' : effectiveAiRole;
 
   useEffect(() => {
     const handleOpenAi = (e) => {
-      if (e?.detail) {
-        setEnrichedContext(prev => ({ ...prev, ...e.detail }));
-      }
-      setAiOpen(true);
+      window.dispatchEvent(new CustomEvent('open-atlas-ai', { detail: e?.detail }));
     };
     window.addEventListener('open-clinical-ai', handleOpenAi);
     return () => window.removeEventListener('open-clinical-ai', handleOpenAi);
@@ -229,6 +226,11 @@ export default function PortalLayout({
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setPaletteOpen((prev) => !prev);
+      }
+      // Cmd+J or Cmd+I for AI Copilot
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'j' || e.key === 'J' || e.key === 'i' || e.key === 'I')) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('open-atlas-ai'));
       }
       // Shift + / (?) for Help Drawer (only if not typing in an input)
       if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
@@ -971,45 +973,145 @@ export default function PortalLayout({
             )}
           </button>
 
+          <style>{`
+            @keyframes gcpGeminiGlow {
+              0% { box-shadow: 0 0 0 0 ${screenAI.accentColor || '#0d9488'}66, 0 2px 10px ${screenAI.accentColor || '#0d9488'}20; }
+              50% { box-shadow: 0 0 0 7px rgba(0,0,0,0), 0 4px 16px ${screenAI.accentColor || '#0d9488'}35; }
+              100% { box-shadow: 0 0 0 0 ${screenAI.accentColor || '#0d9488'}66, 0 2px 10px ${screenAI.accentColor || '#0d9488'}20; }
+            }
+            @keyframes geminiPulseRing {
+              0% { transform: scale(0.95); opacity: 0.9; }
+              50% { transform: scale(1.15); opacity: 0.4; }
+              100% { transform: scale(0.95); opacity: 0.9; }
+            }
+            .portal-header-sparkles-btn:hover {
+              transform: translateY(-1.5px) scale(1.02);
+              border-color: ${screenAI.accentColor || '#0d9488'}99 !important;
+              box-shadow: 0 6px 20px ${screenAI.accentColor || '#0d9488'}40 !important;
+            }
+            .portal-header-sparkles-btn:active {
+              transform: translateY(0) scale(0.98);
+            }
+          `}</style>
           <button
             className="portal-header-sparkles-btn"
             onClick={() => {
-              setAiOpen(!isAiOpen);
+              window.dispatchEvent(new CustomEvent('open-atlas-ai'));
             }}
             style={{
               ...iconBtnStyle,
-              padding: '0.4rem 0.8rem',
+              padding: isMobile ? '0.35rem 0.75rem' : '0.42rem 1.05rem',
               borderRadius: '24px',
-              gap: '6px',
-              backgroundColor: isAiOpen
-                ? 'rgba(168, 85, 247, 0.1)'
-                : 'rgba(255,255,255,0.5)',
-              borderColor: isAiOpen
-                ? 'rgba(168, 85, 247, 0.4)'
-                : 'rgba(0,0,0,0.05)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: `linear-gradient(135deg, rgba(255,255,255,0.98) 0%, ${screenAI.accentColor || '#0d9488'}15 50%, ${screenAI.accentColor || '#0d9488'}28 100%)`,
+              border: `1.5px solid ${screenAI.accentColor || '#0d9488'}66`,
+              animation: 'gcpGeminiGlow 2.8s infinite ease-in-out',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
-            title="Ask Atlas AI anything"
+            title={`Open AI Copilot (${screenAI.agentName}) - Press ⌘J`}
+            aria-label="Open AI Copilot"
           >
+            {/* Live Pulsing Beacon Dot */}
+            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: screenAI.contextAnchor ? 'rgba(34, 197, 94, 0.4)' : `${screenAI.accentColor || '#0d9488'}40`,
+                  animation: 'geminiPulseRing 2s infinite ease-in-out',
+                }}
+              />
+              <span
+                style={{
+                  position: 'relative',
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: screenAI.contextAnchor ? '#22c55e' : (screenAI.accentColor || '#0d9488'),
+                  boxShadow: `0 0 0 2px ${screenAI.contextAnchor ? 'rgba(34, 197, 94, 0.4)' : `${screenAI.accentColor || '#0d9488'}40`}`,
+                  flexShrink: 0,
+                }}
+              />
+            </span>
+
             <Sparkles
-              size={16}
-              color={
-                isAiOpen
-                  ? '#a855f7'
-                  : 'var(--color-text-secondary)'
-              }
+              size={15}
+              color={screenAI.accentColor || '#0d9488'}
+              style={{ flexShrink: 0, filter: `drop-shadow(0 0 3px ${screenAI.accentColor || '#0d9488'}55)` }}
             />
+
             <span
               style={{
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: isAiOpen
-                  ? '#a855f7'
-                  : 'var(--color-text-secondary)',
-                display: isMobile ? 'none' : 'inline',
+                fontSize: '0.82rem',
+                fontWeight: 800,
+                color: 'var(--text-main, #0f172a)',
+                letterSpacing: '-0.01em',
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              Atlas AI
+              {isMobile ? (
+                'AI Copilot'
+              ) : screenAI.contextAnchor ? (
+                <>
+                  <span>AI Copilot</span>
+                  <span style={{
+                    color: screenAI.accentColor || '#0d9488',
+                    maxWidth: '120px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    • {screenAI.contextAnchor.name}
+                  </span>
+                </>
+              ) : (
+                screenAI.agentName || 'AI Copilot'
+              )}
             </span>
+
+            {/* Desktop Pill / Shortcut or Live indicator */}
+            {!isMobile && (
+              screenAI.contextAnchor ? (
+                <span
+                  style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    padding: '1px 5px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+                    color: '#16a34a',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  Live
+                </span>
+              ) : (
+                <kbd
+                  style={{
+                    fontSize: '0.65rem',
+                    fontFamily: 'inherit',
+                    fontWeight: 700,
+                    color: 'var(--color-text-secondary, #64748b)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                    padding: '1px 5px',
+                    borderRadius: '5px',
+                    border: '1px solid rgba(0, 0, 0, 0.08)',
+                    marginLeft: '2px',
+                  }}
+                >
+                  ⌘J
+                </kbd>
+              )
+            )}
           </button>
 
           <div
@@ -1062,65 +1164,6 @@ export default function PortalLayout({
           </PullToRefreshContainer>
         </main>
 
-        {/* Universal Atlas AI Assistant Drawer */}
-        {isAiOpen && (
-          <aside
-            style={{
-              width: isMobile ? '100%' : '300px',
-              position: isMobile ? 'absolute' : 'relative',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              backgroundColor: 'var(--color-bg-surface)',
-              borderLeft: '1px solid var(--color-border)',
-              display: 'flex',
-              flexDirection: 'column',
-              zIndex: isMobile ? 60 : 40,
-              boxShadow: isMobile ? '-4px 0 15px rgba(0,0,0,0.1)' : 'none',
-            }}
-          >
-            {isMobile && (
-              <div
-                style={{
-                  padding: '1rem',
-                  borderBottom: '1px solid var(--color-border)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 600,
-                    color: 'var(--color-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <Sparkles size={18} /> Atlas AI
-                </span>
-                <button
-                  onClick={() => setAiOpen(false)}
-                  style={{ background: 'none', border: 'none' }}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            )}
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              <ClinicalAssistant
-                embedded={true}
-                isOpen={true}
-                setIsOpen={() => setAiOpen(false)}
-                pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext}
-                contextMode={normalizedAiRole}
-                agentType={ROLE_AGENT_TYPE[effectiveAiRole] || ROLE_AGENT_TYPE[normalizedAiRole] || 'default'}
-                suggestedPrompts={ROLE_SUGGESTED_PROMPTS[effectiveAiRole] || ROLE_SUGGESTED_PROMPTS[normalizedAiRole] || []}
-              />
-            </div>
-          </aside>
-        )}
       </div>
 
       <CommandPalette
@@ -1132,31 +1175,16 @@ export default function PortalLayout({
         portalType={roleContext}
         onAskAI={(q) => {
           setPaletteOpen(false);
-          setAiOpen(true);
-          // Dispatch after a tick so the panel is mounted before receiving the event
-          if (q && q.trim()) {
-            setTimeout(() => {
-              window.dispatchEvent(
-                new CustomEvent('ATLAS_PREFILL_QUERY', { detail: { query: q } })
-              );
-            }, 150);
-          }
+          window.dispatchEvent(
+            new CustomEvent('open-atlas-ai', { detail: { query: q } })
+          );
         }}
       />
       <CopilotWorkspacePanel />
-      <ClinicalAssistant
-        embedded={false}
-        isOpen={isAiOpen}
-        setIsOpen={setAiOpen}
-        pageContext={enrichedContext ? { ...pageContext, ...enrichedContext } : pageContext}
-        contextMode={normalizedAiRole}
-        agentType={ROLE_AGENT_TYPE[effectiveAiRole] || ROLE_AGENT_TYPE[normalizedAiRole] || 'default'}
-        suggestedPrompts={ROLE_SUGGESTED_PROMPTS[effectiveAiRole] || ROLE_SUGGESTED_PROMPTS[normalizedAiRole] || []}
-      />
       <HelpDrawer isOpen={isHelpOpen} onClose={() => setHelpOpen(false)} />
       <MobileBottomNav 
         onOpenSidebar={() => setSidebarOpen(true)}
-        onOpenAi={() => setAiOpen(true)}
+        onOpenAi={() => window.dispatchEvent(new CustomEvent('open-atlas-ai'))}
       />
     </div>
   );

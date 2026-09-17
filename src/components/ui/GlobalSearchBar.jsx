@@ -107,8 +107,27 @@ export default function GlobalSearchBar({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Debounced Algolia instant suggestions query
+  // Debounced Algolia instant suggestions query & Natural Language /ai support
   useEffect(() => {
+    const trimmedVal = (value || '').trim();
+    if (trimmedVal.startsWith('/ai') || trimmedVal.startsWith('/copilot')) {
+      const q = trimmedVal.replace(/^\/(ai|copilot)\s*/i, '').trim();
+      setSuggestions([
+        {
+          key: 'ai_prompt_entry',
+          id: 'ai_copilot',
+          name: q ? `Ask Screen AI Copilot: "${q}"` : 'Ask Screen AI Copilot (type question & press Enter)',
+          category: 'AI Omnibar',
+          isAiPrompt: true,
+          query: q,
+        }
+      ]);
+      setShowDropdown(true);
+      setIsSearchingSuggestions(false);
+      setSelectedIndex(0);
+      return;
+    }
+
     if (!value || value.trim().length < 2) {
       setSuggestions([]);
       setIsSearchingSuggestions(false);
@@ -279,6 +298,16 @@ export default function GlobalSearchBar({
 
   const handleSuggestionClick = useCallback(
     (item) => {
+      // Natural Language /ai suggestion click
+      if (item.isAiPrompt) {
+        window.dispatchEvent(new CustomEvent('open-atlas-ai', { detail: { query: item.query } }));
+        saveRecentSearch(item.name);
+        setShowDropdown(false);
+        setSelectedIndex(-1);
+        onChange?.('');
+        return;
+      }
+
       saveRecentSearch(item.name);
       trackSearchClick({
         indexName: item.indexName || 'products',
@@ -319,13 +348,25 @@ export default function GlobalSearchBar({
         return;
       }
       if (e.key === 'Enter') {
+        const trimmed = (value || '').trim();
+        if (trimmed.startsWith('/ai') || trimmed.startsWith('/copilot')) {
+          e.preventDefault();
+          const query = trimmed.replace(/^\/(ai|copilot)\s*/i, '').trim();
+          window.dispatchEvent(new CustomEvent('open-atlas-ai', { detail: { query } }));
+          saveRecentSearch(trimmed);
+          setShowDropdown(false);
+          setSelectedIndex(-1);
+          onChange?.('');
+          return;
+        }
+
         if (selectedIndex >= 0 && suggestions[selectedIndex]) {
           e.preventDefault();
           handleSuggestionClick(suggestions[selectedIndex]);
           return;
         }
-        if (value.trim()) {
-          saveRecentSearch(value.trim());
+        if (trimmed) {
+          saveRecentSearch(trimmed);
           setShowDropdown(false);
         }
       }
@@ -333,7 +374,7 @@ export default function GlobalSearchBar({
         handleClear();
       }
     },
-    [value, suggestions, selectedIndex, handleSuggestionClick, saveRecentSearch, handleClear]
+    [value, suggestions, selectedIndex, handleSuggestionClick, saveRecentSearch, handleClear, onChange]
   );
 
   const handleRecentClick = useCallback(
@@ -554,7 +595,7 @@ export default function GlobalSearchBar({
           <div className="atlas-search__dropdown" style={{ zIndex: 100 }}>
             <div style={{ padding: '0.5rem 1rem 0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Algolia Suggestions
+                {value.trim().startsWith('/ai') ? '🤖 Screen AI Copilot' : 'Algolia Suggestions'}
               </span>
               {isSearchingSuggestions && <Loader size={12} className="atlas-search__spinner" />}
             </div>
@@ -575,12 +616,28 @@ export default function GlobalSearchBar({
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       cursor: 'pointer',
-                      backgroundColor: selectedIndex === idx ? '#f1f5f9' : 'transparent'
+                      backgroundColor: selectedIndex === idx ? (item.isAiPrompt ? '#eff6ff' : '#f1f5f9') : 'transparent'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                      <Search size={13} color="#003666" />
-                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</span>
+                      {item.isAiPrompt ? (
+                        <span style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                          color: '#2563eb',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '11px',
+                        }}>
+                          ✨
+                        </span>
+                      ) : (
+                        <Search size={13} color="#003666" />
+                      )}
+                      <span style={{ fontWeight: 600, color: item.isAiPrompt ? '#1d4ed8' : '#0f172a' }}>{item.name}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {item.variantCount > 1 && (

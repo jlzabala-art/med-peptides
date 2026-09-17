@@ -47,6 +47,13 @@ export function useKeyboardShortcuts() {
         return;
       }
 
+      // ⌘ + J / Ctrl + J or ⌘ + I / Ctrl + I -> Toggle Unified AI Copilot (Atlas AI)
+      if (isCmdOrCtrl && (e.key === 'j' || e.key === 'J' || e.key === 'i' || e.key === 'I')) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('open-atlas-ai'));
+        return;
+      }
+
       // ⌘ + B or Ctrl + B -> Toggle Navigation Sidebar
       if (isCmdOrCtrl && (e.key === 'b' || e.key === 'B')) {
         e.preventDefault();

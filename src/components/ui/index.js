@@ -49,4 +49,5 @@ export { default as ComponentErrorBoundary } from './ComponentErrorBoundary';
 export { default as UniversalShareDrawer } from './UniversalShareDrawer';
 export { default as AIContextBadge } from './AIContextBadge';
 export { default as GcpTableToolbar } from './GcpTableToolbar';
+export { default as GcpActiveRecommender } from './GcpActiveRecommender';
 
