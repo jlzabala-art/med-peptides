@@ -7,6 +7,7 @@ import DataTable from '../../ui/DataTable';
 import EmptyState from '../../ui/EmptyState';
 import notifier from '../../../services/NotificationService';
 import Dna from 'lucide-react/dist/esm/icons/dna';
+import { isPrescriptionInDoctorScope } from '@/domain';
 
 export default function GenomicsCohortTable({ doctorId }) {
   const [patients, setPatients] = useState([]);
@@ -48,30 +49,7 @@ export default function GenomicsCohortTable({ doctorId }) {
                 status: (d.status || 'active').toLowerCase(),
               };
             })
-            .filter(item => {
-              const pName = (item.name || '').toLowerCase();
-              if (
-                pName.includes('alan maclean') ||
-                pName.includes('mangesh sakharkar') ||
-                pName.includes('matthew taylor') ||
-                item.physicianId === 'z3aUIMaYsPViG1JgM95r' ||
-                item.doctorId === 'z3aUIMaYsPViG1JgM95r'
-              ) {
-                return false;
-              }
-
-              if (effectiveDocId === 'dr-hanieh-erdmann') {
-                const docStr = `${item.doctorName || ''} ${item.physicianName || ''} ${item.prescribingDoctor || ''} ${item.clinicName || ''} ${item.clinic || ''}`.toLowerCase();
-                if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
-                const isMatch = item.doctorId === 'dr-hanieh-erdmann' ||
-                  item.physicianId === 'dr-hanieh-erdmann' ||
-                  docStr.includes('erdmann') ||
-                  docStr.includes('bedaya');
-                return isMatch;
-              }
-
-              return item.doctorId === effectiveDocId || item.physicianId === effectiveDocId;
-            });
+            .filter(item => isPrescriptionInDoctorScope(item, effectiveDocId));
 
           setPatients(mapped);
         }

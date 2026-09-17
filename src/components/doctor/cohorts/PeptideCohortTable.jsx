@@ -7,6 +7,7 @@ import DataTable from '../../ui/DataTable';
 import EmptyState from '../../ui/EmptyState';
 import notifier from '../../../services/NotificationService';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import { isPrescriptionInDoctorScope } from '@/domain';
 
 export default function PeptideCohortTable({ doctorId }) {
   const [patients, setPatients] = useState([]);
@@ -45,31 +46,7 @@ export default function PeptideCohortTable({ doctorId }) {
                 alert: d.notes || d.clinicalNotes || 'Monitoring active protocol',
               };
             })
-            .filter(rx => {
-              const pName = (rx.name || '').toLowerCase();
-              // STRICT EXCLUSION: Never show Hortman Clinics / Dr. Sezgin Cagatay patients to Dr. Erdmann
-              if (
-                pName.includes('alan maclean') ||
-                pName.includes('mangesh sakharkar') ||
-                pName.includes('matthew taylor') ||
-                rx.physicianId === 'z3aUIMaYsPViG1JgM95r' ||
-                rx.doctorId === 'z3aUIMaYsPViG1JgM95r'
-              ) {
-                return false;
-              }
-
-              if (effectiveDocId === 'dr-hanieh-erdmann') {
-                const docStr = `${rx.doctorName || ''} ${rx.physicianName || ''} ${rx.prescribingDoctor || ''} ${rx.clinicName || ''} ${rx.clinic || ''}`.toLowerCase();
-                if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
-                const isMatch = rx.doctorId === 'dr-hanieh-erdmann' ||
-                  rx.physicianId === 'dr-hanieh-erdmann' ||
-                  docStr.includes('erdmann') ||
-                  docStr.includes('bedaya');
-                return isMatch;
-              }
-
-              return rx.doctorId === effectiveDocId || rx.physicianId === effectiveDocId;
-            });
+            .filter(rx => isPrescriptionInDoctorScope(rx, effectiveDocId));
 
           setPatients(mapped);
         }

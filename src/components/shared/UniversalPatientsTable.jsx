@@ -20,6 +20,7 @@ import StandardDrawer from '../ui/StandardDrawer';
 import { formatAEDtoDual } from '../../utils/currencies';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import AppActionGroup from '../ui/AppActionGroup';
+import { filterDoctorPatients } from '@/domain';
 
 import { useFirestoreCollection } from '../../hooks/data/useFirestoreCollection';
 import { usePatientAggregates } from '../../hooks/data/usePatientAggregates';
@@ -183,51 +184,11 @@ export default function UniversalPatientsTable({ doctorId, accountManagerId, rea
       list = firestorePatients.map(p => ({ ...p, id: p.id || p.objectID }));
     }
 
-    // Safety guard: in doctor viewMode, fail closed to [] if doctorId cannot be resolved (anti-leak guard)
-    if (viewMode === 'doctor' && !effectiveDoctorId && !doctorId) {
-      return [];
-    }
-
-    // Filter by effectiveDoctorId if specified (STRICT CLINICAL ISOLATION - HIPAA / Medical Privacy)
+    // Strict Clinical Segregation (HIPAA / Medical Privacy - Domain Kernel Rule)
     if (effectiveDoctorId || viewMode === 'doctor') {
-      const targetDocId = effectiveDoctorId || 'dr-hanieh-erdmann';
-      list = list.filter(p => {
-        const pId = String(p.id || p.objectID || '').toLowerCase();
-        const pName = cleanStr(p.name || `${p.firstName || ''} ${p.lastName || ''}`);
-
-        if (targetDocId === 'dr-hanieh-erdmann') {
-          // EXPLICIT BLOCKLIST: Under NO circumstance can Hortman Clinics / Dr. Sezgin Cagatay patients leak to Dr. Erdmann
-          if (
-            pId === 'alan-maclean-rutledge' || 
-            pId === 'ke8uxxn1sumgpabnvt32' || 
-            pId === 'matthew-taylor' ||
-            pName.includes('alan maclean') ||
-            pName.includes('mangesh sakharkar') ||
-            pName.includes('matthew taylor') ||
-            p.physicianId === 'z3aUIMaYsPViG1JgM95r'
-          ) {
-            return false;
-          }
-
-          const docStr = `${p.doctorName || ''} ${p.physicianName || ''} ${p.prescribingDoctor || ''} ${p.clinicName || ''} ${p.clinic || ''} ${p.physician || ''}`.toLowerCase();
-          
-          // Strict segregation: explicitly exclude any patient belonging to other clinics or doctors
-          if (docStr.includes('cagatay') || docStr.includes('sezgin') || docStr.includes('hortman')) return false;
-
-          const isDirectMatch = p.physicianId === 'dr-hanieh-erdmann' ||
-            p.assignedDoctorId === 'dr-hanieh-erdmann' ||
-            p.doctorId === 'dr-hanieh-erdmann' ||
-            (Array.isArray(p.doctorIds) && p.doctorIds.includes('dr-hanieh-erdmann'));
-
-          return isDirectMatch || docStr.includes('erdmann') || docStr.includes('bedaya');
-        }
-        return (
-          p.physicianId === targetDocId ||
-          p.assignedDoctorId === targetDocId ||
-          p.doctorId === targetDocId ||
-          (Array.isArray(p.doctorIds) && p.doctorIds.includes(targetDocId))
-        );
-      });
+      const targetDocId = effectiveDoctorId || (viewMode === 'doctor' ? 'dr-hanieh-erdmann' : null);
+      if (viewMode === 'doctor' && !targetDocId) return [];
+      list = filterDoctorPatients(list, targetDocId);
     }
 
     // Multi-patient query support (comma-separated search) with diacritic-insensitivity

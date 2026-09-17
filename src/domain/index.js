@@ -56,3 +56,14 @@ export {
   normalizeProduct,
   getProductAvailableTypes
 } from '@/utils/productNormalizer';
+
+// 7. Clinical Segregation Policy & HIPAA Isolation (Domain Kernel)
+export {
+  isPatientInDoctorScope,
+  filterDoctorPatients,
+  isPrescriptionInDoctorScope,
+  filterDoctorPrescriptions,
+  assertDoctorAccess,
+  DR_ERDMANN_BLOCKED_PATIENT_IDS,
+  DR_ERDMANN_BLOCKED_NAME_SNIPPETS
+} from './clinical/clinicalSegregationPolicy';
