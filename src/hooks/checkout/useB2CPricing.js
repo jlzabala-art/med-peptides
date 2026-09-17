@@ -18,6 +18,8 @@ export function useB2CPricing(cartItemEntries = []) {
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [pricingError, setPricingError] = useState(null);
 
+  const serialized = JSON.stringify(cartItemEntries);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -132,7 +134,7 @@ export function useB2CPricing(cartItemEntries = []) {
     return () => {
       isMounted = false;
     };
-  }, [cartItemEntries]);
+  }, [serialized]);
 
   return { b2cTotals, isPricingLoading, pricingError };
 }

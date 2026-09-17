@@ -314,7 +314,7 @@ function CatalogPage({ onOpenSearch }) {
             return (
               <Link
                 key={tile.id}
-                to={tile.path}
+                href={tile.path}
                 className="browse-tile"
                 style={{ '--tile-accent': tile.accent, borderColor: tile.border }}
               >
@@ -360,7 +360,7 @@ function CatalogPage({ onOpenSearch }) {
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
           <Link
-            to="/protocols"
+            href="/protocols"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               color: 'var(--primary)', fontWeight: 700, fontSize: '0.9rem',
@@ -384,7 +384,7 @@ function CatalogPage({ onOpenSearch }) {
 
         <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingBottom: '4rem' }}>
           <Link
-            to="/collection/peptides"
+            href="/collection/peptides"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
               color: '#7C3AED', fontWeight: 700, fontSize: '0.9rem',
