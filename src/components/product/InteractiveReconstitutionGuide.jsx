@@ -377,6 +377,20 @@ export default function InteractiveReconstitutionGuide({
     return 'custom';
   }, [clinicalPhases, doseValue, doseUnit]);
 
+  const activePhaseObj = useMemo(() => {
+    const found = clinicalPhases.find(p => p.id === activePhaseId);
+    if (found) return found;
+    return {
+      id: 'custom',
+      phaseLabel: lang === 'es' ? 'AJUSTE' : 'CUSTOM',
+      name: lang === 'es' ? 'Personalizada' : 'Custom Dose',
+      badge: lang === 'es' ? 'Manual' : 'Fine-Tune',
+      dose: doseValue,
+      unit: doseUnit,
+      subtitle: `${syringeUnits.toFixed(0)} UI (${liquidVolumeMl.toFixed(2)} mL)`
+    };
+  }, [clinicalPhases, activePhaseId, doseValue, doseUnit, syringeUnits, liquidVolumeMl, lang]);
+
   // Preset arrays are defined as module-level frozen constants (above the component)
 
   // Extract available vial lot sizes strictly from the genuine catalog presentations
@@ -1100,7 +1114,7 @@ export default function InteractiveReconstitutionGuide({
               </div>
             </div>
 
-            {/* Protocol Phase Selector Cards (Google Cloud Console Standard) */}
+            {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Google Cloud Console Standard) */}
             <div className="irg-phase-cards-grid">
               {clinicalPhases.map(phase => {
                 const isActive = activePhaseId === phase.id;
@@ -1167,6 +1181,60 @@ export default function InteractiveReconstitutionGuide({
                   )}
                 </div>
               </button>
+            </div>
+
+            {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card (Option 1 - Zero truncation, ultra-compact) */}
+            <div className="irg-mobile-phase-container">
+              <div className="irg-mobile-segmented-bar" role="tablist" aria-label="Clinical Phase Selector">
+                {clinicalPhases.map(phase => {
+                  const isActive = activePhaseId === phase.id;
+                  return (
+                    <button
+                      key={phase.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => {
+                        triggerHaptic('selection');
+                        setDoseUnit(phase.unit);
+                        setDoseValue(phase.dose);
+                      }}
+                      className={`irg-mobile-tab-btn ${isActive ? 'active' : ''}`}
+                    >
+                      <span className="irg-mtb-label">{phase.phaseLabel}</span>
+                      <span className="irg-mtb-dose font-mono">{phase.dose} {phase.unit}</span>
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activePhaseId === 'custom'}
+                  onClick={() => triggerHaptic('light')}
+                  className={`irg-mobile-tab-btn ${activePhaseId === 'custom' ? 'active' : ''}`}
+                >
+                  <span className="irg-mtb-label">{lang === 'es' ? 'LIBRE' : 'CUSTOM'}</span>
+                  <span className="irg-mtb-dose font-mono">{doseValue} {doseUnit}</span>
+                </button>
+              </div>
+
+              {/* Active Phase Summary Card on Mobile */}
+              <div className={`irg-mobile-active-card ${activePhaseId === 'custom' ? 'custom' : ''}`}>
+                <div className="irg-mac-left">
+                  <div className="irg-mac-tag-row">
+                    <span className="irg-mac-phase-name">{activePhaseObj.phaseLabel}: {activePhaseObj.name}</span>
+                    <span className="irg-mac-badge">{activePhaseObj.badge}</span>
+                  </div>
+                  <div className="irg-mac-sub font-mono">{activePhaseObj.subtitle}</div>
+                </div>
+                <div className="irg-mac-right">
+                  <div className="irg-mac-dose-wrap font-mono">
+                    <span className="irg-mac-num">{activePhaseObj.dose}</span>
+                    <span className="irg-mac-unit">{activePhaseObj.unit}</span>
+                  </div>
+                  <span className="irg-mac-active-pill">✓ {lang === 'es' ? 'Activa' : 'Active'}</span>
+                </div>
+              </div>
             </div>
 
             {/* Fine-Tuning & Micro-Titration Header */}

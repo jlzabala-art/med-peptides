@@ -226,10 +226,183 @@
   margin-bottom: 0.85rem;
 }
 
+.irg-mobile-phase-container {
+  display: none;
+}
+
 @media (max-width: 640px) {
   .irg-phase-cards-grid {
-    grid-template-columns: 1fr;
+    display: none !important;
+  }
+
+  .irg-mobile-phase-container {
+    display: flex !important;
+    flex-direction: column;
     gap: 0.55rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .irg-mobile-segmented-bar {
+    display: flex;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .irg-mobile-tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.35rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+    text-align: center;
+  }
+
+  .irg-mobile-tab-btn.active {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .irg-mtb-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
+    line-height: 1;
+  }
+
+  .irg-mobile-tab-btn.active .irg-mtb-label {
+    color: #1a73e8;
+  }
+
+  .irg-mtb-dose {
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: #334155;
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+
+  .irg-mobile-tab-btn.active .irg-mtb-dose {
+    color: #174ea6;
+  }
+
+  /* Mobile Active Detail Summary Card */
+  .irg-mobile-active-card {
+    background: #ffffff;
+    border: 1.5px solid #1a73e8;
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 1px 3px rgba(26, 115, 232, 0.12);
+    box-sizing: border-box;
+  }
+
+  .irg-mobile-active-card.custom {
+    border-color: #6366f1;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.12);
+  }
+
+  .irg-mac-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .irg-mac-tag-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .irg-mac-phase-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+  }
+
+  .irg-mac-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #1a73e8;
+    background: #e8f0fe;
+    padding: 1px 6px;
+    border-radius: 4px;
+    line-height: 1.3;
+  }
+
+  .irg-mobile-active-card.custom .irg-mac-badge {
+    color: #4f46e5;
+    background: #eef2ff;
+  }
+
+  .irg-mac-sub {
+    font-size: 0.71rem;
+    color: #64748b;
+    margin-top: 2px;
+    line-height: 1.25;
+  }
+
+  .irg-mac-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .irg-mac-dose-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+
+  .irg-mac-num {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #174ea6;
+    line-height: 1;
+  }
+
+  .irg-mobile-active-card.custom .irg-mac-num {
+    color: #312e81;
+  }
+
+  .irg-mac-unit {
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: #5f6368;
+  }
+
+  .irg-mac-active-pill {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #16a34a;
+    margin-top: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
   }
 }
 
@@ -1117,25 +1290,16 @@
 
   .irg-pills-row {
     display: flex;
-    overflow-x: auto;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0.45rem;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-  }
-
-  .irg-pills-row::-webkit-scrollbar {
-    display: none;
+    padding-bottom: 4px;
   }
 
   .irg-pill-btn {
     font-size: 0.82rem;
-    padding: 0.5rem 0.85rem;
-    min-height: 40px;
-    flex-shrink: 0;
-    scroll-snap-align: start;
+    padding: 0.45rem 0.75rem;
+    min-height: 38px;
+    flex: 0 0 auto;
   }
 
   .irg-dose-stepper {
