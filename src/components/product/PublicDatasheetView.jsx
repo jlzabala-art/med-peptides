@@ -25,7 +25,8 @@ import {
   Building2,
   Tag,
   Eye,
-  Loader2
+  Loader2,
+  Droplets
 } from '@/lib/icons';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
@@ -960,166 +961,179 @@ export default function PublicDatasheetView({
             </div>
           </div>
 
-          {/* ── Complete Formulations & Strengths Matrix (Always fully visible in Print & Web) ── */}
-          <div className="pds-all-strengths-matrix">
-            <div className="pds-matrix-header-row">
-              <div>
-                <h4 className="pds-matrix-table-title">
-                  <span>📋</span> Complete Formulations & Strengths Matrix
-                </h4>
-                <p className="pds-matrix-table-sub">
-                  Full analytical index of all approved laboratory presentations, doses and preparation protocols for {name}
-                </p>
+          {/* ── Complete Formulations & Strengths Matrix (Harmonized Navy Header) ── */}
+          <div className="pds-section-card">
+            <div className="pds-section-header">
+              <div className="pds-section-header-left">
+                <div className="pds-section-header-shield">
+                  <Layers size={22} />
+                </div>
+                <div className="pds-section-header-titles">
+                  <div className="pds-section-header-meta-row">
+                    <span className="pds-section-header-category">
+                      {lang === 'es' ? 'MATRIZ ANALÍTICA & ESPECIFICACIONES' : 'ANALYTICAL MATRIX & CLINICAL SPECIFICATIONS'}
+                    </span>
+                    <span className="pds-section-badge">
+                      <CheckCircle2 size={11} /> {lang === 'es' ? 'COMPENDIO OFICIAL' : 'OFFICIAL COMPENDIUM'}
+                    </span>
+                  </div>
+                  <h3 className="pds-section-header-title">
+                    {lang === 'es' ? 'Matriz Completa de Formulaciones y Dosificaciones' : 'Complete Formulations & Strengths Matrix'}
+                  </h3>
+                </div>
               </div>
-              <span className="pds-matrix-print-pill">
-                All Available Options Included
-              </span>
+
+              <div className="pds-section-cert-badge">
+                <Sparkles size={14} color="#38bdf8" />
+                <span>{lang === 'es' ? 'Presentaciones y Concentraciones Aprobadas' : 'All Approved Presentations & Doses'}</span>
+              </div>
             </div>
 
-            <div className="pds-table-responsive">
-              <table className="pds-strengths-table">
-                <thead>
-                  <tr>
-                    <th>Strength / Dose</th>
-                    <th>Presentation Format</th>
-                    <th>Reconstitution Diluent</th>
-                    <th>{lang === 'es' ? 'Concentración Solución (mg/mL)' : 'Solution Concentration (mg/mL)'}</th>
-                    <th>Administration</th>
-                    <th>Analytical Grade</th>
-                    <th>Laboratory Verification</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {availableFormats.flatMap(fmt => {
-                    const compatStrengths = sortedStrengths.filter(s => !fmt.strengths || fmt.strengths.includes(s.id));
-                    const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: 'Standard Clinical Dose' }];
-                    const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
-                    const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet') || fmt.id.includes('oral');
-                    const isSpray = fmt.id.includes('spray') || fmt.id.includes('nasal');
+            <div className="pds-section-card-body">
+              <div className="pds-table-responsive">
+                <table className="pds-strengths-table">
+                  <thead>
+                    <tr>
+                      <th>Strength / Dose</th>
+                      <th>Presentation Format</th>
+                      <th>Reconstitution Diluent</th>
+                      <th>{lang === 'es' ? 'Concentración Solución (mg/mL)' : 'Solution Concentration (mg/mL)'}</th>
+                      <th>Administration</th>
+                      <th>Analytical Grade</th>
+                      <th>Laboratory Verification</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {availableFormats.flatMap(fmt => {
+                      const compatStrengths = sortedStrengths.filter(s => !fmt.strengths || fmt.strengths.includes(s.id));
+                      const list = compatStrengths.length > 0 ? compatStrengths : [{ id: 'std', name: 'Standard Clinical Dose' }];
+                      const isPenOrCart = fmt.id.includes('pen') || fmt.id.includes('cartridge');
+                      const isOral = fmt.id.includes('capsule') || fmt.id.includes('tablet') || fmt.id.includes('oral');
+                      const isSpray = fmt.id.includes('spray') || fmt.id.includes('nasal');
 
-                    return list.map(st => {
-                      const recon = getReconstitutionVolume(st.name);
-                      const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
+                      return list.map(st => {
+                        const recon = getReconstitutionVolume(st.name);
+                        const isCurrentlyActive = fmt.id === activeFormatId && st.id === selectedStrengthId;
 
-                      const diluentText = isPenOrCart 
-                        ? 'Pre-filled Solution (Zero mixing)' 
-                        : isOral 
-                          ? 'Solid Oral Dose (No diluent)'
-                          : isSpray
-                            ? 'Pre-metered Intranasal Solution'
-                            : `${recon.volume} mL BAC Water`;
+                        const diluentText = isPenOrCart 
+                          ? 'Pre-filled Solution (Zero mixing)' 
+                          : isOral 
+                            ? 'Solid Oral Dose (No diluent)'
+                            : isSpray
+                              ? 'Pre-metered Intranasal Solution'
+                              : `${recon.volume} mL BAC Water`;
 
-                      const isVialSolution = !isPenOrCart && !isOral && !isSpray;
-                      const concText = isPenOrCart 
-                        ? 'Pre-formulated Liquid' 
-                        : isOral 
-                          ? 'Unit Dosage'
-                          : isSpray
-                            ? 'Metered Spray Solution'
-                            : `${recon.concentration} mg/mL`;
+                        const concText = isPenOrCart 
+                          ? 'Calibrated Pen Solution' 
+                          : isOral 
+                            ? 'Dry Oral Solid Unit'
+                            : isSpray
+                              ? 'Metered Spray Unit'
+                              : `${recon.concentration} mg/mL`;
 
-                      const adminText = isOral 
-                        ? 'Oral (Gastro-resistant)' 
-                        : isSpray 
-                          ? 'Intranasal (Nasal Mucosa)'
-                          : isPenOrCart
-                            ? 'SubQ Pen Injection'
-                            : 'Subcutaneous (SubQ)';
+                        const adminText = isPenOrCart 
+                          ? 'Subcutaneous Pen Multi-dose' 
+                          : isOral 
+                            ? 'Oral Enteric Unit'
+                            : isSpray
+                              ? 'Intranasal Mucosal'
+                              : 'Subcutaneous / IM (U-100)';
 
-                      return (
-                        <tr 
-                          key={`${fmt.id}-${st.id}`} 
-                          className={isCurrentlyActive ? 'pds-row-selected' : ''}
-                          onClick={() => {
-                            setActiveFormatId(fmt.id);
-                            setSelectedStrengthId(st.id);
-                          }}
-                          style={{ cursor: 'pointer' }}
-                          title={`Click to select ${st.name} ${fmt.name}`}
-                        >
-                          <td data-label="Strength / Dose">
-                            <span className="pds-mobile-card-title">{st.name}</span>
-                            <span className="pds-mobile-card-badges">
-                              <span className="pds-format-mini-badge">{fmt.name}</span>
-                              {isCurrentlyActive && <span className="pds-active-badge">Active Selection</span>}
-                            </span>
-                          </td>
-                          <td data-label="Presentation Format">{fmt.name}</td>
-                          <td data-label="Reconstitution Diluent">{diluentText}</td>
-                          <td data-label={lang === 'es' ? 'Concentración Solución' : 'Solution Concentration'} className="pds-conc-cell">
-                            {isVialSolution ? (
-                              <div className="pds-conc-badge-wrap">
-                                <span className="pds-conc-main-val font-mono">{recon.concentration} mg/mL</span>
-                                <span className="pds-conc-subtext">{lang === 'es' ? 'en vial' : 'in vial'}</span>
-                              </div>
-                            ) : (
-                              concText
-                            )}
-                          </td>
-                          <td data-label="Administration">{adminText}</td>
-                          <td data-label="Analytical Grade" className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
-                          <td data-label="Laboratory Verification">{supplierName}</td>
-                        </tr>
-                      );
-                    });
-                  })}
-                </tbody>
-              </table>
+                        return (
+                          <tr 
+                            key={`${fmt.id}-${st.id}`}
+                            className={isCurrentlyActive ? 'pds-row-highlight' : ''}
+                            onClick={() => {
+                              setActiveFormatId(fmt.id);
+                              setSelectedStrengthId(st.id);
+                              triggerHaptic('selection');
+                            }}
+                            title="Click to view full clinical details for this presentation"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <td data-label="Strength / Dose">
+                              <span className="pds-table-bold-spec">{st.name}</span>
+                              {isCurrentlyActive && (
+                                <span className="pds-table-active-indicator">Selected Active</span>
+                              )}
+                            </td>
+                            <td data-label="Presentation Format">
+                              <span className={`pds-format-pill pds-format-${fmt.id}`}>
+                                {fmt.name}
+                              </span>
+                            </td>
+                            <td data-label="Reconstitution Diluent">{diluentText}</td>
+                            <td data-label="Solution Concentration (mg/mL)" className="font-mono">
+                              {!isPenOrCart && !isOral && !isSpray ? (
+                                <span className="pds-conc-highlight">{concText}</span>
+                              ) : (
+                                concText
+                              )}
+                            </td>
+                            <td data-label="Administration">{adminText}</td>
+                            <td data-label="Analytical Grade" className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
+                            <td data-label="Laboratory Verification">{supplierName}</td>
+                          </tr>
+                        );
+                      });
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── Block 2.5: Interactive Reconstitution Simulator & Precision Syringe Visualizer (Optional & Toggleable) ── */}
-        <section id="reconstitution-guide" className="pds-reconstitution-section">
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 16px',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            marginBottom: showReconstitutionSection ? '14px' : '0',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FlaskConical size={17} color="#0284c7" />
-              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>
-                Reconstitution Simulator & Syringe Visualizer
-              </span>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '10px' }}>
-                Optional Tool
-              </span>
+        {/* ── Block 2: Reconstitution Protocol & Interactive Simulator (Harmonized Navy Header) ── */}
+        <section id="reconstitution-guide" className="pds-section-card">
+          <div className="pds-section-header">
+            <div className="pds-section-header-left">
+              <div className="pds-section-header-shield">
+                <FlaskConical size={22} />
+              </div>
+              <div className="pds-section-header-titles">
+                <div className="pds-section-header-meta-row">
+                  <span className="pds-section-header-category">
+                    {lang === 'es' ? 'PROTOCOLO DE RECONSTITUCIÓN & DOSIMETRÍA' : 'RECONSTITUTION PROTOCOL & DOSIMETRY'}
+                  </span>
+                  <span className="pds-section-badge">
+                    <CheckCircle2 size={11} /> {lang === 'es' ? 'SIMULADOR CLÍNICO' : 'PRECISION SIMULATOR'}
+                  </span>
+                </div>
+                <h3 className="pds-section-header-title">
+                  {lang === 'es' ? 'Guía Interactiva de Reconstitución y Calibrador U-100' : 'Interactive Reconstitution & U-100 Syringe Simulator'}
+                </h3>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowReconstitutionSection(prev => !prev)}
-              style={{
-                backgroundColor: showReconstitutionSection ? '#f1f5f9' : '#003666',
-                color: showReconstitutionSection ? '#334155' : '#ffffff',
-                border: '1px solid #cbd5e1',
-                borderRadius: '8px',
-                padding: '6px 14px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {showReconstitutionSection ? 'Hide Section ✕' : 'Show Simulator ▾'}
-            </button>
+
+            <div className="pds-section-header-right">
+              <div className="pds-section-cert-badge">
+                <Droplets size={14} color="#38bdf8" />
+                <span>U-100 Standard (1.0 mL = 100 U)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowReconstitutionSection(prev => !prev)}
+                className="pds-section-toggle-btn"
+                title={showReconstitutionSection ? (lang === 'es' ? 'Ocultar simulador' : 'Hide simulator') : (lang === 'es' ? 'Mostrar simulador' : 'Show simulator')}
+              >
+                {showReconstitutionSection ? (lang === 'es' ? 'Ocultar Simulador ✕' : 'Hide Simulator ✕') : (lang === 'es' ? 'Mostrar Simulador ▾' : 'Show Simulator ▾')}
+              </button>
+            </div>
           </div>
 
           {showReconstitutionSection && (
-            <InteractiveReconstitutionGuide
-              product={product}
-              selectedStrength={selectedStrength}
-              availableStrengths={sortedStrengths}
-              activeFormatId={activeFormatId}
-              activeFormat={activeFormat}
-              supplierName={supplierName}
-              lang={lang}
-            />
+            <div className="pds-section-card-body" style={{ padding: 0 }}>
+              <InteractiveReconstitutionGuide
+                product={product}
+                selectedStrength={selectedStrength}
+                availableStrengths={sortedStrengths}
+                activeFormatId={activeFormatId}
+                activeFormat={activeFormat}
+                supplierName={supplierName}
+                lang={lang}
+              />
+            </div>
           )}
         </section>
 

@@ -1614,3 +1614,155 @@
     size: A4 portrait;
   }
 }
+
+/* ── Unified Navy Blue Section Cards (Harmonized with ProductTraceabilityCard) ── */
+.pds-section-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -4px rgba(0, 54, 102, 0.08);
+  overflow: hidden;
+  margin: 1.75rem 0;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pds-section-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 24px -4px rgba(0, 54, 102, 0.12);
+}
+
+.pds-section-header {
+  background: linear-gradient(135deg, #003666 0%, #002244 100%);
+  color: #ffffff;
+  padding: 1.15rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pds-section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.pds-section-header-shield {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
+.pds-section-header-titles {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pds-section-header-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.pds-section-header-category {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.pds-section-badge {
+  background-color: #10b981;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.pds-section-header-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.pds-section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pds-section-cert-badge {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.pds-section-toggle-btn {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.42rem 0.9rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pds-section-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.pds-section-card-body {
+  padding: 1.25rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .pds-section-header {
+    padding: 1rem 1.15rem;
+  }
+  .pds-section-header-shield {
+    width: 36px;
+    height: 36px;
+  }
+  .pds-section-header-title {
+    font-size: 1rem;
+  }
+  .pds-section-cert-badge {
+    display: none;
+  }
+}
