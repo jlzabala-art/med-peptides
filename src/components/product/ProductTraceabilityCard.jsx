@@ -81,7 +81,8 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         .replace(/supplier=(all|supplier-all[^&]*)/gi, `supplier=${encodeURIComponent(defaultSupplier)}`)
     : canonicalProductUrl;
   const activeMonographUrl = cleanMonographUrl.includes('#') ? cleanMonographUrl : `${cleanMonographUrl}#specs-section`;
-  const pdfUrl = `/api/product-sheet/${product.id || slug}?format=vial`;
+  const pdfUrl = `/api/product-sheet/${product.id || slug}?format=${encodeURIComponent(defaultFormat)}`;
+  const fullPdfUrl = `${origin}${pdfUrl}`;
 
   const handleCopyHash = async () => {
     await navigator.clipboard.writeText(activeMonographUrl).catch(() => {});
@@ -305,53 +306,53 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         </div>
       </div>
 
-      {/* ── Verification QR & PDF Download Footer ── */}
+      {/* ── Verification QR & CoA PDF Access Footer ── */}
       <div className="ptc-footer-verification">
         <div className="ptc-footer-qr-group">
-          <div className="ptc-footer-qr-box">
-            <QRCodeSVG value={activeMonographUrl} size={62} level="M" />
-          </div>
-          <div className="ptc-footer-qr-text">
-            <div className="ptc-footer-qr-title">
-              {t.digitalRecordTitle}
-            </div>
-            <div className="ptc-footer-qr-desc">
-              {t.digitalRecordDesc}
-            </div>
-            <div className="ptc-footer-qr-meta">
-              Synth Date: {mfgDate} · Retest: {expDate}
-            </div>
-          </div>
-        </div>
-
-        {/* CTAs */}
-        <div className="ptc-footer-ctas">
           <a
-            href={pdfUrl}
+            href={fullPdfUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="ptc-btn-primary"
+            className="ptc-footer-qr-box"
+            title="Scan with phone camera or click to open official Analytical CoA & Monograph PDF"
+            style={{ textDecoration: 'none', cursor: 'pointer', transition: 'transform 0.15s ease, box-shadow 0.15s ease' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'; }}
           >
-            <Download size={15} /> {t.downloadPdf}
+            <QRCodeSVG value={fullPdfUrl} size={68} level="M" />
           </a>
-
-          <a
-            href={product?.coaUrl || '#specs-section'}
-            target={product?.coaUrl ? '_blank' : '_self'}
-            rel="noopener noreferrer"
-            className="ptc-btn-secondary"
-          >
-            <ExternalLink size={15} color="#64748b" /> {t.viewCoaPortal}
-          </a>
-
-          <button
-            type="button"
-            onClick={handleCopyHash}
-            className="ptc-btn-copy"
-          >
-            {copied ? <Check size={14} color="#16a34a" /> : <Copy size={14} />}
-            {copied ? t.copied : t.copyLink}
-          </button>
+          <div className="ptc-footer-qr-text">
+            <div className="ptc-footer-qr-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>{t.digitalRecordTitle || 'Digital Verification Record'}</span>
+              <a
+                href={fullPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.68rem',
+                  color: '#0284c7',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  backgroundColor: '#f0f9ff',
+                  padding: '2px 7px',
+                  borderRadius: '4px',
+                  border: '1px solid #bae6fd'
+                }}
+              >
+                <span>Open CoA PDF</span>
+                <ExternalLink size={10} />
+              </a>
+            </div>
+            <div className="ptc-footer-qr-desc">
+              Scan QR code with your mobile camera or click directly to access the official Analytical Certificate of Analysis (CoA) &amp; Clinical Monograph PDF.
+            </div>
+            <div className="ptc-footer-qr-meta">
+              Batch Code: <strong style={{ color: '#0f172a' }}>{batchCode}</strong> · Synth Date: {mfgDate} · Retest: {expDate}
+            </div>
+          </div>
         </div>
       </div>
     </div>

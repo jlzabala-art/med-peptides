@@ -60,12 +60,43 @@
   max-width: 800px;
 }
 
-/* ── Workspace 2-Column Grid ── */
+/* ── 1. Vial Preparation Block (Top Horizontal Section) ── */
+.irg-vial-prep-block {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.irg-vial-prep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.15rem;
+}
+
+@media (max-width: 860px) {
+  .irg-vial-prep-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+}
+
+/* ── 2. Workspace 2-Column Grid (Laptop & Desktop Balanced Standard) ── */
 .irg-workspace {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 1.75rem;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .irg-workspace {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 }
 
 /* ── Left Column: Controls ── */
@@ -221,9 +252,15 @@
 /* Clinical Phase Selector Cards (Google Cloud Console Standard) */
 .irg-phase-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.65rem;
   margin-bottom: 0.85rem;
+}
+
+@media (max-width: 1200px) {
+  .irg-phase-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .irg-mobile-phase-container {

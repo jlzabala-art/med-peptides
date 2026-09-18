@@ -253,118 +253,83 @@ export default function InteractiveReconstitutionGuide({
     };
   }, [vialMg, bacWaterMl, doseUnit, doseValue]);
 
-  // ── Clinical Phase Protocols (Titration vs Maintenance vs Custom) ───────────
+  // ── Clinical Phase Protocols (3 Phases: Titration, Maintenance, Optimization + Custom) ──
   const clinicalPhases = useMemo(() => {
     const pName = String(product?.name || '').toLowerCase();
     const isMetabolic = pName.includes('retatrutide') || pName.includes('tirzepatide') || pName.includes('semaglutide') || pName.includes('cagrilintide') || pName.includes('glp');
+    const isTb500 = pName.includes('tb-500') || pName.includes('tb500') || pName.includes('thymosin');
     const vMg = safeVialMg;
     const conc = concentrationMgMl > 0 ? concentrationMgMl : (vMg / (safeBacMl || 2.0));
 
-    if (isMetabolic) {
-      // Phase 1: Titration (2.5 mg) -> volume = 2.5 / conc
-      // Phase 2: Maintenance (5.0 mg) -> volume = 5.0 / conc
-      const p1Dose = 2.5;
-      const p1Vol = p1Dose / conc;
-      const p1Units = Math.round(p1Vol * 100);
-      const p1Doses = Math.floor((vMg / p1Dose) * 10) / 10;
+    // Helper to safely format phase objects with exact UI and doses calculation
+    const createPhase = (id, dose, unit, pLabel, name, title, badge) => {
+      const dMg = unit === 'mcg' ? dose / 1000 : dose;
+      const vol = conc > 0 ? dMg / conc : 0;
+      const units = Math.round(vol * 100);
+      const doses = dMg > 0 ? Math.floor((vMg / dMg) * 10) / 10 : 0;
+      return {
+        id,
+        dose,
+        unit,
+        phaseLabel: pLabel,
+        name,
+        title,
+        badge,
+        subtitle: `${units} UI (${vol.toFixed(2)} mL) · ~${doses} ${lang === 'es' ? 'dosis' : 'doses'}`
+      };
+    };
 
-      const p2Dose = 5.0;
-      const p2Vol = p2Dose / conc;
-      const p2Units = Math.round(p2Vol * 100);
-      const p2Doses = Math.floor((vMg / p2Dose) * 10) / 10;
+    // 1. TB-500 / Thymosin Beta-4 Protocol (1.0 mg - 2.0 mg - 2.5/3.0 mg)
+    if (isTb500) {
+      const p1Dose = vMg <= 5 ? 1.0 : (vMg <= 10 ? 1.25 : 2.0);
+      const p2Dose = vMg <= 5 ? 2.0 : 2.5;
+      const p3Dose = vMg <= 5 ? 2.5 : (vMg <= 10 ? 3.0 : 5.0);
 
       return [
-        {
-          id: 'phase_titration',
-          dose: p1Dose,
-          unit: 'mg',
-          phaseLabel: lang === 'es' ? 'FASE 1' : 'PHASE 1',
-          name: lang === 'es' ? 'Titulación' : 'Titration',
-          title: lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration',
-          badge: lang === 'es' ? 'Inicio' : 'Initial',
-          subtitle: `${p1Units} UI (${p1Vol.toFixed(2)} mL) · ~${p1Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
-        },
-        {
-          id: 'phase_maintenance',
-          dose: p2Dose,
-          unit: 'mg',
-          phaseLabel: lang === 'es' ? 'FASE 2' : 'PHASE 2',
-          name: lang === 'es' ? 'Mantenimiento' : 'Maintenance',
-          title: lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance',
-          badge: lang === 'es' ? 'Objetivo' : 'Target',
-          subtitle: `${p2Units} UI (${p2Vol.toFixed(2)} mL) · ~${p2Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
-        }
+        createPhase('phase_tb_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', `${p1Dose} mg`),
+        createPhase('phase_tb_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', `${p2Dose} mg`),
+        createPhase('phase_tb_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Fase 3: Pauta Avanzada' : 'Phase 3: Advanced Protocol', `${p3Dose} mg`)
       ];
     }
 
-    // Micro-dosed compounds (BPC-157, Epithalon, CJC-1295, Ipamorelin, etc.)
+    // 2. Metabolic Peptides (Retatrutide, Tirzepatide, Semaglutide)
+    if (isMetabolic) {
+      const p1Dose = Math.min(2.5, vMg * 0.5);
+      const p2Dose = Math.min(5.0, vMg);
+      const p3Dose = vMg >= 15 ? 7.5 : (vMg >= 10 ? 5.0 : Math.min(3.75, vMg));
+
+      return [
+        createPhase('phase_met_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', lang === 'es' ? 'Inicio' : 'Initial'),
+        createPhase('phase_met_maintenance', p2Dose, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance', lang === 'es' ? 'Estándar' : 'Standard'),
+        createPhase('phase_met_optimization', p3Dose, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Objetivo' : 'Target', lang === 'es' ? 'Fase 3: Dosis Óptima' : 'Phase 3: Target Dose', lang === 'es' ? 'Avanzada' : 'Target')
+      ];
+    }
+
+    // 3. Micro-dosed compounds (BPC-157, Epithalon, CJC-1295, Ipamorelin)
     const isMicro = pName.includes('bpc') || pName.includes('epithalon') || pName.includes('ipamorelin') || pName.includes('cjc') || vMg <= 5;
     if (isMicro) {
-      const p1Dose = 0.25; // 250 mcg
-      const p1Vol = p1Dose / conc;
-      const p1Units = Math.round(p1Vol * 100);
-      const p1Doses = Math.floor((vMg / p1Dose) * 10) / 10;
-
-      const p2Dose = 0.50; // 500 mcg
-      const p2Vol = p2Dose / conc;
-      const p2Units = Math.round(p2Vol * 100);
-      const p2Doses = Math.floor((vMg / p2Dose) * 10) / 10;
+      const p1Dose = doseUnit === 'mcg' ? 250 : 0.25;
+      const p2Dose = doseUnit === 'mcg' ? 500 : 0.50;
+      const p3Dose = doseUnit === 'mcg' ? 750 : 0.75;
+      const u = doseUnit === 'mcg' ? 'mcg' : 'mg';
 
       return [
-        {
-          id: 'phase_low',
-          dose: doseUnit === 'mcg' ? 250 : p1Dose,
-          unit: doseUnit === 'mcg' ? 'mcg' : 'mg',
-          phaseLabel: lang === 'es' ? 'PAUTA 1' : 'TIER 1',
-          name: lang === 'es' ? 'Inicio' : 'Initial',
-          title: lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol',
-          badge: '250 mcg',
-          subtitle: `${p1Units} UI (${p1Vol.toFixed(2)} mL) · ~${p1Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
-        },
-        {
-          id: 'phase_standard',
-          dose: doseUnit === 'mcg' ? 500 : p2Dose,
-          unit: doseUnit === 'mcg' ? 'mcg' : 'mg',
-          phaseLabel: lang === 'es' ? 'PAUTA 2' : 'TIER 2',
-          name: lang === 'es' ? 'Estándar' : 'Standard',
-          title: lang === 'es' ? 'Pauta Estándar' : 'Standard Protocol',
-          badge: '500 mcg',
-          subtitle: `${p2Units} UI (${p2Vol.toFixed(2)} mL) · ~${p2Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
-        }
+        createPhase('phase_micro_low', p1Dose, u, lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol', '250 mcg'),
+        createPhase('phase_micro_std', p2Dose, u, lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Estándar' : 'Standard', lang === 'es' ? 'Pauta Estándar' : 'Standard Protocol', '500 mcg'),
+        createPhase('phase_micro_opt', p3Dose, u, lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Intensiva' : 'Intensive', lang === 'es' ? 'Pauta Intensiva' : 'Intensive Protocol', '750 mcg')
       ];
     }
 
-    // Standard fallback by vial size
-    const d1 = vMg <= 10 ? 2.5 : 5.0;
-    const d2 = vMg <= 10 ? 5.0 : 10.0;
-    const v1 = d1 / conc;
-    const u1 = Math.round(v1 * 100);
-    const n1 = Math.floor((vMg / d1) * 10) / 10;
-    const v2 = d2 / conc;
-    const u2 = Math.round(v2 * 100);
-    const n2 = Math.floor((vMg / d2) * 10) / 10;
+    // 4. Standard Fallback scaled safely to concentration bounds (≤ 80 Units)
+    const maxSafeDose = Math.min(vMg, conc * 0.85);
+    const d1 = +(Math.max(0.25, Math.min(2.5, maxSafeDose * 0.35)).toFixed(2));
+    const d2 = +(Math.max(d1, Math.min(5.0, maxSafeDose * 0.65)).toFixed(2));
+    const d3 = +(Math.max(d2, Math.min(vMg, maxSafeDose)).toFixed(2));
 
     return [
-      {
-        id: 'phase_p1',
-        dose: d1,
-        unit: 'mg',
-        phaseLabel: lang === 'es' ? 'FASE 1' : 'PHASE 1',
-        name: lang === 'es' ? 'Inicio' : 'Initial',
-        title: lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol',
-        badge: `${d1} mg`,
-        subtitle: `${u1} UI (${v1.toFixed(2)} mL) · ~${n1} ${lang === 'es' ? 'dosis' : 'doses'}`
-      },
-      {
-        id: 'phase_p2',
-        dose: d2,
-        unit: 'mg',
-        phaseLabel: lang === 'es' ? 'FASE 2' : 'PHASE 2',
-        name: lang === 'es' ? 'Regular' : 'Regular',
-        title: lang === 'es' ? 'Pauta Regular' : 'Standard Protocol',
-        badge: `${d2} mg`,
-        subtitle: `${u2} UI (${v2.toFixed(2)} mL) · ~${n2} ${lang === 'es' ? 'dosis' : 'doses'}`
-      }
+      createPhase('phase_gen_p1', d1, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol', `${d1} mg`),
+      createPhase('phase_gen_p2', d2, 'mg', lang === 'es' ? 'FASE 2' : 'PHASE 2', lang === 'es' ? 'Mantenimiento' : 'Maintenance', lang === 'es' ? 'Pauta Regular' : 'Standard Protocol', `${d2} mg`),
+      createPhase('phase_gen_p3', d3, 'mg', lang === 'es' ? 'FASE 3' : 'PHASE 3', lang === 'es' ? 'Avanzada' : 'Advanced', lang === 'es' ? 'Pauta Óptima' : 'Optimized Protocol', `${d3} mg`)
     ];
   }, [product, safeVialMg, safeBacMl, concentrationMgMl, doseUnit, lang]);
 
@@ -1004,13 +969,10 @@ export default function InteractiveReconstitutionGuide({
         )}
       </div>
 
-      {/* ── Interactive Workspace Grid ── */}
-      <div className="irg-workspace">
-        
-        {/* Left Column: Input Parameter Controls */}
-        <div className="irg-controls-panel">
-          
-          {/* Control 1: Vial Content */}
+      {/* ── 1. Vial Solution Preparation Block (Top Horizontal Grid) ── */}
+      <div className="irg-vial-prep-block">
+        <div className="irg-vial-prep-grid">
+          {/* Control 1: Vial Active Content */}
           <div className="irg-control-group">
             <div className="irg-control-label-row">
               <label className="irg-label">
@@ -1041,7 +1003,7 @@ export default function InteractiveReconstitutionGuide({
             )}
           </div>
 
-          {/* Control 2: Bacteriostatic Water (BAC) */}
+          {/* Control 2: Bacteriostatic Water Added */}
           <div className="irg-control-group">
             <div className="irg-control-label-row">
               <label className="irg-label">
@@ -1080,38 +1042,40 @@ export default function InteractiveReconstitutionGuide({
                 aria-label="BAC Water Volume Slider"
               />
             </div>
-            <div className="irg-concentration-tag">
-              <span className="irg-ct-label">{t.resultingConcLabel || 'Resulting Concentration'}:</span>
-              <strong className="irg-ct-val font-mono">
-                {concentrationMgMl.toFixed(2)} mg/mL ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL)
-              </strong>
+          </div>
+        </div>
+
+        {/* Global Concentration Banner */}
+        <div className="irg-solution-banner">
+          <div className="irg-sb-icon">💡</div>
+          <div className="irg-sb-body">
+            <div className="irg-sb-title">
+              <span>{lang === 'es' ? 'Concentración Nominal del Vial:' : 'Nominal Vial Concentration:'}</span>
+              <strong className="font-mono font-bold text-sky-950"> {concentrationMgMl.toFixed(2)} mg/mL</strong>
+              <span className="irg-sb-tag font-mono"> ({Math.round(concentrationMcgMl).toLocaleString()} mcg/mL · {safeVialMg} mg en {safeBacMl.toFixed(1)} mL BAC)</span>
+            </div>
+            <div className="irg-sb-desc">
+              {lang === 'es' 
+                ? 'La concentración es uniforme en todo el volumen. Seleccione la fase clínica o ajuste libremente los mg/mcg a extraer en la jeringa:' 
+                : 'Uniform concentration across vial volume. Select your clinical phase or adjust exact dose to draw in the U-100 syringe below:'}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Control 3: Target Dose to Draw */}
+      {/* ── 2. Target Dose & Precision Syringe Calibration Workspace ── */}
+      <div className="irg-workspace">
+        
+        {/* Left Column: Target Dose Selector & Step Stepper */}
+        <div className="irg-controls-panel">
+          
           <div className="irg-control-group">
             <div className="irg-control-label-row">
               <label className="irg-label">
                 <CheckCircle2 size={14} color="#0284c7" />
                 {t.targetDoseLabel || 'Target Injection Dose to Draw'}
               </label>
-            </div>
-
-            {/* Explanatory Banner: Solution Concentration vs Injection Dose */}
-            <div className="irg-solution-banner">
-              <div className="irg-sb-icon">💡</div>
-              <div className="irg-sb-body">
-                <div className="irg-sb-title">
-                  <span>{lang === 'es' ? 'Concentración de la Solución:' : 'Vial Solution Concentration:'}</span>
-                  <strong className="font-mono font-bold text-sky-950"> {concentrationMgMl.toFixed(1)} mg/mL</strong>
-                  <span className="irg-sb-tag"> ({safeVialMg} mg / {safeBacMl.toFixed(1)} mL BAC)</span>
-                </div>
-                <div className="irg-sb-desc">
-                  {lang === 'es' 
-                    ? 'La concentración es fija en el vial. Seleccione abajo la fase clínica prescrita o ajuste la dosis exacta a inyectar:' 
-                    : 'Concentration is fixed in the vial solution. Select the prescribed clinical phase below or fine-tune exact target dose:'}
-                </div>
-              </div>
+              <span className="irg-val-badge font-mono">{doseValue} {doseUnit}</span>
             </div>
 
             {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Google Cloud Console Standard) */}
@@ -1183,7 +1147,7 @@ export default function InteractiveReconstitutionGuide({
               </button>
             </div>
 
-            {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card (Option 1 - Zero truncation, ultra-compact) */}
+            {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card */}
             <div className="irg-mobile-phase-container">
               <div className="irg-mobile-segmented-bar" role="tablist" aria-label="Clinical Phase Selector">
                 {clinicalPhases.map(phase => {
@@ -1355,20 +1319,44 @@ export default function InteractiveReconstitutionGuide({
               </div>
             </div>
 
-            {/* Safety Alerts */}
-            {isOverSyringe && (
-              <div className="irg-alert irg-alert-warning" role="alert">
-                <AlertTriangle size={16} />
-                <span>{t.warnExceedsSyringe || '⚠ Exceeds single syringe capacity (100 Units / 1.0 mL). Dilute with less BAC water or divide into two separate draws.'}</span>
+            {/* Informative Guidance on Multi-Syringe Volumetric Bounds */}
+            {isOverSyringe ? (
+              <div className="irg-alert irg-alert-warning" role="alert" style={{ background: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }}>
+                <AlertTriangle size={16} color="#d97706" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span>
+                    {lang === 'es' 
+                      ? `La dosis requiere ${liquidVolumeMl.toFixed(2)} mL (${syringeUnits.toFixed(0)} UI). Se recomienda dividir en 2 cargas de ${(syringeUnits / 2).toFixed(0)} UI, o reducir el volumen de agua BAC para mayor concentración.`
+                      : `Target dose requires ${liquidVolumeMl.toFixed(2)} mL (${syringeUnits.toFixed(0)} Units). Divide into 2 draws of ${(syringeUnits / 2).toFixed(0)} Units each, or dilute with less BAC water.`}
+                  </span>
+                  {safeBacMl > 1.0 && (
+                    <button
+                      type="button"
+                      onClick={() => setBacWaterMl(1.0)}
+                      style={{
+                        alignSelf: 'flex-start',
+                        background: '#ffffff',
+                        border: '1px solid #f59e0b',
+                        color: '#b45309',
+                        borderRadius: '6px',
+                        padding: '2px 8px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        marginTop: '2px'
+                      }}
+                    >
+                      {lang === 'es' ? '⚡ Reconstituir con 1.0 mL BAC (más concentrado)' : '⚡ Reconstitute with 1.0 mL BAC (higher concentration)'}
+                    </button>
+                  )}
+                </div>
               </div>
-            )}
-
-            {isUnderMeasured && !isOverSyringe && (
+            ) : isUnderMeasured ? (
               <div className="irg-alert irg-alert-info" role="status">
                 <Info size={16} />
                 <span>{t.tipSmallVolume || 'ℹ Small draw volume (< 5 Units). Consider adding more BAC water for easier and more precise visual measurement.'}</span>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* ── Realistic Interactive U-100 Syringe Graphic ── */}
@@ -1417,13 +1405,17 @@ export default function InteractiveReconstitutionGuide({
                 </div>
 
                 {/* Active Alignment Callout Arrow */}
-                {!isOverSyringe && syringeUnits > 0 && (
+                {syringeUnits > 0 && (
                   <div 
                     className="irg-syringe-pointer"
                     style={{ left: `${fillPct}%` }}
                   >
                     <div className="irg-pointer-pill font-mono">
-                      ▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)
+                      {isOverSyringe ? (
+                        <span>▲ 100 U max ({liquidVolumeMl.toFixed(2)} mL total)</span>
+                      ) : (
+                        <span>▲ {syringeUnits.toFixed(1)} U ({liquidVolumeMl.toFixed(2)} mL)</span>
+                      )}
                     </div>
                   </div>
                 )}

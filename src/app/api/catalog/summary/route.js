@@ -515,9 +515,10 @@ export async function buildCatalogSummary(searchParams) {
         if (!ex.molecularWeight && (data.molecularWeight || data.scientificData?.molecularWeight)) ex.molecularWeight = data.molecularWeight || data.scientificData?.molecularWeight;
         if (!ex.casNumber && (data.casNumber || data.scientificData?.casNumber)) ex.casNumber = data.casNumber || data.scientificData?.casNumber;
         if (!ex.pubchemCid && (data.pubchemCid || data.scientificData?.pubchemCid)) ex.pubchemCid = data.pubchemCid || data.scientificData?.pubchemCid;
-        if (!ex.purity && data.purity) ex.purity = data.purity;
-        if (!ex.hasCOA && (data.hasCOA || data.coaUrl)) { ex.hasCOA = true; ex.coaUrl = data.coaUrl || 'Verified CoA'; }
-        if (!ex.primaryGoal && data.primaryGoal) ex.primaryGoal = data.primaryGoal;
+        if (!ex.hasCOA && (data.hasCOA || data.coaUrl)) { 
+          ex.hasCOA = true; 
+          if (data.coaUrl && String(data.coaUrl).startsWith('http')) ex.coaUrl = data.coaUrl; 
+        }
       } else {
         groupsMap.set(key, {
           ...data,

@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { adminDb } from '../../../../lib/firebaseAdmin';
 import { getPeptideScientificData } from '../../../../utils/knownPeptideData';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://atlassolutions.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
 const BRAND_NAME = 'Atlas Solutions';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666 (Deep Corporate Navy)
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488 (Medical Teal)
@@ -532,7 +532,25 @@ export async function GET(request, context) {
         }
         const vDose = cleanPdfText(v.dosage || v.dose || 'Standard Dose');
         const vPres = cleanPdfText(v.presentationName || v.presentation || v.format || 'Lyophilized Sterile Vial');
-        const vRecon = cleanPdfText(v.reconstitutionGuide || '1.0 - 2.0 mL Bacteriostatic Water');
+        const vPresLower = String(vPres || '').toLowerCase();
+        
+        let reconText = v.reconstitutionGuide;
+        if (vPresLower.includes('single') && (vPresLower.includes('pen') || vPresLower.includes('cartridge'))) {
+          reconText = 'Pre-filled Cartridge (Ready to use)';
+        } else if (vPresLower.includes('double') || vPresLower.includes('dual')) {
+          reconText = 'Dual-Chamber In-Device Bypass';
+        } else if (vPresLower.includes('pen') || vPresLower.includes('cartridge') || vPresLower.includes('pod') || vPresLower.includes('pre_filled') || vPresLower.includes('prefilled')) {
+          reconText = 'Pre-filled Cartridge (Ready to use)';
+        } else if (vPresLower.includes('spray') || vPresLower.includes('nasal')) {
+          reconText = 'Pre-mixed Solution (Ready to use)';
+        } else if (vPresLower.includes('device') || vPresLower.includes('hardware')) {
+          reconText = 'Delivery Hardware (No diluent)';
+        } else if (vPresLower.includes('capsule') || vPresLower.includes('tablet') || vPresLower.includes('oral')) {
+          reconText = 'Oral Formulation (No diluent)';
+        } else {
+          reconText = reconText || '1.0 - 2.0 mL Bacteriostatic Water';
+        }
+        const vRecon = cleanPdfText(reconText);
         const vPurity = cleanPdfText(v.purity || v.grade || '>= 99.0% (RP-HPLC Verified)');
 
         page.drawText(trunc(vDose, 20), { x: MRG + 8, y, size: 7.2, font: fontB, color: DARK_GRAY });

@@ -1,9 +1,10 @@
 /* eslint-disable react-refresh/only-export-components -- Next.js App Router: metadata exports must live in page/layout files */
 import React from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { adminDb } from '../../../lib/firebaseAdmin';
 import { processProductVariants } from '../../../utils/productVariantProcessing';
 import { sanitizePublicProduct } from '../../../repositories/publicDataSanitizer';
+import { deriveCanonicalIdentity } from '../../../utils/canonicalProductRegistry';
 import PublicDatasheetView from '../../../components/product/PublicDatasheetView';
 
 export const dynamic = 'force-dynamic';
@@ -39,9 +40,20 @@ async function getPublicProduct(slug, supplierFilter = null) {
 
   let doc = null;
 
+  // 1b. Canonical registry resolution (e.g. 'tb-500-thymosin-beta-4' -> 'tb-500')
+  const canonicalIdent = deriveCanonicalIdentity({ id: target, name: target });
+  if (canonicalIdent.isRecognized && canonicalIdent.canonicalKey && canonicalIdent.canonicalKey !== target) {
+    const canonicalDoc = await adminDb.collection('products').doc(canonicalIdent.canonicalKey).get().catch(() => null);
+    if (canonicalDoc?.exists && canonicalDoc.data().status !== 'archived' && canonicalDoc.data().status !== 'hidden') {
+      doc = canonicalDoc;
+    }
+  }
+
   // 2. Try by doc ID
-  const byId = await adminDb.collection('products').doc(target).get().catch(() => null);
-  if (byId?.exists) doc = byId;
+  if (!doc) {
+    const byId = await adminDb.collection('products').doc(target).get().catch(() => null);
+    if (byId?.exists) doc = byId;
+  }
 
   // 3. Try slug field
   if (!doc) {
@@ -61,7 +73,15 @@ async function getPublicProduct(slug, supplierFilter = null) {
 
   const raw = { id: doc.id, ...doc.data() };
   raw.slug = raw.slug || doc.id || slug;
-  if (raw.status === 'hidden' || raw.status === 'archived') return null;
+
+  // 🔄 Transparent redirection for archived duplicates / alias documents
+  if (raw.status === 'hidden' || raw.status === 'archived') {
+    const fallbackTarget = raw.redirectSlug || raw.canonicalKey;
+    if (fallbackTarget && fallbackTarget !== target) {
+      return getPublicProduct(fallbackTarget, supplierFilter);
+    }
+    return null;
+  }
 
   // 🛡️ Clinical Guardrail: Public Monograph & Reconstitution is strictly for Peptides
   const rawType = (raw.type || raw.product_type || '').toLowerCase();
@@ -241,6 +261,11 @@ export default async function PublicProductRoute({ params, searchParams }) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
   const slug = resolvedParams?.slug;
+  const rawTarget = decodeURIComponent(slug || '').toLowerCase().trim();
+  if (rawTarget.includes('verified coa') || rawTarget.includes('coa attached') || rawTarget === 'verified coa attached') {
+    redirect('/catalog');
+  }
+
   const supplierFilter = resolvedSearchParams?.supplier || resolvedSearchParams?.supplierId || null;
   const initialFormat = resolvedSearchParams?.format || resolvedSearchParams?.presentation || null;
   const initialStrength = resolvedSearchParams?.dose || resolvedSearchParams?.strength || null;

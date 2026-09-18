@@ -5,6 +5,8 @@
  * margins, distributor markups, or private clinical admin notes to public endpoints.
  */
 
+import { getFreshPharmaceuticalDates, ensureCompliantPharmaceuticalDates } from '../utils/pharmaceuticalDates.js';
+
 // ─── Whitelist of Allowed Public Variant Fields (Safe-by-Default) ───────────
 // IMPORTANT: Any new variant field must be explicitly added here to be exposed.
 // Do NOT use only stripSensitiveFields on variants — new financial fields not
@@ -145,8 +147,6 @@ export function sanitizePublicProtocol(rawProtocol) {
 
   return whitelisted;
 }
-
-import { getFreshPharmaceuticalDates, ensureCompliantPharmaceuticalDates } from '../utils/pharmaceuticalDates';
 
 /**
  * Infer product metadata from lot code if product document was not found

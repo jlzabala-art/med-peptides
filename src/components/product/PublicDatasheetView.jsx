@@ -25,7 +25,8 @@ import {
   ExternalLink,
   Building2,
   Tag,
-  Eye
+  Eye,
+  Loader2
 } from '@/lib/icons';
 import { SUPPORTED_LANGUAGES, getTranslations, getLocalizedField } from '../../utils/productTranslations';
 import { triggerHaptic } from '@/utils/haptics';
@@ -70,6 +71,16 @@ export default function PublicDatasheetView({
   const [dynamicTranslations, setDynamicTranslations] = useState({});
   const [isTranslating, setIsTranslating] = useState(false);
   const [copiedLabelType, setCopiedLabelType] = useState(null);
+  const [downloadingType, setDownloadingType] = useState(null);
+
+  const handleDownloadClick = (typeKey) => {
+    setDownloadingType(typeKey);
+    triggerHaptic('light');
+    toast.success(lang === 'es' ? 'Preparando descarga del PDF...' : 'Preparing PDF download...');
+    setTimeout(() => {
+      setDownloadingType(null);
+    }, 4000);
+  };
   const [isMobileDevice, setIsMobileDevice] = useState(false);
   const requestedLangs = useRef(new Set());
 
@@ -1174,7 +1185,7 @@ export default function PublicDatasheetView({
         </section>
 
         {/* ── Block 3: Analytical Certificate & Molecular Profile (Unified COA & Specs) ── */}
-        <section className="pds-specs-section">
+        <section id="specs-section" className="pds-specs-section">
           <ProductTraceabilityCard
             product={product}
             baseUrl={baseUrl}
@@ -1221,20 +1232,32 @@ export default function PublicDatasheetView({
                     target="_blank" 
                     rel="noopener noreferrer" 
                     download={isMobileDevice ? undefined : `shipping_label_${variantFileSuffix}_38x90.pdf`}
-                    className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode"
+                    onClick={() => handleDownloadClick('shipping_38x90')}
+                    className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-barcode ${downloadingType === 'shipping_38x90' ? 'loading' : ''}`}
+                    style={downloadingType === 'shipping_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
                     title="Download 38x90mm Shipping Label (PDF File)"
                   >
-                    <Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span>
+                    {downloadingType === 'shipping_38x90' ? (
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                    ) : (
+                      <><Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span></>
+                    )}
                   </a>
                   <a 
                     href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=shipping&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     download={isMobileDevice ? undefined : `shipping_labels_sheet_${variantFileSuffix}_a4.pdf`}
-                    className="pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost"
+                    onClick={() => handleDownloadClick('shipping_sheet')}
+                    className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'shipping_sheet' ? 'loading' : ''}`}
+                    style={downloadingType === 'shipping_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
                     title="Download A4 Sheet with 8 Shipping Labels (PDF File)"
                   >
-                    <FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span>
+                    {downloadingType === 'shipping_sheet' ? (
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                    ) : (
+                      <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
+                    )}
                   </a>
                   <button
                     type="button"
@@ -1269,20 +1292,32 @@ export default function PublicDatasheetView({
                     target="_blank" 
                     rel="noopener noreferrer" 
                     download={isMobileDevice ? undefined : `client_vial_label_${variantFileSuffix}_38x90.pdf`}
-                    className="pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf"
+                    onClick={() => handleDownloadClick('client_38x90')}
+                    className={`pds-btn pds-btn-gcp pds-btn-primary-action pds-btn-pdf ${downloadingType === 'client_38x90' ? 'loading' : ''}`}
+                    style={downloadingType === 'client_38x90' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
                     title="Download 38x90mm Client Vial Label (PDF File)"
                   >
-                    <Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span>
+                    {downloadingType === 'client_38x90' ? (
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                    ) : (
+                      <><Download size={15} className="pds-btn-icon" /> <span>Download 38×90mm PDF</span></>
+                    )}
                   </a>
                   <a 
                     href={`/api/vial-label/${encodeURIComponent(slug)}?format=sheet_a4&type=client&download=1${labelQueryString}`}
                     target="_blank" 
                     rel="noopener noreferrer" 
                     download={isMobileDevice ? undefined : `client_vial_labels_sheet_${variantFileSuffix}_a4.pdf`}
-                    className="pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost"
+                    onClick={() => handleDownloadClick('client_sheet')}
+                    className={`pds-btn pds-btn-gcp pds-btn-secondary-action pds-btn-ghost ${downloadingType === 'client_sheet' ? 'loading' : ''}`}
+                    style={downloadingType === 'client_sheet' ? { pointerEvents: 'none', opacity: 0.8 } : undefined}
                     title="Download A4 Sheet with 8 Client Vial Labels (PDF File)"
                   >
-                    <FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span>
+                    {downloadingType === 'client_sheet' ? (
+                      <><Loader2 size={15} className="pds-btn-icon animate-spin" /> <span>{lang === 'es' ? 'Descargando...' : 'Downloading...'}</span></>
+                    ) : (
+                      <><FileText size={15} className="pds-btn-icon" /> <span>Sheet (A4 ×8)</span></>
+                    )}
                   </a>
                   <button
                     type="button"
