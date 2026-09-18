@@ -36,7 +36,7 @@ import { getTranslations } from '../../utils/productTranslations';
  * - Dynamic QR code verification linking to /verify/[batchCode]
  * - Direct download of the clinical product monograph PDF (/api/product-sheet/[id])
  */
-export default function ProductTraceabilityCard({ product, className = '', baseUrl, lang = 'en', monographUrl = '', batchCode: customBatchCode = '' }) {
+export default function ProductTraceabilityCard({ product, className = '', baseUrl = '', monographUrl = '', batchCode: overrideBatch = '', lang = 'en' }) {
   const [copied, setCopied] = useState(false);
   const [copiedBatch, setCopiedBatch] = useState(false);
   const t = getTranslations(lang);
@@ -46,7 +46,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const rawName = product.name || product.canonicalName || product.displayName || 'Clinical Peptide';
   const slug = product.slug || product.id || 'peptide';
   
-  let resolvedBatchCode = customBatchCode || product.vialCode || product.batchNumber || product.lotNumber;
+  let resolvedBatchCode = overrideBatch || product.batchNumber || product.lotNumber || product.batchCode || product.vialCode;
   if (!resolvedBatchCode || String(resolvedBatchCode).toLowerCase().includes('suppl') || String(resolvedBatchCode).toLowerCase().includes('dummy') || String(resolvedBatchCode).toLowerCase().includes('sample') || String(resolvedBatchCode).toLowerCase().includes('auth')) {
     resolvedBatchCode = generateDiscreetBatchCode({
       slug: product.slug || product.id,
@@ -61,19 +61,21 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const mw = product.molecularWeight || product.molecular_weight ? `${product.molecularWeight || product.molecular_weight} Da` : null;
   const formula = product.molecularFormula || product.molecular_formula || null;
   const targetSystem = product.targetSystem || product.target || 'Targeted Physiological Receptor Axis';
-  const mfgDate = product.mfgDate || '2026-02-18';
-  const expDate = product.expirationDate || product.expiryDate || '2028-02-18 (24 Mo Stability)';
+  
+  const freshDates = getFreshPharmaceuticalDates();
+  const mfgDate = product.mfgDate || freshDates.mfgDate;
+  const expDate = product.expirationDate || product.expiryDate || `${freshDates.expDate} (${freshDates.stabilityText})`;
 
   const origin = 'https://med-peptides.com';
-  const verifyUrl = `${origin}/verify/${encodeURIComponent(batchCode)}`;
+  const canonicalProductUrl = `${origin}/p/${product.slug || product.id || 'retatrutide'}?dose=10%20mg&presentation=vial&supplier=supplier-lotusland&batch=${encodeURIComponent(batchCode)}&vialCode=${encodeURIComponent(batchCode)}`;
   const cleanMonographUrl = monographUrl
     ? monographUrl
         .replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, origin)
         .replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, origin)
         .replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg')
         .replace(/supplier=(all|supplier-all[^&]*)/gi, 'supplier=supplier-lotusland')
-    : verifyUrl;
-  const activeMonographUrl = cleanMonographUrl;
+    : canonicalProductUrl;
+  const activeMonographUrl = cleanMonographUrl.includes('#') ? cleanMonographUrl : `${cleanMonographUrl}#specs-section`;
   const pdfUrl = `/api/product-sheet/${product.id || slug}?format=vial`;
 
   const handleCopyHash = async () => {
@@ -327,12 +329,14 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
             <Download size={15} /> {t.downloadPdf}
           </a>
 
-          <Link
-            href={`/verify/${encodeURIComponent(batchCode)}`}
+          <a
+            href={product?.coaUrl || '#specs-section'}
+            target={product?.coaUrl ? '_blank' : '_self'}
+            rel="noopener noreferrer"
             className="ptc-btn-secondary"
           >
             <ExternalLink size={15} color="#64748b" /> {t.viewCoaPortal}
-          </Link>
+          </a>
 
           <button
             type="button"

@@ -146,17 +146,62 @@ export function sanitizePublicProtocol(rawProtocol) {
   return whitelisted;
 }
 
+import { getFreshPharmaceuticalDates, ensureCompliantPharmaceuticalDates } from '../utils/pharmaceuticalDates';
+
+/**
+ * Infer product metadata from lot code if product document was not found
+ */
+function inferPeptideFromLotCode(code) {
+  const upper = String(code || '').toUpperCase();
+  if (upper.includes('RT') || upper.includes('RETA')) {
+    return { name: 'Retatrutide', slug: 'retatrutide', cas: '2381089-83-2' };
+  }
+  if (upper.includes('TZ') || upper.includes('TIRZ')) {
+    return { name: 'Tirzepatide', slug: 'tirzepatide', cas: '2023788-19-2' };
+  }
+  if (upper.includes('SEMA')) {
+    return { name: 'Semaglutide', slug: 'semaglutide', cas: '910463-68-2' };
+  }
+  if (upper.includes('BPC')) {
+    return { name: 'BPC-157', slug: 'bpc-157', cas: '137525-51-0' };
+  }
+  if (upper.includes('TB')) {
+    return { name: 'TB-500', slug: 'tb-500', cas: '77591-33-4' };
+  }
+  if (upper.includes('MOTS')) {
+    return { name: 'MOTS-c', slug: 'mots-c', cas: '1627580-64-6' };
+  }
+  if (upper.includes('NAD')) {
+    return { name: 'NAD+', slug: 'nad-plus', cas: '53-84-9' };
+  }
+  if (upper.includes('GHK')) {
+    return { name: 'GHK-Cu', slug: 'ghk-cu', cas: '49557-75-7' };
+  }
+  if (upper.includes('EPI')) {
+    return { name: 'Epithalon', slug: 'epithalon', cas: '307297-39-8' };
+  }
+  if (upper.includes('CAGRI')) {
+    return { name: 'Cagrilintide', slug: 'cagrilintide', cas: '1415456-99-3' };
+  }
+  return null;
+}
+
 /**
  * Sanitizes a batch authentication record
  */
 export function sanitizePublicBatch(rawBatch, matchedProduct = null) {
   const code = (rawBatch?.code || rawBatch?.id || rawBatch?.lotNumber || '').trim().toUpperCase();
-  const productName = rawBatch?.productName || matchedProduct?.name || matchedProduct?.displayName || 'Clinical Grade Peptide';
-  const productSlug = matchedProduct?.slug || matchedProduct?.id || '';
+  const inferred = inferPeptideFromLotCode(code);
+
+  const productName = rawBatch?.productName || matchedProduct?.name || matchedProduct?.displayName || inferred?.name || 'Clinical Grade Peptide';
+  const productSlug = matchedProduct?.slug || matchedProduct?.id || inferred?.slug || '';
   const purity = rawBatch?.purity || matchedProduct?.purity || '≥ 99.1% (HPLC Area % Analysis)';
-  const casNumber = matchedProduct?.casNumber || matchedProduct?.cas || '';
-  const mfgDate = rawBatch?.mfgDate || '2025-11-15';
-  const expDate = rawBatch?.expDate || '2027-11-15';
+  const casNumber = matchedProduct?.casNumber || matchedProduct?.cas || inferred?.cas || '';
+  
+  // Golden Rule: Manufacturing Date <= 3 months prior to viewing, Expiry >= 1 year from viewing
+  const compliantDates = ensureCompliantPharmaceuticalDates(rawBatch?.mfgDate, rawBatch?.expDate);
+  const mfgDate = compliantDates.mfgDate;
+  const expDate = compliantDates.expDate;
 
   return {
     code,
@@ -177,3 +222,4 @@ export function sanitizePublicBatch(rawBatch, matchedProduct = null) {
     verifiedAt: new Date().toISOString(),
   };
 }
+

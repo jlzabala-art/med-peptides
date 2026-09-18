@@ -103,10 +103,20 @@ export async function generateMetadata({ params }) {
   };
 }
 
+import { redirect } from 'next/navigation';
+
 export default async function VerifyPage({ params }) {
   const resolvedParams = await params;
   const code = resolvedParams?.code || '';
   const verification = await getBatchVerificationData(code);
+
+  // 🎯 Golden QR Destination Rule:
+  // If the batch code maps to a catalog peptide, redirect directly to the canonical
+  // monograph where the live analytical CoA table and batch traceability card reside.
+  if (verification?.productSlug) {
+    const canonicalUrl = `/p/${verification.productSlug}?dose=10%20mg&presentation=vial&supplier=supplier-lotusland&batch=${encodeURIComponent(code)}&vialCode=${encodeURIComponent(code)}#specs-section`;
+    redirect(canonicalUrl);
+  }
 
   return (
     <VerifyBatchClient 
@@ -116,3 +126,4 @@ export default async function VerifyPage({ params }) {
     />
   );
 }
+

@@ -278,6 +278,8 @@ export default function InteractiveReconstitutionGuide({
           id: 'phase_titration',
           dose: p1Dose,
           unit: 'mg',
+          phaseLabel: lang === 'es' ? 'FASE 1' : 'PHASE 1',
+          name: lang === 'es' ? 'Titulación' : 'Titration',
           title: lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration',
           badge: lang === 'es' ? 'Inicio' : 'Initial',
           subtitle: `${p1Units} UI (${p1Vol.toFixed(2)} mL) · ~${p1Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
@@ -286,8 +288,10 @@ export default function InteractiveReconstitutionGuide({
           id: 'phase_maintenance',
           dose: p2Dose,
           unit: 'mg',
+          phaseLabel: lang === 'es' ? 'FASE 2' : 'PHASE 2',
+          name: lang === 'es' ? 'Mantenimiento' : 'Maintenance',
           title: lang === 'es' ? 'Fase 2: Mantenimiento' : 'Phase 2: Maintenance',
-          badge: lang === 'es' ? 'Terapéutica' : 'Target',
+          badge: lang === 'es' ? 'Objetivo' : 'Target',
           subtitle: `${p2Units} UI (${p2Vol.toFixed(2)} mL) · ~${p2Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
         }
       ];
@@ -311,6 +315,8 @@ export default function InteractiveReconstitutionGuide({
           id: 'phase_low',
           dose: doseUnit === 'mcg' ? 250 : p1Dose,
           unit: doseUnit === 'mcg' ? 'mcg' : 'mg',
+          phaseLabel: lang === 'es' ? 'PAUTA 1' : 'TIER 1',
+          name: lang === 'es' ? 'Inicio' : 'Initial',
           title: lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol',
           badge: '250 mcg',
           subtitle: `${p1Units} UI (${p1Vol.toFixed(2)} mL) · ~${p1Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
@@ -319,6 +325,8 @@ export default function InteractiveReconstitutionGuide({
           id: 'phase_standard',
           dose: doseUnit === 'mcg' ? 500 : p2Dose,
           unit: doseUnit === 'mcg' ? 'mcg' : 'mg',
+          phaseLabel: lang === 'es' ? 'PAUTA 2' : 'TIER 2',
+          name: lang === 'es' ? 'Estándar' : 'Standard',
           title: lang === 'es' ? 'Pauta Estándar' : 'Standard Protocol',
           badge: '500 mcg',
           subtitle: `${p2Units} UI (${p2Vol.toFixed(2)} mL) · ~${p2Doses} ${lang === 'es' ? 'dosis' : 'doses'}`
@@ -341,6 +349,8 @@ export default function InteractiveReconstitutionGuide({
         id: 'phase_p1',
         dose: d1,
         unit: 'mg',
+        phaseLabel: lang === 'es' ? 'FASE 1' : 'PHASE 1',
+        name: lang === 'es' ? 'Inicio' : 'Initial',
         title: lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol',
         badge: `${d1} mg`,
         subtitle: `${u1} UI (${v1.toFixed(2)} mL) · ~${n1} ${lang === 'es' ? 'dosis' : 'doses'}`
@@ -349,6 +359,8 @@ export default function InteractiveReconstitutionGuide({
         id: 'phase_p2',
         dose: d2,
         unit: 'mg',
+        phaseLabel: lang === 'es' ? 'FASE 2' : 'PHASE 2',
+        name: lang === 'es' ? 'Regular' : 'Regular',
         title: lang === 'es' ? 'Pauta Regular' : 'Standard Protocol',
         badge: `${d2} mg`,
         subtitle: `${u2} UI (${v2.toFixed(2)} mL) · ~${n2} ${lang === 'es' ? 'dosis' : 'doses'}`
@@ -1088,7 +1100,7 @@ export default function InteractiveReconstitutionGuide({
               </div>
             </div>
 
-            {/* Protocol Phase Selector Cards */}
+            {/* Protocol Phase Selector Cards (Google Cloud Console Standard) */}
             <div className="irg-phase-cards-grid">
               {clinicalPhases.map(phase => {
                 const isActive = activePhaseId === phase.id;
@@ -1102,12 +1114,13 @@ export default function InteractiveReconstitutionGuide({
                       setDoseValue(phase.dose);
                     }}
                     className={`irg-phase-card ${isActive ? 'active' : ''}`}
-                    title={`${phase.title} - ${phase.dose} ${phase.unit}`}
+                    title={`${phase.phaseLabel}: ${phase.name} — ${phase.dose} ${phase.unit}`}
                   >
                     <div className="irg-pc-header">
-                      <span className="irg-pc-title">{phase.title}</span>
-                      <span className="irg-pc-badge font-mono">{phase.badge}</span>
+                      <span className="irg-pc-overline">{phase.phaseLabel}</span>
+                      <span className="irg-pc-badge">{phase.badge}</span>
                     </div>
+                    <div className="irg-pc-title">{phase.name}</div>
                     <div className="irg-pc-dose-row">
                       <span className="irg-pc-num font-mono">{phase.dose}</span>
                       <span className="irg-pc-unit">{phase.unit}</span>
@@ -1115,11 +1128,13 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-pc-sub font-mono">
                       {phase.subtitle}
                     </div>
-                    {isActive && (
-                      <div className="irg-pc-status font-bold">
-                        ✓ {lang === 'es' ? 'Seleccionada' : 'Active'}
-                      </div>
-                    )}
+                    <div className="irg-pc-status">
+                      {isActive ? (
+                        <span className="irg-pc-status-active">✓ {lang === 'es' ? 'Fase Activa' : 'Active Phase'}</span>
+                      ) : (
+                        <span className="irg-pc-select-hint">{lang === 'es' ? 'Seleccionar' : 'Select'}</span>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -1133,9 +1148,10 @@ export default function InteractiveReconstitutionGuide({
                 title={lang === 'es' ? 'Dosis personalizada' : 'Custom dose'}
               >
                 <div className="irg-pc-header">
-                  <span className="irg-pc-title">{lang === 'es' ? 'Personalizada' : 'Custom Dose'}</span>
-                  <span className="irg-pc-badge">{lang === 'es' ? 'Manual' : 'Adjust'}</span>
+                  <span className="irg-pc-overline">{lang === 'es' ? 'AJUSTE' : 'CUSTOM'}</span>
+                  <span className="irg-pc-badge">{lang === 'es' ? 'Manual' : 'Fine-Tune'}</span>
                 </div>
+                <div className="irg-pc-title">{lang === 'es' ? 'Personalizada' : 'Custom Dose'}</div>
                 <div className="irg-pc-dose-row">
                   <span className="irg-pc-num font-mono">{doseValue}</span>
                   <span className="irg-pc-unit">{doseUnit}</span>
@@ -1143,11 +1159,13 @@ export default function InteractiveReconstitutionGuide({
                 <div className="irg-pc-sub font-mono">
                   {syringeUnits.toFixed(0)} UI ({liquidVolumeMl.toFixed(2)} mL)
                 </div>
-                {activePhaseId === 'custom' && (
-                  <div className="irg-pc-status font-bold">
-                    ✓ {lang === 'es' ? 'Ajuste libre' : 'Manual'}
-                  </div>
-                )}
+                <div className="irg-pc-status">
+                  {activePhaseId === 'custom' ? (
+                    <span className="irg-pc-status-active">✓ {lang === 'es' ? 'Ajuste Libre' : 'Active Dose'}</span>
+                  ) : (
+                    <span className="irg-pc-select-hint">{lang === 'es' ? 'Ajustar' : 'Fine-Tune'}</span>
+                  )}
+                </div>
               </button>
             </div>
 
