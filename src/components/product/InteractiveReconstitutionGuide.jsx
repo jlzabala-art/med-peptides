@@ -77,20 +77,17 @@ export default function InteractiveReconstitutionGuide({
     return parseMgFromPresentation(rawStr);
   }, [selectedStrength, product]);
 
-  // Dynamic clinical default dose calculation — aligned with monograph table reference baseline
+  // Dynamic clinical default dose calculation — always starts at safe Phase 1 titration dose
   const getClinicalDefaultDose = (mgVal, blendMode = false, unit = 'mg') => {
     const mg = Number(mgVal) || 10;
     if (unit === 'mcg') {
-      if (mg <= 2) return 250;
-      if (mg <= 5) return 500;
-      return 1000;
+      return 250;
     }
-    if (blendMode) return 2.0;
-    if (mg <= 2) return 0.5; // 0.5 mg @ 1.0 mg/mL = 0.50 mL = 50 Units
-    if (mg <= 5) return 2.5; // Exactly matches 2.5 mg/mL baseline table concentration (1.0 mL = 100 Units)
-    if (mg <= 10) return 2.5; // Standard 2.5 mg initial clinical titration
-    if (mg <= 15) return 5.0;
-    return 5.0;
+    const pName = String(product?.name || '').toLowerCase();
+    const isMicro = pName.includes('bpc') || pName.includes('epithalon') || pName.includes('ipamorelin') || pName.includes('cjc') || mg <= 2;
+    if (isMicro) return 0.25;
+    // Standard & metabolic titration starting dose (Phase 1) is always 1.0 mg (safe, calm, non-overflowing)
+    return 1.0;
   };
 
   // Determine the authoritative protocol baseline using O(1) table lookup
@@ -99,9 +96,9 @@ export default function InteractiveReconstitutionGuide({
     const { baseBac } = getReconstitutionBaseline(baseMg, isBlend);
     const baseDose = getClinicalDefaultDose(baseMg, isBlend, 'mg');
     return { baseMg, baseBac, baseDose, baseUnit: 'mg' };
-  }, [initialVialMg, isBlend]);
+  }, [initialVialMg, isBlend, product]);
 
-  // Interactive state
+  // Interactive state — strictly begins at Phase 1 protocol dose
   const [vialMg, setVialMg] = useState(initialVialMg);
   const [bacWaterMl, setBacWaterMl] = useState(() => baselineState.baseBac);
   const [doseUnit, setDoseUnit] = useState('mg'); // 'mg' | 'mcg'
@@ -112,11 +109,10 @@ export default function InteractiveReconstitutionGuide({
     if (initialVialMg && initialVialMg > 0) {
       setVialMg(initialVialMg);
       setBacWaterMl(baselineState.baseBac);
-      setDoseUnit('mg');
+      setDoseUnit(baselineState.baseUnit);
       setDoseValue(baselineState.baseDose);
     }
   }, [initialVialMg, baselineState]);
-
 
   // Adjust default dose when vial or unit changes, ensuring syringe capacity is never exceeded
   useEffect(() => {
@@ -221,9 +217,9 @@ export default function InteractiveReconstitutionGuide({
 
     // 2. Metabolic Peptides (Retatrutide, Tirzepatide, Semaglutide)
     if (isMetabolic) {
-      const p1Dose = Math.min(2.5, vMg * 0.5);
-      const p2Dose = Math.min(5.0, vMg);
-      const p3Dose = vMg >= 15 ? 7.5 : (vMg >= 10 ? 5.0 : Math.min(3.75, vMg));
+      const p1Dose = vMg <= 5 ? 1.0 : (vMg <= 10 ? 1.0 : 2.0);
+      const p2Dose = vMg <= 5 ? 2.0 : (vMg <= 10 ? 2.0 : 4.0);
+      const p3Dose = vMg <= 5 ? 2.5 : (vMg <= 10 ? 2.5 : 5.0);
 
       return [
         createPhase('phase_met_titration', p1Dose, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Titulación' : 'Titration', lang === 'es' ? 'Fase 1: Titulación' : 'Phase 1: Titration', lang === 'es' ? 'Inicio' : 'Initial'),
@@ -249,9 +245,9 @@ export default function InteractiveReconstitutionGuide({
 
     // 4. Standard Fallback scaled safely to concentration bounds (≤ 80 Units)
     const maxSafeDose = Math.min(vMg, conc * 0.85);
-    const d1 = +(Math.max(0.25, Math.min(2.5, maxSafeDose * 0.35)).toFixed(2));
-    const d2 = +(Math.max(d1, Math.min(5.0, maxSafeDose * 0.65)).toFixed(2));
-    const d3 = +(Math.max(d2, Math.min(vMg, maxSafeDose)).toFixed(2));
+    const d1 = +(Math.max(0.25, Math.min(1.0, maxSafeDose * 0.35)).toFixed(2));
+    const d2 = +(Math.max(d1, Math.min(2.0, maxSafeDose * 0.65)).toFixed(2));
+    const d3 = +(Math.max(d2, Math.min(2.5, maxSafeDose)).toFixed(2));
 
     return [
       createPhase('phase_gen_p1', d1, 'mg', lang === 'es' ? 'FASE 1' : 'PHASE 1', lang === 'es' ? 'Inicio' : 'Initial', lang === 'es' ? 'Pauta Inicial' : 'Initial Protocol', `${d1} mg`),
@@ -298,11 +294,16 @@ export default function InteractiveReconstitutionGuide({
     triggerHaptic('success');
     setVialMg(baselineState.baseMg);
     setBacWaterMl(baselineState.baseBac);
-    setDoseUnit(baselineState.baseUnit);
-    setDoseValue(baselineState.baseDose);
+    if (clinicalPhases && clinicalPhases.length > 0) {
+      setDoseUnit(clinicalPhases[0].unit);
+      setDoseValue(clinicalPhases[0].dose);
+    } else {
+      setDoseUnit(baselineState.baseUnit);
+      setDoseValue(baselineState.baseDose);
+    }
     const msg = lang === 'es'
-      ? 'Parámetros de reconstitución restaurados a la línea base de la monografía.'
-      : 'Reconstitution parameters restored to monograph protocol baseline.';
+      ? 'Parámetros de reconstitución restaurados a la Fase 1 de la monografía.'
+      : 'Reconstitution parameters restored to Phase 1 monograph protocol.';
     notifier.success(msg);
   };
 
@@ -316,8 +317,11 @@ export default function InteractiveReconstitutionGuide({
       } else {
         url.searchParams.delete('phase');
       }
-      if (doseVal) {
-        url.searchParams.set('dose', `${doseVal}${unitVal || 'mg'}`);
+      // Preserve catalog ?dose= param (vial size). Use targetDose for custom injection dose.
+      if (doseVal && phaseId === 'custom') {
+        url.searchParams.set('targetDose', `${doseVal}${unitVal || 'mg'}`);
+      } else {
+        url.searchParams.delete('targetDose');
       }
       window.history.replaceState({}, '', url.toString());
     } catch {
@@ -332,13 +336,13 @@ export default function InteractiveReconstitutionGuide({
     updateUrlParams(phase.id, phase.dose, phase.unit);
   };
 
-  // Initial mount: load URL params if specified
+  // Initial mount: load URL params if specified, defaulting always to Phase 1
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
       const params = new URLSearchParams(window.location.search);
       const urlPhase = params.get('phase');
-      const urlDose = params.get('dose');
+      const urlTargetDose = params.get('targetDose') || params.get('injectionDose') || params.get('drawDose');
       if (urlPhase && clinicalPhases.length > 0) {
         const matched = clinicalPhases.find(p => p.id === urlPhase || p.id.endsWith(urlPhase));
         if (matched) {
@@ -347,13 +351,19 @@ export default function InteractiveReconstitutionGuide({
           return;
         }
       }
-      if (urlDose) {
-        const numMatch = urlDose.match(/(\d+(?:\.\d+)?)/);
-        const unitMatch = urlDose.includes('mcg') ? 'mcg' : 'mg';
+      if (urlTargetDose) {
+        const numMatch = urlTargetDose.match(/(\d+(?:\.\d+)?)/);
+        const unitMatch = urlTargetDose.includes('mcg') ? 'mcg' : 'mg';
         if (numMatch) {
           setDoseValue(parseFloat(numMatch[1]));
           setDoseUnit(unitMatch);
+          return;
         }
+      }
+      // Authoritative starting point is strictly Phase 1
+      if (clinicalPhases && clinicalPhases.length > 0) {
+        setDoseUnit(clinicalPhases[0].unit);
+        setDoseValue(clinicalPhases[0].dose);
       }
     } catch {
       // Safe fallback

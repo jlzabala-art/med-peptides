@@ -685,23 +685,6 @@ export default function PublicDatasheetView({
                 </option>
               ))}
             </select>
-
-            {/* Primary Action CTA with Zero-Latency Background Prefetch */}
-            <button 
-              type="button"
-              onMouseEnter={() => prefetchPdf(`/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`)}
-              onTouchStart={() => prefetchPdf(`/api/product-sheet/${encodeURIComponent(product?.id || slug)}?format=vial`)}
-              onClick={() => {
-                triggerHaptic('light');
-                setIsPreviewModalOpen(true);
-              }}
-              className="pds-btn pds-btn-pdf"
-              title={lang === 'es' ? 'Previsualizar y Descargar Dossier Oficial (PDF)' : 'Preview & Download Official Clinical Monograph (PDF)'}
-            >
-              <Download size={14} />
-              <span className="pds-btn-label-desktop">{t.downloadPdf || 'Download Monograph PDF'}</span>
-              <span className="pds-btn-label-mobile">PDF</span>
-            </button>
           </div>
         </div>
       </header>
