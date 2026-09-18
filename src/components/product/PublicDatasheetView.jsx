@@ -441,69 +441,67 @@ export default function PublicDatasheetView({
     });
   }, [initialBatch, slug, product?.slug, selectedStrength?.name, selectedStrengthId, activeSupplierId, supplierName]);
 
-  // Reactive Dynamic Share URL respecting active state
+  // Reactive Dynamic Share URL respecting active state — Guaranteed https://med-peptides.com
   const dynamicPublicUrl = useMemo(() => {
     const params = new URLSearchParams();
     
-    // 1. Supplier: Always bind the concrete active or canonical supplier
+    // 1. Dose: Prefer canonical readable name e.g. "10 mg"
+    const currentDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
+    params.set('dose', currentDose);
+
+    // 2. Presentation / Format: Always bound (e.g. "vial")
+    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    params.set('presentation', currentFormat);
+
+    // 3. Supplier: Always bind the concrete active or canonical supplier (e.g. "supplier-lotusland")
     const targetSupplier = (activeSupplierId && activeSupplierId !== 'all')
       ? activeSupplierId
       : (product?.supplierId || (supplierName ? (supplierName.startsWith('supplier-') ? supplierName : `supplier-${supplierName.toLowerCase().replace(/[\s_]+/g, '-')}`) : 'supplier-lotusland'));
-    if (targetSupplier) {
-      params.set('supplier', targetSupplier);
-    }
+    params.set('supplier', targetSupplier);
 
-    // 2. Presentation / Format: Always bound
-    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
-    if (currentFormat && currentFormat !== 'all') {
-      params.set('presentation', currentFormat);
-      params.set('format', currentFormat);
-    }
+    // 4. Batch & VialCode: Synchronized authentic discreet lot code
+    params.set('batch', effectiveBatchCode);
+    params.set('vialCode', effectiveBatchCode);
 
-    // 3. Dose: Prefer canonical readable name e.g. "10 mg"
-    const currentDose = selectedStrength?.name || (selectedStrengthId ? selectedStrengthId.replace(/_/g, ' ') : '10 mg');
-    if (currentDose && currentDose !== 'all') {
-      params.set('dose', currentDose);
-    }
-
-    // 4. Language (if not default)
+    // 5. Language (if not default)
     if (lang && lang !== 'en') {
       params.set('lang', lang);
     }
 
-    // 5. Batch & VialCode: Synchronized authentic discreet lot code
-    params.set('batch', effectiveBatchCode);
-    params.set('vialCode', effectiveBatchCode);
-
     const q = params.toString();
-    return `${baseUrl}/p/${slug}${q ? `?${q}` : ''}`;
-  }, [baseUrl, slug, activeSupplierId, activeFormat?.id, activeFormatId, selectedStrength?.name, selectedStrengthId, lang, product, supplierName, effectiveBatchCode]);
+    const canonicalDomain = 'https://med-peptides.com';
+    return `${canonicalDomain}/p/${slug}${q ? `?${q}` : ''}`;
+  }, [slug, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, product?.supplierId, supplierName, effectiveBatchCode, lang]);
 
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
+    const targetDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
+    p.set('dose', targetDose);
+
+    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    p.set('presentation', currentFormat);
+    p.set('format', currentFormat);
+
     const targetSupplier = (activeSupplierId && activeSupplierId !== 'all')
       ? activeSupplierId
       : (product?.supplierId || (supplierName ? (supplierName.startsWith('supplier-') ? supplierName : `supplier-${supplierName.toLowerCase().replace(/[\s_]+/g, '-')}`) : 'supplier-lotusland'));
-    if (targetSupplier) p.set('supplier', targetSupplier);
+    p.set('supplier', targetSupplier);
+
     if (supplierName && !supplierName.includes('All Certified Laboratories')) {
       p.set('supplierName', supplierName);
     }
-    const targetDose = selectedStrength?.name || (selectedStrengthId ? selectedStrengthId.replace(/_/g, ' ') : '10 mg');
-    if (targetDose && targetDose !== 'all') p.set('dose', targetDose);
-    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
-    if (currentFormat && currentFormat !== 'all') {
-      p.set('presentation', currentFormat);
-      p.set('format', currentFormat);
-    }
-    if (lang && lang !== 'en') p.set('lang', lang);
+
     p.set('batch', effectiveBatchCode);
     p.set('vialCode', effectiveBatchCode);
+
+    if (lang && lang !== 'en') p.set('lang', lang);
+
     if (dynamicPublicUrl) {
       p.set('url', dynamicPublicUrl);
     }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormat?.id, activeFormatId, lang, effectiveBatchCode, dynamicPublicUrl]);
+  }, [selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, activeSupplierId, product?.supplierId, supplierName, effectiveBatchCode, lang, dynamicPublicUrl]);
 
   // Variant-specific file naming suffix so operators never confuse downloaded labels
   const variantFileSuffix = useMemo(() => {
@@ -518,14 +516,14 @@ export default function PublicDatasheetView({
   // Live Scannable 2D/3D Barcode SVG URL synced with current variant state
   const barcodeSupplier = (activeSupplierId && activeSupplierId !== 'all')
     ? activeSupplierId
-    : (product?.supplierId || product?.supplierName || product?.supplier || 'lotusland');
+    : (product?.supplierId || product?.supplierName || product?.supplier || 'supplier-lotusland');
   const barcodeImageUrl = useMemo(() => {
     const qs = new URLSearchParams();
-    if (barcodeSupplier) qs.set('supplier', barcodeSupplier);
-    const currentDose = selectedStrength?.name || (selectedStrengthId ? selectedStrengthId.replace(/_/g, ' ') : '10 mg');
-    if (currentDose) qs.set('dose', currentDose);
+    const currentDose = (selectedStrength?.name || selectedStrengthId || '10 mg').replace(/_/g, ' ');
+    qs.set('dose', currentDose);
     const currentFormat = activeFormat?.id || activeFormatId || 'vial';
-    if (currentFormat) qs.set('presentation', currentFormat);
+    qs.set('presentation', currentFormat);
+    qs.set('supplier', barcodeSupplier);
     qs.set('batch', effectiveBatchCode);
     qs.set('vialCode', effectiveBatchCode);
     if (dynamicPublicUrl) qs.set('url', dynamicPublicUrl);
@@ -1024,7 +1022,7 @@ export default function PublicDatasheetView({
                     <th>Strength / Dose</th>
                     <th>Presentation Format</th>
                     <th>Reconstitution Diluent</th>
-                    <th>Resulting Concentration</th>
+                    <th>{lang === 'es' ? 'Concentración Solución (mg/mL)' : 'Solution Concentration (mg/mL)'}</th>
                     <th>Administration</th>
                     <th>Analytical Grade</th>
                     <th>Laboratory Verification</th>
@@ -1050,6 +1048,7 @@ export default function PublicDatasheetView({
                             ? 'Pre-metered Intranasal Solution'
                             : `${recon.volume} mL BAC Water`;
 
+                      const isVialSolution = !isPenOrCart && !isOral && !isSpray;
                       const concText = isPenOrCart 
                         ? 'Pre-formulated Liquid' 
                         : isOral 
@@ -1086,7 +1085,16 @@ export default function PublicDatasheetView({
                           </td>
                           <td data-label="Presentation Format">{fmt.name}</td>
                           <td data-label="Reconstitution Diluent">{diluentText}</td>
-                          <td data-label="Resulting Concentration" className="pds-conc-cell">{concText}</td>
+                          <td data-label={lang === 'es' ? 'Concentración Solución' : 'Solution Concentration'} className="pds-conc-cell">
+                            {isVialSolution ? (
+                              <div className="pds-conc-badge-wrap">
+                                <span className="pds-conc-main-val font-mono">{recon.concentration} mg/mL</span>
+                                <span className="pds-conc-subtext">{lang === 'es' ? 'en vial' : 'in vial'}</span>
+                              </div>
+                            ) : (
+                              concText
+                            )}
+                          </td>
                           <td data-label="Administration">{adminText}</td>
                           <td data-label="Analytical Grade" className="pds-purity-cell">≥ 99.0% (RP-HPLC)</td>
                           <td data-label="Laboratory Verification">{supplierName}</td>

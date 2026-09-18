@@ -9,7 +9,7 @@ import PublicDatasheetView from '../../../components/product/PublicDatasheetView
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides-app-27a3a.web.app';
+const BASE_URL = 'https://med-peptides.com';
 
 // ⚡ Layer 1 In-Memory Server RAM Cache (Golden Rule #2)
 const PUBLIC_PRODUCT_RAM_CACHE = new Map();

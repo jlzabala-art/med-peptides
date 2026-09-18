@@ -114,29 +114,40 @@ export async function GET(request, { params }) {
     const { searchParams } = new URL(request.url);
     const supplier = searchParams.get('supplier') || 'lotusland';
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+    const baseUrl = 'https://med-peptides.com';
     const explicitUrl = searchParams.get('url') || searchParams.get('shareUrl');
     let targetUrl = explicitUrl;
 
-    if (!targetUrl) {
+    if (targetUrl) {
+      if (targetUrl.startsWith('/')) {
+        targetUrl = `${baseUrl}${targetUrl}`;
+      }
+      targetUrl = targetUrl.replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, baseUrl);
+      targetUrl = targetUrl.replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, baseUrl);
+      targetUrl = targetUrl.replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg');
+
+      const suppParam = supplier.startsWith('supplier-') ? supplier : `supplier-${supplier}`;
+      if (!targetUrl.includes('supplier=')) {
+        targetUrl += (targetUrl.includes('?') ? '&' : '?') + `supplier=${encodeURIComponent(suppParam)}`;
+      }
+    } else {
       const qParams = new URLSearchParams();
-      const dose = searchParams.get('dose') || searchParams.get('strength');
-      const presentation = searchParams.get('presentation') || searchParams.get('format');
+      const dose = searchParams.get('dose') || searchParams.get('strength') || '10 mg';
+      const presentation = searchParams.get('presentation') || searchParams.get('format') || 'vial';
+      const suppParam = (supplier && supplier !== 'all') ? (supplier.startsWith('supplier-') ? supplier : `supplier-${supplier}`) : 'supplier-lotusland';
       const batch = searchParams.get('batch') || searchParams.get('vialCode');
       const vialCode = searchParams.get('vialCode') || searchParams.get('batch');
       const lang = searchParams.get('lang');
 
-      if (dose && dose !== 'all') qParams.set('dose', dose);
-      if (presentation && presentation !== 'all') qParams.set('presentation', presentation);
-      if (supplier && supplier !== 'all') qParams.set('supplier', supplier);
+      qParams.set('dose', dose.replace(/_/g, ' '));
+      qParams.set('presentation', presentation);
+      qParams.set('supplier', suppParam);
       if (batch) qParams.set('batch', batch);
       if (vialCode) qParams.set('vialCode', vialCode);
       if (lang && lang !== 'en') qParams.set('lang', lang);
 
       const qs = qParams.toString();
       targetUrl = `${baseUrl}/p/${slug}${qs ? `?${qs}` : ''}`;
-    } else if (targetUrl.startsWith('/')) {
-      targetUrl = `${baseUrl}${targetUrl}`;
     }
 
     // 1. Fetch Product Metadata

@@ -12,7 +12,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://med-peptides.com';
+const BASE_URL = 'https://med-peptides.com';
 const BRAND_COLOR = rgb(0, 0.21, 0.4);       // #003666
 const TEAL_COLOR  = rgb(0.05, 0.58, 0.53);   // #0d9488
 const DARK_GRAY   = rgb(0.12, 0.15, 0.18);
@@ -602,22 +602,41 @@ export async function GET(request, { params }) {
       if (targetShareUrl.startsWith('/')) {
         targetShareUrl = `${BASE_URL}${targetShareUrl}`;
       }
+      // Force canonical production domain https://med-peptides.com in ALL cases
+      targetShareUrl = targetShareUrl.replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, BASE_URL);
+      targetShareUrl = targetShareUrl.replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, BASE_URL);
+
+      // Force human-readable dose (10 mg instead of 10_mg)
+      targetShareUrl = targetShareUrl.replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg');
+
+      // Guarantee supplier is present in QR url
+      const suppVal = targetSupplier || rawSupplier || 'supplier-lotusland';
+      if (!targetShareUrl.includes('supplier=')) {
+        targetShareUrl += (targetShareUrl.includes('?') ? '&' : '?') + `supplier=${encodeURIComponent(suppVal)}`;
+      }
+
+      // Guarantee presentation is present
+      if (!targetShareUrl.includes('presentation=')) {
+        targetShareUrl += (targetShareUrl.includes('?') ? '&' : '?') + `presentation=${encodeURIComponent(targetFormat || 'vial')}`;
+      }
+
       // Sanitize any dummy SUPPL strings in the explicit URL
       if (targetShareUrl.toLowerCase().includes('suppl')) {
         targetShareUrl = targetShareUrl.replace(/RP-SUPPL-[^&]+/gi, batchNumber);
       }
-      // Ensure vialCode is present
+      // Ensure vialCode and batch are present
       if (!targetShareUrl.includes('vialCode=') && batchNumber) {
         targetShareUrl += (targetShareUrl.includes('?') ? '&' : '?') + `vialCode=${encodeURIComponent(batchNumber)}`;
       }
+      if (!targetShareUrl.includes('batch=') && batchNumber) {
+        targetShareUrl += (targetShareUrl.includes('?') ? '&' : '?') + `batch=${encodeURIComponent(batchNumber)}`;
+      }
     } else {
       const qParams = new URLSearchParams();
-      if (targetSupplier && targetSupplier !== 'all') qParams.set('supplier', targetSupplier);
-      if (targetDose && targetDose !== 'all') qParams.set('dose', targetDose);
-      if (targetFormat && targetFormat !== 'all') {
-        qParams.set('presentation', targetFormat);
-        qParams.set('format', targetFormat);
-      }
+      const doseStr = (targetDose || '10 mg').replace(/_/g, ' ');
+      qParams.set('dose', doseStr);
+      qParams.set('presentation', targetFormat || 'vial');
+      qParams.set('supplier', targetSupplier || rawSupplier || 'supplier-lotusland');
       if (batchNumber) {
         qParams.set('batch', batchNumber);
         qParams.set('vialCode', batchNumber);
