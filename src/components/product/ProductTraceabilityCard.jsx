@@ -23,6 +23,7 @@ import { triggerHaptic } from '@/utils/haptics';
 import { generateDiscreetBatchCode } from '../../utils/discreetBatchHelper';
 import './ProductTraceabilityCard.css';
 import { getTranslations } from '../../utils/productTranslations';
+import { getFreshPharmaceuticalDates } from '../../utils/pharmaceuticalDates';
 
 /**
  * ProductTraceabilityCard
@@ -67,13 +68,17 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
   const expDate = product.expirationDate || product.expiryDate || `${freshDates.expDate} (${freshDates.stabilityText})`;
 
   const origin = 'https://med-peptides.com';
-  const canonicalProductUrl = `${origin}/p/${product.slug || product.id || 'retatrutide'}?dose=10%20mg&presentation=vial&supplier=supplier-lotusland&batch=${encodeURIComponent(batchCode)}&vialCode=${encodeURIComponent(batchCode)}`;
+  const defaultSupplier = product.supplierId || (Array.isArray(product.suppliers) && product.suppliers[0]) || (Array.isArray(product.supplierIds) && product.supplierIds[0]) || 'supplier-lotusland';
+  const defaultDose = (product.dosage || (Array.isArray(product.variants) && product.variants[0]?.dosage) || '10 mg').replace(/_/g, ' ');
+  const defaultFormat = product.format || product.presentation || (Array.isArray(product.variants) && product.variants[0]?.format) || 'vial';
+  const productSlug = product.slug || product.id || 'peptide';
+  const canonicalProductUrl = `${origin}/p/${productSlug}?dose=${encodeURIComponent(defaultDose)}&presentation=${encodeURIComponent(defaultFormat)}&supplier=${encodeURIComponent(defaultSupplier)}&batch=${encodeURIComponent(batchCode)}&vialCode=${encodeURIComponent(batchCode)}`;
   const cleanMonographUrl = monographUrl
     ? monographUrl
         .replace(/https?:\/\/[a-z0-9-]+\.web\.app/gi, origin)
         .replace(/https?:\/\/[a-z0-9-]+\.firebaseapp\.com/gi, origin)
         .replace(/dose=([0-9.]+)_mg/gi, 'dose=$1%20mg')
-        .replace(/supplier=(all|supplier-all[^&]*)/gi, 'supplier=supplier-lotusland')
+        .replace(/supplier=(all|supplier-all[^&]*)/gi, `supplier=${encodeURIComponent(defaultSupplier)}`)
     : canonicalProductUrl;
   const activeMonographUrl = cleanMonographUrl.includes('#') ? cleanMonographUrl : `${cleanMonographUrl}#specs-section`;
   const pdfUrl = `/api/product-sheet/${product.id || slug}?format=vial`;
@@ -243,6 +248,7 @@ export default function ProductTraceabilityCard({ product, className = '', baseU
         </h4>
 
         <div className="ptc-coa-wrapper">
+          {/* eslint-disable-next-line no-restricted-syntax -- Static Certificate of Analysis laboratory specification table */}
           <table className="ptc-coa-table">
             <thead>
               <tr>

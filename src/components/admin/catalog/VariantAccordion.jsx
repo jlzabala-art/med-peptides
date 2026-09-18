@@ -10,6 +10,7 @@ import { COMMERCIAL_CHANNELS } from '../../../utils/commercialPricingHelper';
 import { ChevronDown, ChevronRight, Building2, Layers, ListFilter, ShieldCheck, FileText, Share2, Download, DollarSign, TrendingUp, Clock, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ShareProductMonographDrawer from './drawers/ShareProductMonographDrawer';
+import GcpSupplierFilterBar from './components/GcpSupplierFilterBar';
 
 // Lead times by supplier geography & fulfillment SLA
 const SUPPLIER_LEAD_TIMES = {
@@ -411,78 +412,14 @@ export default function VariantAccordion({
         </div>
       </div>
 
-      {/* Supplier Filter Pills */}
+      {/* Google Cloud Platform Supplier Filter Bar */}
       {supplierGroups.length > 1 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.375rem',
-          overflowX: 'auto',
-          paddingBottom: '0.25rem'
-        }}>
-          <button
-            onClick={() => setSelectedSupplierFilter('all')}
-            style={{
-              padding: '0.3rem 0.65rem',
-              fontSize: '0.75rem',
-              fontWeight: selectedSupplierFilter === 'all' ? 700 : 500,
-              borderRadius: '9999px',
-              border: selectedSupplierFilter === 'all' ? '1px solid var(--color-primary, #003666)' : '1px solid #e2e8f0',
-              backgroundColor: selectedSupplierFilter === 'all' ? 'var(--color-primary, #003666)' : '#fff',
-              color: selectedSupplierFilter === 'all' ? '#fff' : '#475569',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span>All Suppliers</span>
-            <span style={{
-              fontSize: '0.68rem',
-              opacity: selectedSupplierFilter === 'all' ? 0.9 : 0.6,
-              padding: '0 4px',
-              borderRadius: '10px',
-              backgroundColor: selectedSupplierFilter === 'all' ? 'rgba(255,255,255,0.25)' : '#f1f5f9'
-            }}>
-              {typeFilteredVariants.length}
-            </span>
-          </button>
-          {supplierGroups.map(group => {
-            const isSelected = selectedSupplierFilter === group.key;
-            return (
-              <button
-                key={group.key}
-                onClick={() => setSelectedSupplierFilter(prev => prev === group.key ? 'all' : group.key)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.3rem 0.65rem',
-                  fontSize: '0.75rem',
-                  fontWeight: isSelected ? 700 : 500,
-                  borderRadius: '9999px',
-                  border: isSelected ? '1px solid var(--color-primary, #003666)' : '1px solid #e2e8f0',
-                  backgroundColor: isSelected ? 'var(--color-primary, #003666)' : '#fff',
-                  color: isSelected ? '#fff' : '#475569',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <span>{group.name}</span>
-                <span style={{
-                  fontSize: '0.68rem',
-                  opacity: isSelected ? 0.9 : 0.6,
-                  padding: '0 4px',
-                  borderRadius: '10px',
-                  backgroundColor: isSelected ? 'rgba(255,255,255,0.25)' : '#f1f5f9'
-                }}>
-                  {group.variants.length}
-                </span>
-                {group.hasCOA && <ShieldCheck size={12} style={{ color: isSelected ? '#86efac' : '#10b981' }} />}
-              </button>
-            );
-          })}
-        </div>
+        <GcpSupplierFilterBar
+          supplierGroups={supplierGroups}
+          selectedSupplierFilter={selectedSupplierFilter}
+          onSelectSupplier={setSelectedSupplierFilter}
+          totalVariantsCount={typeFilteredVariants.length}
+        />
       )}
 
       {/* View Rendering: Grouped by Supplier vs Flat Table */}
