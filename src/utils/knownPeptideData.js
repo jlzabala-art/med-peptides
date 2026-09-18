@@ -6,11 +6,13 @@
 export const KNOWN_PEPTIDE_DATA = {
   'retatrutide': {
     casNumber: '2381089-83-2',
-    molecularFormula: 'C223H343N53O67',
+    molecularFormula: 'C221H342N46O68',
     molecularWeight: '4731.33',
-    pubchemCid: 168128362,
+    pubchemCid: 171934787,
     targetSystem: 'GLP-1 / GIP / Glucagon Tri-Agonist',
-    mechanismOfAction: 'Triple receptor agonist optimizing metabolic rate and glucose control'
+    mechanismOfAction: 'Triple unimolecular receptor agonist of GCGR, GIPR, and GLP-1R optimizing glycemic control, appetite suppression, and hepatic lipid oxidation',
+    sequence: 'Y-Aib-EGTFTSDVSSYLEGQAA-K(20-diacid)-EFIAWLVRGRG',
+    halfLife: '144 hours (6 days)'
   },
   'tirzepatide': {
     casNumber: '2023788-19-2',

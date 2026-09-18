@@ -34,7 +34,8 @@ export const PRODUCT_PUBLIC_WHITELIST = [
   'batchNumber', 'lotNumber', 'expirationDate', 'expiryDate', 'coaUrl',
   'analyticalSpecs', 'testingStandards', 'storageConditions', 'mfgDate',
   'reconstitutionGuide', 'warnings', 'contraindications',
-  'supplier', 'supplierName', 'laboratory', 'provenance', 'processedHierarchy'
+  'supplier', 'supplierName', 'laboratory', 'provenance', 'processedHierarchy',
+  'clinicalOverview', 'clinical_overview', 'clinical_overview_en', 'clinical_overview_es', 'scientificData'
 ];
 
 // ─── Blacklist of Sensitive Fields to NEVER Expose ────────────────────────────

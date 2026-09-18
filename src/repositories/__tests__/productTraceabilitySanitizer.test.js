@@ -61,7 +61,7 @@ describe('Product Traceability & Zero-Trust Public Sanitization', () => {
     // Science enriched via knownPeptideData
     expect(normalized.casNumber).toBe('2381089-83-2');
     expect(normalized.molecularWeight).toBe('4731.33');
-    expect(normalized.molecularFormula).toBe('C223H343N53O67');
+    expect(normalized.molecularFormula).toBe('C221H342N46O68');
     expect(normalized.targetSystem).toContain('GLP-1');
 
     // Traceability fields

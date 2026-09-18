@@ -226,7 +226,8 @@ export function normalizeProduct(data, id = null) {
     molecular_formula: safeString(data.molecularFormula || data.molecular_formula || sciData.molecularFormula, ''),
     targetSystem:     safeString(data.targetSystem || data.target || sciData.targetSystem, ''),
     target:           safeString(data.targetSystem || data.target || sciData.targetSystem, ''),
-    sequence:         safeString(data.sequence, ''),
+    sequence:         safeString(data.sequence || sciData.sequence, ''),
+    pubchemCid:       data.pubchemCid || sciData.pubchemCid || null,
     mechanismOfAction: safeString(data.mechanismOfAction || sciData.mechanismOfAction, ''),
 
     // ── Quality & Batch Traceability (Schema v2) ──

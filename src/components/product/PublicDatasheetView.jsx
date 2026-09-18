@@ -163,13 +163,15 @@ export default function PublicDatasheetView({
   const name = product?.name || product?.displayName || 'Clinical Peptide';
   const category = product?.category || product?.therapeutic_category || 'Peptide';
   const casNumber = product?.casNumber || product?.cas || 'Documented on Monograph';
-  const formula = product?.molecularFormula || product?.molecular_formula || null;
-  const mw = product?.molecularWeight || product?.molecular_weight ? `${product.molecularWeight || product.molecular_weight} g/mol` : null;
+  const formula = product?.molecularFormula || product?.molecular_formula || product?.molecular?.molecularFormula || product?.molecular?.formula || null;
+  const mw = product?.molecularWeight || product?.molecular_weight || product?.molecular?.molecularWeight ? `${product.molecularWeight || product.molecular_weight || product?.molecular?.molecularWeight} g/mol` : null;
   const purity = product?.purity || '≥ 99.4% (RP-HPLC)';
-  const sequence = product?.sequence || null;
+  const sequence = product?.sequence || product?.molecular?.sequence || null;
   const targetSystem = product?.targetSystem || product?.target || 'Targeted Physiological Receptor Axis';
   const description = dynamicTranslations[lang]?.description
     || getLocalizedField(product, 'description', lang) 
+    || product?.clinicalOverview
+    || product?.clinical_overview
     || product?.description 
     || product?.desc 
     || product?.objective 
@@ -256,7 +258,7 @@ export default function PublicDatasheetView({
     const mg = parseNum(strengthName);
     if (mg <= 0 || isNaN(mg)) return { volume: '2.0', concentration: '5.0' };
 
-    let targetConc;
+    let volumeNum = 2.0;
     const strLower = String(strengthName || '').toLowerCase();
     const isBlendStrength = strLower.includes('+') 
       || strLower.includes('|') 
@@ -264,17 +266,21 @@ export default function PublicDatasheetView({
       || String(name || '').toLowerCase().includes('klow')
       || String(name || '').toLowerCase().includes('glow');
 
-    if (isBlendStrength || mg > 50) {
-      targetConc = 15.0; // Multi-peptide blends (GLOW, KLOW, etc.)
+    if (isBlendStrength) {
+      volumeNum = 2.0; // Standard 2.0 mL for multi-peptide blends
     } else if (mg <= 5) {
-      targetConc = 2.5;  // Easy low-dose titration
+      volumeNum = 2.0; // 2.5 mg/mL for precise low-dose titration
+    } else if (mg <= 15) {
+      volumeNum = 2.0; // 5.0 - 7.5 mg/mL standard clinical concentration
+    } else if (mg <= 30) {
+      volumeNum = 3.0; // 3.0 mL fits standard 3 mL vial -> 10.0 mg/mL
     } else {
-      targetConc = 5.0;  // Standard single peptides
+      // 40mg, 50mg, 60mg+: 2.0 mL to keep SubQ injection volume <= 0.6 mL
+      volumeNum = 2.0;
     }
 
-    const rawVol = mg / targetConc;
-    const volume = Math.min(10.0, Math.round(rawVol * 2) / 2).toFixed(1);
-    const concentration = (mg / parseFloat(volume)).toFixed(1);
+    const volume = volumeNum.toFixed(1);
+    const concentration = (mg / volumeNum).toFixed(1);
     return { volume, concentration };
   };
 
