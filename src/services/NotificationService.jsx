@@ -32,6 +32,9 @@ class NotificationService {
       case 'error':
         toast.error(message);
         break;
+      case 'warning':
+        toast(message, { icon: '⚠️' });
+        break;
       default:
         toast(message, { icon: 'ℹ️' });
         break;
@@ -44,6 +47,10 @@ class NotificationService {
 
   error(message) {
     this.toast(message, 'error');
+  }
+
+  warning(message) {
+    this.toast(message, 'warning');
   }
 
   info(message) {

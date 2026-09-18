@@ -157,26 +157,15 @@ export default function InteractiveReconstitutionGuide({
     }
   }, [initialVialMg, baselineState]);
 
-  // Detect whether active parameters differ from official monograph baseline
+  // Detect whether active parameters differ from official monograph protocol
   const isModifiedFromBaseline = useMemo(() => {
     if (!baselineState) return false;
     const vialChanged = Math.abs(vialMg - baselineState.baseMg) > 0.01;
     const bacChanged = Math.abs(bacWaterMl - baselineState.baseBac) > 0.01;
-    const doseChanged = doseUnit !== baselineState.baseUnit || Math.abs(doseValue - baselineState.baseDose) > 0.01;
-    return vialChanged || bacChanged || doseChanged;
-  }, [baselineState, vialMg, bacWaterMl, doseUnit, doseValue]);
-
-  // Notify on modification transition
-  const prevModifiedRef = React.useRef(false);
-  useEffect(() => {
-    if (isModifiedFromBaseline && !prevModifiedRef.current) {
-      const msg = lang === 'es'
-        ? 'Aviso de protocolo clínico: Parámetros de referencia modificados. Los valores son exclusivamente orientativos; el médico prescriptor debe establecer la dosis terapéutica y dilución definitivas.'
-        : 'Clinical Protocol Notice: Reference reconstitution parameters modified. Default values are for indicative clinical simulation only; the prescribing physician must determine the final patient-specific dose and reconstitution volume.';
-      notifier.warning(msg);
-    }
-    prevModifiedRef.current = isModifiedFromBaseline;
-  }, [isModifiedFromBaseline, lang]);
+    // Official clinical phases (Phase 1, 2, 3) conform to the protocol monograph
+    const isCustomDose = activePhaseId === 'custom';
+    return vialChanged || bacChanged || isCustomDose;
+  }, [baselineState, vialMg, bacWaterMl, activePhaseId]);
 
   const handleResetToBaseline = () => {
     if (!baselineState) return;
@@ -1078,7 +1067,7 @@ export default function InteractiveReconstitutionGuide({
               <span className="irg-val-badge font-mono">{doseValue} {doseUnit}</span>
             </div>
 
-            {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Google Cloud Console Standard) */}
+            {/* 🖥️ Desktop / Laptop: Protocol Phase Selector Cards (Google Cloud Console Standard - 3 Columns) */}
             <div className="irg-phase-cards-grid">
               {clinicalPhases.map(phase => {
                 const isActive = activePhaseId === phase.id;
@@ -1092,7 +1081,7 @@ export default function InteractiveReconstitutionGuide({
                       setDoseValue(phase.dose);
                     }}
                     className={`irg-phase-card ${isActive ? 'active' : ''}`}
-                    title={`${phase.phaseLabel}: ${phase.name} — ${phase.dose} ${phase.unit}`}
+                    title={`${phase.phaseLabel}: ${phase.name} — ${phase.dose} ${phase.unit} (${phase.subtitle})`}
                   >
                     <div className="irg-pc-header">
                       <span className="irg-pc-overline">{phase.phaseLabel}</span>
@@ -1102,9 +1091,6 @@ export default function InteractiveReconstitutionGuide({
                     <div className="irg-pc-dose-row">
                       <span className="irg-pc-num font-mono">{phase.dose}</span>
                       <span className="irg-pc-unit">{phase.unit}</span>
-                    </div>
-                    <div className="irg-pc-sub font-mono">
-                      {phase.subtitle}
                     </div>
                     <div className="irg-pc-status">
                       {isActive ? (
@@ -1116,35 +1102,6 @@ export default function InteractiveReconstitutionGuide({
                   </button>
                 );
               })}
-
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                }}
-                className={`irg-phase-card custom ${activePhaseId === 'custom' ? 'active' : ''}`}
-                title={lang === 'es' ? 'Dosis personalizada' : 'Custom dose'}
-              >
-                <div className="irg-pc-header">
-                  <span className="irg-pc-overline">{lang === 'es' ? 'AJUSTE' : 'CUSTOM'}</span>
-                  <span className="irg-pc-badge">{lang === 'es' ? 'Manual' : 'Fine-Tune'}</span>
-                </div>
-                <div className="irg-pc-title">{lang === 'es' ? 'Personalizada' : 'Custom Dose'}</div>
-                <div className="irg-pc-dose-row">
-                  <span className="irg-pc-num font-mono">{doseValue}</span>
-                  <span className="irg-pc-unit">{doseUnit}</span>
-                </div>
-                <div className="irg-pc-sub font-mono">
-                  {syringeUnits.toFixed(0)} UI ({liquidVolumeMl.toFixed(2)} mL)
-                </div>
-                <div className="irg-pc-status">
-                  {activePhaseId === 'custom' ? (
-                    <span className="irg-pc-status-active">✓ {lang === 'es' ? 'Ajuste Libre' : 'Active Dose'}</span>
-                  ) : (
-                    <span className="irg-pc-select-hint">{lang === 'es' ? 'Ajustar' : 'Fine-Tune'}</span>
-                  )}
-                </div>
-              </button>
             </div>
 
             {/* 📱 Mobile: Segmented Pill Bar + Active Detail Summary Card */}
@@ -1203,9 +1160,16 @@ export default function InteractiveReconstitutionGuide({
 
             {/* Fine-Tuning & Micro-Titration Header */}
             <div className="irg-fine-tune-header">
-              <span className="irg-ft-label">
-                {lang === 'es' ? 'Ajuste manual o micro-titulación:' : 'Fine-tuning & micro-titration:'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span className="irg-ft-label">
+                  {lang === 'es' ? 'Ajuste manual o micro-titulación:' : 'Fine-tuning & micro-titration:'}
+                </span>
+                {activePhaseId === 'custom' && (
+                  <span className="irg-custom-active-tag font-mono">
+                    ● {lang === 'es' ? 'Dosis Manual' : 'Custom Dose'}: {doseValue} {doseUnit}
+                  </span>
+                )}
+              </div>
               <div className="irg-unit-toggle">
                 <button
                   type="button"
