@@ -557,15 +557,29 @@
 
 /* ── Print Stylesheet for Modal Preview ── */
 @media print {
-  /* Hide the rest of the application when modal is active during print */
-  body > *:not(.mpm-overlay),
-  .public-datasheet-root > *:not(.mpm-overlay),
-  .pds-top-bar,
-  .pds-mobile-bar,
-  .pds-actions-group {
+  /* Reset document for clean printing */
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide all siblings of the modal inside public-datasheet-root */
+  .public-datasheet-root > *:not(.mpm-overlay) {
     display: none !important;
   }
 
+  /* Hide standard page elements */
+  .pds-top-bar,
+  .pds-container,
+  .pds-mobile-bar,
+  .pds-actions-group,
+  .pds-footer {
+    display: none !important;
+  }
+
+  /* Make modal take the whole page naturally */
   .mpm-overlay {
     position: static !important;
     background: #ffffff !important;
@@ -573,7 +587,9 @@
     margin: 0 !important;
     display: block !important;
     overflow: visible !important;
-    z-index: 99999 !important;
+    z-index: auto !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .mpm-container {
@@ -586,12 +602,13 @@
     background: #ffffff !important;
     border-radius: 0 !important;
     overflow: visible !important;
+    display: block !important;
   }
 
   /* Hide modal interface controls in print mode */
   .mpm-top-bar,
   .mpm-tabs-bar,
-  .mpm-footer,
+  .mpm-bottom-bar,
   .mpm-close-btn,
   [data-print-hide="true"] {
     display: none !important;
@@ -609,10 +626,26 @@
   [data-print-body="true"] {
     max-width: 100% !important;
     width: 100% !important;
-    border: 1pt solid #cbd5e1 !important;
+    border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    padding: 14pt !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Physical labels print formatting */
+  .mpm-label-card-wrap {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .mpm-label-physical {
+    border: 1.5pt solid #0f172a !important;
+    box-shadow: none !important;
     page-break-inside: avoid !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -620,6 +653,6 @@
 
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 12mm 15mm;
   }
 }

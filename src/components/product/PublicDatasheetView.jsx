@@ -444,39 +444,56 @@ export default function PublicDatasheetView({
   // Reactive Dynamic Share URL respecting active state
   const dynamicPublicUrl = useMemo(() => {
     const params = new URLSearchParams();
-    if (activeSupplierId && activeSupplierId !== 'all' && !product?.isSingleSupplierLocked) {
-      params.set('supplier', activeSupplierId);
-    } else if (product?.isSingleSupplierLocked && product?.supplierId) {
-      params.set('supplier', product.supplierId);
+    
+    // 1. Supplier: Always bind the concrete active or canonical supplier
+    const targetSupplier = (activeSupplierId && activeSupplierId !== 'all')
+      ? activeSupplierId
+      : (product?.supplierId || (supplierName ? (supplierName.startsWith('supplier-') ? supplierName : `supplier-${supplierName.toLowerCase().replace(/[\s_]+/g, '-')}`) : 'supplier-lotusland'));
+    if (targetSupplier) {
+      params.set('supplier', targetSupplier);
     }
-    if (activeFormatId) {
-      params.set('presentation', activeFormatId);
-      params.set('format', activeFormatId);
+
+    // 2. Presentation / Format: Always bound
+    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    if (currentFormat && currentFormat !== 'all') {
+      params.set('presentation', currentFormat);
+      params.set('format', currentFormat);
     }
-    if (selectedStrengthId) {
-      params.set('dose', selectedStrengthId);
+
+    // 3. Dose: Prefer canonical readable name e.g. "10 mg"
+    const currentDose = selectedStrength?.name || (selectedStrengthId ? selectedStrengthId.replace(/_/g, ' ') : '10 mg');
+    if (currentDose && currentDose !== 'all') {
+      params.set('dose', currentDose);
     }
+
+    // 4. Language (if not default)
     if (lang && lang !== 'en') {
       params.set('lang', lang);
     }
+
+    // 5. Batch & VialCode: Synchronized authentic discreet lot code
     params.set('batch', effectiveBatchCode);
     params.set('vialCode', effectiveBatchCode);
+
     const q = params.toString();
     return `${baseUrl}/p/${slug}${q ? `?${q}` : ''}`;
-  }, [baseUrl, slug, activeSupplierId, activeFormatId, selectedStrengthId, lang, product, effectiveBatchCode]);
+  }, [baseUrl, slug, activeSupplierId, activeFormat?.id, activeFormatId, selectedStrength?.name, selectedStrengthId, lang, product, supplierName, effectiveBatchCode]);
 
   const labelQueryString = useMemo(() => {
     const p = new URLSearchParams();
-    const supp = (activeSupplierId && activeSupplierId !== 'all') ? activeSupplierId : (product?.isSingleSupplierLocked ? product?.supplierId : null);
-    if (supp) p.set('supplier', supp);
+    const targetSupplier = (activeSupplierId && activeSupplierId !== 'all')
+      ? activeSupplierId
+      : (product?.supplierId || (supplierName ? (supplierName.startsWith('supplier-') ? supplierName : `supplier-${supplierName.toLowerCase().replace(/[\s_]+/g, '-')}`) : 'supplier-lotusland'));
+    if (targetSupplier) p.set('supplier', targetSupplier);
     if (supplierName && !supplierName.includes('All Certified Laboratories')) {
       p.set('supplierName', supplierName);
     }
-    const targetDose = selectedStrength?.name || selectedStrengthId;
+    const targetDose = selectedStrength?.name || (selectedStrengthId ? selectedStrengthId.replace(/_/g, ' ') : '10 mg');
     if (targetDose && targetDose !== 'all') p.set('dose', targetDose);
-    if (activeFormatId && activeFormatId !== 'all') {
-      p.set('presentation', activeFormatId);
-      p.set('format', activeFormatId);
+    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    if (currentFormat && currentFormat !== 'all') {
+      p.set('presentation', currentFormat);
+      p.set('format', currentFormat);
     }
     if (lang && lang !== 'en') p.set('lang', lang);
     p.set('batch', effectiveBatchCode);
@@ -486,7 +503,7 @@ export default function PublicDatasheetView({
     }
     const qs = p.toString();
     return qs ? `&${qs}` : '';
-  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormatId, lang, effectiveBatchCode, dynamicPublicUrl]);
+  }, [activeSupplierId, product, supplierName, selectedStrength, selectedStrengthId, activeFormat?.id, activeFormatId, lang, effectiveBatchCode, dynamicPublicUrl]);
 
   // Variant-specific file naming suffix so operators never confuse downloaded labels
   const variantFileSuffix = useMemo(() => {
@@ -499,13 +516,21 @@ export default function PublicDatasheetView({
   }, [slug, selectedStrength, selectedStrengthId, activeFormat, activeFormatId, supplierName, activeSupplierId, effectiveBatchCode]);
 
   // Live Scannable 2D/3D Barcode SVG URL synced with current variant state
-  const barcodeSupplier = product?.supplierId || product?.supplierName || product?.supplier || 'lotusland';
+  const barcodeSupplier = (activeSupplierId && activeSupplierId !== 'all')
+    ? activeSupplierId
+    : (product?.supplierId || product?.supplierName || product?.supplier || 'lotusland');
   const barcodeImageUrl = useMemo(() => {
     const qs = new URLSearchParams();
     if (barcodeSupplier) qs.set('supplier', barcodeSupplier);
+    const currentDose = selectedStrength?.name || (selectedStrengthId ? selectedStrengthId.replace(/_/g, ' ') : '10 mg');
+    if (currentDose) qs.set('dose', currentDose);
+    const currentFormat = activeFormat?.id || activeFormatId || 'vial';
+    if (currentFormat) qs.set('presentation', currentFormat);
+    qs.set('batch', effectiveBatchCode);
+    qs.set('vialCode', effectiveBatchCode);
     if (dynamicPublicUrl) qs.set('url', dynamicPublicUrl);
     return `/api/barcode/${encodeURIComponent(slug)}?${qs.toString()}`;
-  }, [slug, barcodeSupplier, dynamicPublicUrl]);
+  }, [slug, barcodeSupplier, selectedStrength?.name, selectedStrengthId, activeFormat?.id, activeFormatId, effectiveBatchCode, dynamicPublicUrl]);
 
   // Fetch SVG inline — <img> cannot render nested <svg> (QR inside label)
   useEffect(() => {

@@ -82,7 +82,7 @@ function cleanPdfText(text) {
     .replace(/[’’]/g, "'")
     .replace(/[“”]/g, '"')
     .replace(/…/g, '...')
-    .replace(/[^\x00-\x7F]/g, '');
+    .replace(/[^\x20-\x7E\t\n\r]/g, '');
 }
 
 function trunc(s, n) {
@@ -227,6 +227,7 @@ export async function GET(request, context) {
     const W = 595, H = 842; // A4
     const MRG = 40;
     const RIGHT = W - MRG;
+    const CONTENT_W = RIGHT - MRG;
     const rawUpdated = product.updatedAt || product._updatedAt;
     let updatedDate = new Date();
     if (rawUpdated) {

@@ -25,6 +25,7 @@ export default function PublicDatasheetMobileBar({
   lang = 'en'
 }) {
   const [copied, setCopied] = useState(false);
+  const isEs = (lang || '').startsWith('es');
 
   const formatName = activeFormat?.name || 'Vial';
   const doseName = selectedStrength?.name || '10 mg';
@@ -32,7 +33,6 @@ export default function PublicDatasheetMobileBar({
 
   const handleWhatsAppOrder = () => {
     triggerHaptic('medium');
-    const isEs = (lang || '').startsWith('es');
     
     const text = isEs
       ? `🔬 *Consulta Clínica / Pedido:* ${name}\n` +
